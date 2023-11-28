@@ -11,6 +11,7 @@
 	<packaging>jar</packaging>
 	<artifactId>live-ingester</artifactId>
 	<name>Alfresco HxInsight Connector :: Live Ingester</name>
+	<version>0.0.1-SNAPSHOT</version>
 
 	<dependencies>
 		<dependency>
