@@ -1,0 +1,7 @@
+---
+BasedOnStyle: Microsoft
+ColumnLimit: 160
+---
+Language: Java
+BreakAfterJavaFieldAnnotations: true
+ReflowComments: false

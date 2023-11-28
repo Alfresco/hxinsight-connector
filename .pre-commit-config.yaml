@@ -12,5 +12,11 @@ repos:
       - id: detect-private-key
       - id: check-case-conflict
       - id: check-yaml
+        exclude: .clang-format
       - id: check-json
       - id: check-xml
+  - repo: https://github.com/pocc/pre-commit-hooks
+    rev: v1.3.5
+    hooks:
+        - id: clang-format
+          args: ["-i"]
