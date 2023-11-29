@@ -1,6 +1,6 @@
 /*
  * #%L
- * Alfresco Repository
+ * Alfresco HX Insight Connector
  * %%
  * Copyright (C) 2023 Alfresco Software Limited
  * %%
