@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest
@@ -35,7 +36,7 @@ class LiveIngesterApplicationTests {
 
 	@Test
 	void contextLoads() {
-		assertTrue(true);
+        assertEquals(1, 1);
 	}
 
 }
