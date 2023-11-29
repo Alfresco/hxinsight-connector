@@ -26,7 +26,10 @@
 
 package org.alfresco.hxi_connector.live_ingester.routes.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import jakarta.jms.ConnectionFactory;
+import org.alfresco.repo.event.databind.ObjectMapperFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -41,5 +44,11 @@ public class LiveIngesterMessagingConfig
     public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
     {
         return new JmsTransactionManager(connectionFactory);
+    }
+
+    @Bean
+    public ObjectMapper objectMapper()
+    {
+        return ObjectMapperFactory.createInstance();
     }
 }

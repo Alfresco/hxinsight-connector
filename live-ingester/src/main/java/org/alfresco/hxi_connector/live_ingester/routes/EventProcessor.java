@@ -23,35 +23,47 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+
 package org.alfresco.hxi_connector.live_ingester.routes;
 
-import static org.apache.camel.LoggingLevel.DEBUG;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-import org.alfresco.hxi_connector.live_ingester.routes.config.ActiveMQProperties;
-import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.exception.LiveIngesterRuntimeException;
+import org.alfresco.repo.event.v1.model.EventType;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
+@Slf4j
 @Component
-public class LiveIngesterRouteBuilder extends RouteBuilder
+@RequiredArgsConstructor
+public class EventProcessor
 {
-    private final ActiveMQProperties properties;
-    private final EventProcessor eventProcessor;
 
-    public LiveIngesterRouteBuilder(CamelContext context, ActiveMQProperties activeMQProperties, EventProcessor eventProcessor)
+    private final ObjectMapper mapper;
+
+    public void process(Exchange exchange)
     {
-        super(context);
-        this.properties = activeMQProperties;
-        this.eventProcessor = eventProcessor;
+        RepoEvent<?> event = eventFrom(exchange);
+
+        if (event.getType().equals(EventType.NODE_CREATED.getType()))
+        {
+            log.info("Received event of type CREATE {}", event);
+        }
     }
 
-    public void configure()
+    private RepoEvent<?> eventFrom(Exchange exchange)
     {
-        from(properties.getChannel())
-            .transacted()
-            .routeId("ingester-events-consumer")
-            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
-            .process(eventProcessor::process)
-            .end();
+        try
+        {
+            return mapper.readValue(exchange.getIn().getBody(String.class), RepoEvent.class);
+        }
+        catch (JsonProcessingException e)
+        {
+            throw new LiveIngesterRuntimeException("Event deserialization failed", e);
+        }
     }
 }
