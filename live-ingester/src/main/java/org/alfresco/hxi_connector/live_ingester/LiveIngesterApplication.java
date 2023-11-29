@@ -30,10 +30,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SuppressWarnings("PMD.UseUtilityClass")
 @SpringBootApplication
-public class LiveIngesterApplication {
+public class LiveIngesterApplication
+{
 
-	public static void main(String[] args) {
-		SpringApplication.run(LiveIngesterApplication.class, args);
-	}
-
+    public static void main(String[] args)
+    {
+        SpringApplication.run(LiveIngesterApplication.class, args);
+    }
 }
