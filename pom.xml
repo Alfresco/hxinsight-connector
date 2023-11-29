@@ -55,8 +55,6 @@
 
     <spring-boot.version>3.2.0</spring-boot.version>
     <spring.camel.version>4.2.0</spring.camel.version>
-
-    <acs.enterprise.event.model.version>0.0.63</acs.enterprise.event.model.version>
   </properties>
 
   <repositories>
@@ -113,11 +111,6 @@
         <groupId>org.apache.camel.springboot</groupId>
         <artifactId>camel-sjms-starter</artifactId>
         <version>${spring.camel.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.alfresco</groupId>
-        <artifactId>acs-enterprise-event-model</artifactId>
-        <version>${acs.enterprise.event.model.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
