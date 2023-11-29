@@ -23,11 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.routes;
+package org.alfresco.hxi_connector.live_ingester.messaging;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
-import org.alfresco.hxi_connector.live_ingester.routes.config.ActiveMQProperties;
+import org.alfresco.hxi_connector.live_ingester.messaging.config.ActiveMQProperties;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;

@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.routes.config;
+package org.alfresco.hxi_connector.live_ingester.messaging.config;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
