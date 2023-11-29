@@ -46,6 +46,10 @@ public class LiveIngesterRouteBuilder extends RouteBuilder
 
     public void configure()
     {
-        from(properties.getChannel()).transacted().routeId("ingester-events-consumer").log(DEBUG, "Received path event : ${header.JMSMessageID}").end();
+        from(properties.getChannel())
+            .transacted()
+            .routeId("ingester-events-consumer")
+            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
+            .end();
     }
 }
