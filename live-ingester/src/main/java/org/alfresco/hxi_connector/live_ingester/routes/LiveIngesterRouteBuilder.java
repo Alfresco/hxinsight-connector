@@ -10,34 +10,30 @@
  */
 package org.alfresco.hxi_connector.live_ingester.routes;
 
+import static org.apache.camel.LoggingLevel.DEBUG;
+
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.routes.config.ActiveMQProperties;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import static org.apache.camel.LoggingLevel.DEBUG;
-
 @Slf4j
 @Component
-public class LiveIngesterRouteBuilder extends RouteBuilder {
+public class LiveIngesterRouteBuilder extends RouteBuilder
+{
 
-  private final ActiveMQProperties properties;
+    private final ActiveMQProperties properties;
 
-  public LiveIngesterRouteBuilder(
-          CamelContext context,
-          ActiveMQProperties activeMQProperties
-  ) {
-    super(context);
-    this.properties = activeMQProperties;
-  }
+    public LiveIngesterRouteBuilder(CamelContext context, ActiveMQProperties activeMQProperties)
+    {
+        super(context);
+        this.properties = activeMQProperties;
+    }
 
-  public void configure() {
-    System.out.println(properties);
-    from(properties.getChannel())
-            .transacted()
-            .routeId("ingester-events-consumer")
-            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
-            .end();
-  }
+    public void configure()
+    {
+        System.out.println(properties);
+        from(properties.getChannel()).transacted().routeId("ingester-events-consumer").log(DEBUG, "Received path event : ${header.JMSMessageID}").end();
+    }
 }

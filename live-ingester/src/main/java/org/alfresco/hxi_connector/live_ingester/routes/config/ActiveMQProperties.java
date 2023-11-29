@@ -1,7 +1,6 @@
 package org.alfresco.hxi_connector.live_ingester.routes.config;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -13,9 +12,9 @@ import org.springframework.validation.annotation.Validated;
 @ToString
 @Validated
 @ConfigurationProperties(prefix = "alfresco.ingester.messaging")
-public class ActiveMQProperties {
+public class ActiveMQProperties
+{
 
     @NotBlank
     private String channel;
-
 }
