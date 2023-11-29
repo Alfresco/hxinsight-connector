@@ -34,7 +34,7 @@
                         <executions>
                             <execution>
                                 <id>copy-resources-for-zip</id>
-                                <phase>generate-resources</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>copy</goal>
                                 </goals>
