@@ -23,18 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package org.alfresco.hxi_connector.live_ingester.routes.config;
 
-@SuppressWarnings("PMD.UseUtilityClass")
-@SpringBootApplication
-public class LiveIngesterApplication
+import jakarta.jms.ConnectionFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.connection.JmsTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+
+@Configuration
+@EnableConfigurationProperties(ActiveMQProperties.class)
+public class LiveIngesterMessagingConfig
 {
-
-    public static void main(String[] args)
+    @Bean
+    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        return new JmsTransactionManager(connectionFactory);
     }
 }
