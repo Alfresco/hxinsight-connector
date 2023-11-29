@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+@SuppressWarnings("PMD.UseUtilityClass")
 @SpringBootApplication
 public class LiveIngesterApplication {
 
