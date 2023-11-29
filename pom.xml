@@ -13,6 +13,7 @@
   <version>0.0.1-SNAPSHOT</version>
 
   <modules>
+    <module>live-ingester</module>
   </modules>
 
   <scm>
