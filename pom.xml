@@ -14,6 +14,7 @@
 
   <modules>
     <module>live-ingester</module>
+    <module>distribution</module>
   </modules>
 
   <scm>
@@ -195,6 +196,16 @@
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
+          <configuration>
+            <classifier>app</classifier>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>repackage</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
