@@ -30,17 +30,13 @@
             <outputDirectory>./</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${project.basedir}/src/main/resources/licenses</directory>
-            <outputDirectory>licenses</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.basedir}/src/main/resources/docker-compose</directory>
-            <outputDirectory>docker-compose</outputDirectory>
+            <directory>${project.parent.basedir}/live-ingester/target/generated-resources/licenses</directory>
+            <outputDirectory>third-party-licenses-live-ingester</outputDirectory>
         </fileSet>
     </fileSets>
     <files>
         <file>
-            <source>${project.basedir}/../live-ingester/target/generated-sources/license/THIRD-PARTY.txt</source>
+            <source>${project.parent.basedir}/live-ingester/target/generated-sources/license/THIRD-PARTY.txt</source>
             <outputDirectory>.</outputDirectory>
             <destName>third-party-live-ingester.txt</destName>
         </file>

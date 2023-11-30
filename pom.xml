@@ -142,6 +142,7 @@
               <id>third-party-licenses</id>
               <goals>
                 <goal>add-third-party</goal>
+                <goal>download-licenses</goal>
               </goals>
               <phase>generate-resources</phase>
               <configuration>
