@@ -101,7 +101,7 @@ jobs:
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Push docker images"
-        run: bash ./scripts/ci/pushDockerImagesCi.sh
+        run: bash ./scripts/ci/buildDockerImages.sh -p
         env:
           COMMIT_MESSAGE: ${{ github.sha }}
       - name: "Clean Maven cache"
