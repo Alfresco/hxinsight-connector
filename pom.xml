@@ -14,6 +14,7 @@
 
   <modules>
     <module>live-ingester</module>
+    <module>distribution</module>
   </modules>
 
   <scm>
@@ -148,6 +149,7 @@
               <id>third-party-licenses</id>
               <goals>
                 <goal>add-third-party</goal>
+                <goal>download-licenses</goal>
               </goals>
               <phase>generate-resources</phase>
               <configuration>
@@ -202,6 +204,16 @@
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
+          <configuration>
+            <classifier>app</classifier>
+          </configuration>
+          <executions>
+            <execution>
+              <goals>
+                <goal>repackage</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
       </plugins>
     </pluginManagement>
