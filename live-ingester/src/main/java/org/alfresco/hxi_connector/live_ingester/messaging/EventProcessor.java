@@ -26,13 +26,15 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging;
 
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.exception.LiveIngesterRuntimeException;
-import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
@@ -49,9 +51,13 @@ public class EventProcessor
     {
         RepoEvent<?> event = eventFrom(exchange);
 
-        if (event.getType().equals(EventType.NODE_CREATED.getType()))
+        if (NODE_CREATED.getType().equals(event.getType()))
         {
             log.info("Received event of type CREATE {}", event);
+        }
+        else if (NODE_UPDATED.getType().equals(event.getType()))
+        {
+            log.info("Received event of type UPDATE {}", event);
         }
     }
 
