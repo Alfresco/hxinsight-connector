@@ -84,6 +84,7 @@ jobs:
     needs:
       - test_application
     if: >
+      github.event_name == 'push' &&
       !(failure() || cancelled()) &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
