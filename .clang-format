@@ -56,7 +56,7 @@ BreakConstructorInitializersBeforeComma: false
 BreakConstructorInitializers: BeforeColon
 BreakAfterJavaFieldAnnotations: true
 BreakStringLiterals: true
-ColumnLimit: 160
+ColumnLimit: 0
 CommentPragmas:  '^ IWYU pragma:'
 QualifierAlignment: Leave
 CompactNamespaces: false
@@ -127,7 +127,7 @@ PenaltyBreakFirstLessLess: 120
 PenaltyBreakOpenParenthesis: 0
 PenaltyBreakString: 1000
 PenaltyBreakTemplateDeclaration: 10
-PenaltyExcessCharacter: 1000000
+PenaltyExcessCharacter: 0
 PenaltyReturnTypeOnItsOwnLine: 1000
 PenaltyIndentedWhitespace: 0
 PointerAlignment: Right

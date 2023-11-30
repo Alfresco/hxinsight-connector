@@ -23,18 +23,33 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.routes;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static org.apache.camel.LoggingLevel.DEBUG;
 
-@SuppressWarnings("PMD.UseUtilityClass")
-@SpringBootApplication
-public class LiveIngesterApplication
+import org.alfresco.hxi_connector.live_ingester.routes.config.ActiveMQProperties;
+import org.apache.camel.CamelContext;
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
+
+@Component
+public class LiveIngesterRouteBuilder extends RouteBuilder
 {
 
-    public static void main(String[] args)
+    private final ActiveMQProperties properties;
+
+    public LiveIngesterRouteBuilder(CamelContext context, ActiveMQProperties activeMQProperties)
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        super(context);
+        this.properties = activeMQProperties;
+    }
+
+    public void configure()
+    {
+        from(properties.getChannel())
+            .transacted()
+            .routeId("ingester-events-consumer")
+            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
+            .end();
     }
 }

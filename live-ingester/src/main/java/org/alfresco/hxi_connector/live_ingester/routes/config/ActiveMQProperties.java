@@ -23,18 +23,24 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package org.alfresco.hxi_connector.live_ingester.routes.config;
 
-@SuppressWarnings("PMD.UseUtilityClass")
-@SpringBootApplication
-public class LiveIngesterApplication
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+@Getter
+@Setter
+@ToString
+@Validated
+@ConfigurationProperties(prefix = "alfresco.ingester.messaging")
+public class ActiveMQProperties
 {
 
-    public static void main(String[] args)
-    {
-        SpringApplication.run(LiveIngesterApplication.class, args);
-    }
+    @NotBlank
+    private String channel;
 }
