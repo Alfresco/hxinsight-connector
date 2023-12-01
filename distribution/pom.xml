@@ -52,7 +52,7 @@
                             </execution>
                             <execution>
                                 <id>copy-resources-for-docker</id>
-                                <phase>generate-resources</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>copy</goal>
                                 </goals>
