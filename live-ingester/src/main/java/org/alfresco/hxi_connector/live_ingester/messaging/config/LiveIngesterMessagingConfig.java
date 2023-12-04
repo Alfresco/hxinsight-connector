@@ -23,36 +23,34 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
-import static org.apache.camel.LoggingLevel.DEBUG;
+package org.alfresco.hxi_connector.live_ingester.messaging.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.jms.ConnectionFactory;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
-import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
-import org.springframework.stereotype.Component;
+import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
+import org.alfresco.repo.event.databind.ObjectMapperFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.connection.JmsTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
 
-@Component
-public class LiveIngesterRouteBuilder extends RouteBuilder
+@Configuration
+@EnableConfigurationProperties({MessagingInputConfig.class, MessagingOutputConfig.class})
+public class LiveIngesterMessagingConfig
 {
-    private final MessagingInputConfig properties;
-    private final EventProcessor eventProcessor;
-
-    public LiveIngesterRouteBuilder(CamelContext context, MessagingInputConfig messagingInputConfig, EventProcessor eventProcessor)
+    @Bean
+    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
     {
-        super(context);
-        this.properties = messagingInputConfig;
-        this.eventProcessor = eventProcessor;
+        return new JmsTransactionManager(connectionFactory);
     }
 
-    @Override
-    public void configure()
+    @Bean
+    public ObjectMapper objectMapper()
     {
-        from(properties.getEndpoint())
-            .transacted()
-            .routeId("ingester-events-consumer")
-            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
-            .process(eventProcessor::process)
-            .end();
+        return ObjectMapperFactory.createInstance();
     }
 }

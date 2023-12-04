@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.messaging.out;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
@@ -36,20 +37,24 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ProducerRouteBuilder extends RouteBuilder
 {
+    private static final String LOCAL_ENDPOINT = "direct:start";
+
     private final CamelContext context;
+
+    private final MessagingOutputConfig config;
 
     @Override
     public void configure()
     {
-        from("direct:start")
+        from(LOCAL_ENDPOINT)
             .log("sending new message")
-            .to("aws2-sns://arn:aws:sns:us-east-1:000000000000:test-hxinsight-topic")
+            .to(config.getEndpoint())
             .log("message sent")
             .end();
     }
 
     public void publishMessage(String message)
     {
-        context.createProducerTemplate().sendBody("direct:start", message);
+        context.createProducerTemplate().sendBody(LOCAL_ENDPOINT, message);
     }
 }

@@ -37,10 +37,10 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 @ToString
 @Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging")
-public class ActiveMQProperties
+@ConfigurationProperties(prefix = "alfresco.ingester.messaging.in")
+public class MessagingInputConfig
 {
 
     @NotBlank
-    private String channel;
+    private String endpoint;
 }

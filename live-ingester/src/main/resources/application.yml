@@ -1,5 +1,3 @@
-alfresco.ingester.messaging.channel: activemq:queue:org.alfresco.ingester.event
-
 camel:
   springboot.main-run-controller: true
   component:
@@ -9,3 +7,9 @@ camel:
       message-group-id-strategy: useExchangeId
       secretKey: dummy_secret_key
       accessKey: dummy_access_key
+
+alfresco:
+  ingester:
+    messaging:
+        in.endpoint: activemq:queue:org.alfresco.ingester.event
+        out.endpoint: aws2-sns://arn:aws:sns:us-east-1:000000000000:test-hxinsight-topic
