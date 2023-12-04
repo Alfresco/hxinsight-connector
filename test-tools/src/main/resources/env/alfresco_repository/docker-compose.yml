@@ -1,0 +1,10 @@
+version: "3.8"
+
+services:
+  activemq:
+    image: quay.io/alfresco/alfresco-activemq:5.18.3-jre17-rockylinux8
+    ports:
+      - 8161:8161 # Web Console
+      - 5672:5672 # AMQP
+      - 61616:61616 # OpenWire
+      - 61613:61613 # STOMP

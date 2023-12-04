@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"
+    environment:
+      - SERVICES=sns,sqs
+    volumes:
+      - './init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh'

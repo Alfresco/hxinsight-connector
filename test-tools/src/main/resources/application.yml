@@ -1,0 +1,16 @@
+alfresco:
+  hx_insight:
+    enabled: "true"
+    endpoint_uri: "aws2-sqs://arn:aws:sqs:us-east-1:000000000000:test-hxinsight-topic-consumer"
+  alfresco_repository:
+    enabled: "true"
+    endpoint_uri: activemq:topic:alfresco.repo.event2
+
+camel:
+  springboot.main-run-controller: true
+  component:
+    aws2-sqs:
+      overrideEndpoint: true
+      uriEndpointOverride: http://localhost:4566
+      secretKey: dummy_secret_key
+      accessKey: dummy_access_key
