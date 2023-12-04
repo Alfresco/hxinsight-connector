@@ -23,35 +23,32 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.messaging;
 
-import static org.apache.camel.LoggingLevel.DEBUG;
+package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
 
-import org.alfresco.hxi_connector.live_ingester.messaging.config.ActiveMQProperties;
-import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
-@Component
-public class LiveIngesterRouteBuilder extends RouteBuilder
+import jakarta.jms.ConnectionFactory;
+import org.alfresco.repo.event.databind.ObjectMapperFactory;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.connection.JmsTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+
+@Configuration
+@EnableConfigurationProperties(ActiveMQProperties.class)
+public class LiveIngesterMessagingConfig
 {
-    private final ActiveMQProperties properties;
-    private final EventProcessor eventProcessor;
-
-    public LiveIngesterRouteBuilder(CamelContext context, ActiveMQProperties activeMQProperties, EventProcessor eventProcessor)
+    @Bean
+    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
     {
-        super(context);
-        this.properties = activeMQProperties;
-        this.eventProcessor = eventProcessor;
+        return new JmsTransactionManager(connectionFactory);
     }
 
-    public void configure()
+    @Bean
+    public ObjectMapper objectMapper()
     {
-        from(properties.getChannel())
-            .transacted()
-            .routeId("ingester-events-consumer")
-            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
-            .process(eventProcessor::process)
-            .end();
+        return ObjectMapperFactory.createInstance();
     }
 }

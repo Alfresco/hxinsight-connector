@@ -1,0 +1,11 @@
+alfresco.ingester.messaging.channel: activemq:queue:org.alfresco.ingester.event
+
+camel:
+  springboot.main-run-controller: true
+  component:
+    aws2-sns:
+      overrideEndpoint: true
+      uriEndpointOverride: http://localhost:4566
+      message-group-id-strategy: useExchangeId
+      secretKey: dummy_secret_key
+      accessKey: dummy_access_key

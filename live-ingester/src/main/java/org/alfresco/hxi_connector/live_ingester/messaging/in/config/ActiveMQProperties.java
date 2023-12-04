@@ -24,31 +24,23 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config;
+package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
-import jakarta.jms.ConnectionFactory;
-import org.alfresco.repo.event.databind.ObjectMapperFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.connection.JmsTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
-
-@Configuration
-@EnableConfigurationProperties(ActiveMQProperties.class)
-public class LiveIngesterMessagingConfig
+@Getter
+@Setter
+@ToString
+@Validated
+@ConfigurationProperties(prefix = "alfresco.ingester.messaging")
+public class ActiveMQProperties
 {
-    @Bean
-    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
-    {
-        return new JmsTransactionManager(connectionFactory);
-    }
 
-    @Bean
-    public ObjectMapper objectMapper()
-    {
-        return ObjectMapperFactory.createInstance();
-    }
+    @NotBlank
+    private String channel;
 }

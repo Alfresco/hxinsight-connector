@@ -23,24 +23,33 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.messaging.out;
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.CamelContext;
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
 
-import jakarta.validation.constraints.NotBlank;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Getter
-@Setter
-@ToString
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging")
-public class ActiveMQProperties
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class ProducerRouteBuilder extends RouteBuilder
 {
+    private final CamelContext context;
 
-    @NotBlank
-    private String channel;
+    @Override
+    public void configure()
+    {
+        from("direct:start")
+            .log("sending new message")
+            .to("aws2-sns://arn:aws:sns:us-east-1:000000000000:test-hxinsight-topic")
+            .log("message sent")
+            .end();
+    }
+
+    public void publishMessage(String message)
+    {
+        context.createProducerTemplate().sendBody("direct:start", message);
+    }
 }
