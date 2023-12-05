@@ -72,6 +72,7 @@
     <dist.nginx.version>3.0.0</dist.nginx.version>
     <dist.elasticsearch.version>7.17.3</dist.elasticsearch.version>
     <dist.search.enterprise.version>4.0.0.1</dist.search.enterprise.version>
+    <dist.localstack.version>3.0.2</dist.localstack.version>
   </properties>
 
   <repositories>
