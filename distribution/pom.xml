@@ -52,7 +52,7 @@
                             </execution>
                             <execution>
                                 <id>copy-resources-for-docker</id>
-                                <phase>generate-resources</phase>
+                                <phase>prepare-package</phase>
                                 <goals>
                                     <goal>copy</goal>
                                 </goals>
@@ -95,6 +95,22 @@
                         <artifactId>maven-resources-plugin</artifactId>
                         <version>${maven-resources-plugin.version}</version>
                         <executions>
+                            <execution>
+                                <id>copy-resources</id>
+                                <phase>validate</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${basedir}/src/main/resources/docker-compose</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${basedir}/src/main/resources/docker-compose-origin</directory>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
                             <execution>
                                 <id>copy-resources-docker-live-indexing</id>
                                 <phase>process-resources</phase>
