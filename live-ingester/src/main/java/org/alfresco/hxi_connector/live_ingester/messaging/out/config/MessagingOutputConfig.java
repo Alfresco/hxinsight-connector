@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config;
+package org.alfresco.hxi_connector.live_ingester.messaging.out.config;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
@@ -37,10 +37,10 @@ import org.springframework.validation.annotation.Validated;
 @Setter
 @ToString
 @Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging")
-public class ActiveMQProperties
+@ConfigurationProperties(prefix = "alfresco.ingester.messaging.out")
+public class MessagingOutputConfig
 {
 
     @NotBlank
-    private String channel;
+    private String endpoint;
 }

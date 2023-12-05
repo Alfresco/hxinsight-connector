@@ -23,34 +23,38 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.messaging.out;
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import jakarta.jms.ConnectionFactory;
-import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
-import org.alfresco.repo.event.databind.ObjectMapperFactory;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.connection.JmsTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
+import org.apache.camel.CamelContext;
+import org.apache.camel.builder.RouteBuilder;
+import org.springframework.stereotype.Component;
 
-@Configuration
-@EnableConfigurationProperties({MessagingInputConfig.class, MessagingOutputConfig.class})
-public class LiveIngesterMessagingConfig
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class ProducerRouteBuilder extends RouteBuilder
 {
-    @Bean
-    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
+    private static final String LOCAL_ENDPOINT = "direct:start";
+
+    private final CamelContext context;
+
+    private final MessagingOutputConfig config;
+
+    @Override
+    public void configure()
     {
-        return new JmsTransactionManager(connectionFactory);
+        from(LOCAL_ENDPOINT)
+            .log("sending new message")
+            .to(config.getEndpoint())
+            .log("message sent")
+            .end();
     }
 
-    @Bean
-    public ObjectMapper objectMapper()
+    public void publishMessage(String message)
     {
-        return ObjectMapperFactory.createInstance();
+        context.createProducerTemplate().sendBody(LOCAL_ENDPOINT, message);
     }
 }

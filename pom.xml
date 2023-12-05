@@ -130,6 +130,11 @@
         <version>${spring.camel.version}</version>
       </dependency>
       <dependency>
+        <groupId>org.apache.camel.springboot</groupId>
+        <artifactId>camel-aws2-sns-starter</artifactId>
+        <version>${spring.camel.version}</version>
+      </dependency>
+      <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>acs-event-model</artifactId>
         <version>${acs-event-model.version}</version>

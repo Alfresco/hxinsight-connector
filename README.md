@@ -27,8 +27,8 @@ pre-commit run --all-files
 To set up a local developer environment then build the jar, the docker image and finally run the docker-compose environment.
 
 ```bash
-mvn clean install
-./scripts/ci/buildDockerImages.sh
-cd distribution/src/main/resources/docker-compose
+mvn clean install && \
+./scripts/ci/buildDockerImages.sh && \
+cd distribution/src/main/resources/docker-compose && \
 docker compose --project-name dev up
 ```
