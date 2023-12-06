@@ -39,21 +39,21 @@ public class UpdateNodeMetadataEvent
 {
 
     @JsonProperty("setProperties")
-    private final List<NodeProperty<?>> metadataPropertiesToAdd = new ArrayList<>();
+    private final List<NodeProperty<?>> metadataPropertiesToSet = new ArrayList<>();
 
     @JsonProperty("unsetProperties")
-    private final List<String> metadataPropertiesToRemove = new ArrayList<>();
+    private final List<String> metadataPropertiesToUnset = new ArrayList<>();
 
     public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty)
     {
-        metadataPropertiesToAdd.add(metadataProperty);
+        metadataPropertiesToSet.add(metadataProperty);
 
         return this;
     }
 
     public UpdateNodeMetadataEvent unset(String metadataPropertyName)
     {
-        metadataPropertiesToRemove.add(metadataPropertyName);
+        metadataPropertiesToUnset.add(metadataPropertyName);
 
         return this;
     }
