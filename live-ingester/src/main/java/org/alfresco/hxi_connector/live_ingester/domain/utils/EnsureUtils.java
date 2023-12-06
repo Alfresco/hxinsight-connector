@@ -24,12 +24,31 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.exception;
+package org.alfresco.hxi_connector.live_ingester.domain.utils;
 
-public class LiveIngesterRuntimeException extends RuntimeException
+import java.util.Objects;
+import java.util.function.Supplier;
+
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
+
+public class EnsureUtils
 {
-    public LiveIngesterRuntimeException(String message, Throwable cause)
+    public static void ensureNotBlank(String s, String errorMessage, String... formatArgs)
     {
-        super(message, cause);
+        ensureThat(Objects.nonNull(s) & !s.isBlank(), () -> new ValidationException(String.format(errorMessage, formatArgs)));
+    }
+
+    public static void ensureNonNull(Object o, String errorMessage, String... formatArgs)
+    {
+        ensureThat(Objects.nonNull(o), () -> new ValidationException(String.format(errorMessage, formatArgs)));
+    }
+
+    public static void ensureThat(boolean isOk, Supplier<? extends LiveIngesterRuntimeException> exceptionSupplier)
+    {
+        if (!isOk)
+        {
+            throw exceptionSupplier.get();
+        }
     }
 }

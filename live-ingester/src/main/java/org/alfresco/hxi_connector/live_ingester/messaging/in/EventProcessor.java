@@ -30,11 +30,16 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
@@ -47,13 +52,17 @@ public class EventProcessor
 
     private final ObjectMapper mapper;
 
+    private final IngestNewNodeEventHandler ingestNewNodeEventHandler;
+
     public void process(Exchange exchange)
     {
-        RepoEvent<?> event = eventFrom(exchange);
+        RepoEvent<DataAttributes<NodeResource>> event = eventFrom(exchange);
 
         if (NODE_CREATED.getType().equals(event.getType()))
         {
-            log.info("Received event of type CREATE {}", event);
+            IngestNewNodeEvent ingestNewNodeEvent = EventMapper.mapToIngestNewNodeEvent(event);
+
+            ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
         }
         else if (NODE_UPDATED.getType().equals(event.getType()))
         {
@@ -61,11 +70,12 @@ public class EventProcessor
         }
     }
 
-    private RepoEvent<?> eventFrom(Exchange exchange)
+    private RepoEvent<DataAttributes<NodeResource>> eventFrom(Exchange exchange)
     {
         try
         {
-            return mapper.readValue(exchange.getIn().getBody(String.class), RepoEvent.class);
+            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {
+            });
         }
         catch (JsonProcessingException e)
         {

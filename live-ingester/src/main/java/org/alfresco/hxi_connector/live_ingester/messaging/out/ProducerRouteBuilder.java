@@ -25,8 +25,12 @@
  */
 package org.alfresco.hxi_connector.live_ingester.messaging.out;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
@@ -35,9 +39,11 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ProducerRouteBuilder extends RouteBuilder
+public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
 {
     private static final String LOCAL_ENDPOINT = "direct:start";
+
+    private final ObjectMapper objectMapper;
 
     private final CamelContext context;
 
@@ -47,14 +53,18 @@ public class ProducerRouteBuilder extends RouteBuilder
     public void configure()
     {
         from(LOCAL_ENDPOINT)
+            .marshal()
+            .json()
             .log("sending new message")
             .to(config.getEndpoint())
             .log("message sent")
             .end();
     }
 
-    public void publishMessage(String message)
+    @Override
+    public void publishMessage(UpdateNodeMetadataEvent event)
     {
-        context.createProducerTemplate().sendBody(LOCAL_ENDPOINT, message);
+        context.createProducerTemplate()
+            .sendBody(LOCAL_ENDPOINT, event);
     }
 }

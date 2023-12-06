@@ -7,6 +7,7 @@ camel:
       message-group-id-strategy: useExchangeId
       secretKey: dummy_secret_key
       accessKey: dummy_access_key
+  dataformat.jackson.autoDiscoverObjectMapper: true
 
 alfresco:
   ingester:
