@@ -42,7 +42,6 @@
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-jackson-starter</artifactId>
-			<version>4.2.0</version>
 		</dependency>
 
 		<dependency>
