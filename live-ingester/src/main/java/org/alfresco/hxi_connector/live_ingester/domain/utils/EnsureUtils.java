@@ -26,12 +26,16 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.utils;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.Objects;
 import java.util.function.Supplier;
 
+import lombok.NoArgsConstructor;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
 
+@NoArgsConstructor(access = PRIVATE)
 public class EnsureUtils
 {
     public static void ensureNotBlank(String s, String errorMessage, String... formatArgs)
