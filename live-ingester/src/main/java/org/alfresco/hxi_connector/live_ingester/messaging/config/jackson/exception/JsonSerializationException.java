@@ -24,34 +24,14 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
+package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.exception;
 
-import java.util.ArrayList;
-import java.util.List;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
-
-@Getter
-@NoArgsConstructor(staticName = "create")
-public class UpdateNodeMetadataEvent
+public class JsonSerializationException extends LiveIngesterRuntimeException
 {
-    private final List<NodeProperty<?>> metadataPropertiesToSet = new ArrayList<>();
-
-    private final List<String> metadataPropertiesToUnset = new ArrayList<>();
-
-    public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty)
+    public JsonSerializationException(String message, Throwable cause)
     {
-        metadataPropertiesToSet.add(metadataProperty);
-
-        return this;
-    }
-
-    public UpdateNodeMetadataEvent unset(String metadataPropertyName)
-    {
-        metadataPropertiesToUnset.add(metadataPropertyName);
-
-        return this;
+        super(message, cause);
     }
 }

@@ -27,8 +27,11 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 
 import jakarta.jms.ConnectionFactory;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.UpdateNodeMetadataEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
 import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
 import org.alfresco.repo.event.databind.ObjectMapperFactory;
@@ -51,6 +54,17 @@ public class LiveIngesterMessagingConfig
     @Bean
     public ObjectMapper objectMapper()
     {
-        return ObjectMapperFactory.createInstance();
+        ObjectMapper objectMapper = ObjectMapperFactory.createInstance();
+
+        registerCustomSerializers(objectMapper);
+
+        return objectMapper;
+    }
+
+    private void registerCustomSerializers(ObjectMapper objectMapper)
+    {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(UpdateNodeMetadataEvent.class, new UpdateNodeMetadataEventSerializer());
+        objectMapper.registerModule(module);
     }
 }
