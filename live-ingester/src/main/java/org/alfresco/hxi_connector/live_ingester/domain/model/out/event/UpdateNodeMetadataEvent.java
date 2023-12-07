@@ -26,7 +26,9 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import lombok.Getter;
@@ -37,13 +39,13 @@ import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 @NoArgsConstructor(staticName = "create")
 public class UpdateNodeMetadataEvent
 {
-    private final Set<NodeProperty<?>> metadataPropertiesToSet = new HashSet<>();
+    private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
 
     private final Set<String> metadataPropertiesToUnset = new HashSet<>();
 
     public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty)
     {
-        metadataPropertiesToSet.add(metadataProperty);
+        metadataPropertiesToSet.put(metadataProperty.name(), metadataProperty);
 
         return this;
     }

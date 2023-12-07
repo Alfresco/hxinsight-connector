@@ -59,7 +59,7 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
             jgen.writeStartObject();
 
             jgen.writeArrayFieldStart("setProperties");
-            event.getMetadataPropertiesToSet().forEach(property -> writeProperty(jgen, property));
+            event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, property));
             jgen.writeEndArray();
 
             jgen.writeArrayFieldStart("unsetProperties");
