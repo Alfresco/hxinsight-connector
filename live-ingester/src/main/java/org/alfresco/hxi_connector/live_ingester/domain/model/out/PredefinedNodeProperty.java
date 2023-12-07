@@ -48,8 +48,8 @@ public class PredefinedNodeProperty<V>
 
     private PredefinedNodeProperty(String propertyName)
     {
-        ensureThat(!propertyName.contains(":"), new LiveIngesterRuntimeException(
-                                                    "Predefined properties should not contain the ':' character, as this may cause a collision with the client's custom property."));
+        ensureThat(!propertyName.contains(":"),
+                   "Predefined properties should not contain the ':' character, as this may cause a collision with the client's custom property.");
         this.propertyName = propertyName;
     }
 

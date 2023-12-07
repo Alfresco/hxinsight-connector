@@ -40,17 +40,17 @@ public class EnsureUtils
 {
     public static void ensureNotBlank(String s, String errorMessage, String... formatArgs)
     {
-        ensureThat(Objects.nonNull(s) & !s.isBlank(), () -> new ValidationException(String.format(errorMessage, formatArgs)));
+        ensureThat(Objects.nonNull(s) & !s.isBlank(), () -> new ValidationException(String.format(errorMessage, (Object[])formatArgs)));
     }
 
     public static void ensureNonNull(Object o, String errorMessage, String... formatArgs)
     {
-        ensureThat(Objects.nonNull(o), () -> new ValidationException(String.format(errorMessage, formatArgs)));
+        ensureThat(Objects.nonNull(o), () -> new ValidationException(String.format(errorMessage, (Object[])formatArgs)));
     }
 
-    public static void ensureThat(boolean isOk, LiveIngesterRuntimeException exception)
+    public static void ensureThat(boolean isOk, String errorMessage, String... formatArgs)
     {
-        ensureThat(isOk, () -> exception);
+        ensureThat(isOk, () -> new ValidationException(String.format(errorMessage, (Object[])formatArgs)));
     }
 
     public static void ensureThat(boolean isOk, Supplier<? extends LiveIngesterRuntimeException> exceptionSupplier)
