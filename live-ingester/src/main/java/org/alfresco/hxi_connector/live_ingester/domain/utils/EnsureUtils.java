@@ -48,6 +48,11 @@ public class EnsureUtils
         ensureThat(Objects.nonNull(o), () -> new ValidationException(String.format(errorMessage, formatArgs)));
     }
 
+    public static void ensureThat(boolean isOk, LiveIngesterRuntimeException exception)
+    {
+        ensureThat(isOk, () -> exception);
+    }
+
     public static void ensureThat(boolean isOk, Supplier<? extends LiveIngesterRuntimeException> exceptionSupplier)
     {
         if (!isOk)

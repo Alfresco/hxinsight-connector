@@ -26,11 +26,12 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.model.out;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
+
 import java.util.Set;
 
-import lombok.RequiredArgsConstructor;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-@RequiredArgsConstructor
 public class PredefinedNodeProperty<V>
 {
     public static final PredefinedNodeProperty<String> NAME = new PredefinedNodeProperty<>("name");
@@ -44,6 +45,13 @@ public class PredefinedNodeProperty<V>
     public static final PredefinedNodeProperty<Long> CREATED_AT = new PredefinedNodeProperty<>("createdAt");
 
     private final String propertyName;
+
+    private PredefinedNodeProperty(String propertyName)
+    {
+        ensureThat(!propertyName.contains(":"), new LiveIngesterRuntimeException(
+                                                    "Predefined properties should not contain the ':' character, as this may cause a collision with the client's custom property."));
+        this.propertyName = propertyName;
+    }
 
     public NodeProperty<V> withValue(V value)
     {
