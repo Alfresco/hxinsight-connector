@@ -42,7 +42,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Slf4j
 @NoArgsConstructor(access = PRIVATE)
-public class EventMapper
+public class RepoEventMapper
 {
     public static IngestNewNodeEvent mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {

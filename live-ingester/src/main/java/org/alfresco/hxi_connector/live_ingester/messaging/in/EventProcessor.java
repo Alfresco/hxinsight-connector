@@ -60,7 +60,7 @@ public class EventProcessor
 
         if (NODE_CREATED.getType().equals(event.getType()))
         {
-            IngestNewNodeEvent ingestNewNodeEvent = EventMapper.mapToIngestNewNodeEvent(event);
+            IngestNewNodeEvent ingestNewNodeEvent = RepoEventMapper.mapToIngestNewNodeEvent(event);
 
             ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
         }
