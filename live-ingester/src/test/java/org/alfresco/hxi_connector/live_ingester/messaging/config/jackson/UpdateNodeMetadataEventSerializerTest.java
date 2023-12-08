@@ -26,66 +26,74 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
 
-import static java.lang.String.format;
-import static java.nio.charset.StandardCharsets.UTF_8;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import lombok.SneakyThrows;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.junit.jupiter.api.Test;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-
-import lombok.SneakyThrows;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
-import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Test;
-
-class UpdateNodeMetadataEventSerializerTest
-{
+class UpdateNodeMetadataEventSerializerTest {
     private final UpdateNodeMetadataEventSerializer serializer = new UpdateNodeMetadataEventSerializer();
 
     @Test
-    public void shouldSerializeEmptyEvent()
-    {
+    public void shouldSerializeEmptyEvent() {
         UpdateNodeMetadataEvent emptyEvent = UpdateNodeMetadataEvent.create();
 
-        String expectedJson = getExpectedMapping("empty.json");
+        String expectedJson = """
+                        {
+                          "setProperties" : [ ],
+                          "unsetProperties" : [ ]
+                        }""";
         String actualJson = serialize(emptyEvent);
 
         assertEquals(expectedJson, actualJson);
     }
 
     @Test
-    public void shouldSerializePropertiesToSet()
-    {
+    public void shouldSerializePropertiesToSet() {
         UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
-                                            .set(NAME.withValue("some-name"))
-                                            .set(IS_FILE.withValue(true))
-                                            .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
+                .set(NAME.withValue("some-name"))
+                .set(IS_FILE.withValue(true))
+                .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
 
-        String expectedJson = getExpectedMapping("with-properties-to-set.json");
+        String expectedJson = """
+                {
+                  "setProperties" : [ {
+                    "isFile" : true
+                  }, {
+                    "name" : "some-name"
+                  }, {
+                    "modifiedByUserWithId" : "000-000-000"
+                  } ],
+                  "unsetProperties" : [ ]
+                }""";
         String actualJson = serialize(event);
 
         assertEquals(expectedJson, actualJson);
     }
 
     @Test
-    public void shouldSerializePropertiesToUnset()
-    {
+    public void shouldSerializePropertiesToUnset() {
         UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
-                                            .unset(NAME.getName())
-                                            .unset(IS_FILE.getName())
-                                            .unset(MODIFIED_BY_USER_WITH_ID.getName());
+                .unset(NAME.getName())
+                .unset(IS_FILE.getName())
+                .unset(MODIFIED_BY_USER_WITH_ID.getName());
 
-        String expectedJson = getExpectedMapping("with-properties-to-unset.json");
+        String expectedJson = """
+                {
+                  "setProperties" : [ ],
+                  "unsetProperties" : [ "isFile", "name", "modifiedByUserWithId" ]
+                }""";
         String actualJson = serialize(event);
 
         assertEquals(expectedJson, actualJson);
     }
 
     @SneakyThrows
-    private String serialize(UpdateNodeMetadataEvent eventToSerialize)
-    {
+    private String serialize(UpdateNodeMetadataEvent eventToSerialize) {
         ObjectMapper objectMapper = new ObjectMapper();
 
         SimpleModule module = new SimpleModule();
@@ -93,11 +101,5 @@ class UpdateNodeMetadataEventSerializerTest
         objectMapper.registerModule(module);
 
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(eventToSerialize);
-    }
-
-    @SneakyThrows
-    private String getExpectedMapping(String name)
-    {
-        return IOUtils.resourceToString(format("/jackson/update-node-metadata-event/%s", name), UTF_8);
     }
 }
