@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.live_ingester.messaging.out;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.EventPublisher;
@@ -42,8 +40,6 @@ import org.springframework.stereotype.Component;
 public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
 {
     private static final String LOCAL_ENDPOINT = "direct:start";
-
-    private final ObjectMapper objectMapper;
 
     private final CamelContext context;
 
