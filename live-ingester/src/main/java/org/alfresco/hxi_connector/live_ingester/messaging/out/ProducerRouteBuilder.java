@@ -51,9 +51,8 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
         from(LOCAL_ENDPOINT)
             .marshal()
             .json()
-            .log("sending new message")
+            .log("Sending event ${body}")
             .to(config.getEndpoint())
-            .log("message sent")
             .end();
     }
 
