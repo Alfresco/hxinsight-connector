@@ -27,39 +27,35 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
+import org.junit.jupiter.api.Test;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class EventProcessor
+class EventProcessorTest
 {
+    private final RepoEventMapper repoEventMapper = mock();
 
-    private final IngestNewNodeEventHandler ingestNewNodeEventHandler;
+    private final IngestNewNodeEventHandler ingestNewNodeEventHandler = mock();
 
-    private final RepoEventMapper repoEventMapper;
+    private final EventProcessor eventProcessor = new EventProcessor(ingestNewNodeEventHandler, repoEventMapper);
 
-    public void process(RepoEvent<DataAttributes<NodeResource>> event)
+    @Test
+    void shouldIngestNewNodeIfEventTypeIsCreated()
     {
-        if (NODE_CREATED.getType().equals(event.getType()))
-        {
-            IngestNewNodeEvent ingestNewNodeEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        when(event.getType()).thenReturn(NODE_CREATED.getType());
 
-            ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
-        }
-        else if (NODE_UPDATED.getType().equals(event.getType()))
-        {
-            log.info("Received event of type UPDATE {}", event);
-        }
+        // when
+        eventProcessor.process(event);
+
+        // then
+        verify(ingestNewNodeEventHandler).handle(any());
     }
 }

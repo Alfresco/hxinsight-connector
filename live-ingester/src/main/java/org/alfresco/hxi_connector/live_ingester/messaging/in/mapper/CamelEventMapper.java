@@ -24,42 +24,39 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in;
+package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
 
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EventProcessor
+public class CamelEventMapper
 {
 
-    private final IngestNewNodeEventHandler ingestNewNodeEventHandler;
+    private final ObjectMapper mapper;
 
-    private final RepoEventMapper repoEventMapper;
-
-    public void process(RepoEvent<DataAttributes<NodeResource>> event)
+    public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
     {
-        if (NODE_CREATED.getType().equals(event.getType()))
+        try
         {
-            IngestNewNodeEvent ingestNewNodeEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
-
-            ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
+            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {
+            });
         }
-        else if (NODE_UPDATED.getType().equals(event.getType()))
+        catch (JsonProcessingException e)
         {
-            log.info("Received event of type UPDATE {}", event);
+            throw new LiveIngesterRuntimeException("Event deserialization failed", e);
         }
     }
 }

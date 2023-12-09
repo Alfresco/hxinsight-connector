@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.messaging.in;
 import static org.apache.camel.LoggingLevel.DEBUG;
 
 import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
+import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.CamelEventMapper;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
@@ -38,10 +39,13 @@ public class LiveIngesterRouteBuilder extends RouteBuilder
     private final MessagingInputConfig properties;
     private final EventProcessor eventProcessor;
 
-    public LiveIngesterRouteBuilder(CamelContext context, MessagingInputConfig messagingInputConfig, EventProcessor eventProcessor)
+    private final CamelEventMapper camelEventMapper;
+
+    public LiveIngesterRouteBuilder(CamelContext context, MessagingInputConfig messagingInputConfig, EventProcessor eventProcessor, CamelEventMapper camelEventMapper)
     {
         super(context);
         this.properties = messagingInputConfig;
+        this.camelEventMapper = camelEventMapper;
         this.eventProcessor = eventProcessor;
     }
 
@@ -51,8 +55,8 @@ public class LiveIngesterRouteBuilder extends RouteBuilder
         from(properties.getEndpoint())
             .transacted()
             .routeId("ingester-events-consumer")
-            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
-            .process(eventProcessor::process)
+            .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
+            .process((exchange) -> eventProcessor.process(camelEventMapper.repoEventFrom(exchange)))
             .end();
     }
 }

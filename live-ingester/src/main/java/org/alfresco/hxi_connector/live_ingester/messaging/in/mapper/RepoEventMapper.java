@@ -24,14 +24,11 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in;
-
-import static lombok.AccessLevel.PRIVATE;
+package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
 
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
@@ -39,12 +36,14 @@ import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.springframework.stereotype.Component;
 
 @Slf4j
-@NoArgsConstructor(access = PRIVATE)
+@Component
 public class RepoEventMapper
 {
-    public static IngestNewNodeEvent mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
+
+    public IngestNewNodeEvent mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {
         log.info("Creating node metadata properties {}", event);
 

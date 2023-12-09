@@ -1,0 +1,55 @@
+{
+  "specversion": "1.0",
+  "type": "org.alfresco.event.node.Created",
+  "id": "cf268b2d-d0b5-4ddf-87a0-e434d9b86318",
+  "source": "/3892b626-b6a9-4526-9879-6f2f7195d7c3",
+  "time": "2023-09-06T05:20:06.483Z",
+  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeCreated",
+  "datacontenttype": "application/json",
+  "data": {
+    "eventGroupId": "6cd51986-d6f1-4175-afeb-4200a1a8eb9a",
+    "resource": {
+      "@type": "NodeResource",
+      "id": "0fe2919a-e0a6-4033-8d35-168a16cf33fc",
+      "primaryHierarchy": [
+        "a8b420e6-7c14-43c1-ae8b-1b59be76dec5",
+        "2deb2e96-f39d-462f-9da1-61d0b9dae260"
+      ],
+      "name": "some-name",
+      "nodeType": "cm:folder",
+      "createdByUser": {
+        "id": "admin",
+        "displayName": "Administrator"
+      },
+      "createdAt": "2023-09-06T05:20:06.444Z",
+      "modifiedByUser": {
+        "id": "admin",
+        "displayName": "Administrator"
+      },
+      "modifiedAt": "2023-09-06T05:20:06.444Z",
+      "properties": {
+        "cm:title": null,
+        "cm:description": null
+      },
+      "localizedProperties": {
+        "cm:title": {
+          "en": null
+        },
+        "cm:description": {
+          "en": null
+        }
+      },
+      "aspectNames": [
+        "cm:titled",
+        "cm:auditable"
+      ],
+      "primaryAssocQName": "cm:some-name",
+      "isFile": false,
+      "isFolder": true
+    },
+    "resourceReaderAuthorities": [
+      "GROUP_EVERYONE"
+    ],
+    "resourceDeniedAuthorities": []
+  }
+}
