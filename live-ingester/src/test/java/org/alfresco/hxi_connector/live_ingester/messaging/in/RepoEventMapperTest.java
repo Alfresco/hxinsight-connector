@@ -66,9 +66,7 @@ class RepoEventMapperTest
     private static final boolean NODE_IS_FILE = false;
     private static final long NODE_CREATED_AT = 1690000000050L;
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
-    private static final NodeProperty<String> NODE_DESCRIPTION = new NodeProperty<>("cm:description", "some description");
-    private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE, NODE_DESCRIPTION);
-
+    private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
     private final CamelEventMapper camelEventMapper = new CamelEventMapper(ObjectMapperFactory.createInstance());
     private final RepoEventMapper repoEventMapper = new RepoEventMapper();
 

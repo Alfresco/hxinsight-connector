@@ -30,14 +30,14 @@
       "modifiedAt": "2023-09-06T05:20:06.444Z",
       "properties": {
         "cm:title": "some title",
-        "cm:description": "some description"
+        "cm:description": null
       },
       "localizedProperties": {
         "cm:title": {
           "en": "some title"
         },
         "cm:description": {
-          "en": "some description"
+          "en": null
         }
       },
       "aspectNames": [
