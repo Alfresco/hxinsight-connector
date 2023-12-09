@@ -52,7 +52,6 @@ import org.junit.jupiter.api.Test;
 
 class RepoEventMapperTest
 {
-
     private static final long EVENT_TIMESTAMP = 1690000000100L;
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
     private static final String NODE_NAME = "test-name";
