@@ -26,15 +26,16 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Set;
 
+import lombok.SneakyThrows;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
@@ -44,25 +45,27 @@ import org.alfresco.repo.event.databind.ObjectMapperFactory;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.alfresco.repo.event.v1.model.UserInfo;
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 class RepoEventMapperTest
 {
 
-    private static final long EVENT_TIMESTAMP = 1000;
-    private static final String NODE_ID = "test-id";
+    private static final long EVENT_TIMESTAMP = 1690000000100L;
+    private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
     private static final String NODE_NAME = "test-name";
     private static final String NODE_PRIMARY_ASSOC_Q_NAME = "cm:test-name";
     private static final String NODE_TYPE = "cm:folder";
-    private static final String NODE_CREATED_BY_USER_WITH_ID = "first-user-id";
-    private static final String NODE_MODIFIED_BY_USER_WITH_ID = "second-user-id";
+    private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
+    private static final String NODE_MODIFIED_BY_USER_WITH_ID = "admin";
     private static final Set<String> NODE_ASPECT_NAMES = Set.of(
         "cm:titled",
         "cm:auditable");
     private static final boolean NODE_IS_FOLDER = true;
     private static final boolean NODE_IS_FILE = false;
-    private static final long NODE_CREATED_AT = 1000;
+    private static final long NODE_CREATED_AT = 1690000000050L;
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final NodeProperty<String> NODE_DESCRIPTION = new NodeProperty<>("cm:description", "some description");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE, NODE_DESCRIPTION);
@@ -74,22 +77,7 @@ class RepoEventMapperTest
     void mapToIngestNewNodeEvent()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        DataAttributes<NodeResource> eventData = mock();
-        NodeResource nodeResource = mock();
-
-        when(event.getTime()).thenReturn(ZonedDateTime.ofInstant(Instant.ofEpochMilli(EVENT_TIMESTAMP), ZoneId.systemDefault()));
-        when(event.getData()).thenReturn(eventData);
-
-        when(eventData.getResource()).thenReturn(nodeResource);
-
-        when(nodeResource.getId()).thenReturn(NODE_ID);
-        when(nodeResource.getName()).thenReturn(NODE_NAME);
-        when(nodeResource.getPrimaryAssocQName()).thenReturn(NODE_PRIMARY_ASSOC_Q_NAME);
-        when(nodeResource.getNodeType()).thenReturn(NODE_TYPE);
-        when(nodeResource.getCreatedByUser()).thenReturn(mockUser(NODE_CREATED_BY_USER_WITH_ID));
-        when(nodeResource.getModifiedByUser()).thenReturn(mockUser(NODE_MODIFIED_BY_USER_WITH_ID));
-        when(nodeResource.getAspectNames()).thenReturn(mockUser(NODE_MODIFIED_BY_USER_WITH_ID));
+        RepoEvent<DataAttributes<NodeResource>> event = getEvent("node-created-event.json");
 
         Node node = new Node(
             NODE_ID,
@@ -115,12 +103,17 @@ class RepoEventMapperTest
         assertEquals(expectedEvent, actualEvent);
     }
 
-    private UserInfo mockUser(String id)
+    @SneakyThrows
+    private RepoEvent<DataAttributes<NodeResource>> getEvent(String eventName)
     {
-        UserInfo userInfo = mock();
+        String eventBody = IOUtils.resourceToString("/repo-event-mapper/" + eventName, UTF_8);
 
-        when(userInfo.getId()).thenReturn(id);
+        Exchange exchange = mock();
+        Message message = mock();
 
-        return userInfo;
+        when(exchange.getIn()).thenReturn(message);
+        when(message.getBody(any())).thenReturn(eventBody);
+
+        return camelEventMapper.repoEventFrom(exchange);
     }
 }
