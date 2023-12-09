@@ -38,19 +38,19 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationExcep
 @NoArgsConstructor(access = PRIVATE)
 public class EnsureUtils
 {
-    public static void ensureNotBlank(String s, String errorMessage, String... formatArgs)
+    public static void ensureNotBlank(String s, String errorMessage, Object... formatArgs)
     {
-        ensureThat(Objects.nonNull(s) & !s.isBlank(), () -> new ValidationException(String.format(errorMessage, (Object[])formatArgs)));
+        ensureThat(Objects.nonNull(s) && !s.isBlank(), errorMessage, formatArgs);
     }
 
-    public static void ensureNonNull(Object o, String errorMessage, String... formatArgs)
+    public static void ensureNonNull(Object o, String errorMessage, Object... formatArgs)
     {
-        ensureThat(Objects.nonNull(o), () -> new ValidationException(String.format(errorMessage, (Object[])formatArgs)));
+        ensureThat(Objects.nonNull(o), errorMessage, formatArgs);
     }
 
-    public static void ensureThat(boolean isOk, String errorMessage, String... formatArgs)
+    public static void ensureThat(boolean isOk, String errorMessage, Object... formatArgs)
     {
-        ensureThat(isOk, () -> new ValidationException(String.format(errorMessage, (Object[])formatArgs)));
+        ensureThat(isOk, () -> new ValidationException(String.format(errorMessage, formatArgs)));
     }
 
     public static void ensureThat(boolean isOk, Supplier<? extends LiveIngesterRuntimeException> exceptionSupplier)
