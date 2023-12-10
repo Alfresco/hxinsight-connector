@@ -57,8 +57,7 @@ public class IngestNewNodeEventHandler
                                                           .set(IS_FOLDER.withValue(node.isFolder()))
                                                           .set(CREATED_AT.withValue(node.createdAt()));
 
-        node.properties()
-            .forEach(updateMetadataEvent::set);
+        node.properties().forEach(updateMetadataEvent::set);
 
         eventPublisher.publishMessage(updateMetadataEvent);
     }
