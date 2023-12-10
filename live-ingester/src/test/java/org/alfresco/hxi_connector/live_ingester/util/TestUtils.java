@@ -28,9 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.util;
 
 import static java.util.function.Predicate.not;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
