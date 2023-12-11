@@ -20,3 +20,4 @@ repos:
             name: spotless check and format
             entry: ./scripts/hooks/spotless-check-and-format.sh
             language: script
+            always_run: true
