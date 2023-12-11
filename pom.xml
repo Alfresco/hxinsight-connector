@@ -288,7 +288,7 @@
         <configuration>
           <java>
             <includes>
-              <include>src/main/java/**/*.java</include>
+              <include>src/*/java/**/*.java</include>
             </includes>
             <eclipse>
               <file>code-formatter.xml</file>
