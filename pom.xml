@@ -291,7 +291,7 @@
               <include>src/*/java/**/*.java</include>
             </includes>
             <eclipse>
-              <file>code-formatter.xml</file>
+              <file>alfresco-formatter.xml</file>
             </eclipse>
           </java>
         </configuration>
