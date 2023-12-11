@@ -293,6 +293,13 @@
             <eclipse>
               <file>alfresco-formatter.xml</file>
             </eclipse>
+
+            <importOrder>
+              <order>\#,\#org.alfresco,java,javax,jakarta,com,lombok,org,org.alfresco</order>
+            </importOrder>
+
+            <removeUnusedImports />
+            <formatAnnotations />
           </java>
         </configuration>
       </plugin>
