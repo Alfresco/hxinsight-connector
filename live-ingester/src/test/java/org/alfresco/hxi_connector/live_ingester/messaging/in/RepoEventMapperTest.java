@@ -33,6 +33,12 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import lombok.SneakyThrows;
@@ -45,6 +51,7 @@ import org.alfresco.repo.event.databind.ObjectMapperFactory;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.repo.event.v1.model.UserInfo;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.commons.io.IOUtils;
@@ -98,6 +105,79 @@ class RepoEventMapperTest
 
         // then
         assertEquals(expectedEvent, actualEvent);
+    }
+
+    @Test
+    void mapToIngestNewNodeEvent2()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        DataAttributes<NodeResource> data = mock();
+        NodeResource nodeResource = mock();
+
+        UserInfo nodeCreator = mockUser(NODE_CREATED_BY_USER_WITH_ID);
+        UserInfo nodeModifier = mockUser(NODE_MODIFIED_BY_USER_WITH_ID);
+
+        when(event.getTime()).thenReturn(dateFromTimestamp(EVENT_TIMESTAMP));
+        when(event.getData()).thenReturn(data);
+        when(data.getResource()).thenReturn(nodeResource);
+        when(nodeResource.getId()).thenReturn(NODE_ID);
+        when(nodeResource.getName()).thenReturn(NODE_NAME);
+        when(nodeResource.getPrimaryAssocQName()).thenReturn(NODE_PRIMARY_ASSOC_Q_NAME);
+        when(nodeResource.getNodeType()).thenReturn(NODE_TYPE);
+        when(nodeResource.getCreatedByUser()).thenReturn(nodeCreator);
+        when(nodeResource.getModifiedByUser()).thenReturn(nodeModifier);
+        when(nodeResource.getAspectNames()).thenReturn(NODE_ASPECT_NAMES);
+        when(nodeResource.isFile()).thenReturn(NODE_IS_FILE);
+        when(nodeResource.isFolder()).thenReturn(NODE_IS_FOLDER);
+        when(nodeResource.getCreatedAt()).thenReturn(dateFromTimestamp(NODE_CREATED_AT));
+        when(nodeResource.getProperties()).thenReturn(createPropertiesMap("cm:title", "some title", "cm:description", null));
+
+        Node node = new Node(
+            NODE_ID,
+            NODE_NAME,
+            NODE_PRIMARY_ASSOC_Q_NAME,
+            NODE_TYPE,
+            NODE_CREATED_BY_USER_WITH_ID,
+            NODE_MODIFIED_BY_USER_WITH_ID,
+            NODE_ASPECT_NAMES,
+            NODE_IS_FILE,
+            NODE_IS_FOLDER,
+            NODE_CREATED_AT,
+            NODE_PROPERTIES);
+
+        IngestNewNodeEvent expectedEvent = new IngestNewNodeEvent(
+            EVENT_TIMESTAMP,
+            node);
+
+        // when
+        IngestNewNodeEvent actualEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
+
+        // then
+        assertEquals(expectedEvent, actualEvent);
+    }
+
+    private UserInfo mockUser(String id)
+    {
+        UserInfo userInfo = mock();
+        when(userInfo.getId()).thenReturn(id);
+
+        return userInfo;
+    }
+
+    private ZonedDateTime dateFromTimestamp(long timestamp)
+    {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("UTC"));
+    }
+
+    private Map<String, Serializable> createPropertiesMap(String property1Name, String property1Value, String property2Name, String property2Value)
+    {
+        Map<String, Serializable> properties = new HashMap<>();
+
+        properties.put(property1Name, property1Value);
+        properties.put(property2Name, property2Value);
+
+        return properties;
     }
 
     @SneakyThrows
