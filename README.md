@@ -14,7 +14,7 @@ To reformat files you can use:
 ```bash
 mvn spotless:apply
 ```
-or load `code-formatter.xml` to IntelliJ
+or load `alfresco-formatter.xml` to IntelliJ
 
 ### Development Environment
 
