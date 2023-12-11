@@ -14,11 +14,11 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-xml
-#  -   repo: local
-#      hooks:
-#        -   id: spotless-check-and-format
-#            name: spotless check and format
-#            entry: ./scripts/hooks/spotless-check-and-format.sh
-#            language: script
-#            always_run: true
-#            fail_fast: true
+  -   repo: local
+      hooks:
+        -   id: spotless-check-and-format
+            name: spotless check and format
+            entry: ./scripts/hooks/spotless-check-and-format.sh
+            language: script
+            files: ".*.java"
+            pass_filenames: false
