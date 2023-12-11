@@ -28,10 +28,15 @@ package org.alfresco.hxi_connector.live_ingester.util;
 
 import static java.util.function.Predicate.not;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.Collection;
 import java.util.List;
 
-public class TestUtils
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = PRIVATE)
+public final class TestUtils
 {
     public static <T> void assertContainsSameElements(Collection<T> expected, Collection<T> actual)
     {
