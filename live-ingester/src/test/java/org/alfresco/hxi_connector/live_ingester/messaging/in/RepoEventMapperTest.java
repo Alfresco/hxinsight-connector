@@ -64,7 +64,7 @@ class RepoEventMapperTest
         "cm:auditable");
     private static final boolean NODE_IS_FOLDER = true;
     private static final boolean NODE_IS_FILE = false;
-    private static final long NODE_CREATED_AT = 1690000000050L;
+    private static final long NODE_CREATED_AT = 1_690_000_000_050L;
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
     private final CamelEventMapper camelEventMapper = new CamelEventMapper(ObjectMapperFactory.createInstance());

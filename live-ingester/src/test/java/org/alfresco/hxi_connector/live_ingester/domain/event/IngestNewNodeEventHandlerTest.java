@@ -48,7 +48,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 @ExtendWith(MockitoExtension.class)
 class IngestNewNodeEventHandlerTest
 {
-    private static final long EVENT_TIMESTAMP = 1690000000100L;
+    private static final long EVENT_TIMESTAMP = 1_690_000_000_100L;
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
     private static final String NODE_NAME = "test-name";
     private static final String NODE_PRIMARY_ASSOC_Q_NAME = "cm:test-name";
@@ -60,7 +60,7 @@ class IngestNewNodeEventHandlerTest
         "cm:auditable");
     private static final boolean NODE_IS_FOLDER = true;
     private static final boolean NODE_IS_FILE = false;
-    private static final long NODE_CREATED_AT = 1690000000050L;
+    private static final long NODE_CREATED_AT = 1_690_000_000_050L;
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
     @Captor
