@@ -14,3 +14,9 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-xml
+  -   repo: local
+      hooks:
+        -   id: spotless-check-and-format
+            name: spotless check and format
+            entry: ./scripts/hooks/spotless-check-and-format.sh
+            language: script

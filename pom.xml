@@ -291,7 +291,7 @@
               <include>src/main/java/**/*.java</include>
             </includes>
             <eclipse>
-              <file>${project.basedir}/code-formatter.xml</file>
+              <file>code-formatter.xml</file>
             </eclipse>
           </java>
         </configuration>
