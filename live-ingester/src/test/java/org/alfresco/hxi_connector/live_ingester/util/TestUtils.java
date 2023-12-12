@@ -34,6 +34,7 @@ import java.util.List;
 
 import lombok.NoArgsConstructor;
 
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SystemPrintln"})
 @NoArgsConstructor(access = PRIVATE)
 public final class TestUtils
 {
@@ -47,11 +48,11 @@ public final class TestUtils
             return;
         }
 
-        System.out.println("expected: " + expected);
-        System.out.println("actual: " + actual);
+        System.err.println("expected: " + expected);
+        System.err.println("actual: " + actual);
 
-        System.out.println("present in expected and not in actual: " + difference(expected, actual));
-        System.out.println("present in actual and not in expected: " + difference(actual, expected));
+        System.err.println("present in expected and not in actual: " + difference(expected, actual));
+        System.err.println("present in actual and not in expected: " + difference(actual, expected));
     }
 
     private static <T> List<T> difference(Collection<T> first, Collection<T> second)

@@ -35,6 +35,7 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
 
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class EnsureUtilsTest
 {
 
