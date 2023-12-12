@@ -4,23 +4,17 @@ Connector for sending ACS events to HxInsight and updating the Repository with t
 
 
 ### Code Quality
-This project uses `pre-commit` and `clang-format` to ensure code quality. To run them locally you should:
+This project uses `spotless` to ensure code quality.
 
-(mac)
+To check code-style violations you can use:
 ```bash
-brew install pre-commit
-brew install clang-format
+mvn spotless:check
 ```
-
-Than install pre-commit in git repository
+To reformat files you can use:
 ```bash
-pre-commit install
+mvn spotless:apply
 ```
-
-Then to reformat all files run
-```bash
-pre-commit run --all-files
-```
+or load `alfresco-formatter.xml` to IntelliJ
 
 ### Development Environment
 

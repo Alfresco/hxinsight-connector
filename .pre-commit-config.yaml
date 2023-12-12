@@ -14,8 +14,11 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-xml
-  - repo: https://github.com/pocc/pre-commit-hooks
-    rev: v1.3.5
-    hooks:
-        - id: clang-format
-          args: ["-i"]
+  -   repo: local
+      hooks:
+        -   id: spotless-check-and-format
+            name: spotless check and format
+            entry: ./scripts/hooks/spotless-check-and-format.sh
+            language: script
+            files: ".*.java"
+            pass_filenames: false
