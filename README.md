@@ -4,7 +4,7 @@ Connector for sending ACS events to HxInsight and updating the Repository with t
 
 
 ### Code Quality
-This project uses `spotless` to ensure code quality.
+This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.
 
 To check code-style violations you can use:
 ```bash
@@ -14,7 +14,6 @@ To reformat files you can use:
 ```bash
 mvn spotless:apply
 ```
-or load `alfresco-formatter.xml` to IntelliJ
 
 ### Development Environment
 
