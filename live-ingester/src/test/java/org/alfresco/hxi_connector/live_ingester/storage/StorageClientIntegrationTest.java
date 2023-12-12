@@ -63,6 +63,7 @@ class StorageClientIntegrationTest
     private static final String OBJECT_CONTENT_TYPE = "plain/text";
 
     @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
     private static final LocalStackContainer localStack = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
 
     @Autowired

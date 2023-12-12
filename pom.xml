@@ -64,6 +64,8 @@
 
     <acs-event-model.version>0.0.24</acs-event-model.version>
 
+    <testcontainers.version>1.19.3</testcontainers.version>
+
     <!-- Used by the generated .env file for docker-compose. -->
     <dist.alfresco.version>23.1.1</dist.alfresco.version>
     <dist.share.version>23.1.1</dist.share.version>
@@ -133,7 +135,7 @@
       <dependency>
         <groupId>org.testcontainers</groupId>
         <artifactId>testcontainers-bom</artifactId>
-        <version>1.19.3</version>
+        <version>${testcontainers.version}</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
