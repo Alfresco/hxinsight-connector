@@ -28,11 +28,11 @@ package org.alfresco.hxi_connector.live_ingester.storage;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.Files;
 
 import org.alfresco.hxi_connector.live_ingester.exception.LiveIngesterRuntimeException;
 import org.apache.http.HttpEntity;
@@ -48,9 +48,10 @@ import org.springframework.stereotype.Component;
 public class SignedStorageClient implements StorageClient
 {
 
+    @Override
     public StatusLine upload(File file, String contentType, URL preSignedUrl)
     {
-        try (InputStream fileInputStream = new FileInputStream(file))
+        try (InputStream fileInputStream = Files.newInputStream(file.toPath()))
         {
             return this.upload(fileInputStream, contentType, preSignedUrl);
         }
@@ -60,6 +61,7 @@ public class SignedStorageClient implements StorageClient
         }
     }
 
+    @Override
     public StatusLine upload(InputStream inputStream, String contentType, URL preSignedUrl)
     {
         try (CloseableHttpClient httpClient = HttpClients.createDefault())

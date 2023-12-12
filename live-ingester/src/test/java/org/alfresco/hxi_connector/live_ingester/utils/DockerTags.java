@@ -26,7 +26,7 @@
 package org.alfresco.hxi_connector.live_ingester.utils;
 
 import java.io.File;
-import java.io.FileInputStream;
+import java.nio.file.Files;
 import java.util.Optional;
 import java.util.Properties;
 
@@ -81,8 +81,8 @@ public class DockerTags
         File file = new File(PROPERTIES_FILE_PATH);
         if (file.exists())
         {
-            properties = new java.util.Properties();
-            properties.load(new FileInputStream(file));
+            properties = new Properties();
+            properties.load(Files.newInputStream(file.toPath()));
         }
     }
 }

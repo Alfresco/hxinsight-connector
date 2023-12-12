@@ -52,6 +52,7 @@ import org.testcontainers.utility.DockerImageName;
 @SpringBootTest(classes = {LocalStorageConfig.class, SignedStorageClient.class})
 @ActiveProfiles({"test"})
 @Testcontainers
+@SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
 class StorageClientIntegrationTest
 {
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
@@ -62,27 +63,18 @@ class StorageClientIntegrationTest
     private static final String OBJECT_CONTENT_TYPE = "plain/text";
 
     @Container
-    static LocalStackContainer localStack = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
+    private static final LocalStackContainer localStack = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
 
-    @DynamicPropertySource
-    static void overrideProperties(DynamicPropertyRegistry registry)
-    {
-        registry.add("local.aws.endpoint", localStack.getEndpointOverride(S3)::toString);
-        registry.add("local.aws.region", localStack::getRegion);
-        registry.add("local.aws.access-key-id", localStack::getAccessKey);
-        registry.add("local.aws.secret-access-key", localStack::getSecretKey);
-    }
+    @Autowired
+    private LocalStorageClient testS3Storage;
+    @Autowired
+    private StorageClient storageClient;
 
     @BeforeAll
     static void beforeAll() throws IOException, InterruptedException
     {
         localStack.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
     }
-
-    @Autowired
-    private LocalStorageClient testS3Storage;
-    @Autowired
-    private StorageClient storageClient;
 
     @Test
     void testUpload() throws IOException
@@ -107,5 +99,14 @@ class StorageClientIntegrationTest
                 .isNotNull()
                 .containsOnly(OBJECT_KEY);
         }
+    }
+
+    @DynamicPropertySource
+    static void overrideProperties(DynamicPropertyRegistry registry)
+    {
+        registry.add("local.aws.endpoint", localStack.getEndpointOverride(S3)::toString);
+        registry.add("local.aws.region", localStack::getRegion);
+        registry.add("local.aws.access-key-id", localStack::getAccessKey);
+        registry.add("local.aws.secret-access-key", localStack::getSecretKey);
     }
 }
