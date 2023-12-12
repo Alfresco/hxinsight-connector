@@ -49,8 +49,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-@SpringBootTest(classes = { LocalStorageConfig.class, SignedStorageClient.class })
-@ActiveProfiles({ "test" })
+@SpringBootTest(classes = {LocalStorageConfig.class, SignedStorageClient.class})
+@ActiveProfiles({"test"})
 @Testcontainers
 class StorageClientIntegrationTest
 {

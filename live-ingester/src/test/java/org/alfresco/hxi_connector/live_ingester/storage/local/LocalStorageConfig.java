@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Profile;
 
 @TestConfiguration
 @ComponentScan
-@EnableConfigurationProperties({ LocalStorageConfig.Properties.class })
+@EnableConfigurationProperties({LocalStorageConfig.Properties.class})
 @Profile("test")
 public class LocalStorageConfig
 {

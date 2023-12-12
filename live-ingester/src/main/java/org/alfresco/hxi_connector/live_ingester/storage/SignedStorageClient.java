@@ -66,8 +66,8 @@ public class SignedStorageClient implements StorageClient
         {
             HttpPut httpPut = new HttpPut(preSignedUrl.toURI());
             HttpEntity entity = EntityBuilder.create()
-                .setStream(inputStream)
-                .build();
+                                    .setStream(inputStream)
+                                    .build();
             httpPut.setEntity(entity);
             httpPut.setHeader(CONTENT_TYPE, contentType);
             //TODO If additional metadata will be required uncomment bellow, otherwise removed it
