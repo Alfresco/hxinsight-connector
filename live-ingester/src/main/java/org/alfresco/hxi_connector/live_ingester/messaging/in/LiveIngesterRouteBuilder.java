@@ -27,10 +27,11 @@ package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
-import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
 
 @Component
 public class LiveIngesterRouteBuilder extends RouteBuilder
@@ -49,10 +50,10 @@ public class LiveIngesterRouteBuilder extends RouteBuilder
     public void configure()
     {
         from(properties.getEndpoint())
-            .transacted()
-            .routeId("ingester-events-consumer")
-            .log(DEBUG, "Received path event : ${header.JMSMessageID}")
-            .process(eventProcessor::process)
-            .end();
+                .transacted()
+                .routeId("ingester-events-consumer")
+                .log(DEBUG, "Received path event : ${header.JMSMessageID}")
+                .process(eventProcessor::process)
+                .end();
     }
 }
