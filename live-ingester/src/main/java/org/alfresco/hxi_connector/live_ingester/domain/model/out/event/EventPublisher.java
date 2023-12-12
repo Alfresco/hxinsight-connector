@@ -23,20 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-
-@SpringBootTest
-class LiveIngesterApplicationTests
+public interface EventPublisher
 {
-
-    @Test
-    void contextLoads()
-    {
-        assertEquals(1, 1);
-    }
+    void publishMessage(UpdateNodeMetadataEvent event);
 }

@@ -31,6 +31,7 @@ jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v1.35.2
 
   veracode:

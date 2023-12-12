@@ -23,45 +23,44 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.messaging.out;
+
+package org.alfresco.hxi_connector.live_ingester.domain.event;
+
+import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
-public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
+public class IngestNewNodeEventHandler
 {
-    private static final String LOCAL_ENDPOINT = "direct:start";
 
-    private final CamelContext context;
+    private final EventPublisher eventPublisher;
 
-    private final MessagingOutputConfig config;
-
-    @Override
-    public void configure()
+    public void handle(IngestNewNodeEvent event)
     {
-        from(LOCAL_ENDPOINT)
-                .marshal()
-                .json()
-                .log("Sending event ${body}")
-                .to(config.getEndpoint())
-                .end();
-    }
+        Node node = event.node();
 
-    @Override
-    public void publishMessage(UpdateNodeMetadataEvent event)
-    {
-        context.createProducerTemplate()
-                .sendBody(LOCAL_ENDPOINT, event);
+        UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create()
+                .set(NAME.withValue(node.name()))
+                .set(PRIMARY_ASSOC_Q_NAME.withValue(node.primaryAssocQName()))
+                .set(TYPE.withValue(node.nodeType()))
+                .set(CREATED_BY_USER_WITH_ID.withValue(node.createdByUserWithId()))
+                .set(MODIFIED_BY_USER_WITH_ID.withValue(node.modifiedByUserWithId()))
+                .set(ASPECTS_NAMES.withValue(node.aspectNames()))
+                .set(IS_FILE.withValue(node.isFile()))
+                .set(IS_FOLDER.withValue(node.isFolder()))
+                .set(CREATED_AT.withValue(node.createdAt()));
+
+        node.properties().forEach(updateMetadataEvent::set);
+
+        eventPublisher.publishMessage(updateMetadataEvent);
     }
 }

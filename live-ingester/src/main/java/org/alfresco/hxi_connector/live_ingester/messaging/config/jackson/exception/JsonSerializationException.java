@@ -24,11 +24,13 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.exception;
+package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.exception;
 
-public class LiveIngesterRuntimeException extends RuntimeException
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+
+public class JsonSerializationException extends LiveIngesterRuntimeException
 {
-    public LiveIngesterRuntimeException(String message, Throwable cause)
+    public JsonSerializationException(String message, Throwable cause)
     {
         super(message, cause);
     }
