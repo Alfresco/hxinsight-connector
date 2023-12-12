@@ -73,7 +73,7 @@
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.6.0</version>
+                        <version>${maven-assembly-plugin.version}</version>
                         <configuration>
                             <finalName>alfresco-hxinsight-connector-distribution-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>

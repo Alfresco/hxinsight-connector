@@ -50,12 +50,17 @@
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.year>2023</project.year>
     <licenseName>community</licenseName>
+    <skipTests>false</skipTests>
+    <skipUnitTests>${skipTests}</skipUnitTests>
+    <skipIntegrationTests>${skipTests}</skipIntegrationTests>
 
-    <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+    <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+    <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
 
     <spring-boot.version>3.2.0</spring-boot.version>
-    <spring.camel.version>4.2.0</spring.camel.version>
+    <spring-camel.version>4.2.0</spring-camel.version>
+    <aws-sdk-s3.version>2.21.42</aws-sdk-s3.version>
 
     <acs-event-model.version>0.0.24</acs-event-model.version>
 
@@ -71,7 +76,7 @@
     <dist.digital.workspace.version>4.4.0-7099328816</dist.digital.workspace.version>
     <dist.control.center.version>8.3.0</dist.control.center.version>
     <dist.nginx.version>3.4.2</dist.nginx.version>
-    <dist.elasticsearch.version>7.17.3</dist.elasticsearch.version>
+    <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
     <dist.search.enterprise.version>4.0.0.1</dist.search.enterprise.version>
     <dist.localstack.version>3.0.2</dist.localstack.version>
   </properties>
@@ -116,30 +121,32 @@
         <type>pom</type>
         <scope>import</scope>
       </dependency>
+
       <dependency>
         <groupId>org.apache.camel.springboot</groupId>
-        <artifactId>camel-spring-boot-starter</artifactId>
-        <version>${spring.camel.version}</version>
+        <artifactId>camel-spring-boot-dependencies</artifactId>
+        <version>${spring-camel.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
+
       <dependency>
-        <groupId>org.apache.camel.springboot</groupId>
-        <artifactId>camel-activemq-starter</artifactId>
-        <version>${spring.camel.version}</version>
+        <groupId>org.testcontainers</groupId>
+        <artifactId>testcontainers-bom</artifactId>
+        <version>1.19.3</version>
+        <type>pom</type>
+        <scope>import</scope>
       </dependency>
-      <dependency>
-        <groupId>org.apache.camel.springboot</groupId>
-        <artifactId>camel-sjms-starter</artifactId>
-        <version>${spring.camel.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.apache.camel.springboot</groupId>
-        <artifactId>camel-aws2-sns-starter</artifactId>
-        <version>${spring.camel.version}</version>
-      </dependency>
+
       <dependency>
         <groupId>org.alfresco</groupId>
         <artifactId>acs-event-model</artifactId>
         <version>${acs-event-model.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>software.amazon.awssdk</groupId>
+        <artifactId>s3</artifactId>
+        <version>${aws-sdk-s3.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
@@ -159,6 +166,19 @@
   </dependencies>
 
   <build>
+    <resources>
+      <resource>
+        <directory>src/main/resources</directory>
+        <filtering>true</filtering>
+      </resource>
+    </resources>
+    <testResources>
+      <testResource>
+        <directory>src/test/resources</directory>
+        <filtering>true</filtering>
+      </testResource>
+    </testResources>
+
     <pluginManagement>
       <plugins>
         <plugin>
@@ -215,6 +235,7 @@
             </dependency>
           </dependencies>
         </plugin>
+
         <plugin>
           <artifactId>maven-site-plugin</artifactId>
           <configuration>
@@ -222,6 +243,7 @@
             <skipDeploy>true</skipDeploy>
           </configuration>
         </plugin>
+
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
@@ -241,11 +263,28 @@
 
     <plugins>
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
+        <artifactId>maven-resources-plugin</artifactId>
+        <version>${maven-resources-plugin.version}</version>
+        <configuration>
+          <delimiters>
+            <delimiter>@</delimiter>
+          </delimiters>
+          <useDefaultDelimiters>false</useDefaultDelimiters>
+        </configuration>
       </plugin>
+
       <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <configuration>
+          <excludes>
+            <exclude>**/*IT.java</exclude>
+            <exclude>**/*IntegrationTest.java</exclude>
+          </excludes>
+          <skipTests>${skipUnitTests}</skipTests>
+        </configuration>
+      </plugin>
+
+      <plugin>
         <artifactId>maven-failsafe-plugin</artifactId>
         <executions>
           <execution>
@@ -255,7 +294,15 @@
             </goals>
           </execution>
         </executions>
+        <configuration>
+          <includes>
+            <include>**/*IT.java</include>
+            <include>**/*IntegrationTest.java</include>
+          </includes>
+          <skipTests>${skipIntegrationTests}</skipTests>
+        </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
@@ -268,10 +315,12 @@
           </execution>
         </executions>
       </plugin>
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>license-maven-plugin</artifactId>
       </plugin>
+
       <plugin>
         <artifactId>maven-release-plugin</artifactId>
         <configuration>

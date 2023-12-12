@@ -195,12 +195,14 @@ services:
       - activemq
     environment:
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
+
   localstack:
     image: localstack/localstack:${LOCALSTACK_TAG}
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=sns,sqs
+      SERVICES: sns,sqs,s3
+      BUCKET_NAME: test-hxinsight-bucket
     volumes:
       - './init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh'
 
