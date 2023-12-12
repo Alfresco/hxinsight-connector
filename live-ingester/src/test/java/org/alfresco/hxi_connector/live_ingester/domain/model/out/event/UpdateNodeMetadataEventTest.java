@@ -26,12 +26,14 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.NAME;
 import static org.junit.jupiter.api.Assertions.*;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
+import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.NAME;
+
 import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 
 class UpdateNodeMetadataEventTest
 {

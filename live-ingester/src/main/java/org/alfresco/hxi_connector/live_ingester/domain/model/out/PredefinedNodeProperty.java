@@ -50,7 +50,7 @@ public class PredefinedNodeProperty<V>
     private PredefinedNodeProperty(String name)
     {
         ensureThat(!name.contains(":"),
-                   "Predefined properties names should not contain the ':' character, as this may cause a collision with the client's custom property.");
+                "Predefined properties names should not contain the ':' character, as this may cause a collision with the client's custom property.");
         this.name = name;
     }
 

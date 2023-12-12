@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 import lombok.NoArgsConstructor;
+
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
 

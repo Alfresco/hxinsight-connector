@@ -26,12 +26,14 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.utils;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.*;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.*;
+
+import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
-import org.junit.jupiter.api.Test;
 
 class EnsureUtilsTest
 {
@@ -67,8 +69,8 @@ class EnsureUtilsTest
         // when, then
 
         assertThrows(
-            ValidationException.class,
-            () -> ensureThat(first == second, "first: %s is not equal to second: %s", first, second), expectedErrorMessage);
+                ValidationException.class,
+                () -> ensureThat(first == second, "first: %s is not equal to second: %s", first, second), expectedErrorMessage);
     }
 
     @Test

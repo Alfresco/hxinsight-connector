@@ -32,12 +32,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.apache.camel.Exchange;
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.apache.camel.Exchange;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -51,10 +53,8 @@ public class CamelEventMapper
     {
         try
         {
-            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {
-            });
-        }
-        catch (JsonProcessingException e)
+            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
+        } catch (JsonProcessingException e)
         {
             throw new LiveIngesterRuntimeException("Event deserialization failed", e);
         }

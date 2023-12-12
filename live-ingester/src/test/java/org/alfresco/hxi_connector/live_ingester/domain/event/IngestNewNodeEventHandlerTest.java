@@ -26,24 +26,26 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
-import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
+import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
+
 import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 @ExtendWith(MockitoExtension.class)
 class IngestNewNodeEventHandlerTest
@@ -56,8 +58,8 @@ class IngestNewNodeEventHandlerTest
     private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
     private static final String NODE_MODIFIED_BY_USER_WITH_ID = "admin";
     private static final Set<String> NODE_ASPECT_NAMES = Set.of(
-        "cm:titled",
-        "cm:auditable");
+            "cm:titled",
+            "cm:auditable");
     private static final boolean NODE_IS_FOLDER = true;
     private static final boolean NODE_IS_FILE = false;
     private static final long NODE_CREATED_AT = 1_690_000_000_050L;
@@ -73,33 +75,33 @@ class IngestNewNodeEventHandlerTest
     {
         // given
         Node node = new Node(
-            NODE_ID,
-            NODE_NAME,
-            NODE_PRIMARY_ASSOC_Q_NAME,
-            NODE_TYPE,
-            NODE_CREATED_BY_USER_WITH_ID,
-            NODE_MODIFIED_BY_USER_WITH_ID,
-            NODE_ASPECT_NAMES,
-            NODE_IS_FILE,
-            NODE_IS_FOLDER,
-            NODE_CREATED_AT,
-            NODE_PROPERTIES);
+                NODE_ID,
+                NODE_NAME,
+                NODE_PRIMARY_ASSOC_Q_NAME,
+                NODE_TYPE,
+                NODE_CREATED_BY_USER_WITH_ID,
+                NODE_MODIFIED_BY_USER_WITH_ID,
+                NODE_ASPECT_NAMES,
+                NODE_IS_FILE,
+                NODE_IS_FOLDER,
+                NODE_CREATED_AT,
+                NODE_PROPERTIES);
 
         IngestNewNodeEvent event = new IngestNewNodeEvent(
-            EVENT_TIMESTAMP,
-            node);
+                EVENT_TIMESTAMP,
+                node);
 
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-            NAME.withValue(NODE_NAME),
-            PRIMARY_ASSOC_Q_NAME.withValue(NODE_PRIMARY_ASSOC_Q_NAME),
-            TYPE.withValue(NODE_TYPE),
-            CREATED_BY_USER_WITH_ID.withValue(NODE_CREATED_BY_USER_WITH_ID),
-            MODIFIED_BY_USER_WITH_ID.withValue(NODE_MODIFIED_BY_USER_WITH_ID),
-            ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
-            IS_FILE.withValue(NODE_IS_FILE),
-            IS_FOLDER.withValue(NODE_IS_FOLDER),
-            CREATED_AT.withValue(NODE_CREATED_AT),
-            NODE_TITLE);
+                NAME.withValue(NODE_NAME),
+                PRIMARY_ASSOC_Q_NAME.withValue(NODE_PRIMARY_ASSOC_Q_NAME),
+                TYPE.withValue(NODE_TYPE),
+                CREATED_BY_USER_WITH_ID.withValue(NODE_CREATED_BY_USER_WITH_ID),
+                MODIFIED_BY_USER_WITH_ID.withValue(NODE_MODIFIED_BY_USER_WITH_ID),
+                ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
+                IS_FILE.withValue(NODE_IS_FILE),
+                IS_FOLDER.withValue(NODE_IS_FOLDER),
+                CREATED_AT.withValue(NODE_CREATED_AT),
+                NODE_TITLE);
 
         // when
         ingestNewNodeEventHandler.handle(event);

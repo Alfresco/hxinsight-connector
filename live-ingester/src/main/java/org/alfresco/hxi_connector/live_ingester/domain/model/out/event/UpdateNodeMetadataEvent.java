@@ -33,6 +33,7 @@ import java.util.Set;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 
 @Getter

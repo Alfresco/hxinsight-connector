@@ -30,13 +30,15 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -50,23 +52,23 @@ public class RepoEventMapper
         NodeResource node = event.getData().getResource();
 
         return new IngestNewNodeEvent(
-            event.getTime().toInstant().toEpochMilli(),
-            new Node(
-                node.getId(),
-                node.getName(),
-                node.getPrimaryAssocQName(),
-                node.getNodeType(),
-                node.getCreatedByUser().getId(),
-                node.getModifiedByUser().getId(),
-                node.getAspectNames(),
-                node.isFile(),
-                node.isFolder(),
-                node.getCreatedAt().toInstant().toEpochMilli(),
-                node.getProperties()
-                    .entrySet()
-                    .stream()
-                    .filter(property -> Objects.nonNull(property.getKey()) && Objects.nonNull(property.getValue()))
-                    .map(property -> new NodeProperty<>(property.getKey(), property.getValue()))
-                    .collect(Collectors.toSet())));
+                event.getTime().toInstant().toEpochMilli(),
+                new Node(
+                        node.getId(),
+                        node.getName(),
+                        node.getPrimaryAssocQName(),
+                        node.getNodeType(),
+                        node.getCreatedByUser().getId(),
+                        node.getModifiedByUser().getId(),
+                        node.getAspectNames(),
+                        node.isFile(),
+                        node.isFolder(),
+                        node.getCreatedAt().toInstant().toEpochMilli(),
+                        node.getProperties()
+                                .entrySet()
+                                .stream()
+                                .filter(property -> Objects.nonNull(property.getKey()) && Objects.nonNull(property.getValue()))
+                                .map(property -> new NodeProperty<>(property.getKey(), property.getValue()))
+                                .collect(Collectors.toSet())));
     }
 }

@@ -27,12 +27,14 @@ package org.alfresco.hxi_connector.live_ingester.messaging.out;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
+
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
 
 @Slf4j
 @Component
@@ -49,17 +51,17 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
     public void configure()
     {
         from(LOCAL_ENDPOINT)
-            .marshal()
-            .json()
-            .log("Sending event ${body}")
-            .to(config.getEndpoint())
-            .end();
+                .marshal()
+                .json()
+                .log("Sending event ${body}")
+                .to(config.getEndpoint())
+                .end();
     }
 
     @Override
     public void publishMessage(UpdateNodeMetadataEvent event)
     {
         context.createProducerTemplate()
-            .sendBody(LOCAL_ENDPOINT, event);
+                .sendBody(LOCAL_ENDPOINT, event);
     }
 }

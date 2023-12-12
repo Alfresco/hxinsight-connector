@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.util;
 
 import static java.util.function.Predicate.not;
-
 import static lombok.AccessLevel.PRIVATE;
 
 import java.util.Collection;
@@ -58,7 +57,7 @@ public final class TestUtils
     private static <T> List<T> difference(Collection<T> first, Collection<T> second)
     {
         return first.stream()
-            .filter(not(second::contains))
-            .toList();
+                .filter(not(second::contains))
+                .toList();
     }
 }

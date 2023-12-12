@@ -34,17 +34,17 @@ import java.util.Set;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 
 public record Node(
-    String id,
-    String name,
-    String primaryAssocQName,
-    String nodeType,
-    String createdByUserWithId,
-    String modifiedByUserWithId,
-    Set<String> aspectNames,
-    boolean isFile,
-    boolean isFolder,
-    long createdAt,
-    Set<NodeProperty<?>> properties)
+        String id,
+        String name,
+        String primaryAssocQName,
+        String nodeType,
+        String createdByUserWithId,
+        String modifiedByUserWithId,
+        Set<String> aspectNames,
+        boolean isFile,
+        boolean isFolder,
+        long createdAt,
+        Set<NodeProperty<?>> properties)
 {
     public Node
     {

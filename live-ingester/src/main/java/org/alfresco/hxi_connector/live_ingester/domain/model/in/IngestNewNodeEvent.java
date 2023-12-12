@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.domain.model.in;
 
 public record IngestNewNodeEvent(
-    long time,
-    Node node)
-{
-}
+        long time,
+        Node node)
+{}

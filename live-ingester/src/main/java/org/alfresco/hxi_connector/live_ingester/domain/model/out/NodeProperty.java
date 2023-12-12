@@ -30,8 +30,8 @@ import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
 public record NodeProperty<V>(
-    String name,
-    V value)
+        String name,
+        V value)
 {
     public NodeProperty
     {

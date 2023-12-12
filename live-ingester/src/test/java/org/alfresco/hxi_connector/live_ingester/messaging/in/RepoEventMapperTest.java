@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -42,6 +41,12 @@ import java.util.Map;
 import java.util.Set;
 
 import lombok.SneakyThrows;
+
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
+import org.apache.commons.io.IOUtils;
+import org.junit.jupiter.api.Test;
+
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
@@ -52,10 +57,6 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
-import org.apache.camel.Exchange;
-import org.apache.camel.Message;
-import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Test;
 
 class RepoEventMapperTest
 {
@@ -67,8 +68,8 @@ class RepoEventMapperTest
     private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
     private static final String NODE_MODIFIED_BY_USER_WITH_ID = "admin";
     private static final Set<String> NODE_ASPECT_NAMES = Set.of(
-        "cm:titled",
-        "cm:auditable");
+            "cm:titled",
+            "cm:auditable");
     private static final boolean NODE_IS_FOLDER = true;
     private static final boolean NODE_IS_FILE = false;
     private static final long NODE_CREATED_AT = 1_690_000_000_050L;
@@ -84,21 +85,21 @@ class RepoEventMapperTest
         RepoEvent<DataAttributes<NodeResource>> event = getEvent("node-created-event.json");
 
         Node node = new Node(
-            NODE_ID,
-            NODE_NAME,
-            NODE_PRIMARY_ASSOC_Q_NAME,
-            NODE_TYPE,
-            NODE_CREATED_BY_USER_WITH_ID,
-            NODE_MODIFIED_BY_USER_WITH_ID,
-            NODE_ASPECT_NAMES,
-            NODE_IS_FILE,
-            NODE_IS_FOLDER,
-            NODE_CREATED_AT,
-            NODE_PROPERTIES);
+                NODE_ID,
+                NODE_NAME,
+                NODE_PRIMARY_ASSOC_Q_NAME,
+                NODE_TYPE,
+                NODE_CREATED_BY_USER_WITH_ID,
+                NODE_MODIFIED_BY_USER_WITH_ID,
+                NODE_ASPECT_NAMES,
+                NODE_IS_FILE,
+                NODE_IS_FOLDER,
+                NODE_CREATED_AT,
+                NODE_PROPERTIES);
 
         IngestNewNodeEvent expectedEvent = new IngestNewNodeEvent(
-            EVENT_TIMESTAMP,
-            node);
+                EVENT_TIMESTAMP,
+                node);
 
         // when
         IngestNewNodeEvent actualEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
@@ -134,21 +135,21 @@ class RepoEventMapperTest
         when(nodeResource.getProperties()).thenReturn(createPropertiesMap("cm:title", "some title", "cm:description", null));
 
         Node node = new Node(
-            NODE_ID,
-            NODE_NAME,
-            NODE_PRIMARY_ASSOC_Q_NAME,
-            NODE_TYPE,
-            NODE_CREATED_BY_USER_WITH_ID,
-            NODE_MODIFIED_BY_USER_WITH_ID,
-            NODE_ASPECT_NAMES,
-            NODE_IS_FILE,
-            NODE_IS_FOLDER,
-            NODE_CREATED_AT,
-            NODE_PROPERTIES);
+                NODE_ID,
+                NODE_NAME,
+                NODE_PRIMARY_ASSOC_Q_NAME,
+                NODE_TYPE,
+                NODE_CREATED_BY_USER_WITH_ID,
+                NODE_MODIFIED_BY_USER_WITH_ID,
+                NODE_ASPECT_NAMES,
+                NODE_IS_FILE,
+                NODE_IS_FOLDER,
+                NODE_CREATED_AT,
+                NODE_PROPERTIES);
 
         IngestNewNodeEvent expectedEvent = new IngestNewNodeEvent(
-            EVENT_TIMESTAMP,
-            node);
+                EVENT_TIMESTAMP,
+                node);
 
         // when
         IngestNewNodeEvent actualEvent = repoEventMapper.mapToIngestNewNodeEvent(event);

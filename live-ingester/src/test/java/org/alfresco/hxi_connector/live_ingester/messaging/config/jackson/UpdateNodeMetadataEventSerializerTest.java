@@ -26,34 +26,41 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
-import lombok.SneakyThrows;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
-import org.junit.jupiter.api.Test;
-
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class UpdateNodeMetadataEventSerializerTest {
+import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import lombok.SneakyThrows;
+
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+
+class UpdateNodeMetadataEventSerializerTest
+{
     private final UpdateNodeMetadataEventSerializer serializer = new UpdateNodeMetadataEventSerializer();
 
     @Test
-    public void shouldSerializeEmptyEvent() {
+    public void shouldSerializeEmptyEvent()
+    {
         UpdateNodeMetadataEvent emptyEvent = UpdateNodeMetadataEvent.create();
 
         String expectedJson = """
-                        {
-                          "setProperties" : [ ],
-                          "unsetProperties" : [ ]
-                        }""";
+                {
+                  "setProperties" : [ ],
+                  "unsetProperties" : [ ]
+                }""";
         String actualJson = serialize(emptyEvent);
 
         assertEquals(expectedJson, actualJson);
     }
 
     @Test
-    public void shouldSerializePropertiesToSet() {
+    public void shouldSerializePropertiesToSet()
+    {
         UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
                 .set(NAME.withValue("some-name"))
                 .set(IS_FILE.withValue(true))
@@ -76,7 +83,8 @@ class UpdateNodeMetadataEventSerializerTest {
     }
 
     @Test
-    public void shouldSerializePropertiesToUnset() {
+    public void shouldSerializePropertiesToUnset()
+    {
         UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
                 .unset(NAME.getName())
                 .unset(IS_FILE.getName())
@@ -93,7 +101,8 @@ class UpdateNodeMetadataEventSerializerTest {
     }
 
     @SneakyThrows
-    private String serialize(UpdateNodeMetadataEvent eventToSerialize) {
+    private String serialize(UpdateNodeMetadataEvent eventToSerialize)
+    {
         ObjectMapper objectMapper = new ObjectMapper();
 
         SimpleModule module = new SimpleModule();

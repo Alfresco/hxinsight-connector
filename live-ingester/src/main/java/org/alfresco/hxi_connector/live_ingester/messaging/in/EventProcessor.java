@@ -31,13 +31,15 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
@@ -56,8 +58,7 @@ public class EventProcessor
             IngestNewNodeEvent ingestNewNodeEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
 
             ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
-        }
-        else if (NODE_UPDATED.getType().equals(event.getType()))
+        } else if (NODE_UPDATED.getType().equals(event.getType()))
         {
             log.info("Received event of type UPDATE {}", event);
         }
