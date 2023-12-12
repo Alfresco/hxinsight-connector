@@ -303,7 +303,6 @@
               <order>\#,\#org.alfresco,java,javax,jakarta,com,lombok,org,org.alfresco</order>
             </importOrder>
 
-<!--            <removeUnusedImports />-->
             <formatAnnotations />
           </java>
         </configuration>
