@@ -32,7 +32,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
 

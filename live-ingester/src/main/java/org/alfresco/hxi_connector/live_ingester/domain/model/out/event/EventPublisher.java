@@ -24,9 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.out;
-
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
 
 public interface EventPublisher
 {
