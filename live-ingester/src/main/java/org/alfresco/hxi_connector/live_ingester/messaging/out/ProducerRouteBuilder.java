@@ -41,7 +41,7 @@ import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOu
 @RequiredArgsConstructor
 public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
 {
-    private static final String LOCAL_ENDPOINT = "direct:start";
+    private static final String LOCAL_ENDPOINT = "direct:" + ProducerRouteBuilder.class.getSimpleName();
 
     private final CamelContext context;
 

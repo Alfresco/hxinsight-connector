@@ -26,11 +26,10 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
-import java.util.Optional;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.TransformRequestMapper.PDF_MIMETYPE;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,32 +40,19 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequester;
 
 @ExtendWith(MockitoExtension.class)
-class IngestNewNodeEventHandlerTest
+class TransformRequestMapperTest
 {
+    static final long TIMESTAMP = 1_234_567_890L;
+    static final String NODE_REF = "123412341234-1234-1234-1234-12341234";
     @Mock
     IngestNewNodeEvent ingestNewNodeEvent;
     @Mock
     Node node;
-    @Mock
-    UpdateNodeMetadataEvent updateNodeMetadataEvent;
-    @Mock
-    TransformRequest transformRequest;
-    @Mock
-    UpdateNodeEventMapper updateNodeEventMapper;
-    @Mock
-    EventPublisher eventPublisher;
-    @Mock
-    TransformRequestMapper transformRequestMapper;
-    @Mock
-    TransformRequester transformRequester;
     @InjectMocks
-    IngestNewNodeEventHandler ingestNewNodeEventHandler;
+    TransformRequestMapper transformRequestMapper;
 
     @BeforeEach
     void setUp()
@@ -75,33 +61,17 @@ class IngestNewNodeEventHandlerTest
     }
 
     @Test
-    void nodeWithoutContent_PublishMetadataButNoTransform()
+    void createTransformRequest()
     {
         // given
-        given(node.contentMimeType()).willReturn(Optional.empty());
-        given(updateNodeEventMapper.map(ingestNewNodeEvent)).willReturn(updateNodeMetadataEvent);
+        given(ingestNewNodeEvent.time()).willReturn(TIMESTAMP);
+        given(node.id()).willReturn(NODE_REF);
 
         // when
-        ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
+        TransformRequest transformRequest = transformRequestMapper.map(ingestNewNodeEvent);
 
         // then
-        verify(eventPublisher).publishMessage(updateNodeMetadataEvent);
-        verifyNoInteractions(transformRequestMapper, transformRequester);
-    }
-
-    @Test
-    void nodeWithContent_PublishMetadataAndRequestTransform()
-    {
-        // given
-        given(node.contentMimeType()).willReturn(Optional.of("application/msword"));
-        given(updateNodeEventMapper.map(ingestNewNodeEvent)).willReturn(updateNodeMetadataEvent);
-        given(transformRequestMapper.map(ingestNewNodeEvent)).willReturn(transformRequest);
-
-        // when
-        ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
-
-        // then
-        verify(eventPublisher).publishMessage(updateNodeMetadataEvent);
-        verify(transformRequester).requestTransform(transformRequest);
+        TransformRequest expected = new TransformRequest(TIMESTAMP, NODE_REF, PDF_MIMETYPE);
+        assertEquals(transformRequest, expected);
     }
 }

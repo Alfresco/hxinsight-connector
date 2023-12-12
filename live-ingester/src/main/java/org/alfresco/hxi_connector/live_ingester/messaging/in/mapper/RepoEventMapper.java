@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
 
+import static java.util.Optional.ofNullable;
+
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
+import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -60,6 +63,7 @@ public class RepoEventMapper
                         node.getNodeType(),
                         node.getCreatedByUser().getId(),
                         node.getModifiedByUser().getId(),
+                        ofNullable(node.getContent()).map(ContentInfo::getMimeType),
                         node.getAspectNames(),
                         node.isFile(),
                         node.isFolder(),
