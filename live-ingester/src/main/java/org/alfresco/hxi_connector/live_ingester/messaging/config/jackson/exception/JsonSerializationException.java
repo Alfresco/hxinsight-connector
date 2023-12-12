@@ -23,20 +23,15 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.exception;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-@SpringBootTest
-class LiveIngesterApplicationIntegrationTest
+public class JsonSerializationException extends LiveIngesterRuntimeException
 {
-
-    @Test
-    void contextLoads()
+    public JsonSerializationException(String message, Throwable cause)
     {
-        assertEquals(1, 1);
+        super(message, cause);
     }
 }

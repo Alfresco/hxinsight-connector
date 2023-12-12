@@ -23,45 +23,40 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.messaging.out;
+
+package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
+
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.camel.CamelContext;
-import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
+public class CamelEventMapper
 {
-    private static final String LOCAL_ENDPOINT = "direct:start";
 
-    private final CamelContext context;
+    private final ObjectMapper mapper;
 
-    private final MessagingOutputConfig config;
-
-    @Override
-    public void configure()
+    public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
     {
-        from(LOCAL_ENDPOINT)
-                .marshal()
-                .json()
-                .log("Sending event ${body}")
-                .to(config.getEndpoint())
-                .end();
-    }
-
-    @Override
-    public void publishMessage(UpdateNodeMetadataEvent event)
-    {
-        context.createProducerTemplate()
-                .sendBody(LOCAL_ENDPOINT, event);
+        try
+        {
+            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
+        } catch (JsonProcessingException e)
+        {
+            throw new LiveIngesterRuntimeException("Event deserialization failed", e);
+        }
     }
 }

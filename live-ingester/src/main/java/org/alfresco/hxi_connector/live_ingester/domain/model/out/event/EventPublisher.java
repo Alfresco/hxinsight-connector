@@ -24,12 +24,9 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.exception;
+package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
 
-public class LiveIngesterRuntimeException extends RuntimeException
+public interface EventPublisher
 {
-    public LiveIngesterRuntimeException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+    void publishMessage(UpdateNodeMetadataEvent event);
 }

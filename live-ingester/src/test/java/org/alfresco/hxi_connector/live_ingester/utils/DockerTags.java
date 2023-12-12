@@ -35,8 +35,7 @@ import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
 /**
- * Allows to access properties from 'docker-tags.properties' file.
- * It's required to run: `mvn package` before accessing the properties file, to allow Maven filter out and replace variables.
+ * Allows to access properties from 'docker-tags.properties' file. It's required to run: `mvn package` before accessing the properties file, to allow Maven filter out and replace variables.
  */
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerTags

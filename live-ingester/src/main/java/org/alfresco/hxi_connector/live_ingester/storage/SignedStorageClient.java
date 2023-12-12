@@ -34,7 +34,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 
-import org.alfresco.hxi_connector.live_ingester.exception.LiveIngesterRuntimeException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
@@ -43,6 +42,8 @@ import org.apache.http.client.methods.HttpPut;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
 public class SignedStorageClient implements StorageClient
@@ -54,8 +55,7 @@ public class SignedStorageClient implements StorageClient
         try (InputStream fileInputStream = Files.newInputStream(file.toPath()))
         {
             return this.upload(fileInputStream, contentType, preSignedUrl);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             throw new LiveIngesterRuntimeException("Accessing file failed", e);
         }
@@ -68,21 +68,19 @@ public class SignedStorageClient implements StorageClient
         {
             HttpPut httpPut = new HttpPut(preSignedUrl.toURI());
             HttpEntity entity = EntityBuilder.create()
-                                    .setStream(inputStream)
-                                    .build();
+                    .setStream(inputStream)
+                    .build();
             httpPut.setEntity(entity);
             httpPut.setHeader(CONTENT_TYPE, contentType);
-            //TODO If additional metadata will be required uncomment bellow, otherwise removed it
-            //metadata.forEach((k, v) -> httpPut.setHeader("x-amz-meta-" + k, v));
+            // TODO If additional metadata will be required uncomment bellow, otherwise removed it
+            // metadata.forEach((k, v) -> httpPut.setHeader("x-amz-meta-" + k, v));
 
             HttpResponse response = httpClient.execute(httpPut);
             return response.getStatusLine();
-        }
-        catch (URISyntaxException e)
+        } catch (URISyntaxException e)
         {
             throw new IllegalArgumentException("Pre Signed URL cannot be parsed to URI", e);
-        }
-        catch (IOException e)
+        } catch (IOException e)
         {
             throw new LiveIngesterRuntimeException("Calling Pre Signed URL failed", e);
         }

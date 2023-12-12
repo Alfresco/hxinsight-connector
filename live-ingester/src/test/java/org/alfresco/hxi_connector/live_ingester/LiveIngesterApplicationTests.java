@@ -23,26 +23,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester;
 
-package org.alfresco.hxi_connector.live_ingester.messaging.out.config;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import jakarta.validation.constraints.NotBlank;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Getter
-@Setter
-@ToString
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.out")
-public class MessagingOutputConfig
+@SpringBootTest
+class LiveIngesterApplicationTests
 {
 
-    @NotBlank
-    private String endpoint;
+    @Test
+    void contextLoads()
+    {
+        assertEquals(1, 1);
+    }
 }

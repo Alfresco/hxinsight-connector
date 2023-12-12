@@ -57,36 +57,36 @@ public class LocalStorageClient
         this.region = Region.of(config.getRegion());
         this.awsCredentials = AwsBasicCredentials.create(config.getAccessKeyId(), config.getSecretAccessKey());
         this.s3Config = S3Configuration.builder()
-                            .pathStyleAccessEnabled(true)
-                            .build();
+                .pathStyleAccessEnabled(true)
+                .build();
 
         this.s3client = S3Client.builder()
-                            .endpointOverride(endpoint)
-                            .region(region)
-                            .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
-                            .serviceConfiguration(s3Config)
-                            .build();
+                .endpointOverride(endpoint)
+                .region(region)
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .serviceConfiguration(s3Config)
+                .build();
     }
 
     public URL generatePreSignedUploadUrl(String bucketName, String objectKey, String contentType)
     {
         try (S3Presigner s3Presigner = S3Presigner.builder()
-                                           .endpointOverride(endpoint)
-                                           .region(region)
-                                           .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
-                                           .serviceConfiguration(s3Config)
-                                           .build())
+                .endpointOverride(endpoint)
+                .region(region)
+                .credentialsProvider(StaticCredentialsProvider.create(awsCredentials))
+                .serviceConfiguration(s3Config)
+                .build())
         {
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                                                    .bucket(bucketName)
-                                                    .key(objectKey)
-                                                    .contentType(contentType)
-                                                    .build();
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .contentType(contentType)
+                    .build();
 
             PutObjectPresignRequest preSignPutRequest = PutObjectPresignRequest.builder()
-                                                            .signatureDuration(Duration.ofMinutes(1))
-                                                            .putObjectRequest(putObjectRequest)
-                                                            .build();
+                    .signatureDuration(Duration.ofMinutes(1))
+                    .putObjectRequest(putObjectRequest)
+                    .build();
 
             return s3Presigner.presignPutObject(preSignPutRequest).url();
         }
@@ -95,13 +95,13 @@ public class LocalStorageClient
     public List<String> listBucketContent(String bucketName)
     {
         ListObjectsV2Request request = ListObjectsV2Request.builder()
-                                           .bucket(bucketName)
-                                           .build();
+                .bucket(bucketName)
+                .build();
         ListObjectsV2Iterable response = s3client.listObjectsV2Paginator(request);
 
         return response.stream()
-            .flatMap(page -> page.contents().stream())
-            .map(S3Object::key)
-            .toList();
+                .flatMap(page -> page.contents().stream())
+                .map(S3Object::key)
+                .toList();
     }
 }

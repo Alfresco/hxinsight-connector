@@ -24,25 +24,17 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.out.config;
+package org.alfresco.hxi_connector.live_ingester.domain.exception;
 
-import jakarta.validation.constraints.NotBlank;
-
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Getter
-@Setter
-@ToString
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.out")
-public class MessagingOutputConfig
+public class LiveIngesterRuntimeException extends RuntimeException
 {
+    public LiveIngesterRuntimeException(String message)
+    {
+        super(message);
+    }
 
-    @NotBlank
-    private String endpoint;
+    public LiveIngesterRuntimeException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
 }

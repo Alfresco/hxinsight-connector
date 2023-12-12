@@ -24,25 +24,18 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.out.config;
+package org.alfresco.hxi_connector.live_ingester.domain.model.out;
 
-import jakarta.validation.constraints.NotBlank;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Getter
-@Setter
-@ToString
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.out")
-public class MessagingOutputConfig
+public record NodeProperty<V>(
+        String name,
+        V value)
 {
-
-    @NotBlank
-    private String endpoint;
+    public NodeProperty
+    {
+        ensureNotBlank(name, "Node property name cannot be blank");
+        ensureNonNull(value, "Node property %s value cannot be null", name);
+    }
 }

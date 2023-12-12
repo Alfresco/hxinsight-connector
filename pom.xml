@@ -62,6 +62,8 @@
     <spring-camel.version>4.2.0</spring-camel.version>
     <aws-sdk-s3.version>2.21.42</aws-sdk-s3.version>
 
+    <spotless.version>2.41.1</spotless.version>
+
     <acs-event-model.version>0.0.24</acs-event-model.version>
 
     <testcontainers.version>1.19.3</testcontainers.version>
@@ -328,6 +330,28 @@
         <configuration>
           <tagNameFormat>@{project.version}</tagNameFormat>
           <autoVersionSubmodules>true</autoVersionSubmodules>
+        </configuration>
+      </plugin>
+      <plugin>
+        <groupId>com.diffplug.spotless</groupId>
+        <artifactId>spotless-maven-plugin</artifactId>
+        <version>${spotless.version}</version>
+        <configuration>
+          <java>
+            <includes>
+              <include>src/*/java/**/*.java</include>
+            </includes>
+            <eclipse>
+              <file>alfresco-formatter.xml</file>
+            </eclipse>
+
+            <importOrder>
+              <order>\#,\#org.alfresco,java,javax,jakarta,com,lombok,org,org.alfresco</order>
+            </importOrder>
+
+            <removeUnusedImports />
+            <formatAnnotations />
+          </java>
         </configuration>
       </plugin>
     </plugins>

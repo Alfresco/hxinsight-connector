@@ -34,9 +34,6 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
-import org.alfresco.hxi_connector.live_ingester.storage.local.LocalStorageClient;
-import org.alfresco.hxi_connector.live_ingester.storage.local.LocalStorageConfig;
-import org.alfresco.hxi_connector.live_ingester.utils.DockerTags;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +45,10 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import org.alfresco.hxi_connector.live_ingester.storage.local.LocalStorageClient;
+import org.alfresco.hxi_connector.live_ingester.storage.local.LocalStorageConfig;
+import org.alfresco.hxi_connector.live_ingester.utils.DockerTags;
 
 @SpringBootTest(classes = {LocalStorageConfig.class, SignedStorageClient.class})
 @ActiveProfiles({"test"})
@@ -82,8 +83,8 @@ class StorageClientIntegrationTest
     {
         List<String> freshBucketContent = testS3Storage.listBucketContent(BUCKET_NAME);
         assertThat(freshBucketContent)
-            .isNotNull()
-            .isEmpty();
+                .isNotNull()
+                .isEmpty();
 
         // given
         try (InputStream fileInputStream = new ByteArrayInputStream(OBJECT_CONTENT.getBytes()))
@@ -97,8 +98,8 @@ class StorageClientIntegrationTest
             assertThat(actualStatusCode).isEqualTo(200);
             List<String> actualBucketContent = testS3Storage.listBucketContent(BUCKET_NAME);
             assertThat(actualBucketContent)
-                .isNotNull()
-                .containsOnly(OBJECT_KEY);
+                    .isNotNull()
+                    .containsOnly(OBJECT_KEY);
         }
     }
 

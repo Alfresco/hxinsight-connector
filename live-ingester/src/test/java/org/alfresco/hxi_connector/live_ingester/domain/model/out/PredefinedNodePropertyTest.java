@@ -24,25 +24,26 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.out.config;
+package org.alfresco.hxi_connector.live_ingester.domain.model.out;
 
-import jakarta.validation.constraints.NotBlank;
+import static org.junit.jupiter.api.Assertions.*;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Getter
-@Setter
-@ToString
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.out")
-public class MessagingOutputConfig
+class PredefinedNodePropertyTest
 {
 
-    @NotBlank
-    private String endpoint;
+    @Test
+    void shouldCreatePropertyWithGivenValue()
+    {
+        // given
+        String name = "test name";
+
+        // when
+        NodeProperty<String> nodeProperty = PredefinedNodeProperty.NAME.withValue(name);
+
+        // then
+        assertEquals(PredefinedNodeProperty.NAME.getName(), nodeProperty.name());
+        assertEquals(name, nodeProperty.value());
+    }
 }

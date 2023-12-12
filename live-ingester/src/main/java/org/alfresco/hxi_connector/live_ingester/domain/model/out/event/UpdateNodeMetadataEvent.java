@@ -24,25 +24,37 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.out.config;
+package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
 
-import jakarta.validation.constraints.NotBlank;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.NoArgsConstructor;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
 
 @Getter
-@Setter
-@ToString
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.out")
-public class MessagingOutputConfig
+@NoArgsConstructor(staticName = "create")
+public class UpdateNodeMetadataEvent
 {
+    private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
 
-    @NotBlank
-    private String endpoint;
+    private final Set<String> metadataPropertiesToUnset = new HashSet<>();
+
+    public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty)
+    {
+        metadataPropertiesToSet.put(metadataProperty.name(), metadataProperty);
+
+        return this;
+    }
+
+    public UpdateNodeMetadataEvent unset(String metadataPropertyName)
+    {
+        metadataPropertiesToUnset.add(metadataPropertyName);
+
+        return this;
+    }
 }
