@@ -53,7 +53,6 @@ import org.alfresco.hxi_connector.live_ingester.utils.DockerTags;
 @SpringBootTest(classes = {LocalStorageConfig.class, SignedStorageClient.class})
 @ActiveProfiles({"test"})
 @Testcontainers
-@SuppressWarnings("PMD.FieldDeclarationsShouldBeAtStartOfClass")
 class StorageClientIntegrationTest
 {
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
