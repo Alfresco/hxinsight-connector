@@ -43,8 +43,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 
 @ExtendWith(MockitoExtension.class)
