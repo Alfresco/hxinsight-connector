@@ -34,10 +34,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.exception.LiveIngesterRuntimeException;
-import org.alfresco.repo.event.v1.model.RepoEvent;
+
 import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.exception.LiveIngesterRuntimeException;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Slf4j
 @Component
@@ -54,8 +56,7 @@ public class EventProcessor
         if (NODE_CREATED.getType().equals(event.getType()))
         {
             log.info("Received event of type CREATE {}", event);
-        }
-        else if (NODE_UPDATED.getType().equals(event.getType()))
+        } else if (NODE_UPDATED.getType().equals(event.getType()))
         {
             log.info("Received event of type UPDATE {}", event);
         }
@@ -66,8 +67,7 @@ public class EventProcessor
         try
         {
             return mapper.readValue(exchange.getIn().getBody(String.class), RepoEvent.class);
-        }
-        catch (JsonProcessingException e)
+        } catch (JsonProcessingException e)
         {
             throw new LiveIngesterRuntimeException("Event deserialization failed", e);
         }
