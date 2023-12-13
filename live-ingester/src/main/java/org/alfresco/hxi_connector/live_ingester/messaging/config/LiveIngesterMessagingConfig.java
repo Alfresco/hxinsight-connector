@@ -26,11 +26,9 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.config;
 
-import jakarta.jms.ConnectionFactory;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
+import jakarta.jms.ConnectionFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

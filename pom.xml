@@ -300,7 +300,7 @@
             </eclipse>
 
             <importOrder>
-              <order>\#,\#org.alfresco,java,javax,jakarta,com,lombok,org,org.alfresco</order>
+              <order>\#java|\#javax,\#,\#org.alfresco,java|javax,,org.alfresco</order>
             </importOrder>
 
             <removeUnusedImports />

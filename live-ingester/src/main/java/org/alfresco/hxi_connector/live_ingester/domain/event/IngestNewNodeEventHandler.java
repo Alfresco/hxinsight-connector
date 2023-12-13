@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
