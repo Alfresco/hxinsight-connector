@@ -26,14 +26,11 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
-
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 
@@ -41,26 +38,12 @@ import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNod
 @RequiredArgsConstructor
 public class IngestNewNodeEventHandler
 {
-
+    private final UpdateNodeEventMapper updateNodeEventMapper;
     private final EventPublisher eventPublisher;
 
     public void handle(IngestNewNodeEvent event)
     {
-        Node node = event.node();
-
-        UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create()
-                .set(NAME.withValue(node.name()))
-                .set(PRIMARY_ASSOC_Q_NAME.withValue(node.primaryAssocQName()))
-                .set(TYPE.withValue(node.nodeType()))
-                .set(CREATED_BY_USER_WITH_ID.withValue(node.createdByUserWithId()))
-                .set(MODIFIED_BY_USER_WITH_ID.withValue(node.modifiedByUserWithId()))
-                .set(ASPECTS_NAMES.withValue(node.aspectNames()))
-                .set(IS_FILE.withValue(node.isFile()))
-                .set(IS_FOLDER.withValue(node.isFolder()))
-                .set(CREATED_AT.withValue(node.createdAt()));
-
-        node.properties().forEach(updateMetadataEvent::set);
-
+        UpdateNodeMetadataEvent updateMetadataEvent = updateNodeEventMapper.map(event);
         eventPublisher.publishMessage(updateMetadataEvent);
     }
 }
