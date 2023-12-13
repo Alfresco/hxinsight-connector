@@ -29,12 +29,10 @@ package org.alfresco.hxi_connector.live_ingester.messaging.transform.request;
 import jakarta.validation.constraints.NotBlank;
 
 import lombok.Data;
-import lombok.ToString;
 
 import org.springframework.validation.annotation.Validated;
 
 @Data
-@ToString
 @Validated
 public class TransformRequestConfig
 {

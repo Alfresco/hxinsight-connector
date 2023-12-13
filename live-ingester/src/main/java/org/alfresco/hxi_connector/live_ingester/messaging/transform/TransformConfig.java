@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.transform;
 
 import lombok.Data;
-import lombok.ToString;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -37,7 +36,6 @@ import org.alfresco.hxi_connector.live_ingester.messaging.transform.request.Tran
 import org.alfresco.hxi_connector.live_ingester.messaging.transform.response.TransformResponseConfig;
 
 @Data
-@ToString
 @Validated
 @ConfigurationProperties(prefix = "alfresco.transform.messaging")
 public class TransformConfig
