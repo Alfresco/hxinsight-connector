@@ -54,19 +54,19 @@
     <skipUnitTests>${skipTests}</skipUnitTests>
     <skipIntegrationTests>${skipTests}</skipIntegrationTests>
 
-    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-    <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
-    <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
-
     <spring-boot.version>3.2.0</spring-boot.version>
     <spring-camel.version>4.2.0</spring-camel.version>
     <aws-sdk-s3.version>2.21.42</aws-sdk-s3.version>
 
-    <spotless.version>2.41.1</spotless.version>
-
     <acs-event-model.version>0.0.24</acs-event-model.version>
 
     <testcontainers.version>1.19.3</testcontainers.version>
+
+    <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
+    <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+    <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
+    <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
+    <spotless-plugin.version>2.41.1</spotless-plugin.version>
 
     <!-- Used by the generated .env file for docker-compose. -->
     <dist.alfresco.version>23.1.1</dist.alfresco.version>
@@ -310,7 +310,7 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <version>0.8.11</version>
+        <version>${jacoco-maven-plugin.version}</version>
         <executions>
           <execution>
             <goals>
@@ -335,7 +335,7 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <version>${spotless.version}</version>
+        <version>${spotless-plugin.version}</version>
         <configuration>
           <java>
             <includes>
