@@ -24,34 +24,23 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.util;
+package org.alfresco.hxi_connector.live_ingester.domain.utils;
 
+import static java.util.function.Predicate.not;
 import static lombok.AccessLevel.PRIVATE;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.CollectionUtils.difference;
-
 import java.util.Collection;
+import java.util.List;
 
 import lombok.NoArgsConstructor;
 
-@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SystemPrintln"})
 @NoArgsConstructor(access = PRIVATE)
-public final class TestUtils
+public final class CollectionUtils
 {
-    public static <T> void assertContainsSameElements(Collection<T> expected, Collection<T> actual)
+    public static <T> List<T> difference(Collection<T> first, Collection<T> second)
     {
-
-        boolean areContainingSameElements = expected.size() == actual.size() && expected.containsAll(actual) && actual.containsAll(expected);
-
-        if (areContainingSameElements)
-        {
-            return;
-        }
-
-        System.err.println("expected: " + expected);
-        System.err.println("actual: " + actual);
-
-        System.err.println("present in expected and not in actual: " + difference(expected, actual));
-        System.err.println("present in actual and not in expected: " + difference(actual, expected));
+        return first.stream()
+                .filter(not(second::contains))
+                .toList();
     }
 }

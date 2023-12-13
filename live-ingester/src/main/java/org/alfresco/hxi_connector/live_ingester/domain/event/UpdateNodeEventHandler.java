@@ -24,34 +24,28 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.util;
+package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import static lombok.AccessLevel.PRIVATE;
+import lombok.RequiredArgsConstructor;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.CollectionUtils.difference;
+import org.springframework.stereotype.Component;
 
-import java.util.Collection;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.UpdateNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 
-import lombok.NoArgsConstructor;
-
-@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SystemPrintln"})
-@NoArgsConstructor(access = PRIVATE)
-public final class TestUtils
+@Component
+@RequiredArgsConstructor
+public class UpdateNodeEventHandler
 {
-    public static <T> void assertContainsSameElements(Collection<T> expected, Collection<T> actual)
+
+    private final UpdateNodeEventMapper updateNodeEventMapper;
+    private final EventPublisher eventPublisher;
+
+    public void handle(UpdateNodeEvent event)
     {
+        UpdateNodeMetadataEvent updateMetadataEvent = updateNodeEventMapper.map(event);
 
-        boolean areContainingSameElements = expected.size() == actual.size() && expected.containsAll(actual) && actual.containsAll(expected);
-
-        if (areContainingSameElements)
-        {
-            return;
-        }
-
-        System.err.println("expected: " + expected);
-        System.err.println("actual: " + actual);
-
-        System.err.println("present in expected and not in actual: " + difference(expected, actual));
-        System.err.println("present in actual and not in expected: " + difference(actual, expected));
+        eventPublisher.publishMessage(updateMetadataEvent);
     }
 }

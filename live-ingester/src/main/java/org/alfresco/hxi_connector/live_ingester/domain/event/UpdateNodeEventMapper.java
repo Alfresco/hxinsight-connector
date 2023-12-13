@@ -35,11 +35,18 @@ import static org.alfresco.hxi_connector.live_ingester.domain.model.out.Predefin
 import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.NAME;
 import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
 import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.CollectionUtils.difference;
+
+import java.util.List;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.UpdateNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 
 @Component
@@ -60,5 +67,51 @@ public class UpdateNodeEventMapper
                 .set(CREATED_AT.withValue(node.createdAt()));
         node.properties().forEach(updateMetadataEvent::set);
         return updateMetadataEvent;
+    }
+
+    public UpdateNodeMetadataEvent map(UpdateNodeEvent event)
+    {
+        UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create();
+
+        applyFieldDelta(updateMetadataEvent, NAME, event.name());
+        applyFieldDelta(updateMetadataEvent, PRIMARY_ASSOC_Q_NAME, event.primaryAssocQName());
+        applyFieldDelta(updateMetadataEvent, TYPE, event.nodeType());
+        applyFieldDelta(updateMetadataEvent, MODIFIED_BY_USER_WITH_ID, event.modifiedByUserWithId());
+        applyFieldDelta(updateMetadataEvent, ASPECTS_NAMES, event.aspectNames());
+        applyFieldDelta(updateMetadataEvent, IS_FILE, event.isFile());
+        applyFieldDelta(updateMetadataEvent, IS_FOLDER, event.isFolder());
+
+        applyCustomPropertiesDelta(updateMetadataEvent, event.properties());
+
+        return updateMetadataEvent;
+    }
+
+    private <T> void applyFieldDelta(
+            UpdateNodeMetadataEvent updateMetadataEvent,
+            PredefinedNodeProperty<T> predefinedNodeProperty,
+            UpdateNodeEvent.FieldDelta<T> fieldDelta)
+    {
+        if (!fieldDelta.updated())
+        {
+            return;
+        }
+
+        updateMetadataEvent.set(predefinedNodeProperty.withValue(fieldDelta.propertyValue()));
+    }
+
+    private void applyCustomPropertiesDelta(
+            UpdateNodeMetadataEvent updateMetadataEvent,
+            UpdateNodeEvent.FieldDelta<Set<NodeProperty<?>>> customPropertiesDelta)
+    {
+        if (!customPropertiesDelta.updated())
+        {
+            return;
+        }
+
+        List<NodeProperty<?>> toSet = difference(customPropertiesDelta.propertyValue(), customPropertiesDelta.propertyValueBefore());
+        List<NodeProperty<?>> toUnset = difference(customPropertiesDelta.propertyValueBefore(), customPropertiesDelta.propertyValue());
+
+        toSet.forEach(updateMetadataEvent::set);
+        toUnset.forEach(property -> updateMetadataEvent.unset(property.name()));
     }
 }

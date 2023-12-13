@@ -35,7 +35,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.event.UpdateNodeEventHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -49,6 +51,8 @@ public class EventProcessor
 
     private final IngestNewNodeEventHandler ingestNewNodeEventHandler;
 
+    private final UpdateNodeEventHandler updateNodeEventHandler;
+
     private final RepoEventMapper repoEventMapper;
 
     public void process(RepoEvent<DataAttributes<NodeResource>> event)
@@ -60,7 +64,9 @@ public class EventProcessor
             ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
         } else if (NODE_UPDATED.getType().equals(event.getType()))
         {
-            log.info("Received event of type UPDATE {}", event);
+            UpdateNodeEvent updateNodeMetadataEvent = repoEventMapper.mapToUpdateNodeMetadataEvent(event);
+
+            updateNodeEventHandler.handle(updateNodeMetadataEvent);
         }
     }
 }
