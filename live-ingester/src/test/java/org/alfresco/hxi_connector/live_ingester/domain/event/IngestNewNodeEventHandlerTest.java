@@ -44,6 +44,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNod
 import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequester;
 
+// PMD doesn't recognise Mockito then().should() syntax.
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 class IngestNewNodeEventHandlerTest
 {
