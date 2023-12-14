@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
 import static java.util.Optional.ofNullable;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;

@@ -29,7 +29,6 @@ package org.alfresco.hxi_connector.live_ingester.messaging.out.config;
 import jakarta.validation.constraints.NotBlank;
 
 import lombok.Data;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 

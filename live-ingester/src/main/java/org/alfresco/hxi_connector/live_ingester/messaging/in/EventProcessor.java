@@ -31,7 +31,6 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;

@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.live_ingester.messaging.out;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;

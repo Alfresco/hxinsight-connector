@@ -35,7 +35,6 @@ import java.net.URL;
 import java.util.List;
 
 import lombok.Cleanup;
-
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
