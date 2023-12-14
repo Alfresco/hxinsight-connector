@@ -24,20 +24,22 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
+package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import jakarta.validation.constraints.NotBlank;
+import org.springframework.stereotype.Component;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
+import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
 
-@Data
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.in")
-public class MessagingInputConfig
+@Component
+public class TransformRequestMapper
 {
+    static final String PDF_MIMETYPE = "application/pdf";
 
-    @NotBlank
-    private String endpoint;
+    public TransformRequest map(IngestNewNodeEvent event)
+    {
+        Node node = event.node();
+        return new TransformRequest(event.time(), node.id(), PDF_MIMETYPE);
+    }
 }

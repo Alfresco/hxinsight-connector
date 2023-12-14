@@ -39,6 +39,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.model.out.Predefin
 import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.TYPE;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -84,6 +85,7 @@ class UpdateNodeEventMapperTest
                 NODE_TYPE,
                 NODE_CREATED_BY_USER_WITH_ID,
                 NODE_MODIFIED_BY_USER_WITH_ID,
+                Optional.empty(),
                 NODE_ASPECT_NAMES,
                 NODE_IS_FILE,
                 NODE_IS_FOLDER,

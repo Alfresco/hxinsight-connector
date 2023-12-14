@@ -14,3 +14,9 @@ alfresco:
     messaging:
         in.endpoint: activemq:topic:alfresco.repo.event2
         out.endpoint: aws2-sns://arn:aws:sns:us-east-1:000000000000:test-hxinsight-topic
+  transform:
+    messaging:
+      request:
+        endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
+        timeout: 20000
+      response.queueName: org.alfresco.hxi-connector.transform.response
