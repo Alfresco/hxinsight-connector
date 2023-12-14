@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
 
 import jakarta.validation.constraints.NotBlank;
+
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
