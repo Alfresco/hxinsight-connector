@@ -23,21 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.storage;
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
+import java.io.File;
+import java.io.InputStream;
+import java.net.URL;
 
-import jakarta.validation.constraints.NotBlank;
+import org.apache.http.StatusLine;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Data
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.in")
-public class MessagingInputConfig
+public interface StorageClient
 {
+    StatusLine upload(File file, String contentType, URL preSignedUrl);
 
-    @NotBlank
-    private String endpoint;
+    StatusLine upload(InputStream inputStream, String contentType, URL preSignedUrl);
 }

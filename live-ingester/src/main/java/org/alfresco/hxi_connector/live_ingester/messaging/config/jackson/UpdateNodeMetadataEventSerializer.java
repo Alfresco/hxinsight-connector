@@ -31,7 +31,6 @@ import java.io.IOException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
@@ -68,7 +67,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
             jgen.writeEndArray();
 
             jgen.writeEndObject();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             throw new JsonSerializationException("Property serialization failed", e);
         }
@@ -81,7 +81,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
             jgen.writeStartObject();
             jgen.writeObjectField(property.name(), property.value());
             jgen.writeEndObject();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             throw new JsonSerializationException("UpdateNodeMetadataEvent serialization failed", e);
         }
@@ -92,7 +93,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
         try
         {
             jgen.writeString(propertyName);
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             throw new JsonSerializationException("UpdateNodeMetadataEvent serialization failed", e);
         }

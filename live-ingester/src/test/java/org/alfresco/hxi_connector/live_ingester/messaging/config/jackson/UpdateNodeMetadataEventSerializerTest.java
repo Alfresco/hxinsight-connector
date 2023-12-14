@@ -32,9 +32,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.model.out.Predefin
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-
 import lombok.SneakyThrows;
-
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;

@@ -19,14 +19,13 @@
             <build>
                 <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-failsafe-plugin</artifactId>
                         <configuration>
                             <skipITs>true</skipITs>
                         </configuration>
                     </plugin>
+
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-dependency-plugin</artifactId>
                         <configuration>
                             <includeTypes>jar</includeTypes>
@@ -70,10 +69,9 @@
                             </execution>
                         </executions>
                     </plugin>
+
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-assembly-plugin</artifactId>
-                        <version>3.6.0</version>
                         <configuration>
                             <finalName>alfresco-hxinsight-connector-distribution-${project.version}</finalName>
                             <appendAssemblyId>false</appendAssemblyId>
@@ -91,9 +89,9 @@
                             </execution>
                         </executions>
                     </plugin>
+
                     <plugin>
                         <artifactId>maven-resources-plugin</artifactId>
-                        <version>${maven-resources-plugin.version}</version>
                         <executions>
                             <execution>
                                 <id>copy-resources</id>

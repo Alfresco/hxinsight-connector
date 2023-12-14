@@ -24,38 +24,22 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
+package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
+import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
 
-@Slf4j
 @Component
-@RequiredArgsConstructor
-public class CamelEventMapper
+public class TransformRequestMapper
 {
+    static final String PDF_MIMETYPE = "application/pdf";
 
-    private final ObjectMapper mapper;
-
-    public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
+    public TransformRequest map(IngestNewNodeEvent event)
     {
-        try
-        {
-            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
-        }
-        catch (JsonProcessingException e)
-        {
-            throw new LiveIngesterRuntimeException("Event deserialization failed", e);
-        }
+        Node node = event.node();
+        return new TransformRequest(event.time(), node.id(), PDF_MIMETYPE);
     }
 }
