@@ -24,21 +24,24 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
-
-import jakarta.validation.constraints.NotBlank;
+package org.alfresco.hxi_connector.live_ingester.messaging.transform;
 
 import lombok.Data;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.validation.annotation.Validated;
+
+import org.alfresco.hxi_connector.live_ingester.messaging.transform.request.TransformRequestConfig;
+import org.alfresco.hxi_connector.live_ingester.messaging.transform.response.TransformResponseConfig;
 
 @Data
 @Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.in")
-public class MessagingInputConfig
+@ConfigurationProperties(prefix = "alfresco.transform.messaging")
+public class TransformConfig
 {
-
-    @NotBlank
-    private String endpoint;
+    @NestedConfigurationProperty
+    private TransformRequestConfig request;
+    @NestedConfigurationProperty
+    private TransformResponseConfig response;
 }

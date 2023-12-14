@@ -41,10 +41,11 @@ import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNod
 import org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.UpdateNodeMetadataEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
 import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
+import org.alfresco.hxi_connector.live_ingester.messaging.transform.TransformConfig;
 import org.alfresco.repo.event.databind.ObjectMapperFactory;
 
 @Configuration
-@EnableConfigurationProperties({MessagingInputConfig.class, MessagingOutputConfig.class})
+@EnableConfigurationProperties({MessagingInputConfig.class, MessagingOutputConfig.class, TransformConfig.class})
 public class LiveIngesterMessagingConfig
 {
     @Bean

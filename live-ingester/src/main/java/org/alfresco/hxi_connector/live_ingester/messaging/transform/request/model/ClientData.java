@@ -24,21 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
+package org.alfresco.hxi_connector.live_ingester.messaging.transform.request.model;
 
-import jakarta.validation.constraints.NotBlank;
-
-import lombok.Data;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Data
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.in")
-public class MessagingInputConfig
-{
-
-    @NotBlank
-    private String endpoint;
-}
+public record ClientData(long modificationTimestamp, String nodeRef)
+{}
