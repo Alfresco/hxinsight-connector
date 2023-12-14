@@ -53,9 +53,9 @@ public class LocalStorageClient
 
     public LocalStorageClient(LocalStorageConfig.Properties config)
     {
-        this.endpoint = URI.create(config.getEndpoint());
-        this.region = Region.of(config.getRegion());
-        this.awsCredentials = AwsBasicCredentials.create(config.getAccessKeyId(), config.getSecretAccessKey());
+        this.endpoint = URI.create(config.endpoint());
+        this.region = Region.of(config.region());
+        this.awsCredentials = AwsBasicCredentials.create(config.accessKeyId(), config.secretAccessKey());
         this.s3Config = S3Configuration.builder()
                 .pathStyleAccessEnabled(true)
                 .build();

@@ -79,7 +79,7 @@ public class SignedStorageClient implements StorageClient
             return response.getStatusLine();
         } catch (URISyntaxException e)
         {
-            throw new IllegalArgumentException("Pre Signed URL cannot be parsed to URI", e);
+            throw new LiveIngesterRuntimeException("Pre Signed URL cannot be parsed to URI", e);
         } catch (IOException e)
         {
             throw new LiveIngesterRuntimeException("Calling Pre Signed URL failed", e);

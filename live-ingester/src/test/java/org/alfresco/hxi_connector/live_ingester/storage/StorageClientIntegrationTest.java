@@ -34,6 +34,8 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 
+import lombok.Cleanup;
+
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import org.alfresco.hxi_connector.live_ingester.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.storage.local.LocalStorageConfig;
-import org.alfresco.hxi_connector.live_ingester.utils.DockerTags;
+import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {LocalStorageConfig.class, SignedStorageClient.class})
 @ActiveProfiles({"test"})
@@ -81,25 +83,20 @@ class StorageClientIntegrationTest
     void testUpload() throws IOException
     {
         List<String> freshBucketContent = testS3Storage.listBucketContent(BUCKET_NAME);
-        assertThat(freshBucketContent)
-                .isNotNull()
-                .isEmpty();
+        assertThat(freshBucketContent).isEmpty();
 
         // given
-        try (InputStream fileInputStream = new ByteArrayInputStream(OBJECT_CONTENT.getBytes()))
-        {
-            URL preSignedUrl = testS3Storage.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
+        @Cleanup
+        InputStream fileInputStream = new ByteArrayInputStream(OBJECT_CONTENT.getBytes());
+        URL preSignedUrl = testS3Storage.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
 
-            // when
-            int actualStatusCode = storageClient.upload(fileInputStream, OBJECT_CONTENT_TYPE, preSignedUrl).getStatusCode();
+        // when
+        int actualStatusCode = storageClient.upload(fileInputStream, OBJECT_CONTENT_TYPE, preSignedUrl).getStatusCode();
 
-            // then
-            assertThat(actualStatusCode).isEqualTo(200);
-            List<String> actualBucketContent = testS3Storage.listBucketContent(BUCKET_NAME);
-            assertThat(actualBucketContent)
-                    .isNotNull()
-                    .containsOnly(OBJECT_KEY);
-        }
+        // then
+        assertThat(actualStatusCode).isEqualTo(200);
+        List<String> actualBucketContent = testS3Storage.listBucketContent(BUCKET_NAME);
+        assertThat(actualBucketContent).containsOnly(OBJECT_KEY);
     }
 
     @DynamicPropertySource

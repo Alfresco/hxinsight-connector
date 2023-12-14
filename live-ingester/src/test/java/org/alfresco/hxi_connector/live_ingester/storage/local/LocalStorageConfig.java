@@ -25,9 +25,6 @@
  */
 package org.alfresco.hxi_connector.live_ingester.storage.local;
 
-import lombok.Getter;
-import lombok.Setter;
-
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
@@ -47,13 +44,10 @@ public class LocalStorageConfig
     }
 
     @ConfigurationProperties(prefix = "local.aws")
-    @Getter
-    @Setter
-    public static class Properties
-    {
-        private String endpoint;
-        private String region;
-        private String accessKeyId;
-        private String secretAccessKey;
-    }
+    public record Properties(
+            String endpoint,
+            String region,
+            String accessKeyId,
+            String secretAccessKey)
+    {}
 }

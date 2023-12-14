@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.utils;
+package org.alfresco.hxi_connector.live_ingester.util;
 
 import java.io.File;
 import java.nio.file.Files;
