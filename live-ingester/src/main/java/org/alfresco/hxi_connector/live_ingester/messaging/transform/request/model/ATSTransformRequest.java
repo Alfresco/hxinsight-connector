@@ -24,21 +24,23 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in.config;
+package org.alfresco.hxi_connector.live_ingester.messaging.transform.request.model;
 
-import jakarta.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.util.Map;
 
-import lombok.Data;
+import lombok.Builder;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Data
-@Validated
-@ConfigurationProperties(prefix = "alfresco.ingester.messaging.in")
-public class MessagingInputConfig
-{
-
-    @NotBlank
-    private String endpoint;
-}
+/**
+ * Model used for Transform Request Events.
+ *
+ * This is a mirror of org.alfresco.repo.rendition2.TransformRequest in Alfresco Repository project.
+ */
+@Builder
+public record ATSTransformRequest(String requestId,
+        String nodeRef,
+        String targetMediaType,
+        String clientData,
+        Map<String, String> transformOptions,
+        String replyQueue) implements Serializable
+{}

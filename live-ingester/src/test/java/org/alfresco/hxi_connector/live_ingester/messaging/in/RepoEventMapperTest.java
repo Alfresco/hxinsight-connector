@@ -36,6 +36,7 @@ import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -105,6 +106,7 @@ class RepoEventMapperTest
                 NODE_TYPE,
                 NODE_CREATED_BY_USER_WITH_ID,
                 NODE_MODIFIED_BY_USER_WITH_ID,
+                Optional.empty(),
                 NODE_ASPECT_NAMES,
                 NODE_IS_FILE,
                 NODE_IS_FOLDER,

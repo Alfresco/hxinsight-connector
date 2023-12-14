@@ -26,34 +26,20 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequester;
 
 @Component
-@RequiredArgsConstructor
-public class IngestNewNodeEventHandler
+public class TransformRequestMapper
 {
-    private final UpdateNodeEventMapper updateNodeEventMapper;
-    private final EventPublisher eventPublisher;
-    private final TransformRequestMapper transformRequestMapper;
-    private final TransformRequester transformRequester;
+    static final String PDF_MIMETYPE = "application/pdf";
 
-    public void handle(IngestNewNodeEvent event)
+    public TransformRequest map(IngestNewNodeEvent event)
     {
-        UpdateNodeMetadataEvent updateMetadataEvent = updateNodeEventMapper.map(event);
-        eventPublisher.publishMessage(updateMetadataEvent);
-
-        if (event.node().contentMimeType().isPresent())
-        {
-            TransformRequest transformRequest = transformRequestMapper.map(event);
-            transformRequester.requestTransform(transformRequest);
-        }
+        Node node = event.node();
+        return new TransformRequest(event.time(), node.id(), PDF_MIMETYPE);
     }
 }

@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.model.in;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
+import java.util.Optional;
 import java.util.Set;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
@@ -40,6 +41,7 @@ public record Node(
         String nodeType,
         String createdByUserWithId,
         String modifiedByUserWithId,
+        Optional<String> contentMimeType,
         Set<String> aspectNames,
         boolean isFile,
         boolean isFolder,
