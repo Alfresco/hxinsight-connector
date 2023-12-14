@@ -88,7 +88,7 @@ public class RepoEventMapper
 
     private String getModifiedByUserWithId(NodeResource node)
     {
-        return Optional.ofNullable(node.getModifiedByUser())
+        return ofNullable(node.getModifiedByUser())
                 .map(UserInfo::getId)
                 .orElse(null);
     }
