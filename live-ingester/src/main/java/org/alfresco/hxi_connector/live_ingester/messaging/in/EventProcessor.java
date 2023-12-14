@@ -57,7 +57,8 @@ public class EventProcessor
             IngestNewNodeEvent ingestNewNodeEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
 
             ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
-        } else if (NODE_UPDATED.getType().equals(event.getType()))
+        }
+        else if (NODE_UPDATED.getType().equals(event.getType()))
         {
             log.info("Received event of type UPDATE {}", event);
         }

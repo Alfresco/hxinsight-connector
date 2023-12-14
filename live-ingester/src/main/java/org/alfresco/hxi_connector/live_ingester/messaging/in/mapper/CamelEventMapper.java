@@ -52,7 +52,8 @@ public class CamelEventMapper
         try
         {
             return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
-        } catch (JsonProcessingException e)
+        }
+        catch (JsonProcessingException e)
         {
             throw new LiveIngesterRuntimeException("Event deserialization failed", e);
         }

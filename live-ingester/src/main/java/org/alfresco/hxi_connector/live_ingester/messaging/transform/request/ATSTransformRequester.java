@@ -99,7 +99,8 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         try
         {
             return objectMapper.writeValueAsString(clientData);
-        } catch (JsonProcessingException e)
+        }
+        catch (JsonProcessingException e)
         {
             throw new LiveIngesterRuntimeException("Failed to construct client data string for Transform Service request.", e);
         }

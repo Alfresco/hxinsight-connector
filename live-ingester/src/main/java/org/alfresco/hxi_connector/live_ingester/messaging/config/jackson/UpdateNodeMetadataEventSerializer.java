@@ -67,7 +67,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
             jgen.writeEndArray();
 
             jgen.writeEndObject();
-        } catch (Exception e)
+        }
+        catch (Exception e)
         {
             throw new JsonSerializationException("Property serialization failed", e);
         }
@@ -80,7 +81,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
             jgen.writeStartObject();
             jgen.writeObjectField(property.name(), property.value());
             jgen.writeEndObject();
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             throw new JsonSerializationException("UpdateNodeMetadataEvent serialization failed", e);
         }
@@ -91,7 +93,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
         try
         {
             jgen.writeString(propertyName);
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             throw new JsonSerializationException("UpdateNodeMetadataEvent serialization failed", e);
         }

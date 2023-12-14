@@ -55,7 +55,8 @@ public class SignedStorageClient implements StorageClient
         try (InputStream fileInputStream = Files.newInputStream(file.toPath()))
         {
             return this.upload(fileInputStream, contentType, preSignedUrl);
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             throw new LiveIngesterRuntimeException("Accessing file failed", e);
         }
@@ -77,10 +78,12 @@ public class SignedStorageClient implements StorageClient
 
             HttpResponse response = httpClient.execute(httpPut);
             return response.getStatusLine();
-        } catch (URISyntaxException e)
+        }
+        catch (URISyntaxException e)
         {
             throw new LiveIngesterRuntimeException("Pre Signed URL cannot be parsed to URI", e);
-        } catch (IOException e)
+        }
+        catch (IOException e)
         {
             throw new LiveIngesterRuntimeException("Calling Pre Signed URL failed", e);
         }
