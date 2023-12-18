@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.out;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;

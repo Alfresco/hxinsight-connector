@@ -30,10 +30,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 @Component
 @RequiredArgsConstructor

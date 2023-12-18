@@ -24,13 +24,15 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.out;
+package org.alfresco.hxi_connector.live_ingester.domain.event;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
 import java.util.Set;
 
 import lombok.Getter;
+
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 
 @Getter
 public class PredefinedNodeProperty<V>

@@ -33,8 +33,8 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.exception.JsonSerializationException;
 
 @Component

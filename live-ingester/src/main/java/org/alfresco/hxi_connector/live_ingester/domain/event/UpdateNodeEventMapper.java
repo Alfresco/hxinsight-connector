@@ -26,21 +26,21 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.ASPECTS_NAMES;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.CREATED_AT;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.IS_FILE;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.IS_FOLDER;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.ASPECTS_NAMES;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.CREATED_AT;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.IS_FILE;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.IS_FOLDER;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.MODIFIED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.TYPE;
 
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 @Component
 public class UpdateNodeEventMapper

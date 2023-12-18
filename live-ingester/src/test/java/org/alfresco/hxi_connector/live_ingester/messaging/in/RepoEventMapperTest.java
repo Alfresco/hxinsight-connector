@@ -43,7 +43,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
