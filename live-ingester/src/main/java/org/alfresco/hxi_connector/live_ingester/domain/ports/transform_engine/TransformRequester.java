@@ -24,9 +24,9 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.out.event;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine;
 
-public interface EventPublisher
+public interface TransformRequester
 {
-    void publishMessage(UpdateNodeMetadataEvent event);
+    void requestTransform(TransformRequest transformRequest);
 }

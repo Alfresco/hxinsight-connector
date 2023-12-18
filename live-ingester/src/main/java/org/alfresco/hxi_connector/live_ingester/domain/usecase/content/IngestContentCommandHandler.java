@@ -24,26 +24,23 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.out;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import static org.junit.jupiter.api.Assertions.*;
+import lombok.RequiredArgsConstructor;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
+import org.springframework.stereotype.Component;
 
-import org.junit.jupiter.api.Test;
+@Component
+@RequiredArgsConstructor
+public class IngestContentCommandHandler {
+    private static final String PDF_MIMETYPE = "application/pdf";
 
-class PredefinedNodePropertyTest
-{
+    private final TransformRequester transformRequester;
 
-    @Test
-    void shouldCreatePropertyWithGivenValue()
-    {
-        // given
-        String name = "test name";
+    public void handle(IngestContentCommand command) {
+        TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
 
-        // when
-        NodeProperty<String> nodeProperty = PredefinedNodeProperty.NAME.withValue(name);
-
-        // then
-        assertEquals(PredefinedNodeProperty.NAME.getName(), nodeProperty.name());
-        assertEquals(name, nodeProperty.value());
+        transformRequester.requestTransform(transformRequest);
     }
 }

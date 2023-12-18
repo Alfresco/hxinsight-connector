@@ -26,106 +26,126 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
 
-import static java.util.Optional.ofNullable;
-
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.springframework.stereotype.Component;
-
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.UpdateNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
-import org.alfresco.repo.event.v1.model.ContentInfo;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.UpsertNodeMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
+import org.springframework.stereotype.Component;
+
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static java.util.Collections.emptySet;
+import static java.util.Optional.ofNullable;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 
 @Component
-public class RepoEventMapper
-{
+public class RepoEventMapper {
 
-    public IngestNewNodeEvent mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        NodeResource node = event.getData().getResource();
-
-        return new IngestNewNodeEvent(
-                event.getTime().toInstant().toEpochMilli(),
-                new Node(
-                        node.getId(),
-                        node.getName(),
-                        node.getPrimaryAssocQName(),
-                        node.getNodeType(),
-                        node.getCreatedByUser().getId(),
-                        node.getModifiedByUser().getId(),
-                        ofNullable(node.getContent()).map(ContentInfo::getMimeType),
-                        node.getAspectNames(),
-                        node.isFile(),
-                        node.isFolder(),
-                        node.getCreatedAt().toInstant().toEpochMilli(),
-                        getNodeCustomProperties(node)));
+    public IngestContentCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event) {
+        return new IngestContentCommand(
+                toMilliseconds(event.getTime()),
+                event.getData().getResource().getId()
+        );
     }
 
-    public UpdateNodeEvent mapToUpdateNodeMetadataEvent(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        return new UpdateNodeEvent(
-                event.getTime().toInstant().toEpochMilli(),
-                calculateFieldDelta(event, NodeResource::getName),
-                calculateFieldDelta(event, NodeResource::getPrimaryAssocQName),
-                calculateFieldDelta(event, NodeResource::getNodeType),
-                calculateFieldDelta(event, this::getModifiedByUserWithId),
-                calculateFieldDelta(event, NodeResource::getAspectNames),
-                calculateFieldDelta(event, NodeResource::isFile),
-                calculateFieldDelta(event, NodeResource::isFolder),
-                calculateFieldDelta(event, this::getNodeCustomProperties));
+    public UpsertNodeMetadataCommand mapToUpsertNodeMetadataCommand(RepoEvent<DataAttributes<NodeResource>> event) {
+        return new UpsertNodeMetadataCommand(
+                toMilliseconds(event.getTime()),
+                event.getData().getResource().getId(),
+                calculatePropertyDelta(event, NodeResource::getName),
+                calculatePropertyDelta(event, NodeResource::getPrimaryAssocQName),
+                calculatePropertyDelta(event, NodeResource::getNodeType),
+                calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getCreatedByUser)),
+                calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getModifiedByUser)),
+                calculatePropertyDelta(event, NodeResource::getAspectNames),
+                calculatePropertyDelta(event, NodeResource::isFile),
+                calculatePropertyDelta(event, NodeResource::isFolder),
+                calculatePropertyDelta(event, node -> toMilliseconds(node.getCreatedAt())),
+                calculateCustomPropertiesDelta(event));
     }
 
-    private String getModifiedByUserWithId(NodeResource node)
-    {
-        return ofNullable(node.getModifiedByUser())
+    private Long toMilliseconds(ZonedDateTime time) {
+        return time == null ? null : time.toInstant().toEpochMilli();
+    }
+
+    private String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter) {
+        return ofNullable(node)
+                .map(userInfoGetter)
                 .map(UserInfo::getId)
                 .orElse(null);
     }
 
-    private Set<NodeProperty<?>> getNodeCustomProperties(NodeResource node)
-    {
-        if (node.getProperties() == null)
-        {
-            return Collections.emptySet();
+    private <T> PropertyDelta<T> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, T> fieldGetter) {
+        if (shouldNotUpdateField(event, fieldGetter)) {
+            return PropertyDelta.unchanged(fieldGetter.apply(event.getData().getResource()));
         }
 
-        return node.getProperties()
-                .entrySet()
-                .stream()
-                .filter(property -> Objects.nonNull(property.getKey()) && Objects.nonNull(property.getValue()))
-                .map(property -> new NodeProperty<>(property.getKey(), property.getValue()))
+        return PropertyDelta.updated(fieldGetter.apply(event.getData().getResource()));
+    }
+
+    private Set<CustomPropertyDelta<?>> calculateCustomPropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event) {
+        if (shouldNotUpdateField(event, NodeResource::getProperties)) {
+            return emptySet();
+        }
+
+        if (isEventTypeCreated(event)) {
+            return allCustomPropertiesUpdated(event);
+        }
+
+        return someCustomPropertiesUpdated(event);
+    }
+
+    private Set<CustomPropertyDelta<?>> someCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event) {
+        return customPropertiesStream(event.getData().getResourceBefore())
+                .map(Map.Entry::getKey)
+                .map(changedPropertyName -> toCustomPropertyDelta(event.getData(), changedPropertyName))
                 .collect(Collectors.toSet());
     }
 
-    private <T> UpdateNodeEvent.FieldDelta<T> calculateFieldDelta(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, T> fieldGetter)
-    {
-        if (wasFieldUpdated(event, fieldGetter))
-        {
-            return UpdateNodeEvent.FieldDelta.updated(
-                    fieldGetter.apply(event.getData().getResource()),
-                    fieldGetter.apply(event.getData().getResourceBefore()));
-        }
+    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> event, String changedPropertyName) {
+        Serializable propertyValue = event.getResource().getProperties().get(changedPropertyName);
 
-        return UpdateNodeEvent.FieldDelta.notUpdated(
-                fieldGetter.apply(event.getData().getResource()));
+        return propertyValue == null ?
+                CustomPropertyDelta.deleted(changedPropertyName) :
+                CustomPropertyDelta.updated(changedPropertyName, propertyValue);
     }
 
-    private boolean wasFieldUpdated(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
-    {
+    private Set<CustomPropertyDelta<?>> allCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event) {
+        return customPropertiesStream(event.getData().getResource())
+                .filter(property -> Objects.nonNull(property.getValue()))
+                .map(property -> CustomPropertyDelta.updated(property.getKey(), property.getValue()))
+                .collect(Collectors.toSet());
+    }
+
+    private Stream<Map.Entry<String, ?>> customPropertiesStream(NodeResource node) {
+        return Optional.ofNullable(node)
+                .map(NodeResource::getProperties)
+                .map(Map::entrySet)
+                .stream()
+                .flatMap(Collection::stream);
+    }
+
+    private boolean shouldNotUpdateField(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter) {
+        return !isEventTypeCreated(event) && isFieldUnchanged(event, fieldGetter);
+    }
+
+    private boolean isFieldUnchanged(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter) {
         return Optional.of(event.getData())
                 .map(DataAttributes::getResourceBefore)
                 .map(fieldGetter::apply)
-                .isPresent();
+                .isEmpty();
+    }
+
+    private boolean isEventTypeCreated(RepoEvent<DataAttributes<NodeResource>> event) {
+        return NODE_CREATED.getType().equals(event.getType());
     }
 }

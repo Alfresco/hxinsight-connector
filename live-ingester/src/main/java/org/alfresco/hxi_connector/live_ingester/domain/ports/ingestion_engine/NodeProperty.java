@@ -24,39 +24,18 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.in;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
-import java.util.Optional;
-import java.util.Set;
-
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
-
-public record Node(
-        String id,
+public record NodeProperty<V>(
         String name,
-        String primaryAssocQName,
-        String nodeType,
-        String createdByUserWithId,
-        String modifiedByUserWithId,
-        Optional<String> contentMimeType,
-        Set<String> aspectNames,
-        boolean isFile,
-        boolean isFolder,
-        long createdAt,
-        Set<NodeProperty<?>> properties)
+        V value)
 {
-    public Node
+    public NodeProperty
     {
-        ensureNotBlank(id, "Node id cannot be blank");
-        ensureNotBlank(name, "Node %s name cannot be blank", id);
-        ensureNotBlank(primaryAssocQName, "Node %s qualified name cannot be blank", id);
-        ensureNotBlank(nodeType, "Node %s type cannot be blank", id);
-        ensureNotBlank(createdByUserWithId, "Node %s created by user with id cannot be blank", id);
-        ensureNotBlank(modifiedByUserWithId, "Node %s modified by user with id cannot be blank", id);
-        ensureNonNull(aspectNames, "Node %s aspect names cannot be null", id);
-        ensureNonNull(properties, "Node %s properties cannot be null", id);
+        ensureNotBlank(name, "Node property name cannot be blank");
+        ensureNonNull(value, "Node property %s value cannot be null", name);
     }
 }

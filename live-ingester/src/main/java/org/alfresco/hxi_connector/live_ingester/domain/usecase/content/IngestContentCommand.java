@@ -24,27 +24,15 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.event;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.UpdateNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
-
-@Component
-@RequiredArgsConstructor
-public class UpdateNodeEventHandler
-{
-
-    private final UpdateNodeEventMapper updateNodeEventMapper;
-    private final EventPublisher eventPublisher;
-
-    public void handle(UpdateNodeEvent event)
-    {
-        UpdateNodeMetadataEvent updateMetadataEvent = updateNodeEventMapper.map(event);
-
-        eventPublisher.publishMessage(updateMetadataEvent);
+public record IngestContentCommand(
+        long time,
+        String nodeId
+) {
+    public IngestContentCommand {
+        ensureNotBlank(nodeId, "Node id cannot be blank");
     }
 }

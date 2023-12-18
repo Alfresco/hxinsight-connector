@@ -23,19 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine;
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.out;
-
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
-
-public record NodeProperty<V>(
-        String name,
-        V value)
-{
-    public NodeProperty
-    {
-        ensureNotBlank(name, "Node property name cannot be blank");
-        ensureNonNull(value, "Node property %s value cannot be null", name);
-    }
-}
+public record TransformRequest(long eventTimestamp, String nodeRef, String targetMimeType)
+{}

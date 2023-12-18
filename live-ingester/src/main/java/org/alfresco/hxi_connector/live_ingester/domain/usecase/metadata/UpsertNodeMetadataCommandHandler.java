@@ -1,0 +1,60 @@
+/*
+ * #%L
+ * Alfresco HX Insight Connector
+ * %%
+ * Copyright (C) 2023 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
+ * provided under the following open source license terms:
+ *
+ * Alfresco is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Alfresco is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
+
+import lombok.RequiredArgsConstructor;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.springframework.stereotype.Component;
+
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
+
+@Component
+@RequiredArgsConstructor
+public class UpsertNodeMetadataCommandHandler {
+
+    private final EventPublisher eventPublisher;
+
+    public void handle(UpsertNodeMetadataCommand command) {
+        UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create();
+
+        command.name().applyAs(NAME, updateMetadataEvent);
+        command.primaryAssocQName().applyAs(PRIMARY_ASSOC_Q_NAME, updateMetadataEvent);
+        command.nodeType().applyAs(TYPE, updateMetadataEvent);
+        command.createdByUserWithId().applyAs(CREATED_BY_USER_WITH_ID, updateMetadataEvent);
+        command.modifiedByUserWithId().applyAs(MODIFIED_BY_USER_WITH_ID, updateMetadataEvent);
+        command.aspectNames().applyAs(ASPECTS_NAMES, updateMetadataEvent);
+        command.isFile().applyAs(IS_FILE, updateMetadataEvent);
+        command.isFolder().applyAs(IS_FOLDER, updateMetadataEvent);
+        command.createdAt().applyAs(CREATED_AT, updateMetadataEvent);
+
+        command.properties()
+                .forEach(customPropertyDelta -> customPropertyDelta.applyOn(updateMetadataEvent));
+
+        eventPublisher.publishMessage(updateMetadataEvent);
+    }
+}

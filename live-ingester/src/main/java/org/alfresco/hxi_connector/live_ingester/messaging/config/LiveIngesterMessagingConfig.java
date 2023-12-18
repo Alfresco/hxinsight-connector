@@ -36,7 +36,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.UpdateNodeMetadataEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
 import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;

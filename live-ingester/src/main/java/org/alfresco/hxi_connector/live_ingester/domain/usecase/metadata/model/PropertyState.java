@@ -24,9 +24,8 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.model.transform.request;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-public interface TransformRequester
-{
-    void requestTransform(TransformRequest transformRequest);
+public enum PropertyState {
+    UPDATED, UNCHANGED, DELETED
 }

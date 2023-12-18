@@ -24,22 +24,9 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.event;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import org.springframework.stereotype.Component;
-
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
-
-@Component
-public class TransformRequestMapper
+public interface EventPublisher
 {
-    static final String PDF_MIMETYPE = "application/pdf";
-
-    public TransformRequest map(IngestNewNodeEvent event)
-    {
-        Node node = event.node();
-        return new TransformRequest(event.time(), node.id(), PDF_MIMETYPE);
-    }
+    void publishMessage(UpdateNodeMetadataEvent event);
 }
