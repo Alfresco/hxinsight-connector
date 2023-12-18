@@ -46,19 +46,20 @@ public class CustomPropertyDelta<T>
 
     public static <T> CustomPropertyDelta<T> updated(String key, T propertyValue)
     {
+        ensureNonNull(propertyValue, "Property value cannot be null. Property name: %s", key);
+
         return new CustomPropertyDelta<>(PropertyState.UPDATED, key, propertyValue);
     }
 
     public static CustomPropertyDelta<?> deleted(String key)
     {
-        return new CustomPropertyDelta<>(PropertyState.DELETED, key, new Object());
+        return new CustomPropertyDelta<>(PropertyState.DELETED, key, null);
     }
 
     private CustomPropertyDelta(PropertyState propertyState, String propertyName, T propertyValue)
     {
         ensureNonNull(propertyName, "Property key cannot be null");
         ensureNonNull(propertyState, "Property state cannot be null");
-        ensureNonNull(propertyValue, "Property key cannot be null");
 
         this.propertyState = propertyState;
         this.propertyValue = propertyValue;

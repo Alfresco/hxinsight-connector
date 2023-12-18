@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -72,6 +73,23 @@ class EventProcessorTest
 
         NodeResource nodeResource = mockNodeResource(event);
         given(nodeResource.getContent()).willReturn(null);
+
+        // when
+        eventProcessor.process(event);
+
+        // then
+        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).shouldHaveNoMoreInteractions();
+
+        then(ingestMetadataCommandHandler).should().handle(any());
+    }
+
+    @Test
+    void shouldIngestUpdatedNodeMetadata()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getType()).willReturn(NODE_UPDATED.getType());
 
         // when
         eventProcessor.process(event);
