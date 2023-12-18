@@ -26,19 +26,19 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
 
-import static java.util.Optional.ofNullable;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventUtils.isEventTypeCreated;
 
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
-import org.alfresco.repo.event.v1.model.ContentInfo;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -55,31 +55,34 @@ public class RepoEventMapper
                 event.getData().getResource().getId());
     }
 
-    public IngestMetadataCommand mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
+    public IngestMetadataCommand mapToIngestMetadataCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        log.info("Creating node metadata properties {}", event);
-
-        NodeResource node = event.getData().getResource();
+        ensureThat(isEventTypeCreated(event), "Unsupported event type");
 
         return new IngestMetadataCommand(
                 event.getTime().toInstant().toEpochMilli(),
-                new Node(
-                        node.getId(),
-                        node.getName(),
-                        node.getPrimaryAssocQName(),
-                        node.getNodeType(),
-                        node.getCreatedByUser().getId(),
-                        node.getModifiedByUser().getId(),
-                        ofNullable(node.getContent()).map(ContentInfo::getMimeType),
-                        node.getAspectNames(),
-                        node.isFile(),
-                        node.isFolder(),
-                        node.getCreatedAt().toInstant().toEpochMilli(),
-                        node.getProperties()
-                                .entrySet()
-                                .stream()
-                                .filter(property -> Objects.nonNull(property.getKey()) && Objects.nonNull(property.getValue()))
-                                .map(property -> new NodeProperty<>(property.getKey(), property.getValue()))
-                                .collect(Collectors.toSet())));
+                event.getData().getResource().getId(),
+                updated(event.getData().getResource().getName()),
+                updated(event.getData().getResource().getPrimaryAssocQName()),
+                updated(event.getData().getResource().getNodeType()),
+                updated(event.getData().getResource().getCreatedByUser().getId()),
+                updated(event.getData().getResource().getModifiedByUser().getId()),
+                updated(event.getData().getResource().getAspectNames()),
+                updated(event.getData().getResource().isFile()),
+                updated(event.getData().getResource().isFolder()),
+                updated(event.getData().getResource().getCreatedAt().toInstant().toEpochMilli()),
+                allCustomPropertiesUpdated(event));
+    }
+
+    private Set<CustomPropertyDelta<?>> allCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return Optional.ofNullable(event.getData().getResource())
+                .map(NodeResource::getProperties)
+                .map(Map::entrySet)
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(property -> Objects.nonNull(property.getValue()))
+                .map(property -> CustomPropertyDelta.updated(property.getKey(), property.getValue()))
+                .collect(Collectors.toSet());
     }
 }

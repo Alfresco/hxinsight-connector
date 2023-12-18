@@ -30,21 +30,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -59,7 +62,7 @@ class RepoEventMapperTest
     private static final String NODE_PRIMARY_ASSOC_Q_NAME = "cm:test-name";
     private static final String NODE_TYPE = "cm:folder";
     private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
-    private static final String NODE_MODIFIED_BY_USER_WITH_ID = "admin";
+    private static final String NODE_MODIFIED_BY_USER_WITH_ID = "hr_user";
     private static final Set<String> NODE_ASPECT_NAMES = Set.of(
             "cm:titled",
             "cm:auditable");
@@ -98,13 +101,14 @@ class RepoEventMapperTest
     }
 
     @Test
-    void mapToIngestNewNodeEvent()
+    void shouldMapToIngestNodeMetadataCommand()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
         DataAttributes<NodeResource> data = mock();
 
         when(event.getTime()).thenReturn(dateFromTimestamp(EVENT_TIMESTAMP));
+        when(event.getType()).thenReturn(NODE_CREATED.getType());
         when(event.getData()).thenReturn(data);
 
         NodeResource nodeResource = NodeResource.builder()
@@ -124,26 +128,24 @@ class RepoEventMapperTest
         when(data.getResource()).thenReturn(nodeResource);
 
         // when
-        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
+        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
 
         // then
-        Node expectedNode = new Node(
-                NODE_ID,
-                NODE_NAME,
-                NODE_PRIMARY_ASSOC_Q_NAME,
-                NODE_TYPE,
-                NODE_CREATED_BY_USER_WITH_ID,
-                NODE_MODIFIED_BY_USER_WITH_ID,
-                Optional.empty(),
-                NODE_ASPECT_NAMES,
-                NODE_IS_FILE,
-                NODE_IS_FOLDER,
-                NODE_CREATED_AT,
-                NODE_PROPERTIES);
-
         IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
-                expectedNode);
+                NODE_ID,
+                updated(NODE_NAME),
+                updated(NODE_PRIMARY_ASSOC_Q_NAME),
+                updated(NODE_TYPE),
+                updated(NODE_CREATED_BY_USER_WITH_ID),
+                updated(NODE_MODIFIED_BY_USER_WITH_ID),
+                updated(NODE_ASPECT_NAMES),
+                updated(NODE_IS_FILE),
+                updated(NODE_IS_FOLDER),
+                updated(NODE_CREATED_AT),
+                NODE_PROPERTIES.stream()
+                        .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
+                        .collect(Collectors.toSet()));
 
         assertEquals(expectedEvent, actualEvent);
     }

@@ -26,14 +26,13 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.*;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
 
 @Component
 @RequiredArgsConstructor
@@ -41,22 +40,22 @@ public class IngestMetadataCommandHandler
 {
     private final EventPublisher eventPublisher;
 
-    public void handle(IngestMetadataCommand event)
+    public void handle(IngestMetadataCommand command)
     {
-        Node node = event.node();
+        UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create();
 
-        UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create()
-                .set(NAME.withValue(node.name()))
-                .set(PRIMARY_ASSOC_Q_NAME.withValue(node.primaryAssocQName()))
-                .set(TYPE.withValue(node.nodeType()))
-                .set(CREATED_BY_USER_WITH_ID.withValue(node.createdByUserWithId()))
-                .set(MODIFIED_BY_USER_WITH_ID.withValue(node.modifiedByUserWithId()))
-                .set(ASPECTS_NAMES.withValue(node.aspectNames()))
-                .set(IS_FILE.withValue(node.isFile()))
-                .set(IS_FOLDER.withValue(node.isFolder()))
-                .set(CREATED_AT.withValue(node.createdAt()));
+        command.name().applyAs(NAME, updateMetadataEvent);
+        command.primaryAssocQName().applyAs(PRIMARY_ASSOC_Q_NAME, updateMetadataEvent);
+        command.nodeType().applyAs(TYPE, updateMetadataEvent);
+        command.createdByUserWithId().applyAs(CREATED_BY_USER_WITH_ID, updateMetadataEvent);
+        command.modifiedByUserWithId().applyAs(MODIFIED_BY_USER_WITH_ID, updateMetadataEvent);
+        command.aspectNames().applyAs(ASPECTS_NAMES, updateMetadataEvent);
+        command.isFile().applyAs(IS_FILE, updateMetadataEvent);
+        command.isFolder().applyAs(IS_FOLDER, updateMetadataEvent);
+        command.createdAt().applyAs(CREATED_AT, updateMetadataEvent);
 
-        node.properties().forEach(updateMetadataEvent::set);
+        command.properties()
+                .forEach(customPropertyDelta -> customPropertyDelta.applyOn(updateMetadataEvent));
 
         eventPublisher.publishMessage(updateMetadataEvent);
     }

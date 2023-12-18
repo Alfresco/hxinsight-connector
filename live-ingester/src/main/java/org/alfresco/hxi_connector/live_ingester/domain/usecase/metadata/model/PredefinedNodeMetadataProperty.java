@@ -35,21 +35,21 @@ import lombok.Getter;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 
 @Getter
-public class PredefinedNodeProperty<V>
+public class PredefinedNodeMetadataProperty<V>
 {
-    public static final PredefinedNodeProperty<String> NAME = new PredefinedNodeProperty<>("name");
-    public static final PredefinedNodeProperty<String> PRIMARY_ASSOC_Q_NAME = new PredefinedNodeProperty<>("primaryAssocQName");
-    public static final PredefinedNodeProperty<String> TYPE = new PredefinedNodeProperty<>("type");
-    public static final PredefinedNodeProperty<String> CREATED_BY_USER_WITH_ID = new PredefinedNodeProperty<>("createdByUserWithId");
-    public static final PredefinedNodeProperty<String> MODIFIED_BY_USER_WITH_ID = new PredefinedNodeProperty<>("modifiedByUserWithId");
-    public static final PredefinedNodeProperty<Set<String>> ASPECTS_NAMES = new PredefinedNodeProperty<>("aspectsNames");
-    public static final PredefinedNodeProperty<Boolean> IS_FOLDER = new PredefinedNodeProperty<>("isFolder");
-    public static final PredefinedNodeProperty<Boolean> IS_FILE = new PredefinedNodeProperty<>("isFile");
-    public static final PredefinedNodeProperty<Long> CREATED_AT = new PredefinedNodeProperty<>("createdAt");
+    public static final PredefinedNodeMetadataProperty<String> NAME = new PredefinedNodeMetadataProperty<>("name");
+    public static final PredefinedNodeMetadataProperty<String> PRIMARY_ASSOC_Q_NAME = new PredefinedNodeMetadataProperty<>("primaryAssocQName");
+    public static final PredefinedNodeMetadataProperty<String> TYPE = new PredefinedNodeMetadataProperty<>("type");
+    public static final PredefinedNodeMetadataProperty<String> CREATED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("createdByUserWithId");
+    public static final PredefinedNodeMetadataProperty<String> MODIFIED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("modifiedByUserWithId");
+    public static final PredefinedNodeMetadataProperty<Set<String>> ASPECTS_NAMES = new PredefinedNodeMetadataProperty<>("aspectsNames");
+    public static final PredefinedNodeMetadataProperty<Boolean> IS_FOLDER = new PredefinedNodeMetadataProperty<>("isFolder");
+    public static final PredefinedNodeMetadataProperty<Boolean> IS_FILE = new PredefinedNodeMetadataProperty<>("isFile");
+    public static final PredefinedNodeMetadataProperty<Long> CREATED_AT = new PredefinedNodeMetadataProperty<>("createdAt");
 
     private final String name;
 
-    private PredefinedNodeProperty(String name)
+    private PredefinedNodeMetadataProperty(String name)
     {
         ensureThat(!name.contains(":"),
                 "Predefined properties names should not contain the ':' character, as this may cause a collision with the client's custom property.");

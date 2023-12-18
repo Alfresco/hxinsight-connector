@@ -26,26 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-import static org.junit.jupiter.api.Assertions.*;
-
-import org.junit.jupiter.api.Test;
-
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
-
-class PredefinedNodePropertyTest
+public enum PropertyState
 {
-
-    @Test
-    void shouldCreatePropertyWithGivenValue()
-    {
-        // given
-        String name = "test name";
-
-        // when
-        NodeProperty<String> nodeProperty = PredefinedNodeProperty.NAME.withValue(name);
-
-        // then
-        assertEquals(PredefinedNodeProperty.NAME.getName(), nodeProperty.name());
-        assertEquals(name, nodeProperty.value());
-    }
+    UPDATED, UNCHANGED, DELETED
 }

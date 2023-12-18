@@ -26,9 +26,43 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
+import java.util.Set;
+
+import org.springframework.validation.annotation.Validated;
+
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+
+@Validated
 public record IngestMetadataCommand(
         long time,
-        Node node)
-{}
+        String nodeId,
+        PropertyDelta<String> name,
+        PropertyDelta<String> primaryAssocQName,
+        PropertyDelta<String> nodeType,
+        PropertyDelta<String> createdByUserWithId,
+        PropertyDelta<String> modifiedByUserWithId,
+        PropertyDelta<Set<String>> aspectNames,
+        PropertyDelta<Boolean> isFile,
+        PropertyDelta<Boolean> isFolder,
+        PropertyDelta<Long> createdAt,
+        Set<CustomPropertyDelta<?>> properties)
+{
+    public IngestMetadataCommand
+    {
+        ensureNotBlank(nodeId, "Node id cannot be blank");
+        ensureNonNull(name, "Node %s name cannot be blank", nodeId);
+        ensureNonNull(primaryAssocQName, "Node %s qualified name cannot be blank", nodeId);
+        ensureNonNull(nodeType, "Node %s type cannot be blank", nodeId);
+        ensureNonNull(createdByUserWithId, "Node %s created by user with nodeId cannot be blank", nodeId);
+        ensureNonNull(modifiedByUserWithId, "Node %s modified by user with nodeId cannot be blank", nodeId);
+        ensureNonNull(aspectNames, "Node %s aspect names cannot be null", nodeId);
+        ensureNonNull(isFile, "Node %s is file property cannot be null", nodeId);
+        ensureNonNull(isFolder, "Node %s is folder property cannot be null", nodeId);
+        ensureNonNull(createdAt, "Node %s created at property cannot be null", nodeId);
+        ensureNonNull(properties, "Node %s properties cannot be null", nodeId);
+    }
+}

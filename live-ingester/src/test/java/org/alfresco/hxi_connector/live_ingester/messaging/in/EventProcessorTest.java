@@ -77,7 +77,7 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestNewNodeEvent(event);
+        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
         then(repoEventMapper).shouldHaveNoMoreInteractions();
 
         then(ingestMetadataCommandHandler).should().handle(any());
@@ -97,7 +97,7 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestNewNodeEvent(event);
+        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
         then(repoEventMapper).should().mapToIngestContentCommand(event);
 
         then(ingestMetadataCommandHandler).should().handle(any());
