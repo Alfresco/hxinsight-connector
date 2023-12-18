@@ -27,9 +27,10 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor

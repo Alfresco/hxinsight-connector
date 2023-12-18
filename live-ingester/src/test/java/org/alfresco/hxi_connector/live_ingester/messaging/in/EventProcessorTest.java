@@ -26,6 +26,19 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
 import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
@@ -33,17 +46,6 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventData;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class EventProcessorTest
@@ -101,7 +103,8 @@ class EventProcessorTest
         then(ingestContentCommandHandler).should().handle(any());
     }
 
-    NodeResource mockNodeResource(RepoEvent<DataAttributes<NodeResource>> repoEvent) {
+    NodeResource mockNodeResource(RepoEvent<DataAttributes<NodeResource>> repoEvent)
+    {
         EventData<NodeResource> eventData = mock();
         NodeResource nodeResource = mock();
 

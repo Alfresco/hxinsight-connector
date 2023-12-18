@@ -26,8 +26,15 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
@@ -36,12 +43,6 @@ import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMap
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 @Slf4j
 @Component
@@ -68,7 +69,8 @@ public class EventProcessor
             IngestNewNodeEvent ingestNewNodeEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
 
             ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
-        } else if (isUpdated(event))
+        }
+        else if (isUpdated(event))
         {
             log.info("Received event of type UPDATE {}", event);
         }

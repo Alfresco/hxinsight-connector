@@ -32,8 +32,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
 @Component
 @RequiredArgsConstructor
@@ -41,6 +39,7 @@ public class IngestNewNodeEventHandler
 {
     private final UpdateNodeEventMapper updateNodeEventMapper;
     private final EventPublisher eventPublisher;
+
     public void handle(IngestNewNodeEvent event)
     {
         UpdateNodeMetadataEvent updateMetadataEvent = updateNodeEventMapper.map(event);

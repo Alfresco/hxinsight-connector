@@ -39,15 +39,14 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
-import org.alfresco.repo.event.v1.model.*;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
+import org.alfresco.repo.event.v1.model.*;
 
 class RepoEventMapperTest
 {
@@ -90,8 +89,7 @@ class RepoEventMapperTest
         // then
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 EVENT_TIMESTAMP,
-                NODE_ID
-        );
+                NODE_ID);
 
         assertEquals(expectedCommand, actualCommand);
     }
