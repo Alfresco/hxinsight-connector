@@ -24,26 +24,35 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
+package org.alfresco.hxi_connector.live_ingester.domain.event;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 @Component
 @RequiredArgsConstructor
-public class IngestContentCommandHandler
+public class IngestNewNodeEventHandler
 {
-    private static final String PDF_MIMETYPE = "application/pdf";
-
+    private final UpdateNodeEventMapper updateNodeEventMapper;
+    private final EventPublisher eventPublisher;
+    private final TransformRequestMapper transformRequestMapper;
     private final TransformRequester transformRequester;
 
-    public void handle(IngestContentCommand command)
+    public void handle(IngestNewNodeEvent event)
     {
-        TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
+        UpdateNodeMetadataEvent updateMetadataEvent = updateNodeEventMapper.map(event);
+        eventPublisher.publishMessage(updateMetadataEvent);
 
-        transformRequester.requestTransform(transformRequest);
+        if (event.node().contentMimeType().isPresent())
+        {
+            TransformRequest transformRequest = transformRequestMapper.map(event);
+            transformRequester.requestTransform(transformRequest);
+        }
     }
 }
