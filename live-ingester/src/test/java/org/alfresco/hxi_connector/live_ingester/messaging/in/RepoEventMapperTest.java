@@ -39,16 +39,15 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.repo.event.v1.model.*;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.alfresco.repo.event.v1.model.UserInfo;
 
 class RepoEventMapperTest
 {
@@ -68,6 +67,34 @@ class RepoEventMapperTest
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
     private final RepoEventMapper repoEventMapper = new RepoEventMapper();
+
+    @Test
+    void shouldMapToIngestNodeContentCommand()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        DataAttributes<NodeResource> data = mock();
+
+        when(event.getTime()).thenReturn(dateFromTimestamp(EVENT_TIMESTAMP));
+        when(event.getData()).thenReturn(data);
+
+        NodeResource nodeResource = NodeResource.builder()
+                .setId(NODE_ID)
+                .build();
+
+        when(data.getResource()).thenReturn(nodeResource);
+
+        // when
+        IngestContentCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
+
+        // then
+        IngestContentCommand expectedCommand = new IngestContentCommand(
+                EVENT_TIMESTAMP,
+                NODE_ID
+        );
+
+        assertEquals(expectedCommand, actualCommand);
+    }
 
     @Test
     void mapToIngestNewNodeEvent()

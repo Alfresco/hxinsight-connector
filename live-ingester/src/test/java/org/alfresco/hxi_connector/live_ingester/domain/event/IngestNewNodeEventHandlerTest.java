@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.junit.jupiter.api.Test;
@@ -36,7 +35,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static java.util.Optional.ofNullable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -54,10 +52,11 @@ class IngestNewNodeEventHandlerTest
     IngestNewNodeEventHandler ingestNewNodeEventHandler;
 
     @Test
-    void nodeWithoutContent_PublishMetadataButNoTransform()
+    void shouldIngestNodeMetadata()
     {
         // given
-        IngestNewNodeEvent ingestNewNodeEvent = mockIngestNodeEvent(null);
+        IngestNewNodeEvent ingestNewNodeEvent = mock();
+
         UpdateNodeMetadataEvent updateNodeMetadataEvent = mock(UpdateNodeMetadataEvent.class);
         given(updateNodeEventMapper.map(ingestNewNodeEvent)).willReturn(updateNodeMetadataEvent);
 
@@ -68,13 +67,4 @@ class IngestNewNodeEventHandlerTest
         then(eventPublisher).should().publishMessage(updateNodeMetadataEvent);
     }
 
-    IngestNewNodeEvent mockIngestNodeEvent(String sourceContentType)
-    {
-        Node node = mock();
-        given(node.contentMimeType()).willReturn(ofNullable(sourceContentType));
-
-        IngestNewNodeEvent ingestNewNodeEvent = mock();
-        given(ingestNewNodeEvent.node()).willReturn(node);
-        return ingestNewNodeEvent;
-    }
 }
