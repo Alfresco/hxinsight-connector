@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.*;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
