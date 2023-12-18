@@ -41,13 +41,13 @@ import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import org.opentest4j.AssertionFailedError;
 
-@SuppressWarnings({"PMD.TestClassWithoutTestCases"})
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "UseObjectForClearerAPI"})
 @NoArgsConstructor(access = PRIVATE)
 public final class TestUtils
 {
     public static Map<String, Serializable> mapWith(@Nullable String key, @Nullable String value)
     {
-        HashMap<String, Serializable> map = new HashMap<>();
+        Map<String, Serializable> map = new HashMap<>();
 
         map.put(key, value);
 
@@ -56,7 +56,7 @@ public final class TestUtils
 
     public static Map<String, Serializable> mapWith(@Nullable String k1, @Nullable String v1, @Nullable String k2, @Nullable String v2)
     {
-        HashMap<String, Serializable> map = new HashMap<>();
+        Map<String, Serializable> map = new HashMap<>();
 
         map.put(k1, v1);
         map.put(k2, v2);
