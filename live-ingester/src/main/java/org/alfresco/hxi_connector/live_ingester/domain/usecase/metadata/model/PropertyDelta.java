@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.UNCHANGED;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.UPDATED;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
@@ -44,12 +45,12 @@ public class PropertyDelta<T>
 
     public static <T> PropertyDelta<T> updated(T propertyValue)
     {
-        return new PropertyDelta<>(PropertyState.UPDATED, propertyValue);
+        return new PropertyDelta<>(UPDATED, propertyValue);
     }
 
     public static <T> PropertyDelta<T> unchanged(T propertyValue)
     {
-        return new PropertyDelta<>(PropertyState.UNCHANGED, propertyValue);
+        return new PropertyDelta<>(UNCHANGED, propertyValue);
     }
 
     private PropertyDelta(PropertyState propertyState, T value)

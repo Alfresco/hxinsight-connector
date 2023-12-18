@@ -46,12 +46,12 @@ public class CustomPropertyDelta<T>
 
     public static <T> CustomPropertyDelta<T> updated(String key, T propertyValue)
     {
-        return new CustomPropertyDelta<>(PropertyState.UPDATED, key, propertyValue);
+        return new CustomPropertyDelta<>(UPDATED, key, propertyValue);
     }
 
     public static CustomPropertyDelta<?> deleted(String key)
     {
-        return new CustomPropertyDelta<>(PropertyState.DELETED, key, new Object());
+        return new CustomPropertyDelta<>(DELETED, key, new Object());
     }
 
     private CustomPropertyDelta(PropertyState propertyState, String propertyName, T propertyValue)
