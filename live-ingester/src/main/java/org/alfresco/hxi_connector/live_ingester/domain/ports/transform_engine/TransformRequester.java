@@ -23,7 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.model.transform.request;
 
-public record TransformRequest(long eventTimestamp, String nodeRef, String targetMimeType)
-{}
+package org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine;
+
+public interface TransformRequester
+{
+    void requestTransform(TransformRequest transformRequest);
+}
