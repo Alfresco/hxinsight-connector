@@ -26,25 +26,29 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.UPDATED;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
-public class PropertyDelta<T> {
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+
+public class PropertyDelta<T>
+{
 
     private final PropertyState propertyState;
     private final T propertyValue;
 
-    public static <T> PropertyDelta<T> updated(T propertyValue) {
+    public static <T> PropertyDelta<T> updated(T propertyValue)
+    {
         return new PropertyDelta<>(PropertyState.UPDATED, propertyValue);
     }
 
-    public static <T> PropertyDelta<T> unchanged(T propertyValue) {
+    public static <T> PropertyDelta<T> unchanged(T propertyValue)
+    {
         return new PropertyDelta<>(PropertyState.UNCHANGED, propertyValue);
     }
 
-    private PropertyDelta(PropertyState propertyState, T value) {
+    private PropertyDelta(PropertyState propertyState, T value)
+    {
         ensureNonNull(propertyState, "Property state cannot be null");
         ensureNonNull(value, "Property key cannot be null");
 
@@ -52,8 +56,10 @@ public class PropertyDelta<T> {
         this.propertyValue = value;
     }
 
-    public void applyAs(PredefinedNodeMetadataProperty<T> predefinedNodeMetadataProperty, UpdateNodeMetadataEvent event) {
-        if (propertyState == UPDATED) {
+    public void applyAs(PredefinedNodeMetadataProperty<T> predefinedNodeMetadataProperty, UpdateNodeMetadataEvent event)
+    {
+        if (propertyState == UPDATED)
+        {
             event.set(predefinedNodeMetadataProperty.withValue(propertyValue));
         }
     }

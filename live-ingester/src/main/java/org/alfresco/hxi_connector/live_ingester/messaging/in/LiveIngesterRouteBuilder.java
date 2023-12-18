@@ -60,4 +60,14 @@ public class LiveIngesterRouteBuilder extends RouteBuilder
                 .process((exchange) -> eventProcessor.process(camelEventMapper.repoEventFrom(exchange)))
                 .end();
     }
+
+    @SneakyThrows
+    public void prettyPrintJsonUsingDefaultPrettyPrinter(String uglyJsonString)
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object jsonObject = objectMapper.readValue(uglyJsonString, Object.class);
+        String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+
+        System.out.println(prettyJson);
+    }
 }

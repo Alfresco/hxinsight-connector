@@ -26,14 +26,15 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.springframework.validation.annotation.Validated;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
 import java.util.Set;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
+import org.springframework.validation.annotation.Validated;
+
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @Validated
 public record UpsertNodeMetadataCommand(
@@ -48,8 +49,10 @@ public record UpsertNodeMetadataCommand(
         PropertyDelta<Boolean> isFile,
         PropertyDelta<Boolean> isFolder,
         PropertyDelta<Long> createdAt,
-        Set<CustomPropertyDelta<?>> properties) {
-    public UpsertNodeMetadataCommand {
+        Set<CustomPropertyDelta<?>> properties)
+{
+    public UpsertNodeMetadataCommand
+    {
         ensureNotBlank(nodeId, "Node id cannot be blank");
         ensureNonNull(name, "Node %s name cannot be blank", nodeId);
         ensureNonNull(primaryAssocQName, "Node %s qualified name cannot be blank", nodeId);

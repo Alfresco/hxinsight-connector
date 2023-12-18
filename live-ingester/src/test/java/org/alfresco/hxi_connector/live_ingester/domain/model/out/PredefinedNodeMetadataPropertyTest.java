@@ -28,9 +28,10 @@ package org.alfresco.hxi_connector.live_ingester.domain.model.out;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import org.junit.jupiter.api.Test;
+
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty;
-import org.junit.jupiter.api.Test;
 
 class PredefinedNodeMetadataPropertyTest
 {

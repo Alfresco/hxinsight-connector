@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-public enum PropertyState {
+public enum PropertyState
+{
     UPDATED, UNCHANGED, DELETED
 }

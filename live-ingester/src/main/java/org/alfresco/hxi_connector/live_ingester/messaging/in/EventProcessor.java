@@ -26,8 +26,15 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.UpsertNodeMetadataCommand;
@@ -36,17 +43,12 @@ import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMap
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
-
-import java.util.Optional;
-
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class EventProcessor {
+public class EventProcessor
+{
 
     private final UpsertNodeMetadataCommandHandler upsertNodeMetadataCommandHandler;
 
@@ -54,38 +56,46 @@ public class EventProcessor {
 
     private final RepoEventMapper repoEventMapper;
 
-    public void process(RepoEvent<DataAttributes<NodeResource>> event) {
+    public void process(RepoEvent<DataAttributes<NodeResource>> event)
+    {
         handleMetadataPropertiesChange(event);
         handleContentChange(event);
     }
 
-    private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event) {
-        if (isCreated(event) || isUpdated(event)) {
+    private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (isCreated(event) || isUpdated(event))
+        {
             UpsertNodeMetadataCommand command = repoEventMapper.mapToUpsertNodeMetadataCommand(event);
 
             upsertNodeMetadataCommandHandler.handle(command);
         }
     }
 
-    private void handleContentChange(RepoEvent<DataAttributes<NodeResource>> event) {
-        if (isCreated(event) && containsContent(event)) {
+    private void handleContentChange(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (isCreated(event) && containsContent(event))
+        {
             IngestContentCommand command = repoEventMapper.mapToIngestContentCommand(event);
 
             ingestContentCommandHandler.handle(command);
         }
     }
 
-    private boolean containsContent(RepoEvent<DataAttributes<NodeResource>> event) {
+    private boolean containsContent(RepoEvent<DataAttributes<NodeResource>> event)
+    {
         return Optional.ofNullable(event.getData().getResource())
                 .map(NodeResource::getContent)
                 .isPresent();
     }
 
-    private boolean isCreated(RepoEvent<DataAttributes<NodeResource>> event) {
+    private boolean isCreated(RepoEvent<DataAttributes<NodeResource>> event)
+    {
         return NODE_CREATED.getType().equals(event.getType());
     }
 
-    private boolean isUpdated(RepoEvent<DataAttributes<NodeResource>> event) {
+    private boolean isUpdated(RepoEvent<DataAttributes<NodeResource>> event)
+    {
         return NODE_UPDATED.getType().equals(event.getType());
     }
 }

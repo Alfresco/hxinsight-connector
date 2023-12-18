@@ -26,20 +26,23 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
+
 import lombok.RequiredArgsConstructor;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.springframework.stereotype.Component;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 @Component
 @RequiredArgsConstructor
-public class UpsertNodeMetadataCommandHandler {
+public class UpsertNodeMetadataCommandHandler
+{
 
     private final EventPublisher eventPublisher;
 
-    public void handle(UpsertNodeMetadataCommand command) {
+    public void handle(UpsertNodeMetadataCommand command)
+    {
         UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create();
 
         command.name().applyAs(NAME, updateMetadataEvent);

@@ -27,18 +27,21 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class IngestContentCommandHandler {
+public class IngestContentCommandHandler
+{
     private static final String PDF_MIMETYPE = "application/pdf";
 
     private final TransformRequester transformRequester;
 
-    public void handle(IngestContentCommand command) {
+    public void handle(IngestContentCommand command)
+    {
         TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
 
         transformRequester.requestTransform(transformRequest);

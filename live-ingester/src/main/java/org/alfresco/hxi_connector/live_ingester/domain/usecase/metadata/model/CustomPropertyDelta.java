@@ -26,28 +26,32 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.DELETED;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.UPDATED;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
-public class CustomPropertyDelta<T> {
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+
+public class CustomPropertyDelta<T>
+{
     private final PropertyState propertyState;
     private final String propertyName;
 
     private final T propertyValue;
 
-    public static <T> CustomPropertyDelta<T> updated(String key, T propertyValue) {
+    public static <T> CustomPropertyDelta<T> updated(String key, T propertyValue)
+    {
         return new CustomPropertyDelta<>(PropertyState.UPDATED, key, propertyValue);
     }
 
-    public static CustomPropertyDelta<?> deleted(String key) {
+    public static CustomPropertyDelta<?> deleted(String key)
+    {
         return new CustomPropertyDelta<>(PropertyState.DELETED, key, new Object());
     }
 
-    private CustomPropertyDelta(PropertyState propertyState, String propertyName, T propertyValue) {
+    private CustomPropertyDelta(PropertyState propertyState, String propertyName, T propertyValue)
+    {
         ensureNonNull(propertyName, "Property key cannot be null");
         ensureNonNull(propertyState, "Property state cannot be null");
         ensureNonNull(propertyValue, "Property key cannot be null");
@@ -57,10 +61,14 @@ public class CustomPropertyDelta<T> {
         this.propertyName = propertyName;
     }
 
-    public void applyOn(UpdateNodeMetadataEvent event) {
-        if (propertyState == UPDATED) {
+    public void applyOn(UpdateNodeMetadataEvent event)
+    {
+        if (propertyState == UPDATED)
+        {
             event.set(new NodeProperty<>(propertyName, propertyValue));
-        } else if (propertyState == DELETED) {
+        }
+        else if (propertyState == DELETED)
+        {
             event.unset(propertyName);
         }
     }

@@ -30,9 +30,10 @@ import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.
 
 public record IngestContentCommand(
         long time,
-        String nodeId
-) {
-    public IngestContentCommand {
+        String nodeId)
+{
+    public IngestContentCommand
+    {
         ensureNotBlank(nodeId, "Node id cannot be blank");
     }
 }

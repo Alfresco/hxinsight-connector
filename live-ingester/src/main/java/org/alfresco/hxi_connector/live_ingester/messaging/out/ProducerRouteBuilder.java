@@ -63,4 +63,14 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
         context.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, event);
     }
+
+    @SneakyThrows
+    public void prettyPrintJsonUsingDefaultPrettyPrinter(String uglyJsonString)
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        Object jsonObject = objectMapper.readValue(uglyJsonString, Object.class);
+        String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonObject);
+
+        System.out.println(prettyJson);
+    }
 }

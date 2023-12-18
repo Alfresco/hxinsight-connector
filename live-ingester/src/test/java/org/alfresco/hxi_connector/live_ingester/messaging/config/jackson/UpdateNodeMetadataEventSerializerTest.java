@@ -26,20 +26,24 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.junit.jupiter.api.Test;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
-class UpdateNodeMetadataEventSerializerTest {
+class UpdateNodeMetadataEventSerializerTest
+{
     private final UpdateNodeMetadataEventSerializer serializer = new UpdateNodeMetadataEventSerializer();
 
     @Test
-    public void shouldSerializeEmptyEvent() {
+    public void shouldSerializeEmptyEvent()
+    {
         UpdateNodeMetadataEvent emptyEvent = UpdateNodeMetadataEvent.create();
 
         String expectedJson = """
@@ -53,7 +57,8 @@ class UpdateNodeMetadataEventSerializerTest {
     }
 
     @Test
-    public void shouldSerializePropertiesToSet() {
+    public void shouldSerializePropertiesToSet()
+    {
         UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
                 .set(NAME.withValue("some-name"))
                 .set(IS_FILE.withValue(true))
@@ -76,7 +81,8 @@ class UpdateNodeMetadataEventSerializerTest {
     }
 
     @Test
-    public void shouldSerializePropertiesToUnset() {
+    public void shouldSerializePropertiesToUnset()
+    {
         UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
                 .unset(NAME.getName())
                 .unset(IS_FILE.getName())
@@ -93,7 +99,8 @@ class UpdateNodeMetadataEventSerializerTest {
     }
 
     @SneakyThrows
-    private String serialize(UpdateNodeMetadataEvent eventToSerialize) {
+    private String serialize(UpdateNodeMetadataEvent eventToSerialize)
+    {
         ObjectMapper objectMapper = new ObjectMapper();
 
         SimpleModule module = new SimpleModule();

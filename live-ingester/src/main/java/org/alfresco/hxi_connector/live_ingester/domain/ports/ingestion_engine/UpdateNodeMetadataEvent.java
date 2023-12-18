@@ -26,33 +26,33 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor(staticName = "create")
-public class UpdateNodeMetadataEvent {
+public class UpdateNodeMetadataEvent
+{
     private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
 
     private final Set<String> metadataPropertiesToUnset = new HashSet<>();
 
-    public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty) {
+    public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty)
+    {
         metadataPropertiesToSet.put(metadataProperty.name(), metadataProperty);
 
         return this;
     }
 
-    public UpdateNodeMetadataEvent unset(String metadataPropertyName) {
+    public UpdateNodeMetadataEvent unset(String metadataPropertyName)
+    {
         metadataPropertiesToUnset.add(metadataPropertyName);
 
         return this;

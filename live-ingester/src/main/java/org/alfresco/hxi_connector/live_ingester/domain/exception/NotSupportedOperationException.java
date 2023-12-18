@@ -26,8 +26,10 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.exception;
 
-public class NotSupportedOperationException extends LiveIngesterRuntimeException {
-    public NotSupportedOperationException(String message) {
+public class NotSupportedOperationException extends LiveIngesterRuntimeException
+{
+    public NotSupportedOperationException(String message)
+    {
         super(message);
     }
 }
