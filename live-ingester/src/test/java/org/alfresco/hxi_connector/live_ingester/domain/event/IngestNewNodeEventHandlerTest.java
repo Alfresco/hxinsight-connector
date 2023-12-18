@@ -40,10 +40,10 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
 // PMD doesn't recognise Mockito then().should() syntax.
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
