@@ -38,8 +38,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 import org.alfresco.hxi_connector.live_ingester.messaging.transform.TransformConfig;
 import org.alfresco.hxi_connector.live_ingester.messaging.transform.request.model.ATSTransformRequest;
 import org.alfresco.hxi_connector.live_ingester.messaging.transform.request.model.ClientData;

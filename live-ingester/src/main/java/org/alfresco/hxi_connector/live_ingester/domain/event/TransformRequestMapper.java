@@ -30,7 +30,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 
 @Component
 public class TransformRequestMapper

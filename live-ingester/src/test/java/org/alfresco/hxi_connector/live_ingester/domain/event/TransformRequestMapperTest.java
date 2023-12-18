@@ -39,7 +39,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
-import org.alfresco.hxi_connector.live_ingester.domain.model.transform.request.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 
 @ExtendWith(MockitoExtension.class)
 class TransformRequestMapperTest
