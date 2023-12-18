@@ -28,14 +28,14 @@ package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.model.out.PredefinedNodeProperty.*;
+import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.event.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 class UpdateNodeMetadataEventSerializerTest
 {

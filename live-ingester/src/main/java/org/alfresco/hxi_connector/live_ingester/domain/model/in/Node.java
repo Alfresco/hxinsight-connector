@@ -32,7 +32,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.
 import java.util.Optional;
 import java.util.Set;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.out.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 
 public record Node(
         String id,
