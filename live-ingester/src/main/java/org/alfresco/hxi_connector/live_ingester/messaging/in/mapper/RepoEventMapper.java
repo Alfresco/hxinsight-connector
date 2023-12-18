@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
@@ -46,6 +47,13 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @Component
 public class RepoEventMapper
 {
+
+    public IngestContentCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return new IngestContentCommand(
+                event.getTime().toInstant().toEpochMilli(),
+                event.getData().getResource().getId());
+    }
 
     public IngestNewNodeEvent mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {
