@@ -48,12 +48,12 @@ public class CustomPropertyDelta<T>
     {
         ensureNonNull(propertyValue, "Property value cannot be null. Property name: %s", key);
 
-        return new CustomPropertyDelta<>(PropertyState.UPDATED, key, propertyValue);
+        return new CustomPropertyDelta<>(UPDATED, key, propertyValue);
     }
 
     public static CustomPropertyDelta<?> deleted(String key)
     {
-        return new CustomPropertyDelta<>(PropertyState.DELETED, key, null);
+        return new CustomPropertyDelta<>(DELETED, key, null);
     }
 
     private CustomPropertyDelta(PropertyState propertyState, String propertyName, T propertyValue)
