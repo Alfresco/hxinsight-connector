@@ -35,7 +35,11 @@ import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventU
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -148,7 +152,7 @@ public class RepoEventMapper
 
     private Stream<Map.Entry<String, ?>> customPropertiesStream(NodeResource node)
     {
-        return Optional.ofNullable(node)
+        return ofNullable(node)
                 .map(NodeResource::getProperties)
                 .map(Map::entrySet)
                 .stream()
