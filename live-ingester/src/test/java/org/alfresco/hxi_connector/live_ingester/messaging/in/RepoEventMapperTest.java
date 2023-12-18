@@ -41,10 +41,10 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -124,7 +124,7 @@ class RepoEventMapperTest
         when(data.getResource()).thenReturn(nodeResource);
 
         // when
-        IngestNewNodeEvent actualEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
+        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
 
         // then
         Node expectedNode = new Node(
@@ -141,7 +141,7 @@ class RepoEventMapperTest
                 NODE_CREATED_AT,
                 NODE_PROPERTIES);
 
-        IngestNewNodeEvent expectedEvent = new IngestNewNodeEvent(
+        IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
                 expectedNode);
 

@@ -35,10 +35,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -50,7 +50,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class EventProcessor
 {
 
-    private final IngestNewNodeEventHandler ingestNewNodeEventHandler;
+    private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
 
@@ -66,9 +66,9 @@ public class EventProcessor
     {
         if (isCreated(event))
         {
-            IngestNewNodeEvent ingestNewNodeEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
+            IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestNewNodeEvent(event);
 
-            ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
+            ingestMetadataCommandHandler.handle(ingestMetadataCommand);
         }
         else if (isUpdated(event))
         {

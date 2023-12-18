@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.util;
 
+import static java.lang.String.format;
 import static java.util.function.Predicate.not;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -34,26 +35,38 @@ import java.util.Collection;
 import java.util.List;
 
 import lombok.NoArgsConstructor;
+import org.opentest4j.AssertionFailedError;
 
-@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SystemPrintln"})
+@SuppressWarnings({"PMD.TestClassWithoutTestCases"})
 @NoArgsConstructor(access = PRIVATE)
 public final class TestUtils
 {
     public static <T> void assertContainsSameElements(Collection<T> expected, Collection<T> actual)
     {
 
-        boolean areContainingSameElements = expected.size() == actual.size() && expected.containsAll(actual) && actual.containsAll(expected);
+        boolean areContainingSameElements = areContainingSameElements(expected, actual);
 
         if (areContainingSameElements)
         {
             return;
         }
 
-        System.err.println("expected: " + expected);
-        System.err.println("actual: " + actual);
+        String errorMessage = format("""
 
-        System.err.println("present in expected and not in actual: " + difference(expected, actual));
-        System.err.println("present in actual and not in expected: " + difference(actual, expected));
+                expected: %s
+                actual:   %s
+
+                present in expected and not in actual: %s
+                present in actual and not in expected: %s
+                """,
+                expected, actual, difference(expected, actual), difference(actual, expected));
+
+        throw new AssertionFailedError(errorMessage);
+    }
+
+    public static <T> boolean areContainingSameElements(Collection<T> expected, Collection<T> actual)
+    {
+        return expected.size() == actual.size() && expected.containsAll(actual) && actual.containsAll(expected);
     }
 
     private static <T> List<T> difference(Collection<T> first, Collection<T> second)
