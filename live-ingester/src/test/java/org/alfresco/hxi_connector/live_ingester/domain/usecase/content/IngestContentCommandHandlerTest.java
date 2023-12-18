@@ -37,6 +37,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 class IngestContentCommandHandlerTest
 {

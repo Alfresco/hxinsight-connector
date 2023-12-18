@@ -27,9 +27,9 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 
@@ -47,6 +47,7 @@ import org.alfresco.repo.event.v1.model.EventData;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 class EventProcessorTest
 {
@@ -67,10 +68,10 @@ class EventProcessorTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
-        when(event.getType()).thenReturn(NODE_CREATED.getType());
+        given(event.getType()).willReturn(NODE_CREATED.getType());
 
         NodeResource nodeResource = mockNodeResource(event);
-        when(nodeResource.getContent()).thenReturn(null);
+        given(nodeResource.getContent()).willReturn(null);
 
         // when
         eventProcessor.process(event);
@@ -87,10 +88,10 @@ class EventProcessorTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
-        when(event.getType()).thenReturn(NODE_CREATED.getType());
+        given(event.getType()).willReturn(NODE_CREATED.getType());
 
         NodeResource nodeResource = mockNodeResource(event);
-        when(nodeResource.getContent()).thenReturn(mock());
+        given(nodeResource.getContent()).willReturn(mock());
 
         // when
         eventProcessor.process(event);
@@ -108,8 +109,8 @@ class EventProcessorTest
         EventData<NodeResource> eventData = mock();
         NodeResource nodeResource = mock();
 
-        when(repoEvent.getData()).thenReturn(eventData);
-        when(eventData.getResource()).thenReturn(nodeResource);
+        given(repoEvent.getData()).willReturn(eventData);
+        given(eventData.getResource()).willReturn(nodeResource);
 
         return nodeResource;
     }
