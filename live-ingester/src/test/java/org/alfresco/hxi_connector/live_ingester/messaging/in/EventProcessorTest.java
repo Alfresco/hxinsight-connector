@@ -26,38 +26,88 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
-
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-
-import org.junit.jupiter.api.Test;
-
 import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.EventData;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+@ExtendWith(MockitoExtension.class)
 class EventProcessorTest
 {
-    private final RepoEventMapper repoEventMapper = mock();
+    @Mock
+    RepoEventMapper repoEventMapper;
 
-    private final IngestNewNodeEventHandler ingestNewNodeEventHandler = mock();
+    @Mock
+    IngestNewNodeEventHandler ingestNewNodeEventHandler;
 
-    private final EventProcessor eventProcessor = new EventProcessor(ingestNewNodeEventHandler, repoEventMapper);
+    @Mock
+    IngestContentCommandHandler ingestContentCommandHandler;
+
+    @InjectMocks
+    EventProcessor eventProcessor;
 
     @Test
-    void shouldIngestNewNodeIfEventTypeIsCreated()
+    void shouldIngestNewNodeMetadata()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
         when(event.getType()).thenReturn(NODE_CREATED.getType());
 
+        NodeResource nodeResource = mockNodeResource(event);
+        when(nodeResource.getContent()).thenReturn(null);
+
         // when
         eventProcessor.process(event);
 
         // then
-        verify(ingestNewNodeEventHandler).handle(any());
+        then(repoEventMapper).should().mapToIngestNewNodeEvent(event);
+        then(repoEventMapper).shouldHaveNoMoreInteractions();
+
+        then(ingestNewNodeEventHandler).should().handle(any());
+    }
+
+    @Test
+    void shouldIngestNewNodeContent()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        when(event.getType()).thenReturn(NODE_CREATED.getType());
+
+        NodeResource nodeResource = mockNodeResource(event);
+        when(nodeResource.getContent()).thenReturn(mock());
+
+        // when
+        eventProcessor.process(event);
+
+        // then
+        then(repoEventMapper).should().mapToIngestNewNodeEvent(event);
+        then(repoEventMapper).should().mapToIngestContentCommand(event);
+
+        then(ingestNewNodeEventHandler).should().handle(any());
+        then(ingestContentCommandHandler).should().handle(any());
+    }
+
+    NodeResource mockNodeResource(RepoEvent<DataAttributes<NodeResource>> repoEvent) {
+        EventData<NodeResource> eventData = mock();
+        NodeResource nodeResource = mock();
+
+        when(repoEvent.getData()).thenReturn(eventData);
+        when(eventData.getResource()).thenReturn(nodeResource);
+
+        return nodeResource;
     }
 }
