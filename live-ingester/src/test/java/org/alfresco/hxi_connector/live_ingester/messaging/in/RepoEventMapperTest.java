@@ -46,7 +46,10 @@ import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
-import org.alfresco.repo.event.v1.model.*;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.repo.event.v1.model.UserInfo;
 
 class RepoEventMapperTest
 {
