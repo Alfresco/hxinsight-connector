@@ -26,11 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import lombok.RequiredArgsConstructor;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.springframework.stereotype.Component;
-
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
@@ -40,6 +35,12 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.PRIMARY_ASSOC_Q_NAME;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 @Component
 @RequiredArgsConstructor
