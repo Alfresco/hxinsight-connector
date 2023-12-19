@@ -26,16 +26,14 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.springframework.validation.annotation.Validated;
-
-import java.util.Set;
-
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
-@Validated
+import java.util.Set;
+
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+
 public record IngestMetadataCommand(
         long time,
         String nodeId,
