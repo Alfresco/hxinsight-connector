@@ -54,15 +54,15 @@ public record IngestMetadataCommand(
     public IngestMetadataCommand
     {
         ensureNotBlank(nodeId, "Node id cannot be blank");
-        ensureNonNull(name, "Node %s name cannot be blank", nodeId);
-        ensureNonNull(primaryAssocQName, "Node %s qualified name cannot be blank", nodeId);
-        ensureNonNull(nodeType, "Node %s type cannot be blank", nodeId);
-        ensureNonNull(createdByUserWithId, "Node %s created by user with nodeId cannot be blank", nodeId);
-        ensureNonNull(modifiedByUserWithId, "Node %s modified by user with nodeId cannot be blank", nodeId);
-        ensureNonNull(aspectNames, "Node %s aspect names cannot be null", nodeId);
-        ensureNonNull(isFile, "Node %s is file property cannot be null", nodeId);
-        ensureNonNull(isFolder, "Node %s is folder property cannot be null", nodeId);
-        ensureNonNull(createdAt, "Node %s created at property cannot be null", nodeId);
-        ensureNonNull(properties, "Node %s properties cannot be null", nodeId);
+        ensureNonNull(name, "Node %s name delta cannot be null", nodeId);
+        ensureNonNull(primaryAssocQName, "Node %s qualified name delta cannot be null", nodeId);
+        ensureNonNull(nodeType, "Node %s type delta cannot be null", nodeId);
+        ensureNonNull(createdByUserWithId, "Node %s created by user with nodeId delta cannot be null", nodeId);
+        ensureNonNull(modifiedByUserWithId, "Node %s modified by user with nodeId delta cannot be null", nodeId);
+        ensureNonNull(aspectNames, "Node %s aspect names delta cannot be null", nodeId);
+        ensureNonNull(isFile, "Node %s is file property delta cannot be null", nodeId);
+        ensureNonNull(isFolder, "Node %s is folder property delta cannot be null", nodeId);
+        ensureNonNull(createdAt, "Node %s created at property delta cannot be null", nodeId);
+        ensureNonNull(properties, "Node %s custom properties delta cannot be null", nodeId);
     }
 }
