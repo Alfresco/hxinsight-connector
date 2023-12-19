@@ -26,8 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventUtils.isEventTypeUpdated;
 
 import java.util.Optional;
 
@@ -64,13 +64,13 @@ public class EventProcessor
 
     private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (isCreated(event))
+        if (isEventTypeCreated(event))
         {
-            IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestNewNodeEvent(event);
+            IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
 
             ingestMetadataCommandHandler.handle(ingestMetadataCommand);
         }
-        else if (isUpdated(event))
+        else if (isEventTypeUpdated(event))
         {
             log.info("Received event of type UPDATE {}", event);
         }
@@ -78,7 +78,7 @@ public class EventProcessor
 
     private void handleContentChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (isCreated(event) && containsContent(event))
+        if (isEventTypeCreated(event) && containsContent(event))
         {
             IngestContentCommand command = repoEventMapper.mapToIngestContentCommand(event);
 
@@ -91,15 +91,5 @@ public class EventProcessor
         return Optional.ofNullable(event.getData().getResource())
                 .map(NodeResource::getContent)
                 .isPresent();
-    }
-
-    private boolean isCreated(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        return NODE_CREATED.getType().equals(event.getType());
-    }
-
-    private boolean isUpdated(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        return NODE_UPDATED.getType().equals(event.getType());
     }
 }

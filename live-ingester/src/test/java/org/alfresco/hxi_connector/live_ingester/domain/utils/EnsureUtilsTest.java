@@ -28,7 +28,9 @@ package org.alfresco.hxi_connector.live_ingester.domain.utils;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.*;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
 import org.junit.jupiter.api.Test;
 

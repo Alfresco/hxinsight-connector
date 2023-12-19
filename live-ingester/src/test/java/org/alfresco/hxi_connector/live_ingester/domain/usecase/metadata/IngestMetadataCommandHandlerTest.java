@@ -29,19 +29,20 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.ASPECTS_NAMES;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.CREATED_AT;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.IS_FILE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.IS_FOLDER;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FOLDER;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.PRIMARY_ASSOC_Q_NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
-import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -54,7 +55,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 
 @ExtendWith(MockitoExtension.class)
 class IngestMetadataCommandHandlerTest
@@ -65,7 +66,7 @@ class IngestMetadataCommandHandlerTest
     private static final String NODE_PRIMARY_ASSOC_Q_NAME = "cm:test-name";
     private static final String NODE_TYPE = "cm:folder";
     private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
-    private static final String NODE_MODIFIED_BY_USER_WITH_ID = "admin";
+    private static final String NODE_MODIFIED_BY_USER_WITH_ID = "hr_user";
     private static final Set<String> NODE_ASPECT_NAMES = Set.of(
             "cm:titled",
             "cm:auditable");
@@ -86,23 +87,21 @@ class IngestMetadataCommandHandlerTest
     void shouldSetNewlyCreatedNodeMetadataProperties()
     {
         // given
-        Node node = new Node(
-                NODE_ID,
-                NODE_NAME,
-                NODE_PRIMARY_ASSOC_Q_NAME,
-                NODE_TYPE,
-                NODE_CREATED_BY_USER_WITH_ID,
-                NODE_MODIFIED_BY_USER_WITH_ID,
-                Optional.empty(),
-                NODE_ASPECT_NAMES,
-                NODE_IS_FILE,
-                NODE_IS_FOLDER,
-                NODE_CREATED_AT,
-                NODE_PROPERTIES);
-
         IngestMetadataCommand command = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
-                node);
+                NODE_ID,
+                updated(NODE_NAME),
+                updated(NODE_PRIMARY_ASSOC_Q_NAME),
+                updated(NODE_TYPE),
+                updated(NODE_CREATED_BY_USER_WITH_ID),
+                updated(NODE_MODIFIED_BY_USER_WITH_ID),
+                updated(NODE_ASPECT_NAMES),
+                updated(NODE_IS_FILE),
+                updated(NODE_IS_FOLDER),
+                updated(NODE_CREATED_AT),
+                NODE_PROPERTIES.stream()
+                        .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
+                        .collect(Collectors.toSet()));
 
         // when
         ingestMetadataCommandHandler.handle(command);
