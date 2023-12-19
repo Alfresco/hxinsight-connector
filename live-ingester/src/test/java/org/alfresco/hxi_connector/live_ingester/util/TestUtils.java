@@ -41,7 +41,7 @@ import jakarta.annotation.Nullable;
 import lombok.NoArgsConstructor;
 import org.opentest4j.AssertionFailedError;
 
-@SuppressWarnings({"PMD.TestClassWithoutTestCases", "UseObjectForClearerAPI"})
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.UseObjectForClearerAPI"})
 @NoArgsConstructor(access = PRIVATE)
 public final class TestUtils
 {
