@@ -30,7 +30,11 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventUtils.isEventTypeCreated;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
