@@ -26,15 +26,17 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.unchanged;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
-import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.EventType;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.repo.event.v1.model.UserInfo;
+import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
 import java.time.ZoneId;
@@ -43,14 +45,14 @@ import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.junit.jupiter.api.Test;
-
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
-import org.alfresco.repo.event.v1.model.*;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.unchanged;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 class RepoEventMapperTest
 {
@@ -312,14 +314,14 @@ class RepoEventMapperTest
     private UserInfo mockUser(String id)
     {
         UserInfo userInfo = mock();
-        when(userInfo.getId()).thenReturn(id);
+        given(userInfo.getId()).willReturn(id);
 
         return userInfo;
     }
 
     private void setTime(RepoEvent<DataAttributes<NodeResource>> event, long timestamp)
     {
-        when(event.getTime()).thenReturn(dateFromTimestamp(timestamp));
+        given(event.getTime()).willReturn(dateFromTimestamp(timestamp));
     }
 
     private ZonedDateTime dateFromTimestamp(long timestamp)
@@ -329,21 +331,21 @@ class RepoEventMapperTest
 
     private void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
-        when(event.getType()).thenReturn(type.getType());
+        given(event.getType()).willReturn(type.getType());
     }
 
     private void setNodeResource(RepoEvent<DataAttributes<NodeResource>> event, NodeResource nodeResource)
     {
         DataAttributes<NodeResource> data = mockData(event);
 
-        when(data.getResource()).thenReturn(nodeResource);
+        given(data.getResource()).willReturn(nodeResource);
     }
 
     private void setNodeResourceBefore(RepoEvent<DataAttributes<NodeResource>> event, NodeResource nodeResourceBefore)
     {
         DataAttributes<NodeResource> data = mockData(event);
 
-        when(data.getResourceBefore()).thenReturn(nodeResourceBefore);
+        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
     }
 
     private DataAttributes<NodeResource> mockData(RepoEvent<DataAttributes<NodeResource>> event)
@@ -355,7 +357,7 @@ class RepoEventMapperTest
 
         DataAttributes<NodeResource> data = mock();
 
-        when(event.getData()).thenReturn(data);
+        given(event.getData()).willReturn(data);
 
         return data;
     }
