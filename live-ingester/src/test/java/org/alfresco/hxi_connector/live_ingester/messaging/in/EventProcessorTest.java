@@ -39,8 +39,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.event.IngestNewNodeEventHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventData;
@@ -55,7 +55,7 @@ class EventProcessorTest
     RepoEventMapper repoEventMapper;
 
     @Mock
-    IngestNewNodeEventHandler ingestNewNodeEventHandler;
+    IngestMetadataCommandHandler ingestMetadataCommandHandler;
 
     @Mock
     IngestContentCommandHandler ingestContentCommandHandler;
@@ -80,7 +80,7 @@ class EventProcessorTest
         then(repoEventMapper).should().mapToIngestNewNodeEvent(event);
         then(repoEventMapper).shouldHaveNoMoreInteractions();
 
-        then(ingestNewNodeEventHandler).should().handle(any());
+        then(ingestMetadataCommandHandler).should().handle(any());
     }
 
     @Test
@@ -100,7 +100,7 @@ class EventProcessorTest
         then(repoEventMapper).should().mapToIngestNewNodeEvent(event);
         then(repoEventMapper).should().mapToIngestContentCommand(event);
 
-        then(ingestNewNodeEventHandler).should().handle(any());
+        then(ingestMetadataCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).should().handle(any());
     }
 

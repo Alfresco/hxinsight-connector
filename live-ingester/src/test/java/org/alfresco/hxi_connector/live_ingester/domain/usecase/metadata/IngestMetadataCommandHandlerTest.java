@@ -24,19 +24,20 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.event;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.ASPECTS_NAMES;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.CREATED_AT;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.IS_FILE;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.IS_FOLDER;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.ASPECTS_NAMES;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.CREATED_AT;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.IS_FILE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.IS_FOLDER;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.MODIFIED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.TYPE;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
 import java.util.Optional;
@@ -44,16 +45,19 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
 
 @ExtendWith(MockitoExtension.class)
-class UpdateNodeEventMapperTest
+class IngestMetadataCommandHandlerTest
 {
     private static final long EVENT_TIMESTAMP = 1_690_000_000_100L;
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
@@ -71,8 +75,12 @@ class UpdateNodeEventMapperTest
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
 
+    @Captor
+    ArgumentCaptor<UpdateNodeMetadataEvent> updateNodeMetadataEventCaptor;
+    @Mock
+    EventPublisher eventPublisher;
     @InjectMocks
-    private UpdateNodeEventMapper updateNodeEventMapper;
+    IngestMetadataCommandHandler ingestMetadataCommandHandler;
 
     @Test
     void shouldSetNewlyCreatedNodeMetadataProperties()
@@ -92,12 +100,12 @@ class UpdateNodeEventMapperTest
                 NODE_CREATED_AT,
                 NODE_PROPERTIES);
 
-        IngestNewNodeEvent event = new IngestNewNodeEvent(
+        IngestMetadataCommand command = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
                 node);
 
         // when
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeEventMapper.map(event);
+        ingestMetadataCommandHandler.handle(command);
 
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
@@ -112,7 +120,11 @@ class UpdateNodeEventMapperTest
                 CREATED_AT.withValue(NODE_CREATED_AT),
                 NODE_TITLE);
 
+        verify(eventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
+        UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
+
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
         assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
     }
+
 }

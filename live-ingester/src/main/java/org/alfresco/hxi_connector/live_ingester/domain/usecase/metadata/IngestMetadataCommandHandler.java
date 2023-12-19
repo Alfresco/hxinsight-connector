@@ -24,30 +24,35 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.event;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.ASPECTS_NAMES;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.CREATED_AT;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.IS_FILE;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.IS_FOLDER;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.event.PredefinedNodeProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.ASPECTS_NAMES;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.CREATED_AT;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.CREATED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.IS_FILE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.IS_FOLDER;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.MODIFIED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.PRIMARY_ASSOC_Q_NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeProperty.TYPE;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
 
 @Component
-public class UpdateNodeEventMapper
+@RequiredArgsConstructor
+public class IngestMetadataCommandHandler
 {
-    public UpdateNodeMetadataEvent map(IngestNewNodeEvent event)
+    private final EventPublisher eventPublisher;
+
+    public void handle(IngestMetadataCommand event)
     {
         Node node = event.node();
+
         UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create()
                 .set(NAME.withValue(node.name()))
                 .set(PRIMARY_ASSOC_Q_NAME.withValue(node.primaryAssocQName()))
@@ -58,7 +63,9 @@ public class UpdateNodeEventMapper
                 .set(IS_FILE.withValue(node.isFile()))
                 .set(IS_FOLDER.withValue(node.isFolder()))
                 .set(CREATED_AT.withValue(node.createdAt()));
+
         node.properties().forEach(updateMetadataEvent::set);
-        return updateMetadataEvent;
+
+        eventPublisher.publishMessage(updateMetadataEvent);
     }
 }

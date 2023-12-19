@@ -34,10 +34,10 @@ import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -55,13 +55,13 @@ public class RepoEventMapper
                 event.getData().getResource().getId());
     }
 
-    public IngestNewNodeEvent mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
+    public IngestMetadataCommand mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {
         log.info("Creating node metadata properties {}", event);
 
         NodeResource node = event.getData().getResource();
 
-        return new IngestNewNodeEvent(
+        return new IngestMetadataCommand(
                 event.getTime().toInstant().toEpochMilli(),
                 new Node(
                         node.getId(),

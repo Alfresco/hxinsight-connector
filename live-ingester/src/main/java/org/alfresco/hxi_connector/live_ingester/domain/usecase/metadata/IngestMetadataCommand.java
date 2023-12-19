@@ -24,28 +24,11 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.event;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Node;
 
-import org.junit.jupiter.api.Test;
-
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
-
-class PredefinedNodePropertyTest
-{
-
-    @Test
-    void shouldCreatePropertyWithGivenValue()
-    {
-        // given
-        String name = "test name";
-
-        // when
-        NodeProperty<String> nodeProperty = PredefinedNodeProperty.NAME.withValue(name);
-
-        // then
-        assertEquals(PredefinedNodeProperty.NAME.getName(), nodeProperty.name());
-        assertEquals(name, nodeProperty.value());
-    }
-}
+public record IngestMetadataCommand(
+        long time,
+        Node node)
+{}
