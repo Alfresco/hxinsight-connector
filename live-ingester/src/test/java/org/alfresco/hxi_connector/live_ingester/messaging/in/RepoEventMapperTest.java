@@ -27,8 +27,8 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.in;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -44,6 +44,7 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -70,14 +71,41 @@ class RepoEventMapperTest
     private final RepoEventMapper repoEventMapper = new RepoEventMapper();
 
     @Test
+    void shouldMapToIngestNodeContentCommand()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        DataAttributes<NodeResource> data = mock();
+
+        given(event.getTime()).willReturn(dateFromTimestamp(EVENT_TIMESTAMP));
+        given(event.getData()).willReturn(data);
+
+        NodeResource nodeResource = NodeResource.builder()
+                .setId(NODE_ID)
+                .build();
+
+        given(data.getResource()).willReturn(nodeResource);
+
+        // when
+        IngestContentCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
+
+        // then
+        IngestContentCommand expectedCommand = new IngestContentCommand(
+                EVENT_TIMESTAMP,
+                NODE_ID);
+
+        assertEquals(expectedCommand, actualCommand);
+    }
+
+    @Test
     void mapToIngestNewNodeEvent()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
         DataAttributes<NodeResource> data = mock();
 
-        when(event.getTime()).thenReturn(dateFromTimestamp(EVENT_TIMESTAMP));
-        when(event.getData()).thenReturn(data);
+        given(event.getTime()).willReturn(dateFromTimestamp(EVENT_TIMESTAMP));
+        given(event.getData()).willReturn(data);
 
         NodeResource nodeResource = NodeResource.builder()
                 .setId(NODE_ID)
@@ -93,7 +121,7 @@ class RepoEventMapperTest
                 .setProperties(createPropertiesMap("cm:title", "some title", "cm:description", null))
                 .build();
 
-        when(data.getResource()).thenReturn(nodeResource);
+        given(data.getResource()).willReturn(nodeResource);
 
         // when
         IngestNewNodeEvent actualEvent = repoEventMapper.mapToIngestNewNodeEvent(event);
@@ -123,7 +151,7 @@ class RepoEventMapperTest
     private UserInfo mockUser(String id)
     {
         UserInfo userInfo = mock();
-        when(userInfo.getId()).thenReturn(id);
+        given(userInfo.getId()).willReturn(id);
 
         return userInfo;
     }

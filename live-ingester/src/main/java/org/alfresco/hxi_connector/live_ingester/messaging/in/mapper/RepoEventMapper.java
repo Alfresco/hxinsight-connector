@@ -37,6 +37,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -46,6 +47,13 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @Component
 public class RepoEventMapper
 {
+
+    public IngestContentCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return new IngestContentCommand(
+                event.getTime().toInstant().toEpochMilli(),
+                event.getData().getResource().getId());
+    }
 
     public IngestNewNodeEvent mapToIngestNewNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {

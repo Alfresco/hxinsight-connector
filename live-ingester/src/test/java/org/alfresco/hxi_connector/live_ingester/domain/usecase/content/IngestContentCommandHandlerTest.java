@@ -24,46 +24,44 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.event;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
-import static org.alfresco.hxi_connector.live_ingester.domain.event.TransformRequestMapper.PDF_MIMETYPE;
+import static org.mockito.BDDMockito.then;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
-class TransformRequestMapperTest
+class IngestContentCommandHandlerTest
 {
     static final long TIMESTAMP = 1_234_567_890L;
-    static final String NODE_REF = "12341234-1234-1234-1234-123412341234";
+    static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
+    static final String PDF_MIMETYPE = "application/pdf";
+
+    @Mock
+    TransformRequester transformRequester;
     @InjectMocks
-    TransformRequestMapper transformRequestMapper;
+    IngestContentCommandHandler ingestContentCommandHandler;
 
     @Test
-    void createTransformRequest()
+    void shouldRequestNodeContentTransformation()
     {
         // given
-        Node node = mock();
-        given(node.id()).willReturn(NODE_REF);
-        IngestNewNodeEvent ingestNewNodeEvent = mock();
-        given(ingestNewNodeEvent.node()).willReturn(node);
-        given(ingestNewNodeEvent.time()).willReturn(TIMESTAMP);
+        IngestContentCommand command = new IngestContentCommand(TIMESTAMP, NODE_ID);
 
         // when
-        TransformRequest transformRequest = transformRequestMapper.map(ingestNewNodeEvent);
+        ingestContentCommandHandler.handle(command);
 
         // then
-        TransformRequest expected = new TransformRequest(TIMESTAMP, NODE_REF, PDF_MIMETYPE);
-        assertEquals(transformRequest, expected);
+        TransformRequest expectedTransformationRequest = new TransformRequest(TIMESTAMP, NODE_ID, PDF_MIMETYPE);
+
+        then(transformRequester).should().requestTransform(expectedTransformationRequest);
     }
 }

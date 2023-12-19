@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.event;
 
-import static java.util.Optional.ofNullable;
-
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -39,11 +37,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.model.in.IngestNewNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.model.in.Node;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
 // PMD doesn't recognise Mockito then().should() syntax.
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -54,55 +49,23 @@ class IngestNewNodeEventHandlerTest
     UpdateNodeEventMapper updateNodeEventMapper;
     @Mock
     EventPublisher eventPublisher;
-    @Mock
-    TransformRequestMapper transformRequestMapper;
-    @Mock
-    TransformRequester transformRequester;
     @InjectMocks
     IngestNewNodeEventHandler ingestNewNodeEventHandler;
 
     @Test
-    void nodeWithoutContent_PublishMetadataButNoTransform()
+    void shouldIngestNodeMetadata()
     {
         // given
-        IngestNewNodeEvent ingestNewNodeEvent = mockIngestNodeEvent(null);
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = mock(UpdateNodeMetadataEvent.class);
-        given(updateNodeEventMapper.map(ingestNewNodeEvent)).willReturn(updateNodeMetadataEvent);
-
-        // when
-        ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
-
-        // then
-        then(eventPublisher).should().publishMessage(updateNodeMetadataEvent);
-        then(transformRequestMapper).shouldHaveNoInteractions();
-        then(transformRequester).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void nodeWithContent_PublishMetadataAndRequestTransform()
-    {
-        // given
-        IngestNewNodeEvent ingestNewNodeEvent = mockIngestNodeEvent("application/msword");
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = mock(UpdateNodeMetadataEvent.class);
-        given(updateNodeEventMapper.map(ingestNewNodeEvent)).willReturn(updateNodeMetadataEvent);
-        TransformRequest transformRequest = mock(TransformRequest.class);
-        given(transformRequestMapper.map(ingestNewNodeEvent)).willReturn(transformRequest);
-
-        // when
-        ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
-
-        // then
-        then(eventPublisher).should().publishMessage(updateNodeMetadataEvent);
-        then(transformRequester).should().requestTransform(transformRequest);
-    }
-
-    IngestNewNodeEvent mockIngestNodeEvent(String sourceContentType)
-    {
-        Node node = mock();
-        given(node.contentMimeType()).willReturn(ofNullable(sourceContentType));
-
         IngestNewNodeEvent ingestNewNodeEvent = mock();
-        given(ingestNewNodeEvent.node()).willReturn(node);
-        return ingestNewNodeEvent;
+
+        UpdateNodeMetadataEvent updateNodeMetadataEvent = mock(UpdateNodeMetadataEvent.class);
+        given(updateNodeEventMapper.map(ingestNewNodeEvent)).willReturn(updateNodeMetadataEvent);
+
+        // when
+        ingestNewNodeEventHandler.handle(ingestNewNodeEvent);
+
+        // then
+        then(eventPublisher).should().publishMessage(updateNodeMetadataEvent);
     }
+
 }
