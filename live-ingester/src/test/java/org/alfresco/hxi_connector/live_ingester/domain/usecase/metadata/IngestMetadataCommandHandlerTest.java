@@ -26,16 +26,10 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
-
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
-import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
-
-import java.util.Set;
-import java.util.stream.Collectors;
-
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -44,10 +38,22 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FOLDER;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.PRIMARY_ASSOC_Q_NAME;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class IngestMetadataCommandHandlerTest

@@ -26,16 +26,16 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.*;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UpdateNodeMetadataEventSerializerTest
 {
