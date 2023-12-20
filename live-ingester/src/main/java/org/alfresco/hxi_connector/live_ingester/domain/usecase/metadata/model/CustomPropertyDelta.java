@@ -30,11 +30,14 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyState.UPDATED;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
+import java.util.Optional;
+
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @ToString
 @EqualsAndHashCode
@@ -51,7 +54,7 @@ public class CustomPropertyDelta<T>
         return new CustomPropertyDelta<>(UPDATED, key, propertyValue);
     }
 
-    public static CustomPropertyDelta<?> deleted(String key)
+    public static <T> CustomPropertyDelta<T> deleted(String key)
     {
         return new CustomPropertyDelta<>(DELETED, key, null);
     }
@@ -76,5 +79,24 @@ public class CustomPropertyDelta<T>
         {
             event.unset(propertyName);
         }
+    }
+
+    public boolean canBeResolvedWith(CustomPropertyResolver<?> resolver)
+    {
+        return resolver.canResolve(propertyName);
+    }
+
+    public <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver)
+    {
+        if (propertyState == UPDATED)
+        {
+            return resolver.resolveUpdated(propertyName, propertyValue);
+        }
+        else if (propertyState == DELETED)
+        {
+            return resolver.resolveDeleted(propertyName);
+        }
+
+        return Optional.empty();
     }
 }
