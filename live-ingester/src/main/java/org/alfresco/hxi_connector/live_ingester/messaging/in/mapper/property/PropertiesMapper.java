@@ -31,7 +31,6 @@ import static java.util.Optional.ofNullable;
 
 import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventUtils.isEventTypeCreated;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,7 +52,6 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class PropertiesMapper
 {
-
     public <T> PropertyDelta<T> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, T> fieldGetter)
     {
         if (shouldNotUpdateField(event, fieldGetter))
@@ -108,9 +106,9 @@ public class PropertiesMapper
                 .collect(Collectors.toSet());
     }
 
-    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> event, String changedPropertyName)
+    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> eventData, String changedPropertyName)
     {
-        Object propertyValue = event.getResource().getProperties().get(changedPropertyName);
+        Object propertyValue = eventData.getResource().getProperties().get(changedPropertyName);
 
         return propertyValue == null ? CustomPropertyDelta.deleted(changedPropertyName) : CustomPropertyDelta.updated(changedPropertyName, propertyValue);
     }
@@ -120,7 +118,6 @@ public class PropertiesMapper
         return ofNullable(node)
                 .stream()
                 .map(NodeResource::getProperties)
-                .map(Map::entrySet)
-                .flatMap(Collection::stream);
+                .flatMap(properties -> properties.entrySet().stream());
     }
 }
