@@ -135,9 +135,9 @@ public class RepoEventMapper
                 .collect(Collectors.toSet());
     }
 
-    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> event, String changedPropertyName)
+    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> eventData, String changedPropertyName)
     {
-        Serializable propertyValue = event.getResource().getProperties().get(changedPropertyName);
+        Serializable propertyValue = eventData.getResource().getProperties().get(changedPropertyName);
 
         return propertyValue == null ? CustomPropertyDelta.deleted(changedPropertyName) : CustomPropertyDelta.updated(changedPropertyName, propertyValue);
     }
