@@ -35,7 +35,6 @@ import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventU
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -135,9 +134,9 @@ public class RepoEventMapper
                 .collect(Collectors.toSet());
     }
 
-    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> event, String changedPropertyName)
+    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> eventData, String changedPropertyName)
     {
-        Serializable propertyValue = event.getResource().getProperties().get(changedPropertyName);
+        Serializable propertyValue = eventData.getResource().getProperties().get(changedPropertyName);
 
         return propertyValue == null ? CustomPropertyDelta.deleted(changedPropertyName) : CustomPropertyDelta.updated(changedPropertyName, propertyValue);
     }
@@ -153,10 +152,9 @@ public class RepoEventMapper
     private Stream<Map.Entry<String, ?>> customPropertiesStream(NodeResource node)
     {
         return ofNullable(node)
-                .map(NodeResource::getProperties)
-                .map(Map::entrySet)
                 .stream()
-                .flatMap(Collection::stream);
+                .map(NodeResource::getProperties)
+                .flatMap(properties -> properties.entrySet().stream());
     }
 
     private boolean shouldNotUpdateField(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
