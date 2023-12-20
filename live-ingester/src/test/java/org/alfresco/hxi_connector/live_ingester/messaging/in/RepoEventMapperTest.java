@@ -30,15 +30,16 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.unchanged;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
-import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,6 +51,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMe
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
@@ -78,16 +80,13 @@ class RepoEventMapperTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
-        DataAttributes<NodeResource> data = mock();
 
-        given(event.getTime()).willReturn(dateFromTimestamp(EVENT_TIMESTAMP));
-        given(event.getData()).willReturn(data);
+        setTime(event, EVENT_TIMESTAMP);
+        setType(event, NODE_CREATED);
 
-        NodeResource nodeResource = NodeResource.builder()
-                .setId(NODE_ID)
-                .build();
+        NodeResource nodeResource = defaultNodeResource().build();
 
-        given(data.getResource()).willReturn(nodeResource);
+        setNodeResource(event, nodeResource);
 
         // when
         IngestContentCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
@@ -101,31 +100,17 @@ class RepoEventMapperTest
     }
 
     @Test
-    void shouldMapToIngestNodeMetadataCommand()
+    void shouldMapToIngestNodeMetadataCommand_whenNodeCreated()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
-        DataAttributes<NodeResource> data = mock();
 
-        given(event.getTime()).willReturn(dateFromTimestamp(EVENT_TIMESTAMP));
-        given(event.getType()).willReturn(NODE_CREATED.getType());
-        given(event.getData()).willReturn(data);
+        setTime(event, EVENT_TIMESTAMP);
+        setType(event, NODE_CREATED);
 
-        NodeResource nodeResource = NodeResource.builder()
-                .setId(NODE_ID)
-                .setName(NODE_NAME)
-                .setPrimaryAssocQName(NODE_PRIMARY_ASSOC_Q_NAME)
-                .setNodeType(NODE_TYPE)
-                .setCreatedByUser(mockUser(NODE_CREATED_BY_USER_WITH_ID))
-                .setModifiedByUser(mockUser(NODE_MODIFIED_BY_USER_WITH_ID))
-                .setAspectNames(NODE_ASPECT_NAMES)
-                .setIsFile(NODE_IS_FILE)
-                .setIsFolder(NODE_IS_FOLDER)
-                .setCreatedAt(dateFromTimestamp(NODE_CREATED_AT))
-                .setProperties(createPropertiesMap("cm:title", "some title", "cm:description", null))
-                .build();
+        NodeResource nodeResource = defaultNodeResource().build();
 
-        given(data.getResource()).willReturn(nodeResource);
+        setNodeResource(event, nodeResource);
 
         // when
         IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
@@ -150,6 +135,184 @@ class RepoEventMapperTest
         assertEquals(expectedEvent, actualEvent);
     }
 
+    @Test
+    void shouldMapToIngestNodeMetadataCommand_whenNodeNameAndAspectNamesUpdated()
+    {
+        // given
+        String newName = "some new amazing name";
+        Set<String> newAspectNames = Set.of("some new aspect");
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setTime(event, EVENT_TIMESTAMP);
+        setType(event, NODE_UPDATED);
+
+        NodeResource nodeResourceBefore = NodeResource.builder()
+                .setName(NODE_NAME)
+                .setAspectNames(NODE_ASPECT_NAMES)
+                .build();
+        NodeResource nodeResource = defaultNodeResource()
+                .setName(newName)
+                .setAspectNames(newAspectNames)
+                .build();
+
+        setNodeResourceBefore(event, nodeResourceBefore);
+        setNodeResource(event, nodeResource);
+
+        // when
+        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
+
+        // then
+        IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
+                EVENT_TIMESTAMP,
+                NODE_ID,
+                updated(newName),
+                unchanged(NODE_PRIMARY_ASSOC_Q_NAME),
+                unchanged(NODE_TYPE),
+                unchanged(NODE_CREATED_BY_USER_WITH_ID),
+                unchanged(NODE_MODIFIED_BY_USER_WITH_ID),
+                updated(newAspectNames),
+                unchanged(NODE_IS_FILE),
+                unchanged(NODE_IS_FOLDER),
+                unchanged(NODE_CREATED_AT),
+                Collections.emptySet());
+
+        assertEquals(expectedEvent, actualEvent);
+    }
+
+    @Test
+    void shouldMapToIngestNodeMetadataCommand_whenNodeCustomPropertyCreated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setTime(event, EVENT_TIMESTAMP);
+        setType(event, NODE_UPDATED);
+        NodeResource nodeResourceBefore = NodeResource.builder()
+                .setProperties(mapWith("cm:description", null))
+                .build();
+        NodeResource nodeResource = defaultNodeResource()
+                .setProperties(mapWith("cm:title", "some title", "cm:description", "some description"))
+                .build();
+
+        setNodeResourceBefore(event, nodeResourceBefore);
+        setNodeResource(event, nodeResource);
+
+        // when
+        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
+
+        // then
+        IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
+                EVENT_TIMESTAMP,
+                NODE_ID,
+                unchanged(NODE_NAME),
+                unchanged(NODE_PRIMARY_ASSOC_Q_NAME),
+                unchanged(NODE_TYPE),
+                unchanged(NODE_CREATED_BY_USER_WITH_ID),
+                unchanged(NODE_MODIFIED_BY_USER_WITH_ID),
+                unchanged(NODE_ASPECT_NAMES),
+                unchanged(NODE_IS_FILE),
+                unchanged(NODE_IS_FOLDER),
+                unchanged(NODE_CREATED_AT),
+                Set.of(CustomPropertyDelta.updated("cm:description", "some description")));
+
+        assertEquals(expectedEvent, actualEvent);
+    }
+
+    @Test
+    void shouldMapToIngestNodeMetadataCommand_whenNodeCustomPropertyUpdated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setTime(event, EVENT_TIMESTAMP);
+        setType(event, NODE_UPDATED);
+        NodeResource nodeResourceBefore = NodeResource.builder()
+                .setProperties(mapWith("cm:description", "some description"))
+                .build();
+        NodeResource nodeResource = defaultNodeResource()
+                .setProperties(mapWith("cm:title", "some title", "cm:description", "new description"))
+                .build();
+
+        setNodeResourceBefore(event, nodeResourceBefore);
+        setNodeResource(event, nodeResource);
+
+        // when
+        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
+
+        // then
+        IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
+                EVENT_TIMESTAMP,
+                NODE_ID,
+                unchanged(NODE_NAME),
+                unchanged(NODE_PRIMARY_ASSOC_Q_NAME),
+                unchanged(NODE_TYPE),
+                unchanged(NODE_CREATED_BY_USER_WITH_ID),
+                unchanged(NODE_MODIFIED_BY_USER_WITH_ID),
+                unchanged(NODE_ASPECT_NAMES),
+                unchanged(NODE_IS_FILE),
+                unchanged(NODE_IS_FOLDER),
+                unchanged(NODE_CREATED_AT),
+                Set.of(CustomPropertyDelta.updated("cm:description", "new description")));
+
+        assertEquals(expectedEvent, actualEvent);
+    }
+
+    @Test
+    void shouldMapToIngestNodeMetadataCommand_whenNodeCustomPropertyRemoved()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setTime(event, EVENT_TIMESTAMP);
+        setType(event, NODE_UPDATED);
+        NodeResource nodeResourceBefore = NodeResource.builder()
+                .setProperties(mapWith("cm:title", "some title"))
+                .build();
+        NodeResource nodeResource = defaultNodeResource()
+                .setProperties(mapWith("cm:title", null, "cm:description", "some description"))
+                .build();
+
+        setNodeResourceBefore(event, nodeResourceBefore);
+        setNodeResource(event, nodeResource);
+
+        // when
+        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
+
+        // then
+        IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
+                EVENT_TIMESTAMP,
+                NODE_ID,
+                unchanged(NODE_NAME),
+                unchanged(NODE_PRIMARY_ASSOC_Q_NAME),
+                unchanged(NODE_TYPE),
+                unchanged(NODE_CREATED_BY_USER_WITH_ID),
+                unchanged(NODE_MODIFIED_BY_USER_WITH_ID),
+                unchanged(NODE_ASPECT_NAMES),
+                unchanged(NODE_IS_FILE),
+                unchanged(NODE_IS_FOLDER),
+                unchanged(NODE_CREATED_AT),
+                Set.of(CustomPropertyDelta.deleted("cm:title")));
+
+        assertEquals(expectedEvent, actualEvent);
+    }
+
+    private NodeResource.Builder defaultNodeResource()
+    {
+        return NodeResource.builder()
+                .setId(NODE_ID)
+                .setName(NODE_NAME)
+                .setPrimaryAssocQName(NODE_PRIMARY_ASSOC_Q_NAME)
+                .setNodeType(NODE_TYPE)
+                .setCreatedByUser(mockUser(NODE_CREATED_BY_USER_WITH_ID))
+                .setModifiedByUser(mockUser(NODE_MODIFIED_BY_USER_WITH_ID))
+                .setAspectNames(NODE_ASPECT_NAMES)
+                .setIsFile(NODE_IS_FILE)
+                .setIsFolder(NODE_IS_FOLDER)
+                .setCreatedAt(dateFromTimestamp(NODE_CREATED_AT))
+                .setProperties(mapWith("cm:title", "some title", "cm:description", null));
+    }
+
     private UserInfo mockUser(String id)
     {
         UserInfo userInfo = mock();
@@ -158,18 +321,46 @@ class RepoEventMapperTest
         return userInfo;
     }
 
+    private void setTime(RepoEvent<DataAttributes<NodeResource>> event, long timestamp)
+    {
+        given(event.getTime()).willReturn(dateFromTimestamp(timestamp));
+    }
+
     private ZonedDateTime dateFromTimestamp(long timestamp)
     {
         return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("UTC"));
     }
 
-    private Map<String, Serializable> createPropertiesMap(String k1, String v1, String k2, String v2)
+    private void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
-        Map<String, Serializable> properties = new HashMap<>();
+        given(event.getType()).willReturn(type.getType());
+    }
 
-        properties.put(k1, v1);
-        properties.put(k2, v2);
+    private void setNodeResource(RepoEvent<DataAttributes<NodeResource>> event, NodeResource nodeResource)
+    {
+        DataAttributes<NodeResource> data = mockData(event);
 
-        return properties;
+        given(data.getResource()).willReturn(nodeResource);
+    }
+
+    private void setNodeResourceBefore(RepoEvent<DataAttributes<NodeResource>> event, NodeResource nodeResourceBefore)
+    {
+        DataAttributes<NodeResource> data = mockData(event);
+
+        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
+    }
+
+    private DataAttributes<NodeResource> mockData(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (event.getData() != null)
+        {
+            return event.getData();
+        }
+
+        DataAttributes<NodeResource> data = mock();
+
+        given(event.getData()).willReturn(data);
+
+        return data;
     }
 }

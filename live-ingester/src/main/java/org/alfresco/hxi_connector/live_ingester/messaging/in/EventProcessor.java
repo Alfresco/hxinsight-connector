@@ -64,15 +64,11 @@ public class EventProcessor
 
     private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (isEventTypeCreated(event))
+        if (isEventTypeCreated(event) || isEventTypeUpdated(event))
         {
             IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
 
             ingestMetadataCommandHandler.handle(ingestMetadataCommand);
-        }
-        else if (isEventTypeUpdated(event))
-        {
-            log.info("Received event of type UPDATE {}", event);
         }
     }
 

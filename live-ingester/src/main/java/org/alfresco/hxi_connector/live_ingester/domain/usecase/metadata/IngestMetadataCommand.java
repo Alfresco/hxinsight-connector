@@ -31,12 +31,9 @@ import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.
 
 import java.util.Set;
 
-import org.springframework.validation.annotation.Validated;
-
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
-@Validated
 public record IngestMetadataCommand(
         long time,
         String nodeId,
