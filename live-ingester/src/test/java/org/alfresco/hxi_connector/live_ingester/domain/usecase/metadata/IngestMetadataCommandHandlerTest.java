@@ -41,6 +41,8 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -50,12 +52,14 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
 class IngestMetadataCommandHandlerTest
@@ -80,6 +84,8 @@ class IngestMetadataCommandHandlerTest
     ArgumentCaptor<UpdateNodeMetadataEvent> updateNodeMetadataEventCaptor;
     @Mock
     EventPublisher eventPublisher;
+    @Spy
+    List<CustomPropertyResolver<?>> customPropertyResolvers = Collections.emptyList();
     @InjectMocks
     IngestMetadataCommandHandler ingestMetadataCommandHandler;
 

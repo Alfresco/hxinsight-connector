@@ -10,15 +10,12 @@ import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.property.resolver.CustomPropertyResolver;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -26,8 +23,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 class PropertiesMapperTest
 {
     private static final String NODE_NAME = "test-name";
-    List<CustomPropertyResolver<?>> customPropertyResolvers = Collections.emptyList();
-    PropertiesMapper propertiesMapper = new PropertiesMapper(customPropertyResolvers);
+    PropertiesMapper propertiesMapper = new PropertiesMapper();
 
     @Test
     void shouldHandlePropertyUpdate_NodeCreated()

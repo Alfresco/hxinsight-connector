@@ -31,9 +31,7 @@ import static java.util.Optional.ofNullable;
 
 import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.EventUtils.isEventTypeCreated;
 
-import java.io.Serializable;
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -47,7 +45,6 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.property.resolver.CustomPropertyResolver;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -56,7 +53,6 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class PropertiesMapper
 {
-    private final List<CustomPropertyResolver<?>> customPropertyResolvers;
 
     public <T> PropertyDelta<T> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, T> fieldGetter)
     {
@@ -114,7 +110,7 @@ public class PropertiesMapper
 
     private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> event, String changedPropertyName)
     {
-        Serializable propertyValue = event.getResource().getProperties().get(changedPropertyName);
+        Object propertyValue = event.getResource().getProperties().get(changedPropertyName);
 
         return propertyValue == null ? CustomPropertyDelta.deleted(changedPropertyName) : CustomPropertyDelta.updated(changedPropertyName, propertyValue);
     }
@@ -125,18 +121,6 @@ public class PropertiesMapper
                 .stream()
                 .map(NodeResource::getProperties)
                 .map(Map::entrySet)
-                .flatMap(Collection::stream)
-                .map(this::resolveProperty);
-    }
-
-    private Map.Entry<String, ?> resolveProperty(Map.Entry<String, ?> property)
-    {
-
-        for (CustomPropertyResolver<?> propertyResolver : customPropertyResolvers)
-        {
-            property = propertyResolver.canResolve(property) ? propertyResolver.resolve(property) : property;
-        }
-
-        return property;
+                .flatMap(Collection::stream);
     }
 }

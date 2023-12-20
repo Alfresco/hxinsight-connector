@@ -62,6 +62,6 @@ class EventUtilsTest
         given(event.getType()).willReturn(NODE_CREATED.getType());
 
         // then
-        assertTrue(EventUtils.isEventTypeUpdated(event));
+        assertFalse(EventUtils.isEventTypeUpdated(event));
     }
 }

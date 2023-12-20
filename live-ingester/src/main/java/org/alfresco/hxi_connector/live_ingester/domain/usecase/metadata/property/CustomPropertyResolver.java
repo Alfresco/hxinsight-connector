@@ -24,13 +24,17 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.property.resolver;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property;
 
-import java.util.Map;
+import java.util.Optional;
 
-public interface CustomPropertyResolver<V>
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+
+public interface CustomPropertyResolver<T>
 {
-    boolean canResolve(Map.Entry<String, ?> property);
+    boolean canResolve(String propertyName);
 
-    Map.Entry<String, V> resolve(Map.Entry<String, ?> property);
+    Optional<CustomPropertyDelta<T>> resolveUpdated(String propertyName, Object propertyValue);
+
+    Optional<CustomPropertyDelta<T>> resolveDeleted(String propertyName);
 }
