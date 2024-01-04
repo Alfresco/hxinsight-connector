@@ -5,13 +5,13 @@
 	<parent>
 		<groupId>org.alfresco</groupId>
 		<artifactId>alfresco-hxinsight-connector-parent</artifactId>
-		<version>0.0.1-SNAPSHOT</version>
+		<version>0.0.1</version>
 	</parent>
 
 	<packaging>jar</packaging>
 	<artifactId>alfresco-hxinsight-connector-live-ingester</artifactId>
 	<name>Alfresco HxInsight Connector :: Live Ingester</name>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 
 	<dependencies>
 		<dependency>
