@@ -10,7 +10,7 @@
   <artifactId>alfresco-hxinsight-connector-parent</artifactId>
   <packaging>pom</packaging>
   <name>Alfresco HxInsight Connector :: Parent</name>
-  <version>0.0.2-A1</version>
+  <version>0.0.2-SNAPSHOT</version>
 
   <modules>
     <module>live-ingester</module>
@@ -21,7 +21,7 @@
     <url>http://github.com/${project.scm.organization}/${project.scm.repository}</url>
     <connection>scm:git:https://github.com/${project.scm.organization}/${project.scm.repository}.git</connection>
     <developerConnection>scm:git:https://github.com/${project.scm.organization}/${project.scm.repository}.git</developerConnection>
-    <tag>0.0.2-A1</tag>
+    <tag>HEAD</tag>
   </scm>
   <issueManagement>
     <system>Jira</system>

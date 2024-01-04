@@ -3,7 +3,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-hxinsight-connector-parent</artifactId>
-        <version>0.0.2-A1</version>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <name>Alfresco HxInsight Connector :: Distribution zip</name>
