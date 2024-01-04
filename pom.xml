@@ -33,11 +33,11 @@
   </ciManagement>
   <distributionManagement>
     <snapshotRepository>
-      <id>alfresco-public-snapshots</id>
+      <id>alfresco-internal-snapshots</id>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
     </snapshotRepository>
     <repository>
-      <id>alfresco-public</id>
+      <id>alfresco-internal</id>
       <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
     </repository>
   </distributionManagement>
