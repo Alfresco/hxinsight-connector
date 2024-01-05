@@ -175,7 +175,7 @@ jobs:
         run: bash ./scripts/ci/cleanup_cache.sh
 
   deploy_release_version_to_quay_and_dockerhub:
-    name: "Deploy release version to quay.io and Dockerhub"
+    name: "Deploy release version to quay.io and Docker Hub"
     runs-on: ubuntu-latest
     needs:
       - test_application
@@ -203,7 +203,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }}
-      - name: "Deploy release version to quay.io"
+      - name: "Deploy release version to quay.io and Docker Hub"
         run: bash ./scripts/ci/releaseDockerImage.sh -v ${{ env.RELEASE_VERSION }}
         env:
           COMMIT_MESSAGE: ${{ github.sha }}
