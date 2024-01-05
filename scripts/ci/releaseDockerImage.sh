@@ -43,9 +43,13 @@ do
     echo "Build docker image in:: ${dockerBuildDir}"
     # Load properties related to this docker image.
     source ./build.properties
+    DOCKER_REGISTRIES="quay.io docker.io"
 
-    # Build the image and push.
-    docker buildx build --push --provenance=false --label "GIT_COMMIT=$COMMIT_MESSAGE" --label "GIT_BRANCH=$GITHUB_REF_NAME" --tag "${DOCKER_IMAGE_REPOSITORY}:${releaseVersion}" --platform linux/amd64,linux/arm64 .
+    for DOCKER_REGISTRY in ${DOCKER_REGISTRIES}
+    do
+      # Build the image and push.
+      docker buildx build --push --provenance=false --label "GIT_COMMIT=$COMMIT_MESSAGE" --label "GIT_BRANCH=$GITHUB_REF_NAME" --tag "${DOCKER_REGISTRY}/${DOCKER_IMAGE_REPOSITORY}:${releaseVersion}" --platform linux/amd64,linux/arm64 .
+    done
 
     cd -
 done

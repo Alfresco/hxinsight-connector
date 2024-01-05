@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 usage() {
-    echo "Create docker images." 1>&2;
+    echo "Create development docker images." 1>&2;
     echo "Usage: $0 [-p] [-t <tag>] [-h]" 1>&2;
     echo "  -p: Build multiarch images and push them (requires GitHub Action variables to be set)"
     echo "  -t <tag>: Override the default docker tag" 1>&2;
@@ -38,6 +38,7 @@ do
   cd "${DOCKER_BUILD_DIR}"
   echo "Build docker image in: ${DOCKER_BUILD_DIR}"
   source ./build.properties
+  DOCKER_REGISTRY="quay.io"
 
   if [[ "${PUSH_IMAGE}" == "true" ]]
   then
@@ -52,14 +53,14 @@ do
         then
           DOCKER_TAG=latest
         fi
-        docker buildx build --push --file Dockerfile --provenance=false --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" --platform linux/amd64,linux/arm64 .
+        docker buildx build --push --file Dockerfile --provenance=false --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_REGISTRY}/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" --platform linux/amd64,linux/arm64 .
       else
         if [[ "${DOCKER_TAG}" == "" ]]
         then
           DOCKER_TAG=${DOCKER_TAG_BASE}-${GITHUB_RUN_NUMBER}
         fi
         # Build and push image with 7-day expiration date
-        docker buildx build --push --file Dockerfile --provenance=false --label quay.expires-after=7d --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" --platform linux/amd64,linux/arm64 .
+        docker buildx build --push --file Dockerfile --provenance=false --label quay.expires-after=7d --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_REGISTRY}/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" --platform linux/amd64,linux/arm64 .
       fi
     else
       echo "Skip pushing docker image on pull request"
@@ -70,7 +71,7 @@ do
     then
       DOCKER_TAG=${PROJECT_VERSION}
     fi
-    docker build --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" .
+    docker build --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_REGISTRY}/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" .
   fi
 
   cd -
