@@ -10,7 +10,7 @@
   <artifactId>alfresco-hxinsight-connector-parent</artifactId>
   <packaging>pom</packaging>
   <name>Alfresco HxInsight Connector :: Parent</name>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.3-SNAPSHOT</version>
 
   <modules>
     <module>live-ingester</module>
@@ -45,7 +45,7 @@
   <properties>
     <maven.build.sourceVersion>17</maven.build.sourceVersion>
     <project.scm.organization>Alfresco</project.scm.organization>
-    <project.scm.repository>hxinsight-connector</project.scm.repository>
+    <project.scm.repository>hxi-connector</project.scm.repository>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.year>2023</project.year>
