@@ -190,7 +190,7 @@ services:
       ALFRESCO_ACCEPTEDCONTENTMEDIATYPESCACHE_BASEURL: http://transform-core-aio:8090/transform/config
 
   live-ingester:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:${HXI_CONNECTOR_TAG}
+    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:${HXINSIGHT_CONNECTOR_TAG}
     depends_on:
       - activemq
     environment:

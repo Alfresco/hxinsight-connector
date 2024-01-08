@@ -9,7 +9,7 @@
   <modelVersion>4.0.0</modelVersion>
   <artifactId>alfresco-hxinsight-connector-parent</artifactId>
   <packaging>pom</packaging>
-  <name>Alfresco HxInsight Connector :: Parent</name>
+  <name>Alfresco Connector for Hyland Experience Insight :: Parent</name>
   <version>0.0.3-SNAPSHOT</version>
 
   <modules>
@@ -45,7 +45,7 @@
   <properties>
     <maven.build.sourceVersion>17</maven.build.sourceVersion>
     <project.scm.organization>Alfresco</project.scm.organization>
-    <project.scm.repository>hxi-connector</project.scm.repository>
+    <project.scm.repository>hxinsight-connector</project.scm.repository>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     <project.year>2023</project.year>

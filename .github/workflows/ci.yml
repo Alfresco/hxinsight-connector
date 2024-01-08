@@ -1,4 +1,4 @@
-name: Alfresco HxInsight Connector CI
+name: Alfresco Connector for Hyland Experience Insight CI
 
 on:
   pull_request:
@@ -155,14 +155,14 @@ jobs:
       - name: "Make release and deploy to Nexus"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }}" release:prepare release:perform
-      - run: mkdir -p deploy_dir/community/hxi-connector/${{ env.RELEASE_VERSION }}
+      - run: mkdir -p deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}
       - name: "Move the final artifacts to a single folder (deploy_dir) to be copied to S3"
-        run: mv "distribution/target/alfresco-hxinsight-connector-distribution-${{ env.RELEASE_VERSION }}.zip" "deploy_dir/community/hxi-connector/${{ env.RELEASE_VERSION }}/"
+        run: mv "distribution/target/alfresco-hxinsight-connector-distribution-${{ env.RELEASE_VERSION }}.zip" "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/"
       - name: "Clone Alfresco/third-party-license-overrides"
         run: git clone --depth=1 https://github.com/Alfresco/third-party-license-overrides.git
       - uses: actions/setup-python@v3
       - name: "Create third party license csv file and add it to the deploy directory"
-        run: python3 ./third-party-license-overrides/thirdPartyLicenseCSVCreator.py --project "${{ github.workspace }}" --version "${{ env.RELEASE_VERSION }}" --combined --output "deploy_dir/community/hxi-connector/${{ env.RELEASE_VERSION }}"
+        run: python3 ./third-party-license-overrides/thirdPartyLicenseCSVCreator.py --project "${{ github.workspace }}" --version "${{ env.RELEASE_VERSION }}" --combined --output "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}"
       - name: "Configure AWS credentials"
         uses: aws-actions/configure-aws-credentials@v1
         with:
@@ -235,5 +235,5 @@ jobs:
       - name: "Check release version and copy to S3 Downloads Bucket"
         run: |
           if [[ ${{ env.RELEASE_VERSION }} =~ ^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-              aws s3 cp --recursive --acl private --copy-props none "s3://alfresco-artefacts-staging/community/hxi-connector/${{ env.RELEASE_VERSION }}/" "s3://eu.dl.alfresco.com/release/community/hxi-connector/${{ env.RELEASE_VERSION }}/"
+              aws s3 cp --recursive --acl private --copy-props none "s3://alfresco-artefacts-staging/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/" "s3://eu.dl.alfresco.com/release/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/"
           fi

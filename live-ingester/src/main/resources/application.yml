@@ -19,4 +19,4 @@ alfresco:
       request:
         endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
         timeout: 20000
-      response.queueName: org.alfresco.hxi-connector.transform.response
+      response.queueName: org.alfresco.hxinsight-connector.transform.response

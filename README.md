@@ -1,6 +1,6 @@
-# Alfresco HxInsight Connector
+# Alfresco Connector for Hyland Experience Insight
 
-Connector for sending ACS events to HxInsight and updating the Repository with the predictions that it generates.
+Connector for sending ACS events to Hx Insight and updating the Repository with the predictions that it generates.
 
 
 ### Code Quality
