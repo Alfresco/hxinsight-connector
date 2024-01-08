@@ -26,6 +26,30 @@
 
 package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.property.PropertiesMapper;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.EventType;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -34,31 +58,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-
-import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.RepoEventTestUtils.setNodeResource;
-import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.RepoEventTestUtils.setTime;
-import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.RepoEventTestUtils.setType;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
-
-import java.util.Collections;
-
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
-import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.property.PropertiesMapper;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class RepoEventMapperTest
@@ -175,5 +174,41 @@ class RepoEventMapperTest
 
         // then
         assertThrows(ValidationException.class, () -> repoEventMapper.mapToIngestMetadataCommand(event));
+    }
+
+    public static void setTime(RepoEvent<DataAttributes<NodeResource>> event, long timestamp)
+    {
+        given(event.getTime()).willReturn(dateFromTimestamp(timestamp));
+    }
+
+    public static ZonedDateTime dateFromTimestamp(long timestamp)
+    {
+        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("UTC"));
+    }
+
+    public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
+    {
+        given(event.getType()).willReturn(type.getType());
+    }
+
+    public static void setNodeResource(RepoEvent<DataAttributes<NodeResource>> event, NodeResource nodeResource)
+    {
+        DataAttributes<NodeResource> data = mockData(event);
+
+        given(data.getResource()).willReturn(nodeResource);
+    }
+
+    private static DataAttributes<NodeResource> mockData(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (event.getData() != null)
+        {
+            return event.getData();
+        }
+
+        DataAttributes<NodeResource> data = mock();
+
+        given(event.getData()).willReturn(data);
+
+        return data;
     }
 }

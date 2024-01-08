@@ -27,17 +27,18 @@
 package org.alfresco.hxi_connector.live_ingester.messaging.in.mapper.property;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
-
-import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.RepoEventTestUtils.setNodeResource;
-import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.RepoEventTestUtils.setNodeResourceBefore;
-import static org.alfresco.hxi_connector.live_ingester.messaging.in.utils.RepoEventTestUtils.setType;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
+import org.alfresco.repo.event.v1.model.EventType;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
@@ -255,4 +256,36 @@ class PropertiesMapperTest
         assertEquals(expectedPropertyDeltas, customPropertyDeltas);
     }
 
+    public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
+    {
+        given(event.getType()).willReturn(type.getType());
+    }
+
+    public static void setNodeResource(RepoEvent<DataAttributes<NodeResource>> event, NodeResource nodeResource)
+    {
+        DataAttributes<NodeResource> data = mockData(event);
+
+        given(data.getResource()).willReturn(nodeResource);
+    }
+
+    public static void setNodeResourceBefore(RepoEvent<DataAttributes<NodeResource>> event, NodeResource nodeResourceBefore)
+    {
+        DataAttributes<NodeResource> data = mockData(event);
+
+        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
+    }
+
+    private static DataAttributes<NodeResource> mockData(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (event.getData() != null)
+        {
+            return event.getData();
+        }
+
+        DataAttributes<NodeResource> data = mock();
+
+        given(event.getData()).willReturn(data);
+
+        return data;
+    }
 }
