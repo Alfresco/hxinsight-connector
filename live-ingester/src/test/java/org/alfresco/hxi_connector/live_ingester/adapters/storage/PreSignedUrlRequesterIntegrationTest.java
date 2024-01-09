@@ -75,6 +75,7 @@ class PreSignedUrlRequesterIntegrationTest
     private static final int HX_INSIGHT_RESPONSE_CODE = 201;
 
     @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
     static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG));
 
     @Autowired

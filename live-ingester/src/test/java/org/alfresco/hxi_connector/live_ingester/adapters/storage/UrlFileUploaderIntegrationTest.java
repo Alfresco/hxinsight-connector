@@ -67,6 +67,7 @@ class UrlFileUploaderIntegrationTest
     private static final String OBJECT_CONTENT_TYPE = "plain/text";
 
     @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
     static final LocalStackContainer localStackServer = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
 
     @Autowired

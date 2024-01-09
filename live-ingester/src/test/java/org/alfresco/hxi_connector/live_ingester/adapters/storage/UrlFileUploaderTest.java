@@ -48,6 +48,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRun
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploadRequest;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class UrlFileUploaderTest
 {
     private static final int STATUS_CODE_200 = 200;
