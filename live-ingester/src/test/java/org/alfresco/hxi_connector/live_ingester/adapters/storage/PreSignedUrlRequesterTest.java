@@ -63,7 +63,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLoca
 class PreSignedUrlRequesterTest
 {
     private static final int STATUS_CODE_201 = 201;
-
     private static final String STORAGE_LOCATION = "http://dummy-url";
     private static final String RESPONSE_BODY = "{\"" + STORAGE_LOCATION_PROPERTY + "\": \"" + STORAGE_LOCATION + "\"}";
 

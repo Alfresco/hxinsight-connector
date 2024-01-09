@@ -74,7 +74,7 @@ public class UrlFileUploader extends RouteBuilder implements FileUploader
         int statusCode = message.getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
         if (statusCode != EXPECTED_STATUS_CODE)
         {
-            log.error("Unexpected response body: {}", message.getBody(String.class));
+            log.error("Unexpected response. Body: {}", message.getBody(String.class));
             throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + statusCode);
         }
     }

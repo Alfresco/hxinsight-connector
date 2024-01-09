@@ -58,7 +58,7 @@
     <spring-boot.version>3.2.1</spring-boot.version>
     <spring-camel.version>4.3.0</spring-camel.version>
     <aws-sdk-s3.version>2.22.9</aws-sdk-s3.version>
-    <wiremock.version>3.0.1</wiremock.version>
+    <wiremock.version>3.3.1</wiremock.version>
 
     <testcontainers.version>1.19.3</testcontainers.version>
     <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
@@ -84,7 +84,7 @@
     <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
     <dist.search.enterprise.version>4.0.0.1</dist.search.enterprise.version>
     <dist.localstack.version>3.0.2</dist.localstack.version>
-    <dist.wiremock.version>3.3.1</dist.wiremock.version>
+    <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
   </properties>
 
   <repositories>
@@ -161,7 +161,7 @@
         <version>${wiremock-testcontainers-module.version}</version>
       </dependency>
       <dependency>
-        <groupId>com.github.tomakehurst</groupId>
+        <groupId>org.wiremock</groupId>
         <artifactId>wiremock</artifactId>
         <version>${wiremock.version}</version>
       </dependency>

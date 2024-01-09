@@ -112,7 +112,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     {
         if (actual != EXPECTED_STATUS_CODE)
         {
-            log.error("Unexpected response body: {}", responseBody);
+            log.error("Unexpected response. Body: {}", responseBody);
             throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + actual);
         }
     }
@@ -128,18 +128,18 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             }
             else
             {
-                log.error("Unexpected response body: {}", responseBody);
+                log.error("Unexpected response. Body: {}", responseBody);
                 throw new LiveIngesterRuntimeException("Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
             }
         }
         catch (JsonProcessingException e)
         {
-            log.error("Unexpected response body: {}", responseBody);
+            log.error("Unexpected response. Body: {}", responseBody);
             throw new LiveIngesterRuntimeException("Parsing JSON response failed!", e);
         }
         catch (MalformedURLException e)
         {
-            log.error("Unexpected pre-signed URL in response: {}", responseBody);
+            log.error("Unexpected pre-signed URL in response. Body: {}", responseBody);
             throw new LiveIngesterRuntimeException("Parsing URL from response property failed!", e);
         }
     }
