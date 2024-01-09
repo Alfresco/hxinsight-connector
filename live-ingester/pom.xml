@@ -10,7 +10,7 @@
 
 	<packaging>jar</packaging>
 	<artifactId>alfresco-hxinsight-connector-live-ingester</artifactId>
-	<name>Alfresco HxInsight Connector :: Live Ingester</name>
+	<name>Alfresco Connector for Hyland Experience Insight :: Live Ingester</name>
 	<version>0.0.3-SNAPSHOT</version>
 
 	<dependencies>

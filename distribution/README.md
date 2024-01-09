@@ -1,6 +1,6 @@
-# Alfresco HxInsight Connector
+# Alfresco Connector for Hyland Experience Insight
 
-Full project details and source code is available at https://github.com/Alfresco/hxi-connector
+Full project details and source code is available at https://github.com/Alfresco/hxinsight-connector
 
 ## Licenses
 
