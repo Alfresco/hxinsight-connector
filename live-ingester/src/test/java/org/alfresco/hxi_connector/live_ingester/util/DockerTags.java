@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,8 +27,10 @@ package org.alfresco.hxi_connector.live_ingester.util;
 
 import java.io.File;
 import java.nio.file.Files;
-import java.util.Optional;
+import java.nio.file.NoSuchFileException;
+import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -52,14 +54,24 @@ public class DockerTags
             loadProperties();
         }
 
-        return Optional.ofNullable(properties).map(p -> p.getProperty(key)).orElse(null);
+        String value = properties.getProperty(key);
+        if (value == null)
+        {
+            throw new NoSuchElementException("Property: '" + key + "' not found");
+        }
+        else if (value.startsWith("@") && value.endsWith("@"))
+        {
+            throw new IllegalArgumentException("Value: '" + value + "' not resolved for property: '" + key + "'");
+        }
+
+        return value;
     }
 
     public static String getOrDefault(String propertyKey, String defaultValue)
     {
         if (properties == null)
         {
-            loadProperties();
+            loadProperties(false);
         }
 
         String value = defaultValue;
@@ -74,14 +86,33 @@ public class DockerTags
         return value;
     }
 
-    @SneakyThrows
+    public static Set<Object> keySet()
+    {
+        if (properties == null)
+        {
+            loadProperties();
+        }
+
+        return properties.keySet();
+    }
+
     private static void loadProperties()
+    {
+        loadProperties(true);
+    }
+
+    @SneakyThrows
+    private static void loadProperties(boolean failOnMissingFile)
     {
         File file = new File(PROPERTIES_FILE_PATH);
         if (file.exists())
         {
             properties = new Properties();
             properties.load(Files.newInputStream(file.toPath()));
+        }
+        else if (failOnMissingFile)
+        {
+            throw new NoSuchFileException("File: '" + file + "' not found");
         }
     }
 }

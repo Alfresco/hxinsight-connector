@@ -13,9 +13,6 @@
     <profiles>
         <profile>
             <id>distribution</id>
-            <activation>
-                <activeByDefault>true</activeByDefault>
-            </activation>
             <build>
                 <plugins>
                     <plugin>

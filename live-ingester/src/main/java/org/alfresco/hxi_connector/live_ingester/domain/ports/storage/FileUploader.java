@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,17 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.storage;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.storage;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
-
-import org.apache.http.StatusLine;
-
-public interface StorageClient
+public interface FileUploader
 {
-    StatusLine upload(File file, String contentType, URL preSignedUrl);
-
-    StatusLine upload(InputStream inputStream, String contentType, URL preSignedUrl);
+    void upload(FileUploadRequest fileUploadRequest);
 }

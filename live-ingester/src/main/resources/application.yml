@@ -2,11 +2,21 @@ camel:
   springboot.main-run-controller: true
   dataformat.jackson.autoDiscoverObjectMapper: true
 
+hyland:
+  experience:
+    insight:
+      api:
+        username: dummy_user
+        password: dummy_pass
+        url:
+          storage-location-request: http://dummy-url/pre-signed-url
+          ingest: http://localhost:8001/ingest?httpMethod=POST
+
 alfresco:
   ingester:
     messaging:
-        in.endpoint: activemq:topic:alfresco.repo.event2
-        out.endpoint: http:localhost:8001/ingest?httpMethod=POST
+      in.endpoint: activemq:topic:alfresco.repo.event2
+      out.endpoint: ${hyland.experience.insight.api.url.ingest}
   transform:
     messaging:
       request:

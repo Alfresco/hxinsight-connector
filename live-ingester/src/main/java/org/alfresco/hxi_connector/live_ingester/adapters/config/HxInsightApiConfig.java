@@ -23,18 +23,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+@Configuration
+@EnableConfigurationProperties(HxInsightApiConfig.Properties.class)
+public class HxInsightApiConfig
 {
 
-    public static void main(String[] args)
-    {
-        SpringApplication.run(LiveIngesterApplication.class, args);
-    }
+    @ConfigurationProperties(prefix = "hyland.experience.insight.api")
+    public record Properties(
+            String username,
+            String password,
+            Url url)
+    {}
+
+    public record Url(
+            String storageLocationRequest)
+    {}
 }

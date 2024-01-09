@@ -13,10 +13,6 @@
 	<name>Alfresco Connector for Hyland Experience Insight :: Live Ingester</name>
 	<version>0.0.3-SNAPSHOT</version>
 
-	<properties>
-		<httpclient.version>4.5.14</httpclient.version>
-	</properties>
-
 	<dependencies>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -36,18 +32,12 @@
 			<artifactId>camel-activemq-starter</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.camel</groupId>
-			<artifactId>camel-http</artifactId>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-http-starter</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-jackson-starter</artifactId>
-		</dependency>
-
-		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>${httpclient.version}</version>
 		</dependency>
 
 		<dependency>
@@ -57,6 +47,17 @@
 		<dependency>
 			<groupId>org.alfresco</groupId>
 			<artifactId>acs-event-model</artifactId>
+		</dependency>
+
+		<dependency>
+			<groupId>software.amazon.awssdk</groupId>
+			<artifactId>s3</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.github.tomakehurst</groupId>
+			<artifactId>wiremock</artifactId>
+			<scope>test</scope>
 		</dependency>
 
 		<dependency>
@@ -70,8 +71,8 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>software.amazon.awssdk</groupId>
-			<artifactId>s3</artifactId>
+			<groupId>org.wiremock.integrations.testcontainers</groupId>
+			<artifactId>wiremock-testcontainers-module</artifactId>
 			<scope>test</scope>
 		</dependency>
 

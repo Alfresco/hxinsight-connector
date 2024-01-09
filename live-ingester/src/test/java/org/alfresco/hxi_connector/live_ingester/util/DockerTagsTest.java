@@ -23,18 +23,44 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.util;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+import java.util.NoSuchElementException;
+
+import org.junit.jupiter.api.Test;
+
+class DockerTagsTest
 {
 
-    public static void main(String[] args)
+    @Test
+    void testGetNonExistingProperty()
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        // given
+        String nonExistingProperty = "non.existing.property";
+
+        // when
+        Throwable thrown = catchThrowable(() -> DockerTags.getProperty(nonExistingProperty));
+
+        // then
+        assertThat(thrown)
+                .isInstanceOf(NoSuchElementException.class)
+                .hasMessageContaining(nonExistingProperty);
+    }
+
+    @Test
+    void testGetDefaultForNonExistingProperty()
+    {
+        // given
+        String nonExistingProperty = "non.existing.property";
+        String defaultValue = "default";
+
+        // when
+        String property = DockerTags.getOrDefault(nonExistingProperty, defaultValue);
+
+        // then
+        assertThat(property).isEqualTo(defaultValue);
     }
 }

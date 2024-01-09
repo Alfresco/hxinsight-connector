@@ -23,28 +23,34 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config;
-
-import jakarta.jms.ConnectionFactory;
-
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.jms.connection.JmsTransactionManager;
-import org.springframework.transaction.PlatformTransactionManager;
 
-import org.alfresco.hxi_connector.live_ingester.messaging.in.config.MessagingInputConfig;
-import org.alfresco.hxi_connector.live_ingester.messaging.out.config.MessagingOutputConfig;
-import org.alfresco.hxi_connector.live_ingester.messaging.transform.TransformConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeMetadataEventSerializer;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.repo.event.databind.ObjectMapperFactory;
 
 @Configuration
-@EnableConfigurationProperties({MessagingInputConfig.class, MessagingOutputConfig.class, TransformConfig.class})
-public class LiveIngesterMessagingConfig
+public class MappingConfig
 {
+
     @Bean
-    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
+    public ObjectMapper objectMapper()
     {
-        return new JmsTransactionManager(connectionFactory);
+        ObjectMapper objectMapper = ObjectMapperFactory.createInstance();
+        registerCustomSerializers(objectMapper);
+
+        return objectMapper;
+    }
+
+    private void registerCustomSerializers(ObjectMapper objectMapper)
+    {
+        SimpleModule module = new SimpleModule();
+        module.addSerializer(UpdateNodeMetadataEvent.class, new UpdateNodeMetadataEventSerializer());
+        objectMapper.registerModule(module);
     }
 }

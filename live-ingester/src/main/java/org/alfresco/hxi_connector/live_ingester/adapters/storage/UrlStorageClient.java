@@ -23,42 +23,51 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.storage;
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
-
-import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Files;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploadRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequester;
 
 @Component
 @RequiredArgsConstructor
-public class IngestContentCommandHandler
+@Slf4j
+public class UrlStorageClient implements StorageClient
 {
-    private static final String PDF_MIMETYPE = "application/pdf";
 
-    private final TransformRequester transformRequester;
-    private final StorageClient storageClient;
+    private final StorageLocationRequester storageLocationRequester;
+    private final FileUploader fileUploader;
 
-    public void handle(IngestContentCommand command)
+    @Override
+    public void upload(File file, String contentType, String nodeId)
     {
-        TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
-        transformRequester.requestTransform(transformRequest);
-
-        try (InputStream fileContent = new ByteArrayInputStream("Dummy's file dummy content".getBytes()))
+        try (InputStream fileInputStream = Files.newInputStream(file.toPath()))
         {
-            storageClient.upload(fileContent, PDF_MIMETYPE, command.nodeId());
+            this.upload(fileInputStream, contentType, nodeId);
         }
         catch (IOException e)
         {
-            throw new LiveIngesterRuntimeException("Unable to store file in S3 bucket!", e);
+            throw new LiveIngesterRuntimeException("Accessing file with name: " + file.getName() + " failed", e);
         }
+    }
+
+    @Override
+    public void upload(InputStream inputStream, String contentType, String nodeId)
+    {
+        URL preSignedUrl = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
+        fileUploader.upload(new FileUploadRequest(inputStream, contentType, preSignedUrl));
     }
 }

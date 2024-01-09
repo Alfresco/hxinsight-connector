@@ -23,18 +23,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.util;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+import org.junit.jupiter.api.Test;
+
+class DockerTagsIntegrationTest
 {
 
-    public static void main(String[] args)
+    @Test
+    void testMavenPropertyResolution()
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        // when
+        Throwable thrown = catchThrowable(() -> DockerTags.keySet().stream()
+                .map(String::valueOf)
+                .forEach(DockerTags::getProperty));
+
+        // then
+        assertThat(thrown).doesNotThrowAnyException();
     }
 }

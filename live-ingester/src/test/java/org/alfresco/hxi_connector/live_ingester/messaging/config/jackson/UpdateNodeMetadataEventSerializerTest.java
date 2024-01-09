@@ -37,6 +37,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeMetadataEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 class UpdateNodeMetadataEventSerializerTest
