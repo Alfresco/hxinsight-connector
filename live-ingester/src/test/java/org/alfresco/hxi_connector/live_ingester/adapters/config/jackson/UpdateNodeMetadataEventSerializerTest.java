@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -37,7 +37,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeMetadataEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 class UpdateNodeMetadataEventSerializerTest
