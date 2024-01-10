@@ -209,11 +209,11 @@
           <executions>
             <execution>
               <id>third-party-licenses</id>
+              <phase>generate-resources</phase>
               <goals>
                 <goal>add-third-party</goal>
                 <goal>download-licenses</goal>
               </goals>
-              <phase>generate-resources</phase>
               <configuration>
                 <failOnMissing>true</failOnMissing>
                 <excludedScopes>provided,test</excludedScopes>
@@ -261,6 +261,13 @@
           <groupId>org.jacoco</groupId>
           <artifactId>jacoco-maven-plugin</artifactId>
           <version>${jacoco-maven-plugin.version}</version>
+          <executions>
+            <execution>
+              <goals>
+                <goal>prepare-agent</goal>
+              </goals>
+            </execution>
+          </executions>
         </plugin>
 
         <plugin>
@@ -282,6 +289,21 @@
           <groupId>com.diffplug.spotless</groupId>
           <artifactId>spotless-maven-plugin</artifactId>
           <version>${spotless-plugin.version}</version>
+          <configuration>
+            <java>
+              <includes>
+                <include>src/*/java/**/*.java</include>
+              </includes>
+              <eclipse>
+                <file>alfresco-formatter.xml</file>
+              </eclipse>
+              <importOrder>
+                <order>\#java|\#javax|\#jakarta,\#,\#org.alfresco,java|javax|jakarta,,org.alfresco</order>
+              </importOrder>
+              <removeUnusedImports />
+              <formatAnnotations />
+            </java>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -330,18 +352,6 @@
       <plugin>
         <groupId>org.jacoco</groupId>
         <artifactId>jacoco-maven-plugin</artifactId>
-        <executions>
-          <execution>
-            <goals>
-              <goal>prepare-agent</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.codehaus.mojo</groupId>
-        <artifactId>license-maven-plugin</artifactId>
       </plugin>
 
       <plugin>
@@ -355,22 +365,42 @@
       <plugin>
         <groupId>com.diffplug.spotless</groupId>
         <artifactId>spotless-maven-plugin</artifactId>
-        <configuration>
-          <java>
-            <includes>
-              <include>src/*/java/**/*.java</include>
-            </includes>
-            <eclipse>
-              <file>alfresco-formatter.xml</file>
-            </eclipse>
-            <importOrder>
-              <order>\#java|\#javax|\#jakarta,\#,\#org.alfresco,java|javax|jakarta,,org.alfresco</order>
-            </importOrder>
-            <removeUnusedImports />
-            <formatAnnotations />
-          </java>
-        </configuration>
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>local</id>
+      <activation>
+        <activeByDefault>true</activeByDefault>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>third-party-licenses</id>
+                <phase>none</phase>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>distribution</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.codehaus.mojo</groupId>
+            <artifactId>license-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 </project>
