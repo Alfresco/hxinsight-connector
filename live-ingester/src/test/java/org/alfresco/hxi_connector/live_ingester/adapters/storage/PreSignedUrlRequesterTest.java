@@ -101,8 +101,8 @@ class PreSignedUrlRequesterTest
         URL url = preSignedUrlRequester.requestStorageLocation(request);
 
         // then
-        then(messageMock).should().getBody(eq(String.class));
         then(messageMock).should().getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
+        then(messageMock).should().getBody(String.class);
         then(objectMapperMock).should().readValue(eq(RESPONSE_BODY), anyTypeReferenceOfMap());
         assertThat(url).asString().isEqualTo(STORAGE_LOCATION);
     }

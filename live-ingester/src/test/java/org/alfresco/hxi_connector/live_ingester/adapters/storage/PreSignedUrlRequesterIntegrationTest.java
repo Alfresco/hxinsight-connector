@@ -110,6 +110,7 @@ class PreSignedUrlRequesterIntegrationTest
         registry.add("alfresco.integration.storage.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static String createEndpointUrl()
     {
         return String.format(
