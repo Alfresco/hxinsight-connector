@@ -58,10 +58,8 @@
     <spring-boot.version>3.2.1</spring-boot.version>
     <spring-camel.version>4.3.0</spring-camel.version>
     <aws-sdk-s3.version>2.22.9</aws-sdk-s3.version>
-    <wiremock.version>3.3.1</wiremock.version>
 
     <testcontainers.version>1.19.3</testcontainers.version>
-    <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
 
     <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
     <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
@@ -84,7 +82,6 @@
     <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
     <dist.search.enterprise.version>4.0.0.1</dist.search.enterprise.version>
     <dist.localstack.version>3.0.2</dist.localstack.version>
-    <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
   </properties>
 
   <repositories>
@@ -153,17 +150,6 @@
         <groupId>software.amazon.awssdk</groupId>
         <artifactId>s3</artifactId>
         <version>${aws-sdk-s3.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.wiremock.integrations.testcontainers</groupId>
-        <artifactId>wiremock-testcontainers-module</artifactId>
-        <version>${wiremock-testcontainers-module.version}</version>
-      </dependency>
-      <dependency>
-        <groupId>org.wiremock</groupId>
-        <artifactId>wiremock</artifactId>
-        <version>${wiremock.version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>
