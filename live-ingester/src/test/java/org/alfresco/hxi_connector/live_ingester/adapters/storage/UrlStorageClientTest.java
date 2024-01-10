@@ -34,7 +34,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,7 +45,6 @@ import lombok.Cleanup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -57,6 +55,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLoca
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequester;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class UrlStorageClientTest
 {
     private static final String FILE_CONTENT = "some test content";
@@ -71,30 +70,23 @@ class UrlStorageClientTest
     @InjectMocks
     UrlStorageClient urlStorageClient;
 
-    @Captor
-    ArgumentCaptor<StorageLocationRequest> storageLocationRequestCaptor;
-    @Captor
-    ArgumentCaptor<FileUploadRequest> fileUploadRequestCaptor;
-
     @Test
     void testUploadDataFromFile() throws IOException
     {
         // given
         URL url = mock(URL.class);
-        File file = Files.createTempFile("test", ".txt").toFile();
-        Files.write(file.toPath(), FILE_CONTENT.getBytes(), APPEND);
+        File testFile = Files.createTempFile("test", ".txt").toFile();
+        Files.write(testFile.toPath(), FILE_CONTENT.getBytes(), APPEND);
         given(storageLocationRequesterMock.requestStorageLocation(any())).willReturn(url);
 
         // when
-        urlStorageClient.upload(file, FILE_CONTENT_TYPE, NODE_ID);
+        urlStorageClient.upload(testFile, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
-        then(storageLocationRequesterMock).should().requestStorageLocation(storageLocationRequestCaptor.capture());
-        StorageLocationRequest actualStorageLocationRequest = storageLocationRequestCaptor.getValue();
-        assertThat(actualStorageLocationRequest).satisfies(request -> {
-            assertThat(request.nodeId()).isEqualTo(NODE_ID);
-            assertThat(request.contentType()).isEqualTo(FILE_CONTENT_TYPE);
-        });
+        StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
+        then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
+
+        ArgumentCaptor<FileUploadRequest> fileUploadRequestCaptor = ArgumentCaptor.forClass(FileUploadRequest.class);
         then(fileUploaderMock).should().upload(fileUploadRequestCaptor.capture());
         FileUploadRequest actualFileUploadRequest = fileUploadRequestCaptor.getValue();
         assertThat(actualFileUploadRequest).satisfies(request -> {
@@ -108,27 +100,18 @@ class UrlStorageClientTest
     void testUploadDataFromInputStream() throws IOException
     {
         // given
-        URL url = mock(URL.class);
         @Cleanup
-        InputStream inputStream = new ByteArrayInputStream(FILE_CONTENT.getBytes());
+        InputStream testData = mock(InputStream.class);
+        URL url = mock(URL.class);
         given(storageLocationRequesterMock.requestStorageLocation(any())).willReturn(url);
 
         // when
-        urlStorageClient.upload(inputStream, FILE_CONTENT_TYPE, NODE_ID);
+        urlStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
-        then(storageLocationRequesterMock).should().requestStorageLocation(storageLocationRequestCaptor.capture());
-        StorageLocationRequest actualStorageLocationRequest = storageLocationRequestCaptor.getValue();
-        assertThat(actualStorageLocationRequest).satisfies(request -> {
-            assertThat(request.nodeId()).isEqualTo(NODE_ID);
-            assertThat(request.contentType()).isEqualTo(FILE_CONTENT_TYPE);
-        });
-        then(fileUploaderMock).should().upload(fileUploadRequestCaptor.capture());
-        FileUploadRequest actualFileUploadRequest = fileUploadRequestCaptor.getValue();
-        assertThat(actualFileUploadRequest).satisfies(request -> {
-            assertThat(request.contentType()).isEqualTo(FILE_CONTENT_TYPE);
-            assertThat(request.storageLocation()).isEqualTo(url);
-            assertThat(request.inputStream()).hasContent(FILE_CONTENT);
-        });
+        StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
+        then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
+        FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(testData, FILE_CONTENT_TYPE, url);
+        then(fileUploaderMock).should().upload(expectedFileUploadRequest);
     }
 }
