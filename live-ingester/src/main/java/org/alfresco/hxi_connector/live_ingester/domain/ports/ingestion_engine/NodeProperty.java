@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
 public record NodeProperty<V>(
@@ -36,6 +35,5 @@ public record NodeProperty<V>(
     public NodeProperty
     {
         ensureNotBlank(name, "Node property name cannot be blank");
-        ensureNonNull(value, "Node property %s value cannot be null", name);
     }
 }

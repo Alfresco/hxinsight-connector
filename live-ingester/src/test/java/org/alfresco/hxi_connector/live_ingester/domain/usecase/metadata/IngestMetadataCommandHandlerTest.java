@@ -132,4 +132,46 @@ class IngestMetadataCommandHandlerTest
         assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
     }
 
+    @Test
+    void canSupportEventsWithNullUsers()
+    {
+        // given
+        IngestMetadataCommand command = new IngestMetadataCommand(
+                EVENT_TIMESTAMP,
+                NODE_ID,
+                updated(NODE_NAME),
+                updated(NODE_PRIMARY_ASSOC_Q_NAME),
+                updated(NODE_TYPE),
+                updated(null),
+                updated(null),
+                updated(NODE_ASPECT_NAMES),
+                updated(NODE_IS_FILE),
+                updated(NODE_IS_FOLDER),
+                updated(NODE_CREATED_AT),
+                NODE_PROPERTIES.stream()
+                        .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
+                        .collect(Collectors.toSet()));
+
+        // when
+        ingestMetadataCommandHandler.handle(command);
+
+        // then
+        Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
+                NAME.withValue(NODE_NAME),
+                PRIMARY_ASSOC_Q_NAME.withValue(NODE_PRIMARY_ASSOC_Q_NAME),
+                TYPE.withValue(NODE_TYPE),
+                CREATED_BY_USER_WITH_ID.withValue(null),
+                MODIFIED_BY_USER_WITH_ID.withValue(null),
+                ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
+                IS_FILE.withValue(NODE_IS_FILE),
+                IS_FOLDER.withValue(NODE_IS_FOLDER),
+                CREATED_AT.withValue(NODE_CREATED_AT),
+                NODE_TITLE);
+
+        verify(eventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
+        UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
+
+        assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
+        assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
+    }
 }
