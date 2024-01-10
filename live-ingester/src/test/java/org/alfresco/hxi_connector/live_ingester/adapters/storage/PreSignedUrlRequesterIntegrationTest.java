@@ -48,7 +48,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.HxInsightApiConfig;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.MappingConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequester;
@@ -56,7 +55,6 @@ import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
         CamelAutoConfiguration.class,
-        HxInsightApiConfig.class,
         MappingConfig.class,
         PreSignedUrlRequester.class})
 @ActiveProfiles({"test"})
@@ -69,6 +67,7 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
     private static final String HX_INSIGHT_TEST_USERNAME = "mock";
     private static final String HX_INSIGHT_TEST_PASSWORD = "pass";
+    private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true";
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String PRE_SIGNED_URL = "http://s3-storage-location";
     private static final String HX_INSIGHT_RESPONSE_BODY = "{\"" + STORAGE_LOCATION_PROPERTY + "\": \"" + PRE_SIGNED_URL + "\"}";
@@ -108,8 +107,13 @@ class PreSignedUrlRequesterIntegrationTest
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("hyland.experience.insight.api.username", () -> HX_INSIGHT_TEST_USERNAME);
-        registry.add("hyland.experience.insight.api.password", () -> HX_INSIGHT_TEST_PASSWORD);
-        registry.add("hyland.experience.insight.api.url.storage-location-request", () -> wireMockServer.getBaseUrl() + HX_INSIGHT_PRE_SIGNED_URL_PATH);
+        registry.add("alfresco.integration.storage.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
+    }
+
+    private static String createEndpointUrl()
+    {
+        return String.format(
+                CAMEL_ENDPOINT_PATTERN,
+                wireMockServer.getBaseUrl(), HX_INSIGHT_PRE_SIGNED_URL_PATH, HX_INSIGHT_TEST_USERNAME, HX_INSIGHT_TEST_PASSWORD);
     }
 }

@@ -38,9 +38,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.HxInsightApiConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequester;
@@ -58,19 +58,15 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     private final CamelContext camelContext;
     private final ObjectMapper objectMapper;
 
-    private final String url;
-    private final String username;
-    private final String password;
+    private final String targetEndpoint;
 
     @Autowired
-    public PreSignedUrlRequester(CamelContext camelContext, ObjectMapper objectMapper, HxInsightApiConfig.Properties config)
+    public PreSignedUrlRequester(CamelContext camelContext, ObjectMapper objectMapper, @Value("${alfresco.integration.storage.endpoint}") String targetEndpoint)
     {
         super(camelContext);
         this.camelContext = camelContext;
         this.objectMapper = objectMapper;
-        this.url = config.url().storageLocationRequest();
-        this.username = config.username();
-        this.password = config.password();
+        this.targetEndpoint = targetEndpoint;
     }
 
     @Override
@@ -79,11 +75,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         from(LOCAL_ENDPOINT)
                 .marshal()
                 .json()
-                .to(url + "?httpMethod=POST" +
-                        "&authMethod=Basic" +
-                        "&authUsername=" + username +
-                        "&authPassword=" + password +
-                        "&authenticationPreemptive=true");
+                .to(targetEndpoint);
     }
 
     @Override

@@ -9,14 +9,22 @@ hyland:
         username: dummy_user
         password: dummy_pass
         url:
-          storage-location-request: http://dummy-url/pre-signed-url
-          ingest: http://localhost:8001/ingest?httpMethod=POST
+          storage-location-request: http://localhost:8001/pre-signed-url
+          ingest: http://localhost:8001/ingest
 
 alfresco:
+  integration:
+    storage:
+      endpoint: "${hyland.experience.insight.api.url.storage-location-request}\
+        ?httpMethod=POST\
+        &authMethod=Basic\
+        &authUsername=${hyland.experience.insight.api.username}\
+        &authPassword=${hyland.experience.insight.api.password}\
+        &authenticationPreemptive=true"
   ingester:
     messaging:
       in.endpoint: activemq:topic:alfresco.repo.event2
-      out.endpoint: ${hyland.experience.insight.api.url.ingest}
+      out.endpoint: ${hyland.experience.insight.api.url.ingest}?httpMethod=POST
   transform:
     messaging:
       request:

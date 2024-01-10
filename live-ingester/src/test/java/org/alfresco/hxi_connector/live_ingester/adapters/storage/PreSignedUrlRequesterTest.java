@@ -52,10 +52,10 @@ import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.HxInsightApiConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequest;
 
@@ -76,16 +76,13 @@ class PreSignedUrlRequesterTest
     Message messageMock;
     @Mock
     ObjectMapper objectMapperMock;
-    @Mock
-    HxInsightApiConfig.Properties configPropertiesMock;
 
+    @InjectMocks
     PreSignedUrlRequester preSignedUrlRequester;
 
     @BeforeEach
     void setUp()
     {
-        given(configPropertiesMock.url()).willReturn(new HxInsightApiConfig.Url(null));
-        preSignedUrlRequester = new PreSignedUrlRequester(camelContextMock, objectMapperMock, configPropertiesMock);
         given(camelContextMock.createProducerTemplate()).willReturn(producerTemplateMock);
         given(producerTemplateMock.send(any(String.class), any(Processor.class))).willReturn(exchangeMock);
         given(exchangeMock.getMessage()).willReturn(messageMock);
