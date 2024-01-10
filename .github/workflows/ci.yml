@@ -21,7 +21,7 @@ env:
   DEVELOPMENT_VERSION: "0.0.3-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
   RELEASE_VERSION: "0.0.2" # The version of the release (tag).
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
-  MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn "
+  MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   JAVA_VERSION: "17"
