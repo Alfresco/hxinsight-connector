@@ -49,14 +49,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequester;
-
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-class UrlStorageClientTest
+class HttpStorageClientTest
 {
     private static final String FILE_CONTENT = "some test content";
     private static final String FILE_CONTENT_TYPE = "plain/text";
@@ -68,7 +63,7 @@ class UrlStorageClientTest
     FileUploader fileUploaderMock;
 
     @InjectMocks
-    UrlStorageClient urlStorageClient;
+    HttpStorageClient httpStorageClient;
 
     @Test
     void testUploadDataFromFile() throws IOException
@@ -80,7 +75,7 @@ class UrlStorageClientTest
         given(storageLocationRequesterMock.requestStorageLocation(any())).willReturn(url);
 
         // when
-        urlStorageClient.upload(testFile, FILE_CONTENT_TYPE, NODE_ID);
+        httpStorageClient.upload(testFile, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
         StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
@@ -106,7 +101,7 @@ class UrlStorageClientTest
         given(storageLocationRequesterMock.requestStorageLocation(any())).willReturn(url);
 
         // when
-        urlStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
+        httpStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
         StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);

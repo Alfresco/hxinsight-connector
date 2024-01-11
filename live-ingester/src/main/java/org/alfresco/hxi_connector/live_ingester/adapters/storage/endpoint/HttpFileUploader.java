@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.CamelContext;
@@ -33,15 +33,15 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpMethods;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploadRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploader;
 
 @Component
 @RequiredArgsConstructor
-public class UrlFileUploader extends RouteBuilder implements FileUploader
+public class HttpFileUploader extends RouteBuilder implements FileUploader
 {
-    private static final String LOCAL_ENDPOINT = "direct:" + UrlFileUploader.class.getSimpleName();
+    private static final String LOCAL_ENDPOINT = "direct:" + HttpFileUploader.class.getSimpleName();
     private static final String STORAGE_LOCATION = "storageLocation";
     private static final int EXPECTED_STATUS_CODE = 200;
 

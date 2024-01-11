@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
@@ -44,14 +44,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploadRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploadRequest;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-class UrlFileUploaderTest
+class HttpFileUploaderTest
 {
     private static final int STATUS_CODE_200 = 200;
+    private static final int STATUS_CODE_500 = 500;
 
     @Mock
     CamelContext camelContextMock;
@@ -59,11 +60,11 @@ class UrlFileUploaderTest
     ProducerTemplate producerTemplateMock;
     @Mock
     Exchange exchangeMock;
-    @Mock(strictness = Mock.Strictness.LENIENT)
+    @Mock
     Message messageMock;
 
     @InjectMocks
-    UrlFileUploader urlFileUploader;
+    HttpFileUploader httpFileUploader;
 
     @BeforeEach
     void setUp()
@@ -71,7 +72,6 @@ class UrlFileUploaderTest
         given(camelContextMock.createProducerTemplate()).willReturn(producerTemplateMock);
         given(producerTemplateMock.send(any(String.class), any(Processor.class))).willReturn(exchangeMock);
         given(exchangeMock.getMessage()).willReturn(messageMock);
-        given(messageMock.getHeader(any(String.class), any(Class.class))).willReturn(STATUS_CODE_200);
     }
 
     @Test
@@ -79,9 +79,10 @@ class UrlFileUploaderTest
     {
         // given
         FileUploadRequest request = mock(FileUploadRequest.class);
+        httpClientWillRespondWith(STATUS_CODE_200);
 
         // when
-        urlFileUploader.upload(request);
+        httpFileUploader.upload(request);
 
         // then
         then(messageMock).should().getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
@@ -93,10 +94,10 @@ class UrlFileUploaderTest
     {
         // given
         FileUploadRequest request = mock(FileUploadRequest.class);
-        given(messageMock.getHeader(any(String.class), any(Class.class))).willReturn(500);
+        httpClientWillRespondWith(STATUS_CODE_500);
 
         // when
-        Throwable thrown = catchThrowable(() -> urlFileUploader.upload(request));
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
 
         // then
         then(messageMock).should().getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
@@ -104,5 +105,10 @@ class UrlFileUploaderTest
         assertThat(thrown)
                 .isInstanceOf(LiveIngesterRuntimeException.class)
                 .hasMessageContaining("received:", 500);
+    }
+
+    private void httpClientWillRespondWith(int statusCode)
+    {
+        given(messageMock.getHeader(any(String.class), any(Class.class))).willReturn(statusCode);
     }
 }

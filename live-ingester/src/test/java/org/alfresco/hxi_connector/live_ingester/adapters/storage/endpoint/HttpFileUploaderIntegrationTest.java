@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
@@ -48,16 +48,16 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploadRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageConfig;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
-@SpringBootTest(classes = {CamelAutoConfiguration.class, LocalStorageConfig.class, UrlFileUploader.class})
+@SpringBootTest(classes = {CamelAutoConfiguration.class, LocalStorageConfig.class, HttpFileUploader.class})
 @ActiveProfiles({"test"})
 @Testcontainers
-class UrlFileUploaderIntegrationTest
+class HttpFileUploaderIntegrationTest
 {
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
     private static final String LOCALSTACK_TAG = DockerTags.getOrDefault("localstack.tag", "3.0.2");
