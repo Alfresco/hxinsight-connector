@@ -36,16 +36,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequester;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class UrlStorageClient implements StorageClient
+public class HttpStorageClient implements StorageClient
 {
 
     private final StorageLocationRequester storageLocationRequester;
