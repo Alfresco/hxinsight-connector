@@ -23,14 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.URL;
 
@@ -49,8 +49,8 @@ import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.MappingConfig;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageLocationRequester;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.StorageLocationRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
@@ -70,7 +70,7 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true";
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String PRE_SIGNED_URL = "http://s3-storage-location";
-    private static final String HX_INSIGHT_RESPONSE_BODY = "{\"" + STORAGE_LOCATION_PROPERTY + "\": \"" + PRE_SIGNED_URL + "\"}";
+    private static final String HX_INSIGHT_RESPONSE_BODY = String.format("{\"%s\": \"%s\"}", STORAGE_LOCATION_PROPERTY, PRE_SIGNED_URL);
     private static final int HX_INSIGHT_RESPONSE_CODE = 201;
 
     @Container
