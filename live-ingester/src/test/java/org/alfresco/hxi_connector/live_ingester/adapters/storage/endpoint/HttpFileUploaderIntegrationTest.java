@@ -54,7 +54,10 @@ import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStor
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageConfig;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
-@SpringBootTest(classes = {CamelAutoConfiguration.class, LocalStorageConfig.class, HttpFileUploader.class})
+@SpringBootTest(classes = {
+        CamelAutoConfiguration.class,
+        LocalStorageConfig.class,
+        HttpFileUploader.class})
 @ActiveProfiles({"test"})
 @Testcontainers
 class HttpFileUploaderIntegrationTest

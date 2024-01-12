@@ -48,14 +48,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.MappingConfig;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
         CamelAutoConfiguration.class,
-        MappingConfig.class,
         PreSignedUrlRequester.class})
 @ActiveProfiles({"test"})
 @Testcontainers
