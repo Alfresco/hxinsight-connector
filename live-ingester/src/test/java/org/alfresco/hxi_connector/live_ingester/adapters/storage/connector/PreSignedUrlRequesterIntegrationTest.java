@@ -30,7 +30,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.NODE_ID_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.URL;
@@ -91,8 +90,8 @@ class PreSignedUrlRequesterIntegrationTest
         String hxInsightResponse = String.format("{\"%s\": \"%s\"}", STORAGE_LOCATION_PROPERTY, preSignedUrl);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .withBasicAuth(HX_INSIGHT_TEST_USERNAME, HX_INSIGHT_TEST_PASSWORD)
-                .withRequestBody(new ContainsPattern(NODE_ID_PROPERTY))
                 .withRequestBody(new ContainsPattern(nodeId))
+                .withRequestBody(new ContainsPattern(FILE_CONTENT_TYPE))
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
                         .withBody(hxInsightResponse)));
