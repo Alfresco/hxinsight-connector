@@ -25,10 +25,14 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpMethods;
 import org.springframework.stereotype.Component;
@@ -42,6 +46,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRun
 public class HttpFileUploader extends RouteBuilder implements FileUploader
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HttpFileUploader.class.getSimpleName();
+    static final String ROUTE_ID = HttpFileUploader.class.getSimpleName();
     private static final String STORAGE_LOCATION = "storageLocation";
     private static final int EXPECTED_STATUS_CODE = 200;
 
@@ -50,32 +55,32 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     @Override
     public void configure()
     {
+        onException(Exception.class)
+                .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+                .stop();
+
         from(LOCAL_ENDPOINT)
+                .id(ROUTE_ID)
                 .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
-                .toD("${headers." + STORAGE_LOCATION + "}");
+                .toD("${headers." + STORAGE_LOCATION + "}")
+                .choice()
+                .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
+                .process(HttpFileUploader::throwUnexpectedStatusCodeException)
+                .endChoice()
+                .end();
     }
 
     @Override
     public void upload(FileUploadRequest fileUploadRequest)
     {
-        Message message = camelContext.createProducerTemplate()
-                .send(LOCAL_ENDPOINT, exchange -> {
-                    exchange.getIn().setBody(fileUploadRequest.inputStream());
-                    exchange.getIn().setHeader(STORAGE_LOCATION, fileUploadRequest.storageLocation().toString());
-                    exchange.getIn().setHeader(Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
-                })
-                .getMessage();
+        Map<String, Object> headers = Map.of(STORAGE_LOCATION, fileUploadRequest.storageLocation().toString(),
+                Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
-        verifyStatusCode(message);
+        camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileUploadRequest.inputStream(), headers);
     }
 
-    private void verifyStatusCode(Message message)
+    private static void throwUnexpectedStatusCodeException(Exchange exchange)
     {
-        int statusCode = message.getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
-        if (statusCode != EXPECTED_STATUS_CODE)
-        {
-            log.error("Unexpected response. Body: {}", message.getBody(String.class));
-            throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + statusCode);
-        }
+        throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class));
     }
 }

@@ -25,85 +25,78 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.PreSignedUrlRequester.CONTENT_TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.PreSignedUrlRequester.NODE_ID_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
-import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.apache.camel.Message;
-import org.apache.camel.Processor;
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.model.language.ConstantExpression;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.Spy;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-@ExtendWith(MockitoExtension.class)
 class PreSignedUrlRequesterTest
 {
+    private static final String MOCK_ENDPOINT = "mock:hxi-endpoint";
     private static final int STATUS_CODE_201 = 201;
     private static final int STATUS_CODE_500 = 500;
+    private static final String NODE_REF = "node-ref";
+    private static final String CONTENT_TYPE = "content/type";
     private static final String STORAGE_LOCATION = "http://dummy-url";
     private static final String RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
-    private static final String RESPONSE_BODY = responseBodyWith(STORAGE_LOCATION_PROPERTY, STORAGE_LOCATION);
+    private static final String RESPONSE_BODY = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, STORAGE_LOCATION);
 
-    @Mock
-    CamelContext camelContextMock;
-    @Mock
-    ProducerTemplate producerTemplateMock;
-    @Mock
-    Exchange exchangeMock;
-    @Mock
-    Message messageMock;
-    @Spy
-    ObjectMapper objectMapperSpy = new ObjectMapper();
+    CamelContext camelContext;
+    MockEndpoint mockEndpoint;
 
-    @InjectMocks
     PreSignedUrlRequester preSignedUrlRequester;
 
     @BeforeEach
-    void setUp()
+    public void setUp() throws Exception
     {
-        given(camelContextMock.createProducerTemplate()).willReturn(producerTemplateMock);
-        given(producerTemplateMock.send(any(String.class), any(Processor.class))).willReturn(exchangeMock);
-        given(exchangeMock.getMessage()).willReturn(messageMock);
+        camelContext = new DefaultCamelContext();
+        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, MOCK_ENDPOINT);
+        camelContext.addRoutes(preSignedUrlRequester);
+        camelContext.start();
+
+        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
+    }
+
+    @AfterEach
+    void tearDown()
+    {
+        camelContext.stop();
     }
 
     @Test
-    void testRequestStorageLocation() throws IOException
+    void testRequestStorageLocation() throws InterruptedException
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
-        httpClientWillRespondWith(STATUS_CODE_201, RESPONSE_BODY);
+        mockEndpointWillRespondWith(STATUS_CODE_201, RESPONSE_BODY);
+        mockEndpointExpectInRequestBody(NODE_ID_PROPERTY, NODE_REF, CONTENT_TYPE_PROPERTY, CONTENT_TYPE);
 
         // when
         URL url = preSignedUrlRequester.requestStorageLocation(request);
 
         // then
-        then(messageMock).should().getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
-        then(messageMock).should().getBody(String.class);
-        then(objectMapperSpy).should().readValue(eq(RESPONSE_BODY), anyTypeReferenceOfMap());
+        mockEndpoint.assertIsSatisfied();
         assertThat(url).asString().isEqualTo(STORAGE_LOCATION);
     }
 
@@ -112,53 +105,52 @@ class PreSignedUrlRequesterTest
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
-        httpClientWillRespondWith(STATUS_CODE_500);
+        mockEndpointWillRespondWith(STATUS_CODE_500);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
 
         // then
-        then(objectMapperSpy).shouldHaveNoInteractions();
         assertThat(thrown)
+                .cause()
                 .isInstanceOf(LiveIngesterRuntimeException.class)
-                .hasMessageContaining("received:", 500);
+                .hasMessageContaining("received:", STATUS_CODE_500);
     }
 
     @Test
-    void testRequestStorageLocation_missingStorageLocationPropertyInResponse() throws IOException
+    void testRequestStorageLocation_missingStorageLocationPropertyInResponse()
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
-        String responseBodyWithoutUrl = responseBodyWith("unexpectedProperty", STORAGE_LOCATION);
-        httpClientWillRespondWith(STATUS_CODE_201, responseBodyWithoutUrl);
+        String responseBodyWithoutUrl = createResponseBodyWith("unexpectedProperty", STORAGE_LOCATION);
+        mockEndpointWillRespondWith(STATUS_CODE_201, responseBodyWithoutUrl);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
 
         // then
-        then(objectMapperSpy).should().readValue(eq(responseBodyWithoutUrl), anyTypeReferenceOfMap());
         assertThat(thrown)
+                .cause()
                 .isInstanceOf(LiveIngesterRuntimeException.class)
                 .hasMessageContaining("Missing", STORAGE_LOCATION_PROPERTY);
     }
 
     @Test
-    void testRequestStorageLocation_invalidJsonResponse() throws IOException
+    void testRequestStorageLocation_invalidJsonResponse()
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
         String invalidJsonBody = RESPONSE_BODY.replaceAll(".$", "");
-        httpClientWillRespondWith(STATUS_CODE_201, invalidJsonBody);
+        mockEndpointWillRespondWith(STATUS_CODE_201, invalidJsonBody);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
 
         // then
-        then(objectMapperSpy).should().readValue(eq(invalidJsonBody), anyTypeReferenceOfMap());
         assertThat(thrown)
-                .isInstanceOf(LiveIngesterRuntimeException.class)
-                .hasMessageContaining("Parsing JSON response failed!")
-                .hasRootCauseInstanceOf(JsonParseException.class);
+                .cause()
+                .isInstanceOf(JsonParseException.class)
+                .message().isNotEmpty();
     }
 
     @Test
@@ -166,14 +158,15 @@ class PreSignedUrlRequesterTest
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
-        String responseBodyWithInvalidUrl = responseBodyWith(STORAGE_LOCATION_PROPERTY, "invalidUrl");
-        httpClientWillRespondWith(STATUS_CODE_201, responseBodyWithInvalidUrl);
+        String responseBodyWithInvalidUrl = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, "invalidUrl");
+        mockEndpointWillRespondWith(STATUS_CODE_201, responseBodyWithInvalidUrl);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
 
         // then
         assertThat(thrown)
+                .cause()
                 .isInstanceOf(LiveIngesterRuntimeException.class)
                 .hasMessageContaining("Parsing URL from response property failed!")
                 .rootCause()
@@ -184,31 +177,32 @@ class PreSignedUrlRequesterTest
     private StorageLocationRequest createStorageLocationRequestMock()
     {
         StorageLocationRequest request = mock(StorageLocationRequest.class);
-        given(request.nodeId()).willReturn("node-ref");
-        given(request.contentType()).willReturn("content/type");
+        given(request.nodeId()).willReturn(NODE_REF);
+        given(request.contentType()).willReturn(CONTENT_TYPE);
 
         return request;
     }
 
-    private void httpClientWillRespondWith(int statusCode)
+    private void mockEndpointWillRespondWith(int statusCode)
     {
-        httpClientWillRespondWith(statusCode, null);
+        mockEndpoint.returnReplyHeader(HTTP_RESPONSE_CODE, new ConstantExpression(String.valueOf(statusCode)));
     }
 
-    private void httpClientWillRespondWith(int statusCode, String responseBody)
+    private void mockEndpointWillRespondWith(int statusCode, String responseBody)
     {
-        given(messageMock.getHeader(any(String.class), any(Class.class))).willReturn(statusCode);
-        given(messageMock.getBody(any())).willReturn(responseBody);
+        mockEndpoint.whenAnyExchangeReceived(exchange -> {
+            exchange.getMessage().setHeader(HTTP_RESPONSE_CODE, statusCode);
+            exchange.getMessage().setBody(responseBody);
+        });
     }
 
-    private static String responseBodyWith(String propertyName, String propertyValue)
+    private void mockEndpointExpectInRequestBody(String... expectedProperties)
+    {
+        Stream.of(expectedProperties).forEach(property -> mockEndpoint.message(0).body(String.class).contains(property));
+    }
+
+    private static String createResponseBodyWith(String propertyName, String propertyValue)
     {
         return String.format(RESPONSE_BODY_PATTERN, propertyName, propertyValue);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <K, V, M extends Map<? extends K, ? extends V>> TypeReference<M> anyTypeReferenceOfMap()
-    {
-        return any(TypeReference.class);
     }
 }
