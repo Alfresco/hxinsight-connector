@@ -36,6 +36,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint
 
 import java.net.URL;
 
+import lombok.SneakyThrows;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -62,7 +63,8 @@ class HttpFileUploaderTest
     HttpFileUploader httpFileUploader;
 
     @BeforeEach
-    void setUp() throws Exception
+    @SneakyThrows
+    void setUp()
     {
         camelContext = new DefaultCamelContext();
         httpFileUploader = new HttpFileUploader(camelContext);
