@@ -37,8 +37,6 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpMethods;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component

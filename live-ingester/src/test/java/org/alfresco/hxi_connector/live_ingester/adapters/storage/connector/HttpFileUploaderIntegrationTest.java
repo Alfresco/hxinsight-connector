@@ -48,8 +48,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageConfig;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;

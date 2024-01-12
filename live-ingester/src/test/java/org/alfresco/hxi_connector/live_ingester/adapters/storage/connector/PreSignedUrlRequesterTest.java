@@ -49,7 +49,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 class PreSignedUrlRequesterTest
