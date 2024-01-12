@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.builder.AdviceWith.adviceWith;
@@ -32,7 +32,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.HttpFileUploader.ROUTE_ID;
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.HttpFileUploader.ROUTE_ID;
 
 import java.net.URL;
 
