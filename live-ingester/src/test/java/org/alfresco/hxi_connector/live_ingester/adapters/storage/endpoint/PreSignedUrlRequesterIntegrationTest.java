@@ -67,7 +67,7 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
     private static final String HX_INSIGHT_TEST_USERNAME = "mock";
     private static final String HX_INSIGHT_TEST_PASSWORD = "pass";
-    private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true";
+    private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String PRE_SIGNED_URL = "http://s3-storage-location";
     private static final String HX_INSIGHT_RESPONSE_BODY = String.format("{\"%s\": \"%s\"}", STORAGE_LOCATION_PROPERTY, PRE_SIGNED_URL);
