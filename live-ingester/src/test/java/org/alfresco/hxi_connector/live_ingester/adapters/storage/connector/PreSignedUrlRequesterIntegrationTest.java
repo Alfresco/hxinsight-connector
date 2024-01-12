@@ -30,11 +30,13 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.NODE_ID_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.URL;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import org.apache.camel.spring.boot.CamelAutoConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -65,8 +67,6 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String HX_INSIGHT_TEST_PASSWORD = "pass";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
     private static final String FILE_CONTENT_TYPE = "plain/text";
-    private static final String PRE_SIGNED_URL = "http://s3-storage-location";
-    private static final String HX_INSIGHT_RESPONSE_BODY = String.format("{\"%s\": \"%s\"}", STORAGE_LOCATION_PROPERTY, PRE_SIGNED_URL);
     private static final int HX_INSIGHT_RESPONSE_CODE = 201;
 
     @Container
@@ -87,17 +87,21 @@ class PreSignedUrlRequesterIntegrationTest
     {
         // given
         String nodeId = "some-node-ref";
+        String preSignedUrl = "http://s3-storage-location";
+        String hxInsightResponse = String.format("{\"%s\": \"%s\"}", STORAGE_LOCATION_PROPERTY, preSignedUrl);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .withBasicAuth(HX_INSIGHT_TEST_USERNAME, HX_INSIGHT_TEST_PASSWORD)
+                .withRequestBody(new ContainsPattern(NODE_ID_PROPERTY))
+                .withRequestBody(new ContainsPattern(nodeId))
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
-                        .withBody(HX_INSIGHT_RESPONSE_BODY)));
+                        .withBody(hxInsightResponse)));
 
         // when
         URL actualUrl = locationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, FILE_CONTENT_TYPE));
 
         // then
-        assertThat(actualUrl).asString().isEqualTo(PRE_SIGNED_URL);
+        assertThat(actualUrl).asString().isEqualTo(preSignedUrl);
     }
 
     @DynamicPropertySource
