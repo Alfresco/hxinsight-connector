@@ -79,6 +79,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileUploadRequest.inputStream(), headers);
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static void throwUnexpectedStatusCodeException(Exchange exchange)
     {
         throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class));
