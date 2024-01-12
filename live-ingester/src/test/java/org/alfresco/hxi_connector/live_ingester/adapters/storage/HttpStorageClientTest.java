@@ -49,6 +49,11 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploadRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploader;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequester;
+
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class HttpStorageClientTest

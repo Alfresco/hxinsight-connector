@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,9 +31,9 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.PreSignedUrlRequester.CONTENT_TYPE_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.PreSignedUrlRequester.NODE_ID_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.CONTENT_TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.NODE_ID_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -49,7 +49,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 class PreSignedUrlRequesterTest
