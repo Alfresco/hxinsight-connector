@@ -25,90 +25,110 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.builder.AdviceWith.adviceWith;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
+
+import static org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint.HttpFileUploader.ROUTE_ID;
+
+import java.net.URL;
 
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
-import org.apache.camel.Processor;
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.component.mock.MockEndpoint;
+import org.apache.camel.impl.DefaultCamelContext;
+import org.apache.camel.model.ToDynamicDefinition;
+import org.apache.camel.model.language.ConstantExpression;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.FileUploadRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-@ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class HttpFileUploaderTest
 {
+    private static final String MOCK_ENDPOINT = "mock:s3-endpoint";
     private static final int STATUS_CODE_200 = 200;
     private static final int STATUS_CODE_500 = 500;
+    private static final String CONTENT_TYPE = "content/type";
 
-    @Mock
-    CamelContext camelContextMock;
-    @Mock
-    ProducerTemplate producerTemplateMock;
-    @Mock
-    Exchange exchangeMock;
-    @Mock
-    Message messageMock;
+    CamelContext camelContext;
+    MockEndpoint mockEndpoint;
 
-    @InjectMocks
     HttpFileUploader httpFileUploader;
 
     @BeforeEach
-    void setUp()
+    void setUp() throws Exception
     {
-        given(camelContextMock.createProducerTemplate()).willReturn(producerTemplateMock);
-        given(producerTemplateMock.send(any(String.class), any(Processor.class))).willReturn(exchangeMock);
-        given(exchangeMock.getMessage()).willReturn(messageMock);
+        camelContext = new DefaultCamelContext();
+        httpFileUploader = new HttpFileUploader(camelContext);
+        camelContext.addRoutes(httpFileUploader);
+        camelContext.start();
+
+        adviceWith(camelContext, ROUTE_ID, route -> route.weaveByType(ToDynamicDefinition.class).replace().to(MOCK_ENDPOINT));
+        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
+    }
+
+    @AfterEach
+    void tearDown()
+    {
+        camelContext.stop();
     }
 
     @Test
-    void testUpload()
+    void testUpload() throws InterruptedException
     {
         // given
-        FileUploadRequest request = mock(FileUploadRequest.class);
-        httpClientWillRespondWith(STATUS_CODE_200);
+        FileUploadRequest request = createFileUploadRequestMock();
+        mockEndpointWillRespondWith(STATUS_CODE_200);
+        mockEndpointExpectInRequestHeader(Exchange.CONTENT_TYPE, CONTENT_TYPE);
 
         // when
-        httpFileUploader.upload(request);
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
 
         // then
-        then(messageMock).should().getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
-        then(messageMock).shouldHaveNoMoreInteractions();
+        mockEndpoint.assertIsSatisfied();
+        assertThat(thrown).doesNotThrowAnyException();
     }
 
     @Test
     void testUpload_invalidResponseStatusCode()
     {
         // given
-        FileUploadRequest request = mock(FileUploadRequest.class);
-        httpClientWillRespondWith(STATUS_CODE_500);
+        FileUploadRequest request = createFileUploadRequestMock();
+        mockEndpointWillRespondWith(STATUS_CODE_500);
 
         // when
         Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
 
         // then
-        then(messageMock).should().getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
-        then(messageMock).should().getBody(String.class);
         assertThat(thrown)
+                .cause()
                 .isInstanceOf(LiveIngesterRuntimeException.class)
-                .hasMessageContaining("received:", 500);
+                .hasMessageContaining("received:", STATUS_CODE_500);
     }
 
-    private void httpClientWillRespondWith(int statusCode)
+    private FileUploadRequest createFileUploadRequestMock()
     {
-        given(messageMock.getHeader(any(String.class), any(Class.class))).willReturn(statusCode);
+        FileUploadRequest request = mock(FileUploadRequest.class);
+        URL url = mock(URL.class);
+        given(request.contentType()).willReturn(CONTENT_TYPE);
+        given(request.storageLocation()).willReturn(url);
+        given(url.toString()).willReturn(MOCK_ENDPOINT);
+        return request;
+    }
+
+    private void mockEndpointWillRespondWith(int statusCode)
+    {
+        mockEndpoint.returnReplyHeader(HTTP_RESPONSE_CODE, new ConstantExpression(String.valueOf(statusCode)));
+    }
+
+    private void mockEndpointExpectInRequestHeader(String headerName, String expectedValue)
+    {
+        mockEndpoint.expectedHeaderReceived(headerName, expectedValue);
     }
 }

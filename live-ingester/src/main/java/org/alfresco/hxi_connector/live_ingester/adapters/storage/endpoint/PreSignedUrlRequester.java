@@ -25,18 +25,18 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage.endpoint;
 
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -51,31 +51,42 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 {
     private static final String LOCAL_ENDPOINT = "direct:" + PreSignedUrlRequester.class.getSimpleName();
     static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
-    private static final String CONTENT_TYPE_PROPERTY = "contentType";
-    private static final String NODE_ID_PROPERTY = "objectId";
+    static final String NODE_ID_PROPERTY = "objectId";
+    static final String CONTENT_TYPE_PROPERTY = "contentType";
     private static final int EXPECTED_STATUS_CODE = 201;
 
     private final CamelContext camelContext;
-    private final ObjectMapper objectMapper;
 
     private final String targetEndpoint;
 
     @Autowired
-    public PreSignedUrlRequester(CamelContext camelContext, ObjectMapper objectMapper, @Value("${alfresco.integration.storage.endpoint}") String targetEndpoint)
+    public PreSignedUrlRequester(CamelContext camelContext, @Value("${alfresco.integration.storage.endpoint}") String targetEndpoint)
     {
         super(camelContext);
         this.camelContext = camelContext;
-        this.objectMapper = objectMapper;
         this.targetEndpoint = targetEndpoint;
     }
 
     @Override
     public void configure()
     {
+        onException(Exception.class)
+                .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+                .stop();
+
         from(LOCAL_ENDPOINT)
                 .marshal()
                 .json()
-                .to(targetEndpoint);
+                .to(targetEndpoint)
+                .choice()
+                .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
+                .unmarshal()
+                .json(JsonLibrary.Jackson, Map.class)
+                .process(PreSignedUrlRequester::extractUrl)
+                .otherwise()
+                .process(PreSignedUrlRequester::throwUnexpectedStatusCodeException)
+                .endChoice()
+                .end();
     }
 
     @Override
@@ -84,55 +95,36 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         Map<String, String> request = Map.of(NODE_ID_PROPERTY, storageLocationRequest.nodeId(),
                 CONTENT_TYPE_PROPERTY, storageLocationRequest.contentType());
 
-        Message message = camelContext.createProducerTemplate()
-                .send(LOCAL_ENDPOINT, exchange -> exchange.getIn().setBody(request))
-                .getMessage();
-
-        return extractUrlFromMessage(message);
+        return camelContext.createProducerTemplate().requestBody(LOCAL_ENDPOINT, request, URL.class);
     }
 
-    private URL extractUrlFromMessage(Message message)
+    @SuppressWarnings("unchecked")
+    private static void extractUrl(Exchange exchange)
     {
-        String responseBody = message.getBody(String.class);
-        int statusCode = message.getHeader(Exchange.HTTP_RESPONSE_CODE, Integer.class);
-        verifyStatusCode(statusCode, responseBody);
-
-        return extractUrlFromResponseBody(responseBody);
+        exchange.getIn().setBody(extractStorageLocationUrl(exchange.getMessage().getBody(Map.class)), URL.class);
     }
 
-    private void verifyStatusCode(int actual, String responseBody)
+    private static URL extractStorageLocationUrl(Map<String, Object> map)
     {
-        if (actual != EXPECTED_STATUS_CODE)
+        if (map.containsKey(STORAGE_LOCATION_PROPERTY))
         {
-            log.error("Unexpected response. Body: {}", responseBody);
-            throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + actual);
-        }
-    }
-
-    private URL extractUrlFromResponseBody(String responseBody)
-    {
-        try
-        {
-            Map<String, Object> response = objectMapper.readValue(responseBody, new TypeReference<>() {});
-            if (response.containsKey(STORAGE_LOCATION_PROPERTY))
+            try
             {
-                return new URL(String.valueOf(response.get(STORAGE_LOCATION_PROPERTY)));
+                return new URL(String.valueOf(map.get(STORAGE_LOCATION_PROPERTY)));
             }
-            else
+            catch (MalformedURLException e)
             {
-                log.error("Unexpected response. Body: {}", responseBody);
-                throw new LiveIngesterRuntimeException("Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
+                throw new LiveIngesterRuntimeException("Parsing URL from response property failed!", e);
             }
         }
-        catch (JsonProcessingException e)
+        else
         {
-            log.error("Unexpected response. Body: {}", responseBody);
-            throw new LiveIngesterRuntimeException("Parsing JSON response failed!", e);
+            throw new LiveIngesterRuntimeException("Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
         }
-        catch (MalformedURLException e)
-        {
-            log.error("Unexpected pre-signed URL in response. Body: {}", responseBody);
-            throw new LiveIngesterRuntimeException("Parsing URL from response property failed!", e);
-        }
+    }
+
+    private static void throwUnexpectedStatusCodeException(Exchange exchange)
+    {
+        throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class));
     }
 }

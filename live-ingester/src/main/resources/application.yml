@@ -20,7 +20,8 @@ alfresco:
         &authMethod=Basic\
         &authUsername=${hyland.experience.insight.api.username}\
         &authPassword=${hyland.experience.insight.api.password}\
-        &authenticationPreemptive=true"
+        &authenticationPreemptive=true\
+        &throwExceptionOnFailure=false"
   ingester:
     messaging:
       in.endpoint: activemq:topic:alfresco.repo.event2
