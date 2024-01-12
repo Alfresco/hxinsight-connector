@@ -40,6 +40,7 @@ import java.net.URL;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import lombok.SneakyThrows;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
@@ -68,7 +69,8 @@ class PreSignedUrlRequesterTest
     PreSignedUrlRequester preSignedUrlRequester;
 
     @BeforeEach
-    public void setUp() throws Exception
+    @SneakyThrows
+    void setUp()
     {
         camelContext = new DefaultCamelContext();
         preSignedUrlRequester = new PreSignedUrlRequester(camelContext, MOCK_ENDPOINT);

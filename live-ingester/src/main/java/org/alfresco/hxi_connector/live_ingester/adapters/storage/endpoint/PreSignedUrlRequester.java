@@ -98,7 +98,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         return camelContext.createProducerTemplate().requestBody(LOCAL_ENDPOINT, request, URL.class);
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "PMD.UnusedPrivateMethod"})
     private static void extractUrl(Exchange exchange)
     {
         exchange.getIn().setBody(extractStorageLocationUrl(exchange.getMessage().getBody(Map.class)), URL.class);
@@ -123,6 +123,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         }
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static void throwUnexpectedStatusCodeException(Exchange exchange)
     {
         throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class));
