@@ -32,6 +32,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Cleanup;
@@ -99,7 +100,7 @@ class HttpFileUploaderIntegrationTest
         List<String> actualBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
         assertThat(initialBucketContent).doesNotContain(OBJECT_KEY);
         assertThat(actualBucketContent).contains(OBJECT_KEY);
-        assertThat(actualBucketContent.size() - initialBucketContent.size()).isEqualTo(1);
+        assertThat(differencesBetween(actualBucketContent, initialBucketContent)).containsExactly(OBJECT_KEY);
     }
 
     @DynamicPropertySource
@@ -109,5 +110,12 @@ class HttpFileUploaderIntegrationTest
         registry.add("local.aws.region", localStackServer::getRegion);
         registry.add("local.aws.access-key-id", localStackServer::getAccessKey);
         registry.add("local.aws.secret-access-key", localStackServer::getSecretKey);
+    }
+
+    private static List<String> differencesBetween(List<String> firstList, List<String> secondList)
+    {
+        List<String> difference = new ArrayList<>(firstList);
+        difference.removeAll(secondList);
+        return difference;
     }
 }
