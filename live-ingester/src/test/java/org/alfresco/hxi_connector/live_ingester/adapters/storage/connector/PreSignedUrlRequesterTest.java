@@ -211,6 +211,6 @@ class PreSignedUrlRequesterTest
 
     private static String removeLastCharacter(String string)
     {
-        return string.replaceAll(".$", "");
+        return string.replaceFirst(".$", "");
     }
 }
