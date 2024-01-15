@@ -143,7 +143,7 @@ class PreSignedUrlRequesterTest
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
-        String invalidJsonBody = RESPONSE_BODY.replaceAll(".$", "");
+        String invalidJsonBody = removeLastCharacter(RESPONSE_BODY);
         mockEndpointWillRespondWith(STATUS_CODE_201, invalidJsonBody);
 
         // when
@@ -207,5 +207,10 @@ class PreSignedUrlRequesterTest
     private static String createResponseBodyWith(String propertyName, String propertyValue)
     {
         return String.format(RESPONSE_BODY_PATTERN, propertyName, propertyValue);
+    }
+
+    private static String removeLastCharacter(String string)
+    {
+        return string.replaceAll(".$", "");
     }
 }
