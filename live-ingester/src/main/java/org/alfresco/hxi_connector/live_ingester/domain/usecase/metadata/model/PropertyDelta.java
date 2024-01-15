@@ -39,7 +39,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.Up
 @EqualsAndHashCode
 public class PropertyDelta<T>
 {
-
     private final PropertyState propertyState;
     private final T propertyValue;
 
@@ -56,7 +55,6 @@ public class PropertyDelta<T>
     private PropertyDelta(PropertyState propertyState, T value)
     {
         ensureNonNull(propertyState, "Property state cannot be null");
-        ensureNonNull(value, "Property key cannot be null");
 
         this.propertyState = propertyState;
         this.propertyValue = value;
