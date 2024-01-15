@@ -59,6 +59,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.Ev
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
@@ -132,18 +133,20 @@ class IngestMetadataCommandHandlerTest
         assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
     }
 
+    /** Test that we handle null created by/updated by, which happens for example with log in events. */
     @Test
     void canSupportEventsWithNullUsers()
     {
         // given
+        PropertyDelta<String> nullUser = updated(null);
         IngestMetadataCommand command = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
                 NODE_ID,
                 updated(NODE_NAME),
                 updated(NODE_PRIMARY_ASSOC_Q_NAME),
                 updated(NODE_TYPE),
-                updated(null),
-                updated(null),
+                nullUser, // Missing created by
+                nullUser, // Missing updated by
                 updated(NODE_ASPECT_NAMES),
                 updated(NODE_IS_FILE),
                 updated(NODE_IS_FOLDER),
