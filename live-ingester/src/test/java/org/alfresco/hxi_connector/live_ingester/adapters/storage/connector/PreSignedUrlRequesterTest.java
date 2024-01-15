@@ -45,12 +45,14 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.language.ConstantExpression;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PreSignedUrlRequesterTest
 {
     private static final String MOCK_ENDPOINT = "mock:hxi-endpoint";
@@ -67,9 +69,9 @@ class PreSignedUrlRequesterTest
 
     PreSignedUrlRequester preSignedUrlRequester;
 
-    @BeforeEach
+    @BeforeAll
     @SneakyThrows
-    void setUp()
+    void beforeAll()
     {
         camelContext = new DefaultCamelContext();
         preSignedUrlRequester = new PreSignedUrlRequester(camelContext, MOCK_ENDPOINT);
@@ -79,8 +81,8 @@ class PreSignedUrlRequesterTest
         mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
     }
 
-    @AfterEach
-    void tearDown()
+    @AfterAll
+    void afterAll()
     {
         camelContext.stop();
     }

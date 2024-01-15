@@ -43,12 +43,14 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.ToDynamicDefinition;
 import org.apache.camel.model.language.ConstantExpression;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HttpFileUploaderTest
 {
     private static final String MOCK_ENDPOINT = "mock:s3-endpoint";
@@ -61,9 +63,9 @@ class HttpFileUploaderTest
 
     HttpFileUploader httpFileUploader;
 
-    @BeforeEach
+    @BeforeAll
     @SneakyThrows
-    void setUp()
+    void beforeAll()
     {
         camelContext = new DefaultCamelContext();
         httpFileUploader = new HttpFileUploader(camelContext);
@@ -74,8 +76,8 @@ class HttpFileUploaderTest
         mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
     }
 
-    @AfterEach
-    void tearDown()
+    @AfterAll
+    void afterAll()
     {
         camelContext.stop();
     }
