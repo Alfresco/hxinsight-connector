@@ -67,7 +67,7 @@
     <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
     <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
     <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
-    <spotless-plugin.version>2.41.1</spotless-plugin.version>
+    <spotless-plugin.version>2.42.0</spotless-plugin.version>
 
     <!-- Used by the generated .env file for docker-compose. -->
     <dist.alfresco.version>23.1.1</dist.alfresco.version>
