@@ -10,7 +10,7 @@
   <artifactId>alfresco-hxinsight-connector-parent</artifactId>
   <packaging>pom</packaging>
   <name>Alfresco Connector for Hyland Experience Insight :: Parent</name>
-  <version>0.0.3-SNAPSHOT</version>
+  <version>0.0.4-SNAPSHOT</version>
 
   <modules>
     <module>live-ingester</module>
