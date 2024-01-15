@@ -54,8 +54,6 @@ public record IngestMetadataCommand(
         ensureNonNull(name, "Node %s name delta cannot be null", nodeId);
         ensureNonNull(primaryAssocQName, "Node %s qualified name delta cannot be null", nodeId);
         ensureNonNull(nodeType, "Node %s type delta cannot be null", nodeId);
-        ensureNonNull(createdByUserWithId, "Node %s created by user with nodeId delta cannot be null", nodeId);
-        ensureNonNull(modifiedByUserWithId, "Node %s modified by user with nodeId delta cannot be null", nodeId);
         ensureNonNull(aspectNames, "Node %s aspect names delta cannot be null", nodeId);
         ensureNonNull(isFile, "Node %s is file property delta cannot be null", nodeId);
         ensureNonNull(isFolder, "Node %s is folder property delta cannot be null", nodeId);

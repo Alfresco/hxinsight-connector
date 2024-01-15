@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
@@ -94,6 +95,27 @@ class UpdateNodeMetadataEventSerializerTest
                 {
                   "setProperties" : [ ],
                   "unsetProperties" : [ "isFile", "name", "modifiedByUserWithId" ]
+                }""";
+        String actualJson = serialize(event);
+
+        assertEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void canCopeWithNullUsers()
+    {
+        UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
+                .set(CREATED_BY_USER_WITH_ID.withValue(null))
+                .set(MODIFIED_BY_USER_WITH_ID.withValue(null));
+
+        String expectedJson = """
+                {
+                  "setProperties" : [ {
+                    "createdByUserWithId" : null
+                  }, {
+                    "modifiedByUserWithId" : null
+                  } ],
+                  "unsetProperties" : [ ]
                 }""";
         String actualJson = serialize(event);
 
