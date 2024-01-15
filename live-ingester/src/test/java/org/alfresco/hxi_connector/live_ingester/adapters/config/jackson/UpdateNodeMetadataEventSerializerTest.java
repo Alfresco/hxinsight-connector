@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

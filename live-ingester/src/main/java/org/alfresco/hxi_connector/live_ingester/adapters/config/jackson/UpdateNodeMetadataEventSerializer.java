@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import java.io.IOException;
 
@@ -33,9 +33,9 @@ import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.exception.JsonSerializationException;
 
 @Component
 public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeMetadataEvent>

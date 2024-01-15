@@ -23,17 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
-import java.io.File;
-import java.io.InputStream;
-import java.net.URL;
-
-import org.apache.http.StatusLine;
-
-public interface StorageClient
-{
-    StatusLine upload(File file, String contentType, URL preSignedUrl);
-
-    StatusLine upload(InputStream inputStream, String contentType, URL preSignedUrl);
-}
+public record StorageLocationRequest(String nodeId, String contentType)
+{}

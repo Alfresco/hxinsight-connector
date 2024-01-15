@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,7 +26,11 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
+
+import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -34,6 +38,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
@@ -47,6 +52,9 @@ class IngestContentCommandHandlerTest
 
     @Mock
     TransformRequester transformRequester;
+    @Mock
+    StorageClient storageClient;
+
     @InjectMocks
     IngestContentCommandHandler ingestContentCommandHandler;
 
@@ -63,5 +71,6 @@ class IngestContentCommandHandlerTest
         TransformRequest expectedTransformationRequest = new TransformRequest(TIMESTAMP, NODE_ID, PDF_MIMETYPE);
 
         then(transformRequester).should().requestTransform(expectedTransformationRequest);
+        then(storageClient).should().upload(any(InputStream.class), eq(PDF_MIMETYPE), eq(NODE_ID));
     }
 }

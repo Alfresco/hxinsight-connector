@@ -23,18 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import java.io.InputStream;
+import java.net.URL;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
-{
-
-    public static void main(String[] args)
-    {
-        SpringApplication.run(LiveIngesterApplication.class, args);
-    }
-}
+public record FileUploadRequest(InputStream inputStream, String contentType, URL storageLocation)
+{}

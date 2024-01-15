@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.messaging.config.jackson.exception;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
