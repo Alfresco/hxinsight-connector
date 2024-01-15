@@ -88,7 +88,7 @@ class HttpFileUploaderTest
         // given
         FileUploadRequest request = createFileUploadRequestMock();
         mockEndpointWillRespondWith(STATUS_CODE_200);
-        mockEndpointExpectInRequestHeader(Exchange.CONTENT_TYPE, CONTENT_TYPE);
+        mockEndpointWillExpectInRequestBody(Exchange.CONTENT_TYPE, CONTENT_TYPE);
 
         // when
         Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
@@ -130,7 +130,7 @@ class HttpFileUploaderTest
         mockEndpoint.returnReplyHeader(HTTP_RESPONSE_CODE, new ConstantExpression(String.valueOf(statusCode)));
     }
 
-    private void mockEndpointExpectInRequestHeader(String headerName, String expectedValue)
+    private void mockEndpointWillExpectInRequestBody(String headerName, String expectedValue)
     {
         mockEndpoint.expectedHeaderReceived(headerName, expectedValue);
     }

@@ -93,7 +93,7 @@ class PreSignedUrlRequesterTest
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
         mockEndpointWillRespondWith(STATUS_CODE_201, RESPONSE_BODY);
-        mockEndpointExpectInRequestBody(NODE_ID_PROPERTY, NODE_REF, CONTENT_TYPE_PROPERTY, CONTENT_TYPE);
+        mockEndpointWillExpectInRequestBody(NODE_ID_PROPERTY, NODE_REF, CONTENT_TYPE_PROPERTY, CONTENT_TYPE);
 
         // when
         URL url = preSignedUrlRequester.requestStorageLocation(request);
@@ -199,7 +199,7 @@ class PreSignedUrlRequesterTest
         });
     }
 
-    private void mockEndpointExpectInRequestBody(String... expectedProperties)
+    private void mockEndpointWillExpectInRequestBody(String... expectedProperties)
     {
         Stream.of(expectedProperties).forEach(property -> mockEndpoint.message(0).body(String.class).contains(property));
     }
