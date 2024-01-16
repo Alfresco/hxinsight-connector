@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/pre-signed-url"
+  },
+  "response": {
+    "status": 201,
+    "bodyFileName": "pre-signed-url.json"
+  }
+}

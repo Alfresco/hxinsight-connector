@@ -54,7 +54,7 @@ public class IngestContentCommandHandler
 
         try (InputStream fileContent = new ByteArrayInputStream("Dummy's file dummy content".getBytes()))
         {
-            storageClient.upload(fileContent, PDF_MIMETYPE, command.nodeId());
+            storageClient.upload(fileContent, "text/plain", command.nodeId());
         }
         catch (IOException e)
         {
