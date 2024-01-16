@@ -51,8 +51,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-mock</artifactId>
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-mock-starter</artifactId>
             <scope>test</scope>
         </dependency>
         <dependency>
