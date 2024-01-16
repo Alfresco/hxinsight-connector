@@ -34,6 +34,8 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyDeleted;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUpdated;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
@@ -45,22 +47,24 @@ public class CategoryPropertyResolver implements CustomPropertyResolver<Set<Stri
     private static final String TAGS_PROPERTY_NAME = "cm:taggable";
 
     @Override
-    public boolean canResolve(String propertyName)
+    public boolean canResolve(CustomPropertyDelta<?> customPropertyDelta)
     {
+        String propertyName = customPropertyDelta.getPropertyName();
+
         return propertyName.equals(CATEGORIES_PROPERTY_NAME) || propertyName.equals(TAGS_PROPERTY_NAME);
     }
 
     @Override
-    public Optional<CustomPropertyDelta<Set<String>>> resolveUpdated(String propertyName, Object propertyValue)
+    public Optional<CustomPropertyDelta<Set<String>>> resolveUpdated(CustomPropertyUpdated<?> updatedProperty)
     {
-        ensureThat(canResolve(propertyName), "Unsupported property. name: %s, value: %s", propertyName, propertyValue);
+        ensureThat(canResolve(updatedProperty), "Unsupported property: %s", updatedProperty);
 
-        Set<String> ids = ((List<Map<String, Object>>) propertyValue)
+        Set<String> ids = ((List<Map<String, Object>>) updatedProperty.getPropertyValue())
                 .stream()
                 .map(this::getId)
                 .collect(Collectors.toSet());
 
-        return Optional.of(CustomPropertyDelta.updated(propertyName, ids));
+        return Optional.of(CustomPropertyDelta.updated(updatedProperty.getPropertyName(), ids));
     }
 
     private String getId(Map<String, Object> entry)
@@ -69,10 +73,10 @@ public class CategoryPropertyResolver implements CustomPropertyResolver<Set<Stri
     }
 
     @Override
-    public Optional<CustomPropertyDelta<Set<String>>> resolveDeleted(String propertyName)
+    public Optional<CustomPropertyDelta<Set<String>>> resolveDeleted(CustomPropertyDeleted<?> deletedProperty)
     {
-        ensureThat(canResolve(propertyName), "Unsupported property. name: %s", propertyName);
+        ensureThat(canResolve(deletedProperty), "Unsupported property: %s", deletedProperty);
 
-        return Optional.of(CustomPropertyDelta.deleted(propertyName));
+        return Optional.of((CustomPropertyDelta<Set<String>>) deletedProperty);
     }
 }

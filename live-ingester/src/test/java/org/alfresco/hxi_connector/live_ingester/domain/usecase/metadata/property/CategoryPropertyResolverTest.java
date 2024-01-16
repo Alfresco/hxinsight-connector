@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.updated;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -53,31 +55,31 @@ class CategoryPropertyResolverTest
     @Test
     void shouldBeAbleToResolveCategoriesProperty()
     {
-        assertTrue(categoryPropertyResolver.canResolve("cm:categories"));
+        assertTrue(categoryPropertyResolver.canResolve(deleted("cm:categories")));
     }
 
     @Test
     void shouldBeAbleToResolveTaggableProperty()
     {
-        assertTrue(categoryPropertyResolver.canResolve("cm:taggable"));
+        assertTrue(categoryPropertyResolver.canResolve(deleted("cm:taggable")));
     }
 
     @Test
     void shouldNotBeAbleToResolveOtherProperties()
     {
-        assertFalse(categoryPropertyResolver.canResolve("cm:other"));
+        assertFalse(categoryPropertyResolver.canResolve(deleted("cm:other")));
     }
 
     @Test
     void shouldThrowIfTryingToResolveUpdatedUnsupportedProperty()
     {
-        assertThrows(ValidationException.class, () -> categoryPropertyResolver.resolveUpdated("cm:other", ""));
+        assertThrows(ValidationException.class, () -> categoryPropertyResolver.resolveUpdated(updated("cm:other", "")));
     }
 
     @Test
     void shouldThrowIfTryingToResolveDeletedUnsupportedProperty()
     {
-        assertThrows(ValidationException.class, () -> categoryPropertyResolver.resolveDeleted("cm:other"));
+        assertThrows(ValidationException.class, () -> categoryPropertyResolver.resolveDeleted(deleted("cm:other")));
     }
 
     @Test
@@ -108,7 +110,7 @@ class CategoryPropertyResolverTest
         List<Object> taggablePropertyValue = getTaggablePropertyValue(propertyDefinition);
 
         // when
-        CustomPropertyDelta<Set<String>> resolvedProperty = categoryPropertyResolver.resolveUpdated(taggable, taggablePropertyValue).get();
+        CustomPropertyDelta<Set<String>> resolvedProperty = categoryPropertyResolver.resolveUpdated(updated(taggable, taggablePropertyValue)).get();
 
         // then
         CustomPropertyDelta<Set<String>> expectedProperty = CustomPropertyDelta.updated("cm:taggable", Set.of("51d0b636-3c3b-4e33-ba1f-098474f53e8c", "a9f57ef6-2acf-4b2a-ae85-82cf552bec58"));
@@ -123,10 +125,10 @@ class CategoryPropertyResolverTest
         String taggable = "cm:taggable";
 
         // when
-        var resolvedProperty = categoryPropertyResolver.resolveDeleted(taggable);
+        var resolvedProperty = categoryPropertyResolver.resolveDeleted(deleted(taggable));
 
         // then
-        CustomPropertyDelta<?> expectedProperty = CustomPropertyDelta.deleted(taggable);
+        CustomPropertyDelta<?> expectedProperty = deleted(taggable);
 
         assertTrue(resolvedProperty.isPresent());
         assertEquals(expectedProperty, resolvedProperty.get());
