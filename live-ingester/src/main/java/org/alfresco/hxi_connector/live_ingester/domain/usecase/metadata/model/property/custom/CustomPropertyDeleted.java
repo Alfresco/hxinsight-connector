@@ -42,6 +42,7 @@ public class CustomPropertyDeleted<T> extends CustomPropertyDelta<T>
         super(propertyName);
     }
 
+    @Override
     public void applyOn(UpdateNodeMetadataEvent event)
     {
         event.unset(getPropertyName());

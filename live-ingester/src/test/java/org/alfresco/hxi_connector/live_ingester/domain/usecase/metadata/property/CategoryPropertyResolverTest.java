@@ -114,7 +114,7 @@ class CategoryPropertyResolverTest
         CustomPropertyDelta<Set<String>> resolvedProperty = categoryPropertyResolver.resolveUpdated(updated(taggable, taggablePropertyValue)).get();
 
         // then
-        CustomPropertyDelta<Set<String>> expectedProperty = CustomPropertyDelta.updated("cm:taggable", Set.of("51d0b636-3c3b-4e33-ba1f-098474f53e8c", "a9f57ef6-2acf-4b2a-ae85-82cf552bec58"));
+        CustomPropertyDelta<Set<String>> expectedProperty = updated("cm:taggable", Set.of("51d0b636-3c3b-4e33-ba1f-098474f53e8c", "a9f57ef6-2acf-4b2a-ae85-82cf552bec58"));
 
         assertEquals(expectedProperty, resolvedProperty);
     }

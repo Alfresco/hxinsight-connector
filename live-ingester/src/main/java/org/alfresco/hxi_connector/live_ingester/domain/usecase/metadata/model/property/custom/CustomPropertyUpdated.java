@@ -52,6 +52,7 @@ public class CustomPropertyUpdated<T> extends CustomPropertyDelta<T>
         this.propertyValue = propertyValue;
     }
 
+    @Override
     public void applyOn(UpdateNodeMetadataEvent event)
     {
         event.set(new NodeProperty<>(getPropertyName(), propertyValue));
