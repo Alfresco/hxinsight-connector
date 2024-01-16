@@ -24,51 +24,43 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyDeleted;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUpdated;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @Getter
 @ToString
-@EqualsAndHashCode
-public abstract class CustomPropertyDelta<T>
+public class CustomPropertyUpdated<T> extends CustomPropertyDelta<T>
 {
-    private final String propertyName;
+    private final T propertyValue;
 
-    public static <T> CustomPropertyUpdated<T> updated(String key, T propertyValue)
+    public CustomPropertyUpdated(String propertyName, T propertyValue)
     {
-        return new CustomPropertyUpdated<>(key, propertyValue);
+        super(propertyName);
+
+        ensureNonNull(propertyValue, "Property value cannot be null. Property name: %s", propertyName);
+        this.propertyValue = propertyValue;
     }
 
-    public static <T> CustomPropertyDeleted<T> deleted(String key)
+    @Override
+    public void applyOn(UpdateNodeMetadataEvent event)
     {
-        return new CustomPropertyDeleted<>(key);
+        event.set(new NodeProperty<>(getPropertyName(), propertyValue));
     }
 
-    protected CustomPropertyDelta(String propertyName)
+    @Override
+    public <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver)
     {
-        ensureNonNull(propertyName, "Property key cannot be null");
-
-        this.propertyName = propertyName;
+        return resolver.resolveUpdated(this);
     }
-
-    public boolean canBeResolvedWith(CustomPropertyResolver<?> resolver)
-    {
-        return resolver.canResolve(this);
-    }
-
-    public abstract void applyOn(UpdateNodeMetadataEvent event);
-
-    public abstract <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver);
 }
