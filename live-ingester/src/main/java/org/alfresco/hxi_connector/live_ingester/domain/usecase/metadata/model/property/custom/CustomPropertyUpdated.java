@@ -26,16 +26,17 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
+
+import java.util.Optional;
+
 import lombok.Getter;
 import lombok.ToString;
+
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
-
-import java.util.Optional;
-
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
 @Getter
 @ToString

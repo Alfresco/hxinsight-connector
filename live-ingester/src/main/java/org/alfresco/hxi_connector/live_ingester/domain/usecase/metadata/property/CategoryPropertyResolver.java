@@ -34,11 +34,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyDeleted;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUpdated;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyDeleted;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUpdated;
 
 @Component
 public class CategoryPropertyResolver implements CustomPropertyResolver<Set<String>>

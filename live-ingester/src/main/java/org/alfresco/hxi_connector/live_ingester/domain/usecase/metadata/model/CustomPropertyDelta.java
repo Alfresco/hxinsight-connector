@@ -70,6 +70,5 @@ public abstract class CustomPropertyDelta<T>
 
     public abstract void applyOn(UpdateNodeMetadataEvent event);
 
-
     public abstract <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver);
 }
