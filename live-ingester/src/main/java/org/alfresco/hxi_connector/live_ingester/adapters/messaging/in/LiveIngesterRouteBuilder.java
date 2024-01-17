@@ -27,11 +27,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.config.MessagingInputConfig;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.CamelEventMapper;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.config.MessagingInputConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.CamelEventMapper;
 
 @Component
 public class LiveIngesterRouteBuilder extends RouteBuilder

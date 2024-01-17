@@ -34,13 +34,13 @@ import java.time.ZonedDateTime;
 import java.util.function.Function;
 
 import lombok.RequiredArgsConstructor;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils;
-import org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;

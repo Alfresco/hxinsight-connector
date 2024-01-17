@@ -34,7 +34,6 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.repo.event.v1.model.DataAttributes;

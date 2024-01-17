@@ -36,7 +36,6 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import java.util.Set;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
