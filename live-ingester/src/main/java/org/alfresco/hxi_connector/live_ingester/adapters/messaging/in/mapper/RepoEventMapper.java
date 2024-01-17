@@ -54,7 +54,7 @@ public class RepoEventMapper
 
     public IngestContentCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        EnsureUtils.ensureThat(EventUtils.isEventTypeCreated(event), "Unsupported event type");
+        ensureThat(EventUtils.isEventTypeCreated(event), "Unsupported event type");
 
         return new IngestContentCommand(
                 event.getTime().toInstant().toEpochMilli(),
