@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper;
 
 import static java.util.Optional.ofNullable;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
 import java.time.ZonedDateTime;
@@ -53,7 +54,7 @@ public class RepoEventMapper
 
     public IngestContentCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(EventUtils.isEventTypeCreated(event), "Unsupported event type");
+        ensureThat(isEventTypeCreated(event), "Unsupported event type");
 
         return new IngestContentCommand(
                 event.getTime().toInstant().toEpochMilli(),
@@ -62,7 +63,7 @@ public class RepoEventMapper
 
     public IngestMetadataCommand mapToIngestMetadataCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(EventUtils.isEventTypeCreated(event) || EventUtils.isEventTypeUpdated(event), "Unsupported event type");
+        ensureThat(isEventTypeCreated(event) || EventUtils.isEventTypeUpdated(event), "Unsupported event type");
 
         return new IngestMetadataCommand(
                 toMilliseconds(event.getTime()),
