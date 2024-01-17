@@ -1,9 +1,12 @@
-version: "2"
+version: "3.8"
 
 services:
   alfresco:
     image: quay.io/alfresco/alfresco-content-repository:${ALFRESCO_TAG}
-    mem_limit: 1700m
+    deploy:
+      resources:
+        limits:
+          memory: 1700m
     environment:
       CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n"
       JAVA_TOOL_OPTIONS: "
@@ -16,7 +19,7 @@ services:
         -Dmetadata-keystore.metadata.password=oKIWzVdEdA
         -Dmetadata-keystore.metadata.algorithm=DESede
         "
-      JAVA_OPTS: '
+      JAVA_OPTS: "
         -Delasticsearch.createIndexIfNotExists=true
         -Ddb.driver=org.postgresql.Driver
         -Ddb.username=alfresco
@@ -25,12 +28,12 @@ services:
         -Dindex.subsystem.name=elasticsearch
         -Delasticsearch.host=elasticsearch
         -Delasticsearch.indexName=alfresco
-        -Dshare.host=127.0.0.1
+        -Dshare.host=localhost
         -Dshare.port=8080
         -Dalfresco.host=localhost
         -Dalfresco.port=8080
         -Daos.baseUrlOverwrite=http://localhost:8080/alfresco/aos
-        -Dmessaging.broker.url="failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true"
+        -Dmessaging.broker.url=\"failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true\"
         -Ddeployment.method=DOCKER_COMPOSE
         -Dtransform.service.enabled=true
         -Dtransform.service.url=http://transform-router:8095
@@ -44,85 +47,111 @@ services:
         -Dcsrf.filter.enabled=false
         -Dalfresco.restApi.basicAuthScheme=true
         -Xms1500m -Xmx1500m
-        '
+        "
     ports:
-      - 8000:8000
+      - "8000:8000"
+    healthcheck:
+      test: curl --fail http://localhost:8080/alfresco || exit 1
+      start_period: 90s
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  postgres:
+    image: postgres:${POSTGRES_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    environment:
+      POSTGRES_PASSWORD: alfresco
+      POSTGRES_USER: alfresco
+      POSTGRES_DB: alfresco
+    command: postgres -c max_connections=300 -c log_min_messages=LOG
+    ports:
+      - "5432:5432"
+
+  activemq:
+    image: quay.io/alfresco/alfresco-activemq:${ACTIVE_MQ_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    ports:
+      - "8161:8161" # Web Console
+      - "5672:5672" # AMQP
+      - "61616:61616" # OpenWire
+      - "61613:61613" # STOMP
 
   transform-router:
-    mem_limit: 512m
     image: quay.io/alfresco/alfresco-transform-router:${TRANSFORM_ROUTER_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
       ACTIVEMQ_URL: "nio://activemq:61616"
       CORE_AIO_URL: "http://transform-core-aio:8090"
       FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
     ports:
-      - 8095:8095
+      - "8095:8095"
     links:
       - activemq
 
   transform-core-aio:
     image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_CORE_AIO_TAG}
-    mem_limit: 1536m
+    deploy:
+      resources:
+        limits:
+          memory: 1536m
     environment:
       JAVA_OPTS: " -Xms256m -Xmx1536m"
       ACTIVEMQ_URL: "nio://activemq:61616"
       FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
     ports:
-      - 8090:8090
+      - "8090:8090"
     links:
       - activemq
 
   shared-file-store:
     image: quay.io/alfresco/alfresco-shared-file-store:${SHARED_FILE_STORE_TAG}
-    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
       scheduler.content.age.millis: 86400000
       scheduler.cleanup.interval: 86400000
     ports:
-      - 8099:8099
+      - "8099:8099"
     volumes:
       - shared-file-store-volume:/tmp/Alfresco/sfs
 
   share:
     image: quay.io/alfresco/alfresco-share:${SHARE_TAG}
-    mem_limit: 512m
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     environment:
       REPO_HOST: "alfresco"
       REPO_PORT: "8080"
       JAVA_OPTS: "
-        -Xms500m
-        -Xmx500m
         -Dalfresco.host=localhost
         -Dalfresco.port=8080
         -Dalfresco.context=alfresco
         -Dalfresco.protocol=http
+        -Xms512m -Xmx512m
         "
-
-  postgres:
-    image: postgres:${POSTGRES_TAG}
-    mem_limit: 512m
-    environment:
-      - POSTGRES_PASSWORD=alfresco
-      - POSTGRES_USER=alfresco
-      - POSTGRES_DB=alfresco
-    command: postgres -c max_connections=300 -c log_min_messages=LOG
-    ports:
-      - 5432:5432
-
-  activemq:
-    image: quay.io/alfresco/alfresco-activemq:${ACTIVE_MQ_TAG}
-    mem_limit: 1g
-    ports:
-      - 8161:8161 # Web Console
-      - 5672:5672 # AMQP
-      - 61616:61616 # OpenWire
-      - 61613:61613 # STOMP
 
   digital-workspace:
     image: quay.io/alfresco/alfresco-digital-workspace:${DIGITAL_WORKSPACE_TAG}
-    mem_limit: 128m
+    deploy:
+      resources:
+        limits:
+          memory: 128m
     environment:
       APP_CONFIG_PROVIDER: "ECM"
       APP_CONFIG_AUTH_TYPE: "BASIC"
@@ -131,7 +160,10 @@ services:
 
   control-center:
     image: quay.io/alfresco/alfresco-control-center:${CONTROL_CENTER_TAG}
-    mem_limit: 128m
+    deploy:
+      resources:
+        limits:
+          memory: 128m
     environment:
       APP_CONFIG_PROVIDER: "ECM"
       APP_CONFIG_AUTH_TYPE: "BASIC"
@@ -140,7 +172,10 @@ services:
   # HTTP proxy to provide HTTP Default port access to services
   proxy:
     image: alfresco/alfresco-acs-nginx:${ACS_NGINX_TAG}
-    mem_limit: 128m
+    deploy:
+      resources:
+        limits:
+          memory: 128m
     environment:
       DISABLE_SYNCSERVICE: "true"
     depends_on:
@@ -148,7 +183,7 @@ services:
       - digital-workspace
       - control-center
     ports:
-      - 8080:8080
+      - "8080:8080"
     links:
       - digital-workspace
       - alfresco
@@ -157,7 +192,10 @@ services:
 
   elasticsearch:
     image: elasticsearch:${ELASTICSEARCH_TAG}
-    mem_limit: 1700m
+    deploy:
+      resources:
+        limits:
+          memory: 1700m
     environment:
       - xpack.security.enabled=false
       - discovery.type=single-node
@@ -173,24 +211,61 @@ services:
     #    volumes:
     #      - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
-      - 9200:9200
-      - 9300:9300
+      - "9200:9200"
+      - "9300:9300"
+
+  reindexing:
+    image: quay.io/alfresco/alfresco-elasticsearch-reindexing:${SEARCH_ENTERPRISE_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5006,server=y,suspend=n
+      SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
+      SPRING_ACTIVEMQ_BROKER-URL: nio://activemq:61616
+      ALFRESCO_REINDEX_BATCH_SIZE: 100
+      ALFRESCO_REINDEX_CONCURRENT_PROCESSORS: 4
+      ALFRESCO_REINDEX_FROM_ID: 0
+      ALFRESCO_REINDEX_TO_ID: 1000
+      ALFRESCO_REINDEX_JOB_NAME: reindexByIds
+      ELASTICSEARCH_INDEX_NAME: alfresco
+      ALFRESCO_REINDEX_PATHINDEXINGENABLED: true
+      ALFRESCO_ACCEPTEDCONTENTMEDIATYPESCACHE_BASEURL: http://transform-core-aio:8090/transform/config
+    ports:
+      - "5006:5006"
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      alfresco:
+        condition: service_healthy
 
   live-indexing:
     image: quay.io/alfresco/alfresco-elasticsearch-live-indexing:${SEARCH_ENTERPRISE_TAG}
-    mem_limit: 512m
-    depends_on:
-      - elasticsearch
-      - alfresco
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n
       ELASTICSEARCH_INDEXNAME: alfresco
       SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       ALFRESCO_SHAREDFILESTORE_BASEURL: http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file/
       ALFRESCO_ACCEPTEDCONTENTMEDIATYPESCACHE_BASEURL: http://transform-core-aio:8090/transform/config
+    ports:
+      - "5005:5005"
+    depends_on:
+      reindexing:
+        condition: service_completed_successfully
 
   live-ingester:
     image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:${HXINSIGHT_CONNECTOR_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
     depends_on:
       - activemq
     environment:
@@ -203,12 +278,20 @@ services:
 
   hxinsight-mock:
     image: wiremock/wiremock:${WIREMOCK_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 256m
     command: "--global-response-templating --verbose"
     volumes:
       - ./wiremock/hxinsight:/home/wiremock
 
   aws-mock:
     image: localstack/localstack:${LOCALSTACK_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 256m
     environment:
       SERVICES: s3
       BUCKET_NAME: hxinsight-bucket-mock
