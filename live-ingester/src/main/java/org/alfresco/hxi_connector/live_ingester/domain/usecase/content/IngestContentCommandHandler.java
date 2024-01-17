@@ -60,12 +60,14 @@ public class IngestContentCommandHandler
 
     public void handle(UploadContentRenditionCommand command)
     {
-        File file = transformEngineFileStorage.downloadFile(command.transformedFileId());
-        log.debug("Downloaded file {} with size of {} bytes", command.transformedFileId(), file.bytes().length);
+        String fileId = command.transformedFileId();
+        File file = transformEngineFileStorage.downloadFile(fileId);
+        int length = file.bytes().length;
+        log.debug("Downloaded file {} with size of {} bytes", fileId, length);
 
         try (InputStream fileContent = new ByteArrayInputStream("Dummy's file dummy content".getBytes()))
         {
-            storageClient.upload(fileContent, "text/plain", command.transformedFileId());
+            storageClient.upload(fileContent, "text/plain", fileId);
         }
         catch (IOException e)
         {
