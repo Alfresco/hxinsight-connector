@@ -1,0 +1,87 @@
+version: "3.8"
+
+services:
+  alfresco:
+    extends:
+      file: docker-compose.yml
+      service: alfresco
+
+  postgres:
+    extends:
+      file: docker-compose.yml
+      service: postgres
+
+  activemq:
+    extends:
+      file: docker-compose.yml
+      service: activemq
+
+  transform-router:
+    extends:
+      file: docker-compose.yml
+      service: transform-router
+
+  transform-core-aio:
+    extends:
+      file: docker-compose.yml
+      service: transform-core-aio
+
+  shared-file-store:
+    extends:
+      file: docker-compose.yml
+      service: shared-file-store
+
+  share:
+    extends:
+      file: docker-compose.yml
+      service: share
+
+  digital-workspace:
+    extends:
+      file: docker-compose.yml
+      service: digital-workspace
+
+  control-center:
+    extends:
+      file: docker-compose.yml
+      service: control-center
+
+  proxy:
+    extends:
+      file: docker-compose.yml
+      service: proxy
+
+  elasticsearch:
+    extends:
+      file: docker-compose.yml
+      service: elasticsearch
+
+  reindexing:
+    extends:
+      file: docker-compose.yml
+      service: reindexing
+
+  live-indexing:
+    extends:
+      file: docker-compose.yml
+      service: live-indexing
+
+  hxinsight-mock:
+    extends:
+      file: docker-compose.yml
+      service: hxinsight-mock
+    environment:
+      AWS_HOST: localhost
+    ports:
+      - "8001:8080"
+
+  aws-mock:
+    extends:
+      file: docker-compose.yml
+      service: aws-mock
+
+volumes:
+  shared-file-store-volume:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs
