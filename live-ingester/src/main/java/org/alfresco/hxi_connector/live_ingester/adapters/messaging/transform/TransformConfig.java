@@ -33,7 +33,7 @@ import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.TransformRequestConfig;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response.TransformResponseConfig;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage.TransformStorageConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage.SharedFileStoreConfig;
 
 @Data
 @Validated
@@ -45,5 +45,5 @@ public class TransformConfig
     @NestedConfigurationProperty
     private TransformResponseConfig response;
     @NestedConfigurationProperty
-    private TransformStorageConfig storage;
+    private SharedFileStoreConfig sharedFileStore;
 }

@@ -60,9 +60,11 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
                 .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
                 .stop();
 
+        SharedFileStoreConfig sfsConfig = transformConfig.getSharedFileStore();
+        String sfsEndpoint = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers.fileId}?httpMethod=GET".formatted(sfsConfig.getHost(), sfsConfig.getPort());
         from(LOCAL_ENDPOINT)
                 .id(ROUTE_ID)
-                .toD(transformConfig.getStorage().getGetFileEndpoint())
+                .toD(sfsEndpoint)
                 .choice()
                 .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::bodyAsFile)

@@ -33,8 +33,9 @@ import org.springframework.validation.annotation.Validated;
 
 @Data
 @Validated
-public class TransformStorageConfig
+public class SharedFileStoreConfig
 {
     @NotBlank
-    private String getFileEndpoint;
+    private String host;
+    private int port;
 }

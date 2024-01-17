@@ -33,5 +33,6 @@ alfresco:
     response:
       queueName: org.alfresco.hxinsight-connector.transform.response
       endpoint: activemq:queue:${alfresco.transform.response.queueName}
-    storage:
-      get_file_endpoint: http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file/${headers.fileId}?httpMethod=GET
+    shared-file-store:
+      host: http://localhost
+      port: 8099
