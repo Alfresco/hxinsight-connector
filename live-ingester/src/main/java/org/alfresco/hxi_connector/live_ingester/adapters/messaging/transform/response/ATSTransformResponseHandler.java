@@ -60,6 +60,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 .end();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void uploadContentRendition(Exchange exchange)
     {
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
