@@ -52,8 +52,6 @@ class IngestContentCommandHandlerTest
 
     @Mock
     TransformRequester transformRequester;
-    @Mock
-    StorageClient storageClient;
 
     @InjectMocks
     IngestContentCommandHandler ingestContentCommandHandler;
@@ -71,6 +69,5 @@ class IngestContentCommandHandlerTest
         TransformRequest expectedTransformationRequest = new TransformRequest(TIMESTAMP, NODE_ID, PDF_MIMETYPE);
 
         then(transformRequester).should().requestTransform(expectedTransformationRequest);
-        then(storageClient).should().upload(any(InputStream.class), eq("text/plain"), eq(NODE_ID));
     }
 }
