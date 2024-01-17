@@ -112,6 +112,9 @@ class EventProcessorTest
         NodeResource nodeResource = mockNodeResource(event);
         given(nodeResource.getContent()).willReturn(mock());
 
+        IngestContentCommand ingestContentCommand = mock();
+        given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(ingestContentCommand);
+
         // when
         eventProcessor.process(event);
 
@@ -120,7 +123,7 @@ class EventProcessorTest
         then(repoEventMapper).should().mapToIngestContentCommand(event);
 
         then(ingestMetadataCommandHandler).should().handle(any());
-        then(ingestContentCommandHandler).should().handle(any(IngestContentCommand.class));
+        then(ingestContentCommandHandler).should().handle(ingestContentCommand);
     }
 
     NodeResource mockNodeResource(RepoEvent<DataAttributes<NodeResource>> repoEvent)

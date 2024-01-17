@@ -26,10 +26,16 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
@@ -43,8 +49,8 @@ public class IngestContentCommandHandler
     private static final String PDF_MIMETYPE = "application/pdf";
 
     private final TransformEngineFileStorage transformEngineFileStorage;
-
     private final TransformRequester transformRequester;
+    private final StorageClient storageClient;
 
     public void handle(IngestContentCommand command)
     {
@@ -56,5 +62,14 @@ public class IngestContentCommandHandler
     {
         File file = transformEngineFileStorage.downloadFile(command.transformedFileId());
         log.debug("Downloaded file {} with size of {} bytes", command.transformedFileId(), file.bytes().length);
+
+        try (InputStream fileContent = new ByteArrayInputStream("Dummy's file dummy content".getBytes()))
+        {
+            storageClient.upload(fileContent, "text/plain", command.transformedFileId());
+        }
+        catch (IOException e)
+        {
+            throw new LiveIngesterRuntimeException("Unable to store file in S3 bucket!", e);
+        }
     }
 }
