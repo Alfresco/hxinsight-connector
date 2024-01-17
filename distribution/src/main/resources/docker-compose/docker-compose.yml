@@ -260,22 +260,6 @@ services:
       reindexing:
         condition: service_completed_successfully
 
-  live-ingester:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:${HXINSIGHT_CONNECTOR_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    depends_on:
-      - activemq
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
-      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      HYLAND_EXPERIENCE_INSIGHT_API_URL_INGEST: http://hxinsight-mock:8080/ingest
-      HYLAND_EXPERIENCE_INSIGHT_API_URL_STORAGE-LOCATION-REQUEST: http://hxinsight-mock:8080/pre-signed-url
-    ports:
-      - "5007:5007"
-
   hxinsight-mock:
     image: wiremock/wiremock:${WIREMOCK_TAG}
     deploy:
