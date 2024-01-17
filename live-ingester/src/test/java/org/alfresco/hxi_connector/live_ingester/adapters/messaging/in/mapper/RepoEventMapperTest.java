@@ -53,7 +53,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -94,10 +94,10 @@ class RepoEventMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        IngestContentCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
+        TriggerContentIngestionCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
 
         // then
-        IngestContentCommand expectedCommand = new IngestContentCommand(
+        TriggerContentIngestionCommand expectedCommand = new TriggerContentIngestionCommand(
                 EVENT_TIMESTAMP,
                 NODE_ID);
 

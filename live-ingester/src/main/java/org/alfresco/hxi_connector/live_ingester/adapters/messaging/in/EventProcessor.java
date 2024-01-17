@@ -36,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.RepoEventMapper;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -52,7 +52,7 @@ public class EventProcessor
 
     private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
 
-    private final IngestContentCommandHandler ingestContentCommandHandler;
+    private final TriggerContentIngestionCommandHandler triggerContentIngestionCommandHandler;
 
     private final RepoEventMapper repoEventMapper;
 
@@ -76,9 +76,9 @@ public class EventProcessor
     {
         if (isEventTypeCreated(event) && containsContent(event))
         {
-            IngestContentCommand command = repoEventMapper.mapToIngestContentCommand(event);
+            TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
 
-            ingestContentCommandHandler.handle(command);
+            triggerContentIngestionCommandHandler.handle(command);
         }
     }
 

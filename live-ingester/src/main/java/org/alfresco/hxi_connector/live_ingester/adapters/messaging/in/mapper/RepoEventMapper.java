@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -52,11 +52,11 @@ public class RepoEventMapper
 {
     private final PropertiesMapper propertiesMapper;
 
-    public IngestContentCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
+    public TriggerContentIngestionCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
         ensureThat(isEventTypeCreated(event), "Unsupported event type");
 
-        return new IngestContentCommand(
+        return new TriggerContentIngestionCommand(
                 event.getTime().toInstant().toEpochMilli(),
                 event.getData().getResource().getId());
     }

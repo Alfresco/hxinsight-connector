@@ -40,14 +40,14 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.Tr
 
 @Component
 @RequiredArgsConstructor
-public class IngestContentCommandHandler
+public class TriggerContentIngestionCommandHandler
 {
     private static final String PDF_MIMETYPE = "application/pdf";
 
     private final TransformRequester transformRequester;
     private final StorageClient storageClient;
 
-    public void handle(IngestContentCommand command)
+    public void handle(TriggerContentIngestionCommand command)
     {
         TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
         transformRequester.requestTransform(transformRequest);

@@ -44,7 +44,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.Tr
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
-class IngestContentCommandHandlerTest
+class TriggerContentIngestionCommandHandlerTest
 {
     static final long TIMESTAMP = 1_234_567_890L;
     static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
@@ -56,16 +56,16 @@ class IngestContentCommandHandlerTest
     StorageClient storageClient;
 
     @InjectMocks
-    IngestContentCommandHandler ingestContentCommandHandler;
+    TriggerContentIngestionCommandHandler triggerContentIngestionCommandHandler;
 
     @Test
     void shouldRequestNodeContentTransformation()
     {
         // given
-        IngestContentCommand command = new IngestContentCommand(TIMESTAMP, NODE_ID);
+        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(TIMESTAMP, NODE_ID);
 
         // when
-        ingestContentCommandHandler.handle(command);
+        triggerContentIngestionCommandHandler.handle(command);
 
         // then
         TransformRequest expectedTransformationRequest = new TransformRequest(TIMESTAMP, NODE_ID, PDF_MIMETYPE);

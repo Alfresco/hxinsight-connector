@@ -28,11 +28,11 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
-public record IngestContentCommand(
+public record TriggerContentIngestionCommand(
         long time,
         String nodeId)
 {
-    public IngestContentCommand
+    public TriggerContentIngestionCommand
     {
         ensureNotBlank(nodeId, "Node id cannot be blank");
     }
