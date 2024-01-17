@@ -41,6 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.RepoEventMapper;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -119,7 +120,7 @@ class EventProcessorTest
         then(repoEventMapper).should().mapToIngestContentCommand(event);
 
         then(ingestMetadataCommandHandler).should().handle(any());
-        then(ingestContentCommandHandler).should().handle(any());
+        then(ingestContentCommandHandler).should().handle(any(IngestContentCommand.class));
     }
 
     NodeResource mockNodeResource(RepoEvent<DataAttributes<NodeResource>> repoEvent)

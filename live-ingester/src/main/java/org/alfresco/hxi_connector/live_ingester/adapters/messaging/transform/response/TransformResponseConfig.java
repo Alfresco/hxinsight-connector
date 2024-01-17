@@ -37,4 +37,7 @@ public class TransformResponseConfig
 {
     @NotBlank
     private String queueName;
+
+    @NotBlank
+    private String endpoint;
 }

@@ -24,26 +24,21 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
-import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import jakarta.validation.constraints.NotBlank;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.TransformRequestConfig;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response.TransformResponseConfig;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage.TransformStorageConfig;
-
-@Data
+@Getter
 @Validated
-@ConfigurationProperties(prefix = "alfresco.transform")
-public class TransformConfig
+@NoArgsConstructor
+@AllArgsConstructor
+public class TransformResponse
 {
-    @NestedConfigurationProperty
-    private TransformRequestConfig request;
-    @NestedConfigurationProperty
-    private TransformResponseConfig response;
-    @NestedConfigurationProperty
-    private TransformStorageConfig storage;
+    @NotBlank
+    private String targetReference;
 }

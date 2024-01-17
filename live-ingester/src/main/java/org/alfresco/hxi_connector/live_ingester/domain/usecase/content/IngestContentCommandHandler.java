@@ -26,39 +26,35 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class IngestContentCommandHandler
 {
     private static final String PDF_MIMETYPE = "application/pdf";
 
+    private final TransformEngineFileStorage transformEngineFileStorage;
+
     private final TransformRequester transformRequester;
-    private final StorageClient storageClient;
 
     public void handle(IngestContentCommand command)
     {
         TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
         transformRequester.requestTransform(transformRequest);
+    }
 
-        try (InputStream fileContent = new ByteArrayInputStream("Dummy's file dummy content".getBytes()))
-        {
-            storageClient.upload(fileContent, "text/plain", command.nodeId());
-        }
-        catch (IOException e)
-        {
-            throw new LiveIngesterRuntimeException("Unable to store file in S3 bucket!", e);
-        }
+    public void handle(UploadContentRenditionCommand command)
+    {
+        File file = transformEngineFileStorage.downloadFile(command.transformedFileId());
+        log.debug("Downloaded file {} with size of {} bytes", command.transformedFileId(), file.bytes().length);
     }
 }

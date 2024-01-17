@@ -27,8 +27,11 @@ alfresco:
       in.endpoint: activemq:topic:alfresco.repo.event2
       out.endpoint: ${hyland.experience.insight.api.url.ingest}?httpMethod=POST
   transform:
-    messaging:
-      request:
-        endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
-        timeout: 20000
-      response.queueName: org.alfresco.hxinsight-connector.transform.response
+    request:
+      endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
+      timeout: 20000
+    response:
+      queueName: org.alfresco.hxinsight-connector.transform.response
+      endpoint: activemq:queue:${alfresco.transform.response.queueName}
+    storage:
+      get_file_endpoint: http://localhost:8099/alfresco/api/-default-/private/sfs/versions/1/file/${headers.fileId}?httpMethod=GET
