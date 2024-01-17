@@ -72,6 +72,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
                 .end();
     }
 
+    @SuppressWarnings({"PMD.UnusedPrivateMethod"})
     private void bodyAsFile(Exchange exchange)
     {
         byte[] bytes = exchange.getIn().getBody(byte[].class);
