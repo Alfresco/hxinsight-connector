@@ -203,7 +203,7 @@ services:
 
   hxinsight-mock:
     image: wiremock/wiremock:${WIREMOCK_TAG}
-    command: "--verbose"
+    command: "--global-response-templating --verbose"
     volumes:
       - ./wiremock/hxinsight:/home/wiremock
 
