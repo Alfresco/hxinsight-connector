@@ -267,6 +267,8 @@ services:
         limits:
           memory: 256m
     command: "--global-response-templating --verbose"
+    ports:
+      - "8001:8080"
     volumes:
       - ./wiremock/hxinsight:/home/wiremock
 
