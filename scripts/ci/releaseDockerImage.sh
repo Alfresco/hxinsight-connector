@@ -34,7 +34,7 @@ fi
 
 for dockerBuildDir in $(find -name Dockerfile -exec dirname {} \;)
 do
-    if [[ "${dockerBuildDir}" != *"/classes"* ]]
+    if [[ "${dockerBuildDir}" != *"/classes/"* ]]
     then
         continue
     fi
