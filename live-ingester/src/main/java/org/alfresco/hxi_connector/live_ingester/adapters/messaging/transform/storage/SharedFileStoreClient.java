@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.st
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import java.io.InputStream;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -48,6 +50,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     private static final String ROUTE_ID = SharedFileStoreClient.class.getSimpleName();
     private static final int EXPECTED_STATUS_CODE = 200;
     private static final String FILE_ID_HEADER = "fileId";
+    private static final String PATH_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET";
 
     private final TransformConfig transformConfig;
 
@@ -61,31 +64,17 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
                 .stop();
 
         SharedFileStoreConfig sfsConfig = transformConfig.getSharedFileStore();
-        String sfsEndpoint = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers.fileId}?httpMethod=GET".formatted(sfsConfig.getHost(), sfsConfig.getPort());
+        String sfsEndpoint = PATH_PATTERN.formatted(sfsConfig.getHost(), sfsConfig.getPort());
         from(LOCAL_ENDPOINT)
                 .id(ROUTE_ID)
                 .toD(sfsEndpoint)
                 .choice()
                 .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
-                .process(this::bodyAsFile)
+                .process(this::convertBodyToFile)
                 .otherwise()
                 .process(this::throwUnexpectedStatusCodeException)
                 .endChoice()
                 .end();
-    }
-
-    @SuppressWarnings({"PMD.UnusedPrivateMethod"})
-    private void bodyAsFile(Exchange exchange)
-    {
-        byte[] bytes = exchange.getIn().getBody(byte[].class);
-
-        exchange.getIn().setBody(new File(bytes), File.class);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void throwUnexpectedStatusCodeException(Exchange exchange)
-    {
-        throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class));
     }
 
     @Override
@@ -95,5 +84,18 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
                 .to(LOCAL_ENDPOINT)
                 .withHeader(FILE_ID_HEADER, fileId)
                 .request(File.class);
+    }
+
+    @SuppressWarnings({"PMD.UnusedPrivateMethod"})
+    private void convertBodyToFile(Exchange exchange)
+    {
+        InputStream fileData = exchange.getIn().getBody(InputStream.class);
+        exchange.getMessage().setBody(new File(fileData), File.class);
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private void throwUnexpectedStatusCodeException(Exchange exchange)
+    {
+        throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class));
     }
 }

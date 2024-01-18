@@ -26,5 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 
-public record File(byte[] bytes)
+import java.io.InputStream;
+
+public record File(InputStream data)
 {}
