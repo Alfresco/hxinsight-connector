@@ -57,6 +57,7 @@ public class IngestContentCommandHandler
         transformRequester.requestTransform(transformRequest);
     }
 
+    @SuppressWarnings("PMD.GuardLogStatement")
     public void handle(UploadContentRenditionCommand command)
     {
         String fileId = command.transformedFileId();
