@@ -20,8 +20,17 @@ mvn spotless:apply
 To set up a local developer environment then build the jar, the docker image and finally run the docker-compose environment.
 
 ```bash
-mvn clean install && \
+mvn clean install -Pdistribution && \
 ./scripts/ci/buildDockerImages.sh && \
 cd distribution/src/main/resources/docker-compose && \
 docker compose --project-name dev up
+```
+
+It's also possible to set up local developer environment adjusted to run Live Ingester outside docker container, to do se please run bellow command:
+
+```bash
+mvn clean install -Pdistribution && \
+./scripts/ci/buildDockerImages.sh && \
+cd distribution/src/main/resources/docker-compose && \
+docker compose --file docker-compose-ingesterless.yml --project-name dev up
 ```

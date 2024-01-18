@@ -282,7 +282,11 @@ services:
       resources:
         limits:
           memory: 256m
-    command: "--global-response-templating --verbose"
+    command: "--global-response-templating --permitted-system-keys=AWS_.* --verbose"
+    environment:
+      AWS_HOST: aws-mock
+      AWS_PORT: 4566
+      AWS_S3_BUCKET_NAME: hxinsight-bucket-mock
     volumes:
       - ./wiremock/hxinsight:/home/wiremock
 
