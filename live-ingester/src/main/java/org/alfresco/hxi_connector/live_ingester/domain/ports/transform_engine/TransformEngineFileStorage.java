@@ -24,20 +24,11 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine;
 
-import jakarta.validation.constraints.NotBlank;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
-import lombok.Data;
-import org.springframework.validation.annotation.Validated;
-
-@Data
-@Validated
-public class TransformResponseConfig
+public interface TransformEngineFileStorage
 {
-    @NotBlank
-    private String queueName;
-
-    @NotBlank
-    private String endpoint;
+    File downloadFile(String fileId);
 }

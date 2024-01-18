@@ -28,16 +28,17 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import jakarta.validation.constraints.NotBlank;
 
-import lombok.Data;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
-@Data
+@Getter
 @Validated
-public class TransformResponseConfig
+@NoArgsConstructor
+@AllArgsConstructor
+public class TransformResponse
 {
     @NotBlank
-    private String queueName;
-
-    @NotBlank
-    private String endpoint;
+    private String targetReference;
 }

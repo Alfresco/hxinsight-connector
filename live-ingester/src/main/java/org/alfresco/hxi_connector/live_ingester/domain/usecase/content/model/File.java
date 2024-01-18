@@ -24,20 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 
-import jakarta.validation.constraints.NotBlank;
-
-import lombok.Data;
-import org.springframework.validation.annotation.Validated;
-
-@Data
-@Validated
-public class TransformResponseConfig
-{
-    @NotBlank
-    private String queueName;
-
-    @NotBlank
-    private String endpoint;
-}
+public record File(byte[] bytes)
+{}

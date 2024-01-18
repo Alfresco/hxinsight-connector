@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage;
 
 import jakarta.validation.constraints.NotBlank;
 
@@ -33,11 +33,9 @@ import org.springframework.validation.annotation.Validated;
 
 @Data
 @Validated
-public class TransformResponseConfig
+public class SharedFileStoreConfig
 {
     @NotBlank
-    private String queueName;
-
-    @NotBlank
-    private String endpoint;
+    private String host;
+    private int port;
 }
