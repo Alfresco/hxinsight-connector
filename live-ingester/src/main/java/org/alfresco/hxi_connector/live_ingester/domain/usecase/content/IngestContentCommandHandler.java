@@ -57,7 +57,6 @@ public class IngestContentCommandHandler
         transformRequester.requestTransform(transformRequest);
     }
 
-    @SuppressWarnings("PMD.GuardLogStatement")
     public void handle(UploadContentRenditionCommand command)
     {
         String fileId = command.transformedFileId();
@@ -65,7 +64,7 @@ public class IngestContentCommandHandler
 
         try (InputStream fileData = downloadedFile.data())
         {
-            log.debug("Downloaded file {} with size of {} bytes from SFS", fileId, fileData.available());
+            log.debug("Downloaded file {} from SFS", fileId);
 
             storageClient.upload(fileData, PDF_MIMETYPE, fileId);
 
