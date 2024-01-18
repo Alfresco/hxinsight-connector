@@ -50,7 +50,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     private static final String ROUTE_ID = SharedFileStoreClient.class.getSimpleName();
     private static final int EXPECTED_STATUS_CODE = 200;
     private static final String FILE_ID_HEADER = "fileId";
-    private static final String PATH_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET";
+    private static final String ENDPOINT_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET";
 
     private final TransformConfig transformConfig;
 
@@ -64,7 +64,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
                 .stop();
 
         SharedFileStoreConfig sfsConfig = transformConfig.getSharedFileStore();
-        String sfsEndpoint = PATH_PATTERN.formatted(sfsConfig.getHost(), sfsConfig.getPort());
+        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsConfig.getHost(), sfsConfig.getPort());
         from(LOCAL_ENDPOINT)
                 .id(ROUTE_ID)
                 .toD(sfsEndpoint)
