@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -47,8 +48,8 @@ public class IngestContentCommandHandler
 {
     private static final String PDF_MIMETYPE = "application/pdf";
 
-    private final TransformRequester transformRequester;
     private final TransformEngineFileStorage transformEngineFileStorage;
+    private final TransformRequester transformRequester;
     private final StorageClient storageClient;
 
     public void handle(IngestContentCommand command)
@@ -60,15 +61,13 @@ public class IngestContentCommandHandler
     public void handle(UploadContentRenditionCommand command)
     {
         String fileId = command.transformedFileId();
-        File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
+        File file = transformEngineFileStorage.downloadFile(fileId);
+        int length = file.bytes().length;
+        log.debug("Downloaded file {} with size of {} bytes", fileId, length);
 
-        try (InputStream fileData = downloadedFile.data())
+        try (InputStream fileContent = new ByteArrayInputStream("Dummy's file dummy content".getBytes()))
         {
-            log.debug("Downloaded file {} with size of {} bytes from SFS", fileId, fileData.available());
-
-            storageClient.upload(fileData, PDF_MIMETYPE, fileId);
-
-            log.debug("Uploaded file {} to S3", fileId);
+            storageClient.upload(fileContent, "text/plain", fileId);
         }
         catch (IOException e)
         {

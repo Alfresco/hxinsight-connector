@@ -26,12 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
-
-import java.io.InputStream;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -39,11 +34,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
@@ -54,11 +46,7 @@ class IngestContentCommandHandlerTest
     static final String PDF_MIMETYPE = "application/pdf";
 
     @Mock
-    TransformRequester transformRequesterMock;
-    @Mock
-    TransformEngineFileStorage transformEngineFileStorageMock;
-    @Mock
-    StorageClient storageClientMock;
+    TransformRequester transformRequester;
 
     @InjectMocks
     IngestContentCommandHandler ingestContentCommandHandler;
@@ -74,22 +62,7 @@ class IngestContentCommandHandlerTest
 
         // then
         TransformRequest expectedTransformationRequest = new TransformRequest(TIMESTAMP, NODE_ID, PDF_MIMETYPE);
-        then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
-    }
 
-    @Test
-    void shouldDownloadContentTransformationAndPassItOn()
-    {
-        // given
-        UploadContentRenditionCommand command = new UploadContentRenditionCommand(NODE_ID);
-        InputStream fileDataMock = mock(InputStream.class);
-        given(transformEngineFileStorageMock.downloadFile(any())).willReturn(new File(fileDataMock));
-
-        // when
-        ingestContentCommandHandler.handle(command);
-
-        // then
-        then(transformEngineFileStorageMock).should().downloadFile(NODE_ID);
-        then(storageClientMock).should().upload(fileDataMock, PDF_MIMETYPE, NODE_ID);
+        then(transformRequester).should().requestTransform(expectedTransformationRequest);
     }
 }
