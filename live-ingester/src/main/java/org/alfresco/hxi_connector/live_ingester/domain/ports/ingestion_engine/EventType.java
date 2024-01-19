@@ -25,7 +25,17 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
+import static java.util.Locale.ENGLISH;
+
+import com.fasterxml.jackson.annotation.JsonValue;
+
 public enum EventType
 {
-    CREATE, UPDATE
+    CREATE, UPDATE, DELETE;
+
+    @JsonValue
+    public String serialise()
+    {
+        return this.toString().toLowerCase(ENGLISH);
+    }
 }

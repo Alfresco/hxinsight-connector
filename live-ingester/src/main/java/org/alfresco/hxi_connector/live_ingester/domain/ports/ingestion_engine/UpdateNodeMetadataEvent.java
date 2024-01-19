@@ -34,7 +34,7 @@ import java.util.Set;
 import lombok.Getter;
 
 @Getter
-public class UpdateNodeMetadataEvent
+public class UpdateNodeMetadataEvent implements NodeEvent
 {
     private final String objectId;
     private final EventType eventType;

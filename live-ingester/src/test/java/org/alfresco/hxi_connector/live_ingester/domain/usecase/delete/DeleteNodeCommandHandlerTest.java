@@ -25,25 +25,42 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.delete;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class DeleteNodeCommandHandler
+@ExtendWith(MockitoExtension.class)
+public class DeleteNodeCommandHandlerTest
 {
-    private final EventPublisher eventPublisher;
+    private static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
 
-    public void handle(DeleteNodeCommand deleteNodeCommand)
+    @InjectMocks
+    private DeleteNodeCommandHandler deleteNodeCommandHandler;
+    @Mock
+    private EventPublisher eventPublisher;
+
+    @Test
+    public void testHandle()
     {
-        String nodeId = deleteNodeCommand.nodeId();
-        log.debug("Processing delete command for {}", nodeId);
-        DeleteNodeEvent deleteNodeEvent = new DeleteNodeEvent(nodeId);
-        eventPublisher.publishMessage(deleteNodeEvent);
+        // given
+        DeleteNodeCommand deleteNodeCommand = mock(DeleteNodeCommand.class);
+        given(deleteNodeCommand.nodeId()).willReturn(NODE_ID);
+
+        // when
+        deleteNodeCommandHandler.handle(deleteNodeCommand);
+
+        // then
+        NodeEvent expectedNodeEvent = new DeleteNodeEvent(NODE_ID);
+        then(eventPublisher).should().publishMessage(expectedNodeEvent);
     }
 }
