@@ -59,7 +59,7 @@ public class IngestMetadataCommandHandler
 
     public void handle(IngestMetadataCommand command)
     {
-        EventType eventType = (command.isUpdate() ? UPDATE : CREATE);
+        EventType eventType = command.isUpdate() ? UPDATE : CREATE;
         UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId(), eventType);
 
         command.name().applyAs(NAME, updateMetadataEvent);
