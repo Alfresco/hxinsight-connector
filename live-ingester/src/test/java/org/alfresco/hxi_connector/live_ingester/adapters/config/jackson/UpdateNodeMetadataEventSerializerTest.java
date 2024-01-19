@@ -26,13 +26,14 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.Assert.assertEquals;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
@@ -42,84 +43,87 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.Up
 
 class UpdateNodeMetadataEventSerializerTest
 {
+    private static final String NODE_ID = "node-id";
+
     private final UpdateNodeMetadataEventSerializer serializer = new UpdateNodeMetadataEventSerializer();
 
     @Test
     public void shouldSerializeEmptyEvent()
     {
-        UpdateNodeMetadataEvent emptyEvent = UpdateNodeMetadataEvent.create();
+        UpdateNodeMetadataEvent emptyEvent = new UpdateNodeMetadataEvent(NODE_ID);
 
         String expectedJson = """
                 {
-                  "setProperties" : [ ],
-                  "unsetProperties" : [ ]
-                }""";
+                  "objectId": "%s",
+                  "properties" : [ ]
+                }""".formatted(NODE_ID);
         String actualJson = serialize(emptyEvent);
 
-        assertEquals(expectedJson, actualJson);
+        assertJsonEquals(expectedJson, actualJson);
     }
 
     @Test
     public void shouldSerializePropertiesToSet()
     {
-        UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
+        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID)
                 .set(NAME.withValue("some-name"))
                 .set(IS_FILE.withValue(true))
                 .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
 
         String expectedJson = """
                 {
-                  "setProperties" : [ {
+                  "objectId": "%s",
+                  "properties" : [ {
                     "isFile" : true
                   }, {
                     "name" : "some-name"
                   }, {
                     "modifiedByUserWithId" : "000-000-000"
-                  } ],
-                  "unsetProperties" : [ ]
-                }""";
+                  } ]
+                }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
-        assertEquals(expectedJson, actualJson);
+        assertJsonEquals(expectedJson, actualJson);
     }
 
     @Test
     public void shouldSerializePropertiesToUnset()
     {
-        UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
+        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID)
                 .unset(NAME.getName())
                 .unset(IS_FILE.getName())
                 .unset(MODIFIED_BY_USER_WITH_ID.getName());
 
         String expectedJson = """
                 {
-                  "setProperties" : [ ],
-                  "unsetProperties" : [ "isFile", "name", "modifiedByUserWithId" ]
-                }""";
+                  "objectId": "%s",
+                  "properties" : [ ],
+                  "removedProperties" : [ "isFile", "name", "modifiedByUserWithId" ]
+                }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
-        assertEquals(expectedJson, actualJson);
+        assertJsonEquals(expectedJson, actualJson);
     }
 
     @Test
     public void canCopeWithNullUsers()
     {
-        UpdateNodeMetadataEvent event = UpdateNodeMetadataEvent.create()
+        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID)
                 .set(CREATED_BY_USER_WITH_ID.withValue(null))
                 .set(MODIFIED_BY_USER_WITH_ID.withValue(null));
 
         String expectedJson = """
                 {
-                  "setProperties" : [ {
+                  "objectId": "%s",
+                  "properties" : [ {
                     "createdByUserWithId" : null
                   }, {
                     "modifiedByUserWithId" : null
-                  } ],
-                  "unsetProperties" : [ ]
-                }""";
+                  } ]
+                }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
-        assertEquals(expectedJson, actualJson);
+        assertJsonEquals(expectedJson, actualJson);
     }
 
     @SneakyThrows
@@ -132,5 +136,14 @@ class UpdateNodeMetadataEventSerializerTest
         objectMapper.registerModule(module);
 
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(eventToSerialize);
+    }
+
+    @SneakyThrows
+    private void assertJsonEquals(String expectedJson, String actualJson)
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode expected = objectMapper.reader().readTree(expectedJson);
+        JsonNode actual = objectMapper.reader().readTree(actualJson);
+        assertEquals(expected, actual);
     }
 }

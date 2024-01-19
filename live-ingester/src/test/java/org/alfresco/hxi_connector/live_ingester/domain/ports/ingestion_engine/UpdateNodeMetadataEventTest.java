@@ -37,12 +37,13 @@ import org.junit.jupiter.api.Test;
 
 class UpdateNodeMetadataEventTest
 {
+    private static final String NODE_ID = "node-id";
 
     @Test
     void shouldOverwriteAlreadySetProperty()
     {
         // given
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = UpdateNodeMetadataEvent.create();
+        UpdateNodeMetadataEvent updateNodeMetadataEvent = new UpdateNodeMetadataEvent(NODE_ID);
 
         NodeProperty<String> name1 = NAME.withValue("name-1");
         NodeProperty<String> name2 = NAME.withValue("name-2");
@@ -60,7 +61,7 @@ class UpdateNodeMetadataEventTest
     void shouldNotDuplicatePropertiesToUnset()
     {
         // given
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = UpdateNodeMetadataEvent.create();
+        UpdateNodeMetadataEvent updateNodeMetadataEvent = new UpdateNodeMetadataEvent(NODE_ID);
 
         // when
         updateNodeMetadataEvent.unset(CREATED_BY_USER_WITH_ID.getName());
