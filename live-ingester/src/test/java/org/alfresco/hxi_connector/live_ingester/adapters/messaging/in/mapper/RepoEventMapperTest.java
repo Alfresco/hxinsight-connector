@@ -66,6 +66,7 @@ class RepoEventMapperTest
 {
     private static final long EVENT_TIMESTAMP = 1_690_000_000_100L;
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
+    private static final boolean EVENT_IS_CREATE = false;
 
     @Mock
     PropertiesMapper propertiesMapper;
@@ -130,6 +131,7 @@ class RepoEventMapperTest
         IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
                 NODE_ID,
+                EVENT_IS_CREATE,
                 regularPropertyDelta,
                 regularPropertyDelta,
                 regularPropertyDelta,

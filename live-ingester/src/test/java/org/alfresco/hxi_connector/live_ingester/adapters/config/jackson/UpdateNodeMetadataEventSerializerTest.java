@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
@@ -50,11 +52,12 @@ class UpdateNodeMetadataEventSerializerTest
     @Test
     public void shouldSerializeEmptyEvent()
     {
-        UpdateNodeMetadataEvent emptyEvent = new UpdateNodeMetadataEvent(NODE_ID);
+        UpdateNodeMetadataEvent emptyEvent = new UpdateNodeMetadataEvent(NODE_ID, CREATE);
 
         String expectedJson = """
                 {
                   "objectId": "%s",
+                  "eventType": "create",
                   "properties" : [ ]
                 }""".formatted(NODE_ID);
         String actualJson = serialize(emptyEvent);
@@ -65,7 +68,7 @@ class UpdateNodeMetadataEventSerializerTest
     @Test
     public void shouldSerializePropertiesToSet()
     {
-        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID)
+        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
                 .set(NAME.withValue("some-name"))
                 .set(IS_FILE.withValue(true))
                 .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
@@ -73,6 +76,7 @@ class UpdateNodeMetadataEventSerializerTest
         String expectedJson = """
                 {
                   "objectId": "%s",
+                  "eventType": "create",
                   "properties" : [ {
                     "isFile" : true
                   }, {
@@ -89,7 +93,7 @@ class UpdateNodeMetadataEventSerializerTest
     @Test
     public void shouldSerializePropertiesToUnset()
     {
-        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID)
+        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, UPDATE)
                 .unset(NAME.getName())
                 .unset(IS_FILE.getName())
                 .unset(MODIFIED_BY_USER_WITH_ID.getName());
@@ -97,6 +101,7 @@ class UpdateNodeMetadataEventSerializerTest
         String expectedJson = """
                 {
                   "objectId": "%s",
+                  "eventType": "update",
                   "properties" : [ ],
                   "removedProperties" : [ "isFile", "name", "modifiedByUserWithId" ]
                 }""".formatted(NODE_ID);
@@ -108,13 +113,14 @@ class UpdateNodeMetadataEventSerializerTest
     @Test
     public void canCopeWithNullUsers()
     {
-        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID)
+        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
                 .set(CREATED_BY_USER_WITH_ID.withValue(null))
                 .set(MODIFIED_BY_USER_WITH_ID.withValue(null));
 
         String expectedJson = """
                 {
                   "objectId": "%s",
+                  "eventType": "create",
                   "properties" : [ {
                     "createdByUserWithId" : null
                   }, {
