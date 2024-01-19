@@ -32,15 +32,18 @@ import java.util.Map;
 import java.util.Set;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
-@NoArgsConstructor(staticName = "create")
 public class UpdateNodeMetadataEvent
 {
+    private final String objectId;
     private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
-
     private final Set<String> metadataPropertiesToUnset = new HashSet<>();
+
+    public UpdateNodeMetadataEvent(String objectId)
+    {
+        this.objectId = objectId;
+    }
 
     public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty)
     {

@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import java.io.IOException;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -58,13 +59,19 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
         {
             jgen.writeStartObject();
 
-            jgen.writeArrayFieldStart("setProperties");
+            jgen.writeStringField("objectId", event.getObjectId());
+
+            jgen.writeArrayFieldStart("properties");
             event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, property));
             jgen.writeEndArray();
 
-            jgen.writeArrayFieldStart("unsetProperties");
-            event.getMetadataPropertiesToUnset().forEach(propertyName -> writePropertyName(jgen, propertyName));
-            jgen.writeEndArray();
+            Set<String> metadataPropertiesToUnset = event.getMetadataPropertiesToUnset();
+            if (!metadataPropertiesToUnset.isEmpty())
+            {
+                jgen.writeArrayFieldStart("removedProperties");
+                metadataPropertiesToUnset.forEach(propertyName -> writePropertyName(jgen, propertyName));
+                jgen.writeEndArray();
+            }
 
             jgen.writeEndObject();
         }

@@ -56,7 +56,7 @@ public class IngestMetadataCommandHandler
 
     public void handle(IngestMetadataCommand command)
     {
-        UpdateNodeMetadataEvent updateMetadataEvent = UpdateNodeMetadataEvent.create();
+        UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId());
 
         command.name().applyAs(NAME, updateMetadataEvent);
         command.primaryAssocQName().applyAs(PRIMARY_ASSOC_Q_NAME, updateMetadataEvent);
