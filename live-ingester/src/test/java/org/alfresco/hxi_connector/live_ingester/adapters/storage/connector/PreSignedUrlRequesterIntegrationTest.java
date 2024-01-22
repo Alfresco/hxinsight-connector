@@ -72,7 +72,7 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
     private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
 
-    private static final String NODE_ID = "some-node-ref";;
+    private static final String NODE_ID = "some-node-ref";
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
     private static final String HX_INSIGHT_TEST_USERNAME = "mock";
     private static final String HX_INSIGHT_TEST_PASSWORD = "pass";
