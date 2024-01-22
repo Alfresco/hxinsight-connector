@@ -54,6 +54,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -178,6 +179,36 @@ class RepoEventMapperTest
 
         // then
         assertThrows(ValidationException.class, () -> repoEventMapper.mapToIngestMetadataCommand(event));
+    }
+
+    @Test
+    void shouldAllowToMapToDeleteNodeCommand_whenNodeDeleted()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setTime(event, EVENT_TIMESTAMP);
+        setType(event, NODE_DELETED);
+
+        NodeResource nodeResource = NodeResource.builder().setId(NODE_ID).build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
+
+        // then
+        DeleteNodeCommand expectedCommand = new DeleteNodeCommand(EVENT_TIMESTAMP, NODE_ID);
+        assertEquals(expectedCommand, deleteNodeCommand);
+    }
+
+    @Test
+    void shouldFailToMapToDeleteNodeCommand_whenNodeCreated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_CREATED);
+
+        // then
+        assertThrows(ValidationException.class, () -> repoEventMapper.mapToDeleteNodeCommand(event));
     }
 
     public static void setTime(RepoEvent<DataAttributes<NodeResource>> event, long timestamp)

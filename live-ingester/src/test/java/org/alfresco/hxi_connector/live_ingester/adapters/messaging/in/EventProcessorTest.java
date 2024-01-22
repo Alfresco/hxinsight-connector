@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventData;
@@ -61,6 +63,9 @@ class EventProcessorTest
 
     @Mock
     IngestContentCommandHandler ingestContentCommandHandler;
+
+    @Mock
+    DeleteNodeCommandHandler deleteNodeCommandHandler;
 
     @InjectMocks
     EventProcessor eventProcessor;
@@ -124,6 +129,21 @@ class EventProcessorTest
 
         then(ingestMetadataCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).should().handle(ingestContentCommand);
+    }
+
+    @Test
+    void shouldDeleteNode()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getType()).willReturn(NODE_DELETED.getType());
+
+        // when
+        eventProcessor.process(event);
+
+        // then
+        then(repoEventMapper).should().mapToDeleteNodeCommand(event);
+        then(repoEventMapper).shouldHaveNoMoreInteractions();
     }
 
     NodeResource mockNodeResource(RepoEvent<DataAttributes<NodeResource>> repoEvent)

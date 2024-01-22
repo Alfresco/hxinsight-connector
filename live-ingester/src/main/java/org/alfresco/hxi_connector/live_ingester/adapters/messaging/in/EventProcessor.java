@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeDeleted;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeUpdated;
 
 import java.util.Optional;
@@ -38,6 +39,8 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -49,17 +52,16 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class EventProcessor
 {
-
     private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
-
     private final IngestContentCommandHandler ingestContentCommandHandler;
-
+    private final DeleteNodeCommandHandler deleteNodeCommandHandler;
     private final RepoEventMapper repoEventMapper;
 
     public void process(RepoEvent<DataAttributes<NodeResource>> event)
     {
         handleMetadataPropertiesChange(event);
         handleContentChange(event);
+        handleNodeDeleteEvent(event);
     }
 
     private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)
@@ -87,5 +89,14 @@ public class EventProcessor
         return Optional.ofNullable(event.getData().getResource())
                 .map(NodeResource::getContent)
                 .isPresent();
+    }
+
+    private void handleNodeDeleteEvent(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (isEventTypeDeleted(event))
+        {
+            DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
+            deleteNodeCommandHandler.handle(deleteNodeCommand);
+        }
     }
 }
