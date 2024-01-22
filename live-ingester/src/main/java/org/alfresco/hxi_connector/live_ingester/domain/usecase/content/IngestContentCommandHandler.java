@@ -26,14 +26,10 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import java.io.IOException;
-import java.io.InputStream;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
@@ -62,17 +58,10 @@ public class IngestContentCommandHandler
         String fileId = command.transformedFileId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
 
-        try (InputStream fileData = downloadedFile.data())
-        {
-            log.debug("Downloaded file {} from SFS", fileId);
+        log.debug("Downloaded file {} from SFS", fileId);
 
-            storageClient.upload(fileData, PDF_MIMETYPE, fileId);
+        storageClient.upload(downloadedFile, PDF_MIMETYPE, fileId);
 
-            log.debug("Uploaded file {} to S3", fileId);
-        }
-        catch (IOException e)
-        {
-            throw new LiveIngesterRuntimeException("Unable to store file in S3 bucket!", e);
-        }
+        log.debug("Uploaded file {} to S3", fileId);
     }
 }

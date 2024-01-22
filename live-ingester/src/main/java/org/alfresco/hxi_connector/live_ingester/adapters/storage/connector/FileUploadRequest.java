@@ -25,8 +25,9 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
-import java.io.InputStream;
 import java.net.URL;
 
-public record FileUploadRequest(InputStream inputStream, String contentType, URL storageLocation)
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
+
+public record FileUploadRequest(File file, String contentType, URL storageLocation)
 {}

@@ -51,6 +51,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageConfig;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
@@ -88,10 +89,13 @@ class HttpFileUploaderIntegrationTest
     {
         // given
         List<String> initialBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
+
         @Cleanup
-        InputStream fileInputStream = new ByteArrayInputStream(OBJECT_CONTENT.getBytes());
+        InputStream fileContent = new ByteArrayInputStream(OBJECT_CONTENT.getBytes());
+        File fileToUpload = new File(fileContent);
         URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
-        FileUploadRequest fileUploadRequest = new FileUploadRequest(fileInputStream, OBJECT_CONTENT_TYPE, preSignedUrl);
+
+        FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
 
         // when
         fileUploader.upload(fileUploadRequest);

@@ -31,10 +31,6 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-import lombok.Cleanup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -80,19 +76,19 @@ class IngestContentCommandHandlerTest
     }
 
     @Test
-    void shouldDownloadContentTransformationAndPassItOn() throws IOException
+    void shouldDownloadContentTransformationAndPassItOn()
     {
         // given
         UploadContentRenditionCommand command = new UploadContentRenditionCommand(NODE_ID);
-        @Cleanup
-        InputStream fileDataMock = mock(InputStream.class);
-        given(transformEngineFileStorageMock.downloadFile(any())).willReturn(new File(fileDataMock));
+
+        File fileToUpload = mock();
+        given(transformEngineFileStorageMock.downloadFile(any())).willReturn(fileToUpload);
 
         // when
         ingestContentCommandHandler.handle(command);
 
         // then
         then(transformEngineFileStorageMock).should().downloadFile(NODE_ID);
-        then(storageClientMock).should().upload(fileDataMock, PDF_MIMETYPE, NODE_ID);
+        then(storageClientMock).should().upload(fileToUpload, PDF_MIMETYPE, NODE_ID);
     }
 }

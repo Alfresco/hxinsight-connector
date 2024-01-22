@@ -49,6 +49,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HttpFileUploaderTest
@@ -119,6 +120,8 @@ class HttpFileUploaderTest
     {
         FileUploadRequest request = mock(FileUploadRequest.class);
         URL url = mock(URL.class);
+        File file = mock(File.class);
+        given(request.file()).willReturn(file);
         given(request.contentType()).willReturn(CONTENT_TYPE);
         given(request.storageLocation()).willReturn(url);
         given(url.toString()).willReturn(MOCK_ENDPOINT);
