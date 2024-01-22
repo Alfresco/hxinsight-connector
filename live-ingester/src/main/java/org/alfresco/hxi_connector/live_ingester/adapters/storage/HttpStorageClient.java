@@ -25,11 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.file.Files;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +36,6 @@ import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileU
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequester;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
 
 @Component
@@ -50,19 +46,6 @@ public class HttpStorageClient implements StorageClient
 
     private final StorageLocationRequester storageLocationRequester;
     private final FileUploader fileUploader;
-
-    @Override
-    public void upload(File file, String contentType, String nodeId)
-    {
-        try (InputStream fileInputStream = Files.newInputStream(file.toPath()))
-        {
-            this.upload(fileInputStream, contentType, nodeId);
-        }
-        catch (IOException e)
-        {
-            throw new LiveIngesterRuntimeException("Accessing file with name: " + file.getName() + " failed", e);
-        }
-    }
 
     @Override
     public void upload(InputStream inputStream, String contentType, String nodeId)
