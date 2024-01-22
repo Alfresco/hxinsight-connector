@@ -30,12 +30,10 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
-import lombok.Cleanup;
 import org.apache.camel.spring.boot.CamelAutoConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -51,6 +49,7 @@ import org.testcontainers.utility.DockerImageName;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageConfig;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
@@ -84,14 +83,15 @@ class HttpFileUploaderIntegrationTest
     }
 
     @Test
-    void testUpload() throws IOException
+    void testUpload()
     {
         // given
         List<String> initialBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
-        @Cleanup
-        InputStream fileInputStream = new ByteArrayInputStream(OBJECT_CONTENT.getBytes());
+
+        File fileToUpload = new File(new ByteArrayInputStream(OBJECT_CONTENT.getBytes()));
         URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
-        FileUploadRequest fileUploadRequest = new FileUploadRequest(fileInputStream, OBJECT_CONTENT_TYPE, preSignedUrl);
+
+        FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
 
         // when
         fileUploader.upload(fileUploadRequest);

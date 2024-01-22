@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage;
 
-import java.io.InputStream;
 import java.net.URL;
 
 import lombok.RequiredArgsConstructor;
@@ -37,6 +36,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileU
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @Component
 @RequiredArgsConstructor
@@ -48,9 +48,9 @@ public class HttpStorageClient implements StorageClient
     private final FileUploader fileUploader;
 
     @Override
-    public void upload(InputStream inputStream, String contentType, String nodeId)
+    public void upload(File file, String contentType, String nodeId)
     {
         URL preSignedUrl = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
-        fileUploader.upload(new FileUploadRequest(inputStream, contentType, preSignedUrl));
+        fileUploader.upload(new FileUploadRequest(file, contentType, preSignedUrl));
     }
 }

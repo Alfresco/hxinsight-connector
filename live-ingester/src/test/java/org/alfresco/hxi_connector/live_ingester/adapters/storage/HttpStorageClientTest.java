@@ -25,23 +25,24 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequester;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
+
+import java.net.URL;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.io.InputStream;
-import java.net.URL;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploadRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploader;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -62,7 +63,7 @@ class HttpStorageClientTest
     void testUploadDataFromInputStream()
     {
         // given
-        InputStream testData = mock(InputStream.class);
+        File testData = mock(File.class);
         URL url = mock(URL.class);
         given(storageLocationRequesterMock.requestStorageLocation(any())).willReturn(url);
 

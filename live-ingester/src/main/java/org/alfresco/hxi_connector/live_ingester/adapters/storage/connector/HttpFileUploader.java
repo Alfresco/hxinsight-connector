@@ -74,7 +74,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         Map<String, Object> headers = Map.of(STORAGE_LOCATION, fileUploadRequest.storageLocation().toString(),
                 Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
-        camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileUploadRequest.inputStream(), headers);
+        camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileUploadRequest.file().data(), headers);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
