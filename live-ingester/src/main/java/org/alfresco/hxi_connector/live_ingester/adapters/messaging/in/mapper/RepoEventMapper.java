@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper;
 import static java.util.Optional.ofNullable;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
 import java.time.ZonedDateTime;
@@ -38,7 +39,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -63,11 +63,14 @@ public class RepoEventMapper
 
     public IngestMetadataCommand mapToIngestMetadataCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(isEventTypeCreated(event) || EventUtils.isEventTypeUpdated(event), "Unsupported event type");
+        boolean isCreateEvent = isEventTypeCreated(event);
+        boolean isUpdateEvent = isEventTypeUpdated(event);
+        ensureThat(isCreateEvent || isUpdateEvent, "Unsupported event type");
 
         return new IngestMetadataCommand(
                 toMilliseconds(event.getTime()),
                 event.getData().getResource().getId(),
+                isUpdateEvent,
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getName),
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getPrimaryAssocQName),
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getNodeType),

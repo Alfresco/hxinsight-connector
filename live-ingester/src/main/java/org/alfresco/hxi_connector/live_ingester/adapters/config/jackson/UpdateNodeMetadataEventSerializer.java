@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
+import static java.util.Locale.ENGLISH;
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -60,6 +62,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
             jgen.writeStartObject();
 
             jgen.writeStringField("objectId", event.getObjectId());
+
+            jgen.writeStringField("eventType", event.getEventType().toString().toLowerCase(ENGLISH));
 
             jgen.writeArrayFieldStart("properties");
             event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, property));

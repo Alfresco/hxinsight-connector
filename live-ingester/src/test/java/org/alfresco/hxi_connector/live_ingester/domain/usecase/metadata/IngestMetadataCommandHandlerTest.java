@@ -26,9 +26,11 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
@@ -77,6 +79,7 @@ class IngestMetadataCommandHandlerTest
             "cm:auditable");
     private static final boolean NODE_IS_FOLDER = true;
     private static final boolean NODE_IS_FILE = false;
+    private static final boolean EVENT_IS_CREATE = false;
     private static final long NODE_CREATED_AT = 1_690_000_000_050L;
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
@@ -97,6 +100,7 @@ class IngestMetadataCommandHandlerTest
         IngestMetadataCommand command = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
                 NODE_ID,
+                EVENT_IS_CREATE,
                 updated(NODE_NAME),
                 updated(NODE_PRIMARY_ASSOC_Q_NAME),
                 updated(NODE_TYPE),
@@ -131,6 +135,7 @@ class IngestMetadataCommandHandlerTest
 
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
         assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
+        assertEquals(updateNodeMetadataEvent.getEventType(), CREATE);
     }
 
     /** Test that we handle null created by/updated by, which happens for example with log in events. */
@@ -142,6 +147,7 @@ class IngestMetadataCommandHandlerTest
         IngestMetadataCommand command = new IngestMetadataCommand(
                 EVENT_TIMESTAMP,
                 NODE_ID,
+                EVENT_IS_CREATE,
                 updated(NODE_NAME),
                 updated(NODE_PRIMARY_ASSOC_Q_NAME),
                 updated(NODE_TYPE),
