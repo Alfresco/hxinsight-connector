@@ -58,7 +58,7 @@
         <acs-event-model.version>0.0.25</acs-event-model.version>
         <spring-boot.version>3.2.1</spring-boot.version>
         <spring-camel.version>4.3.0</spring-camel.version>
-        <aws-sdk-s3.version>2.23.5</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.23.8</aws-sdk-s3.version>
         <wiremock.version>3.3.1</wiremock.version>
 
         <testcontainers.version>1.19.3</testcontainers.version>
