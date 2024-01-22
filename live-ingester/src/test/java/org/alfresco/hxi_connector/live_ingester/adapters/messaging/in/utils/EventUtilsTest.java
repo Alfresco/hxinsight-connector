@@ -26,7 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -89,5 +90,29 @@ class EventUtilsTest
 
         // then
         assertFalse(EventUtils.isEventTypeUpdated(event));
+    }
+
+    @Test
+    void shouldDetectNodeDeletedEvent()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        given(event.getType()).willReturn(NODE_DELETED.getType());
+
+        // then
+        assertTrue(EventUtils.isEventTypeDeleted(event));
+    }
+
+    @Test
+    void shouldDetectEventTypeIsNotDeleted()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        given(event.getType()).willReturn(NODE_UPDATED.getType());
+
+        // then
+        assertFalse(EventUtils.isEventTypeDeleted(event));
     }
 }

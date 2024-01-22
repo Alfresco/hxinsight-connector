@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper;
 import static java.util.Optional.ofNullable;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeDeleted;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property.PropertiesMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -81,6 +83,12 @@ public class RepoEventMapper
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::isFolder),
                 propertiesMapper.calculatePropertyDelta(event, node -> toMilliseconds(node.getCreatedAt())),
                 propertiesMapper.calculateCustomPropertiesDelta(event));
+    }
+
+    public DeleteNodeCommand mapToDeleteNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        ensureThat(isEventTypeDeleted(event), "Only delete events can be converted to delete commands");
+        return new DeleteNodeCommand(toMilliseconds(event.getTime()), event.getData().getResource().getId());
     }
 
     private Long toMilliseconds(ZonedDateTime time)
