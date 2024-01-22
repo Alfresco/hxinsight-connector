@@ -30,6 +30,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 
@@ -61,7 +62,7 @@ class HttpStorageClientTest
     HttpStorageClient httpStorageClient;
 
     @Test
-    void testUploadDataFromInputStream()
+    void testUploadDataFromInputStream() throws IOException
     {
         // given
         @Cleanup
