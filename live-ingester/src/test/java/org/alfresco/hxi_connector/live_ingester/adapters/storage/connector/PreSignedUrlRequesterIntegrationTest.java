@@ -26,8 +26,10 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -42,8 +44,10 @@ import java.net.URL;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import org.apache.camel.spring.boot.CamelAutoConfiguration;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -121,7 +125,7 @@ class PreSignedUrlRequesterIntegrationTest
     {
         // given
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
-                .willReturn(aResponse().withStatus(500)));
+                .willReturn(serverError()));
 
         // when
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
@@ -138,7 +142,7 @@ class PreSignedUrlRequesterIntegrationTest
     {
         // given
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
-                .willReturn(aResponse().withStatus(400)));
+                .willReturn(badRequest()));
 
         // when
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
@@ -208,6 +212,23 @@ class PreSignedUrlRequesterIntegrationTest
                 .cause()
                 .cause()
                 .isInstanceOf(MalformedURLException.class);
+    }
+
+    @Test
+    void testRequestStorageLocation_serverDown_doRetry()
+    {
+        // given
+        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+                .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
+
+        // when
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+
+        // then
+        then(locationRequester).should(times(3)).requestStorageLocation(any());
+        assertThat(thrown)
+                .cause()
+                .isInstanceOf(NoHttpResponseException.class);
     }
 
     @DynamicPropertySource

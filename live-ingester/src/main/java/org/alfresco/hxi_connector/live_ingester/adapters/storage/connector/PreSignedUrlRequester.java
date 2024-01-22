@@ -29,6 +29,7 @@ import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParseException;
@@ -39,6 +40,8 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.hc.core5.http.MalformedChunkCodingException;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
@@ -96,7 +99,13 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
                 .end();
     }
 
-    @Retryable(retryFor = {EndpointServerErrorException.class, JsonParseException.class, MismatchedInputException.class}, maxAttemptsExpression = "${alfresco.integration.storage.retry.attempts}", backoff = @Backoff(delayExpression = "${alfresco.integration.storage.retry.delay}"))
+    @Retryable(retryFor = {
+            EndpointServerErrorException.class,
+            JsonParseException.class,
+            MismatchedInputException.class,
+            UnknownHostException.class,
+            NoHttpResponseException.class,
+            MalformedChunkCodingException.class}, maxAttemptsExpression = "${alfresco.integration.storage.retry.attempts}", backoff = @Backoff(delayExpression = "${alfresco.integration.storage.retry.delay}"))
     @Override
     public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {
