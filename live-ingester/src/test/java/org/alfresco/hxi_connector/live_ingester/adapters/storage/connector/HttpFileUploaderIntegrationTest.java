@@ -30,10 +30,12 @@ import static org.testcontainers.containers.localstack.LocalStackContainer.Servi
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import lombok.Cleanup;
 import org.apache.camel.spring.boot.CamelAutoConfiguration;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -83,12 +85,14 @@ class HttpFileUploaderIntegrationTest
     }
 
     @Test
-    void testUpload()
+    void testUpload() throws IOException
     {
         // given
         List<String> initialBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
 
-        File fileToUpload = new File(new ByteArrayInputStream(OBJECT_CONTENT.getBytes()));
+        @Cleanup
+        InputStream fileContent = new ByteArrayInputStream(OBJECT_CONTENT.getBytes());
+        File fileToUpload = new File(fileContent);
         URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
 
         FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
