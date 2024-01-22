@@ -27,6 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
@@ -74,7 +76,14 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         Map<String, Object> headers = Map.of(STORAGE_LOCATION, fileUploadRequest.storageLocation().toString(),
                 Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
-        camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileUploadRequest.file().data(), headers);
+        try (InputStream fileData = fileUploadRequest.file().data())
+        {
+            camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileData, headers);
+        }
+        catch (IOException e)
+        {
+            throw new LiveIngesterRuntimeException(e);
+        }
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

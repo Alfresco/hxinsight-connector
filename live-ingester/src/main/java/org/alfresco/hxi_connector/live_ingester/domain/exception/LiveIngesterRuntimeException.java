@@ -33,6 +33,11 @@ public class LiveIngesterRuntimeException extends RuntimeException
         super(message);
     }
 
+    public LiveIngesterRuntimeException(Throwable cause)
+    {
+        super(cause);
+    }
+
     public LiveIngesterRuntimeException(String message, Throwable cause)
     {
         super(message, cause);
