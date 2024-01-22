@@ -36,6 +36,7 @@ public class DeleteNodeCommandHandler
 {
     public void handle(DeleteNodeCommand deleteNodeCommand)
     {
-        log.debug("Processing delete command for {}", deleteNodeCommand.nodeId());
+        String nodedId = deleteNodeCommand.nodeId();
+        log.debug("Processing delete command for {}", nodedId);
     }
 }
