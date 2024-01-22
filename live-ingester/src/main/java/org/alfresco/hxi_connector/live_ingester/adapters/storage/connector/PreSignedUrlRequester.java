@@ -105,7 +105,8 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             MismatchedInputException.class,
             UnknownHostException.class,
             NoHttpResponseException.class,
-            MalformedChunkCodingException.class}, maxAttemptsExpression = "${alfresco.integration.storage.retry.attempts}", backoff = @Backoff(delayExpression = "${alfresco.integration.storage.retry.delay}"))
+            MalformedChunkCodingException.class
+    }, maxAttemptsExpression = "${alfresco.integration.storage.retry.attempts}", backoff = @Backoff(delayExpression = "${alfresco.integration.storage.retry.delay}"))
     @Override
     public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {
