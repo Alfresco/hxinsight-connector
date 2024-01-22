@@ -25,26 +25,17 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage;
 
-import static java.nio.file.StandardOpenOption.APPEND;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.nio.channels.ClosedChannelException;
-import java.nio.file.Files;
 
 import lombok.Cleanup;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -58,7 +49,6 @@ import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.Stora
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class HttpStorageClientTest
 {
-    private static final String FILE_CONTENT = "some test content";
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String NODE_ID = "node-ref";
 
@@ -71,33 +61,7 @@ class HttpStorageClientTest
     HttpStorageClient httpStorageClient;
 
     @Test
-    void testUploadDataFromFile() throws IOException
-    {
-        // given
-        URL url = mock(URL.class);
-        File testFile = Files.createTempFile("test", ".txt").toFile();
-        Files.write(testFile.toPath(), FILE_CONTENT.getBytes(), APPEND);
-        given(storageLocationRequesterMock.requestStorageLocation(any())).willReturn(url);
-
-        // when
-        httpStorageClient.upload(testFile, FILE_CONTENT_TYPE, NODE_ID);
-
-        // then
-        StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
-        then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
-
-        ArgumentCaptor<FileUploadRequest> fileUploadRequestCaptor = ArgumentCaptor.forClass(FileUploadRequest.class);
-        then(fileUploaderMock).should().upload(fileUploadRequestCaptor.capture());
-        FileUploadRequest actualFileUploadRequest = fileUploadRequestCaptor.getValue();
-        assertThat(actualFileUploadRequest).satisfies(request -> {
-            assertThat(request.contentType()).isEqualTo(FILE_CONTENT_TYPE);
-            assertThat(request.storageLocation()).isEqualTo(url);
-            assertThatExceptionOfType(ClosedChannelException.class).isThrownBy(() -> request.inputStream().read());
-        });
-    }
-
-    @Test
-    void testUploadDataFromInputStream() throws IOException
+    void testUploadDataFromInputStream()
     {
         // given
         @Cleanup
