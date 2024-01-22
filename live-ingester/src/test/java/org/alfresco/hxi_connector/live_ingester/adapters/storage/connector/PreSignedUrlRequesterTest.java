@@ -40,6 +40,7 @@ import java.net.URL;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.SneakyThrows;
 import org.apache.camel.CamelContext;
 import org.apache.camel.component.mock.MockEndpoint;
@@ -50,6 +51,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -57,7 +60,6 @@ class PreSignedUrlRequesterTest
 {
     private static final String MOCK_ENDPOINT = "mock:hxi-endpoint";
     private static final int STATUS_CODE_201 = 201;
-    private static final int STATUS_CODE_500 = 500;
     private static final String NODE_REF = "node-ref";
     private static final String CONTENT_TYPE = "content/type";
     private static final String STORAGE_LOCATION = "http://dummy-url";
@@ -104,11 +106,11 @@ class PreSignedUrlRequesterTest
     }
 
     @Test
-    void testRequestStorageLocation_invalidResponseStatusCode()
+    void testRequestStorageLocation_invalidResponseStatusCode5xx()
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
-        mockEndpointWillRespondWith(STATUS_CODE_500);
+        mockEndpointWillRespondWith(500);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
@@ -116,8 +118,25 @@ class PreSignedUrlRequesterTest
         // then
         assertThat(thrown)
                 .cause()
-                .isInstanceOf(LiveIngesterRuntimeException.class)
-                .hasMessageContaining("received:", STATUS_CODE_500);
+                .isInstanceOf(EndpointServerErrorException.class)
+                .hasMessageContaining("received:", 500);
+    }
+
+    @Test
+    void testRequestStorageLocation_invalidResponseStatusCode4xx()
+    {
+        // given
+        StorageLocationRequest request = createStorageLocationRequestMock();
+        mockEndpointWillRespondWith(400);
+
+        // when
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+
+        // then
+        assertThat(thrown)
+                .cause()
+                .isInstanceOf(EndpointClientErrorException.class)
+                .hasMessageContaining("received:", 400);
     }
 
     @Test
@@ -153,6 +172,24 @@ class PreSignedUrlRequesterTest
         assertThat(thrown)
                 .cause()
                 .isInstanceOf(JsonParseException.class)
+                .message().isNotEmpty();
+    }
+
+    @Test
+    void testRequestStorageLocation_emptyBodyInResponse()
+    {
+        // given
+        StorageLocationRequest request = createStorageLocationRequestMock();
+        String emptyBody = "";
+        mockEndpointWillRespondWith(STATUS_CODE_201, emptyBody);
+
+        // when
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+
+        // then
+        assertThat(thrown)
+                .cause()
+                .isInstanceOf(MismatchedInputException.class)
                 .message().isNotEmpty();
     }
 

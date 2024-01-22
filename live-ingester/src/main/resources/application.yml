@@ -22,6 +22,9 @@ alfresco:
         &authPassword=${hyland.experience.insight.api.password}\
         &authenticationPreemptive=true\
         &throwExceptionOnFailure=false"
+      retry:
+        attempts: 3
+        delay: 1000
   ingester:
     messaging:
       in.endpoint: activemq:topic:alfresco.repo.event2

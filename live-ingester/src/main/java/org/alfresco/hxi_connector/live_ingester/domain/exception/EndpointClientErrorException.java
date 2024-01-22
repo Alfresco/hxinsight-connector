@@ -23,20 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.domain.exception;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.retry.annotation.EnableRetry;
-
-@SpringBootApplication
-@EnableRetry
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+public class EndpointClientErrorException extends RuntimeException
 {
-
-    public static void main(String[] args)
+    public EndpointClientErrorException(String message)
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        super(message);
+    }
+
+    public EndpointClientErrorException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }
