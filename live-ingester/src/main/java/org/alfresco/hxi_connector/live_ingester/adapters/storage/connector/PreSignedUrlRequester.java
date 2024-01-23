@@ -41,6 +41,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,13 +161,14 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private static void wrapServerExceptions(Exchange exchange) throws Exception
+    private static void wrapServerExceptions(Exchange exchange)
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
         Set<Class<?>> expectedServerExceptions = Set.of(
                 JsonEOFException.class,
                 MismatchedInputException.class,
                 UnknownHostException.class,
+                HttpHostConnectException.class,
                 NoHttpResponseException.class,
                 MalformedChunkCodingException.class);
 
@@ -176,7 +178,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         }
         else
         {
-            throw cause;
+            throw new EndpointClientErrorException(cause);
         }
     }
 }
