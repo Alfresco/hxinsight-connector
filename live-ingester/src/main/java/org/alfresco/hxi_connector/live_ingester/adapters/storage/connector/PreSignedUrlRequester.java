@@ -159,6 +159,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         }
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static void wrapServerExceptions(Exchange exchange) throws Exception
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
