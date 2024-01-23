@@ -31,8 +31,9 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.Map;
+import java.util.Set;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
@@ -81,6 +82,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     {
         onException(Exception.class)
                 .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+                .process(PreSignedUrlRequester::wrapServerExceptions)
                 .stop();
 
         from(LOCAL_ENDPOINT)
@@ -99,14 +101,9 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
                 .end();
     }
 
-    @Retryable(retryFor = {
-            EndpointServerErrorException.class,
-            JsonParseException.class,
-            MismatchedInputException.class,
-            UnknownHostException.class,
-            NoHttpResponseException.class,
-            MalformedChunkCodingException.class
-    }, maxAttemptsExpression = "${alfresco.integration.storage.retry.attempts}", backoff = @Backoff(delayExpression = "${alfresco.integration.storage.retry.delay}"))
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "${alfresco.integration.storage.retry.attempts}",
+            backoff = @Backoff(delayExpression = "${alfresco.integration.storage.retry.delay}"))
     @Override
     public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {
@@ -159,6 +156,26 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         else if (actualStatusCode != EXPECTED_STATUS_CODE)
         {
             log.warn(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(EXPECTED_STATUS_CODE, actualStatusCode));
+        }
+    }
+
+    private static void wrapServerExceptions(Exchange exchange) throws Exception
+    {
+        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+        Set<Class<?>> expectedServerExceptions = Set.of(
+                JsonEOFException.class,
+                MismatchedInputException.class,
+                UnknownHostException.class,
+                NoHttpResponseException.class,
+                MalformedChunkCodingException.class);
+
+        if (expectedServerExceptions.contains(cause.getClass()))
+        {
+            throw new EndpointServerErrorException(cause);
+        }
+        else
+        {
+            throw cause;
         }
     }
 }

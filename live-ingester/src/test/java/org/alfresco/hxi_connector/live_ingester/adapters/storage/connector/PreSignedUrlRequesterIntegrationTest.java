@@ -41,7 +41,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connecto
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
@@ -63,6 +63,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
@@ -132,9 +133,7 @@ class PreSignedUrlRequesterIntegrationTest
 
         // then
         then(locationRequester).should(times(3)).requestStorageLocation(any());
-        assertThat(thrown)
-                .cause()
-                .isInstanceOf(EndpointServerErrorException.class);
+        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
     }
 
     @Test
@@ -149,9 +148,7 @@ class PreSignedUrlRequesterIntegrationTest
 
         // then
         then(locationRequester).should(times(1)).requestStorageLocation(any());
-        assertThat(thrown)
-                .cause()
-                .isInstanceOf(EndpointClientErrorException.class);
+        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
     }
 
     @Test
@@ -169,8 +166,8 @@ class PreSignedUrlRequesterIntegrationTest
         // then
         then(locationRequester).should(times(3)).requestStorageLocation(any());
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(MismatchedInputException.class);
+                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .cause().isInstanceOf(MismatchedInputException.class);
     }
 
     @Test
@@ -188,8 +185,8 @@ class PreSignedUrlRequesterIntegrationTest
         // then
         then(locationRequester).should(times(3)).requestStorageLocation(any());
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(JsonParseException.class);
+                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .cause().isInstanceOf(JsonEOFException.class);
     }
 
     @Test
@@ -209,9 +206,8 @@ class PreSignedUrlRequesterIntegrationTest
         // then
         then(locationRequester).should(times(1)).requestStorageLocation(any());
         assertThat(thrown)
-                .cause()
-                .cause()
-                .isInstanceOf(MalformedURLException.class);
+                .cause().isInstanceOf(LiveIngesterRuntimeException.class)
+                .cause().isInstanceOf(MalformedURLException.class);
     }
 
     @Test
@@ -227,8 +223,8 @@ class PreSignedUrlRequesterIntegrationTest
         // then
         then(locationRequester).should(times(3)).requestStorageLocation(any());
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(NoHttpResponseException.class);
+                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .cause().isInstanceOf(NoHttpResponseException.class);
     }
 
     @DynamicPropertySource

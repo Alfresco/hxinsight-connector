@@ -39,7 +39,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.SneakyThrows;
 import org.apache.camel.CamelContext;
@@ -117,8 +117,7 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(EndpointServerErrorException.class)
+                .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("received:", 500);
     }
 
@@ -134,8 +133,7 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(EndpointClientErrorException.class)
+                .cause().isInstanceOf(EndpointClientErrorException.class)
                 .hasMessageContaining("received:", 400);
     }
 
@@ -152,8 +150,7 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(LiveIngesterRuntimeException.class)
+                .cause().isInstanceOf(LiveIngesterRuntimeException.class)
                 .hasMessageContaining("Missing", STORAGE_LOCATION_PROPERTY);
     }
 
@@ -170,8 +167,8 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(JsonParseException.class)
+                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .cause().isInstanceOf(JsonEOFException.class)
                 .message().isNotEmpty();
     }
 
@@ -188,8 +185,8 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(MismatchedInputException.class)
+                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .cause().isInstanceOf(MismatchedInputException.class)
                 .message().isNotEmpty();
     }
 
@@ -206,11 +203,9 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause()
-                .isInstanceOf(LiveIngesterRuntimeException.class)
+                .cause().isInstanceOf(LiveIngesterRuntimeException.class)
                 .hasMessageContaining("Parsing URL from response property failed!")
-                .rootCause()
-                .isInstanceOf(MalformedURLException.class)
+                .rootCause().isInstanceOf(MalformedURLException.class)
                 .message().isNotEmpty();
     }
 

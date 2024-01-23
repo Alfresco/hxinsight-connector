@@ -32,6 +32,11 @@ public class EndpointServerErrorException extends RuntimeException
         super(message);
     }
 
+    public EndpointServerErrorException(Throwable cause)
+    {
+        super(cause);
+    }
+
     public EndpointServerErrorException(String message, Throwable cause)
     {
         super(message, cause);
