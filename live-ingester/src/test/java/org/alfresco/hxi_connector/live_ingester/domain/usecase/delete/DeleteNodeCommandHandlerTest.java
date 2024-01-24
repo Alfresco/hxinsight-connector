@@ -39,6 +39,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.De
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 public class DeleteNodeCommandHandlerTest
 {
