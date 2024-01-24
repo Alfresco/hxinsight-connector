@@ -33,7 +33,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.out.config.MessagingOutputConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 
 @Slf4j
 @Component
@@ -58,7 +58,7 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
     }
 
     @Override
-    public void publishMessage(UpdateNodeMetadataEvent event)
+    public void publishMessage(NodeEvent event)
     {
         context.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, event);
