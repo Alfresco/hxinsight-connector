@@ -65,8 +65,7 @@ public class ContainerSupport
     {
         givenThat(post(HX_INSIGHT_INGEST_ENDPOINT)
                 .willReturn(aResponse()
-                        .withStatus(HX_INSIGHT_SUCCESS_CODE)
-                        .withBody("hxInsightResponse")));
+                        .withStatus(HX_INSIGHT_SUCCESS_CODE)));
     }
 
     @SneakyThrows

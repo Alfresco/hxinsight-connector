@@ -28,17 +28,18 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.delete;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.util.AbstractE2ETest;
 import org.alfresco.hxi_connector.live_ingester.util.ContainerSupport;
+import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-class DeleteRequestIntegrationTest extends AbstractE2ETest
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+class DeleteRequestIntegrationTest extends E2ETestBase
 {
     ContainerSupport containerSupport;
 
     @BeforeEach
-    public void setUp() throws Exception
+    public void setUp()
     {
-        containerSupport = super.setUpContainers();
+        containerSupport = super.configureContainers();
     }
 
     @Test

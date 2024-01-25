@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.util;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.HX_INSIGHT_INGEST_ENDPOINT;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REPO_EVENT_TOPIC;
 
@@ -33,6 +35,8 @@ import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -50,7 +54,8 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 })
 @Testcontainers
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
-public abstract class AbstractE2ETest
+@NoArgsConstructor(access = PROTECTED)
+public class E2ETestBase
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
     private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
@@ -87,7 +92,8 @@ public abstract class AbstractE2ETest
         registry.add("alfresco.ingester.messaging.in.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
     }
 
-    public ContainerSupport setUpContainers() throws Exception
+    @SneakyThrows
+    public ContainerSupport configureContainers()
     {
         WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
 
