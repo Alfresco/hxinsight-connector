@@ -33,7 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.RetryUtils.retryWithBackoff;
+import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWithBackoff;
 
 import jakarta.jms.Connection;
 import jakarta.jms.MessageProducer;

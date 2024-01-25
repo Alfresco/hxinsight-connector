@@ -58,7 +58,7 @@ class UpdateNodeMetadataEventSerializerTest
                 {
                   "objectId": "%s",
                   "eventType": "create",
-                  "properties" : [ ]
+                  "properties" : {}
                 }""".formatted(NODE_ID);
         String actualJson = serialize(emptyEvent);
 
@@ -77,13 +77,11 @@ class UpdateNodeMetadataEventSerializerTest
                 {
                   "objectId": "%s",
                   "eventType": "create",
-                  "properties" : [ {
-                    "isFile" : true
-                  }, {
-                    "name" : "some-name"
-                  }, {
-                    "modifiedByUserWithId" : "000-000-000"
-                  } ]
+                  "properties": {
+                    "isFile": true,
+                    "name": "some-name",
+                    "modifiedByUserWithId": "000-000-000"
+                  }
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
@@ -102,8 +100,8 @@ class UpdateNodeMetadataEventSerializerTest
                 {
                   "objectId": "%s",
                   "eventType": "update",
-                  "properties" : [ ],
-                  "removedProperties" : [ "isFile", "name", "modifiedByUserWithId" ]
+                  "properties": {},
+                  "removedProperties": [ "isFile", "name", "modifiedByUserWithId" ]
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
@@ -121,11 +119,10 @@ class UpdateNodeMetadataEventSerializerTest
                 {
                   "objectId": "%s",
                   "eventType": "create",
-                  "properties" : [ {
-                    "createdByUserWithId" : null
-                  }, {
-                    "modifiedByUserWithId" : null
-                  } ]
+                  "properties": {
+                    "createdByUserWithId": null,
+                    "modifiedByUserWithId": null
+                  }
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
