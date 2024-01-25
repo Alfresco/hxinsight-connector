@@ -14,6 +14,7 @@
     <packaging>pom</packaging>
 
     <modules>
+        <module>bulk-ingester</module>
         <module>live-ingester</module>
         <module>distribution</module>
     </modules>
