@@ -26,14 +26,20 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor;
 
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
+
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 @Data
+@Validated
 @ConfigurationProperties("alfresco.bulk.ingest.node-params")
 public class BulkIngesterConfig
 {
+    @PositiveOrZero
     private long fromId;
 
-    private long toId;
+    @Positive private long toId;
 }
