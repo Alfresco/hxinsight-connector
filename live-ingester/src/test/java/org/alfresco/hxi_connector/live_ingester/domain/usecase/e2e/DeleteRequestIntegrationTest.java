@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.delete;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class DeleteRequestIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testRequestDelete()
+    void testDeleteRequest()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();

@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.delete;
+package org.alfresco.hxi_connector.live_ingester.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
