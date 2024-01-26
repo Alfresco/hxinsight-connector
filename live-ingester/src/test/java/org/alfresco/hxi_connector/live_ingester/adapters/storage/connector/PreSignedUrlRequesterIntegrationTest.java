@@ -29,14 +29,17 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.URL;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import org.apache.camel.spring.boot.CamelAutoConfiguration;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,10 +108,27 @@ class PreSignedUrlRequesterIntegrationTest
         assertThat(actualUrl).asString().isEqualTo(preSignedUrl);
     }
 
+    @Test
+    void testRequestStorageLocation_serverDown_doRetry()
+    {
+        // given
+        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+                .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
+
+        // when
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest("node-id", FILE_CONTENT_TYPE)));
+
+        // then
+        assertThat(thrown)
+                .cause().isInstanceOf(NoHttpResponseException.class);
+    }
+
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
         registry.add("alfresco.integration.storage.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
+        registry.add("alfresco.integration.storage.retry.initialDelay", () -> 0);
+        registry.add("alfresco.integration.storage.retry.delayMultiplier", () -> 1);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
