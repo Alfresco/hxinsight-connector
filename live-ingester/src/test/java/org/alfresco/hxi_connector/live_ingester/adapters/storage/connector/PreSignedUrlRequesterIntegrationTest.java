@@ -49,10 +49,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
         CamelAutoConfiguration.class,
+        IntegrationConfig.class,
         PreSignedUrlRequester.class})
 @ActiveProfiles({"test"})
 @Testcontainers

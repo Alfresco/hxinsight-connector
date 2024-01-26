@@ -22,6 +22,19 @@ alfresco:
         &authPassword=${hyland.experience.insight.api.password}\
         &authenticationPreemptive=true\
         &throwExceptionOnFailure=false"
+      retry:
+        attempts: 10
+        initialDelay: 1000
+        deleyMultiplier: 2
+        reasons:
+          - org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException
+          - java.net.UnknownHostException
+          - java.net.MalformedURLException
+          - com.fasterxml.jackson.core.io.JsonEOFException
+          - com.fasterxml.jackson.databind.exc.MismatchedInputException
+          - org.apache.hc.client5.http.HttpHostConnectException
+          - org.apache.hc.core5.http.MalformedChunkCodingException
+          - org.apache.hc.core5.http.NoHttpResponseException
   ingester:
     messaging:
       in.endpoint: activemq:topic:alfresco.repo.event2
