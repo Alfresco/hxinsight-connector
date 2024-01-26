@@ -1,0 +1,16 @@
+### db-connector config
+spring.datasource:
+  url: jdbc:postgresql://localhost:5432/alfresco
+  username: alfresco
+  password: alfresco
+  hikari.maximumPoolSize: 20
+
+alfresco.reindex.pathCacheSize: 10000
+### db-connector config end
+
+alfresco.bulk.ingest:
+  node-params:
+    fromId: 0
+    toId: 20000000000
+  repository:
+    pageSize: 100

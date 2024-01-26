@@ -23,20 +23,15 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+package org.alfresco.hxi_connector.bulk_ingester.repository;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@SpringBootTest
-class BulkIngesterApplicationIntegrationTest
+@Data
+@ConfigurationProperties("alfresco.bulk.ingest.repository")
+public class BulkIngesterRepositoryConfig
 {
-
-    @Test
-    void contextLoads()
-    {
-        assertEquals(1, 1);
-    }
+    private int pageSize;
 }

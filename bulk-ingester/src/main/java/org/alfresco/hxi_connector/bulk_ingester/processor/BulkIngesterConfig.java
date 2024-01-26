@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,18 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package org.alfresco.hxi_connector.bulk_ingester.processor;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class BulkIngesterApplication
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@Data
+@ConfigurationProperties("alfresco.bulk.ingest.node-params")
+public class BulkIngesterConfig
 {
+    private long fromId;
 
-    public static void main(String[] args)
-    {
-        SpringApplication.run(BulkIngesterApplication.class, args);
-    }
+    private long toId;
 }
