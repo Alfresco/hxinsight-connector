@@ -73,7 +73,7 @@ class PreSignedUrlRequesterTest
     private static final String STORAGE_LOCATION = "http://dummy-url";
     private static final String RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
     private static final String RESPONSE_BODY = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, STORAGE_LOCATION);
-    private static final List<Class<? extends Throwable>> retryReasons = List.of(EndpointServerErrorException.class, UnknownHostException.class, MalformedURLException.class,
+    private static final List<Class<? extends Throwable>> RETRY_REASONS = List.of(EndpointServerErrorException.class, UnknownHostException.class, MalformedURLException.class,
             JsonEOFException.class, MismatchedInputException.class, HttpHostConnectException.class, NoHttpResponseException.class, MalformedChunkCodingException.class);
 
     CamelContext camelContext;
@@ -255,7 +255,7 @@ class PreSignedUrlRequesterTest
 
     private IntegrationConfig.Properties integrationPropertiesOf(String endpoint, int retryAttempts)
     {
-        return new IntegrationConfig.Properties(new IntegrationConfig.Storage(endpoint, new IntegrationConfig.Retry(retryAttempts, 0, 1, retryReasons)));
+        return new IntegrationConfig.Properties(new IntegrationConfig.Storage(endpoint, new IntegrationConfig.Retry(retryAttempts, 0, 1, RETRY_REASONS)));
     }
 
     private StorageLocationRequest createStorageLocationRequestMock()
