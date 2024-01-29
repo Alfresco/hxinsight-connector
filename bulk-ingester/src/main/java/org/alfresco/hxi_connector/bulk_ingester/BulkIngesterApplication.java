@@ -39,7 +39,7 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.BulkIngestionProcessor
 @RequiredArgsConstructor
 @SpringBootApplication
 @ImportAutoConfiguration(DatabaseConfig.class)
-@ConfigurationPropertiesScan("org.alfresco.hxi_connector.bulk_ingester")
+@ConfigurationPropertiesScan
 @SuppressWarnings("PMD.UseUtilityClass")
 public class BulkIngesterApplication implements ApplicationRunner
 {
