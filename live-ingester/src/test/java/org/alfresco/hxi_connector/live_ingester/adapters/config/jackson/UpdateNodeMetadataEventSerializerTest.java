@@ -57,8 +57,7 @@ class UpdateNodeMetadataEventSerializerTest
         String expectedJson = """
                 {
                   "objectId": "%s",
-                  "eventType": "create",
-                  "properties" : {}
+                  "eventType": "create"
                 }""".formatted(NODE_ID);
         String actualJson = serialize(emptyEvent);
 
@@ -100,7 +99,6 @@ class UpdateNodeMetadataEventSerializerTest
                 {
                   "objectId": "%s",
                   "eventType": "update",
-                  "properties": {},
                   "removedProperties": [ "isFile", "name", "modifiedByUserWithId" ]
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
