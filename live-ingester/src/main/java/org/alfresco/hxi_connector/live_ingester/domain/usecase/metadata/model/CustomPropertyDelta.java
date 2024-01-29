@@ -59,7 +59,7 @@ public abstract class CustomPropertyDelta<T>
 
     public static CustomPropertyDelta<?> unchanged(String key)
     {
-        return new CustomPropertyUnchanged(key);
+        return new CustomPropertyUnchanged<>(key);
     }
 
     protected CustomPropertyDelta(String propertyName)
