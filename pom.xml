@@ -100,17 +100,6 @@
             </snapshots>
         </repository>
         <repository>
-            <id>alfresco-enterprise</id>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <name>Alfresco Enterprise Releases</name>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/enterprise-releases/</url>
-        </repository>
-        <repository>
             <id>alfresco-internal</id>
             <releases>
                 <enabled>true</enabled>
