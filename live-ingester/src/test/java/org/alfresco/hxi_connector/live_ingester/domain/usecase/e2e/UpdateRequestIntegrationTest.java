@@ -83,7 +83,15 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "cm:title": "Purchase Order",
                         "cm:versionType": null,
                         "cm:versionLabel": "1.0",
-                        "cm:taggable": null
+                        "cm:taggable": [
+                          {
+                            "storeRef": {
+                              "protocol": "workspace",
+                              "identifier": "SpacesStore"
+                            },
+                            "id": "51d0b636-3c3b-4e33-ba1f-098474f53e8c"
+                          }
+                        ]
                       },
                       "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
                       "isFolder": false,
@@ -118,7 +126,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "properties" : {
                     "cm:title" : "Purchase Order",
                     "aspectsNames" : [ "cm:versionable", "cm:author", "cm:titled" ],
-                    "modifiedByUserWithId" : "abeecher"
+                    "modifiedByUserWithId" : "abeecher",
+                    "cm:taggable": [ "51d0b636-3c3b-4e33-ba1f-098474f53e8c" ]
                   },
                   "removedProperties" : [ "cm:versionType", "cm:description" ]
                 }""";
