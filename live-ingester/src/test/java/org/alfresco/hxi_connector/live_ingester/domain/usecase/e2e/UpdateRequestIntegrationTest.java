@@ -124,4 +124,244 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
+
+    @Test
+    void shouldCreateCustomProperty()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String properties = """
+                {
+                  "cm:title": "Purchase Order"
+                }
+                """;
+
+        String propertiesBefore = """
+                {
+                  "cm:title": null
+                }
+                """;
+
+        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update",
+                  "properties" : {
+                    "cm:title": "Purchase Order"
+                  }
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    @Test
+    void shouldUpdateCustomProperty()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String properties = """
+                {
+                  "cm:title": "Summary for year 2024"
+                }
+                """;
+
+        String propertiesBefore = """
+                {
+                  "cm:title": "Summary"
+                }
+                """;
+
+        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update",
+                  "properties" : {
+                    "cm:title": "Summary for year 2024"
+                  }
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    /**
+     * This weird situation when we update property from null -> null sometimes happens, and it is probably some defect of our event system
+     */
+    @Test
+    void shouldDoNothingWithUnchangedProperty()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String properties = """
+                {
+                  "cm:taggable": null
+                }
+                """;
+
+        String propertiesBefore = """
+                {
+                  "cm:taggable": null
+                }
+                """;
+
+        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update"
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    @Test
+    void shouldDeleteCustomProperty()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String properties = """
+                {
+                  "cm:title": null
+                }
+                """;
+
+        String propertiesBefore = """
+                {
+                  "cm:title": "Summary for year 2024"
+                }
+                """;
+
+        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update",
+                  "removedProperties" : [ "cm:title" ]
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    @Test
+    void shouldMapTagsAndCategoriesToJustIds()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String properties = """
+                {
+                  "cm:taggable": [
+                    {
+                      "storeRef": {
+                        "protocol": "workspace",
+                        "identifier": "SpacesStore"
+                      },
+                      "id": "51d0b636-3c3b-4e33-ba1f-098474f53e8c"
+                    }
+                  ],
+                  "cm:categories": [
+                    {
+                      "storeRef": {
+                        "protocol": "workspace",
+                        "identifier": "SpacesStore"
+                      },
+                      "id": "a9f57ef6-2acf-4b2a-ae85-82cf552bec58"
+                    }
+                  ]
+                }
+                """;
+
+        String propertiesBefore = """
+                {
+                  "cm:taggable": null,
+                  "cm:categories": null
+                }
+                """;
+
+        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update",
+                  "properties" : {
+                    "cm:taggable": [ "51d0b636-3c3b-4e33-ba1f-098474f53e8c" ],
+                    "cm:categories": [ "a9f57ef6-2acf-4b2a-ae85-82cf552bec58" ]
+                  }
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    private String generateCustomPropertiesUpdatedEvent(String properties, String propertiesBefore)
+    {
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "ae5dac3c-25d0-438d-b148-2084d1ab05a6",
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2021-01-26T10:29:42.99524Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "b5b1ebfe-45fc-4f86-b71b-421996482881",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                      "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "abeecher",
+                        "displayName": "Alice Beecher"
+                      },
+                      "modifiedAt": "2021-01-26T10:29:42.529Z",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": %s,
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
+                      "isFolder": false,
+                      "isFile": true
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "properties": %s
+                    }
+                  }
+                }""";
+
+        return repoEvent.formatted(properties, propertiesBefore);
+    }
 }
