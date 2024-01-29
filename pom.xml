@@ -110,6 +110,17 @@
             <name>Alfresco Internal Repository</name>
             <url>https://artifacts.alfresco.com/nexus/content/groups/internal/</url>
         </repository>
+        <repository>
+            <id>enterprise-releases</id>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+            <name>Alfresco Enterprise Repository</name>
+            <url>https://artifacts.alfresco.com/nexus/content/groups/enterprise-releases/</url>
+        </repository>
     </repositories>
 
     <pluginRepositories>
