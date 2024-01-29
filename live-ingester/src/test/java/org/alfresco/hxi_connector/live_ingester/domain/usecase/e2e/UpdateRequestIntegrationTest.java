@@ -206,15 +206,13 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         String properties = """
                 {
-                  "cm:taggable": null,
-                  "cm:title": "Summary for year 2024"
+                  "cm:taggable": null
                 }
                 """;
 
         String propertiesBefore = """
                 {
-                  "cm:taggable": null,
-                  "cm:title": "Summary"
+                  "cm:taggable": null
                 }
                 """;
 
@@ -227,10 +225,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         String expectedBody = """
                 {
                   "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType" : "update",
-                  "properties" : {
-                    "cm:title": "Summary for year 2024"
-                  }
+                  "eventType" : "update"
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
