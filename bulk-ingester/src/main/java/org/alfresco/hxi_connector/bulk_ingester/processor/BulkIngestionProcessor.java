@@ -23,18 +23,31 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+package org.alfresco.hxi_connector.bulk_ingester.processor;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class BulkIngesterApplication
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.elasticsearch.db.connector.NodeParams;
+import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class BulkIngestionProcessor
 {
+    private final BulkIngesterNodeRepository bulkIngesterNodeRepository;
 
-    public static void main(String[] args)
+    private final BulkIngesterConfig bulkIngesterConfig;
+
+    public void process()
     {
-        SpringApplication.run(BulkIngesterApplication.class, args);
+        NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
+
+        bulkIngesterNodeRepository.find(nodeParams)
+                .forEach(alfrescoNode -> log.info("Found node {}", alfrescoNode.getId()));
     }
+
 }
