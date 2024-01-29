@@ -25,10 +25,11 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
-import org.alfresco.hxi_connector.live_ingester.util.ContainerSupport;
-import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.live_ingester.util.ContainerSupport;
+import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class UpdateRequestIntegrationTest extends E2ETestBase
@@ -195,8 +196,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     }
 
     /**
-     *  This weird situation when we update property from null -> null
-     *  sometimes happens, and it is probably some defect of our event system
+     * This weird situation when we update property from null -> null sometimes happens, and it is probably some defect of our event system
      */
     @Test
     void shouldDoNothingWithUnchangedProperty()

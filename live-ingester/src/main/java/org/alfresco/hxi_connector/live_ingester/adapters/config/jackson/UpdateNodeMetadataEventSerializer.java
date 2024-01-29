@@ -63,7 +63,8 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
 
             jgen.writeStringField("eventType", event.getEventType().serialise());
 
-            if(!event.getMetadataPropertiesToSet().isEmpty()) {
+            if (!event.getMetadataPropertiesToSet().isEmpty())
+            {
                 jgen.writeObjectFieldStart("properties");
                 event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, property));
                 jgen.writeEndObject();
