@@ -44,7 +44,7 @@ public class BulkIngestionProcessor
 
     public void process()
     {
-        NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.getFromId(), bulkIngesterConfig.getToId());
+        NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
 
         bulkIngesterNodeRepository.find(nodeParams)
                 .forEach(alfrescoNode -> log.info("Found node {}", alfrescoNode.getId()));
