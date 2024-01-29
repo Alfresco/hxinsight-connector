@@ -16,12 +16,7 @@
       <password>${env.MAVEN_PASSWORD}</password>
     </server>
     <server>
-      <id>alfresco-enterprise</id>
-      <username>${env.MAVEN_USERNAME}</username>
-      <password>${env.MAVEN_PASSWORD}</password>
-    </server>
-    <server>
-      <id>alfresco-enterprise-snapshots</id>
+      <id>enterprise-releases</id>
       <username>${env.MAVEN_USERNAME}</username>
       <password>${env.MAVEN_PASSWORD}</password>
     </server>
