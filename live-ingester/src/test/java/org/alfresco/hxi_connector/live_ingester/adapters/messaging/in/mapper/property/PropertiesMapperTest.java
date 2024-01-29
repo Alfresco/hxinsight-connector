@@ -254,6 +254,29 @@ class PropertiesMapperTest
         assertEquals(expectedPropertyDeltas, customPropertyDeltas);
     }
 
+    /**
+     * Test that we can cope with update requests from null to null. See https://docs.alfresco.com/content-services/latest/develop/oop-ext-points/events/ for an example of this.
+     */
+    @Test
+    void shouldHandleNullPropertyUnchanged_NodeUpdated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setType(event, NODE_UPDATED);
+        // Use same null property in before and after.
+        NodeResource nodeResource = NodeResource.builder().setProperties(mapWith("cm:taggable", null)).build();
+        setNodeResourceBefore(event, nodeResource);
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+
+        // then
+        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(CustomPropertyDelta.unchanged("cm:taggable"));
+        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+    }
+
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
         given(event.getType()).willReturn(type.getType());

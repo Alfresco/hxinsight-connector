@@ -101,16 +101,25 @@ public class PropertiesMapper
     private Set<CustomPropertyDelta<?>> someCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return customPropertiesStream(event.getData().getResourceBefore())
-                .map(Map.Entry::getKey)
-                .map(changedPropertyName -> toCustomPropertyDelta(event.getData(), changedPropertyName))
+                .map(oldPropertyEntry -> toCustomPropertyDelta(event.getData(), oldPropertyEntry))
                 .collect(Collectors.toSet());
     }
 
-    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> eventData, String changedPropertyName)
+    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> eventData, Map.Entry<String, ?> oldPropertyEntry)
     {
+        String changedPropertyName = oldPropertyEntry.getKey();
+        Object oldValue = oldPropertyEntry.getValue();
         Object propertyValue = eventData.getResource().getProperties().get(changedPropertyName);
 
-        return propertyValue == null ? CustomPropertyDelta.deleted(changedPropertyName) : CustomPropertyDelta.updated(changedPropertyName, propertyValue);
+        if (Objects.equals(propertyValue, oldValue))
+        {
+            return CustomPropertyDelta.unchanged(changedPropertyName);
+        }
+        if (propertyValue == null)
+        {
+            return CustomPropertyDelta.deleted(changedPropertyName);
+        }
+        return CustomPropertyDelta.updated(changedPropertyName, propertyValue);
     }
 
     private Stream<Map.Entry<String, ?>> customPropertiesStream(NodeResource node)

@@ -36,6 +36,7 @@ import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyDeleted;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUnchanged;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
@@ -54,6 +55,11 @@ public abstract class CustomPropertyDelta<T>
     public static <T> CustomPropertyDeleted<T> deleted(String key)
     {
         return new CustomPropertyDeleted<>(key);
+    }
+
+    public static CustomPropertyDelta<?> unchanged(String key)
+    {
+        return new CustomPropertyUnchanged<>(key);
     }
 
     protected CustomPropertyDelta(String propertyName)
