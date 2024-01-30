@@ -47,8 +47,9 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
+import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.EventData;
+import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
@@ -56,6 +57,9 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @ExtendWith(MockitoExtension.class)
 class EventProcessorTest
 {
+    private static final long CONTENT_SIZE = 123L;
+    public static final long NO_CONTENT = 0L;
+
     @Mock
     RepoEventMapper repoEventMapper;
 
@@ -72,14 +76,11 @@ class EventProcessorTest
     EventProcessor eventProcessor;
 
     @Test
-    void shouldIngestNewNodeMetadata()
+    void shouldIngestNewNodeWithoutContent()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        given(event.getType()).willReturn(NODE_CREATED.getType());
-
-        NodeResource nodeResource = mockNodeResource(event);
-        given(nodeResource.getContent()).willReturn(null);
+        RepoEvent<DataAttributes<NodeResource>> event = prepareMockCreatedEvent();
+        given(event.getData().getResource().getContent()).willReturn(null);
 
         // when
         eventProcessor.process(event);
@@ -97,6 +98,7 @@ class EventProcessorTest
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
         given(event.getType()).willReturn(NODE_UPDATED.getType());
+        given(event.getData()).willReturn(mock());
 
         // when
         eventProcessor.process(event);
@@ -112,11 +114,10 @@ class EventProcessorTest
     void shouldIngestNewNodeContent()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        given(event.getType()).willReturn(NODE_CREATED.getType());
-
-        NodeResource nodeResource = mockNodeResource(event);
-        given(nodeResource.getContent()).willReturn(mock());
+        RepoEvent<DataAttributes<NodeResource>> event = prepareMockCreatedEvent();
+        ContentInfo contentInfo = mock();
+        given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
+        given(event.getData().getResource().getContent()).willReturn(contentInfo);
 
         IngestContentCommand ingestContentCommand = mock();
         given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(ingestContentCommand);
@@ -133,11 +134,77 @@ class EventProcessorTest
     }
 
     @Test
+    void shouldNotProcessZeroByteContent()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = prepareMockCreatedEvent();
+        ContentInfo contentInfo = mock();
+        given(contentInfo.getSizeInBytes()).willReturn(NO_CONTENT);
+        given(event.getData().getResource().getContent()).willReturn(contentInfo);
+
+        // when
+        eventProcessor.process(event);
+
+        // then
+        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).shouldHaveNoMoreInteractions();
+
+        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldIngestUpdatedNodeContent()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = prepareMockUpdateEvent();
+        ContentInfo contentInfo = mock();
+        given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
+        given(event.getData().getResource().getContent()).willReturn(contentInfo);
+        given(event.getData().getResourceBefore().getContent()).willReturn(mock());
+
+        IngestContentCommand ingestContentCommand = mock();
+        given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(ingestContentCommand);
+
+        // when
+        eventProcessor.process(event);
+
+        // then
+        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).should().mapToIngestContentCommand(event);
+
+        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestContentCommandHandler).should().handle(ingestContentCommand);
+    }
+
+    @Test
+    void shouldNotReprocessUnchangedContent()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = prepareMockUpdateEvent();
+        ContentInfo contentInfo = mock();
+        given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
+        given(event.getData().getResource().getContent()).willReturn(contentInfo);
+        given(event.getData().getResourceBefore().getContent()).willReturn(null);
+
+        // when
+        eventProcessor.process(event);
+
+        // then
+        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).shouldHaveNoMoreInteractions();
+
+        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
     void shouldDeleteNode()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
         given(event.getType()).willReturn(NODE_DELETED.getType());
+        given(event.getData()).willReturn(mock());
         DeleteNodeCommand deleteNodeCommand = mock();
         given(repoEventMapper.mapToDeleteNodeCommand(event)).willReturn(deleteNodeCommand);
 
@@ -149,14 +216,33 @@ class EventProcessorTest
         then(deleteNodeCommandHandler).shouldHaveNoMoreInteractions();
     }
 
-    NodeResource mockNodeResource(RepoEvent<DataAttributes<NodeResource>> repoEvent)
+    RepoEvent<DataAttributes<NodeResource>> prepareMockCreatedEvent()
     {
-        EventData<NodeResource> eventData = mock();
-        NodeResource nodeResource = mock();
+        return prepareMockEventWithResource(NODE_CREATED);
+    }
 
-        given(repoEvent.getData()).willReturn(eventData);
-        given(eventData.getResource()).willReturn(nodeResource);
+    RepoEvent<DataAttributes<NodeResource>> prepareMockUpdateEvent()
+    {
+        RepoEvent<DataAttributes<NodeResource>> repoEvent = prepareMockEventWithResource(NODE_UPDATED);
+        DataAttributes<NodeResource> data = repoEvent.getData();
+        given(data.getResourceBefore()).willReturn(mock());
+        return repoEvent;
+    }
 
-        return nodeResource;
+    RepoEvent<DataAttributes<NodeResource>> prepareMockEventWithResource(EventType eventType)
+    {
+        RepoEvent<DataAttributes<NodeResource>> repoEvent = prepareMockEvent(eventType);
+        DataAttributes<NodeResource> data = repoEvent.getData();
+        given(data.getResource()).willReturn(mock());
+        return repoEvent;
+    }
+
+    RepoEvent<DataAttributes<NodeResource>> prepareMockEvent(EventType eventType)
+    {
+        RepoEvent<DataAttributes<NodeResource>> repoEvent = mock();
+        given(repoEvent.getType()).willReturn(eventType.getType());
+        DataAttributes<NodeResource> data = mock();
+        given(repoEvent.getData()).willReturn(data);
+        return repoEvent;
     }
 }
