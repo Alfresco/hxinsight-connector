@@ -24,32 +24,23 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.processor;
+package org.alfresco.hxi_connector.bulk_ingester.processor.model;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.Set;
 
-import org.alfresco.elasticsearch.db.connector.NodeParams;
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper;
-import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
+import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
 
-@Slf4j
-@Component
-@RequiredArgsConstructor
-public class BulkIngestionProcessor
-{
-    private final BulkIngesterNodeRepository bulkIngesterNodeRepository;
-
-    private final BulkIngesterConfig bulkIngesterConfig;
-
-    public void process()
-    {
-        NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
-
-        bulkIngesterNodeRepository.find(nodeParams)
-                .map(AlfrescoNodeMapper::map)
-                .forEach(node -> log.info("Found node {}", node));
-    }
-
-}
+public record Node(
+        String nodeId,
+        String name,
+        String type,
+        String creatorId,
+        String modifierId,
+        Set<String> aspectNames,
+        ContentMetadata contentInfo,
+        ZonedDateTime createdAt,
+        Map<String, Serializable> customProperties)
+{}
