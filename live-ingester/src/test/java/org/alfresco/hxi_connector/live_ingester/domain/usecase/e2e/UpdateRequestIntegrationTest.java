@@ -25,23 +25,15 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
-import org.junit.jupiter.api.BeforeEach;
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQUEST_ID_PLACEHOLDER;
+
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.util.ContainerSupport;
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class UpdateRequestIntegrationTest extends E2ETestBase
 {
-    ContainerSupport containerSupport;
-
-    @BeforeEach
-    public void setUp()
-    {
-        containerSupport = super.configureContainers();
-    }
-
     @Test
     void testUpdateRequest()
     {
@@ -123,6 +115,61 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "removedProperties" : [ "cm:versionType", "cm:description" ]
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    @Test
+    void testContentUpdateRequest()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String repoEvent = """
+                {
+                  "type": "org.alfresco.event.node.Updated",
+                  "time": "2021-01-26T10:29:42.99524Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "data": {
+                    "eventGroupId": "b5b1ebfe-45fc-4f86-b71b-421996482881",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                      "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:content",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 456,
+                        "encoding": "UTF-8"
+                      }
+                    },
+                    "resourceBefore": {
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 123,
+                        "encoding": "UTF-8"
+                      }
+                    }
+                  }
+                }""";
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update"
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        String expectedATSRequest = """
+                {
+                    "requestId": "%s",
+                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "targetMediaType": "application/pdf",
+                    "clientData": "{\\"modificationTimestamp\\":1611656982995,\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\"}",
+                    "transformOptions": { "timeout":"20000" },
+                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
+                }""".formatted(REQUEST_ID_PLACEHOLDER);
+        containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
 
     @Test

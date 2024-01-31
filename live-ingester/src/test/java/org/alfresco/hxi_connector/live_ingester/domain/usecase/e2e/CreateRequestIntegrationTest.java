@@ -25,23 +25,15 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
-import org.junit.jupiter.api.BeforeEach;
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQUEST_ID_PLACEHOLDER;
+
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.util.ContainerSupport;
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class CreateRequestIntegrationTest extends E2ETestBase
 {
-    ContainerSupport containerSupport;
-
-    @BeforeEach
-    public void setUp()
-    {
-        containerSupport = super.configureContainers();
-    }
-
     @Test
     void testCreateRequest()
     {
@@ -116,5 +108,16 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
+
+        String expectedATSRequest = """
+                {
+                    "requestId": "%s",
+                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "targetMediaType": "application/pdf",
+                    "clientData": "{\\"modificationTimestamp\\":1611227656423,\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\"}",
+                    "transformOptions": { "timeout":"20000" },
+                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
+                }""".formatted(REQUEST_ID_PLACEHOLDER);
+        containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
 }

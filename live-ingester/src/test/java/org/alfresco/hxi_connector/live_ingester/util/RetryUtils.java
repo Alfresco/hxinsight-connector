@@ -27,6 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import java.util.function.Supplier;
+
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -39,8 +41,16 @@ public class RetryUtils
     private static final int INITIAL_DELAY_MS = 100;
     private static final int BACKOFF_MULTIPLIER = 2;
 
-    @SneakyThrows
     public static void retryWithBackoff(Runnable runnable)
+    {
+        retryWithBackoff(() -> {
+            runnable.run();
+            return null;
+        });
+    }
+
+    @SneakyThrows
+    public static Object retryWithBackoff(Supplier<Object> supplier)
     {
         int attempt = 0;
         int delay = INITIAL_DELAY_MS;
@@ -48,8 +58,7 @@ public class RetryUtils
         {
             try
             {
-                runnable.run();
-                return;
+                return supplier.get();
             }
             catch (AssertionError e)
             {
