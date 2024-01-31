@@ -51,9 +51,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retryable;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PreSignedUrlRequesterTest
@@ -76,7 +78,8 @@ class PreSignedUrlRequesterTest
     void beforeAll()
     {
         camelContext = new DefaultCamelContext();
-        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, MOCK_ENDPOINT);
+        IntegrationConfig.Properties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT, 0);
+        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties);
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
 
@@ -150,7 +153,7 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause().isInstanceOf(LiveIngesterRuntimeException.class)
+                .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("Missing", STORAGE_LOCATION_PROPERTY);
     }
 
@@ -203,10 +206,24 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause().isInstanceOf(LiveIngesterRuntimeException.class)
+                .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("Parsing URL from response property failed!")
                 .rootCause().isInstanceOf(MalformedURLException.class)
                 .message().isNotEmpty();
+    }
+
+    private IntegrationConfig.Properties integrationPropertiesOf(String endpoint, int retryAttempts)
+    {
+        IntegrationConfig.Properties integrationProperties = new IntegrationConfig.Properties();
+        Storage storageProperties = new Storage();
+        Storage.Location storageLocationProperties = new Storage.Location();
+        storageLocationProperties.setEndpoint(endpoint);
+        Retryable.Retry retryProperties = new Retryable.Retry();
+        retryProperties.setAttempts(retryAttempts);
+        storageLocationProperties.setRetry(retryProperties);
+        storageProperties.setLocation(storageLocationProperties);
+        integrationProperties.setStorage(storageProperties);
+        return integrationProperties;
     }
 
     private StorageLocationRequest createStorageLocationRequestMock()

@@ -14,28 +14,26 @@ hyland:
 
 alfresco:
   integration:
+    repository:
+      endpoint: activemq:topic:alfresco.repo.event2
+    transform:
+      request:
+        endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
+        timeout: 20000
+      response:
+        endpoint: activemq:queue:${alfresco.transform.response.queueName}
+        queueName: org.alfresco.hxinsight-connector.transform.response
+      shared-file-store:
+        host: http://localhost
+        port: 8099
     storage:
-      endpoint: "${hyland.experience.insight.api.url.storage-location-request}\
-        ?httpMethod=POST\
-        &authMethod=Basic\
-        &authUsername=${hyland.experience.insight.api.username}\
-        &authPassword=${hyland.experience.insight.api.password}\
-        &authenticationPreemptive=true\
-        &throwExceptionOnFailure=false"
-      retry:
-        attempts: 3
-        delay: 1000
-  ingester:
-    messaging:
-      in.endpoint: activemq:topic:alfresco.repo.event2
-      out.endpoint: ${hyland.experience.insight.api.url.ingest}?httpMethod=POST
-  transform:
-    request:
-      endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
-      timeout: 20000
-    response:
-      queueName: org.alfresco.hxinsight-connector.transform.response
-      endpoint: activemq:queue:${alfresco.transform.response.queueName}
-    shared-file-store:
-      host: http://localhost
-      port: 8099
+      location:
+        endpoint: "${hyland.experience.insight.api.url.storage-location-request}\
+          ?httpMethod=POST\
+          &authMethod=Basic\
+          &authUsername=${hyland.experience.insight.api.username}\
+          &authPassword=${hyland.experience.insight.api.password}\
+          &authenticationPreemptive=true\
+          &throwExceptionOnFailure=false"
+    ingester:
+      endpoint: ${hyland.experience.insight.api.url.ingest}?httpMethod=POST

@@ -61,13 +61,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
         CamelAutoConfiguration.class,
+        IntegrationConfig.class,
         PreSignedUrlRequester.class})
 @ActiveProfiles({"test"})
 @EnableRetry
@@ -84,7 +85,8 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
     private static final int HX_INSIGHT_RESPONSE_CODE = 201;
-    private static final int RETRY_DELAY_MS = 1;
+    private static final int RETRY_ATTEMPTS = 5;
+    private static final int RETRY_DELAY_MS = 0;
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
@@ -131,7 +133,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(3)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
         assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
     }
 
@@ -163,7 +165,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(3)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MismatchedInputException.class);
@@ -182,7 +184,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(3)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(JsonEOFException.class);
@@ -203,9 +205,9 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(1)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
         assertThat(thrown)
-                .cause().isInstanceOf(LiveIngesterRuntimeException.class)
+                .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MalformedURLException.class);
     }
 
@@ -220,7 +222,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(3)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(NoHttpResponseException.class);
@@ -229,8 +231,9 @@ class PreSignedUrlRequesterIntegrationTest
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("alfresco.integration.storage.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
-        registry.add("alfresco.integration.storage.retry.delay", () -> RETRY_DELAY_MS);
+        registry.add("alfresco.integration.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
+        registry.add("alfresco.integration.storage.location.retry.attempts", () -> RETRY_ATTEMPTS);
+        registry.add("alfresco.integration.storage.location.retry.initialDelay", () -> RETRY_DELAY_MS);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

@@ -35,7 +35,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.TransformConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadContentRenditionCommand;
 
@@ -44,14 +44,14 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadCon
 @RequiredArgsConstructor
 public class ATSTransformResponseHandler extends RouteBuilder
 {
-    private final TransformConfig transformConfig;
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
+    private final IntegrationConfig.Properties integrationProperties;
 
     @Override
     public void configure()
     {
-        from(transformConfig.getResponse().getEndpoint())
+        from(integrationProperties.getTransform().getResponse().getEndpoint())
                 .routeId("transform-events-consumer")
                 .log(DEBUG, "Received transform completed event : ${body}")
                 .unmarshal()

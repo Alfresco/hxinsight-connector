@@ -37,7 +37,8 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.TransformConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -52,9 +53,8 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     private static final String FILE_ID_HEADER = "fileId";
     private static final String ENDPOINT_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET";
 
-    private final TransformConfig transformConfig;
-
     private final CamelContext camelContext;
+    private final IntegrationConfig.Properties integrationProperties;
 
     @Override
     public void configure()
@@ -63,8 +63,8 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
                 .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
                 .stop();
 
-        SharedFileStoreConfig sfsConfig = transformConfig.getSharedFileStore();
-        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsConfig.getHost(), sfsConfig.getPort());
+        Transform.SharedFileStore sfsProperties = integrationProperties.getTransform().getSharedFileStore();
+        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.getHost(), sfsProperties.getPort());
         from(LOCAL_ENDPOINT)
                 .id(ROUTE_ID)
                 .toD(sfsEndpoint)

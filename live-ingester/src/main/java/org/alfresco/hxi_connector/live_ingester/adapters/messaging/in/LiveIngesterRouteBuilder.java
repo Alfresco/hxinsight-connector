@@ -27,33 +27,26 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
-import org.apache.camel.CamelContext;
+import lombok.RequiredArgsConstructor;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.config.MessagingInputConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.CamelEventMapper;
 
 @Component
+@RequiredArgsConstructor
 public class LiveIngesterRouteBuilder extends RouteBuilder
 {
-    private final MessagingInputConfig properties;
+
     private final EventProcessor eventProcessor;
-
     private final CamelEventMapper camelEventMapper;
-
-    public LiveIngesterRouteBuilder(CamelContext context, MessagingInputConfig messagingInputConfig, EventProcessor eventProcessor, CamelEventMapper camelEventMapper)
-    {
-        super(context);
-        this.properties = messagingInputConfig;
-        this.camelEventMapper = camelEventMapper;
-        this.eventProcessor = eventProcessor;
-    }
+    private final IntegrationConfig.Properties integrationProperties;
 
     @Override
     public void configure()
     {
-        from(properties.getEndpoint())
+        from(integrationProperties.getRepository().getEndpoint())
                 .transacted()
                 .routeId("ingester-events-consumer")
                 .log(DEBUG, "Received repo event : ${header.JMSMessageID}")

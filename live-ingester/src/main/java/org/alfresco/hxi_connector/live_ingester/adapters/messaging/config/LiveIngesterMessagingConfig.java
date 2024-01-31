@@ -28,18 +28,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.config;
 
 import jakarta.jms.ConnectionFactory;
 
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.config.MessagingInputConfig;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.out.config.MessagingOutputConfig;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.TransformConfig;
-
 @Configuration
-@EnableConfigurationProperties({MessagingInputConfig.class, MessagingOutputConfig.class, TransformConfig.class})
 public class LiveIngesterMessagingConfig
 {
     @Bean
