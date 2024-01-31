@@ -11,8 +11,8 @@ Retry specification default values are:
 - initial delay: 500 ms
 - delay multiplier: 2
 
-Above specification can be overwritten by setting configuration properties, which for particular endpoints looks like:
-- storage location request, e.g.:
+Above default properties can be overwritten with custom specification, which for particular endpoints may look like, e.g.:
+- storage location request:
 ```yaml
 alfresco:
   integration:
