@@ -26,19 +26,10 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
-import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
-import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
-import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
-import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
-import org.junit.jupiter.api.Test;
-import org.springframework.util.SerializationUtils;
-
-import java.time.ZonedDateTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.BOOLEAN;
 import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.CONTENT_DATA_ID;
@@ -51,10 +42,21 @@ import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.NU
 import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.PATH;
 import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.SERIALIZABLE;
 import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.STRING;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.time.ZonedDateTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.util.SerializationUtils;
+
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
+import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
+import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
+import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
+import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
 
 class AlfrescoPropertyMapperTest
 {
@@ -70,9 +72,7 @@ class AlfrescoPropertyMapperTest
         alfrescoNode.setNodeProperties(
                 Set.of(
                         createNodeProperty("title"),
-                        createNodeProperty(description, stringValue(descriptionText))
-                )
-        );
+                        createNodeProperty(description, stringValue(descriptionText))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, description).performMapping();
@@ -97,9 +97,7 @@ class AlfrescoPropertyMapperTest
                 Set.of(
                         createNodeProperty("title"),
                         createNodeProperty(description, "en_US_", stringValue(usDescription)),
-                        createNodeProperty(description, "en_UK_", stringValue(ukDescription))
-                )
-        );
+                        createNodeProperty(description, "en_UK_", stringValue(ukDescription))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, description).performMapping();
@@ -121,9 +119,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(description, stringValue(descriptionText))
-                )
-        );
+                        createNodeProperty(description, stringValue(descriptionText))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, description).performMapping();
@@ -144,9 +140,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(description, nullValue())
-                )
-        );
+                        createNodeProperty(description, nullValue())));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, description).performMapping();
@@ -165,9 +159,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(isIndexed, boolValue(true))
-                )
-        );
+                        createNodeProperty(isIndexed, boolValue(true))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, isIndexed).performMapping();
@@ -189,9 +181,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(legsCount, longValue(legsCountValue))
-                )
-        );
+                        createNodeProperty(legsCount, longValue(legsCountValue))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, legsCount).performMapping();
@@ -213,9 +203,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(legLength, floatValue(legLengthValue))
-                )
-        );
+                        createNodeProperty(legLength, floatValue(legLengthValue))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, legLength).performMapping();
@@ -237,9 +225,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(legLength, doubleValue(legLengthValue))
-                )
-        );
+                        createNodeProperty(legLength, doubleValue(legLengthValue))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, legLength).performMapping();
@@ -261,9 +247,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(colors, serializableValue(SerializationUtils.serialize(colorsValue)))
-                )
-        );
+                        createNodeProperty(colors, serializableValue(SerializationUtils.serialize(colorsValue)))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, colors).performMapping();
@@ -284,9 +268,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(someRandomUnsupportedPropertyType, propertyValue(PATH))
-                )
-        );
+                        createNodeProperty(someRandomUnsupportedPropertyType, propertyValue(PATH))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, someRandomUnsupportedPropertyType).performMapping();
@@ -308,12 +290,9 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(content, contentValue(contendId))
-                )
-        );
+                        createNodeProperty(content, contentValue(contendId))));
         alfrescoNode.setContentData(
-                Set.of(contentMetadata)
-        );
+                Set.of(contentMetadata));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, content).performMapping();
@@ -336,9 +315,7 @@ class AlfrescoPropertyMapperTest
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(createdAt, dateValue(createdAtString))
-                )
-        );
+                        createNodeProperty(createdAt, dateValue(createdAtString))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, createdAt).performMapping();
@@ -361,14 +338,11 @@ class AlfrescoPropertyMapperTest
                 "id", "f70cb080-9d45-4f21-b936-475b053a23f1",
                 "storeRef", Map.of(
                         "identifier", "SpacesStore",
-                        "protocol", "workspace")
-        );
+                        "protocol", "workspace"));
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(copyOf, nodeRefValue(copyOfValue))
-                )
-        );
+                        createNodeProperty(copyOf, nodeRefValue(copyOfValue))));
 
         // when
         var property = new AlfrescoPropertyMapper(alfrescoNode, copyOf).performMapping();
