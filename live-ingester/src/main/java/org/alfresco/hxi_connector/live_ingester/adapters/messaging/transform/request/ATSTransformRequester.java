@@ -64,7 +64,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         from(LOCAL_ENDPOINT)
                 .marshal()
                 .json()
-                .to(integrationProperties.getTransform().getRequest().getEndpoint());
+                .to(integrationProperties.getAlfresco().getTransform().getRequest().getEndpoint());
     }
 
     @Override
@@ -83,8 +83,8 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
                 .requestId(UUID.randomUUID().toString())
                 .nodeRef(WORKSPACE_SPACES_STORE + transformRequest.nodeRef())
                 .targetMediaType(transformRequest.targetMimeType())
-                .replyQueue(integrationProperties.getTransform().getResponse().getQueueName())
-                .transformOptions(getTransformRequestOptions(integrationProperties.getTransform()))
+                .replyQueue(integrationProperties.getAlfresco().getTransform().getResponse().getQueueName())
+                .transformOptions(getTransformRequestOptions(integrationProperties.getAlfresco().getTransform()))
                 .clientData(clientDataString)
                 .build();
     }

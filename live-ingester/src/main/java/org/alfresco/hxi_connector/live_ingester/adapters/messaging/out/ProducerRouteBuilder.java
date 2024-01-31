@@ -52,7 +52,7 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
                 .marshal()
                 .json()
                 .log("Sending event ${body}")
-                .to(integrationProperties.getIngester().getEndpoint())
+                .to(integrationProperties.getHylandExperience().getIngester().getEndpoint())
                 .end();
     }
 

@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.live_ingester.util;
 
 import static lombok.AccessLevel.PROTECTED;
 
-import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.HX_INSIGHT_INGEST_ENDPOINT;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REPO_EVENT_TOPIC;
 
 import java.time.Duration;
@@ -84,12 +83,12 @@ public class E2ETestBase
     static void configureProperties(DynamicPropertyRegistry registry)
     {
         hxInsightUrl = hxInsight.getBaseUrl();
-        registry.add("hyland.experience.insight.api.url.ingest", () -> hxInsightUrl + HX_INSIGHT_INGEST_ENDPOINT);
+        registry.add("hyland-experience.insight.base-url", () -> hxInsightUrl);
 
         brokerUrl = "tcp://localhost:" + activemq.getMappedPort(ACTIVE_MQ_PORT);
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
-        registry.add("alfresco.integration.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
+        registry.add("integration.alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
     }
 
     @SneakyThrows

@@ -219,7 +219,9 @@ class PreSignedUrlRequesterTest
         Storage.Location storageLocationProperties = new Storage.Location();
         storageLocationProperties.setEndpoint(endpoint);
         storageProperties.setLocation(storageLocationProperties);
-        integrationProperties.setStorage(storageProperties);
+        IntegrationProperties.HylandExperience hylandExperience = new IntegrationProperties.HylandExperience();
+        hylandExperience.setStorage(storageProperties);
+        integrationProperties.setHylandExperience(hylandExperience);
         return integrationProperties;
     }
 

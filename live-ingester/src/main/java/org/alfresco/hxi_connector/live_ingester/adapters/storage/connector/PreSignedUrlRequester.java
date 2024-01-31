@@ -83,7 +83,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             .id(ROUTE_ID)
             .marshal()
             .json()
-            .to(integrationProperties.getStorage().getLocation().getEndpoint())
+            .to(integrationProperties.getHylandExperience().getStorage().getLocation().getEndpoint())
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .unmarshal()
@@ -97,9 +97,9 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "${alfresco.integration.storage.location.retry.attempts}",
-            backoff = @Backoff(delayExpression = "${alfresco.integration.storage.location.retry.initialDelay}",
-                    multiplierExpression = "${alfresco.integration.storage.location.retry.delayMultiplier}"))
+            maxAttemptsExpression = "${integration.hyland-experience.storage.location.retry.attempts}",
+            backoff = @Backoff(delayExpression = "${integration.hyland-experience.storage.location.retry.initialDelay}",
+                    multiplierExpression = "${integration.hyland-experience.storage.location.retry.delayMultiplier}"))
     @Override
     public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {

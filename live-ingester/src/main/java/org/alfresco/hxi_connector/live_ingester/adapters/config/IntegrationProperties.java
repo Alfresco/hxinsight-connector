@@ -39,17 +39,30 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Stora
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
 @Component
-@ConfigurationProperties("alfresco.integration")
+@ConfigurationProperties("integration")
 @Validated
 @Data
 public class IntegrationProperties
 {
-    @NestedConfigurationProperty
-    @NotNull private Repository repository;
-    @NestedConfigurationProperty
-    @NotNull private Transform transform;
-    @NestedConfigurationProperty
-    @NotNull private Storage storage;
-    @NestedConfigurationProperty
-    @NotNull private Ingester ingester;
+
+    @NotNull private Alfresco alfresco;
+    @NotNull private HylandExperience hylandExperience;
+
+    @Data
+    public static class Alfresco
+    {
+        @NestedConfigurationProperty
+        @NotNull private Repository repository;
+        @NestedConfigurationProperty
+        @NotNull private Transform transform;
+    }
+
+    @Data
+    public static class HylandExperience
+    {
+        @NestedConfigurationProperty
+        @NotNull private Storage storage;
+        @NestedConfigurationProperty
+        @NotNull private Ingester ingester;
+    }
 }
