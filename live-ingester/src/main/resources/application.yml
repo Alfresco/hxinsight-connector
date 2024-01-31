@@ -29,9 +29,5 @@ hyland-experience:
         &authPassword=${hyland-experience.insight.password}\
         &authenticationPreemptive=true\
         &throwExceptionOnFailure=false"
-      retry:
-        attempts: 3
-        initial-delay: 500
-        delay-multiplier: 2
   ingester:
     endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST

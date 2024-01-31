@@ -2,6 +2,27 @@
 
 Connector for sending ACS events to Hx Insight and updating the Repository with the predictions that it generates.
 
+### Configuration
+
+#### Retry
+In case of an error while trying to call external endpoint the call will be reattempted.
+Retry specification default values are:
+- attempts: 10
+- initial delay: 500 ms
+- delay multiplier: 2
+
+Above default properties can be overwritten with custom specification, which for particular endpoints may look like, e.g.:
+- storage location request:
+```yaml
+hyland-experience:
+  storage:
+    location:
+      retry:
+        attempts: 5
+        initialDelay: 1000
+        delayMultiplier: 1.5
+```
+
 
 ### Code Quality
 This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.
