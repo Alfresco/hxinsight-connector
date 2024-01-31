@@ -52,14 +52,7 @@ public class AlfrescoNodeMapper
     public static final String CONTENT_PROPERTY = "content";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(NAME_PROPERTY, CONTENT_PROPERTY);
 
-    private final AlfrescoNode alfrescoNode;
-
     public static Node map(AlfrescoNode alfrescoNode)
-    {
-        return new AlfrescoNodeMapper(alfrescoNode).performMapping();
-    }
-
-    private Node performMapping()
     {
         String nodeId = alfrescoNode.getNodeRef();
         String type = alfrescoNode.getType().getLocalName();
@@ -67,7 +60,7 @@ public class AlfrescoNodeMapper
         String modifierId = alfrescoNode.getModifier();
         Set<String> aspectNames = alfrescoNode.getAspects().stream().map(QName::getLocalName).collect(Collectors.toSet());
         ZonedDateTime createdAt = alfrescoNode.getCreatedAt();
-        Map<String, Serializable> allProperties = calculateAllProperties();
+        Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
         String name = (String) allProperties.get(NAME_PROPERTY);
         ContentMetadata content = (ContentMetadata) allProperties.get(CONTENT_PROPERTY);
@@ -86,7 +79,7 @@ public class AlfrescoNodeMapper
                 customProperties);
     }
 
-    private Map<String, Serializable> calculateAllProperties()
+    private static Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)
     {
         return alfrescoNode.getNodeProperties()
                 .stream()
@@ -98,7 +91,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<String, Serializable> getCustomProperties(Map<String, Serializable> allProperties)
+    private static Map<String, Serializable> getCustomProperties(Map<String, Serializable> allProperties)
     {
         return allProperties.entrySet()
                 .stream()
