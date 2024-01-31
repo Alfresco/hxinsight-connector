@@ -34,7 +34,6 @@ import lombok.Data;
 public class Storage
 {
     @NotNull private Location location;
-    @NotNull private Upload upload = new Upload();
 
     @Data
     public static class Location
@@ -42,8 +41,4 @@ public class Storage
         @NotBlank
         private String endpoint;
     }
-
-    @Data
-    public static class Upload
-    {}
 }
