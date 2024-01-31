@@ -64,6 +64,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
@@ -205,9 +206,9 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(1)).requestStorageLocation(any());
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .cause().isInstanceOf(LiveIngesterRuntimeException.class)
                 .cause().isInstanceOf(MalformedURLException.class);
     }
 

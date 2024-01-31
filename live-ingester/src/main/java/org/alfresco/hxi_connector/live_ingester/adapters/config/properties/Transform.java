@@ -29,7 +29,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
 public class Transform
@@ -56,8 +55,7 @@ public class Transform
     }
 
     @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class SharedFileStore extends Retryable
+    public static class SharedFileStore
     {
         @NotBlank
         private String host;

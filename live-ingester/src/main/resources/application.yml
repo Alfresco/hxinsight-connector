@@ -21,8 +21,8 @@ alfresco:
         endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
         timeout: 20000
       response:
-        endpoint: activemq:queue:${alfresco.transform.response.queueName}
-        queueName: org.alfresco.hxinsight-connector.transform.response
+        queue-name: org.alfresco.hxinsight-connector.transform.response
+        endpoint: activemq:queue:${alfresco.integration.transform.response.queue-name}
       shared-file-store:
         host: http://localhost
         port: 8099
@@ -35,5 +35,9 @@ alfresco:
           &authPassword=${hyland.experience.insight.api.password}\
           &authenticationPreemptive=true\
           &throwExceptionOnFailure=false"
+        retry:
+          attempts: 10
+          initialDelay: 500
+          delayMultiplier: 2
     ingester:
       endpoint: ${hyland.experience.insight.api.url.ingest}?httpMethod=POST

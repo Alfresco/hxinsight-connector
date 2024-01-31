@@ -29,9 +29,12 @@ import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.Map;
 import java.util.Set;
 
+import com.fasterxml.jackson.core.io.JsonEOFException;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
@@ -39,6 +42,9 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.hc.client5.http.HttpHostConnectException;
+import org.apache.hc.core5.http.MalformedChunkCodingException;
+import org.apache.hc.core5.http.NoHttpResponseException;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -70,7 +76,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         // @formatter:off
         onException(Exception.class)
             .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
-            .process(this::wrapServerExceptions)
+            .process(PreSignedUrlRequester::wrapServerExceptions)
             .stop();
 
         from(LOCAL_ENDPOINT)
@@ -82,18 +88,18 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .unmarshal()
                 .json(JsonLibrary.Jackson, Map.class)
-                .process(this::extractUrl)
+                .process(PreSignedUrlRequester::extractUrl)
             .otherwise()
-                .process(this::throwUnexpectedStatusCodeException)
+                .process(PreSignedUrlRequester::throwUnexpectedStatusCodeException)
             .endChoice()
             .end();
         // @formatter:on
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{@integrationProperties.storage.location.retry.attempts}",
-            backoff = @Backoff(delayExpression = "#{@integrationProperties.storage.location.retry.initialDelay}",
-                    multiplierExpression = "#{@integrationProperties.storage.location.retry.delayMultiplier}"))
+            maxAttemptsExpression = "${alfresco.integration.storage.location.retry.attempts}",
+            backoff = @Backoff(delayExpression = "${alfresco.integration.storage.location.retry.initialDelay}",
+                    multiplierExpression = "${alfresco.integration.storage.location.retry.delayMultiplier}"))
     @Override
     public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {
@@ -107,12 +113,12 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     }
 
     @SuppressWarnings({"unchecked", "PMD.UnusedPrivateMethod"})
-    private void extractUrl(Exchange exchange)
+    private static void extractUrl(Exchange exchange)
     {
-        exchange.getMessage().setBody(extractStorageLocationUrl(exchange.getIn().getBody(Map.class)), URL.class);
+        exchange.getIn().setBody(extractStorageLocationUrl(exchange.getMessage().getBody(Map.class)), URL.class);
     }
 
-    private URL extractStorageLocationUrl(Map<String, Object> map)
+    private static URL extractStorageLocationUrl(Map<String, Object> map)
     {
         if (map.containsKey(STORAGE_LOCATION_PROPERTY))
         {
@@ -122,17 +128,17 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             }
             catch (MalformedURLException e)
             {
-                throw new EndpointServerErrorException("Parsing URL from response property failed!", e);
+                throw new LiveIngesterRuntimeException("Parsing URL from response property failed!", e);
             }
         }
         else
         {
-            throw new EndpointServerErrorException("Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
+            throw new LiveIngesterRuntimeException("Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
         }
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void throwUnexpectedStatusCodeException(Exchange exchange)
+    private static void throwUnexpectedStatusCodeException(Exchange exchange)
     {
         int actualStatusCode = exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class);
         if (actualStatusCode >= 400 && actualStatusCode <= 499)
@@ -150,18 +156,24 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapServerExceptions(Exchange exchange)
+    private static void wrapServerExceptions(Exchange exchange)
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.getStorage().getLocation().getRetry().getReasons();
+        Set<Class<?>> expectedServerExceptions = Set.of(
+                JsonEOFException.class,
+                MismatchedInputException.class,
+                UnknownHostException.class,
+                HttpHostConnectException.class,
+                NoHttpResponseException.class,
+                MalformedChunkCodingException.class);
 
-        if (cause instanceof EndpointServerErrorException)
-        {
-            throw (EndpointServerErrorException) cause;
-        }
-        else if (retryReasons.contains(cause.getClass()))
+        if (expectedServerExceptions.contains(cause.getClass()))
         {
             throw new EndpointServerErrorException(cause);
+        }
+        else if (cause instanceof EndpointServerErrorException)
+        {
+            throw (EndpointServerErrorException) cause;
         }
         else if (cause instanceof LiveIngesterRuntimeException)
         {

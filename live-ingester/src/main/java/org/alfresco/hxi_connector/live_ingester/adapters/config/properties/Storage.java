@@ -29,7 +29,6 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 
 @Data
 public class Storage
@@ -38,15 +37,13 @@ public class Storage
     @NotNull private Upload upload = new Upload();
 
     @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class Location extends Retryable
+    public static class Location
     {
         @NotBlank
         private String endpoint;
     }
 
     @Data
-    @EqualsAndHashCode(callSuper = true)
-    public static class Upload extends Retryable
+    public static class Upload
     {}
 }
