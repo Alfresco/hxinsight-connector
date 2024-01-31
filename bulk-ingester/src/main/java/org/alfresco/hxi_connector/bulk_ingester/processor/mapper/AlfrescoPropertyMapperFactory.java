@@ -24,22 +24,11 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.processor.model;
+package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.Set;
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 
-import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
-
-public record Node(
-        String nodeId,
-        String type,
-        String creatorId,
-        String modifierId,
-        Set<String> aspectNames,
-        ContentMetadata contentMetadata,
-        ZonedDateTime createdAt,
-        Map<String, Serializable> customProperties)
-{}
+public interface AlfrescoPropertyMapperFactory
+{
+    AlfrescoPropertyMapper create(AlfrescoNode alfrescoNode, String name);
+}

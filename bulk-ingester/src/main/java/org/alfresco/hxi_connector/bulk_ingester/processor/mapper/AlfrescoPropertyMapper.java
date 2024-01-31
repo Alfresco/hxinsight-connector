@@ -30,8 +30,6 @@ import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
-import static lombok.AccessLevel.PRIVATE;
-
 import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CONTENT_PROPERTY;
 
 import java.io.ByteArrayInputStream;
@@ -55,18 +53,13 @@ import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
 
 @Slf4j
-@RequiredArgsConstructor(access = PRIVATE)
+@RequiredArgsConstructor
 public class AlfrescoPropertyMapper
 {
     private final AlfrescoNode alfrescoNode;
     private final String propertyName;
 
-    public static Optional<Map.Entry<String, Serializable>> map(AlfrescoNode alfrescoNode, String propertyName)
-    {
-        return new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
-    }
-
-    private Optional<Map.Entry<String, Serializable>> performMapping()
+    public Optional<Map.Entry<String, Serializable>> performMapping()
     {
         /* Properties might be duplicated - for example they can have different locale (we can have two descriptions with "en_US_" and "en_UK_" locale) and in this case we want to process them together */
         List<Serializable> propertyValues = alfrescoNode.getNodeProperties().stream()

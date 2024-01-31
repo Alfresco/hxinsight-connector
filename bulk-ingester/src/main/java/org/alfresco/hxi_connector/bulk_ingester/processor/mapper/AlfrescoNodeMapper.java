@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import static lombok.AccessLevel.PRIVATE;
-
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -36,8 +34,9 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
@@ -45,13 +44,21 @@ import org.alfresco.elasticsearch.db.connector.model.QName;
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 
 @Slf4j
-@NoArgsConstructor(access = PRIVATE)
+@Component
+@RequiredArgsConstructor
 public class AlfrescoNodeMapper
 {
     public static final String CONTENT_PROPERTY = "content";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
-    public static Node map(AlfrescoNode alfrescoNode)
+    private final AlfrescoPropertyMapperFactory propertyMapperFactory;
+
+    public AlfrescoNodeMapper()
+    {
+        propertyMapperFactory = AlfrescoPropertyMapper::new;
+    }
+
+    public Node map(AlfrescoNode alfrescoNode)
     {
         String nodeId = alfrescoNode.getNodeRef();
         String type = alfrescoNode.getType().getLocalName();
@@ -76,19 +83,19 @@ public class AlfrescoNodeMapper
                 customProperties);
     }
 
-    private static Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)
+    private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)
     {
         return alfrescoNode.getNodeProperties()
                 .stream()
                 .filter(Objects::nonNull)
                 .map(property -> property.getPropertyKey().getLocalName())
                 .distinct()
-                .map(propertyName -> AlfrescoPropertyMapper.map(alfrescoNode, propertyName))
+                .map(propertyName -> propertyMapperFactory.create(alfrescoNode, propertyName).performMapping())
                 .flatMap(Optional::stream)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private static Map<String, Serializable> getCustomProperties(Map<String, Serializable> allProperties)
+    private Map<String, Serializable> getCustomProperties(Map<String, Serializable> allProperties)
     {
         return allProperties.entrySet()
                 .stream()

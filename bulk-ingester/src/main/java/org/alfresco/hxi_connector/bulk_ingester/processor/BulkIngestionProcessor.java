@@ -43,12 +43,14 @@ public class BulkIngestionProcessor
 
     private final BulkIngesterConfig bulkIngesterConfig;
 
+    private final AlfrescoNodeMapper alfrescoNodeMapper;
+
     public void process()
     {
         NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
 
         bulkIngesterNodeRepository.find(nodeParams)
-                .map(AlfrescoNodeMapper::map)
+                .map(alfrescoNodeMapper::map)
                 .forEach(node -> log.info("Found node {}", node));
     }
 
