@@ -28,8 +28,9 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -39,30 +40,21 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Stora
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
 @Component
-@ConfigurationProperties("integration")
+@EnableConfigurationProperties({IntegrationProperties.Alfresco.class, IntegrationProperties.HylandExperience.class})
 @Validated
 @Data
+@Accessors(fluent = true)
 public class IntegrationProperties
 {
 
-    @NotNull private Alfresco alfresco;
-    @NotNull private HylandExperience hylandExperience;
+    @NotNull private final Alfresco alfresco;
+    @NotNull private final HylandExperience hylandExperience;
 
-    @Data
-    public static class Alfresco
-    {
-        @NestedConfigurationProperty
-        @NotNull private Repository repository;
-        @NestedConfigurationProperty
-        @NotNull private Transform transform;
-    }
+    @ConfigurationProperties("alfresco")
+    public record Alfresco(@NotNull Repository repository, @NotNull Transform transform)
+    {}
 
-    @Data
-    public static class HylandExperience
-    {
-        @NestedConfigurationProperty
-        @NotNull private Storage storage;
-        @NestedConfigurationProperty
-        @NotNull private Ingester ingester;
-    }
+    @ConfigurationProperties("hyland-experience")
+    public record HylandExperience(@NotNull Storage storage, @NotNull Ingester ingester)
+    {}
 }

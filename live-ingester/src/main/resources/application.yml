@@ -2,39 +2,36 @@ camel:
   springboot.main-run-controller: true
   dataformat.jackson.autoDiscoverObjectMapper: true
 
+alfresco:
+  repository:
+    endpoint: activemq:topic:alfresco.repo.event2
+  transform:
+    request:
+      endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
+      timeout: 20000
+    response:
+      queue-name: org.alfresco.hxinsight-connector.transform.response
+      endpoint: activemq:queue:${alfresco.transform.response.queue-name}
+    shared-file-store:
+      host: http://localhost
+      port: 8099
 hyland-experience:
   insight:
     username: dummy_user
     password: dummy_pass
     base-url: http://localhost:8001
-
-integration:
-  alfresco:
-    repository:
-      endpoint: activemq:topic:alfresco.repo.event2
-    transform:
-      request:
-        endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
-        timeout: 20000
-      response:
-        queue-name: org.alfresco.hxinsight-connector.transform.response
-        endpoint: activemq:queue:${integration.alfresco.transform.response.queue-name}
-      shared-file-store:
-        host: http://localhost
-        port: 8099
-  hyland-experience:
-    storage:
-      location:
-        endpoint: "${hyland-experience.insight.base-url}/pre-signed-url\
-          ?httpMethod=POST\
-          &authMethod=Basic\
-          &authUsername=${hyland-experience.insight.username}\
-          &authPassword=${hyland-experience.insight.password}\
-          &authenticationPreemptive=true\
-          &throwExceptionOnFailure=false"
-        retry:
-          attempts: 3
-          initialDelay: 500
-          delayMultiplier: 2
-    ingester:
-      endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST
+  storage:
+    location:
+      endpoint: "${hyland-experience.insight.base-url}/pre-signed-url\
+        ?httpMethod=POST\
+        &authMethod=Basic\
+        &authUsername=${hyland-experience.insight.username}\
+        &authPassword=${hyland-experience.insight.password}\
+        &authenticationPreemptive=true\
+        &throwExceptionOnFailure=false"
+      retry:
+        attempts: 3
+        initialDelay: 500
+        delayMultiplier: 2
+  ingester:
+    endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST

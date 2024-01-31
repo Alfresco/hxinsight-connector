@@ -231,8 +231,8 @@ class PreSignedUrlRequesterIntegrationTest
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("integration.hyland-experience.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
-        registry.add("integration.hyland-experience.storage.location.retry.initialDelay", () -> RETRY_DELAY_MS);
+        registry.add("hyland-experience.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
+        registry.add("hyland-experience.storage.location.retry.initialDelay", () -> RETRY_DELAY_MS);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

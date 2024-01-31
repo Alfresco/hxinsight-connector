@@ -28,17 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.Data;
-
-@Data
-public class Storage
+public record Storage(@NotNull Location location)
 {
-    @NotNull private Location location;
-
-    @Data
-    public static class Location
-    {
-        @NotBlank
-        private String endpoint;
-    }
+    public record Location(@NotBlank String endpoint)
+    {}
 }

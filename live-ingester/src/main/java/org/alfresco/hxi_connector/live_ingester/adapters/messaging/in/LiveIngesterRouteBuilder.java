@@ -46,7 +46,7 @@ public class LiveIngesterRouteBuilder extends RouteBuilder
     @Override
     public void configure()
     {
-        from(integrationProperties.getAlfresco().getRepository().getEndpoint())
+        from(integrationProperties.alfresco().repository().endpoint())
                 .transacted()
                 .routeId("ingester-events-consumer")
                 .log(DEBUG, "Received repo event : ${header.JMSMessageID}")

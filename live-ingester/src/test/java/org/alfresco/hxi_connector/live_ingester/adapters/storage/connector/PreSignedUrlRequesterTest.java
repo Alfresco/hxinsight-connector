@@ -214,15 +214,9 @@ class PreSignedUrlRequesterTest
 
     private IntegrationProperties integrationPropertiesOf(String endpoint)
     {
-        IntegrationProperties integrationProperties = new IntegrationProperties();
-        Storage storageProperties = new Storage();
-        Storage.Location storageLocationProperties = new Storage.Location();
-        storageLocationProperties.setEndpoint(endpoint);
-        storageProperties.setLocation(storageLocationProperties);
-        IntegrationProperties.HylandExperience hylandExperience = new IntegrationProperties.HylandExperience();
-        hylandExperience.setStorage(storageProperties);
-        integrationProperties.setHylandExperience(hylandExperience);
-        return integrationProperties;
+        Storage storageProperties = new Storage(new Storage.Location(endpoint));
+        IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
+        return new IntegrationProperties(null, hylandExperienceProperties);
     }
 
     private StorageLocationRequest createStorageLocationRequestMock()

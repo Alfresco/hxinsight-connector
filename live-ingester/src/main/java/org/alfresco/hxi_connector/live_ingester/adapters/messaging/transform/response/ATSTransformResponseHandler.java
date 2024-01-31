@@ -51,7 +51,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     @Override
     public void configure()
     {
-        from(integrationProperties.getAlfresco().getTransform().getResponse().getEndpoint())
+        from(integrationProperties.alfresco().transform().response().endpoint())
                 .routeId("transform-events-consumer")
                 .log(DEBUG, "Received transform completed event : ${body}")
                 .unmarshal()

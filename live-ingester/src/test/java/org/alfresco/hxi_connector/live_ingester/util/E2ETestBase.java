@@ -88,7 +88,7 @@ public class E2ETestBase
         brokerUrl = "tcp://localhost:" + activemq.getMappedPort(ACTIVE_MQ_PORT);
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
-        registry.add("integration.alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
+        registry.add("alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
     }
 
     @SneakyThrows

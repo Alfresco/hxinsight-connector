@@ -27,11 +27,5 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 
-import lombok.Data;
-
-@Data
-public class Ingester
-{
-    @NotBlank
-    private String endpoint;
-}
+public record Ingester(@NotBlank String endpoint)
+{}

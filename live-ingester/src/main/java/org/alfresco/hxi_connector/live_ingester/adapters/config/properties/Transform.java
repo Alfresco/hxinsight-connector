@@ -27,38 +27,18 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-import lombok.Data;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
-@Data
-public class Transform
+public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore)
 {
-    @NotNull private Request request;
-    @NotNull private Response response;
-    @NotNull private SharedFileStore sharedFileStore;
+    public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout)
+    {}
 
-    @Data
-    public static class Request
-    {
-        @NotBlank
-        private String endpoint;
-        private int timeout = 20000;
-    }
+    public record Response(@NotBlank String endpoint, @NotBlank String queueName)
+    {}
 
-    @Data
-    public static class Response
-    {
-        @NotBlank
-        private String endpoint;
-        @NotBlank
-        private String queueName;
-    }
-
-    @Data
-    public static class SharedFileStore
-    {
-        @NotBlank
-        private String host;
-        private int port;
-    }
+    public record SharedFileStore(@NotBlank String host, @Positive int port)
+    {}
 }
