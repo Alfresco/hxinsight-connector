@@ -56,6 +56,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 @Slf4j
+@SuppressWarnings("PMD.NonThreadSafeSingleton")
 public class ContainerSupport
 {
     public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingest";
@@ -71,7 +72,8 @@ public class ContainerSupport
     private MessageConsumer atsConsumer;
 
     @SneakyThrows
-    private ContainerSupport(WireMockContainer hxInsight, GenericContainer activemq, String brokerUrl)
+    @SuppressWarnings("PMD.CloseResource")
+    private ContainerSupport(WireMockContainer hxInsight, String brokerUrl)
     {
         WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
 
@@ -87,11 +89,11 @@ public class ContainerSupport
         atsConsumer = session.createConsumer(atsQueue);
     }
 
-    public static ContainerSupport getInstance(WireMockContainer hxInsight, GenericContainer activemq, String brokerUrl)
+    public static ContainerSupport getInstance(WireMockContainer hxInsight, String brokerUrl)
     {
         if (instance == null)
         {
-            instance = new ContainerSupport(hxInsight, activemq, brokerUrl);
+            instance = new ContainerSupport(hxInsight, brokerUrl);
         }
         return instance;
     }
