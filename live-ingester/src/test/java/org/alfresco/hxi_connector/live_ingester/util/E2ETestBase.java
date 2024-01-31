@@ -101,7 +101,7 @@ public class E2ETestBase
     @SneakyThrows
     public void setUp()
     {
-        containerSupport = ContainerSupport.getInstance(hxInsight, brokerUrl);
+        containerSupport = ContainerSupport.getInstance(hxInsight, activemq, brokerUrl);
     }
 
     @AfterEach
