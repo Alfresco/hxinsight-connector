@@ -52,7 +52,6 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.testcontainers.containers.GenericContainer;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 @Slf4j
