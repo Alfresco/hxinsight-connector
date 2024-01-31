@@ -68,9 +68,7 @@ public class AlfrescoPropertyMapper
 
     private Optional<Map.Entry<String, Serializable>> performMapping()
     {
-        /*
-         * Properties might be duplicated - for example they can have different locale (we can have two descriptions with "en_US_" and "en_UK_" locale) and in this case we want to process them together
-         */
+        /* Properties might be duplicated - for example they can have different locale (we can have two descriptions with "en_US_" and "en_UK_" locale) and in this case we want to process them together */
         List<Serializable> propertyValues = alfrescoNode.getNodeProperties().stream()
                 .filter(nodeProperty -> nodeProperty.getPropertyKey().getLocalName().equals(propertyName))
                 .map(nodeProperty -> mapPropertyValue(nodeProperty.getPropertyValue()))
