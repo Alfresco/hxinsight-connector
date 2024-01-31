@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
@@ -45,7 +45,7 @@ import org.alfresco.elasticsearch.db.connector.model.QName;
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 
 @Slf4j
-@RequiredArgsConstructor(access = PRIVATE)
+@NoArgsConstructor(access = PRIVATE)
 public class AlfrescoNodeMapper
 {
     public static final String NAME_PROPERTY = "name";
