@@ -50,7 +50,7 @@ public class AlfrescoNodeMapper
 {
     public static final String NAME_PROPERTY = "name";
     public static final String CONTENT_PROPERTY = "content";
-    private static final Set<String> predefinedProperties = Set.of(NAME_PROPERTY, CONTENT_PROPERTY);
+    private static final Set<String> PREDEFINED_PROPERTIES = Set.of(NAME_PROPERTY, CONTENT_PROPERTY);
 
     private final AlfrescoNode alfrescoNode;
 
@@ -102,7 +102,7 @@ public class AlfrescoNodeMapper
     {
         return allProperties.entrySet()
                 .stream()
-                .filter(entry -> !predefinedProperties.contains(entry.getKey()))
+                .filter(entry -> !PREDEFINED_PROPERTIES.contains(entry.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }
