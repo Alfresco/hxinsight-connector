@@ -36,7 +36,7 @@ alfresco:
           &authenticationPreemptive=true\
           &throwExceptionOnFailure=false"
         retry:
-          attempts: 10
+          attempts: 3
           initialDelay: 500
           delayMultiplier: 2
     ingester:

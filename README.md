@@ -2,6 +2,7 @@
 
 Connector for sending ACS events to Hx Insight and updating the Repository with the predictions that it generates.
 
+
 ### Code Quality
 This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.
 

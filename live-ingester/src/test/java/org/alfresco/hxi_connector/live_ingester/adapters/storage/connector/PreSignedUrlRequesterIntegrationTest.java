@@ -86,8 +86,7 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
     private static final int HX_INSIGHT_RESPONSE_CODE = 201;
-    private static final int RETRY_ATTEMPTS = 5;
-    private static final int RETRY_DELAY_MS = 0;
+    private static final int RETRY_DELAY_MS = 1;
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
@@ -134,7 +133,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(3)).requestStorageLocation(any());
         assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
     }
 
@@ -166,7 +165,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(3)).requestStorageLocation(any());
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MismatchedInputException.class);
@@ -185,7 +184,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(3)).requestStorageLocation(any());
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(JsonEOFException.class);
@@ -223,7 +222,7 @@ class PreSignedUrlRequesterIntegrationTest
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(3)).requestStorageLocation(any());
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(NoHttpResponseException.class);
@@ -233,7 +232,6 @@ class PreSignedUrlRequesterIntegrationTest
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
         registry.add("alfresco.integration.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
-        registry.add("alfresco.integration.storage.location.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("alfresco.integration.storage.location.retry.initialDelay", () -> RETRY_DELAY_MS);
     }
 
