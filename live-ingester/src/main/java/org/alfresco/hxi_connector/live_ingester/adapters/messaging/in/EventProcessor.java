@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in;
 
-import static java.util.Optional.ofNullable;
-
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeDeleted;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeUpdated;
@@ -45,7 +43,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNode
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
-import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -79,7 +76,7 @@ public class EventProcessor
 
     private void handleContentChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (containsNewContent(event))
+        if (isEventTypeCreated(event) && containsContent(event))
         {
             IngestContentCommand command = repoEventMapper.mapToIngestContentCommand(event);
 
@@ -87,50 +84,11 @@ public class EventProcessor
         }
     }
 
-    /**
-     * We can determine if there is new content that needs processing by looking at the resourceBefore.content and resource.content fields.
-     * <p>
-     * For newly created nodes we have:
-     * <ul>
-     * <li>null -> zero bytes: No content
-     * <li>null -> non-zero bytes: New content
-     * </ul>
-     * For updated nodes we have:
-     * <ul>
-     * <li>null -> zero bytes: No content
-     * <li>null -> non-zero bytes: No change to content
-     * <li>non-zero bytes -> zero bytes: Content deleted
-     * <li>non-zero bytes -> non-zero bytes : Content updated
-     * <li>zero bytes -> non-zero bytes : Content added (no content on node before)
-     * </ul>
-     */
-    private boolean containsNewContent(RepoEvent<DataAttributes<NodeResource>> event)
+    private boolean containsContent(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        Optional<ContentInfo> latestContentInfo = ofNullable(event.getData().getResource()).map(NodeResource::getContent);
-        // If there's no content info in the current resource then the node cannot contain content.
-        if (latestContentInfo.isEmpty())
-        {
-            return false;
-        }
-        boolean latestContentPresent = !latestContentInfo.get().getSizeInBytes().equals(0L);
-        // If there is content on a new node then we should process it.
-        if (isEventTypeCreated(event))
-        {
-            return latestContentPresent;
-        }
-        else if (isEventTypeUpdated(event))
-        {
-            Optional<ContentInfo> oldContentInfo = ofNullable(event.getData().getResourceBefore()).map(NodeResource::getContent);
-            // If content isn't mentioned in the resourceBefore then there was no change to the content.
-            if (oldContentInfo.isEmpty())
-            {
-                return false;
-            }
-            // If the content was mentioned in the resourceBefore _and_ is non-zero now then we need to process it.
-            return latestContentPresent;
-        }
-        // For events other than create or update then we do not need to process the content.
-        return false;
+        return Optional.ofNullable(event.getData().getResource())
+                .map(NodeResource::getContent)
+                .isPresent();
     }
 
     private void handleNodeDeleteEvent(RepoEvent<DataAttributes<NodeResource>> event)
