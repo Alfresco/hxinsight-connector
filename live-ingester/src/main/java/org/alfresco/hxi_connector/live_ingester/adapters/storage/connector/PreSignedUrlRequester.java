@@ -98,8 +98,8 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
     @Retryable(retryFor = EndpointServerErrorException.class,
             maxAttemptsExpression = "${hyland-experience.storage.location.retry.attempts}",
-            backoff = @Backoff(delayExpression = "${hyland-experience.storage.location.retry.initialDelay}",
-                    multiplierExpression = "${hyland-experience.storage.location.retry.delayMultiplier}"))
+            backoff = @Backoff(delayExpression = "${hyland-experience.storage.location.retry.initial-delay}",
+                    multiplierExpression = "${hyland-experience.storage.location.retry.delay-multiplier}"))
     @Override
     public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {

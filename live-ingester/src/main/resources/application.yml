@@ -31,7 +31,7 @@ hyland-experience:
         &throwExceptionOnFailure=false"
       retry:
         attempts: 3
-        initialDelay: 500
-        delayMultiplier: 2
+        initial-delay: 500
+        delay-multiplier: 2
   ingester:
     endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST

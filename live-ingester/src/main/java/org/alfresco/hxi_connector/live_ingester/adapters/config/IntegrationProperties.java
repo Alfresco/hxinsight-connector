@@ -31,6 +31,7 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -51,10 +52,14 @@ public class IntegrationProperties
     @NotNull private final HylandExperience hylandExperience;
 
     @ConfigurationProperties("alfresco")
-    public record Alfresco(@NotNull Repository repository, @NotNull Transform transform)
+    public record Alfresco(
+            @NestedConfigurationProperty @NotNull Repository repository,
+            @NestedConfigurationProperty @NotNull Transform transform)
     {}
 
     @ConfigurationProperties("hyland-experience")
-    public record HylandExperience(@NotNull Storage storage, @NotNull Ingester ingester)
+    public record HylandExperience(
+            @NestedConfigurationProperty @NotNull Storage storage,
+            @NestedConfigurationProperty @NotNull Ingester ingester)
     {}
 }
