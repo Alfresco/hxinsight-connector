@@ -48,9 +48,8 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 @NoArgsConstructor(access = PRIVATE)
 public class AlfrescoNodeMapper
 {
-    public static final String NAME_PROPERTY = "name";
     public static final String CONTENT_PROPERTY = "content";
-    private static final Set<String> PREDEFINED_PROPERTIES = Set.of(NAME_PROPERTY, CONTENT_PROPERTY);
+    private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     public static Node map(AlfrescoNode alfrescoNode)
     {
@@ -62,14 +61,12 @@ public class AlfrescoNodeMapper
         ZonedDateTime createdAt = alfrescoNode.getCreatedAt();
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
-        String name = (String) allProperties.get(NAME_PROPERTY);
         ContentMetadata content = (ContentMetadata) allProperties.get(CONTENT_PROPERTY);
 
         Map<String, Serializable> customProperties = getCustomProperties(allProperties);
 
         return new Node(
                 nodeId,
-                name,
                 type,
                 creatorId,
                 modifierId,

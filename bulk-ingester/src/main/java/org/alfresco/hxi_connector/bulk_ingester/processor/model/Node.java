@@ -35,7 +35,6 @@ import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
 
 public record Node(
         String nodeId,
-        String name,
         String type,
         String creatorId,
         String modifierId,
