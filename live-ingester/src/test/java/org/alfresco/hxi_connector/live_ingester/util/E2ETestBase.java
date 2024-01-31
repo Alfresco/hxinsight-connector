@@ -27,16 +27,17 @@ package org.alfresco.hxi_connector.live_ingester.util;
 
 import static lombok.AccessLevel.PROTECTED;
 
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_QUEUE;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REPO_EVENT_TOPIC;
 
 import java.time.Duration;
-import jakarta.jms.Connection;
-import jakarta.jms.ConnectionFactory;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
-import org.apache.activemq.ActiveMQConnectionFactory;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -70,6 +71,8 @@ public class E2ETestBase
     private static String hxInsightUrl;
     private static String brokerUrl;
 
+    protected ContainerSupport containerSupport;
+
     public static GenericContainer createAMQContainer()
     {
         return new GenericContainer(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
@@ -89,17 +92,27 @@ public class E2ETestBase
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
         registry.add("alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
+
+        registry.add("alfresco.transform.request.endpoint", () -> "activemq:queue:" + ATS_QUEUE + "?jmsMessageType=Text");
     }
 
+    @BeforeEach
     @SneakyThrows
-    public ContainerSupport configureContainers()
+    public void setUp()
     {
-        WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
+        containerSupport = ContainerSupport.getInstance(hxInsight, brokerUrl);
+    }
 
-        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
-        Connection connection = connectionFactory.createConnection();
-        connection.start();
+    @AfterEach
+    public void reset()
+    {
+        WireMock.reset();
+        containerSupport.clearATSQueue();
+    }
 
-        return new ContainerSupport(connection);
+    @AfterAll
+    public static void tearDown()
+    {
+        ContainerSupport.removeInstance();
     }
 }
