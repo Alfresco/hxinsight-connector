@@ -32,33 +32,73 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.junit.Assert.assertEquals;
 
 import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWithBackoff;
 
+import java.util.HashMap;
+import java.util.Map;
 import jakarta.jms.Connection;
+import jakarta.jms.ConnectionFactory;
+import jakarta.jms.MessageConsumer;
 import jakarta.jms.MessageProducer;
+import jakarta.jms.Queue;
 import jakarta.jms.Session;
+import jakarta.jms.TextMessage;
 import jakarta.jms.Topic;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.activemq.ActiveMQConnectionFactory;
+import org.testcontainers.containers.GenericContainer;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+@Slf4j
 public class ContainerSupport
 {
     public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingest";
     private static final int HX_INSIGHT_SUCCESS_CODE = 201;
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
+    public static final String ATS_QUEUE = "ats.queue";
+    public static final String REQUEST_ID_PLACEHOLDER = "_REQUEST_ID_";
+
+    private static ContainerSupport instance;
 
     private Session session;
     private MessageProducer repoEventProducer;
+    private MessageConsumer atsConsumer;
 
     @SneakyThrows
-    public ContainerSupport(Connection connection)
+    private ContainerSupport(WireMockContainer hxInsight, GenericContainer activemq, String brokerUrl)
     {
+        WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
+
+        ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
+        Connection connection = connectionFactory.createConnection();
+        connection.start();
+
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
 
         Topic repoTopic = session.createTopic(REPO_EVENT_TOPIC);
         repoEventProducer = session.createProducer(repoTopic);
+        Queue atsQueue = session.createQueue(ATS_QUEUE);
+        atsConsumer = session.createConsumer(atsQueue);
+    }
+
+    public static ContainerSupport getInstance(WireMockContainer hxInsight, GenericContainer activemq, String brokerUrl)
+    {
+        if (instance == null)
+        {
+            instance = new ContainerSupport(hxInsight, activemq, brokerUrl);
+        }
+        return instance;
+    }
+
+    public static void removeInstance()
+    {
+        instance = null;
     }
 
     public void prepareHxInsightToReturnSuccess()
@@ -80,5 +120,34 @@ public class ContainerSupport
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
+    }
+
+    @SneakyThrows
+    public void verifyATSRequestReceived(String expectedBody)
+    {
+        TextMessage received = (TextMessage) retryWithBackoff(this::receiveATSTextMessage);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        Map<String, Object> receivedMap = objectMapper.readValue(received.getText(), HashMap.class);
+        String requestId = (String) receivedMap.get("requestId");
+
+        Map<String, Object> expectedMap = objectMapper.readValue(expectedBody.replace(REQUEST_ID_PLACEHOLDER, requestId), HashMap.class);
+
+        assertEquals(expectedMap, receivedMap);
+    }
+
+    @SneakyThrows
+    public void clearATSQueue()
+    {
+        while (receiveATSTextMessage() != null)
+        {
+            log.debug("Removed message from ATS queue");
+        }
+    }
+
+    @SneakyThrows
+    TextMessage receiveATSTextMessage()
+    {
+        return (TextMessage) atsConsumer.receiveNoWait();
     }
 }
