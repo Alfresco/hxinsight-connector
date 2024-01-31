@@ -37,7 +37,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ATSTransformRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ClientData;
@@ -56,7 +56,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
 
     private final CamelContext context;
     private final ObjectMapper objectMapper;
-    private final IntegrationConfig.Properties integrationProperties;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()

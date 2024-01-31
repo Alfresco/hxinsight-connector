@@ -43,7 +43,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
@@ -62,7 +62,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     static final String CONTENT_TYPE_PROPERTY = "contentType";
 
     private final CamelContext camelContext;
-    private final IntegrationConfig.Properties integrationProperties;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()

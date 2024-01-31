@@ -37,7 +37,7 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
@@ -54,7 +54,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     private static final String ENDPOINT_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET";
 
     private final CamelContext camelContext;
-    private final IntegrationConfig.Properties integrationProperties;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()

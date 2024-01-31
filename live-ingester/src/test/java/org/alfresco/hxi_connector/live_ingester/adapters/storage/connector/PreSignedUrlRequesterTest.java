@@ -51,7 +51,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retryable;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
@@ -78,7 +78,7 @@ class PreSignedUrlRequesterTest
     void beforeAll()
     {
         camelContext = new DefaultCamelContext();
-        IntegrationConfig.Properties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT, 0);
+        IntegrationProperties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT, 0);
         preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties);
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
@@ -212,9 +212,9 @@ class PreSignedUrlRequesterTest
                 .message().isNotEmpty();
     }
 
-    private IntegrationConfig.Properties integrationPropertiesOf(String endpoint, int retryAttempts)
+    private IntegrationProperties integrationPropertiesOf(String endpoint, int retryAttempts)
     {
-        IntegrationConfig.Properties integrationProperties = new IntegrationConfig.Properties();
+        IntegrationProperties integrationProperties = new IntegrationProperties();
         Storage storageProperties = new Storage();
         Storage.Location storageLocationProperties = new Storage.Location();
         storageLocationProperties.setEndpoint(endpoint);

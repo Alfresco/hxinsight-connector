@@ -29,10 +29,8 @@ import jakarta.validation.constraints.NotNull;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
@@ -40,29 +38,18 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repos
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
-@Configuration
-@EnableConfigurationProperties
-public class IntegrationConfig
+@Component
+@ConfigurationProperties("alfresco.integration")
+@Validated
+@Data
+public class IntegrationProperties
 {
-
-    @Bean
-    @ConfigurationProperties("alfresco.integration")
-    public IntegrationConfig.Properties integrationProperties()
-    {
-        return new Properties();
-    }
-
-    @Validated
-    @Data
-    public static class Properties
-    {
-        @NestedConfigurationProperty
-        @NotNull private Repository repository;
-        @NestedConfigurationProperty
-        @NotNull private Transform transform;
-        @NestedConfigurationProperty
-        @NotNull private Storage storage;
-        @NestedConfigurationProperty
-        @NotNull private Ingester ingester;
-    }
+    @NestedConfigurationProperty
+    @NotNull private Repository repository;
+    @NestedConfigurationProperty
+    @NotNull private Transform transform;
+    @NestedConfigurationProperty
+    @NotNull private Storage storage;
+    @NestedConfigurationProperty
+    @NotNull private Ingester ingester;
 }

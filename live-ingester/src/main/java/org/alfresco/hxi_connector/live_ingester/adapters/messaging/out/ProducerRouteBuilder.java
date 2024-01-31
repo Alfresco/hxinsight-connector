@@ -31,7 +31,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 
@@ -43,7 +43,7 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
     private static final String LOCAL_ENDPOINT = "direct:" + ProducerRouteBuilder.class.getSimpleName();
 
     private final CamelContext context;
-    private final IntegrationConfig.Properties integrationProperties;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()

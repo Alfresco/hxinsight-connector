@@ -35,7 +35,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadContentRenditionCommand;
 
@@ -46,7 +46,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
 {
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
-    private final IntegrationConfig.Properties integrationProperties;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()

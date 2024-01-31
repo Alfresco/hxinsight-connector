@@ -31,7 +31,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.CamelEventMapper;
 
 @Component
@@ -41,7 +41,7 @@ public class LiveIngesterRouteBuilder extends RouteBuilder
 
     private final EventProcessor eventProcessor;
     private final CamelEventMapper camelEventMapper;
-    private final IntegrationConfig.Properties integrationProperties;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()
