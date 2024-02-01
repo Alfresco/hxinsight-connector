@@ -25,12 +25,17 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.utils;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.Set;
+
+import lombok.NoArgsConstructor;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
+@NoArgsConstructor(access = PRIVATE)
 public class ErrorUtils
 {
     public static final String UNEXPECTED_STATUS_CODE_MESSAGE = "Unexpected response status code - expecting: %d, received: %d";
