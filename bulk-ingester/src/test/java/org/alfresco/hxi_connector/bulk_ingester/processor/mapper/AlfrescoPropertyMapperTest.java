@@ -58,6 +58,7 @@ import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
 
+@SuppressWarnings({"PMD.TooManyMethods", "PMD.LinguisticNaming"})
 class AlfrescoPropertyMapperTest
 {
     @Test
