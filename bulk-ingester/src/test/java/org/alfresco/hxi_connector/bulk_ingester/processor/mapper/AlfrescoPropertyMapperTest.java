@@ -45,7 +45,6 @@ import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.ST
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -341,12 +340,9 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "copyOf";
-        String copyOfValue = "workspace://SpacesStore/f70cb080-9d45-4f21-b936-475b053a23f1";
-        Map<String, Object> copyOfExpectedValue = Map.of(
-                "id", "f70cb080-9d45-4f21-b936-475b053a23f1",
-                "storeRef", Map.of(
-                        "identifier", "SpacesStore",
-                        "protocol", "workspace"));
+
+        String nodeId = "f70cb080-9d45-4f21-b936-475b053a23f1";
+        String copyOfValue = "workspace://SpacesStore/" + nodeId;
 
         alfrescoNode.setNodeProperties(
                 Set.of(
@@ -358,7 +354,7 @@ class AlfrescoPropertyMapperTest
         // then
         assertTrue(property.isPresent());
         assertEquals(propertyName, property.get().getKey());
-        assertEquals(copyOfExpectedValue, property.get().getValue());
+        assertEquals(nodeId, property.get().getValue());
     }
 
     private PropertyValue stringValue(String value)

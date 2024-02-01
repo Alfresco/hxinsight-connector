@@ -101,22 +101,15 @@ public class AlfrescoPropertyMapper
         }
     }
 
-    private Optional<Serializable> getNodeRefValue(Serializable persistedValue)
+    private Optional<String> getNodeRefValue(Serializable persistedValue)
     {
         try
         {
-            String stringValue = (String) persistedValue;
-            String[] protocolSplit = stringValue.split("://");
+            String[] nodeRefSplit = ((String) persistedValue).split("/");
 
-            String protocol = protocolSplit[0];
+            String id = nodeRefSplit[nodeRefSplit.length - 1];
 
-            String[] storeSplit = protocolSplit[1].split("/");
-            String storeIdentifier = storeSplit[0];
-            String id = storeSplit[1];
-
-            return of((Serializable) Map.of(
-                    "id", id,
-                    "storeRef", Map.of("identifier", storeIdentifier, "protocol", protocol)));
+            return Optional.of(id);
         }
         catch (Exception e)
         {
