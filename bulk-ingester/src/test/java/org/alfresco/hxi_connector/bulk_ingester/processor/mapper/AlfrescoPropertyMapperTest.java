@@ -107,7 +107,7 @@ class AlfrescoPropertyMapperTest
         // then
         assertTrue(property.isPresent());
         assertEquals(propertyName, property.get().getKey());
-        assertThat(List.of(usDescription, ukDescription)).hasSameElementsAs((Iterable<String>) property.get().getValue());
+        assertThat((Iterable<String>) property.get().getValue()).hasSameElementsAs(List.of(usDescription, ukDescription));
     }
 
     @Test
