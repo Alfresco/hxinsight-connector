@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.bulk_ingester.processor.model;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Set;
 
@@ -38,6 +37,6 @@ public record Node(
         String modifierId,
         Set<String> aspectNames,
         ContentInfo contentInfo,
-        ZonedDateTime createdAt,
+        long createdAt,
         Map<String, Serializable> customProperties)
 {}

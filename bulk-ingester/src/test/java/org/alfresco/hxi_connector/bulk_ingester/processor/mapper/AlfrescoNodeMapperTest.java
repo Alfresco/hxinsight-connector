@@ -83,7 +83,7 @@ class AlfrescoNodeMapperTest
         assertEquals(MODIFIER_ID, node.modifierId());
         assertEquals(Set.of(ASPECT_TITLED), node.aspectNames());
         assertNull(node.contentInfo());
-        assertEquals(CREATED_AT, node.createdAt());
+        assertEquals(CREATED_AT.toInstant().getEpochSecond(), node.createdAt());
         assertEquals(Map.of(), node.customProperties());
     }
 
