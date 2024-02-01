@@ -31,7 +31,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.out.config.MessagingOutputConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 
@@ -43,8 +43,7 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
     private static final String LOCAL_ENDPOINT = "direct:" + ProducerRouteBuilder.class.getSimpleName();
 
     private final CamelContext context;
-
-    private final MessagingOutputConfig config;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()
@@ -53,7 +52,7 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
                 .marshal()
                 .json()
                 .log("Sending event ${body}")
-                .to(config.getEndpoint())
+                .to(integrationProperties.hylandExperience().ingester().endpoint())
                 .end();
     }
 

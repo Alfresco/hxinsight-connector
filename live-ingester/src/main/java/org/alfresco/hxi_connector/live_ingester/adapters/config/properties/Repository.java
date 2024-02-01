@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,21 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 
-import lombok.Data;
-import org.springframework.validation.annotation.Validated;
-
-@Data
-@Validated
-public class TransformResponseConfig
-{
-    @NotBlank
-    private String queueName;
-
-    @NotBlank
-    private String endpoint;
-}
+public record Repository(@NotBlank String endpoint)
+{}

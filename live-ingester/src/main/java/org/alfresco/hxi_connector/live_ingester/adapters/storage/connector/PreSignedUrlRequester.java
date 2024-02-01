@@ -35,6 +35,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
@@ -44,18 +45,18 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
 @Slf4j
+@RequiredArgsConstructor
 public class PreSignedUrlRequester extends RouteBuilder implements StorageLocationRequester
 {
     private static final String LOCAL_ENDPOINT = "direct:" + PreSignedUrlRequester.class.getSimpleName();
@@ -67,44 +68,38 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     static final String CONTENT_TYPE_PROPERTY = "contentType";
 
     private final CamelContext camelContext;
-
-    private final String targetEndpoint;
-
-    @Autowired
-    public PreSignedUrlRequester(CamelContext camelContext, @Value("${alfresco.integration.storage.endpoint}") String targetEndpoint)
-    {
-        super(camelContext);
-        this.camelContext = camelContext;
-        this.targetEndpoint = targetEndpoint;
-    }
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()
     {
+        // @formatter:off
         onException(Exception.class)
-                .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
-                .process(PreSignedUrlRequester::wrapServerExceptions)
-                .stop();
+            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .process(PreSignedUrlRequester::wrapServerExceptions)
+            .stop();
 
         from(LOCAL_ENDPOINT)
-                .id(ROUTE_ID)
-                .marshal()
-                .json()
-                .to(targetEndpoint)
-                .choice()
-                .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
+            .id(ROUTE_ID)
+            .marshal()
+            .json()
+            .to(integrationProperties.hylandExperience().storage().location().endpoint())
+            .choice()
+            .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .unmarshal()
                 .json(JsonLibrary.Jackson, Map.class)
                 .process(PreSignedUrlRequester::extractUrl)
-                .otherwise()
+            .otherwise()
                 .process(PreSignedUrlRequester::throwUnexpectedStatusCodeException)
-                .endChoice()
-                .end();
+            .endChoice()
+            .end();
+        // @formatter:on
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "${alfresco.integration.storage.retry.attempts}",
-            backoff = @Backoff(delayExpression = "${alfresco.integration.storage.retry.delay}"))
+            maxAttemptsExpression = "${hyland-experience.storage.location.retry.attempts}",
+            backoff = @Backoff(delayExpression = "${hyland-experience.storage.location.retry.initial-delay}",
+                    multiplierExpression = "${hyland-experience.storage.location.retry.delay-multiplier}"))
     @Override
     public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {

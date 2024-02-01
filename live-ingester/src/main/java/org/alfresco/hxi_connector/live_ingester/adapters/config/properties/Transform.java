@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,19 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-import lombok.Data;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
-@Data
-@Validated
-public class SharedFileStoreConfig
+public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore)
 {
-    @NotBlank
-    private String host;
-    private int port;
+    public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout)
+    {}
+
+    public record Response(@NotBlank String endpoint, @NotBlank String queueName)
+    {}
+
+    public record SharedFileStore(@NotBlank String host, @Positive int port)
+    {}
 }

@@ -51,6 +51,8 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
@@ -76,7 +78,8 @@ class PreSignedUrlRequesterTest
     void beforeAll()
     {
         camelContext = new DefaultCamelContext();
-        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, MOCK_ENDPOINT);
+        IntegrationProperties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT);
+        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties);
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
 
@@ -207,6 +210,13 @@ class PreSignedUrlRequesterTest
                 .hasMessageContaining("Parsing URL from response property failed!")
                 .rootCause().isInstanceOf(MalformedURLException.class)
                 .message().isNotEmpty();
+    }
+
+    private IntegrationProperties integrationPropertiesOf(String endpoint)
+    {
+        Storage storageProperties = new Storage(new Storage.Location(endpoint));
+        IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
+        return new IntegrationProperties(null, hylandExperienceProperties);
     }
 
     private StorageLocationRequest createStorageLocationRequestMock()

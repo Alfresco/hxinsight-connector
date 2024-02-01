@@ -37,7 +37,8 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.TransformConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ATSTransformRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ClientData;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
@@ -55,7 +56,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
 
     private final CamelContext context;
     private final ObjectMapper objectMapper;
-    private final TransformConfig transformConfig;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()
@@ -63,7 +64,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         from(LOCAL_ENDPOINT)
                 .marshal()
                 .json()
-                .to(transformConfig.getRequest().getEndpoint());
+                .to(integrationProperties.alfresco().transform().request().endpoint());
     }
 
     @Override
@@ -82,15 +83,15 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
                 .requestId(UUID.randomUUID().toString())
                 .nodeRef(WORKSPACE_SPACES_STORE + transformRequest.nodeRef())
                 .targetMediaType(transformRequest.targetMimeType())
-                .replyQueue(transformConfig.getResponse().getQueueName())
-                .transformOptions(getTransformRequestOptions(transformConfig))
+                .replyQueue(integrationProperties.alfresco().transform().response().queueName())
+                .transformOptions(getTransformRequestOptions(integrationProperties.alfresco().transform()))
                 .clientData(clientDataString)
                 .build();
     }
 
-    private Map<String, String> getTransformRequestOptions(TransformConfig transformConfig)
+    private Map<String, String> getTransformRequestOptions(Transform transformProperties)
     {
-        return Map.of(TIMEOUT_KEY, String.valueOf(transformConfig.getRequest().getTimeout()));
+        return Map.of(TIMEOUT_KEY, String.valueOf(transformProperties.request().timeout()));
     }
 
     private String makeClientDataString(TransformRequest transformRequest)
