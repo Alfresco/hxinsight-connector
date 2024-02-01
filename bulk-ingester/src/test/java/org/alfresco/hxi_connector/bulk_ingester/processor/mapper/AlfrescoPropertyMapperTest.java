@@ -318,7 +318,7 @@ class AlfrescoPropertyMapperTest
 
         String propertyName = "createdAt";
         String createdAtString = "2024-01-31T10:15:30+00:00";
-        ZonedDateTime createdAtValue = ZonedDateTime.parse(createdAtString);
+        long createdAtValue = ZonedDateTime.parse(createdAtString).toInstant().toEpochMilli();
 
         alfrescoNode.setNodeProperties(
                 Set.of(

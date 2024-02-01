@@ -141,11 +141,11 @@ public class AlfrescoPropertyMapper
 
     }
 
-    private Optional<ZonedDateTime> getDateValue(Serializable propertyValue)
+    private Optional<Long> getDateValue(Serializable propertyValue)
     {
         try
         {
-            return of(ZonedDateTime.parse((String) propertyValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME));
+            return of(ZonedDateTime.parse((String) propertyValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant().toEpochMilli());
         }
         catch (Exception e)
         {
