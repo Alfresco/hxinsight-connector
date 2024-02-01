@@ -121,13 +121,8 @@ public class EventProcessor
         else if (isEventTypeUpdated(event))
         {
             Optional<ContentInfo> oldContentInfo = ofNullable(event.getData().getResourceBefore()).map(NodeResource::getContent);
-            // If content isn't mentioned in the resourceBefore then there was no change to the content.
-            if (oldContentInfo.isEmpty())
-            {
-                return false;
-            }
-            // If the content was mentioned in the resourceBefore _and_ is non-zero now then we need to process it.
-            return latestContentPresent;
+            // We only need to process the content if it was mentioned in the resourceBefore _and_ is non-zero now.
+            return oldContentInfo.isPresent() && latestContentPresent;
         }
         // For events other than create or update then we do not need to process the content.
         return false;
