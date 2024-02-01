@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.Map;
 import java.util.Objects;
@@ -65,7 +66,7 @@ public class AlfrescoNodeMapper
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
         Set<String> aspectNames = alfrescoNode.getAspects().stream().map(QName::getLocalName).collect(Collectors.toSet());
-        ZonedDateTime createdAt = alfrescoNode.getCreatedAt();
+        long createdAt = getCreatedAt(alfrescoNode);
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
         ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
@@ -81,6 +82,14 @@ public class AlfrescoNodeMapper
                 content,
                 createdAt,
                 customProperties);
+    }
+
+    private long getCreatedAt(AlfrescoNode alfrescoNode)
+    {
+        return Optional.ofNullable(alfrescoNode.getCreatedAt())
+                .map(ZonedDateTime::toInstant)
+                .map(Instant::getEpochSecond)
+                .orElse(0L);
     }
 
     private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)

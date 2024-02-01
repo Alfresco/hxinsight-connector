@@ -26,12 +26,11 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.repository;
 
-import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
-@Data
+@Validated
 @ConfigurationProperties("alfresco.bulk.ingest.repository")
-public class BulkIngesterRepositoryConfig
-{
-    private int pageSize;
-}
+public record BulkIngesterRepositoryConfig(
+        int pageSize)
+{}
