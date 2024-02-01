@@ -43,8 +43,11 @@ import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.PA
 import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.SERIALIZABLE;
 import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.STRING;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -67,21 +70,19 @@ class AlfrescoPropertyMapperTest
         // given
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
-        String description = "description";
+        String propertyName = "description";
         String descriptionText = "The purpose of document is...";
 
         alfrescoNode.setNodeProperties(
                 Set.of(
                         createNodeProperty("title"),
-                        createNodeProperty(description, stringValue(descriptionText))));
+                        createNodeProperty(propertyName, stringValue(descriptionText))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, description).performMapping();
+        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(description, property.get().getKey());
-        assertEquals(descriptionText, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, descriptionText), property);
     }
 
     @Test
@@ -126,9 +127,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(descriptionText, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, descriptionText), property);
     }
 
     @Test
@@ -166,9 +165,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertTrue((Boolean) property.get().getValue());
+        assertEquals(expectedProperty(propertyName, true), property);
     }
 
     @Test
@@ -188,9 +185,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(legsCountValue, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, legsCountValue), property);
     }
 
     @Test
@@ -210,9 +205,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(legLengthValue, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, legLengthValue), property);
     }
 
     @Test
@@ -232,9 +225,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(legLengthValue, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, legLengthValue), property);
     }
 
     @Test
@@ -254,9 +245,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(colorsValue, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, (Serializable) colorsValue), property);
     }
 
     @Test
@@ -305,9 +294,7 @@ class AlfrescoPropertyMapperTest
         // then
         ContentInfo expectedContentInfo = new ContentInfo(contentSize, encoding, mimeType);
 
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(expectedContentInfo, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, expectedContentInfo), property);
     }
 
     @Test
@@ -328,9 +315,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(createdAtValue, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, createdAtValue), property);
     }
 
     @Test
@@ -352,9 +337,12 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
-        assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
-        assertEquals(nodeId, property.get().getValue());
+        assertEquals(expectedProperty(propertyName, nodeId), property);
+    }
+
+    private Optional<Map.Entry<String, Serializable>> expectedProperty(String propertyName, Serializable propertyValue)
+    {
+        return Optional.of(Map.entry(propertyName, propertyValue));
     }
 
     private PropertyValue stringValue(String value)
