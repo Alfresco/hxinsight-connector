@@ -27,17 +27,9 @@
 package org.alfresco.hxi_connector.bulk_ingester.processor.model;
 
 import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.Map;
-import java.util.Set;
 
-public record Node(
-        String nodeId,
-        String type,
-        String creatorId,
-        String modifierId,
-        Set<String> aspectNames,
-        ContentInfo contentInfo,
-        ZonedDateTime createdAt,
-        Map<String, Serializable> customProperties)
+public record ContentInfo(
+        long contentSize,
+        String encoding,
+        String mimetype) implements Serializable
 {}

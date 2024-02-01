@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
 import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 
 @Slf4j
@@ -68,7 +68,7 @@ public class AlfrescoNodeMapper
         ZonedDateTime createdAt = alfrescoNode.getCreatedAt();
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
-        ContentMetadata content = (ContentMetadata) allProperties.get(CONTENT_PROPERTY);
+        ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
         Map<String, Serializable> customProperties = getCustomProperties(allProperties);
 

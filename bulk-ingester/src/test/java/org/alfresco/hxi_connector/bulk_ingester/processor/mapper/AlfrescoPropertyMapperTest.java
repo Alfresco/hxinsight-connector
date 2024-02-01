@@ -57,6 +57,7 @@ import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
+import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 
 @SuppressWarnings({"PMD.TooManyMethods"})
 class AlfrescoPropertyMapperTest
@@ -285,9 +286,13 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "content";
-        long contendId = 1;
 
-        ContentMetadata contentMetadata = contentMetadata(contendId);
+        long contendId = 1;
+        long contentSize = 1000;
+        String encoding = "UTF-8";
+        String mimeType = "application/pdf";
+
+        ContentMetadata contentMetadata = contentMetadata(contendId, contentSize, encoding, mimeType);
 
         alfrescoNode.setNodeProperties(
                 Set.of(
@@ -299,9 +304,11 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
 
         // then
+        ContentInfo expectedContentInfo = new ContentInfo(contentSize, encoding, mimeType);
+
         assertTrue(property.isPresent());
         assertEquals(propertyName, property.get().getKey());
-        assertEquals(contentMetadata, property.get().getValue());
+        assertEquals(expectedContentInfo, property.get().getValue());
     }
 
     @Test
@@ -454,11 +461,14 @@ class AlfrescoPropertyMapperTest
         return propertyValue;
     }
 
-    private ContentMetadata contentMetadata(long contentId)
+    private ContentMetadata contentMetadata(long contentId, long size, String encoding, String mimeType)
     {
         ContentMetadata contentMetadata = new ContentMetadata();
 
         contentMetadata.setId(contentId);
+        contentMetadata.setContentSize(size);
+        contentMetadata.setEncodingStr(encoding);
+        contentMetadata.setMimetypeStr(mimeType);
 
         return contentMetadata;
     }

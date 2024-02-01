@@ -48,9 +48,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
+import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -127,7 +127,7 @@ public class AlfrescoPropertyMapper
         }
     }
 
-    private Optional<ContentMetadata> getContentValue(Serializable propertyValue)
+    private Optional<ContentInfo> getContentValue(Serializable propertyValue)
     {
         if (!propertyName.equals(CONTENT_PROPERTY))
         {
@@ -140,6 +140,7 @@ public class AlfrescoPropertyMapper
                 .stream()
                 .filter(contentMetadata -> Objects.equals(contentMetadata.getId(), propertyValue))
                 .findFirst()
+                .map(content -> new ContentInfo(content.getContentSize(), content.getEncoding(), content.getMimetypeStr()))
                 .or(() -> {
                     log.error("Content metadata not found for node {}", alfrescoNode.getId());
 

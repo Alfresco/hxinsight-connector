@@ -40,10 +40,10 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
 import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 
 class AlfrescoNodeMapperTest
@@ -82,7 +82,7 @@ class AlfrescoNodeMapperTest
         assertEquals(MODIFIER_ID, node.modifierId());
         assertEquals(MODIFIER_ID, node.modifierId());
         assertEquals(Set.of(ASPECT_TITLED), node.aspectNames());
-        assertNull(node.contentMetadata());
+        assertNull(node.contentInfo());
         assertEquals(CREATED_AT, node.createdAt());
         assertEquals(Map.of(), node.customProperties());
     }
@@ -116,18 +116,18 @@ class AlfrescoNodeMapperTest
         AlfrescoNode alfrescoNode = nodeWithDefaultProperties();
 
         String contentPropertyKey = "content";
-        ContentMetadata contentMetadata = mock();
+        ContentInfo contentInfo = mock();
 
         alfrescoNode.setNodeProperties(Set.of(mockProperty(contentPropertyKey)));
 
         given(alfrescoPropertyMapper.performMapping()).willReturn(
                 Optional.of(Map.entry(
-                        contentPropertyKey, contentMetadata)));
+                        contentPropertyKey, contentInfo)));
         // when
         Node node = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertEquals(contentMetadata, node.contentMetadata());
+        assertEquals(contentInfo, node.contentInfo());
         assertTrue(node.customProperties().isEmpty());
     }
 
