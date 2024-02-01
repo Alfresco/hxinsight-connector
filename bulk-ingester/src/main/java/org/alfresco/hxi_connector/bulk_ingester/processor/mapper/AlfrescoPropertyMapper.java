@@ -109,7 +109,7 @@ public class AlfrescoPropertyMapper
 
             String id = nodeRefSplit[nodeRefSplit.length - 1];
 
-            return Optional.of(id);
+            return of(id);
         }
         catch (Exception e)
         {
