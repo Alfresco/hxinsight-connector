@@ -35,8 +35,25 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-public record Storage(@NotNull Location location)
+@Data
+@Getter(AccessLevel.NONE)
+@NoArgsConstructor
+@AllArgsConstructor
+public class Storage
 {
+    @NotNull private Location location;
+    @NotNull private Upload upload = new Upload();
+
+    public Location location()
+    {
+        return location;
+    }
+
+    public Upload upload()
+    {
+        return upload;
+    }
+
     @Data
     @Getter(AccessLevel.NONE)
     @NoArgsConstructor
@@ -52,6 +69,21 @@ public record Storage(@NotNull Location location)
         {
             return endpoint;
         }
+
+        public Retry retry()
+        {
+            return retry;
+        }
+    }
+
+    @Data
+    @Getter(AccessLevel.NONE)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Upload
+    {
+        @NotNull @NestedConfigurationProperty
+        private Retry retry = new Retry();
 
         public Retry retry()
         {

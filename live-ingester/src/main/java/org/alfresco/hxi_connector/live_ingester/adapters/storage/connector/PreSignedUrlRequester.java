@@ -27,6 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Map;
@@ -44,9 +46,8 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Component
 @Slf4j
@@ -55,11 +56,10 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 {
     private static final String LOCAL_ENDPOINT = "direct:" + PreSignedUrlRequester.class.getSimpleName();
     static final String ROUTE_ID = PreSignedUrlRequester.class.getSimpleName();
-    private static final String UNEXPECTED_STATUS_CODE_MESSAGE = "Unexpected response status code - expecting: %d, received: %d";
-    private static final int EXPECTED_STATUS_CODE = 201;
     static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
     static final String NODE_ID_PROPERTY = "objectId";
     static final String CONTENT_TYPE_PROPERTY = "contentType";
+    private static final int EXPECTED_STATUS_CODE = 201;
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
@@ -70,7 +70,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         // @formatter:off
         onException(Exception.class)
             .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
-            .process(this::wrapServerExceptions)
+            .process(this::wrapErrorIfNecessary)
             .stop();
 
         from(LOCAL_ENDPOINT)
@@ -84,7 +84,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
                 .json(JsonLibrary.Jackson, Map.class)
                 .process(this::extractUrl)
             .otherwise()
-                .process(this::throwUnexpectedStatusCodeException)
+                .process(this::throwExceptionOnUnexpectedStatusCode)
             .endChoice()
             .end();
         // @formatter:on
@@ -132,48 +132,23 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void throwUnexpectedStatusCodeException(Exchange exchange)
+    private void throwExceptionOnUnexpectedStatusCode(Exchange exchange)
     {
         int actualStatusCode = exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class);
-        if (actualStatusCode >= 400 && actualStatusCode <= 499)
-        {
-            throw new EndpointClientErrorException(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(EXPECTED_STATUS_CODE, actualStatusCode));
-        }
-        else if (actualStatusCode >= 500 && actualStatusCode <= 599)
-        {
-            throw new EndpointServerErrorException(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(EXPECTED_STATUS_CODE, actualStatusCode));
-        }
-        else if (actualStatusCode != EXPECTED_STATUS_CODE)
+        if (actualStatusCode != EXPECTED_STATUS_CODE)
         {
             log.warn(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(EXPECTED_STATUS_CODE, actualStatusCode));
         }
+
+        ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapServerExceptions(Exchange exchange)
+    private void wrapErrorIfNecessary(Exchange exchange)
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().location().retry().reasons();
+        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
 
-        if (cause instanceof EndpointServerErrorException)
-        {
-            throw (EndpointServerErrorException) cause;
-        }
-        else if (retryReasons.contains(cause.getClass()))
-        {
-            throw new EndpointServerErrorException(cause);
-        }
-        else if (cause instanceof EndpointClientErrorException)
-        {
-            throw (EndpointClientErrorException) cause;
-        }
-        else if (cause instanceof LiveIngesterRuntimeException)
-        {
-            throw (LiveIngesterRuntimeException) cause;
-        }
-        else
-        {
-            throw new LiveIngesterRuntimeException(cause);
-        }
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
     }
 }
