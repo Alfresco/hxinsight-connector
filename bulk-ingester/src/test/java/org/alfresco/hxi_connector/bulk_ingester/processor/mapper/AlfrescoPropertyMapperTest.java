@@ -275,16 +275,16 @@ class AlfrescoPropertyMapperTest
 
         String propertyName = "content";
 
-        long contendId = 1;
+        long contentId = 1;
         long contentSize = 1000;
         String encoding = "UTF-8";
         String mimeType = "application/pdf";
 
-        ContentMetadata contentMetadata = contentMetadata(contendId, contentSize, encoding, mimeType);
+        ContentMetadata contentMetadata = contentMetadata(contentId, contentSize, encoding, mimeType);
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(propertyName, contentValue(contendId))));
+                        createNodeProperty(propertyName, contentValue(contentId))));
         alfrescoNode.setContentData(
                 Set.of(contentMetadata));
 
