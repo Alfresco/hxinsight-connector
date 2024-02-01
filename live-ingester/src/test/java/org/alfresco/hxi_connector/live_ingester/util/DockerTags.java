@@ -112,7 +112,7 @@ public class DockerTags
         }
         else if (failOnMissingFile)
         {
-            throw new NoSuchFileException("File: '" + PROPERTIES_FILE + "' not found");
+            throw new NoSuchFileException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
         }
     }
 }
