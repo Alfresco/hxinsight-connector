@@ -53,8 +53,9 @@ public class BulkIngesterNodeRepository
     public Stream<AlfrescoNode> find(NodeParams nodeParams)
     {
         return IntStream.iterate(0, page -> page + 1)
-                .mapToObj(page -> nodeParams.withPaging(page, bulkIngesterRepositoryConfig.getPageSize()))
+                .mapToObj(page -> nodeParams.withPaging(page, bulkIngesterRepositoryConfig.pageSize()))
                 .map(this::findNodes)
+                .peek(nodes -> log.debug("Found {} nodes", nodes.size()))
                 .takeWhile(not(Collection::isEmpty))
                 .flatMap(Collection::stream);
     }
