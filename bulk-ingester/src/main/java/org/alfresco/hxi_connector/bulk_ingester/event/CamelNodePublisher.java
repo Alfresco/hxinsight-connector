@@ -24,37 +24,43 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.processor;
+package org.alfresco.hxi_connector.bulk_ingester.event;
+
+import static org.apache.camel.LoggingLevel.DEBUG;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.CamelContext;
+import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.elasticsearch.db.connector.NodeParams;
-import org.alfresco.hxi_connector.bulk_ingester.event.NodePublisher;
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper;
-import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
+import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BulkIngestionProcessor
+class CamelNodePublisher extends RouteBuilder implements NodePublisher
 {
-    private final BulkIngesterNodeRepository bulkIngesterNodeRepository;
+    private static final String LOCAL_ENDPOINT = "direct:" + CamelNodePublisher.class.getSimpleName();
 
-    private final BulkIngesterConfig bulkIngesterConfig;
+    private final CamelContext context;
 
-    private final AlfrescoNodeMapper alfrescoNodeMapper;
+    private final NodePublisherConfig nodePublisherConfig;
 
-    private final NodePublisher nodePublisher;
-
-    public void process()
+    @Override
+    public void configure()
     {
-        NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
-
-        bulkIngesterNodeRepository.find(nodeParams)
-                .map(alfrescoNodeMapper::map)
-                .forEach(nodePublisher::publish);
+        from(LOCAL_ENDPOINT)
+                .marshal()
+                .json()
+                .log(DEBUG, log, "Sending event ${body}")
+                .to(nodePublisherConfig.endpoint());
     }
 
+    @Override
+    public void publish(Node node)
+    {
+        context.createProducerTemplate()
+                .sendBody(LOCAL_ENDPOINT, node);
+    }
 }
