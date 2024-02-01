@@ -163,13 +163,17 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         {
             throw new EndpointServerErrorException(cause);
         }
+        else if (cause instanceof EndpointClientErrorException)
+        {
+            throw (EndpointClientErrorException) cause;
+        }
         else if (cause instanceof LiveIngesterRuntimeException)
         {
             throw (LiveIngesterRuntimeException) cause;
         }
         else
         {
-            throw new EndpointClientErrorException(cause);
+            throw new LiveIngesterRuntimeException(cause);
         }
     }
 }
