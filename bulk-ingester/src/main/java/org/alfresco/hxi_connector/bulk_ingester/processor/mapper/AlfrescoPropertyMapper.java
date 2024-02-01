@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import static java.lang.String.format;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
@@ -96,7 +95,7 @@ public class AlfrescoPropertyMapper
         }
         catch (Exception e)
         {
-            log.warn(format("Error occurred while trying to map property %s value %s of node %s", propertyName, propertyValue, alfrescoNode.getId()), e);
+            log.warn("Error occurred while trying to map property {} value {} of node {}", propertyName, propertyValue, alfrescoNode.getId(), e);
 
             return empty();
         }
@@ -121,7 +120,7 @@ public class AlfrescoPropertyMapper
         }
         catch (Exception e)
         {
-            log.error(format("Cannot deserialize noderef property %s with value %s for node %s", propertyName, persistedValue, alfrescoNode.getId()), e);
+            log.error("Cannot deserialize noderef property {} with value {} for node {}", propertyName, persistedValue, alfrescoNode.getId(), e);
 
             return empty();
         }
@@ -194,7 +193,7 @@ public class AlfrescoPropertyMapper
         }
         catch (ClassNotFoundException | IOException e)
         {
-            log.error(format("Cannot deserialize property %s value %s. Node: %s", propertyName, propertyValue, alfrescoNode.getId()), e);
+            log.error("Cannot deserialize property {} value {}. Node: {}", propertyName, propertyValue, alfrescoNode.getId(), e);
 
             return empty();
         }
