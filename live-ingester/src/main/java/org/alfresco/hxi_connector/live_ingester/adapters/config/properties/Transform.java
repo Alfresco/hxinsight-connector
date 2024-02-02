@@ -42,6 +42,7 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
     public record Response(@NotBlank String endpoint, @NotBlank String queueName)
     {}
 
+    @SuppressWarnings("PMD.UnusedAssignment")
     public record SharedFileStore(@NotBlank String host, @Positive int port, @NestedConfigurationProperty @NotNull Retry retry)
     {
         public SharedFileStore
