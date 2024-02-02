@@ -25,7 +25,18 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import jakarta.validation.constraints.NotBlank;
+import static java.util.Objects.requireNonNullElseGet;
 
-public record Ingester(@NotBlank String endpoint)
-{}
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
+@SuppressWarnings("PMD.UnusedAssignment")
+public record Ingester(@NotBlank String endpoint, @NotNull @NestedConfigurationProperty Retry retry)
+{
+    public Ingester
+    {
+        retry = requireNonNullElseGet(retry, Retry::new);
+    }
+}

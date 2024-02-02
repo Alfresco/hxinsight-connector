@@ -30,4 +30,4 @@ hyland-experience:
         &authenticationPreemptive=true\
         &throwExceptionOnFailure=false"
   ingester:
-    endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST
+    endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST&throwExceptionOnFailure=false
