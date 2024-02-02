@@ -48,15 +48,17 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retry;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class HttpFileUploaderTest
 {
     private static final String MOCK_ENDPOINT = "mock:s3-endpoint";
-    private static final int STATUS_CODE_200 = 200;
-    private static final int STATUS_CODE_500 = 500;
     private static final String CONTENT_TYPE = "content/type";
 
     CamelContext camelContext;
@@ -69,7 +71,7 @@ class HttpFileUploaderTest
     void beforeAll()
     {
         camelContext = new DefaultCamelContext();
-        httpFileUploader = new HttpFileUploader(camelContext);
+        httpFileUploader = new HttpFileUploader(camelContext, integrationProperties());
         camelContext.addRoutes(httpFileUploader);
         camelContext.start();
 
@@ -88,7 +90,7 @@ class HttpFileUploaderTest
     {
         // given
         FileUploadRequest request = createFileUploadRequestMock();
-        mockEndpointWillRespondWith(STATUS_CODE_200);
+        mockEndpointWillRespondWith(200);
         mockEndpointWillExpectInRequestHeader(Exchange.CONTENT_TYPE, CONTENT_TYPE);
 
         // when
@@ -100,11 +102,11 @@ class HttpFileUploaderTest
     }
 
     @Test
-    void testUpload_invalidResponseStatusCode()
+    void testUpload_invalidResponseStatusCode5xx()
     {
         // given
         FileUploadRequest request = createFileUploadRequestMock();
-        mockEndpointWillRespondWith(STATUS_CODE_500);
+        mockEndpointWillRespondWith(500);
 
         // when
         Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
@@ -112,8 +114,32 @@ class HttpFileUploaderTest
         // then
         assertThat(thrown)
                 .cause()
-                .isInstanceOf(LiveIngesterRuntimeException.class)
-                .hasMessageContaining("received:", STATUS_CODE_500);
+                .isInstanceOf(EndpointServerErrorException.class)
+                .hasMessageContaining("received:", 500);
+    }
+
+    @Test
+    void testUpload_invalidResponseStatusCode4xx()
+    {
+        // given
+        FileUploadRequest request = createFileUploadRequestMock();
+        mockEndpointWillRespondWith(400);
+
+        // when
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
+
+        // then
+        assertThat(thrown)
+                .cause()
+                .isInstanceOf(EndpointClientErrorException.class)
+                .hasMessageContaining("received:", 400);
+    }
+
+    private IntegrationProperties integrationProperties()
+    {
+        Storage storageProperties = new Storage(new Storage.Location(null, new Retry()), new Storage.Upload(new Retry()));
+        IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
+        return new IntegrationProperties(null, hylandExperienceProperties);
     }
 
     private FileUploadRequest createFileUploadRequestMock()

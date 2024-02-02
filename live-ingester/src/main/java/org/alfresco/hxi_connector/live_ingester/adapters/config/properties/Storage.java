@@ -25,20 +25,36 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-public record Storage(@NotNull Location location)
+@SuppressWarnings("PMD.UnusedAssignment")
+public record Storage(@NotNull Location location, @NotNull Upload upload)
 {
-    @SuppressWarnings("PMD.UnusedAssignment")
+
+    public Storage
+    {
+        upload = requireNonNullElse(upload, new Upload(new Retry()));
+    }
+
     public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
     {
         public Location
         {
-            retry = Objects.requireNonNullElseGet(retry, Retry::new);
+            retry = requireNonNullElseGet(retry, Retry::new);
+        }
+    }
+
+    public record Upload(@NotNull @NestedConfigurationProperty Retry retry)
+    {
+        public Upload
+        {
+            retry = requireNonNullElseGet(retry, Retry::new);
         }
     }
 }

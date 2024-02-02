@@ -27,53 +27,71 @@ package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpMethods;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class HttpFileUploader extends RouteBuilder implements FileUploader
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HttpFileUploader.class.getSimpleName();
     static final String ROUTE_ID = HttpFileUploader.class.getSimpleName();
-    private static final String STORAGE_LOCATION = "storageLocation";
+    private static final String STORAGE_LOCATION_HEADER = "storageLocation";
     private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
+    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()
     {
+        // @formatter:off
         onException(Exception.class)
-                .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
-                .stop();
+            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .process(this::wrapErrorIfNecessary)
+            .stop();
 
         from(LOCAL_ENDPOINT)
-                .id(ROUTE_ID)
-                .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
-                .toD("${headers." + STORAGE_LOCATION + "}")
-                .choice()
-                .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
-                .process(HttpFileUploader::throwUnexpectedStatusCodeException)
-                .endChoice()
-                .end();
+            .id(ROUTE_ID)
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
+            .toD("${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false")
+            .choice()
+            .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
+                .process(this::throwExceptionOnUnexpectedStatusCode)
+            .endChoice()
+            .end();
+        // @formatter:on
     }
 
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.attempts}",
+            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.initialDelay}",
+                    multiplierExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.delayMultiplier}"))
     @Override
     public void upload(FileUploadRequest fileUploadRequest)
     {
-        Map<String, Object> headers = Map.of(STORAGE_LOCATION, fileUploadRequest.storageLocation().toString(),
+        Map<String, Object> headers = Map.of(STORAGE_LOCATION_HEADER, fileUploadRequest.storageLocation().toString(),
                 Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
         try (InputStream fileData = fileUploadRequest.file().data())
@@ -87,8 +105,23 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private static void throwUnexpectedStatusCodeException(Exchange exchange)
+    private void throwExceptionOnUnexpectedStatusCode(Exchange exchange)
     {
-        throw new LiveIngesterRuntimeException("Unexpected response status code - expecting: " + EXPECTED_STATUS_CODE + ", received: " + exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class));
+        int actualStatusCode = exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class);
+        if (actualStatusCode != EXPECTED_STATUS_CODE)
+        {
+            log.warn(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(EXPECTED_STATUS_CODE, actualStatusCode));
+        }
+
+        ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private void wrapErrorIfNecessary(Exchange exchange)
+    {
+        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
+
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
     }
 }
