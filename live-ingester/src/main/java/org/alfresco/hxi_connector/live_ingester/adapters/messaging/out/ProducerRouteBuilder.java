@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,15 +25,27 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.out;
 
+import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
+
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
+import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Slf4j
 @Component
@@ -41,6 +53,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.No
 public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
 {
     private static final String LOCAL_ENDPOINT = "direct:" + ProducerRouteBuilder.class.getSimpleName();
+    private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext context;
     private final IntegrationProperties integrationProperties;
@@ -48,18 +61,54 @@ public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
     @Override
     public void configure()
     {
+        // @formatter:off
+        onException(Exception.class)
+            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .process(this::wrapErrorIfNecessary)
+            .stop();
+
         from(LOCAL_ENDPOINT)
-                .marshal()
-                .json()
-                .log("Sending event ${body}")
-                .to(integrationProperties.hylandExperience().ingester().endpoint())
-                .end();
+            .marshal()
+            .json()
+            .log("Sending event ${body}")
+            .to(integrationProperties.hylandExperience().ingester().endpoint())
+            .choice()
+            .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
+                .process(this::throwExceptionOnUnexpectedStatusCode)
+            .endChoice()
+            .end();
+        // @formatter:on
     }
 
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.ingester.retry.attempts}",
+            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.ingester.retry.initialDelay}",
+                    multiplierExpression = "#{@integrationProperties.hylandExperience.ingester.retry.delayMultiplier}"))
     @Override
     public void publishMessage(NodeEvent event)
     {
         context.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, event);
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private void throwExceptionOnUnexpectedStatusCode(Exchange exchange)
+    {
+        int actualStatusCode = exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class);
+        if (actualStatusCode != EXPECTED_STATUS_CODE)
+        {
+            log.warn(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(EXPECTED_STATUS_CODE, actualStatusCode));
+        }
+
+        ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private void wrapErrorIfNecessary(Exchange exchange)
+    {
+        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().ingester().retry().reasons();
+
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
     }
 }
