@@ -35,6 +35,7 @@ public record Storage(@NotNull Location location)
 {
     public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
     {
+        @SuppressWarnings("PMD.UnusedAssignment")
         public Location
         {
             retry = Objects.requireNonNullElseGet(retry, Retry::new);
