@@ -25,37 +25,19 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
+import java.util.Objects;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 public record Storage(@NotNull Location location)
 {
-    @Data
-    @Getter(AccessLevel.NONE)
-    @NoArgsConstructor
-    @AllArgsConstructor
-    public static class Location
+    public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
     {
-        @NotBlank
-        private String endpoint;
-        @NestedConfigurationProperty
-        @NotNull private Retry retry = new Retry();
-
-        public String endpoint()
+        public Location
         {
-            return endpoint;
-        }
-
-        public Retry retry()
-        {
-            return retry;
+            retry = Objects.requireNonNullElseGet(retry, Retry::new);
         }
     }
 }
