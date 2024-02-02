@@ -46,10 +46,10 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
-import org.apache.camel.spring.boot.CamelAutoConfiguration;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.retry.annotation.EnableRetry;
@@ -67,10 +67,10 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerE
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
-        CamelAutoConfiguration.class,
         IntegrationProperties.class,
         PreSignedUrlRequester.class})
 @ActiveProfiles("test")
+@EnableAutoConfiguration
 @EnableRetry
 @Testcontainers
 class PreSignedUrlRequesterIntegrationTest

@@ -40,11 +40,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Cleanup;
-import org.apache.camel.spring.boot.CamelAutoConfiguration;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.retry.annotation.EnableRetry;
@@ -65,11 +65,11 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
-        CamelAutoConfiguration.class,
         IntegrationProperties.class,
         LocalStorageConfig.class,
         HttpFileUploader.class})
 @ActiveProfiles("test")
+@EnableAutoConfiguration
 @EnableRetry
 @Testcontainers
 class HttpFileUploaderIntegrationTest
