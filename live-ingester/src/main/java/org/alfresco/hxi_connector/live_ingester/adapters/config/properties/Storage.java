@@ -33,9 +33,9 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 public record Storage(@NotNull Location location)
 {
+    @SuppressWarnings("PMD.UnusedAssignment")
     public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
     {
-        @SuppressWarnings("PMD.UnusedAssignment")
         public Location
         {
             retry = Objects.requireNonNullElseGet(retry, Retry::new);
