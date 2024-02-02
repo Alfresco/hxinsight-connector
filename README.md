@@ -34,6 +34,17 @@ hyland-experience:
         delayMultiplier: 1.5
 ```
 
+- file download from shared file store:
+```yaml
+alfresco:
+  transform:
+    shared-file-store:
+      retry:
+        attempts: 5
+        initialDelay: 1000
+        delayMultiplier: 1.5
+```
+
 ### Code Quality
 This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.
 

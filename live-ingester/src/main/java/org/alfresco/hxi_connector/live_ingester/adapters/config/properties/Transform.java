@@ -25,10 +25,13 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore)
@@ -39,6 +42,12 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
     public record Response(@NotBlank String endpoint, @NotBlank String queueName)
     {}
 
-    public record SharedFileStore(@NotBlank String host, @Positive int port)
-    {}
+    @SuppressWarnings("PMD.UnusedAssignment")
+    public record SharedFileStore(@NotBlank String host, @Positive int port, @NestedConfigurationProperty @NotNull Retry retry)
+    {
+        public SharedFileStore
+        {
+            retry = requireNonNullElseGet(retry, Retry::new);
+        }
+    }
 }
