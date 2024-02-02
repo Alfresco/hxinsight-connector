@@ -23,36 +23,12 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import java.util.Objects;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 
-@SuppressWarnings("PMD.UnusedAssignment")
-public record Storage(@NotNull Location location, @NotNull Upload upload)
+public interface AlfrescoPropertyMapperFactory
 {
-
-    public Storage
-    {
-        upload = Objects.requireNonNullElse(upload, new Upload(new Retry()));
-    }
-
-    public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
-    {
-        public Location
-        {
-            retry = Objects.requireNonNullElseGet(retry, Retry::new);
-        }
-    }
-
-    public record Upload(@NotNull @NestedConfigurationProperty Retry retry)
-    {
-        public Upload
-        {
-            retry = Objects.requireNonNullElseGet(retry, Retry::new);
-        }
-    }
+    AlfrescoPropertyMapper create(AlfrescoNode alfrescoNode, String name);
 }

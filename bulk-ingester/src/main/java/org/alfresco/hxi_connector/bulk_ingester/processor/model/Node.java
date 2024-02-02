@@ -23,36 +23,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import java.util.Objects;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+package org.alfresco.hxi_connector.bulk_ingester.processor.model;
 
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import java.io.Serializable;
+import java.util.Map;
+import java.util.Set;
 
-@SuppressWarnings("PMD.UnusedAssignment")
-public record Storage(@NotNull Location location, @NotNull Upload upload)
-{
-
-    public Storage
-    {
-        upload = Objects.requireNonNullElse(upload, new Upload(new Retry()));
-    }
-
-    public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
-    {
-        public Location
-        {
-            retry = Objects.requireNonNullElseGet(retry, Retry::new);
-        }
-    }
-
-    public record Upload(@NotNull @NestedConfigurationProperty Retry retry)
-    {
-        public Upload
-        {
-            retry = Objects.requireNonNullElseGet(retry, Retry::new);
-        }
-    }
-}
+public record Node(
+        String nodeId,
+        String type,
+        String creatorId,
+        String modifierId,
+        Set<String> aspectNames,
+        ContentInfo contentInfo,
+        long createdAt,
+        Map<String, Serializable> customProperties)
+{}

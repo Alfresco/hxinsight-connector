@@ -31,6 +31,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.NodeParams;
+import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper;
 import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
 
 @Slf4j
@@ -42,12 +43,15 @@ public class BulkIngestionProcessor
 
     private final BulkIngesterConfig bulkIngesterConfig;
 
+    private final AlfrescoNodeMapper alfrescoNodeMapper;
+
     public void process()
     {
         NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
 
         bulkIngesterNodeRepository.find(nodeParams)
-                .forEach(alfrescoNode -> log.info("Found node {}", alfrescoNode.getId()));
+                .map(alfrescoNodeMapper::map)
+                .forEach(node -> log.info("Found node {}", node));
     }
 
 }
