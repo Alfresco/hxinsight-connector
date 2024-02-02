@@ -25,7 +25,9 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import java.util.Objects;
+import static java.util.Objects.requireNonNullElse;
+import static java.util.Objects.requireNonNullElseGet;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -37,14 +39,14 @@ public record Storage(@NotNull Location location, @NotNull Upload upload)
 
     public Storage
     {
-        upload = Objects.requireNonNullElse(upload, new Upload(new Retry()));
+        upload = requireNonNullElse(upload, new Upload(new Retry()));
     }
 
     public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
     {
         public Location
         {
-            retry = Objects.requireNonNullElseGet(retry, Retry::new);
+            retry = requireNonNullElseGet(retry, Retry::new);
         }
     }
 
@@ -52,7 +54,7 @@ public record Storage(@NotNull Location location, @NotNull Upload upload)
     {
         public Upload
         {
-            retry = Objects.requireNonNullElseGet(retry, Retry::new);
+            retry = requireNonNullElseGet(retry, Retry::new);
         }
     }
 }
