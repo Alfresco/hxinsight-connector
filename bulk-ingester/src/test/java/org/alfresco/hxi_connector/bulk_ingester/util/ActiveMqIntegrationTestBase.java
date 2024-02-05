@@ -42,7 +42,7 @@ import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
-@NoArgsConstructor(access = PROTECTED)
+@SuppressWarnings("PMD.UseUtilityClass")
 public class ActiveMqIntegrationTestBase
 {
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
