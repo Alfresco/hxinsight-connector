@@ -176,8 +176,7 @@ class PropertiesMapperTest
 
         // then
         Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name)
-        );
+                CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
 
         assertEquals(expectedPropertyDeltas, customPropertyDeltas);
     }
@@ -257,8 +256,7 @@ class PropertiesMapperTest
 
         // then
         Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name)
-        );
+                CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
 
         assertEquals(expectedPropertyDeltas, customPropertyDeltas);
     }
