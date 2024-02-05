@@ -50,8 +50,10 @@ public class BulkIngesterNodeRepository
 
     private final BulkIngesterRepositoryConfig bulkIngesterRepositoryConfig;
 
-    public Stream<AlfrescoNode> find(NodeParams nodeParams)
+    public Stream<AlfrescoNode> find(IdRange idRange)
     {
+        NodeParams nodeParams = NodeParams.searchByIdRange(idRange.from(), idRange.to());
+
         return IntStream.iterate(0, page -> page + 1)
                 .mapToObj(page -> nodeParams.withPaging(page, bulkIngesterRepositoryConfig.pageSize()))
                 .map(this::findNodes)
