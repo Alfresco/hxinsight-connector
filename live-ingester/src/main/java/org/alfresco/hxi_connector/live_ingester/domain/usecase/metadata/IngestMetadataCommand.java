@@ -38,8 +38,6 @@ public record IngestMetadataCommand(
         long time,
         String nodeId,
         boolean isUpdate,
-        PropertyDelta<String> name,
-        PropertyDelta<String> primaryAssocQName,
         PropertyDelta<String> nodeType,
         PropertyDelta<String> createdByUserWithId,
         PropertyDelta<String> modifiedByUserWithId,
@@ -52,8 +50,6 @@ public record IngestMetadataCommand(
     public IngestMetadataCommand
     {
         ensureNotBlank(nodeId, "Node id cannot be blank");
-        ensureNonNull(name, "Node %s name delta cannot be null", nodeId);
-        ensureNonNull(primaryAssocQName, "Node %s qualified name delta cannot be null", nodeId);
         ensureNonNull(nodeType, "Node %s type delta cannot be null", nodeId);
         ensureNonNull(createdByUserWithId, "Node %s created by user with nodeId delta cannot be null", nodeId);
         ensureNonNull(modifiedByUserWithId, "Node %s modified by user with nodeId delta cannot be null", nodeId);

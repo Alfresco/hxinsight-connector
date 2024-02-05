@@ -34,8 +34,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FOLDER;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.PRIMARY_ASSOC_Q_NAME;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
 
 import java.util.List;
@@ -62,8 +60,6 @@ public class IngestMetadataCommandHandler
         EventType eventType = command.isUpdate() ? UPDATE : CREATE;
         UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId(), eventType);
 
-        command.name().applyAs(NAME, updateMetadataEvent);
-        command.primaryAssocQName().applyAs(PRIMARY_ASSOC_Q_NAME, updateMetadataEvent);
         command.nodeType().applyAs(TYPE, updateMetadataEvent);
         command.createdByUserWithId().applyAs(CREATED_BY_USER_WITH_ID, updateMetadataEvent);
         command.modifiedByUserWithId().applyAs(MODIFIED_BY_USER_WITH_ID, updateMetadataEvent);
