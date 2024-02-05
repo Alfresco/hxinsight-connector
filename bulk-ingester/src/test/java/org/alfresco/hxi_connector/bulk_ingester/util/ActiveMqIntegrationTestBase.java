@@ -38,7 +38,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-@DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
+@DirtiesContext // Kills app before testcontainers (activemq) so there are no errors related to lost connection
 @SuppressWarnings("PMD.UseUtilityClass")
 public class ActiveMqIntegrationTestBase
 {
