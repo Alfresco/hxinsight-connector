@@ -87,10 +87,7 @@ class BulkIngesterNodeRepositoryTest
     void ensureNodeStreamIsLazyEvaluated()
     {
         // given
-        ListAppender<ILoggingEvent> testAppender = createTestLogsAppender();
-
-        addAppenderForLogger(testAppender, BulkIngesterNodeRepository.class);
-        addAppenderForLogger(testAppender, BulkIngesterNodeRepositoryTest.class);
+        ListAppender<ILoggingEvent> testLogsAppender = createTestLogsAppender();
 
         metadataRepository.setNodes(List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3)));
 
@@ -99,7 +96,7 @@ class BulkIngesterNodeRepositoryTest
                 .forEach(node -> log.debug("Found node {}", node.getId()));
 
         // then
-        List<String> logs = testAppender.list.stream()
+        List<String> logs = testLogsAppender.list.stream()
                 .map(Object::toString)
                 .toList();
 
@@ -125,6 +122,8 @@ class BulkIngesterNodeRepositoryTest
     {
         ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
 
+        addAppenderForLogger(listAppender, BulkIngesterNodeRepository.class);
+        addAppenderForLogger(listAppender, BulkIngesterNodeRepositoryTest.class);
         listAppender.start();
 
         return listAppender;
