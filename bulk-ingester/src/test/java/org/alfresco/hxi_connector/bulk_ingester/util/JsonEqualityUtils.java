@@ -24,15 +24,25 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.event;
+package org.alfresco.hxi_connector.bulk_ingester.util;
 
-import jakarta.validation.constraints.NotBlank;
+import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import org.skyscreamer.jsonassert.JSONAssert;
 
-@Validated
-@ConfigurationProperties("alfresco.bulk.ingest")
-public record NodePublisherConfig(
-        @NotBlank String endpoint)
-{}
+public class JsonEqualityUtils
+{
+    public static boolean jsonEquals(String expected, String actual)
+    {
+        try
+        {
+            JSONAssert.assertEquals(expected, actual, LENIENT);
+
+            return true;
+        }
+        catch (Exception e)
+        {
+            return false;
+        }
+    }
+}
