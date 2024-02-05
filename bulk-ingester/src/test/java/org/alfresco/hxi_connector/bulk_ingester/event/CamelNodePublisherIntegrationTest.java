@@ -96,7 +96,7 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
                 }""";
 
         testCamelConsumer.assertNMessagesReceived(1);
-        testCamelConsumer.asertMessageReceived(expectedEvent);
+        testCamelConsumer.assertMessageReceived(expectedEvent);
     }
 
     @AfterEach

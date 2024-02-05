@@ -81,7 +81,7 @@ public class TestCamelConsumer extends RouteBuilder
     }
 
     @SneakyThrows
-    public void asertMessageReceived(String message)
+    public void assertMessageReceived(String message)
     {
         if (wasMessageCaptured(message))
         {
