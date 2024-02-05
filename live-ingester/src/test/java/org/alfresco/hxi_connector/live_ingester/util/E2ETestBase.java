@@ -64,18 +64,19 @@ public class E2ETestBase
     private static final int ACTIVE_MQ_PORT = 61616;
 
     @Container
-    private static WireMockContainer hxInsight = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG));
+    private static WireMockContainer hxInsight = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+            .withEnv("WIREMOCK_OPTIONS", "--verbose");
     @Container
-    private static GenericContainer activemq = createAMQContainer();
+    private static GenericContainer<?> activemq = createAMQContainer();
 
     private static String hxInsightUrl;
     private static String brokerUrl;
 
     protected ContainerSupport containerSupport;
 
-    public static GenericContainer createAMQContainer()
+    public static GenericContainer<?> createAMQContainer()
     {
-        return new GenericContainer(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
+        return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2))

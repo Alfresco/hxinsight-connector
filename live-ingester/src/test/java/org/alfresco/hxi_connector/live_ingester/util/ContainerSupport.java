@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWithBackoff;
 
@@ -126,7 +127,11 @@ public class ContainerSupport
     @SneakyThrows
     public void verifyATSRequestReceived(String expectedBody)
     {
-        TextMessage received = (TextMessage) retryWithBackoff(this::receiveATSTextMessage);
+        TextMessage received = (TextMessage) retryWithBackoff(() -> {
+            TextMessage message = receiveATSTextMessage();
+            assertNotNull(message);
+            return message;
+        });
 
         ObjectMapper objectMapper = new ObjectMapper();
         Map<String, Object> receivedMap = objectMapper.readValue(received.getText(), HashMap.class);
