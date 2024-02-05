@@ -64,7 +64,8 @@ public class E2ETestBase
     private static final int ACTIVE_MQ_PORT = 61616;
 
     @Container
-    private static WireMockContainer hxInsight = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG));
+    private static WireMockContainer hxInsight = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+            .withEnv("WIREMOCK_OPTIONS", "--verbose");
     @Container
     private static GenericContainer activemq = createAMQContainer();
 
