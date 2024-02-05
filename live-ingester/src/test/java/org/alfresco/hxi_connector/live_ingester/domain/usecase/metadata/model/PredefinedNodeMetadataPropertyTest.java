@@ -39,13 +39,13 @@ class PredefinedNodeMetadataPropertyTest
     void shouldCreatePropertyWithGivenValue()
     {
         // given
-        String name = "test name";
+        String name = "test user";
 
         // when
-        NodeProperty<String> nodeProperty = PredefinedNodeMetadataProperty.NAME.withValue(name);
+        NodeProperty<String> nodeProperty = PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID.withValue(name);
 
         // then
-        assertEquals(PredefinedNodeMetadataProperty.NAME.getName(), nodeProperty.name());
+        assertEquals(PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID.getName(), nodeProperty.name());
         assertEquals(name, nodeProperty.value());
     }
 }

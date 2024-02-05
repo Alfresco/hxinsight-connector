@@ -37,8 +37,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FOLDER;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.PRIMARY_ASSOC_Q_NAME;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
@@ -101,8 +99,6 @@ class IngestMetadataCommandHandlerTest
                 EVENT_TIMESTAMP,
                 NODE_ID,
                 EVENT_IS_CREATE,
-                updated(NODE_NAME),
-                updated(NODE_PRIMARY_ASSOC_Q_NAME),
                 updated(NODE_TYPE),
                 updated(NODE_CREATED_BY_USER_WITH_ID),
                 updated(NODE_MODIFIED_BY_USER_WITH_ID),
@@ -119,8 +115,6 @@ class IngestMetadataCommandHandlerTest
 
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-                NAME.withValue(NODE_NAME),
-                PRIMARY_ASSOC_Q_NAME.withValue(NODE_PRIMARY_ASSOC_Q_NAME),
                 TYPE.withValue(NODE_TYPE),
                 CREATED_BY_USER_WITH_ID.withValue(NODE_CREATED_BY_USER_WITH_ID),
                 MODIFIED_BY_USER_WITH_ID.withValue(NODE_MODIFIED_BY_USER_WITH_ID),
@@ -148,8 +142,6 @@ class IngestMetadataCommandHandlerTest
                 EVENT_TIMESTAMP,
                 NODE_ID,
                 EVENT_IS_CREATE,
-                updated(NODE_NAME),
-                updated(NODE_PRIMARY_ASSOC_Q_NAME),
                 updated(NODE_TYPE),
                 nullUser, // Missing created by
                 nullUser, // Missing updated by
@@ -166,8 +158,6 @@ class IngestMetadataCommandHandlerTest
 
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-                NAME.withValue(NODE_NAME),
-                PRIMARY_ASSOC_Q_NAME.withValue(NODE_PRIMARY_ASSOC_Q_NAME),
                 TYPE.withValue(NODE_TYPE),
                 CREATED_BY_USER_WITH_ID.withValue(null),
                 MODIFIED_BY_USER_WITH_ID.withValue(null),

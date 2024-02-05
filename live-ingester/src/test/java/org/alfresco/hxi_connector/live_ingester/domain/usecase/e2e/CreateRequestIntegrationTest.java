@@ -100,8 +100,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       "cm:versionType" : "MAJOR",
                       "isFile" : true,
                       "aspectsNames" : [ "cm:versionable", "cm:auditable" ],
-                      "name" : "purchase-order-scan.pdf",
-                      "primaryAssocQName" : null,
+                      "cm:name" : "purchase-order-scan.pdf",
                       "type" : "cm:content",
                       "createdByUserWithId" : "admin",
                       "modifiedByUserWithId" : "admin"
