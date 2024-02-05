@@ -26,8 +26,12 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.util;
 
+import static lombok.AccessLevel.PROTECTED;
+
 import java.time.Duration;
 
+import lombok.NoArgsConstructor;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
@@ -37,15 +41,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
+@DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
+@NoArgsConstructor(access = PROTECTED)
 public class ActiveMqIntegrationTestBase
 {
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
     private static final String ACTIVE_MQ_TAG = DockerTags.getOrDefault("activemq.tag", "5.18.3-jre17-rockylinux8");
     private static final int ACTIVE_MQ_PORT = 61616;
     private static final String BULK_INGESTER_QUEUE = "test.bulk.ingester.queue";
-
     @Container
-    private static final GenericContainer<?> activemq = createAMQContainer();
+    private static final GenericContainer<?> ACTIVEMQ = createAMQContainer();
 
     public static GenericContainer<?> createAMQContainer()
     {
@@ -59,7 +64,7 @@ public class ActiveMqIntegrationTestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("spring.activemq.broker-url", () -> "tcp://localhost:" + activemq.getMappedPort(ACTIVE_MQ_PORT));
+        registry.add("spring.activemq.broker-url", () -> "tcp://localhost:" + ACTIVEMQ.getMappedPort(ACTIVE_MQ_PORT));
         registry.add("alfresco.bulk.ingest.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
     }
 
