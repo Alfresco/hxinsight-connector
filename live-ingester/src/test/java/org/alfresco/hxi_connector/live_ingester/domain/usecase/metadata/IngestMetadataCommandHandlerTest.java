@@ -67,8 +67,6 @@ class IngestMetadataCommandHandlerTest
 {
     private static final long EVENT_TIMESTAMP = 1_690_000_000_100L;
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
-    private static final String NODE_NAME = "test-name";
-    private static final String NODE_PRIMARY_ASSOC_Q_NAME = "cm:test-name";
     private static final String NODE_TYPE = "cm:folder";
     private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
     private static final String NODE_MODIFIED_BY_USER_WITH_ID = "hr_user";
