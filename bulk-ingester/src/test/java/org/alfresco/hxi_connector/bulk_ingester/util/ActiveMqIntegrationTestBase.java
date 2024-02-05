@@ -37,7 +37,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
 @Testcontainers
-public abstract class ActiveMqIntegrationTestBase
+public class ActiveMqIntegrationTestBase
 {
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
     private static final String ACTIVE_MQ_TAG = DockerTags.getOrDefault("activemq.tag", "5.18.3-jre17-rockylinux8");
@@ -45,7 +45,7 @@ public abstract class ActiveMqIntegrationTestBase
     private static final String BULK_INGESTER_QUEUE = "test.bulk.ingester.queue";
 
     @Container
-    static GenericContainer<?> activemq = createAMQContainer();
+    private static final GenericContainer<?> activemq = createAMQContainer();
 
     public static GenericContainer<?> createAMQContainer()
     {

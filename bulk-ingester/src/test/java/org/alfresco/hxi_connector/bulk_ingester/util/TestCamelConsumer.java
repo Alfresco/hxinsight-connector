@@ -43,6 +43,7 @@ import org.alfresco.hxi_connector.bulk_ingester.event.NodePublisherConfig;
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.UnusedPrivateMethod"})
 public class TestCamelConsumer extends RouteBuilder
 {
     private static final int DELAY = 100;

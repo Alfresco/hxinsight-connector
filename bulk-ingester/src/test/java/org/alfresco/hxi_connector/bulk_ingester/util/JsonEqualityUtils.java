@@ -26,10 +26,13 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.util;
 
+import static lombok.AccessLevel.PRIVATE;
 import static org.skyscreamer.jsonassert.JSONCompareMode.LENIENT;
 
+import lombok.NoArgsConstructor;
 import org.skyscreamer.jsonassert.JSONAssert;
 
+@NoArgsConstructor(access = PRIVATE)
 public class JsonEqualityUtils
 {
     public static boolean jsonEquals(String expected, String actual)
