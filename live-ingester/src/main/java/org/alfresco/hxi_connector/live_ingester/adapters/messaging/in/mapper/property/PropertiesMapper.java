@@ -110,7 +110,7 @@ public class PropertiesMapper
             return Stream.empty();
         }
 
-        return Optional.ofNullable(event.getData().getResource().getName())
+        return ofNullable(event.getData().getResource().getName())
                 .stream()
                 .filter(Objects::nonNull)
                 .map(name -> CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
