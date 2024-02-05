@@ -5,6 +5,8 @@ camel:
 alfresco:
   repository:
     endpoint: activemq:topic:alfresco.repo.event2
+  bulk-ingester:
+    endpoint: activemq:queue:bulk-ingester-events
   transform:
     request:
       endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
