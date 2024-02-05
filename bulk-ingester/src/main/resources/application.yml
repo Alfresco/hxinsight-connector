@@ -14,3 +14,4 @@ alfresco.bulk.ingest:
     toId: 20000000000
   repository:
     pageSize: 100
+  endpoint: activemq:queue:bulk-ingester-events

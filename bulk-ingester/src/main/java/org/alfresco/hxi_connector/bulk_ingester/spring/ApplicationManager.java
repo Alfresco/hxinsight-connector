@@ -24,42 +24,21 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.processor;
+package org.alfresco.hxi_connector.bulk_ingester.spring;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.elasticsearch.db.connector.NodeParams;
-import org.alfresco.hxi_connector.bulk_ingester.event.NodePublisher;
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper;
-import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
-import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
-
-@Slf4j
 @Component
 @RequiredArgsConstructor
-public class BulkIngestionProcessor
+public class ApplicationManager
 {
-    private final BulkIngesterNodeRepository bulkIngesterNodeRepository;
+    private final ApplicationContext context;
 
-    private final BulkIngesterConfig bulkIngesterConfig;
-
-    private final AlfrescoNodeMapper alfrescoNodeMapper;
-
-    private final NodePublisher nodePublisher;
-
-    private final ApplicationManager applicationManager;
-
-    public void process()
+    public void shoutDown()
     {
-        NodeParams nodeParams = NodeParams.searchByIdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
-
-        bulkIngesterNodeRepository.find(nodeParams)
-                .map(alfrescoNodeMapper::map)
-                .forEach(nodePublisher::publish);
-
-        applicationManager.shoutDown();
+        ((ConfigurableApplicationContext) context).close();
     }
-
 }
