@@ -51,7 +51,7 @@ public class BulkIngesterEventProcessor
     public void process(BulkIngesterEvent event)
     {
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
-                10000,
+                event.createdAt(),
                 event.nodeId(),
                 false,
                 PropertyDelta.updated(event.type()),
