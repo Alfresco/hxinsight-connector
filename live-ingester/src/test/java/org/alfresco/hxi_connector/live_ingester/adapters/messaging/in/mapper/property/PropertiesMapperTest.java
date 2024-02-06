@@ -34,7 +34,6 @@ import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
-import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -190,7 +189,6 @@ class PropertiesMapperTest
 
         NodeResource nodeResource = NodeResource.builder()
                 .setName(null)
-                .setProperties(Map.of())
                 .build();
 
         setNodeResource(event, nodeResource);
