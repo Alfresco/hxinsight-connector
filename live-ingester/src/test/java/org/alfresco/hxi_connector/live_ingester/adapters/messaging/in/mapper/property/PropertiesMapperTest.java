@@ -166,7 +166,6 @@ class PropertiesMapperTest
 
         NodeResource nodeResource = NodeResource.builder()
                 .setName(name)
-                .setProperties(Map.of())
                 .build();
 
         setNodeResource(event, nodeResource);
