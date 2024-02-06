@@ -41,7 +41,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRun
 
 @Component
 @RequiredArgsConstructor
-public class BulkIngesterRouteBuilder extends RouteBuilder
+public class BulkIngesterEventListener extends RouteBuilder
 {
     private final ObjectMapper mapper;
     private final BulkIngesterEventProcessor eventProcessor;
