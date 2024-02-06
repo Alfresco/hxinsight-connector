@@ -33,6 +33,8 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent;
@@ -47,6 +49,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 public class BulkIngesterEventProcessor
 {
     private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    private final IngestContentCommandHandler ingestContentCommandHandler;
 
     public void process(BulkIngesterEvent event)
     {
@@ -64,6 +67,12 @@ public class BulkIngesterEventProcessor
                 mapToCustomPropertiesDelta(event.customProperties()));
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);
+
+        if(event.contentInfo() != null) {
+            IngestContentCommand ingestContentCommand = new IngestContentCommand(event.createdAt(), event.nodeId());
+
+            ingestContentCommandHandler.handle(ingestContentCommand);
+        }
     }
 
     private Set<CustomPropertyDelta<?>> mapToCustomPropertiesDelta(Map<String, Serializable> properties)
