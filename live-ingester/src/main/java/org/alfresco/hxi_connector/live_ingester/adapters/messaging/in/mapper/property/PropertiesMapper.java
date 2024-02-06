@@ -149,8 +149,8 @@ public class PropertiesMapper
     private Stream<Map.Entry<String, ?>> customPropertiesStream(NodeResource node)
     {
         return ofNullable(node)
-                .stream()
                 .map(NodeResource::getProperties)
+                .stream()
                 .flatMap(properties -> properties.entrySet().stream());
     }
 }
