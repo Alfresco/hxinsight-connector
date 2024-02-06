@@ -35,6 +35,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
@@ -54,6 +55,7 @@ public class IntegrationProperties
     @ConfigurationProperties("alfresco")
     public record Alfresco(
             @NestedConfigurationProperty @NotNull Repository repository,
+            @NestedConfigurationProperty @NotNull BulkIngester bulkIngester,
             @NestedConfigurationProperty @NotNull Transform transform)
     {}
 
