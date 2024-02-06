@@ -28,7 +28,9 @@ package org.alfresco.hxi_connector.bulk_ingester.util;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
+import java.util.NoSuchElementException;
 import java.util.Properties;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -44,6 +46,26 @@ public class DockerTags
     private static final String PROPERTIES_FILE_PATH = "target/test-classes/" + PROPERTIES_FILE;
 
     private static Properties properties;
+
+    public static String getProperty(String key)
+    {
+        if (properties == null)
+        {
+            loadProperties();
+        }
+
+        String value = properties.getProperty(key);
+        if (value == null)
+        {
+            throw new NoSuchElementException("Property: '" + key + "' not found");
+        }
+        else if (value.startsWith("@") && value.endsWith("@"))
+        {
+            throw new IllegalArgumentException("Value: '" + value + "' not resolved for property: '" + key + "'");
+        }
+
+        return value;
+    }
 
     public static String getOrDefault(String propertyKey, String defaultValue)
     {
@@ -62,6 +84,21 @@ public class DockerTags
             }
         }
         return value;
+    }
+
+    public static Set<Object> keySet()
+    {
+        if (properties == null)
+        {
+            loadProperties();
+        }
+
+        return properties.keySet();
+    }
+
+    private static void loadProperties()
+    {
+        loadProperties(true);
     }
 
     @SneakyThrows
