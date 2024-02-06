@@ -37,8 +37,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.No
 @Getter
 public class PredefinedNodeMetadataProperty<V>
 {
-    public static final PredefinedNodeMetadataProperty<String> NAME = new PredefinedNodeMetadataProperty<>("name");
-    public static final PredefinedNodeMetadataProperty<String> PRIMARY_ASSOC_Q_NAME = new PredefinedNodeMetadataProperty<>("primaryAssocQName");
     public static final PredefinedNodeMetadataProperty<String> TYPE = new PredefinedNodeMetadataProperty<>("type");
     public static final PredefinedNodeMetadataProperty<String> CREATED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("createdByUserWithId");
     public static final PredefinedNodeMetadataProperty<String> MODIFIED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("modifiedByUserWithId");

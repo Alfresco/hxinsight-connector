@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
 
 import org.junit.jupiter.api.Test;
 
@@ -46,8 +45,8 @@ class UpdateNodeMetadataEventTest
         // given
         UpdateNodeMetadataEvent updateNodeMetadataEvent = new UpdateNodeMetadataEvent(NODE_ID, UPDATE);
 
-        NodeProperty<String> name1 = NAME.withValue("name-1");
-        NodeProperty<String> name2 = NAME.withValue("name-2");
+        NodeProperty<String> name1 = CREATED_BY_USER_WITH_ID.withValue("admin");
+        NodeProperty<String> name2 = CREATED_BY_USER_WITH_ID.withValue("hruser");
 
         // when
         updateNodeMetadataEvent.set(name1);

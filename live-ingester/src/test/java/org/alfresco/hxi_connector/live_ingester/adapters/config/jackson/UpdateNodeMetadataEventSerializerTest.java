@@ -33,7 +33,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_en
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.NAME;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -68,7 +67,6 @@ class UpdateNodeMetadataEventSerializerTest
     public void shouldSerializePropertiesToSet()
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
-                .set(NAME.withValue("some-name"))
                 .set(IS_FILE.withValue(true))
                 .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
 
@@ -78,7 +76,6 @@ class UpdateNodeMetadataEventSerializerTest
                   "eventType": "create",
                   "properties": {
                     "isFile": true,
-                    "name": "some-name",
                     "modifiedByUserWithId": "000-000-000"
                   }
                 }""".formatted(NODE_ID);
@@ -91,7 +88,6 @@ class UpdateNodeMetadataEventSerializerTest
     public void shouldSerializePropertiesToUnset()
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, UPDATE)
-                .unset(NAME.getName())
                 .unset(IS_FILE.getName())
                 .unset(MODIFIED_BY_USER_WITH_ID.getName());
 
@@ -99,7 +95,7 @@ class UpdateNodeMetadataEventSerializerTest
                 {
                   "objectId": "%s",
                   "eventType": "update",
-                  "removedProperties": [ "isFile", "name", "modifiedByUserWithId" ]
+                  "removedProperties": [ "isFile", "modifiedByUserWithId" ]
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 

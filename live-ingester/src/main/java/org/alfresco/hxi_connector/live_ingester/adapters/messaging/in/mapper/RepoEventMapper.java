@@ -73,8 +73,6 @@ public class RepoEventMapper
                 toMilliseconds(event.getTime()),
                 event.getData().getResource().getId(),
                 isUpdateEvent,
-                propertiesMapper.calculatePropertyDelta(event, NodeResource::getName),
-                propertiesMapper.calculatePropertyDelta(event, NodeResource::getPrimaryAssocQName),
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getNodeType),
                 propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getCreatedByUser)),
                 propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getModifiedByUser)),
