@@ -33,11 +33,11 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
@@ -68,7 +68,8 @@ public class BulkIngesterEventProcessor
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);
 
-        if(event.contentInfo() != null) {
+        if (event.contentInfo() != null)
+        {
             IngestContentCommand ingestContentCommand = new IngestContentCommand(event.createdAt(), event.nodeId());
 
             ingestContentCommandHandler.handle(ingestContentCommand);
