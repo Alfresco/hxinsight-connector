@@ -60,7 +60,7 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
     TestCamelConsumer testCamelConsumer;
 
     @Test
-    void name()
+    void shouldPublishNode()
     {
         // given
         Node node = new Node(
