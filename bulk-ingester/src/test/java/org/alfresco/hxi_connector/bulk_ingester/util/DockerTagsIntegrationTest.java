@@ -23,16 +23,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.bulk_ingester.util;
 
-package org.alfresco.hxi_connector.bulk_ingester.event;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-import jakarta.validation.constraints.NotBlank;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+class DockerTagsIntegrationTest
+{
 
-@Validated
-@ConfigurationProperties("alfresco.bulk.ingest")
-public record NodePublisherConfig(
-        @NotBlank String endpoint)
-{}
+    @Test
+    void testMavenPropertyResolution()
+    {
+        // when
+        Throwable thrown = catchThrowable(() -> DockerTags.keySet().stream()
+                .map(String::valueOf)
+                .forEach(DockerTags::getProperty));
+
+        // then
+        assertThat(thrown).doesNotThrowAnyException();
+    }
+}
