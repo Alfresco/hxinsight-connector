@@ -15,3 +15,4 @@ alfresco.bulk.ingest:
   repository:
     pageSize: 100
   endpoint: activemq:queue:bulk-ingester-events
+  namespace-prefixes-mapping: classpath:namespace-prefixes.json
