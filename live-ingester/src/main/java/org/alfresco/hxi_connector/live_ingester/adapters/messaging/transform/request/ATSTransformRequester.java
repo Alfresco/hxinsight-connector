@@ -96,7 +96,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
 
     private String makeClientDataString(TransformRequest transformRequest)
     {
-        ClientData clientData = new ClientData(transformRequest.eventTimestamp(), transformRequest.nodeRef());
+        ClientData clientData = new ClientData(transformRequest.nodeRef());
         try
         {
             return objectMapper.writeValueAsString(clientData);

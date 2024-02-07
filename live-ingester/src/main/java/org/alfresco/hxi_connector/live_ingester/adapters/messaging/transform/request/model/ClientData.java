@@ -26,5 +26,5 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model;
 
-public record ClientData(long modificationTimestamp, String nodeRef)
+public record ClientData(String nodeRef)
 {}

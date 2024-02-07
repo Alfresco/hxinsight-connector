@@ -65,7 +65,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 @ExtendWith(MockitoExtension.class)
 class IngestMetadataCommandHandlerTest
 {
-    private static final long EVENT_TIMESTAMP = 1_690_000_000_100L;
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
     private static final String NODE_TYPE = "cm:folder";
     private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
@@ -94,7 +93,6 @@ class IngestMetadataCommandHandlerTest
     {
         // given
         IngestMetadataCommand command = new IngestMetadataCommand(
-                EVENT_TIMESTAMP,
                 NODE_ID,
                 EVENT_IS_CREATE,
                 updated(NODE_TYPE),
@@ -137,7 +135,6 @@ class IngestMetadataCommandHandlerTest
         // given
         PropertyDelta<String> nullUser = updated(null);
         IngestMetadataCommand command = new IngestMetadataCommand(
-                EVENT_TIMESTAMP,
                 NODE_ID,
                 EVENT_IS_CREATE,
                 updated(NODE_TYPE),

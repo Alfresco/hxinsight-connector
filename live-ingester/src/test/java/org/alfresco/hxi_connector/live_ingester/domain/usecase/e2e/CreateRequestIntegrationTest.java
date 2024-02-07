@@ -113,7 +113,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"modificationTimestamp\\":1611227656423,\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\"}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\"}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);

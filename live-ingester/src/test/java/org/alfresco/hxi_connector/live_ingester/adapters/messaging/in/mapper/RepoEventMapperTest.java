@@ -39,9 +39,6 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
-import java.time.Instant;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
 import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -65,7 +62,6 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @ExtendWith(MockitoExtension.class)
 class RepoEventMapperTest
 {
-    private static final long EVENT_TIMESTAMP = 1_690_000_000_100L;
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
     private static final boolean EVENT_IS_CREATE = false;
 
@@ -86,7 +82,6 @@ class RepoEventMapperTest
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
-        setTime(event, EVENT_TIMESTAMP);
         setType(event, NODE_CREATED);
 
         NodeResource nodeResource = NodeResource.builder()
@@ -99,9 +94,7 @@ class RepoEventMapperTest
         IngestContentCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
 
         // then
-        IngestContentCommand expectedCommand = new IngestContentCommand(
-                EVENT_TIMESTAMP,
-                NODE_ID);
+        IngestContentCommand expectedCommand = new IngestContentCommand(NODE_ID);
 
         assertEquals(expectedCommand, actualCommand);
     }
@@ -112,7 +105,6 @@ class RepoEventMapperTest
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
-        setTime(event, EVENT_TIMESTAMP);
         setType(event, NODE_CREATED);
 
         NodeResource nodeResource = NodeResource.builder()
@@ -130,7 +122,6 @@ class RepoEventMapperTest
 
         // then
         IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
-                EVENT_TIMESTAMP,
                 NODE_ID,
                 EVENT_IS_CREATE,
                 regularPropertyDelta,
@@ -151,7 +142,6 @@ class RepoEventMapperTest
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
-        setTime(event, EVENT_TIMESTAMP);
         setType(event, NODE_UPDATED);
 
         NodeResource nodeResource = NodeResource.builder()
@@ -184,7 +174,6 @@ class RepoEventMapperTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
-        setTime(event, EVENT_TIMESTAMP);
         setType(event, NODE_DELETED);
 
         NodeResource nodeResource = NodeResource.builder().setId(NODE_ID).build();
@@ -194,7 +183,7 @@ class RepoEventMapperTest
         DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
 
         // then
-        DeleteNodeCommand expectedCommand = new DeleteNodeCommand(EVENT_TIMESTAMP, NODE_ID);
+        DeleteNodeCommand expectedCommand = new DeleteNodeCommand(NODE_ID);
         assertEquals(expectedCommand, deleteNodeCommand);
     }
 
@@ -207,16 +196,6 @@ class RepoEventMapperTest
 
         // then
         assertThrows(ValidationException.class, () -> repoEventMapper.mapToDeleteNodeCommand(event));
-    }
-
-    public static void setTime(RepoEvent<DataAttributes<NodeResource>> event, long timestamp)
-    {
-        given(event.getTime()).willReturn(dateFromTimestamp(timestamp));
-    }
-
-    public static ZonedDateTime dateFromTimestamp(long timestamp)
-    {
-        return ZonedDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("UTC"));
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)

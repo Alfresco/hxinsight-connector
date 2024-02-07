@@ -58,9 +58,7 @@ public class RepoEventMapper
     {
         ensureThat(isEventTypeCreated(event) || isEventTypeUpdated(event), "Unsupported event type");
 
-        return new IngestContentCommand(
-                event.getTime().toInstant().toEpochMilli(),
-                event.getData().getResource().getId());
+        return new IngestContentCommand(event.getData().getResource().getId());
     }
 
     public IngestMetadataCommand mapToIngestMetadataCommand(RepoEvent<DataAttributes<NodeResource>> event)
@@ -70,7 +68,6 @@ public class RepoEventMapper
         ensureThat(isCreateEvent || isUpdateEvent, "Unsupported event type");
 
         return new IngestMetadataCommand(
-                toMilliseconds(event.getTime()),
                 event.getData().getResource().getId(),
                 isUpdateEvent,
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getNodeType),
@@ -86,7 +83,7 @@ public class RepoEventMapper
     public DeleteNodeCommand mapToDeleteNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
         ensureThat(isEventTypeDeleted(event), "Only delete events can be converted to delete commands");
-        return new DeleteNodeCommand(toMilliseconds(event.getTime()), event.getData().getResource().getId());
+        return new DeleteNodeCommand(event.getData().getResource().getId());
     }
 
     private Long toMilliseconds(ZonedDateTime time)
