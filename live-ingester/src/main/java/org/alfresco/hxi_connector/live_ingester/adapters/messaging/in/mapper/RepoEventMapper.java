@@ -74,8 +74,6 @@ public class RepoEventMapper
                 propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getCreatedByUser)),
                 propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getModifiedByUser)),
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getAspectNames),
-                propertiesMapper.calculatePropertyDelta(event, NodeResource::isFile),
-                propertiesMapper.calculatePropertyDelta(event, NodeResource::isFolder),
                 propertiesMapper.calculatePropertyDelta(event, node -> toMilliseconds(node.getCreatedAt())),
                 propertiesMapper.calculateCustomPropertiesDelta(event));
     }

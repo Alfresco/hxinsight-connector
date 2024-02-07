@@ -30,8 +30,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -67,7 +67,7 @@ class UpdateNodeMetadataEventSerializerTest
     public void shouldSerializePropertiesToSet()
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
-                .set(IS_FILE.withValue(true))
+                .set(CREATED_AT.withValue(10000L))
                 .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
 
         String expectedJson = """
@@ -75,7 +75,7 @@ class UpdateNodeMetadataEventSerializerTest
                   "objectId": "%s",
                   "eventType": "create",
                   "properties": {
-                    "isFile": true,
+                    "createdAt": 10000,
                     "modifiedByUserWithId": "000-000-000"
                   }
                 }""".formatted(NODE_ID);
@@ -88,14 +88,14 @@ class UpdateNodeMetadataEventSerializerTest
     public void shouldSerializePropertiesToUnset()
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, UPDATE)
-                .unset(IS_FILE.getName())
+                .unset(CREATED_AT.getName())
                 .unset(MODIFIED_BY_USER_WITH_ID.getName());
 
         String expectedJson = """
                 {
                   "objectId": "%s",
                   "eventType": "update",
-                  "removedProperties": [ "isFile", "modifiedByUserWithId" ]
+                  "removedProperties": [ "createdAt", "modifiedByUserWithId" ]
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
