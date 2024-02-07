@@ -23,8 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model;
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model;
+import jakarta.validation.constraints.NotBlank;
 
-public record ClientData(String nodeRef)
+public record ClientData(@NotBlank String nodeRef)
 {}

@@ -23,19 +23,26 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import java.io.IOException;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.springframework.validation.annotation.Validated;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientDataDeserializer;
+public abstract class RawJsonDeserializer<T> extends StdDeserializer<T>
+{
+    protected RawJsonDeserializer(Class<T> vc)
+    {
+        super(vc);
+    }
 
-@Validated
-public record TransformResponse(
-        @NotBlank String targetReference,
-        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) ClientData clientData)
-{}
+    @Override
+    @SuppressWarnings("unchecked")
+    public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException
+    {
+        return ((ObjectMapper) jsonParser.getCodec()).readValue(jsonParser.getValueAsString(), (Class<T>) handledType());
+    }
+}

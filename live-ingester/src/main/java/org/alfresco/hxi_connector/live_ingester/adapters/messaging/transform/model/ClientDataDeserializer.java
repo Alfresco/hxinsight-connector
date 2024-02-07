@@ -23,19 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.RawJsonDeserializer;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import org.springframework.validation.annotation.Validated;
-
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientDataDeserializer;
-
-@Validated
-public record TransformResponse(
-        @NotBlank String targetReference,
-        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) ClientData clientData)
-{}
+public class ClientDataDeserializer extends RawJsonDeserializer<ClientData>
+{
+    public ClientDataDeserializer()
+    {
+        super(ClientData.class);
+    }
+}
