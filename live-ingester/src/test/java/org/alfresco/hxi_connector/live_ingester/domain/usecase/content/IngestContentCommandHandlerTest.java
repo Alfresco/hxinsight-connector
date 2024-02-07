@@ -47,7 +47,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 @ExtendWith(MockitoExtension.class)
 class IngestContentCommandHandlerTest
 {
-    static final long TIMESTAMP = 1_234_567_890L;
     static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
     static final String PDF_MIMETYPE = "application/pdf";
 
@@ -65,13 +64,13 @@ class IngestContentCommandHandlerTest
     void shouldRequestNodeContentTransformation()
     {
         // given
-        IngestContentCommand command = new IngestContentCommand(TIMESTAMP, NODE_ID);
+        IngestContentCommand command = new IngestContentCommand(NODE_ID);
 
         // when
         ingestContentCommandHandler.handle(command);
 
         // then
-        TransformRequest expectedTransformationRequest = new TransformRequest(TIMESTAMP, NODE_ID, PDF_MIMETYPE);
+        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, PDF_MIMETYPE);
         then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
     }
 

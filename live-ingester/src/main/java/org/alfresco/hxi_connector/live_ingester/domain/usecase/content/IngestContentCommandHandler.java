@@ -49,7 +49,7 @@ public class IngestContentCommandHandler
 
     public void handle(IngestContentCommand command)
     {
-        TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
+        TransformRequest transformRequest = new TransformRequest(command.nodeId(), PDF_MIMETYPE);
         transformRequester.requestTransform(transformRequest);
     }
 

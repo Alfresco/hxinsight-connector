@@ -35,7 +35,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Cu
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 public record IngestMetadataCommand(
-        long time,
         String nodeId,
         boolean isUpdate,
         PropertyDelta<String> nodeType,
