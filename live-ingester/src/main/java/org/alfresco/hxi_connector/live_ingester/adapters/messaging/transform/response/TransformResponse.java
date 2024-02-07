@@ -31,8 +31,8 @@ import jakarta.validation.constraints.NotNull;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.validation.annotation.Validated;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataDeserializer;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientDataDeserializer;
 
 @Validated
 public record TransformResponse(
