@@ -119,7 +119,7 @@ class AlfrescoNodeMapperTest
         // given
         AlfrescoNode alfrescoNode = nodeWithDefaultProperties();
 
-        String contentPropertyKey = "content";
+        String contentPropertyKey = "cm:content";
         ContentInfo contentInfo = mock();
 
         alfrescoNode.setNodeProperties(Set.of(mockProperty(contentPropertyKey)));
