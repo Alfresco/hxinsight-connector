@@ -41,8 +41,6 @@ public class PredefinedNodeMetadataProperty<V>
     public static final PredefinedNodeMetadataProperty<String> CREATED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("createdByUserWithId");
     public static final PredefinedNodeMetadataProperty<String> MODIFIED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("modifiedByUserWithId");
     public static final PredefinedNodeMetadataProperty<Set<String>> ASPECTS_NAMES = new PredefinedNodeMetadataProperty<>("aspectsNames");
-    public static final PredefinedNodeMetadataProperty<Boolean> IS_FOLDER = new PredefinedNodeMetadataProperty<>("isFolder");
-    public static final PredefinedNodeMetadataProperty<Boolean> IS_FILE = new PredefinedNodeMetadataProperty<>("isFile");
     public static final PredefinedNodeMetadataProperty<Long> CREATED_AT = new PredefinedNodeMetadataProperty<>("createdAt");
 
     private final String name;

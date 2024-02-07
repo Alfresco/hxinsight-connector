@@ -60,8 +60,6 @@ public class BulkIngesterEventProcessor
                 PropertyDelta.updated(event.creatorId()),
                 PropertyDelta.updated(event.modifierId()),
                 PropertyDelta.updated(event.aspectNames()),
-                PropertyDelta.updated(false),
-                PropertyDelta.updated(false),
                 PropertyDelta.updated(event.createdAt()),
                 mapToCustomPropertiesDelta(event.customProperties()));
 

@@ -129,8 +129,6 @@ class RepoEventMapperTest
                 regularPropertyDelta,
                 regularPropertyDelta,
                 regularPropertyDelta,
-                regularPropertyDelta,
-                regularPropertyDelta,
                 Collections.emptySet());
 
         assertEquals(expectedEvent, actualEvent);

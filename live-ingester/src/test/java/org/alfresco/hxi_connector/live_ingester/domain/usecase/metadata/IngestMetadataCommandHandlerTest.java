@@ -34,8 +34,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_en
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FOLDER;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
@@ -72,8 +70,6 @@ class IngestMetadataCommandHandlerTest
     private static final Set<String> NODE_ASPECT_NAMES = Set.of(
             "cm:titled",
             "cm:auditable");
-    private static final boolean NODE_IS_FOLDER = true;
-    private static final boolean NODE_IS_FILE = false;
     private static final boolean EVENT_IS_CREATE = false;
     private static final long NODE_CREATED_AT = 1_690_000_000_050L;
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
@@ -99,8 +95,6 @@ class IngestMetadataCommandHandlerTest
                 updated(NODE_CREATED_BY_USER_WITH_ID),
                 updated(NODE_MODIFIED_BY_USER_WITH_ID),
                 updated(NODE_ASPECT_NAMES),
-                updated(NODE_IS_FILE),
-                updated(NODE_IS_FOLDER),
                 updated(NODE_CREATED_AT),
                 NODE_PROPERTIES.stream()
                         .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
@@ -115,8 +109,6 @@ class IngestMetadataCommandHandlerTest
                 CREATED_BY_USER_WITH_ID.withValue(NODE_CREATED_BY_USER_WITH_ID),
                 MODIFIED_BY_USER_WITH_ID.withValue(NODE_MODIFIED_BY_USER_WITH_ID),
                 ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
-                IS_FILE.withValue(NODE_IS_FILE),
-                IS_FOLDER.withValue(NODE_IS_FOLDER),
                 CREATED_AT.withValue(NODE_CREATED_AT),
                 NODE_TITLE);
 
@@ -141,8 +133,6 @@ class IngestMetadataCommandHandlerTest
                 nullUser, // Missing created by
                 nullUser, // Missing updated by
                 updated(NODE_ASPECT_NAMES),
-                updated(NODE_IS_FILE),
-                updated(NODE_IS_FOLDER),
                 updated(NODE_CREATED_AT),
                 NODE_PROPERTIES.stream()
                         .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
@@ -157,8 +147,6 @@ class IngestMetadataCommandHandlerTest
                 CREATED_BY_USER_WITH_ID.withValue(null),
                 MODIFIED_BY_USER_WITH_ID.withValue(null),
                 ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
-                IS_FILE.withValue(NODE_IS_FILE),
-                IS_FOLDER.withValue(NODE_IS_FOLDER),
                 CREATED_AT.withValue(NODE_CREATED_AT),
                 NODE_TITLE);
 
