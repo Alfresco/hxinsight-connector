@@ -30,20 +30,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class DeleteNodeCommandHandler
 {
-    private final EventPublisher eventPublisher;
+    private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
 
     public void handle(DeleteNodeCommand deleteNodeCommand)
     {
         String nodeId = deleteNodeCommand.nodeId();
         log.debug("Processing delete command for {}", nodeId);
         DeleteNodeEvent deleteNodeEvent = new DeleteNodeEvent(nodeId);
-        eventPublisher.publishMessage(deleteNodeEvent);
+        ingestionEngineEventPublisher.publishMessage(deleteNodeEvent);
     }
 }

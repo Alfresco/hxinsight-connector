@@ -23,34 +23,39 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in;
 
-import static org.apache.camel.LoggingLevel.DEBUG;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.camel.builder.RouteBuilder;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.CamelEventMapper;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
-public class LiveIngesterRouteBuilder extends RouteBuilder
+public class CamelEventMapper
 {
 
-    private final EventProcessor eventProcessor;
-    private final CamelEventMapper camelEventMapper;
-    private final IntegrationProperties integrationProperties;
+    private final ObjectMapper mapper;
 
-    @Override
-    public void configure()
+    public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
     {
-        from(integrationProperties.alfresco().repository().endpoint())
-                .transacted()
-                .routeId("ingester-events-consumer")
-                .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
-                .process((exchange) -> eventProcessor.process(camelEventMapper.repoEventFrom(exchange)))
-                .end();
+        try
+        {
+            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
+        }
+        catch (JsonProcessingException e)
+        {
+            throw new LiveIngesterRuntimeException("Event deserialization failed", e);
+        }
     }
 }

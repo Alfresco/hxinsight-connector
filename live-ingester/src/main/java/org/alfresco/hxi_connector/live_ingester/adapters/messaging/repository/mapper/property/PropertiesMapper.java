@@ -24,11 +24,11 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper.property;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
 import static java.util.Optional.ofNullable;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
 
 import java.util.Map;
 import java.util.Objects;
