@@ -40,8 +40,8 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
@@ -50,7 +50,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 @RequiredArgsConstructor
 public class IngestMetadataCommandHandler
 {
-    private final EventPublisher eventPublisher;
+    private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
     private final List<CustomPropertyResolver<?>> customPropertyResolvers;
 
     public void handle(IngestMetadataCommand command)
@@ -70,7 +70,7 @@ public class IngestMetadataCommandHandler
                 .flatMap(Optional::stream)
                 .forEach(customPropertyDelta -> customPropertyDelta.applyOn(updateMetadataEvent));
 
-        eventPublisher.publishMessage(updateMetadataEvent);
+        ingestionEngineEventPublisher.publishMessage(updateMetadataEvent);
     }
 
     private Optional<CustomPropertyDelta<?>> resolve(CustomPropertyDelta<?> customPropertyDelta)

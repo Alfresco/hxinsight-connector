@@ -53,7 +53,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
@@ -78,7 +78,7 @@ class IngestMetadataCommandHandlerTest
     @Captor
     ArgumentCaptor<UpdateNodeMetadataEvent> updateNodeMetadataEventCaptor;
     @Mock
-    EventPublisher eventPublisher;
+    IngestionEngineEventPublisher ingestionEngineEventPublisher;
     @Spy
     List<CustomPropertyResolver<?>> customPropertyResolvers = Collections.emptyList();
     @InjectMocks
@@ -112,7 +112,7 @@ class IngestMetadataCommandHandlerTest
                 CREATED_AT.withValue(NODE_CREATED_AT),
                 NODE_TITLE);
 
-        verify(eventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
+        verify(ingestionEngineEventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
         UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
 
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
@@ -150,7 +150,7 @@ class IngestMetadataCommandHandlerTest
                 CREATED_AT.withValue(NODE_CREATED_AT),
                 NODE_TITLE);
 
-        verify(eventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
+        verify(ingestionEngineEventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
         UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
 
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());

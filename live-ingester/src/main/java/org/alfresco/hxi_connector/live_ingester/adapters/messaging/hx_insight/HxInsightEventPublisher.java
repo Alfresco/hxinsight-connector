@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.out;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
@@ -43,16 +43,16 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ProducerRouteBuilder extends RouteBuilder implements EventPublisher
+public class HxInsightEventPublisher extends RouteBuilder implements IngestionEngineEventPublisher
 {
-    private static final String LOCAL_ENDPOINT = "direct:" + ProducerRouteBuilder.class.getSimpleName();
+    private static final String LOCAL_ENDPOINT = "direct:" + HxInsightEventPublisher.class.getSimpleName();
     private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext context;
