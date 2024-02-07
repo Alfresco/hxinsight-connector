@@ -105,8 +105,7 @@ class BulkIngesterEventProcessorTest
         BulkIngesterEvent.ContentInfo contentInfo = new BulkIngesterEvent.ContentInfo(
                 100L,
                 "UTF-8",
-                "application/pdf"
-        );
+                "application/pdf");
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
