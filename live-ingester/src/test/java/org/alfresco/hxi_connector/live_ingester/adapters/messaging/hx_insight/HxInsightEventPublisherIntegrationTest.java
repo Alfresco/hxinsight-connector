@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.out;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
@@ -52,7 +52,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
@@ -60,12 +60,12 @@ import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        ProducerRouteBuilder.class})
+        HxInsightEventPublisher.class})
 @ActiveProfiles("test")
 @EnableAutoConfiguration
 @EnableRetry
 @Testcontainers
-class ProducerRouteBuilderIntegrationTest
+class HxInsightEventPublisherIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
     private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
@@ -79,7 +79,7 @@ class ProducerRouteBuilderIntegrationTest
     static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG));
 
     @SpyBean
-    EventPublisher eventPublisher;
+    IngestionEngineEventPublisher ingestionEngineEventPublisher;
 
     @BeforeAll
     static void beforeAll()
@@ -95,10 +95,10 @@ class ProducerRouteBuilderIntegrationTest
                 .willReturn(serverError()));
 
         // when
-        Throwable thrown = catchThrowable(() -> eventPublisher.publishMessage(NODE_EVENT));
+        Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
 
         // then
-        then(eventPublisher).should(times(RETRY_ATTEMPTS)).publishMessage(NODE_EVENT);
+        then(ingestionEngineEventPublisher).should(times(RETRY_ATTEMPTS)).publishMessage(NODE_EVENT);
         assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
     }
 
@@ -110,10 +110,10 @@ class ProducerRouteBuilderIntegrationTest
                 .willReturn(badRequest()));
 
         // when
-        Throwable thrown = catchThrowable(() -> eventPublisher.publishMessage(NODE_EVENT));
+        Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
 
         // then
-        then(eventPublisher).should(times(1)).publishMessage(NODE_EVENT);
+        then(ingestionEngineEventPublisher).should(times(1)).publishMessage(NODE_EVENT);
         assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
     }
 
