@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.utils;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils;
 
 import static lombok.AccessLevel.PRIVATE;
 

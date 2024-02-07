@@ -23,39 +23,34 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.in.mapper;
+import static org.apache.camel.LoggingLevel.DEBUG;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
+import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 
-@Slf4j
 @Component
 @RequiredArgsConstructor
-public class CamelEventMapper
+public class LiveIngesterEventHandler extends RouteBuilder
 {
 
-    private final ObjectMapper mapper;
+    private final EventProcessor eventProcessor;
+    private final CamelEventMapper camelEventMapper;
+    private final IntegrationProperties integrationProperties;
 
-    public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
+    @Override
+    public void configure()
     {
-        try
-        {
-            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
-        }
-        catch (JsonProcessingException e)
-        {
-            throw new LiveIngesterRuntimeException("Event deserialization failed", e);
-        }
+        from(integrationProperties.alfresco().repository().endpoint())
+                .transacted()
+                .routeId("repo-events-consumer")
+                .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
+                .process((exchange) -> eventProcessor.process(camelEventMapper.repoEventFrom(exchange)))
+                .end();
     }
 }
