@@ -64,6 +64,9 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 @SuppressWarnings({"PMD.TooManyMethods"})
 class AlfrescoPropertyMapperTest
 {
+    private static final String TEST_PREFIX = "test";
+    private final NamespacePrefixMapper namespacePrefixMapper = new TestNamespaceToPrefixMapper(TEST_PREFIX);
+
     @Test
     void shouldMapJustPropertiesWithGivenName()
     {
@@ -71,6 +74,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "description";
+        String prefixedPropertyName = "test:description";
         String descriptionText = "The purpose of document is...";
 
         alfrescoNode.setNodeProperties(
@@ -79,10 +83,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, stringValue(descriptionText))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, descriptionText), property);
+        assertEquals(expectedProperty(prefixedPropertyName, descriptionText), property);
     }
 
     @Test
@@ -92,6 +96,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "description";
+        String prefixedPropertyName = "test:description";
         String usDescription = "French fries recipe";
         String ukDescription = "Chips recipe";
 
@@ -102,11 +107,11 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, "en_UK_", stringValue(ukDescription))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
         assertTrue(property.isPresent());
-        assertEquals(propertyName, property.get().getKey());
+        assertEquals(prefixedPropertyName, property.get().getKey());
         assertThat((Iterable<String>) property.get().getValue()).hasSameElementsAs(List.of(usDescription, ukDescription));
     }
 
@@ -117,6 +122,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "description";
+        String prefixedPropertyName = "test:description";
         String descriptionText = "This document is about different animals legs length";
 
         alfrescoNode.setNodeProperties(
@@ -124,10 +130,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, stringValue(descriptionText))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, descriptionText), property);
+        assertEquals(expectedProperty(prefixedPropertyName, descriptionText), property);
     }
 
     @Test
@@ -137,13 +143,14 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "description";
+        String prefixedPropertyName = "test:description";
 
         alfrescoNode.setNodeProperties(
                 Set.of(
                         createNodeProperty(propertyName, nullValue())));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
         assertFalse(property.isPresent());
@@ -156,16 +163,17 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "isIndexed";
+        String prefixedPropertyName = "test:isIndexed";
 
         alfrescoNode.setNodeProperties(
                 Set.of(
                         createNodeProperty(propertyName, boolValue(true))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, true), property);
+        assertEquals(expectedProperty(prefixedPropertyName, true), property);
     }
 
     @Test
@@ -175,6 +183,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "legsCount";
+        String prefixedPropertyName = "test:legsCount";
         long legsCountValue = 3;
 
         alfrescoNode.setNodeProperties(
@@ -182,10 +191,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, longValue(legsCountValue))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, legsCountValue), property);
+        assertEquals(expectedProperty(prefixedPropertyName, legsCountValue), property);
     }
 
     @Test
@@ -195,6 +204,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "legLength";
+        String prefixedPropertyName = "test:legLength";
         float legLengthValue = 3.5f;
 
         alfrescoNode.setNodeProperties(
@@ -202,10 +212,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, floatValue(legLengthValue))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, legLengthValue), property);
+        assertEquals(expectedProperty(prefixedPropertyName, legLengthValue), property);
     }
 
     @Test
@@ -215,6 +225,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "legLength";
+        String prefixedPropertyName = "test:legLength";
         double legLengthValue = 3.5d;
 
         alfrescoNode.setNodeProperties(
@@ -222,10 +233,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, doubleValue(legLengthValue))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, legLengthValue), property);
+        assertEquals(expectedProperty(prefixedPropertyName, legLengthValue), property);
     }
 
     @Test
@@ -235,6 +246,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "colors";
+        String prefixedPropertyName = "test:colors";
         List<String> colorsValue = List.of("blue", "red", "black");
 
         alfrescoNode.setNodeProperties(
@@ -242,10 +254,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, serializableValue(SerializationUtils.serialize(colorsValue)))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, (Serializable) colorsValue), property);
+        assertEquals(expectedProperty(prefixedPropertyName, (Serializable) colorsValue), property);
     }
 
     @Test
@@ -255,13 +267,14 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "someRandomPropertyWithUnsupportedType";
+        String prefixedPropertyName = "test:someRandomPropertyWithUnsupportedType";
 
         alfrescoNode.setNodeProperties(
                 Set.of(
                         createNodeProperty(propertyName, propertyValue(PATH))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
         assertFalse(property.isPresent());
@@ -274,6 +287,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "content";
+        String prefixedPropertyName = "cm:content";
 
         long contentId = 1;
         long contentSize = 1000;
@@ -289,12 +303,12 @@ class AlfrescoPropertyMapperTest
                 Set.of(contentMetadata));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
         ContentInfo expectedContentInfo = new ContentInfo(contentSize, encoding, mimeType);
 
-        assertEquals(expectedProperty(propertyName, expectedContentInfo), property);
+        assertEquals(expectedProperty(prefixedPropertyName, expectedContentInfo), property);
     }
 
     @Test
@@ -304,6 +318,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "createdAt";
+        String prefixedPropertyName = "test:createdAt";
         String createdAtString = "2024-01-31T10:15:30+00:00";
         long createdAtValue = ZonedDateTime.parse(createdAtString).toInstant().toEpochMilli();
 
@@ -312,10 +327,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, dateValue(createdAtString))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, createdAtValue), property);
+        assertEquals(expectedProperty(prefixedPropertyName, createdAtValue), property);
     }
 
     @Test
@@ -325,6 +340,7 @@ class AlfrescoPropertyMapperTest
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
         String propertyName = "copyOf";
+        String prefixedPropertyName = "test:copyOf";
 
         String nodeId = "f70cb080-9d45-4f21-b936-475b053a23f1";
         String copyOfValue = "workspace://SpacesStore/" + nodeId;
@@ -334,10 +350,10 @@ class AlfrescoPropertyMapperTest
                         createNodeProperty(propertyName, nodeRefValue(copyOfValue))));
 
         // when
-        var property = new AlfrescoPropertyMapper(alfrescoNode, propertyName).performMapping();
+        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(propertyName, nodeId), property);
+        assertEquals(expectedProperty(prefixedPropertyName, nodeId), property);
     }
 
     private Optional<Map.Entry<String, Serializable>> expectedProperty(String propertyName, Serializable propertyValue)

@@ -40,7 +40,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.QName;
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 
@@ -49,23 +48,20 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 @RequiredArgsConstructor
 public class AlfrescoNodeMapper
 {
-    public static final String CONTENT_PROPERTY = "content";
+    public static final String CONTENT_PROPERTY = "cm:content";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
 
-    public AlfrescoNodeMapper()
-    {
-        propertyMapperFactory = AlfrescoPropertyMapper::new;
-    }
+    private final NamespacePrefixMapper namespacePrefixMapper;
 
     public Node map(AlfrescoNode alfrescoNode)
     {
         String nodeId = alfrescoNode.getNodeRef();
-        String type = alfrescoNode.getType().getLocalName();
+        String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
-        Set<String> aspectNames = alfrescoNode.getAspects().stream().map(QName::getLocalName).collect(Collectors.toSet());
+        Set<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toSet());
         long createdAt = getCreatedAt(alfrescoNode);
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
@@ -97,7 +93,7 @@ public class AlfrescoNodeMapper
         return alfrescoNode.getNodeProperties()
                 .stream()
                 .filter(Objects::nonNull)
-                .map(property -> property.getPropertyKey().getLocalName())
+                .map(property -> namespacePrefixMapper.toPrefixedName(property.getPropertyKey()))
                 .distinct()
                 .map(propertyName -> propertyMapperFactory.create(alfrescoNode, propertyName).performMapping())
                 .flatMap(Optional::stream)
