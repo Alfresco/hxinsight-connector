@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,22 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import org.springframework.validation.annotation.Validated;
 
-@Getter
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataDeserializer;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
+
 @Validated
-@NoArgsConstructor
-@AllArgsConstructor
-public class TransformResponse
-{
-    @NotBlank
-    private String targetReference;
-}
+public record TransformResponse(
+        @NotBlank String targetReference,
+        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) ClientData clientData)
+{}

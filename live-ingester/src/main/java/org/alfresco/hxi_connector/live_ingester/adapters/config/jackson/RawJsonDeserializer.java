@@ -23,9 +23,26 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-public record UploadContentRenditionCommand(
-        String transformedFileId,
-        String nodeId)
-{}
+import java.io.IOException;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
+
+public abstract class RawJsonDeserializer<T> extends StdDeserializer<T>
+{
+    protected RawJsonDeserializer(Class<T> vc)
+    {
+        super(vc);
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException
+    {
+        return ((ObjectMapper) jsonParser.getCodec()).readValue(jsonParser.getValueAsString(), (Class<T>) handledType());
+    }
+}

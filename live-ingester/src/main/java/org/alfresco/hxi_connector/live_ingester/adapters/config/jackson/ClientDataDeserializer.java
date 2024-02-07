@@ -23,9 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-public record UploadContentRenditionCommand(
-        String transformedFileId,
-        String nodeId)
-{}
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
+
+public class ClientDataDeserializer extends RawJsonDeserializer<ClientData>
+{
+    public ClientDataDeserializer()
+    {
+        super(ClientData.class);
+    }
+}
