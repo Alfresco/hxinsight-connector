@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
+import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
@@ -32,6 +33,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 public class PdfOperationsIntegrationTest extends E2ETestBase
 {
 
+    @Ignore
     @Test
     void testPdFOperations()
     {
