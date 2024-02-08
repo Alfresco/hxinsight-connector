@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.storage.local;
 
+import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
 import java.time.Duration;
@@ -33,9 +34,12 @@ import java.util.List;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.AwsCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectResponse;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.S3Object;
@@ -103,5 +107,17 @@ public class LocalStorageClient
                 .flatMap(page -> page.contents().stream())
                 .map(S3Object::key)
                 .toList();
+    }
+
+    public InputStream downloadObject(String bucketName, String objectKey)
+    {
+        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(objectKey)
+                .build();
+
+        ResponseBytes<GetObjectResponse> objectBytes = s3client.getObjectAsBytes(getObjectRequest);
+
+        return objectBytes.asInputStream();
     }
 }
