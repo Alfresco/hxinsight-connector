@@ -13,18 +13,12 @@ public class PdfOperationsIntegrationTest extends E2ETestBase {
 
     @Test
     void testPdFOperations() throws IOException, InterruptedException {
-
         containerSupport.prepareHxInsightToReturnSuccessWithStorageLocation();
         setUpS3();
         WireMock.configureFor(sfs.getHost(), sfs.getPort());
 
         //given
         containerSupport.prepareSFSToReturnSuccess();
-
-//        WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
-//        setUpS3();
-//        containerSupport.prepareHxInsightToReturnSuccessWithStorageLocation();
-
 
         WireMock.configureFor(sfs.getHost(), sfs.getPort());
         //when
@@ -42,9 +36,6 @@ public class PdfOperationsIntegrationTest extends E2ETestBase {
 
         WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
 
-//        setUpS3();
-//        containerSupport.prepareHxInsightToReturnSuccessWithStorageLocation();
-
         String preSignedUrlBody = """
                 {
                    "contentType":"application/pdf",
@@ -53,37 +44,6 @@ public class PdfOperationsIntegrationTest extends E2ETestBase {
                  }""";
         containerSupport.expectHxiPreSignedUrlMessageReceived(preSignedUrlBody);
 
-
-//        containerSupport.expectS3MessageReceived("test-file.pdf");
-
-
-
-
-
-//        setUpS3();
-
-//        containerSupport.prepareS3ToReturnSuccess();
-////
-//        String s3Body = """
-//                {
-//                   "contentType":"application/pdf",
-//                   "objectId":"e71dd823-82c7-477c-8490-04cb0e826e66"
-//                    }
-//                 }""";
-//        containerSupport.expectS3MessageReceived(s3Body);
-
-
-//        String expectedBody = """
-//                {
-//                   "objectId" : "e71dd823-82c7-477c-8490-04cb0e826e66",
-//                   "eventType" : "create",
-//                   "properties" : {
-//                      "file:content": {
-//                        "path": "/ingestion-base-path/filename1.pdf"
-//                        }
-//                    }
-//                 }""";
-//        containerSupport.expectHxIngestMessageReceived(expectedBody);
 
 
     }

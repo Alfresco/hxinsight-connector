@@ -41,6 +41,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.MessageConsumer;
@@ -57,6 +58,7 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.apache.commons.lang3.ClassLoaderUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.springframework.util.ResourceUtils;
@@ -76,7 +78,6 @@ public class ContainerSupport
     private Session session;
     private MessageProducer repoEventProducer;
     private MessageConsumer atsConsumer;
-
 
     public static final String ATS_RESPONSE_QUEUE = "ats.response.queue";
     private MessageProducer atsEventProducer;
@@ -189,96 +190,87 @@ public class ContainerSupport
         return (TextMessage) atsConsumer.receiveNoWait();
     }
 
-
-
-
-
     @SneakyThrows
-    public void raiseATSEvent(String atsEvent) {
+    public void raiseATSEvent(String atsEvent)
+    {
         atsEventProducer.send(session.createTextMessage(atsEvent));
     }
 
     @SneakyThrows
-    public void prepareSFSToReturnSuccess() {
-//        @Cleanup
-//        InputStream fileContent = new ByteArrayInputStream(OBJECT_CONTENT.getBytes());
-////        File fileToUpload = new File(fileContent);
-        InputStream inputStreamFile = ContainerSupport.class.getClassLoader().getResourceAsStream("test-file.pdf");
-//        File testFile = new File(ContainerSupport.class.getClassLoader().getResource("test-file.pdf").getFile());
-        byte[] array1 = inputStreamFile.readAllBytes();
-//        InputStream inStreamFile = this.getClass().getClassLoader().getResourceAsStream("testing.pdf");
-//        URL url = this.getClass().getResource("/testing.pdf");
-//        String absoluteDiskPath = url.getPath();
-//        BufferedReader br = new BufferedReader(new InputStreamReader(fileContent));
-//        File file = ResourceUtils.getFile("testing.pdf");
-//        System.out.println("File Found : " + file.exists());
-//        String content = new String(Files.readAllBytes(file.toPath()));
-//        byte[] pdfFile = Files.readAllBytes(Paths.get(ClassLoader.getSystemResource("/__files/file1.pdf").toURI()));
-//        byte[] pdfFile = Files.readAllBytes(Paths.get(getClass().getResource("/__files/file1.pdf").toURI()));
-//        InputStream pdfStream = getClass().getClassLoader().getResourceAsStream("/__files/file1.pdf");
-//        byte[] pdfFile = Files.readAllBytes(Paths.get(pdfStream.toString()));
-//        URL resourceUrl = getClass().getResource("/__files/file1.pdf");
-//        File file1 = new File(resourceUrl.getFile());
-//        PDDocument document1 = PDDocument.load(pdfFile);
-//        PDFTextStripper stripper1 =new PDFTextStripper();
-//        String text1 = stripper1.getText(document1);
+    public void prepareSFSToReturnSuccess()
+    {
+        //File testFile = new File(ContainerSupport.class.getClassLoader().getResource("test-file.pdf").getFile());
+//        File testFile = new File(getClass().getClassLoader().getResource("src/test/resources/test-file.pdf").getFile());
+
+        File testFile = new File("src/test/resources/test-file.pdf");
+
+        @Cleanup
+        var stream = new FileInputStream(testFile);
+        byte[] bytes = stream.readAllBytes();
+
         givenThat(get(SFS_ENDPOINT)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)
-                        .withBody(inputStreamFile.readAllBytes())
-                        .withHeader("Content-Type", "application/pdf")));
+                        .withBody(bytes)
+                        .withHeader("Content-Type", "application/pdf"))
+        );
     }
 
     @SneakyThrows
-    public void expectSFSMessageReceived() {
+    public void expectSFSMessageReceived()
+    {
         retryWithBackoff(() -> WireMock.verify(getRequestedFor(urlPathEqualTo(SFS_ENDPOINT))));
     }
 
     @SneakyThrows
-    public void prepareHxInsightToReturnSuccessWithStorageLocation() {
-//        String preSignedUrl = "http://s3-storage-location";
+    public void prepareHxInsightToReturnSuccessWithStorageLocation()
+    {
+        //        String preSignedUrl = "http://s3-storage-location";
         URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
-//                .withBasicAuth(HX_INSIGHT_TEST_USERNAME, HX_INSIGHT_TEST_PASSWORD)
-//                .withRequestBody(new ContainsPattern(NODE_ID))
-//                .withRequestBody(new ContainsPattern(FILE_CONTENT_TYPE))
+                //                .withBasicAuth(HX_INSIGHT_TEST_USERNAME, HX_INSIGHT_TEST_PASSWORD)
+                //                .withRequestBody(new ContainsPattern(NODE_ID))
+                //                .withRequestBody(new ContainsPattern(FILE_CONTENT_TYPE))
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
                         .withBody(hxInsightResponse)));
     }
 
     @SneakyThrows
-    public void expectHxiPreSignedUrlMessageReceived(String expectedBody) {
+    public void expectHxiPreSignedUrlMessageReceived(String expectedBody)
+    {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 
     @SneakyThrows
-    public void prepareS3ToReturnSuccess() {
-//        URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
-//        givenThat(post(LOCAL_ENDPOINT)
-//                .willReturn(aResponse()
-//                        .withStatus(OK_SUCCESS_CODE)));
+    public void prepareS3ToReturnSuccess()
+    {
+        //        URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
+        //        givenThat(post(LOCAL_ENDPOINT)
+        //                .willReturn(aResponse()
+        //                        .withStatus(OK_SUCCESS_CODE)));
 
         File testFile = new File(ContainerSupport.class.getClassLoader().getResource("test-file.pdf").getFile());
 
     }
 
     @SneakyThrows
-    public void expectS3MessageReceived(String expectedFile) {
-////        retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(LOCAL_ENDPOINT))
-//                .withHeader("Content-Type", equalTo("application/json"))
-//                .withRequestBody(equalToJson(expectedBody))));
+    public void expectS3MessageReceived(String expectedFile)
+    {
+        ////        retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(LOCAL_ENDPOINT))
+        //                .withHeader("Content-Type", equalTo("application/json"))
+        //                .withRequestBody(equalToJson(expectedBody))));
 
-//        InputStream expectedInputStream = ContainerSupport.class.getClassLoader().getResourceAsStream("test-file.pdf");
-//        InputStream bucketFileInputStream = s3StorageMock.listBucketContent(BUCKET_NAME).contains(OBJECT_KEY);
-//        List<String> actualBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
-//        assertThat(actualBucketContent).contains(OBJECT_KEY);
-////        assertThat(actualBucketContent).cm
-//
-//        assertTrue(IOUtils.contentEquals(expectedInputStream, inputStream2));
+        //        InputStream expectedInputStream = ContainerSupport.class.getClassLoader().getResourceAsStream("test-file.pdf");
+        //        InputStream bucketFileInputStream = s3StorageMock.listBucketContent(BUCKET_NAME).contains(OBJECT_KEY);
+        //        List<String> actualBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
+        //        assertThat(actualBucketContent).contains(OBJECT_KEY);
+        ////        assertThat(actualBucketContent).cm
+        //
+        //        assertTrue(IOUtils.contentEquals(expectedInputStream, inputStream2));
     }
 
 }
