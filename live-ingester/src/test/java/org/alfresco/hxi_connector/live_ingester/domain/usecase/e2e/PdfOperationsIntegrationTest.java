@@ -1,26 +1,29 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
-import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 import org.junit.jupiter.api.Test;
 
-public class PdfOperationsIntegrationTest extends E2ETestBase {
+import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
+
+public class PdfOperationsIntegrationTest extends E2ETestBase
+{
 
     @Test
-    void testPdFOperations() {
+    void testPdFOperations()
+    {
 
-        //given
+        // given
         containerSupport.prepareSFSToReturnSuccess();
         containerSupport.prepareHxIToReturnSuccessWithStorageLocation();
         containerSupport.prepareHxIToReturnSuccessAfterReceivingFileLocation();
 
-        //when
+        // when
         String atsBody = """
                 {
                     "targetReference": "e71dd823-82c7-477c-8490-04cb0e826e66"
                 }""";
         containerSupport.raiseATSEvent(atsBody);
 
-        //then
+        // then
         containerSupport.expectSFSMessageReceived();
 
         String preSignedUrlBody = """

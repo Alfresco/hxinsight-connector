@@ -26,18 +26,17 @@
 package org.alfresco.hxi_connector.live_ingester.util;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.*;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWithBackoff;
 import static org.junit.Assert.*;
+
+import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.*;
+import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWithBackoff;
 
 import java.io.*;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.MessageConsumer;
@@ -52,14 +51,16 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.io.IOUtils;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
+
 @Slf4j
 @SuppressWarnings("PMD.NonThreadSafeSingleton")
-public class ContainerSupport {
+public class ContainerSupport
+{
     public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingest";
     private static final int HX_INSIGHT_SUCCESS_CODE = 201;
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
@@ -84,7 +85,8 @@ public class ContainerSupport {
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
-    private ContainerSupport(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient s3StorageMock) {
+    private ContainerSupport(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient s3StorageMock)
+    {
         WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
 
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
@@ -104,37 +106,44 @@ public class ContainerSupport {
         this.s3StorageMock = s3StorageMock;
     }
 
-    public static ContainerSupport getInstance(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient s3StorageMock) {
-        if (instance == null) {
+    public static ContainerSupport getInstance(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient s3StorageMock)
+    {
+        if (instance == null)
+        {
             instance = new ContainerSupport(hxInsight, brokerUrl, s3StorageMock);
         }
         return instance;
     }
 
-    public static void removeInstance() {
+    public static void removeInstance()
+    {
         instance = null;
     }
 
-    public void prepareHxInsightToReturnSuccess() {
+    public void prepareHxInsightToReturnSuccess()
+    {
         givenThat(post(HX_INSIGHT_INGEST_ENDPOINT)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_SUCCESS_CODE)));
     }
 
     @SneakyThrows
-    public void raiseRepoEvent(String repoEvent) {
+    public void raiseRepoEvent(String repoEvent)
+    {
         repoEventProducer.send(session.createTextMessage(repoEvent));
     }
 
     @SneakyThrows
-    public void expectHxIngestMessageReceived(String expectedBody) {
+    public void expectHxIngestMessageReceived(String expectedBody)
+    {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 
     @SneakyThrows
-    public void verifyATSRequestReceived(String expectedBody) {
+    public void verifyATSRequestReceived(String expectedBody)
+    {
         TextMessage received = (TextMessage) retryWithBackoff(() -> {
             TextMessage message = receiveATSTextMessage();
             assertNotNull(message);
@@ -151,24 +160,29 @@ public class ContainerSupport {
     }
 
     @SneakyThrows
-    public void clearATSQueue() {
-        while (receiveATSTextMessage() != null) {
+    public void clearATSQueue()
+    {
+        while (receiveATSTextMessage() != null)
+        {
             log.debug("Removed message from ATS queue");
         }
     }
 
     @SneakyThrows
-    TextMessage receiveATSTextMessage() {
+    TextMessage receiveATSTextMessage()
+    {
         return (TextMessage) atsConsumer.receiveNoWait();
     }
 
     @SneakyThrows
-    public void raiseATSEvent(String atsEvent) {
+    public void raiseATSEvent(String atsEvent)
+    {
         atsEventProducer.send(session.createTextMessage(atsEvent));
     }
 
     @SneakyThrows
-    public void prepareSFSToReturnSuccess() {
+    public void prepareSFSToReturnSuccess()
+    {
 
         WireMock.configureFor(sfsMock);
 
@@ -180,14 +194,14 @@ public class ContainerSupport {
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)
                         .withBody(fileBytes)
-                        .withHeader("Content-Type", "application/pdf"))
-        );
+                        .withHeader("Content-Type", "application/pdf")));
 
         WireMock.configureFor(hxInsightMock);
     }
 
     @SneakyThrows
-    public void expectSFSMessageReceived() {
+    public void expectSFSMessageReceived()
+    {
         WireMock.configureFor(sfsMock);
 
         retryWithBackoff(() -> WireMock.verify(getRequestedFor(urlPathEqualTo(SFS_ENDPOINT))));
@@ -196,7 +210,8 @@ public class ContainerSupport {
     }
 
     @SneakyThrows
-    public void prepareHxIToReturnSuccessWithStorageLocation() {
+    public void prepareHxIToReturnSuccessWithStorageLocation()
+    {
         URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
@@ -206,14 +221,16 @@ public class ContainerSupport {
     }
 
     @SneakyThrows
-    public void expectHxIStorageLocationMessageReceived(String expectedBody) {
+    public void expectHxIStorageLocationMessageReceived(String expectedBody)
+    {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 
     @SneakyThrows
-    public void expectFileUploadedToS3(String expectedFilePath) {
+    public void expectFileUploadedToS3(String expectedFilePath)
+    {
 
         List<String> actualBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
         @Cleanup
@@ -225,14 +242,16 @@ public class ContainerSupport {
     }
 
     @SneakyThrows
-    public void prepareHxIToReturnSuccessAfterReceivingFileLocation() {
+    public void prepareHxIToReturnSuccessAfterReceivingFileLocation()
+    {
         givenThat(post(HX_INSIGHT_LOCATION_PATH)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)));
     }
 
     @SneakyThrows
-    public void expectHxIMessageWithFileLocationReceived(String expectedBody) {
+    public void expectHxIMessageWithFileLocationReceived(String expectedBody)
+    {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_LOCATION_PATH))
                 .withHeader("Content-Type", equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
