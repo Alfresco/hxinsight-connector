@@ -206,6 +206,9 @@
             <testResource>
                 <directory>src/test/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>test-file.pdf</exclude>
+                </excludes>
             </testResource>
         </testResources>
 
