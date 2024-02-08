@@ -109,7 +109,7 @@ public class LocalStorageClient
                 .toList();
     }
 
-    public InputStream downloadObject(String bucketName, String objectKey)
+    public InputStream downloadBucketObject(String bucketName, String objectKey)
     {
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
