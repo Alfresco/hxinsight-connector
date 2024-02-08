@@ -29,13 +29,16 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingeste
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
@@ -45,6 +48,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMe
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
+@ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class BulkIngesterEventProcessorTest
 {
     private static final String NODE_ID = "07659d13-8d64-4905-a329-6b27fe182023";
@@ -53,11 +58,13 @@ class BulkIngesterEventProcessorTest
     private static final String MODIFIER_ID = "hr_user";
     private static final Set<String> ASPECT_NAMES = Set.of("cm:titled");
     private static final long CREATED_AT = 1000L;
-    private final IngestMetadataCommandHandler ingestMetadataCommandHandler = mock();
-    private final IngestContentCommandHandler ingestContentCommandHandler = mock();
-    private final BulkIngesterEventProcessor bulkIngesterEventProcessor = new BulkIngesterEventProcessor(
-            ingestMetadataCommandHandler,
-            ingestContentCommandHandler);
+
+    @Mock
+    private IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    @Mock
+    private IngestContentCommandHandler ingestContentCommandHandler;
+    @InjectMocks
+    private BulkIngesterEventProcessor bulkIngesterEventProcessor;
 
     @Test
     void shouldIngestJustNodeMetadataIfItDoesNotContainAnyContent()
