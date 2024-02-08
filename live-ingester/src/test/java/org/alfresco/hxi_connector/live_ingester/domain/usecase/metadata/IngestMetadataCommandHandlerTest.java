@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
+import static java.util.Collections.emptySet;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
@@ -36,6 +38,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.unchanged;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
@@ -71,6 +74,7 @@ class IngestMetadataCommandHandlerTest
             "cm:titled",
             "cm:auditable");
     private static final boolean EVENT_IS_CREATE = false;
+    private static final boolean EVENT_IS_UPDATE = true;
     private static final long NODE_CREATED_AT = 1_690_000_000_050L;
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
@@ -98,7 +102,8 @@ class IngestMetadataCommandHandlerTest
                 updated(NODE_CREATED_AT),
                 NODE_PROPERTIES.stream()
                         .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
-                        .collect(Collectors.toSet()));
+                        .collect(Collectors.toSet()),
+                false);
 
         // when
         ingestMetadataCommandHandler.handle(command);
@@ -136,7 +141,8 @@ class IngestMetadataCommandHandlerTest
                 updated(NODE_CREATED_AT),
                 NODE_PROPERTIES.stream()
                         .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
-                        .collect(Collectors.toSet()));
+                        .collect(Collectors.toSet()),
+                false);
 
         // when
         ingestMetadataCommandHandler.handle(command);
@@ -155,5 +161,30 @@ class IngestMetadataCommandHandlerTest
 
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
         assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
+    }
+
+    /** Test that when the content has been deleted we tell Hx Insight to remove it. */
+    @Test
+    void canRemoveContent()
+    {
+        // given
+        IngestMetadataCommand command = new IngestMetadataCommand(
+                NODE_ID,
+                EVENT_IS_UPDATE,
+                unchanged(NODE_TYPE),
+                unchanged(NODE_CREATED_BY_USER_WITH_ID),
+                unchanged(NODE_MODIFIED_BY_USER_WITH_ID),
+                unchanged(NODE_ASPECT_NAMES),
+                unchanged(NODE_CREATED_AT),
+                emptySet(),
+                true);
+
+        // when
+        ingestMetadataCommandHandler.handle(command);
+
+        // then
+        verify(ingestionEngineEventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
+        UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
+        assertContainsSameElements(Set.of("cm:content"), updateNodeMetadataEvent.getMetadataPropertiesToUnset());
     }
 }

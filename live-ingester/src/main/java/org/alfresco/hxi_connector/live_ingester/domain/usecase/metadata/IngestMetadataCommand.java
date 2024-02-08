@@ -42,7 +42,8 @@ public record IngestMetadataCommand(
         PropertyDelta<String> modifiedByUserWithId,
         PropertyDelta<Set<String>> aspectNames,
         PropertyDelta<Long> createdAt,
-        Set<CustomPropertyDelta<?>> properties)
+        Set<CustomPropertyDelta<?>> properties,
+        boolean contentRemoved)
 {
     public IngestMetadataCommand
     {

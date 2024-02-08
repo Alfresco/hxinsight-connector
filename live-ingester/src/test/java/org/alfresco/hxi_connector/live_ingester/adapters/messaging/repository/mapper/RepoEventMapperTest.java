@@ -28,7 +28,9 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
@@ -54,6 +56,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -64,6 +67,7 @@ class RepoEventMapperTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
     private static final boolean EVENT_IS_CREATE = false;
+    private static final boolean CONTENT_NOT_REMOVED = false;
 
     @Mock
     PropertiesMapper propertiesMapper;
@@ -129,7 +133,8 @@ class RepoEventMapperTest
                 regularPropertyDelta,
                 regularPropertyDelta,
                 regularPropertyDelta,
-                Collections.emptySet());
+                Collections.emptySet(),
+                CONTENT_NOT_REMOVED);
 
         assertEquals(expectedEvent, actualEvent);
     }
@@ -194,6 +199,90 @@ class RepoEventMapperTest
 
         // then
         assertThrows(ValidationException.class, () -> repoEventMapper.mapToDeleteNodeCommand(event));
+    }
+
+    @Test
+    void shouldNoticeContentDeleted_whenContentRemoved()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_UPDATED);
+        DataAttributes<NodeResource> data = mockData(event);
+
+        // Content used to be present.
+        NodeResource nodeResourceBefore = mock();
+        given(nodeResourceBefore.getContent()).willReturn(new ContentInfo(null, 123L, null));
+        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
+        // Content now has zero bytes.
+        NodeResource nodeResource = mock();
+        given(nodeResource.getId()).willReturn(NODE_ID);
+        given(nodeResource.getContent()).willReturn(new ContentInfo(null, 0L, null));
+        given(data.getResource()).willReturn(nodeResource);
+
+        PropertyDelta regularPropertyDelta = mock();
+        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
+
+        // when
+        IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
+
+        // then
+        assertTrue(ingestMetadataCommand.contentRemoved(), "Expected content removed flag to be set");
+    }
+
+    @Test
+    void shouldNotSayContentDeleted_whenContentMissingBeforeAndAfter()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_UPDATED);
+        DataAttributes<NodeResource> data = mockData(event);
+
+        // Content used to have zero bytes.
+        NodeResource nodeResourceBefore = mock();
+        given(nodeResourceBefore.getContent()).willReturn(new ContentInfo(null, 0L, null));
+        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
+        // Content now has zero bytes.
+        NodeResource nodeResource = mock();
+        given(nodeResource.getId()).willReturn(NODE_ID);
+        given(nodeResource.getContent()).willReturn(new ContentInfo(null, 0L, null));
+        given(data.getResource()).willReturn(nodeResource);
+
+        PropertyDelta regularPropertyDelta = mock();
+        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
+
+        // when
+        IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
+
+        // then
+        assertFalse(ingestMetadataCommand.contentRemoved(), "Expected content removed flag not to be set");
+    }
+
+    @Test
+    void shouldNotSayContentDeleted_whenContentUpdated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_UPDATED);
+        DataAttributes<NodeResource> data = mockData(event);
+
+        // Content used to have 123 bytes.
+        NodeResource nodeResourceBefore = mock();
+        given(nodeResourceBefore.getContent()).willReturn(new ContentInfo(null, 123L, null));
+        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
+        // Content now has 456 bytes.
+        NodeResource nodeResource = mock();
+        given(nodeResource.getId()).willReturn(NODE_ID);
+        given(nodeResource.getContent()).willReturn(new ContentInfo(null, 456L, null));
+        given(data.getResource()).willReturn(nodeResource);
+
+        PropertyDelta regularPropertyDelta = mock();
+        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
+
+        // when
+        IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
+
+        // then
+        assertFalse(ingestMetadataCommand.contentRemoved(), "Expected content removed flag not to be set");
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)

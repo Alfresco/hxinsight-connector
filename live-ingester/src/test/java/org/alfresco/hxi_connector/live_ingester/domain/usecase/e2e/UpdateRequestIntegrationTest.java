@@ -411,4 +411,50 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         return repoEvent.formatted(properties, propertiesBefore);
     }
+
+    @Test
+    void testRemovingContentFromNode()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "ae5dac3c-25d0-438d-b148-2084d1ab05a6",
+                  "data": {
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                      "name": "purchase-order-scan.pdf",
+                      "content": {
+                        "sizeInBytes": 0
+                      },
+                      "properties": {
+                        "cm:title": "Purchase Order"
+                      }
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      }
+                    }
+                  }
+                }""";
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update",
+                  "removedProperties" : [ "cm:content" ]
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
 }

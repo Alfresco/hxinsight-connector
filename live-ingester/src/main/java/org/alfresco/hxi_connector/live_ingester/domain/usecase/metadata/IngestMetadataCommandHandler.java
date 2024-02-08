@@ -50,6 +50,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 @RequiredArgsConstructor
 public class IngestMetadataCommandHandler
 {
+    private static final String CONTENT_PROPERTY = "cm:content";
+
     private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
     private final List<CustomPropertyResolver<?>> customPropertyResolvers;
 
@@ -69,6 +71,12 @@ public class IngestMetadataCommandHandler
                 .map(this::resolve)
                 .flatMap(Optional::stream)
                 .forEach(customPropertyDelta -> customPropertyDelta.applyOn(updateMetadataEvent));
+
+        // The only time cm:content is mentioned in the Hx Insight metadata event is if it is being removed.
+        if (command.contentRemoved())
+        {
+            updateMetadataEvent.unset(CONTENT_PROPERTY);
+        }
 
         ingestionEngineEventPublisher.publishMessage(updateMetadataEvent);
     }

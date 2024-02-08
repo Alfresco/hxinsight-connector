@@ -34,6 +34,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
 import java.time.ZonedDateTime;
+import java.util.Optional;
 import java.util.function.Function;
 
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ma
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -75,7 +77,8 @@ public class RepoEventMapper
                 propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getModifiedByUser)),
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getAspectNames),
                 propertiesMapper.calculatePropertyDelta(event, node -> toMilliseconds(node.getCreatedAt())),
-                propertiesMapper.calculateCustomPropertiesDelta(event));
+                propertiesMapper.calculateCustomPropertiesDelta(event),
+                isContentRemoved(event));
     }
 
     public DeleteNodeCommand mapToDeleteNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)
@@ -95,5 +98,28 @@ public class RepoEventMapper
                 .map(userInfoGetter)
                 .map(UserInfo::getId)
                 .orElse(null);
+    }
+
+    private boolean isContentRemoved(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        Optional<Long> oldSizeOptional = sizeOfContent(event.getData().getResourceBefore());
+        if (oldSizeOptional.isEmpty())
+        {
+            // Content wasn't updated.
+            return false;
+        }
+        long oldSize = oldSizeOptional.get();
+        long newSize = sizeOfContent(event.getData().getResource()).orElse(0L);
+        return newSize == 0 && oldSize != 0;
+    }
+
+    /**
+     * Find the specified content size in bytes, or an empty Optional if it is not mentioned.
+     */
+    private Optional<Long> sizeOfContent(NodeResource nodeResource)
+    {
+        return ofNullable(nodeResource)
+                .map(NodeResource::getContent)
+                .map(ContentInfo::getSizeInBytes);
     }
 }

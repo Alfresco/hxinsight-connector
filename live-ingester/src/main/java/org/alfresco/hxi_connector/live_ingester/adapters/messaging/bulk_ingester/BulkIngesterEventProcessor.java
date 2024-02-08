@@ -61,7 +61,8 @@ public class BulkIngesterEventProcessor
                 PropertyDelta.updated(event.modifierId()),
                 PropertyDelta.updated(event.aspectNames()),
                 PropertyDelta.updated(event.createdAt()),
-                mapToCustomPropertiesDelta(event.customProperties()));
+                mapToCustomPropertiesDelta(event.customProperties()),
+                false);
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);
 
