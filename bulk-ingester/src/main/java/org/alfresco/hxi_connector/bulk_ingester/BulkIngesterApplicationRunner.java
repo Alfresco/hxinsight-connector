@@ -23,24 +23,26 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+
 package org.alfresco.hxi_connector.bulk_ingester;
 
-import org.alfresco.elasticsearch.db.connector.config.DatabaseConfig;
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import lombok.RequiredArgsConstructor;
+import org.alfresco.hxi_connector.bulk_ingester.processor.BulkIngestionProcessor;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Profile;
+import org.springframework.stereotype.Component;
 
-@SpringBootApplication
-@ImportAutoConfiguration(DatabaseConfig.class)
-@ConfigurationPropertiesScan
-@SuppressWarnings("PMD.UseUtilityClass")
-public class BulkIngesterApplication
+@Component
+@Profile("!test")
+@RequiredArgsConstructor
+public class BulkIngesterApplicationRunner implements ApplicationRunner
 {
 
-    public static void main(String[] args)
+    private final BulkIngestionProcessor bulkIngestionProcessor;
+    @Override
+    public void run(ApplicationArguments args)
     {
-        SpringApplication.run(BulkIngesterApplication.class, args);
+        bulkIngestionProcessor.process();
     }
-
 }
