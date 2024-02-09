@@ -74,12 +74,12 @@ public class E2ETestBase
     private static final int ACTIVE_MQ_PORT = 61616;
     private static String hxInsightUrl;
     private static String brokerUrl;
-    protected ContainerSupport containerSupport;
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
     private static final String LOCALSTACK_TAG = DockerTags.getOrDefault("localstack.tag", "3.0.2");
     public static final String BUCKET_NAME = "test-hxinsight-bucket";
-    public static WireMock hxInsightMock;
-    public static WireMock sfsMock;
+    private static WireMock hxInsightMock;
+    private static WireMock sfsMock;
+    protected ContainerSupport containerSupport;
 
     @Autowired
     private LocalStorageClient localStorageClient;
@@ -108,12 +108,22 @@ public class E2ETestBase
                 .withExposedPorts(ACTIVE_MQ_PORT, 8161, 5672, 61613);
     }
 
+    @SneakyThrows
+    public static WireMock getHxInsightMock()
+    {
+        return hxInsightMock = new WireMock(hxInsight.getHost(), hxInsight.getPort());
+
+    }
+
+    @SneakyThrows
+    public static WireMock getSfsMock()
+    {
+        return sfsMock = new WireMock(sfs.getHost(), sfs.getPort());
+    }
+
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-
-        hxInsightMock = new WireMock(hxInsight.getHost(), hxInsight.getPort());
-        sfsMock = new WireMock(sfs.getHost(), sfs.getPort());
 
         hxInsightUrl = hxInsight.getBaseUrl();
         registry.add("hyland-experience.insight.base-url", () -> hxInsightUrl);

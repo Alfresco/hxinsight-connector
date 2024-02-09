@@ -185,7 +185,7 @@ public class ContainerSupport
     public void prepareSFSToReturnFile(String targetReference, String expectedFile)
     {
 
-        WireMock.configureFor(sfsMock);
+        WireMock.configureFor(getSfsMock());
 
         @Cleanup
         InputStream fileInputStream = Files.newInputStream(Paths.get("src/test/resources/" + expectedFile));
@@ -197,17 +197,17 @@ public class ContainerSupport
                         .withBody(fileBytes)
                         .withHeader("Content-Type", "application/pdf")));
 
-        WireMock.configureFor(hxInsightMock);
+        WireMock.configureFor(getHxInsightMock());
     }
 
     @SneakyThrows
     public void expectSFSMessageReceived(String targetReference)
     {
-        WireMock.configureFor(sfsMock);
+        WireMock.configureFor(getSfsMock());
 
         retryWithBackoff(() -> WireMock.verify(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
 
-        WireMock.configureFor(hxInsightMock);
+        WireMock.configureFor(getHxInsightMock());
     }
 
     @SneakyThrows
