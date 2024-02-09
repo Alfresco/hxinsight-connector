@@ -85,6 +85,10 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install
+      - name: "Dump all Docker containers logs"
+        uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@v1.41.0
+        if: failure() && steps.tests.outcome == 'failure'
+
 
   push_docker_images:
     name: "Push docker images"
