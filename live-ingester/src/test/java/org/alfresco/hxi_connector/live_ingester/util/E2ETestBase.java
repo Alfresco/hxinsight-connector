@@ -92,7 +92,7 @@ public class E2ETestBase
     private static GenericContainer<?> activemq = createAMQContainer();
 
     @Container
-
+    @SuppressWarnings("PMD.FieldNamingConventions")
     private static final WireMockContainer sfs = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG)).withEnv("WIREMOCK_OPTIONS", "--verbose");
 
     @Container

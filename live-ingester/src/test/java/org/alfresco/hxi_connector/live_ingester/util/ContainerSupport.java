@@ -70,7 +70,7 @@ public class ContainerSupport
     public static final String REQUEST_ID_PLACEHOLDER = "_REQUEST_ID_";
     private static ContainerSupport instance;
     public static final String ATS_RESPONSE_QUEUE = "ats.response.queue";
-    public static final String SFS_ENDPOINT = "/alfresco/api/-default-/private/sfs/versions/1/file/e71dd823-82c7-477c-8490-04cb0e826e66";
+    public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
     private static final int OK_SUCCESS_CODE = 200;
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
     private static final String HX_INSIGHT_LOCATION_PATH = "/ingestion-base-path";
@@ -182,7 +182,7 @@ public class ContainerSupport
     }
 
     @SneakyThrows
-    public void prepareSFSToReturnSuccess(String expectedFile)
+    public void prepareSFSToReturnFile(String targetReference, String expectedFile)
     {
 
         WireMock.configureFor(sfsMock);
@@ -191,7 +191,7 @@ public class ContainerSupport
         InputStream fileInputStream = Files.newInputStream(Paths.get("src/test/resources/" + expectedFile));
         byte[] fileBytes = fileInputStream.readAllBytes();
 
-        givenThat(get(SFS_ENDPOINT)
+        givenThat(get(SFS_PATH + targetReference)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)
                         .withBody(fileBytes)
@@ -201,17 +201,17 @@ public class ContainerSupport
     }
 
     @SneakyThrows
-    public void expectSFSMessageReceived()
+    public void expectSFSMessageReceived(String targetReference)
     {
         WireMock.configureFor(sfsMock);
 
-        retryWithBackoff(() -> WireMock.verify(getRequestedFor(urlPathEqualTo(SFS_ENDPOINT))));
+        retryWithBackoff(() -> WireMock.verify(getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
 
         WireMock.configureFor(hxInsightMock);
     }
 
     @SneakyThrows
-    public void prepareHxIToReturnSuccessWithStorageLocation()
+    public void prepareHxIToReturnStorageLocation()
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);

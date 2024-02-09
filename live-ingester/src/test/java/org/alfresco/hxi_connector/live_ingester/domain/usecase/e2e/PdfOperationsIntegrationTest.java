@@ -37,8 +37,8 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
     {
 
         // given
-        containerSupport.prepareSFSToReturnSuccess("test-file.pdf");
-        containerSupport.prepareHxIToReturnSuccessWithStorageLocation();
+        containerSupport.prepareSFSToReturnFile("e71dd823-82c7-477c-8490-04cb0e826e66","test-file.pdf");
+        containerSupport.prepareHxIToReturnStorageLocation();
         containerSupport.prepareHxIToReturnSuccessAfterReceivingFileLocation();
 
         // when
@@ -49,7 +49,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
         containerSupport.raiseTransformationCompletedATSEvent(atsBody);
 
         // then
-        containerSupport.expectSFSMessageReceived();
+        containerSupport.expectSFSMessageReceived("e71dd823-82c7-477c-8490-04cb0e826e66");
 
         String preSignedUrlBody = """
                 {
