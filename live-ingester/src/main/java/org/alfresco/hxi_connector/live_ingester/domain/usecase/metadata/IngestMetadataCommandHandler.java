@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
@@ -40,10 +38,10 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @Component
@@ -55,7 +53,7 @@ public class IngestMetadataCommandHandler
 
     public void handle(IngestMetadataCommand command)
     {
-        EventType eventType = command.isUpdate() ? UPDATE : CREATE;
+        EventType eventType = command.eventType();
         UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId(), eventType);
 
         command.nodeType().applyAs(TYPE, updateMetadataEvent);

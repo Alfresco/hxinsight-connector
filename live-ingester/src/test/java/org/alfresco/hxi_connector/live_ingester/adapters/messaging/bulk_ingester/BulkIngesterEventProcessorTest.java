@@ -30,6 +30,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -90,7 +92,7 @@ class BulkIngesterEventProcessorTest
         // then
         IngestMetadataCommand expectedCommand = new IngestMetadataCommand(
                 NODE_ID,
-                false,
+                CREATE,
                 PropertyDelta.updated(NODE_TYPE),
                 PropertyDelta.updated(CREATOR_ID),
                 PropertyDelta.updated(MODIFIER_ID),

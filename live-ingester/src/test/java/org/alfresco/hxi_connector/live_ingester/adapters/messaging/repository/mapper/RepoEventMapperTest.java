@@ -35,6 +35,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -63,7 +64,6 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 class RepoEventMapperTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
-    private static final boolean EVENT_IS_CREATE = false;
 
     @Mock
     PropertiesMapper propertiesMapper;
@@ -123,7 +123,7 @@ class RepoEventMapperTest
         // then
         IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
                 NODE_ID,
-                EVENT_IS_CREATE,
+                CREATE,
                 regularPropertyDelta,
                 regularPropertyDelta,
                 regularPropertyDelta,
