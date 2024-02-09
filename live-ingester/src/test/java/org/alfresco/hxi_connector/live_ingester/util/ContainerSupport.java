@@ -205,7 +205,7 @@ public class ContainerSupport
     {
         WireMock.configureFor(sfsMock);
 
-        retryWithBackoff(() -> WireMock.verify(getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
+        retryWithBackoff(() -> WireMock.verify(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
 
         WireMock.configureFor(hxInsightMock);
     }
