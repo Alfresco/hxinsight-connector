@@ -61,19 +61,19 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
 
         containerSupport.expectFileUploadedToS3("test-file.pdf");
 
-//        this should be uncommented after feature implementation of ACS-6381
+        // this should be uncommented after feature implementation of ACS-6381
 
-//        String hxiBody = """
-//                {
-//                   "objectId" : "e71dd823-82c7-477c-8490-04cb0e826e66",
-//                   "eventType" : "update",
-//                   "properties" : {
-//                      "file:content": {
-//                        "path": "/ingestion-base-path/test-file.pdf"
-//                        }
-//                    }
-//                 }""";
-//        containerSupport.expectHxIMessageWithFileLocationReceived(hxiBody);
+        // String hxiBody = """
+        // {
+        // "objectId" : "e71dd823-82c7-477c-8490-04cb0e826e66",
+        // "eventType" : "update",
+        // "properties" : {
+        // "file:content": {
+        // "path": "/ingestion-base-path/test-file.pdf"
+        // }
+        // }
+        // }""";
+        // containerSupport.expectHxIMessageWithFileLocationReceived(hxiBody);
 
     }
 }
