@@ -67,12 +67,7 @@ public class ContainerSupport
     public static final String ATS_QUEUE = "ats.queue";
     public static final String REQUEST_ID_PLACEHOLDER = "_REQUEST_ID_";
     private static ContainerSupport instance;
-    private Session session;
-    private MessageProducer repoEventProducer;
-    private MessageConsumer atsConsumer;
-
     public static final String ATS_RESPONSE_QUEUE = "ats.response.queue";
-    private MessageProducer atsEventProducer;
     public static final String SFS_ENDPOINT = "/alfresco/api/-default-/private/sfs/versions/1/file/e71dd823-82c7-477c-8490-04cb0e826e66";
     private static final int OK_SUCCESS_CODE = 200;
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
@@ -81,11 +76,15 @@ public class ContainerSupport
     static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
     private static final String OBJECT_KEY = "dummy-file.pdf";
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";
-    LocalStorageClient s3StorageMock;
+    private Session session;
+    private MessageProducer repoEventProducer;
+    private MessageConsumer atsConsumer;
+    private MessageProducer atsEventProducer;
+    private LocalStorageClient localStorageClient;
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
-    private ContainerSupport(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient s3StorageMock)
+    private ContainerSupport(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient localStorageClient)
     {
         WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
 
@@ -103,14 +102,14 @@ public class ContainerSupport
         Queue atsResponseQueue = session.createQueue(ATS_RESPONSE_QUEUE);
         atsEventProducer = session.createProducer(atsResponseQueue);
 
-        this.s3StorageMock = s3StorageMock;
+        this.localStorageClient = localStorageClient;
     }
 
-    public static ContainerSupport getInstance(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient s3StorageMock)
+    public static ContainerSupport getInstance(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient localStorageClient)
     {
         if (instance == null)
         {
-            instance = new ContainerSupport(hxInsight, brokerUrl, s3StorageMock);
+            instance = new ContainerSupport(hxInsight, brokerUrl, localStorageClient);
         }
         return instance;
     }
@@ -175,19 +174,19 @@ public class ContainerSupport
     }
 
     @SneakyThrows
-    public void raiseATSEvent(String atsEvent)
+    public void raiseTransformationCompletedATSEvent(String atsEvent)
     {
         atsEventProducer.send(session.createTextMessage(atsEvent));
     }
 
     @SneakyThrows
-    public void prepareSFSToReturnSuccess()
+    public void prepareSFSToReturnSuccess(String expectedFile)
     {
 
         WireMock.configureFor(sfsMock);
 
         @Cleanup
-        InputStream fileInputStream = new FileInputStream("src/test/resources/test-file.pdf");
+        InputStream fileInputStream = new FileInputStream("src/test/resources/" + expectedFile);
         byte[] fileBytes = fileInputStream.readAllBytes();
 
         givenThat(get(SFS_ENDPOINT)
@@ -212,7 +211,7 @@ public class ContainerSupport
     @SneakyThrows
     public void prepareHxIToReturnSuccessWithStorageLocation()
     {
-        URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
+        URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
@@ -229,13 +228,13 @@ public class ContainerSupport
     }
 
     @SneakyThrows
-    public void expectFileUploadedToS3(String expectedFilePath)
+    public void expectFileUploadedToS3(String expectedFile)
     {
 
-        List<String> actualBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
+        List<String> actualBucketContent = localStorageClient.listBucketContent(BUCKET_NAME);
         @Cleanup
-        InputStream expectedInputStream = new FileInputStream(expectedFilePath);
-        InputStream bucketFileInputStream = s3StorageMock.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
+        InputStream expectedInputStream = new FileInputStream("src/test/resources/" + expectedFile);
+        InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
         assertThat(actualBucketContent).contains(OBJECT_KEY);
         assertTrue(IOUtils.contentEquals(expectedInputStream, bucketFileInputStream));

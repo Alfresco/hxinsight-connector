@@ -82,7 +82,7 @@ public class E2ETestBase
     public static WireMock sfsMock;
 
     @Autowired
-    LocalStorageClient s3StorageMock;
+    private LocalStorageClient localStorageClient;
 
     @Container
     public static WireMockContainer hxInsight = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
@@ -147,7 +147,7 @@ public class E2ETestBase
     @SneakyThrows
     public void setUp()
     {
-        containerSupport = ContainerSupport.getInstance(hxInsight, brokerUrl, s3StorageMock);
+        containerSupport = ContainerSupport.getInstance(hxInsight, brokerUrl, localStorageClient);
     }
 
     @AfterEach

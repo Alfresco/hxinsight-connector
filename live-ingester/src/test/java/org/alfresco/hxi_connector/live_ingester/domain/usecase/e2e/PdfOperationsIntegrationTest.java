@@ -39,7 +39,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
     {
 
         // given
-        containerSupport.prepareSFSToReturnSuccess();
+        containerSupport.prepareSFSToReturnSuccess("test-file.pdf");
         containerSupport.prepareHxIToReturnSuccessWithStorageLocation();
         containerSupport.prepareHxIToReturnSuccessAfterReceivingFileLocation();
 
@@ -48,7 +48,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
                 {
                     "targetReference": "e71dd823-82c7-477c-8490-04cb0e826e66"
                 }""";
-        containerSupport.raiseATSEvent(atsBody);
+        containerSupport.raiseTransformationCompletedATSEvent(atsBody);
 
         // then
         containerSupport.expectSFSMessageReceived();
@@ -61,12 +61,12 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
                  }""";
         containerSupport.expectHxIStorageLocationMessageReceived(preSignedUrlBody);
 
-        containerSupport.expectFileUploadedToS3("src/test/resources/test-file.pdf");
+        containerSupport.expectFileUploadedToS3("test-file.pdf");
 
         String hxiBody = """
                 {
                    "objectId" : "e71dd823-82c7-477c-8490-04cb0e826e66",
-                   "eventType" : "create",
+                   "eventType" : "update",
                    "properties" : {
                       "file:content": {
                         "path": "/ingestion-base-path/test-file.pdf"
