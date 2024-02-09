@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
 import org.junit.jupiter.api.Test;
 

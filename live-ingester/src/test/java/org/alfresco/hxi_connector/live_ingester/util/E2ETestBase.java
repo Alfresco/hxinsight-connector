@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.util;
 import static lombok.AccessLevel.PROTECTED;
 
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_QUEUE;
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.BULK_INGESTER_QUEUE;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REPO_EVENT_TOPIC;
 
 import java.time.Duration;
@@ -93,6 +94,8 @@ public class E2ETestBase
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
         registry.add("alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
+
+        registry.add("alfresco.bulk-ingester.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
 
         registry.add("alfresco.transform.request.endpoint", () -> "activemq:queue:" + ATS_QUEUE + "?jmsMessageType=Text");
     }
