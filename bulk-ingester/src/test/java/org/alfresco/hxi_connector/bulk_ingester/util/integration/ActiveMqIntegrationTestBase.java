@@ -24,10 +24,11 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.util;
+package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
 import java.time.Duration;
 
+import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -49,7 +50,7 @@ public class ActiveMqIntegrationTestBase
     @Container
     private static final GenericContainer<?> ACTIVEMQ = createAMQContainer();
 
-    public static GenericContainer<?> createAMQContainer()
+    private static GenericContainer<?> createAMQContainer()
     {
         return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
@@ -59,7 +60,7 @@ public class ActiveMqIntegrationTestBase
     }
 
     @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry)
+    private static void configureProperties(DynamicPropertyRegistry registry)
     {
         registry.add("spring.activemq.broker-url", () -> "tcp://localhost:" + ACTIVEMQ.getMappedPort(ACTIVE_MQ_PORT));
         registry.add("alfresco.bulk.ingest.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
