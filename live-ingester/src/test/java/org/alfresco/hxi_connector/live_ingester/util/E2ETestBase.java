@@ -85,19 +85,19 @@ public class E2ETestBase
     private LocalStorageClient localStorageClient;
 
     @Container
-    public static WireMockContainer hxInsight = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+    private static WireMockContainer hxInsight = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
             .withEnv("WIREMOCK_OPTIONS", "--verbose");
 
     @Container
     private static GenericContainer<?> activemq = createAMQContainer();
 
     @Container
-    @SuppressWarnings("PMD.FieldNamingConventions")
-    public static final WireMockContainer sfs = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG)).withEnv("WIREMOCK_OPTIONS", "--verbose");
+
+    private static final WireMockContainer sfs = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG)).withEnv("WIREMOCK_OPTIONS", "--verbose");
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    public static final LocalStackContainer localStackServer = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
+    private static final LocalStackContainer localStackServer = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
 
     public static GenericContainer<?> createAMQContainer()
     {

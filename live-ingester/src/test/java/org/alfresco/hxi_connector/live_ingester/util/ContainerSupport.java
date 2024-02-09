@@ -34,6 +34,8 @@ import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWith
 
 import java.io.*;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,7 +188,7 @@ public class ContainerSupport
         WireMock.configureFor(sfsMock);
 
         @Cleanup
-        InputStream fileInputStream = new FileInputStream("src/test/resources/" + expectedFile);
+        InputStream fileInputStream = Files.newInputStream(Paths.get("src/test/resources/" + expectedFile));
         byte[] fileBytes = fileInputStream.readAllBytes();
 
         givenThat(get(SFS_ENDPOINT)
@@ -233,7 +235,7 @@ public class ContainerSupport
 
         List<String> actualBucketContent = localStorageClient.listBucketContent(BUCKET_NAME);
         @Cleanup
-        InputStream expectedInputStream = new FileInputStream("src/test/resources/" + expectedFile);
+        InputStream expectedInputStream = Files.newInputStream(Paths.get("src/test/resources/" + expectedFile));
         InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
         assertThat(actualBucketContent).contains(OBJECT_KEY);
