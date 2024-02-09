@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
-import org.junit.Ignore;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
@@ -33,7 +32,6 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 public class PdfOperationsIntegrationTest extends E2ETestBase
 {
 
-    @Ignore
     @Test
     void testPdFOperations()
     {
@@ -63,17 +61,19 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
 
         containerSupport.expectFileUploadedToS3("test-file.pdf");
 
-        String hxiBody = """
-                {
-                   "objectId" : "e71dd823-82c7-477c-8490-04cb0e826e66",
-                   "eventType" : "update",
-                   "properties" : {
-                      "file:content": {
-                        "path": "/ingestion-base-path/test-file.pdf"
-                        }
-                    }
-                 }""";
-        containerSupport.expectHxIMessageWithFileLocationReceived(hxiBody);
+//        this should be uncommented after feature implementation of ACS-6381
+
+//        String hxiBody = """
+//                {
+//                   "objectId" : "e71dd823-82c7-477c-8490-04cb0e826e66",
+//                   "eventType" : "update",
+//                   "properties" : {
+//                      "file:content": {
+//                        "path": "/ingestion-base-path/test-file.pdf"
+//                        }
+//                    }
+//                 }""";
+//        containerSupport.expectHxIMessageWithFileLocationReceived(hxiBody);
 
     }
 }
