@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.p
 
 import java.util.Optional;
 
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
@@ -34,6 +35,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Cu
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class CustomPropertyUnchanged<T> extends CustomPropertyDelta<T>
 {
     public CustomPropertyUnchanged(String propertyName)
