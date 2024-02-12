@@ -52,6 +52,7 @@ public class PropertyMappingHelper
     public static final String TYPE_PROPERTY = "type";
     public static final String CREATED_BY_PROPERTY = "createdBy";
     public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
+    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
     public static final String CREATED_AT_PROPERTY = "createdAt";
 
     public static <T> Stream<CustomPropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
@@ -94,6 +95,11 @@ public class PropertyMappingHelper
                 .map(userInfoGetter)
                 .map(UserInfo::getId)
                 .orElse(null);
+    }
+
+    public static Stream<CustomPropertyDelta<?>> calculateAspectsDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return calculatePropertyDelta(event, ASPECT_NAMES_PROPERTY, NodeResource::getAspectNames);
     }
 
     public static Stream<CustomPropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)

@@ -50,7 +50,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -58,8 +57,6 @@ class BulkIngesterEventProcessorTest
 {
     private static final String NODE_ID = "07659d13-8d64-4905-a329-6b27fe182023";
     private static final String NODE_TYPE = "cm:folder";
-    private static final String CREATOR_ID = "admin";
-    private static final String MODIFIER_ID = "hr_user";
     private static final Set<String> ASPECT_NAMES = Set.of("cm:titled");
     private static final long CREATED_AT = 1000L;
 
@@ -92,7 +89,6 @@ class BulkIngesterEventProcessorTest
         IngestMetadataCommand expectedCommand = new IngestMetadataCommand(
                 NODE_ID,
                 CREATE,
-                PropertyDelta.updated(ASPECT_NAMES),
                 Set.of(
                         CustomPropertyDelta.updated(TYPE_PROPERTY, NODE_TYPE),
                         CustomPropertyDelta.updated("cm:name", "test folder"),

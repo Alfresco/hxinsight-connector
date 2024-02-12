@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.MODIFIED_BY_PROPERTY;
@@ -86,11 +87,11 @@ class AlfrescoNodeMapperTest
 
         // then
         assertEquals(NODE_UUID, node.nodeId());
-        assertEquals(Set.of(PREFIXED_ASPECT_TITLED), node.aspectNames());
         assertNull(node.contentInfo());
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
+                ASPECT_NAMES_PROPERTY, Set.of(PREFIXED_ASPECT_TITLED),
                 CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
@@ -184,7 +185,6 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setType(QName.newTransientInstance("", TYPE_FOLDER));
         alfrescoNode.setCreator(CREATOR_ID);
         alfrescoNode.setModifier(MODIFIER_ID);
-        alfrescoNode.setAspects(Set.of(QName.newTransientInstance("", ASPECT_TITLED)));
         alfrescoNode.setCreatedAt(CREATED_AT);
         alfrescoNode.setNodeProperties(Set.of());
 

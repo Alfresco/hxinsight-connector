@@ -44,7 +44,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @Slf4j
 @Component
@@ -63,7 +62,6 @@ public class BulkIngesterEventProcessor
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
                 event.nodeId(),
                 CREATE,
-                PropertyDelta.updated(event.aspectNames()),
                 mapToCustomPropertiesDelta(customProperties));
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);

@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -53,6 +54,7 @@ public class AlfrescoNodeMapper
     public static final String CREATED_BY_PROPERTY = "createdBy";
     public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
     public static final String CREATED_AT_PROPERTY = "createdAt";
+    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
@@ -65,13 +67,17 @@ public class AlfrescoNodeMapper
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
-        Set<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toSet());
+        HashSet<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toCollection(HashSet::new));
         long createdAt = getCreatedAt(alfrescoNode);
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
         allProperties.put(TYPE_PROPERTY, type);
         allProperties.put(CREATED_BY_PROPERTY, creatorId);
         allProperties.put(MODIFIED_BY_PROPERTY, modifierId);
+        if (!aspectNames.isEmpty())
+        {
+            allProperties.put(ASPECT_NAMES_PROPERTY, aspectNames);
+        }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
         ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
@@ -80,7 +86,6 @@ public class AlfrescoNodeMapper
 
         return new Node(
                 nodeId,
-                aspectNames,
                 content,
                 customProperties);
     }
