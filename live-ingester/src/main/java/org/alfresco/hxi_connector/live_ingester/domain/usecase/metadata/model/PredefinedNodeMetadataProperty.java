@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
 import java.util.Set;
@@ -42,7 +41,6 @@ public class PredefinedNodeMetadataProperty<V>
     public static final PredefinedNodeMetadataProperty<String> CREATED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("createdByUserWithId");
     public static final PredefinedNodeMetadataProperty<String> MODIFIED_BY_USER_WITH_ID = new PredefinedNodeMetadataProperty<>("modifiedByUserWithId");
     public static final PredefinedNodeMetadataProperty<Set<String>> ASPECTS_NAMES = new PredefinedNodeMetadataProperty<>("aspectsNames");
-    public static final PredefinedNodeMetadataProperty<Long> CREATED_AT = new PredefinedNodeMetadataProperty<>(CREATED_AT_PROPERTY);
 
     private final String name;
 
