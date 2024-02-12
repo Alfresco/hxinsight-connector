@@ -30,7 +30,9 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.DeleteNodeEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeMetadataEventSerializer;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.repo.event.databind.ObjectMapperFactory;
 
@@ -51,6 +53,7 @@ public class MappingConfig
     {
         SimpleModule module = new SimpleModule();
         module.addSerializer(UpdateNodeMetadataEvent.class, new UpdateNodeMetadataEventSerializer());
+        module.addSerializer(DeleteNodeEvent.class, new DeleteNodeEventSerializer());
         objectMapper.registerModule(module);
     }
 }

@@ -23,19 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
-
-import static java.util.Locale.ENGLISH;
-
-import com.fasterxml.jackson.annotation.JsonValue;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
 public enum EventType
 {
     CREATE, UPDATE, DELETE;
-
-    @JsonValue
-    public String serialise()
-    {
-        return this.toString().toLowerCase(ENGLISH);
-    }
 }

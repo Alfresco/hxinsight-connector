@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -55,7 +57,7 @@ public class BulkIngesterEventProcessor
     {
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
                 event.nodeId(),
-                false,
+                CREATE,
                 PropertyDelta.updated(event.type()),
                 PropertyDelta.updated(event.creatorId()),
                 PropertyDelta.updated(event.modifierId()),
