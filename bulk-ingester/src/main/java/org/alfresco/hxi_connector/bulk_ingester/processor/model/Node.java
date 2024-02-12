@@ -37,6 +37,5 @@ public record Node(
         String modifierId,
         Set<String> aspectNames,
         ContentInfo contentInfo,
-        long createdAt,
-        Map<String, Serializable> customProperties)
+        Map<String, Serializable> properties)
 {}

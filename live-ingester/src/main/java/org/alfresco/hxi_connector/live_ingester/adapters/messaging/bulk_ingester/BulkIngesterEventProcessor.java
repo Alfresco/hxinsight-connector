@@ -26,10 +26,12 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -55,6 +57,12 @@ public class BulkIngesterEventProcessor
 
     public void process(BulkIngesterEvent event)
     {
+        Map<String, Serializable> properties = event.properties();
+        Long createdAt = (Long) properties.get(CREATED_AT_PROPERTY);
+        Map<String, Serializable> customProperties = properties.entrySet().stream()
+                .filter(entry -> !entry.getKey().equals(CREATED_AT_PROPERTY))
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
                 event.nodeId(),
                 CREATE,
@@ -62,8 +70,8 @@ public class BulkIngesterEventProcessor
                 PropertyDelta.updated(event.creatorId()),
                 PropertyDelta.updated(event.modifierId()),
                 PropertyDelta.updated(event.aspectNames()),
-                PropertyDelta.updated(event.createdAt()),
-                mapToCustomPropertiesDelta(event.customProperties()));
+                PropertyDelta.updated(createdAt),
+                mapToCustomPropertiesDelta(customProperties));
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);
 

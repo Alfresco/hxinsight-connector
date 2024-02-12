@@ -49,6 +49,7 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 public class AlfrescoNodeMapper
 {
     public static final String CONTENT_PROPERTY = "cm:content";
+    public static final String CREATED_AT_PROPERTY = "createdAt";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
@@ -65,9 +66,11 @@ public class AlfrescoNodeMapper
         long createdAt = getCreatedAt(alfrescoNode);
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
+        allProperties.put(CREATED_AT_PROPERTY, createdAt);
+
         ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
-        Map<String, Serializable> customProperties = getCustomProperties(allProperties);
+        Map<String, Serializable> customProperties = getProperties(allProperties);
 
         return new Node(
                 nodeId,
@@ -76,7 +79,6 @@ public class AlfrescoNodeMapper
                 modifierId,
                 aspectNames,
                 content,
-                createdAt,
                 customProperties);
     }
 
@@ -100,7 +102,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<String, Serializable> getCustomProperties(Map<String, Serializable> allProperties)
+    private Map<String, Serializable> getProperties(Map<String, Serializable> allProperties)
     {
         return allProperties.entrySet()
                 .stream()
