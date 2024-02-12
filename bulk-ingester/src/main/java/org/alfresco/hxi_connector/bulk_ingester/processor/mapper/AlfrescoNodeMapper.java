@@ -61,6 +61,7 @@ public class AlfrescoNodeMapper
 
     private final NamespacePrefixMapper namespacePrefixMapper;
 
+    @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.
     public Node map(AlfrescoNode alfrescoNode)
     {
         String nodeId = alfrescoNode.getNodeRef();
