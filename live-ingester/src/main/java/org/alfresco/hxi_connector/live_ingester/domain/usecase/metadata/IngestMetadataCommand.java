@@ -42,7 +42,6 @@ public record IngestMetadataCommand(
         PropertyDelta<String> createdByUserWithId,
         PropertyDelta<String> modifiedByUserWithId,
         PropertyDelta<Set<String>> aspectNames,
-        PropertyDelta<Long> createdAt,
         Set<CustomPropertyDelta<?>> properties)
 {
     public IngestMetadataCommand
@@ -53,7 +52,6 @@ public record IngestMetadataCommand(
         ensureNonNull(createdByUserWithId, "Node %s created by user with nodeId delta cannot be null", nodeId);
         ensureNonNull(modifiedByUserWithId, "Node %s modified by user with nodeId delta cannot be null", nodeId);
         ensureNonNull(aspectNames, "Node %s aspect names delta cannot be null", nodeId);
-        ensureNonNull(createdAt, "Node %s created at property delta cannot be null", nodeId);
         ensureNonNull(properties, "Node %s custom properties delta cannot be null", nodeId);
     }
 }
