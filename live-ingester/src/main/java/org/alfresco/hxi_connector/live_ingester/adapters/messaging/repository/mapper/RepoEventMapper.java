@@ -36,7 +36,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
-import java.time.ZonedDateTime;
 import java.util.function.Function;
 
 import lombok.RequiredArgsConstructor;
@@ -77,7 +76,6 @@ public class RepoEventMapper
                 propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getCreatedByUser)),
                 propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getModifiedByUser)),
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getAspectNames),
-                propertiesMapper.calculatePropertyDelta(event, node -> toMilliseconds(node.getCreatedAt())),
                 propertiesMapper.calculateCustomPropertiesDelta(event));
     }
 
@@ -85,11 +83,6 @@ public class RepoEventMapper
     {
         ensureThat(isEventTypeDeleted(event), "Only delete events can be converted to delete commands");
         return new DeleteNodeCommand(event.getData().getResource().getId());
-    }
-
-    private Long toMilliseconds(ZonedDateTime time)
-    {
-        return time == null ? null : time.toInstant().toEpochMilli();
     }
 
     private String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)

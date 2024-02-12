@@ -39,9 +39,6 @@ public record BulkIngesterEvent(
         ContentInfo contentInfo,
         Map<String, Serializable> properties)
 {
-
-    public static final String CREATED_AT_PROPERTY = "createdAt";
-
     public record ContentInfo(
             long contentSize,
             String encoding,

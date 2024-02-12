@@ -30,7 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertiesMapper.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 
 import java.io.Serializable;
@@ -98,7 +98,6 @@ class BulkIngesterEventProcessorTest
                 PropertyDelta.updated(CREATOR_ID),
                 PropertyDelta.updated(MODIFIER_ID),
                 PropertyDelta.updated(ASPECT_NAMES),
-                PropertyDelta.updated(CREATED_AT),
                 Set.of(
                         CustomPropertyDelta.updated("cm:name", "test folder"),
                         CustomPropertyDelta.updated("cm:title", "test folder title")));
