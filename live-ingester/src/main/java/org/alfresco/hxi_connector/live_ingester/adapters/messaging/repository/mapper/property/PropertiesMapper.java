@@ -36,13 +36,11 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.isFieldUnchanged;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.shouldNotUpdateField;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -50,7 +48,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -59,16 +56,6 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class PropertiesMapper
 {
-    public <T> PropertyDelta<T> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, T> fieldGetter)
-    {
-        if (shouldNotUpdateField(event, fieldGetter))
-        {
-            return PropertyDelta.unchanged(fieldGetter.apply(event.getData().getResource()));
-        }
-
-        return PropertyDelta.updated(fieldGetter.apply(event.getData().getResource()));
-    }
-
     public Set<CustomPropertyDelta<?>> calculateCustomPropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         if (isEventTypeCreated(event))
