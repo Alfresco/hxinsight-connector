@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 
 import java.io.Serializable;
@@ -74,7 +75,8 @@ class BulkIngesterEventProcessorTest
         // given
         Map<String, Serializable> properties = Map.of(
                 "cm:name", "test folder",
-                "cm:title", "test folder title");
+                "cm:title", "test folder title",
+                CREATED_AT_PROPERTY, CREATED_AT);
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
@@ -83,7 +85,6 @@ class BulkIngesterEventProcessorTest
                 MODIFIER_ID,
                 ASPECT_NAMES,
                 null,
-                CREATED_AT,
                 properties);
 
         // when
@@ -123,8 +124,7 @@ class BulkIngesterEventProcessorTest
                 MODIFIER_ID,
                 ASPECT_NAMES,
                 contentInfo,
-                CREATED_AT,
-                Map.of());
+                Map.of(CREATED_AT_PROPERTY, CREATED_AT));
 
         // when
         bulkIngesterEventProcessor.process(bulkIngesterEvent);

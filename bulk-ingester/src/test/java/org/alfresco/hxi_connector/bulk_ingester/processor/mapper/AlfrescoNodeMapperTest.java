@@ -28,9 +28,10 @@ package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_AT_PROPERTY;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -57,6 +58,7 @@ class AlfrescoNodeMapperTest
     private static final String ASPECT_TITLED = "titled";
     private static final String PREFIXED_ASPECT_TITLED = "test:titled";
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2024-01-31T10:15:30+00:00");
+    private static final long CREATED_AT_TIMESTAMP = CREATED_AT.toInstant().getEpochSecond();
 
     private final AlfrescoPropertyMapper alfrescoPropertyMapper = mock();
     private final NamespacePrefixMapper namespacePrefixMapper = new TestNamespaceToPrefixMapper(TEST_PREFIX);
@@ -87,8 +89,7 @@ class AlfrescoNodeMapperTest
         assertEquals(MODIFIER_ID, node.modifierId());
         assertEquals(Set.of(PREFIXED_ASPECT_TITLED), node.aspectNames());
         assertNull(node.contentInfo());
-        assertEquals(CREATED_AT.toInstant().getEpochSecond(), node.createdAt());
-        assertEquals(Map.of(), node.customProperties());
+        assertEquals(Map.of(CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -110,7 +111,8 @@ class AlfrescoNodeMapperTest
         Node node = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertEquals(Map.of(namePropertyKey, namePropertyValue), node.customProperties());
+        assertEquals(Map.of(namePropertyKey, namePropertyValue,
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -132,7 +134,7 @@ class AlfrescoNodeMapperTest
 
         // then
         assertEquals(contentInfo, node.contentInfo());
-        assertTrue(node.customProperties().isEmpty());
+        assertEquals(Map.of(CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -149,7 +151,7 @@ class AlfrescoNodeMapperTest
         Node node = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertTrue(node.customProperties().isEmpty());
+        assertEquals(Map.of(CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     private NodeProperty mockProperty(String propertyName)

@@ -37,9 +37,11 @@ public record BulkIngesterEvent(
         String modifierId,
         Set<String> aspectNames,
         ContentInfo contentInfo,
-        long createdAt,
-        Map<String, Serializable> customProperties)
+        Map<String, Serializable> properties)
 {
+
+    public static final String CREATED_AT_PROPERTY = "createdAt";
+
     public record ContentInfo(
             long contentSize,
             String encoding,
