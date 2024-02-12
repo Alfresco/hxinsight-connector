@@ -48,32 +48,36 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class PropertyMappingHelper
 {
     public static final String NAME_PROPERTY_KEY = "cm:name";
+    public static final String TYPE_PROPERTY = "type";
     public static final String CREATED_AT_PROPERTY = "createdAt";
 
-    public static Stream<CustomPropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static <T> Stream<CustomPropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
+            String propertyKey, Function<NodeResource, T> fieldGetter)
     {
-        if (shouldNotUpdateField(event, NodeResource::getName))
+        if (shouldNotUpdateField(event, fieldGetter))
         {
             return Stream.empty();
         }
 
-        return ofNullable(event.getData().getResource().getName())
+        return ofNullable(fieldGetter.apply(event.getData().getResource()))
                 .stream()
                 .filter(Objects::nonNull)
-                .map(name -> CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
+                .map(value -> CustomPropertyDelta.updated(propertyKey, value));
+    }
+
+    public static Stream<CustomPropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return calculatePropertyDelta(event, NAME_PROPERTY_KEY, NodeResource::getName);
+    }
+
+    public static Stream<CustomPropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return calculatePropertyDelta(event, TYPE_PROPERTY, NodeResource::getNodeType);
     }
 
     public static Stream<CustomPropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (shouldNotUpdateField(event, NodeResource::getCreatedAt))
-        {
-            return Stream.empty();
-        }
-
-        return ofNullable(toMilliseconds(event.getData().getResource().getCreatedAt()))
-                .stream()
-                .filter(Objects::nonNull)
-                .map(name -> CustomPropertyDelta.updated(CREATED_AT_PROPERTY, name));
+        return calculatePropertyDelta(event, CREATED_AT_PROPERTY, nodeResource -> toMilliseconds(nodeResource.getCreatedAt()));
     }
 
     private static Long toMilliseconds(ZonedDateTime time)

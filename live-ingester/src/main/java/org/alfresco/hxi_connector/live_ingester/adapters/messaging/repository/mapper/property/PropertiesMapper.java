@@ -31,6 +31,7 @@ import static java.util.function.Function.identity;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedAtDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.isFieldUnchanged;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.shouldNotUpdateField;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
@@ -91,7 +92,10 @@ public class PropertiesMapper
 
     private Set<CustomPropertyDelta<?>> streamOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<CustomPropertyDelta<?>> propertyDeltas)
     {
-        return Stream.of(propertyDeltas, calculateNamePropertyDelta(event), calculateCreatedAtDelta(event))
+        return Stream.of(propertyDeltas,
+                calculateNamePropertyDelta(event),
+                calculateTypeDelta(event),
+                calculateCreatedAtDelta(event))
                 .flatMap(identity())
                 .collect(Collectors.toSet());
     }

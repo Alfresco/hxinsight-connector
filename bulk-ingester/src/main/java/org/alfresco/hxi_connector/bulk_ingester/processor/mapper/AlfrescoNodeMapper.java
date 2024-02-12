@@ -49,6 +49,7 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 public class AlfrescoNodeMapper
 {
     public static final String CONTENT_PROPERTY = "cm:content";
+    public static final String TYPE_PROPERTY = "type";
     public static final String CREATED_AT_PROPERTY = "createdAt";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
@@ -66,6 +67,7 @@ public class AlfrescoNodeMapper
         long createdAt = getCreatedAt(alfrescoNode);
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
+        allProperties.put(TYPE_PROPERTY, type);
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
         ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
@@ -74,7 +76,6 @@ public class AlfrescoNodeMapper
 
         return new Node(
                 nodeId,
-                type,
                 creatorId,
                 modifierId,
                 aspectNames,
