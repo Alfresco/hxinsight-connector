@@ -1,0 +1,96 @@
+/*
+ * #%L
+ * Alfresco HX Insight Connector
+ * %%
+ * Copyright (C) 2024 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
+ * provided under the following open source license terms:
+ *
+ * Alfresco is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Alfresco is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
+
+import static java.util.Optional.ofNullable;
+
+import static lombok.AccessLevel.PRIVATE;
+
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
+
+import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import lombok.NoArgsConstructor;
+
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+
+@NoArgsConstructor(access = PRIVATE)
+public class PropertyMappingHelper
+{
+    public static final String NAME_PROPERTY_KEY = "cm:name";
+    public static final String CREATED_AT_PROPERTY = "createdAt";
+
+    public static Stream<CustomPropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (shouldNotUpdateField(event, NodeResource::getName))
+        {
+            return Stream.empty();
+        }
+
+        return ofNullable(event.getData().getResource().getName())
+                .stream()
+                .filter(Objects::nonNull)
+                .map(name -> CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
+    }
+
+    public static Stream<CustomPropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (shouldNotUpdateField(event, NodeResource::getCreatedAt))
+        {
+            return Stream.empty();
+        }
+
+        return ofNullable(toMilliseconds(event.getData().getResource().getCreatedAt()))
+                .stream()
+                .filter(Objects::nonNull)
+                .map(name -> CustomPropertyDelta.updated(CREATED_AT_PROPERTY, name));
+    }
+
+    private static Long toMilliseconds(ZonedDateTime time)
+    {
+        return time == null ? null : time.toInstant().toEpochMilli();
+    }
+
+    public static boolean shouldNotUpdateField(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
+    {
+        return !isEventTypeCreated(event) && isFieldUnchanged(event, fieldGetter);
+    }
+
+    public static boolean isFieldUnchanged(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
+    {
+        return Optional.of(event.getData())
+                .map(DataAttributes::getResourceBefore)
+                .map(fieldGetter::apply)
+                .isEmpty();
+    }
+}
