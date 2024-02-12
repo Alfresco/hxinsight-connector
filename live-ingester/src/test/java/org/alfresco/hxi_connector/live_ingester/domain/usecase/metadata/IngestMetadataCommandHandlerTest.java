@@ -32,8 +32,6 @@ import static org.mockito.Mockito.verify;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
@@ -55,7 +53,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.In
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
@@ -87,8 +84,6 @@ class IngestMetadataCommandHandlerTest
         IngestMetadataCommand command = new IngestMetadataCommand(
                 NODE_ID,
                 CREATE,
-                updated(NODE_CREATED_BY_USER_WITH_ID),
-                updated(NODE_MODIFIED_BY_USER_WITH_ID),
                 updated(NODE_ASPECT_NAMES),
                 NODE_PROPERTIES.stream()
                         .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
@@ -99,8 +94,6 @@ class IngestMetadataCommandHandlerTest
 
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-                CREATED_BY_USER_WITH_ID.withValue(NODE_CREATED_BY_USER_WITH_ID),
-                MODIFIED_BY_USER_WITH_ID.withValue(NODE_MODIFIED_BY_USER_WITH_ID),
                 ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
                 NODE_TITLE);
 
@@ -110,38 +103,5 @@ class IngestMetadataCommandHandlerTest
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
         assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
         assertEquals(updateNodeMetadataEvent.getEventType(), CREATE);
-    }
-
-    /** Test that we handle null created by/updated by, which happens for example with log in events. */
-    @Test
-    void canSupportEventsWithNullUsers()
-    {
-        // given
-        PropertyDelta<String> nullUser = updated(null);
-        IngestMetadataCommand command = new IngestMetadataCommand(
-                NODE_ID,
-                CREATE,
-                nullUser, // Missing created by
-                nullUser, // Missing updated by
-                updated(NODE_ASPECT_NAMES),
-                NODE_PROPERTIES.stream()
-                        .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
-                        .collect(Collectors.toSet()));
-
-        // when
-        ingestMetadataCommandHandler.handle(command);
-
-        // then
-        Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-                CREATED_BY_USER_WITH_ID.withValue(null),
-                MODIFIED_BY_USER_WITH_ID.withValue(null),
-                ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
-                NODE_TITLE);
-
-        verify(ingestionEngineEventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
-
-        assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
-        assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
     }
 }

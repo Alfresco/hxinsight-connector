@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
-import static java.util.Optional.ofNullable;
-
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.getEventType;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeDeleted;
@@ -35,8 +33,6 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
-
-import java.util.function.Function;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -49,7 +45,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.alfresco.repo.event.v1.model.UserInfo;
 
 @Component
 @RequiredArgsConstructor
@@ -72,8 +67,6 @@ public class RepoEventMapper
         return new IngestMetadataCommand(
                 event.getData().getResource().getId(),
                 eventType,
-                propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getCreatedByUser)),
-                propertiesMapper.calculatePropertyDelta(event, node -> getUserId(node, NodeResource::getModifiedByUser)),
                 propertiesMapper.calculatePropertyDelta(event, NodeResource::getAspectNames),
                 propertiesMapper.calculateCustomPropertiesDelta(event));
     }
@@ -82,13 +75,5 @@ public class RepoEventMapper
     {
         ensureThat(isEventTypeDeleted(event), "Only delete events can be converted to delete commands");
         return new DeleteNodeCommand(event.getData().getResource().getId());
-    }
-
-    private String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)
-    {
-        return ofNullable(node)
-                .map(userInfoGetter)
-                .map(UserInfo::getId)
-                .orElse(null);
     }
 }

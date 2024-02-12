@@ -125,8 +125,6 @@ class RepoEventMapperTest
                 NODE_ID,
                 CREATE,
                 regularPropertyDelta,
-                regularPropertyDelta,
-                regularPropertyDelta,
                 Collections.emptySet());
 
         assertEquals(expectedEvent, actualEvent);

@@ -29,10 +29,10 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -69,7 +69,7 @@ class UpdateNodeMetadataEventSerializerTest
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
                 .set(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
-                .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
+                .set(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
 
         String expectedJson = """
                 {
@@ -77,7 +77,7 @@ class UpdateNodeMetadataEventSerializerTest
                   "eventType": "create",
                   "properties": {
                     "createdAt": 10000,
-                    "modifiedByUserWithId": "000-000-000"
+                    "modifiedBy": "000-000-000"
                   }
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
@@ -90,13 +90,13 @@ class UpdateNodeMetadataEventSerializerTest
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, UPDATE)
                 .unset(CREATED_AT_PROPERTY)
-                .unset(MODIFIED_BY_USER_WITH_ID.getName());
+                .unset(MODIFIED_BY_PROPERTY);
 
         String expectedJson = """
                 {
                   "objectId": "%s",
                   "eventType": "update",
-                  "removedProperties": [ "createdAt", "modifiedByUserWithId" ]
+                  "removedProperties": [ "createdAt", "modifiedBy" ]
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
@@ -107,16 +107,16 @@ class UpdateNodeMetadataEventSerializerTest
     public void canCopeWithNullUsers()
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
-                .set(CREATED_BY_USER_WITH_ID.withValue(null))
-                .set(MODIFIED_BY_USER_WITH_ID.withValue(null));
+                .set(new NodeProperty<>(CREATED_BY_PROPERTY, null))
+                .set(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
 
         String expectedJson = """
                 {
                   "objectId": "%s",
                   "eventType": "create",
                   "properties": {
-                    "createdByUserWithId": null,
-                    "modifiedByUserWithId": null
+                    "createdBy": null,
+                    "modifiedBy": null
                   }
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);

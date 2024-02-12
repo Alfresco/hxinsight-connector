@@ -68,8 +68,6 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
         // given
         Node node = new Node(
                 "66326096-3bd6-412e-abbe-a07fbabf2fcc",
-                "admin",
-                "admin",
                 Set.of("ownable", "taggable"),
                 new ContentInfo(1000, "UTF-8", "application/pdf"),
                 Map.of(TYPE_PROPERTY, "file",
@@ -83,8 +81,6 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
         String expectedEvent = """
                 {
                   "nodeId" : "66326096-3bd6-412e-abbe-a07fbabf2fcc",
-                  "creatorId" : "admin",
-                  "modifierId" : "admin",
                   "aspectNames" : [ "ownable", "taggable" ],
                   "contentInfo" : {
                     "contentSize" : 1000,

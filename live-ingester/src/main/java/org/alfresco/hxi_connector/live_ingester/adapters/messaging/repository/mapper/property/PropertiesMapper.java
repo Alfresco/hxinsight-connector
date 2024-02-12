@@ -30,6 +30,8 @@ import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedAtDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedByDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateModifiedByDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.isFieldUnchanged;
@@ -95,6 +97,8 @@ public class PropertiesMapper
         return Stream.of(propertyDeltas,
                 calculateNamePropertyDelta(event),
                 calculateTypeDelta(event),
+                calculateCreatedByDelta(event),
+                calculateModifiedByDelta(event),
                 calculateCreatedAtDelta(event))
                 .flatMap(identity())
                 .collect(Collectors.toSet());
