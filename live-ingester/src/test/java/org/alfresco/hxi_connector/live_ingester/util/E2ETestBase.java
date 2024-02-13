@@ -35,6 +35,7 @@ import java.time.Duration;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -56,6 +57,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageConfig;
 
+@Slf4j
 @SpringBootTest(properties = {
         "logging.level.org.alfresco=DEBUG"
 }, classes = {
@@ -170,5 +172,14 @@ public class E2ETestBase
     public static void tearDown()
     {
         ContainerSupport.removeInstance();
+    }
+
+    @AfterEach
+    public void testcontainersLogs()
+    {
+        System.out.println("HxInsight testcontainersLogs:");
+        log.debug(hxInsight.getLogs());
+        System.out.println("SFS testcontainersLogs:");
+        log.debug(sfs.getLogs());
     }
 }
