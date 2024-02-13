@@ -31,6 +31,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 
 import java.io.Serializable;
@@ -76,11 +77,11 @@ class BulkIngesterEventProcessorTest
         Map<String, Serializable> properties = Map.of(
                 "cm:name", "test folder",
                 "cm:title", "test folder title",
+                TYPE_PROPERTY, NODE_TYPE,
                 CREATED_AT_PROPERTY, CREATED_AT);
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
-                NODE_TYPE,
                 CREATOR_ID,
                 MODIFIER_ID,
                 ASPECT_NAMES,
@@ -94,11 +95,11 @@ class BulkIngesterEventProcessorTest
         IngestMetadataCommand expectedCommand = new IngestMetadataCommand(
                 NODE_ID,
                 CREATE,
-                PropertyDelta.updated(NODE_TYPE),
                 PropertyDelta.updated(CREATOR_ID),
                 PropertyDelta.updated(MODIFIER_ID),
                 PropertyDelta.updated(ASPECT_NAMES),
                 Set.of(
+                        CustomPropertyDelta.updated(TYPE_PROPERTY, NODE_TYPE),
                         CustomPropertyDelta.updated("cm:name", "test folder"),
                         CustomPropertyDelta.updated("cm:title", "test folder title")));
 
@@ -118,12 +119,12 @@ class BulkIngesterEventProcessorTest
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
-                NODE_TYPE,
                 CREATOR_ID,
                 MODIFIER_ID,
                 ASPECT_NAMES,
                 contentInfo,
-                Map.of(CREATED_AT_PROPERTY, CREATED_AT));
+                Map.of(TYPE_PROPERTY, NODE_TYPE,
+                        CREATED_AT_PROPERTY, CREATED_AT));
 
         // when
         bulkIngesterEventProcessor.process(bulkIngesterEvent);

@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.TYPE_PROPERTY;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -83,13 +84,13 @@ class AlfrescoNodeMapperTest
 
         // then
         assertEquals(NODE_UUID, node.nodeId());
-        assertEquals(PREFIXED_TYPE_FOLDER, node.type());
         assertEquals(CREATOR_ID, node.creatorId());
         assertEquals(MODIFIER_ID, node.modifierId());
         assertEquals(MODIFIER_ID, node.modifierId());
         assertEquals(Set.of(PREFIXED_ASPECT_TITLED), node.aspectNames());
         assertNull(node.contentInfo());
-        assertEquals(Map.of(CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
+        assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -112,6 +113,7 @@ class AlfrescoNodeMapperTest
 
         // then
         assertEquals(Map.of(namePropertyKey, namePropertyValue,
+                TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
@@ -134,7 +136,8 @@ class AlfrescoNodeMapperTest
 
         // then
         assertEquals(contentInfo, node.contentInfo());
-        assertEquals(Map.of(CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
+        assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -151,7 +154,8 @@ class AlfrescoNodeMapperTest
         Node node = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertEquals(Map.of(CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
+        assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     private NodeProperty mockProperty(String propertyName)

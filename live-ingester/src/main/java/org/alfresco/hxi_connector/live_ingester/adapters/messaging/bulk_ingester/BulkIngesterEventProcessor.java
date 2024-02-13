@@ -65,7 +65,6 @@ public class BulkIngesterEventProcessor
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
                 event.nodeId(),
                 CREATE,
-                PropertyDelta.updated(event.type()),
                 PropertyDelta.updated(event.creatorId()),
                 PropertyDelta.updated(event.modifierId()),
                 PropertyDelta.updated(event.aspectNames()),

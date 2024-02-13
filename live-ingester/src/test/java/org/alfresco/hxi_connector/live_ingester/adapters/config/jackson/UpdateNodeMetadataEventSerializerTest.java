@@ -28,9 +28,9 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
 
@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 
 class UpdateNodeMetadataEventSerializerTest
@@ -67,7 +68,7 @@ class UpdateNodeMetadataEventSerializerTest
     public void shouldSerializePropertiesToSet()
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
-                .set(CREATED_AT.withValue(10000L))
+                .set(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
                 .set(MODIFIED_BY_USER_WITH_ID.withValue("000-000-000"));
 
         String expectedJson = """
@@ -88,7 +89,7 @@ class UpdateNodeMetadataEventSerializerTest
     public void shouldSerializePropertiesToUnset()
     {
         UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, UPDATE)
-                .unset(CREATED_AT.getName())
+                .unset(CREATED_AT_PROPERTY)
                 .unset(MODIFIED_BY_USER_WITH_ID.getName());
 
         String expectedJson = """

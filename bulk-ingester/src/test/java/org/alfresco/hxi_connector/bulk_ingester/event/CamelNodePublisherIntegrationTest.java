@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.bulk_ingester.event;
 
 import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.TYPE_PROPERTY;
 
 import java.io.Serializable;
 import java.util.List;
@@ -67,12 +68,12 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
         // given
         Node node = new Node(
                 "66326096-3bd6-412e-abbe-a07fbabf2fcc",
-                "file",
                 "admin",
                 "admin",
                 Set.of("ownable", "taggable"),
                 new ContentInfo(1000, "UTF-8", "application/pdf"),
-                Map.of("cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
+                Map.of(TYPE_PROPERTY, "file",
+                        "cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
                         CREATED_AT_PROPERTY, 2000));
 
         // when
@@ -82,7 +83,6 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
         String expectedEvent = """
                 {
                   "nodeId" : "66326096-3bd6-412e-abbe-a07fbabf2fcc",
-                  "type" : "file",
                   "creatorId" : "admin",
                   "modifierId" : "admin",
                   "aspectNames" : [ "ownable", "taggable" ],
@@ -92,6 +92,7 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
                     "mimetype" : "application/pdf"
                   },
                   "properties" : {
+                    "type" : "file",
                     "cm:categories" : [ "33cd7d4c-ba12-4006-9642-f9fb2d3bd406" ],
                     "createdAt" : 2000
                   }

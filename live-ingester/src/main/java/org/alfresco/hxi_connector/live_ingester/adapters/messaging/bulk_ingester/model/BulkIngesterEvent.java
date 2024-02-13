@@ -32,7 +32,6 @@ import java.util.Set;
 
 public record BulkIngesterEvent(
         String nodeId,
-        String type,
         String creatorId,
         String modifierId,
         Set<String> aspectNames,

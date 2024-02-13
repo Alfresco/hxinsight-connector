@@ -34,7 +34,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
@@ -88,7 +87,6 @@ class IngestMetadataCommandHandlerTest
         IngestMetadataCommand command = new IngestMetadataCommand(
                 NODE_ID,
                 CREATE,
-                updated(NODE_TYPE),
                 updated(NODE_CREATED_BY_USER_WITH_ID),
                 updated(NODE_MODIFIED_BY_USER_WITH_ID),
                 updated(NODE_ASPECT_NAMES),
@@ -101,7 +99,6 @@ class IngestMetadataCommandHandlerTest
 
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-                TYPE.withValue(NODE_TYPE),
                 CREATED_BY_USER_WITH_ID.withValue(NODE_CREATED_BY_USER_WITH_ID),
                 MODIFIED_BY_USER_WITH_ID.withValue(NODE_MODIFIED_BY_USER_WITH_ID),
                 ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
@@ -124,7 +121,6 @@ class IngestMetadataCommandHandlerTest
         IngestMetadataCommand command = new IngestMetadataCommand(
                 NODE_ID,
                 CREATE,
-                updated(NODE_TYPE),
                 nullUser, // Missing created by
                 nullUser, // Missing updated by
                 updated(NODE_ASPECT_NAMES),
@@ -137,7 +133,6 @@ class IngestMetadataCommandHandlerTest
 
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-                TYPE.withValue(NODE_TYPE),
                 CREATED_BY_USER_WITH_ID.withValue(null),
                 MODIFIED_BY_USER_WITH_ID.withValue(null),
                 ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
