@@ -111,13 +111,13 @@ public class E2ETestBase
     @SneakyThrows
     public static WireMock getHxInsightMock()
     {
-        return hxInsightMock = new WireMock(hxInsight.getHost(), hxInsight.getPort(), hxInsight.getLogs());
+        return hxInsightMock = new WireMock(hxInsight.getHost(), hxInsight.getPort());
     }
 
     @SneakyThrows
     public static WireMock getSfsMock()
     {
-        return sfsMock = new WireMock(sfs.getHost(), sfs.getPort(), sfs.getLogs());
+        return sfsMock = new WireMock(sfs.getHost(), sfs.getPort());
     }
 
     @DynamicPropertySource
@@ -157,6 +157,11 @@ public class E2ETestBase
     public void setUp()
     {
         containerSupport = ContainerSupport.getInstance(hxInsight, brokerUrl, localStorageClient);
+    }
+    @AfterEach
+    public void getTestcontainersLogs(){
+        hxInsight.getLogs();
+        sfs.getLogs();
     }
 
     @AfterEach
