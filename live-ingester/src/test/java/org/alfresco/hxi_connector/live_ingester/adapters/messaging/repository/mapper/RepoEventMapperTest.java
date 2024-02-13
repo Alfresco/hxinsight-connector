@@ -26,24 +26,23 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
+import static java.util.Collections.emptySet;
+
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
-import java.util.Collections;
+import java.util.Set;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -55,8 +54,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationExcep
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.repo.event.v1.model.ContentInfo;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -66,33 +64,17 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 class RepoEventMapperTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
-    private static final boolean EVENT_IS_CREATE = false;
-    private static final boolean CONTENT_NOT_REMOVED = false;
 
     @Mock
     PropertiesMapper propertiesMapper;
     @InjectMocks
     RepoEventMapper repoEventMapper;
 
-    @BeforeEach
-    void setUp()
-    {
-        lenient().when(propertiesMapper.calculateCustomPropertiesDelta(any())).thenReturn(Collections.emptySet());
-    }
-
     @Test
     void shouldMapToIngestNodeContentCommand()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_CREATED);
-
-        NodeResource nodeResource = NodeResource.builder()
-                .setId(NODE_ID)
-                .build();
-
-        setNodeResource(event, nodeResource);
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_CREATED);
 
         // when
         IngestContentCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
@@ -107,19 +89,7 @@ class RepoEventMapperTest
     void shouldMapToIngestNodeMetadataCommand_()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_CREATED);
-
-        NodeResource nodeResource = NodeResource.builder()
-                .setId(NODE_ID)
-                .build();
-
-        setNodeResource(event, nodeResource);
-
-        PropertyDelta regularPropertyDelta = mock();
-        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
-        given(propertiesMapper.calculateCustomPropertiesDelta(event)).willReturn(Collections.emptySet());
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_CREATED);
 
         // when
         IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
@@ -127,14 +97,8 @@ class RepoEventMapperTest
         // then
         IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
                 NODE_ID,
-                EVENT_IS_CREATE,
-                regularPropertyDelta,
-                regularPropertyDelta,
-                regularPropertyDelta,
-                regularPropertyDelta,
-                regularPropertyDelta,
-                Collections.emptySet(),
-                CONTENT_NOT_REMOVED);
+                CREATE,
+                emptySet());
 
         assertEquals(expectedEvent, actualEvent);
     }
@@ -143,18 +107,7 @@ class RepoEventMapperTest
     void shouldAllowToMapToIngestNodeMetadataCommand_whenNodeUpdated()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_UPDATED);
-
-        NodeResource nodeResource = NodeResource.builder()
-                .setId(NODE_ID)
-                .build();
-
-        setNodeResource(event, nodeResource);
-
-        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(mock());
-        given(propertiesMapper.calculateCustomPropertiesDelta(event)).willReturn(mock());
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
 
         // then
         assertDoesNotThrow(() -> repoEventMapper.mapToIngestMetadataCommand(event));
@@ -165,7 +118,6 @@ class RepoEventMapperTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
-
         setType(event, NODE_DELETED);
 
         // then
@@ -176,11 +128,7 @@ class RepoEventMapperTest
     void shouldAllowToMapToDeleteNodeCommand_whenNodeDeleted()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        setType(event, NODE_DELETED);
-
-        NodeResource nodeResource = NodeResource.builder().setId(NODE_ID).build();
-        setNodeResource(event, nodeResource);
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_DELETED);
 
         // when
         DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
@@ -205,84 +153,15 @@ class RepoEventMapperTest
     void shouldNoticeContentDeleted_whenContentRemoved()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        setType(event, NODE_UPDATED);
-        DataAttributes<NodeResource> data = mockData(event);
-
-        // Content used to be present.
-        NodeResource nodeResourceBefore = mock();
-        given(nodeResourceBefore.getContent()).willReturn(new ContentInfo(null, 123L, null));
-        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
-        // Content now has zero bytes.
-        NodeResource nodeResource = mock();
-        given(nodeResource.getId()).willReturn(NODE_ID);
-        given(nodeResource.getContent()).willReturn(new ContentInfo(null, 0L, null));
-        given(data.getResource()).willReturn(nodeResource);
-
-        PropertyDelta regularPropertyDelta = mock();
-        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
+        given(propertiesMapper.calculateCustomPropertiesDelta(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY_KEY)));
 
         // when
         IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
 
         // then
-        assertTrue(ingestMetadataCommand.contentRemoved(), "Expected content removed flag to be set");
-    }
-
-    @Test
-    void shouldNotSayContentDeleted_whenContentMissingBeforeAndAfter()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        setType(event, NODE_UPDATED);
-        DataAttributes<NodeResource> data = mockData(event);
-
-        // Content used to have zero bytes.
-        NodeResource nodeResourceBefore = mock();
-        given(nodeResourceBefore.getContent()).willReturn(new ContentInfo(null, 0L, null));
-        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
-        // Content now has zero bytes.
-        NodeResource nodeResource = mock();
-        given(nodeResource.getId()).willReturn(NODE_ID);
-        given(nodeResource.getContent()).willReturn(new ContentInfo(null, 0L, null));
-        given(data.getResource()).willReturn(nodeResource);
-
-        PropertyDelta regularPropertyDelta = mock();
-        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
-
-        // when
-        IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
-
-        // then
-        assertFalse(ingestMetadataCommand.contentRemoved(), "Expected content removed flag not to be set");
-    }
-
-    @Test
-    void shouldNotSayContentDeleted_whenContentUpdated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        setType(event, NODE_UPDATED);
-        DataAttributes<NodeResource> data = mockData(event);
-
-        // Content used to have 123 bytes.
-        NodeResource nodeResourceBefore = mock();
-        given(nodeResourceBefore.getContent()).willReturn(new ContentInfo(null, 123L, null));
-        given(data.getResourceBefore()).willReturn(nodeResourceBefore);
-        // Content now has 456 bytes.
-        NodeResource nodeResource = mock();
-        given(nodeResource.getId()).willReturn(NODE_ID);
-        given(nodeResource.getContent()).willReturn(new ContentInfo(null, 456L, null));
-        given(data.getResource()).willReturn(nodeResource);
-
-        PropertyDelta regularPropertyDelta = mock();
-        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
-
-        // when
-        IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
-
-        // then
-        assertFalse(ingestMetadataCommand.contentRemoved(), "Expected content removed flag not to be set");
+        Set<CustomPropertyDelta<?>> expected = Set.of(deleted(CONTENT_PROPERTY_KEY));
+        assertEquals(expected, ingestMetadataCommand.properties(), "Expected content to be removed");
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
@@ -309,5 +188,15 @@ class RepoEventMapperTest
         given(event.getData()).willReturn(data);
 
         return data;
+    }
+
+    private static RepoEvent<DataAttributes<NodeResource>> mockMinimalEvent(EventType eventType)
+    {
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, eventType);
+        NodeResource nodeResource = mock();
+        given(nodeResource.getId()).willReturn(NODE_ID);
+        setNodeResource(event, nodeResource);
+        return event;
     }
 }

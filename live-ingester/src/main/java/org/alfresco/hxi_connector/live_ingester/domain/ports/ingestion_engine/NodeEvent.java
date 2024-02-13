@@ -28,6 +28,4 @@ package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 public interface NodeEvent
 {
     String getObjectId();
-
-    EventType getEventType();
 }

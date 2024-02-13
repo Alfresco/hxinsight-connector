@@ -30,6 +30,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.
 
 import java.util.Optional;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
@@ -40,6 +41,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 
 @Getter
 @ToString
+@EqualsAndHashCode(callSuper = true)
 public class CustomPropertyUpdated<T> extends CustomPropertyDelta<T>
 {
     private final T propertyValue;
