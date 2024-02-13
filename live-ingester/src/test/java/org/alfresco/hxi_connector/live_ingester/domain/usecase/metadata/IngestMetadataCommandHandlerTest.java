@@ -31,8 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.verify;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
 import java.util.Collections;
@@ -59,12 +57,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 class IngestMetadataCommandHandlerTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
-    private static final String NODE_TYPE = "cm:folder";
-    private static final String NODE_CREATED_BY_USER_WITH_ID = "admin";
-    private static final String NODE_MODIFIED_BY_USER_WITH_ID = "hr_user";
-    private static final Set<String> NODE_ASPECT_NAMES = Set.of(
-            "cm:titled",
-            "cm:auditable");
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
 
@@ -84,7 +76,6 @@ class IngestMetadataCommandHandlerTest
         IngestMetadataCommand command = new IngestMetadataCommand(
                 NODE_ID,
                 CREATE,
-                updated(NODE_ASPECT_NAMES),
                 NODE_PROPERTIES.stream()
                         .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
                         .collect(Collectors.toSet()));
@@ -93,9 +84,7 @@ class IngestMetadataCommandHandlerTest
         ingestMetadataCommandHandler.handle(command);
 
         // then
-        Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(
-                ASPECTS_NAMES.withValue(NODE_ASPECT_NAMES),
-                NODE_TITLE);
+        Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(NODE_TITLE);
 
         verify(ingestionEngineEventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
         UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();

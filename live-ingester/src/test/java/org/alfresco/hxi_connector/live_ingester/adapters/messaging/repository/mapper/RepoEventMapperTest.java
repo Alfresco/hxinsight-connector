@@ -29,10 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
@@ -42,7 +39,6 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import java.util.Collections;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,7 +50,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationExcep
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -69,12 +64,6 @@ class RepoEventMapperTest
     PropertiesMapper propertiesMapper;
     @InjectMocks
     RepoEventMapper repoEventMapper;
-
-    @BeforeEach
-    void setUp()
-    {
-        lenient().when(propertiesMapper.calculateCustomPropertiesDelta(any())).thenReturn(Collections.emptySet());
-    }
 
     @Test
     void shouldMapToIngestNodeContentCommand()
@@ -113,10 +102,6 @@ class RepoEventMapperTest
 
         setNodeResource(event, nodeResource);
 
-        PropertyDelta regularPropertyDelta = mock();
-        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(regularPropertyDelta);
-        given(propertiesMapper.calculateCustomPropertiesDelta(event)).willReturn(Collections.emptySet());
-
         // when
         IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
 
@@ -124,7 +109,6 @@ class RepoEventMapperTest
         IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
                 NODE_ID,
                 CREATE,
-                regularPropertyDelta,
                 Collections.emptySet());
 
         assertEquals(expectedEvent, actualEvent);
@@ -143,9 +127,6 @@ class RepoEventMapperTest
                 .build();
 
         setNodeResource(event, nodeResource);
-
-        given(propertiesMapper.calculatePropertyDelta(eq(event), any())).willReturn(mock());
-        given(propertiesMapper.calculateCustomPropertiesDelta(event)).willReturn(mock());
 
         // then
         assertDoesNotThrow(() -> repoEventMapper.mapToIngestMetadataCommand(event));

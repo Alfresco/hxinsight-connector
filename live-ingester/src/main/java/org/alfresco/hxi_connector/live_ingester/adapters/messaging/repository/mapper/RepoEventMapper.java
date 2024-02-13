@@ -67,7 +67,6 @@ public class RepoEventMapper
         return new IngestMetadataCommand(
                 event.getData().getResource().getId(),
                 eventType,
-                propertiesMapper.calculatePropertyDelta(event, NodeResource::getAspectNames),
                 propertiesMapper.calculateCustomPropertiesDelta(event));
     }
 

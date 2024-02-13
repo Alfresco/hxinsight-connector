@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -51,8 +49,6 @@ public class IngestMetadataCommandHandler
     {
         EventType eventType = command.eventType();
         UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId(), eventType);
-
-        command.aspectNames().applyAs(ASPECTS_NAMES, updateMetadataEvent);
 
         command.properties()
                 .stream()
