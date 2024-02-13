@@ -25,10 +25,12 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
+@Slf4j
 public class PdfOperationsIntegrationTest extends E2ETestBase
 {
 

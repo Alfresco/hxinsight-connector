@@ -160,13 +160,6 @@ public class E2ETestBase
     }
 
     @AfterEach
-    public void getTestcontainersLogs()
-    {
-        hxInsight.getLogs();
-        sfs.getLogs();
-    }
-
-    @AfterEach
     public void reset()
     {
         WireMock.reset();
