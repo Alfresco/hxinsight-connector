@@ -174,12 +174,4 @@ public class E2ETestBase
         ContainerSupport.removeInstance();
     }
 
-    @AfterEach
-    public void testcontainersLogs()
-    {
-        System.out.println("HxInsight testcontainersLogs:");
-        log.debug(hxInsight.getLogs());
-        System.out.println("SFS testcontainersLogs:");
-        log.debug(sfs.getLogs());
-    }
 }

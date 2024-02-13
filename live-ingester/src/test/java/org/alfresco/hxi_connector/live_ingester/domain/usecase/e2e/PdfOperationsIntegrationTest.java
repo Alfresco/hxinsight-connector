@@ -46,7 +46,8 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
         // when
         String atsBody = """
                 {
-                    "targetReference": "e71dd823-82c7-477c-8490-04cb0e826e66"
+                    "targetReference": "e71dd823-82c7-477c-8490-04cb0e826e66",
+                    "clientData": "{\\"nodeRef\\":\\"f71dd823-82c7-477c-8490-04cb0e826e67\\"}"
                 }""";
         containerSupport.raiseTransformationCompletedATSEvent(atsBody);
 
@@ -56,7 +57,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
         String preSignedUrlBody = """
                 {
                    "contentType":"application/pdf",
-                   "objectId":"e71dd823-82c7-477c-8490-04cb0e826e66"
+                   "objectId":"f71dd823-82c7-477c-8490-04cb0e826e67"
                     }
                  }""";
         containerSupport.expectHxIStorageLocationMessageReceived(preSignedUrlBody);
@@ -67,7 +68,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
 
         // String hxiBody = """
         // {
-        // "objectId" : "e71dd823-82c7-477c-8490-04cb0e826e66",
+        // "objectId" : "f71dd823-82c7-477c-8490-04cb0e826e67",
         // "eventType" : "update",
         // "properties" : {
         // "file:content": {
