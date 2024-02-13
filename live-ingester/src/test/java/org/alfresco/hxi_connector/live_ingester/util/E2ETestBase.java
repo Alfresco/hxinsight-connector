@@ -111,14 +111,13 @@ public class E2ETestBase
     @SneakyThrows
     public static WireMock getHxInsightMock()
     {
-        return hxInsightMock = new WireMock(hxInsight.getHost(), hxInsight.getPort());
-
+        return hxInsightMock = new WireMock(hxInsight.getHost(), hxInsight.getPort(), hxInsight.getLogs());
     }
 
     @SneakyThrows
     public static WireMock getSfsMock()
     {
-        return sfsMock = new WireMock(sfs.getHost(), sfs.getPort());
+        return sfsMock = new WireMock(sfs.getHost(), sfs.getPort(), sfs.getLogs());
     }
 
     @DynamicPropertySource
