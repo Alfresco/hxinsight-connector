@@ -236,6 +236,7 @@ public class ContainerSupport
         List<String> actualBucketContent = localStorageClient.listBucketContent(BUCKET_NAME);
         @Cleanup
         InputStream expectedInputStream = Files.newInputStream(Paths.get("src/test/resources/" + expectedFile));
+        @Cleanup
         InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
         assertThat(actualBucketContent).contains(OBJECT_KEY);
