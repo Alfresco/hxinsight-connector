@@ -26,47 +26,29 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.ASPECTS_NAMES;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_AT;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FILE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.IS_FOLDER;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.MODIFIED_BY_USER_WITH_ID;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PredefinedNodeMetadataProperty.TYPE;
-
 import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @Component
 @RequiredArgsConstructor
 public class IngestMetadataCommandHandler
 {
-    private final EventPublisher eventPublisher;
+    private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
     private final List<CustomPropertyResolver<?>> customPropertyResolvers;
 
     public void handle(IngestMetadataCommand command)
     {
-        EventType eventType = command.isUpdate() ? UPDATE : CREATE;
+        EventType eventType = command.eventType();
         UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId(), eventType);
-
-        command.nodeType().applyAs(TYPE, updateMetadataEvent);
-        command.createdByUserWithId().applyAs(CREATED_BY_USER_WITH_ID, updateMetadataEvent);
-        command.modifiedByUserWithId().applyAs(MODIFIED_BY_USER_WITH_ID, updateMetadataEvent);
-        command.aspectNames().applyAs(ASPECTS_NAMES, updateMetadataEvent);
-        command.isFile().applyAs(IS_FILE, updateMetadataEvent);
-        command.isFolder().applyAs(IS_FOLDER, updateMetadataEvent);
-        command.createdAt().applyAs(CREATED_AT, updateMetadataEvent);
 
         command.properties()
                 .stream()
@@ -74,7 +56,7 @@ public class IngestMetadataCommandHandler
                 .flatMap(Optional::stream)
                 .forEach(customPropertyDelta -> customPropertyDelta.applyOn(updateMetadataEvent));
 
-        eventPublisher.publishMessage(updateMetadataEvent);
+        ingestionEngineEventPublisher.publishMessage(updateMetadataEvent);
     }
 
     private Optional<CustomPropertyDelta<?>> resolve(CustomPropertyDelta<?> customPropertyDelta)

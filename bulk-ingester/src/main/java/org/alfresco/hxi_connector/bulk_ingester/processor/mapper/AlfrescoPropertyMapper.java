@@ -55,6 +55,7 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 @RequiredArgsConstructor
 public class AlfrescoPropertyMapper
 {
+    private final NamespacePrefixMapper namespacePrefixMapper;
     private final AlfrescoNode alfrescoNode;
     private final String propertyName;
 
@@ -62,7 +63,7 @@ public class AlfrescoPropertyMapper
     {
         /* Properties might be duplicated - for example they can have different locale (we can have two descriptions with "en_US_" and "en_UK_" locale) and in this case we want to process them together */
         List<Serializable> propertyValues = alfrescoNode.getNodeProperties().stream()
-                .filter(nodeProperty -> nodeProperty.getPropertyKey().getLocalName().equals(propertyName))
+                .filter(nodeProperty -> namespacePrefixMapper.toPrefixedName(nodeProperty.getPropertyKey()).equals(propertyName))
                 .map(nodeProperty -> mapPropertyValue(nodeProperty.getPropertyValue()))
                 .flatMap(Optional::stream)
                 .toList();

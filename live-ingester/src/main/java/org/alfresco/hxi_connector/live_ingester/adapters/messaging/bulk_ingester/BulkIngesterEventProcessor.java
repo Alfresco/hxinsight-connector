@@ -26,8 +26,11 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -41,7 +44,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @Slf4j
 @Component
@@ -53,24 +55,20 @@ public class BulkIngesterEventProcessor
 
     public void process(BulkIngesterEvent event)
     {
+        Map<String, Serializable> properties = event.properties();
+        Map<String, Serializable> customProperties = properties.entrySet().stream()
+                .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
+
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
-                event.createdAt(),
                 event.nodeId(),
-                false,
-                PropertyDelta.updated(event.type()),
-                PropertyDelta.updated(event.creatorId()),
-                PropertyDelta.updated(event.modifierId()),
-                PropertyDelta.updated(event.aspectNames()),
-                PropertyDelta.updated(false),
-                PropertyDelta.updated(false),
-                PropertyDelta.updated(event.createdAt()),
-                mapToCustomPropertiesDelta(event.customProperties()));
+                CREATE,
+                mapToCustomPropertiesDelta(customProperties));
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);
 
         if (event.contentInfo() != null)
         {
-            IngestContentCommand ingestContentCommand = new IngestContentCommand(event.createdAt(), event.nodeId());
+            IngestContentCommand ingestContentCommand = new IngestContentCommand(event.nodeId());
 
             ingestContentCommandHandler.handle(ingestContentCommand);
         }

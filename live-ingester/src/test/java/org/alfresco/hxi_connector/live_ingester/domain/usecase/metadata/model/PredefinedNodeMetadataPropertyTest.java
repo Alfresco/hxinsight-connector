@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_BY_PROPERTY;
+
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
@@ -42,10 +44,10 @@ class PredefinedNodeMetadataPropertyTest
         String name = "test user";
 
         // when
-        NodeProperty<String> nodeProperty = PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID.withValue(name);
+        NodeProperty<String> nodeProperty = new NodeProperty<>(CREATED_BY_PROPERTY, name);
 
         // then
-        assertEquals(PredefinedNodeMetadataProperty.CREATED_BY_USER_WITH_ID.getName(), nodeProperty.name());
+        assertEquals(CREATED_BY_PROPERTY, nodeProperty.name());
         assertEquals(name, nodeProperty.value());
     }
 }

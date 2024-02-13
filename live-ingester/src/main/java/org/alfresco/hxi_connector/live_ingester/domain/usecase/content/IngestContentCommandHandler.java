@@ -49,19 +49,20 @@ public class IngestContentCommandHandler
 
     public void handle(IngestContentCommand command)
     {
-        TransformRequest transformRequest = new TransformRequest(command.time(), command.nodeId(), PDF_MIMETYPE);
+        TransformRequest transformRequest = new TransformRequest(command.nodeId(), PDF_MIMETYPE);
         transformRequester.requestTransform(transformRequest);
     }
 
     public void handle(UploadContentRenditionCommand command)
     {
         String fileId = command.transformedFileId();
+        String nodeId = command.nodeId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
 
-        log.debug("Downloaded file {} from SFS", fileId);
+        log.debug("Downloaded node {} content in file {} from SFS", nodeId, fileId);
 
-        storageClient.upload(downloadedFile, PDF_MIMETYPE, fileId);
+        storageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
 
-        log.debug("Uploaded file {} to S3", fileId);
+        log.debug("Uploaded node {} content to S3", nodeId);
     }
 }

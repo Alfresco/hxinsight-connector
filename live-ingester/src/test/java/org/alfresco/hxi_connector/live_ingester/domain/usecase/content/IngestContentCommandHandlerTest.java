@@ -47,8 +47,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 @ExtendWith(MockitoExtension.class)
 class IngestContentCommandHandlerTest
 {
-    static final long TIMESTAMP = 1_234_567_890L;
     static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
+    static final String FILE_ID = "43214321-4321-4321-4321-432143214321";
     static final String PDF_MIMETYPE = "application/pdf";
 
     @Mock
@@ -65,13 +65,13 @@ class IngestContentCommandHandlerTest
     void shouldRequestNodeContentTransformation()
     {
         // given
-        IngestContentCommand command = new IngestContentCommand(TIMESTAMP, NODE_ID);
+        IngestContentCommand command = new IngestContentCommand(NODE_ID);
 
         // when
         ingestContentCommandHandler.handle(command);
 
         // then
-        TransformRequest expectedTransformationRequest = new TransformRequest(TIMESTAMP, NODE_ID, PDF_MIMETYPE);
+        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, PDF_MIMETYPE);
         then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
     }
 
@@ -79,7 +79,7 @@ class IngestContentCommandHandlerTest
     void shouldDownloadContentTransformationAndPassItOn()
     {
         // given
-        UploadContentRenditionCommand command = new UploadContentRenditionCommand(NODE_ID);
+        UploadContentRenditionCommand command = new UploadContentRenditionCommand(FILE_ID, NODE_ID);
 
         File fileToUpload = mock();
         given(transformEngineFileStorageMock.downloadFile(any())).willReturn(fileToUpload);
@@ -88,7 +88,7 @@ class IngestContentCommandHandlerTest
         ingestContentCommandHandler.handle(command);
 
         // then
-        then(transformEngineFileStorageMock).should().downloadFile(NODE_ID);
+        then(transformEngineFileStorageMock).should().downloadFile(FILE_ID);
         then(storageClientMock).should().upload(fileToUpload, PDF_MIMETYPE, NODE_ID);
     }
 }

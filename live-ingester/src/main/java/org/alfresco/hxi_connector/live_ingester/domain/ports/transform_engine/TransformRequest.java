@@ -25,5 +25,5 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine;
 
-public record TransformRequest(long eventTimestamp, String nodeRef, String targetMimeType)
+public record TransformRequest(String nodeRef, String targetMimeType)
 {}

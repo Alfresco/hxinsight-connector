@@ -96,14 +96,12 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                    "properties" : {
                       "cm:autoVersion" : true,
                       "createdAt" : 1611227655695,
-                      "isFolder" : false,
                       "cm:versionType" : "MAJOR",
-                      "isFile" : true,
                       "aspectsNames" : [ "cm:versionable", "cm:auditable" ],
                       "cm:name" : "purchase-order-scan.pdf",
                       "type" : "cm:content",
-                      "createdByUserWithId" : "admin",
-                      "modifiedByUserWithId" : "admin"
+                      "createdBy" : "admin",
+                      "modifiedBy" : "admin"
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -113,7 +111,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"modificationTimestamp\\":1611227656423,\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\"}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\"}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);

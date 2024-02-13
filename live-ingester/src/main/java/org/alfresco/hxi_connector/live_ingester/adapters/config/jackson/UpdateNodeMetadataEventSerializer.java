@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
+import static java.util.Locale.ENGLISH;
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
 @Component
 public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeMetadataEvent>
@@ -61,7 +64,7 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
 
             jgen.writeStringField("objectId", event.getObjectId());
 
-            jgen.writeStringField("eventType", event.getEventType().serialise());
+            jgen.writeStringField("eventType", serializeEventType(event.getEventType()));
 
             if (!event.getMetadataPropertiesToSet().isEmpty())
             {
@@ -108,5 +111,10 @@ public class UpdateNodeMetadataEventSerializer extends StdSerializer<UpdateNodeM
         {
             throw new JsonSerializationException("UpdateNodeMetadataEvent serialization failed", e);
         }
+    }
+
+    private String serializeEventType(EventType eventType)
+    {
+        return eventType.toString().toLowerCase(ENGLISH);
     }
 }

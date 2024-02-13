@@ -28,9 +28,14 @@ package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.ASPECT_NAMES_PROPERTY;
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.MODIFIED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.TYPE_PROPERTY;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -48,15 +53,20 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 
 class AlfrescoNodeMapperTest
 {
+    private static final String TEST_PREFIX = "test";
     private static final String NODE_UUID = "859fd51f-a311-4daf-a460-1d9c7e80aa8d";
     private static final String TYPE_FOLDER = "folder";
+    private static final String PREFIXED_TYPE_FOLDER = "test:folder";
     private static final String CREATOR_ID = "7cd6bd1f-3ec3-461d-86ec-63cdd32b285e";
     private static final String MODIFIER_ID = "36013be3-4646-4146-b94d-5f72f3a8f717";
     private static final String ASPECT_TITLED = "titled";
+    private static final String PREFIXED_ASPECT_TITLED = "test:titled";
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2024-01-31T10:15:30+00:00");
+    private static final long CREATED_AT_TIMESTAMP = CREATED_AT.toInstant().getEpochSecond();
 
     private final AlfrescoPropertyMapper alfrescoPropertyMapper = mock();
-    private final AlfrescoNodeMapper alfrescoNodeMapper = new AlfrescoNodeMapper((node, propertyName) -> alfrescoPropertyMapper);
+    private final NamespacePrefixMapper namespacePrefixMapper = new TestNamespaceToPrefixMapper(TEST_PREFIX);
+    private final AlfrescoNodeMapper alfrescoNodeMapper = new AlfrescoNodeMapper((node, propertyName) -> alfrescoPropertyMapper, namespacePrefixMapper);
 
     @Test
     void shouldMapNodeWithoutContentAndProperties()
@@ -77,14 +87,12 @@ class AlfrescoNodeMapperTest
 
         // then
         assertEquals(NODE_UUID, node.nodeId());
-        assertEquals(TYPE_FOLDER, node.type());
-        assertEquals(CREATOR_ID, node.creatorId());
-        assertEquals(MODIFIER_ID, node.modifierId());
-        assertEquals(MODIFIER_ID, node.modifierId());
-        assertEquals(Set.of(ASPECT_TITLED), node.aspectNames());
         assertNull(node.contentInfo());
-        assertEquals(CREATED_AT.toInstant().getEpochSecond(), node.createdAt());
-        assertEquals(Map.of(), node.customProperties());
+        assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
+                CREATED_BY_PROPERTY, CREATOR_ID,
+                MODIFIED_BY_PROPERTY, MODIFIER_ID,
+                ASPECT_NAMES_PROPERTY, Set.of(PREFIXED_ASPECT_TITLED),
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -106,7 +114,11 @@ class AlfrescoNodeMapperTest
         Node node = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertEquals(Map.of(namePropertyKey, namePropertyValue), node.customProperties());
+        assertEquals(Map.of(namePropertyKey, namePropertyValue,
+                TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
+                CREATED_BY_PROPERTY, CREATOR_ID,
+                MODIFIED_BY_PROPERTY, MODIFIER_ID,
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -115,7 +127,7 @@ class AlfrescoNodeMapperTest
         // given
         AlfrescoNode alfrescoNode = nodeWithDefaultProperties();
 
-        String contentPropertyKey = "content";
+        String contentPropertyKey = "cm:content";
         ContentInfo contentInfo = mock();
 
         alfrescoNode.setNodeProperties(Set.of(mockProperty(contentPropertyKey)));
@@ -128,7 +140,10 @@ class AlfrescoNodeMapperTest
 
         // then
         assertEquals(contentInfo, node.contentInfo());
-        assertTrue(node.customProperties().isEmpty());
+        assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
+                CREATED_BY_PROPERTY, CREATOR_ID,
+                MODIFIED_BY_PROPERTY, MODIFIER_ID,
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     @Test
@@ -145,7 +160,10 @@ class AlfrescoNodeMapperTest
         Node node = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertTrue(node.customProperties().isEmpty());
+        assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
+                CREATED_BY_PROPERTY, CREATOR_ID,
+                MODIFIED_BY_PROPERTY, MODIFIER_ID,
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
     }
 
     private NodeProperty mockProperty(String propertyName)
@@ -167,7 +185,6 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setType(QName.newTransientInstance("", TYPE_FOLDER));
         alfrescoNode.setCreator(CREATOR_ID);
         alfrescoNode.setModifier(MODIFIER_ID);
-        alfrescoNode.setAspects(Set.of(QName.newTransientInstance("", ASPECT_TITLED)));
         alfrescoNode.setCreatedAt(CREATED_AT);
         alfrescoNode.setNodeProperties(Set.of());
 

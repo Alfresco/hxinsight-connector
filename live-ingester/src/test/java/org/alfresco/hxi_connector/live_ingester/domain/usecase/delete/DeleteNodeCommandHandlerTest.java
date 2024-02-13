@@ -36,7 +36,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -48,7 +48,7 @@ public class DeleteNodeCommandHandlerTest
     @InjectMocks
     private DeleteNodeCommandHandler deleteNodeCommandHandler;
     @Mock
-    private EventPublisher eventPublisher;
+    private IngestionEngineEventPublisher ingestionEngineEventPublisher;
 
     @Test
     public void testHandle()
@@ -62,6 +62,6 @@ public class DeleteNodeCommandHandlerTest
 
         // then
         NodeEvent expectedNodeEvent = new DeleteNodeEvent(NODE_ID);
-        then(eventPublisher).should().publishMessage(expectedNodeEvent);
+        then(ingestionEngineEventPublisher).should().publishMessage(expectedNodeEvent);
     }
 }

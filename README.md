@@ -2,7 +2,7 @@
 
 Connector for sending ACS events to Hx Insight and updating the Repository with the predictions that it generates.
 
-### Configuration
+### Live Ingester configuration
 
 #### Retry
 In case of an error while trying to call external endpoint the call will be reattempted.
@@ -54,6 +54,14 @@ hyland-experience:
       initialDelay: 1000
       delayMultiplier: 1.5
 ```
+
+
+### Bulk Ingester configuration
+
+#### Namespace prefixes
+As namespace prefixes are not available in db you have to specify mapping between `namespace`->`prefix` in configuration
+file. By default, prefixes mappings are specified in [namespace-prefixes.json](bulk-ingester/src/main/resources/namespace-prefixes.json) file -
+you can change it via the `alfresco.bulk.ingest.namespace-prefixes-mapping` property
 
 ### Code Quality
 This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.
