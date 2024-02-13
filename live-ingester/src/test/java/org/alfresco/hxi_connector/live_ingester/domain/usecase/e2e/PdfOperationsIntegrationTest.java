@@ -35,6 +35,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
 {
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testPdFOperations()
     {
 
