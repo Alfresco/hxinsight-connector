@@ -158,8 +158,10 @@ public class E2ETestBase
     {
         containerSupport = ContainerSupport.getInstance(hxInsight, brokerUrl, localStorageClient);
     }
+
     @AfterEach
-    public void getTestcontainersLogs(){
+    public void getTestcontainersLogs()
+    {
         hxInsight.getLogs();
         sfs.getLogs();
     }
