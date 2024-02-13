@@ -187,10 +187,7 @@ public class ContainerSupport
 
         WireMock.configureFor(getSfsMock());
 
-        @Cleanup
-        InputStream fileInputStream = Files.newInputStream(Paths.get("src/test/resources/" + expectedFile));
-        byte[] fileBytes = fileInputStream.readAllBytes();
-
+        byte[] fileBytes = Files.readAllBytes(Paths.get("src/test/resources/" + expectedFile));
         givenThat(get(SFS_PATH + targetReference)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)
