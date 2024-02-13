@@ -43,12 +43,15 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Cu
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.repo.event.v1.model.UserInfo;
 
 @NoArgsConstructor(access = PRIVATE)
 public class PropertyMappingHelper
 {
     public static final String NAME_PROPERTY_KEY = "cm:name";
     public static final String TYPE_PROPERTY = "type";
+    public static final String CREATED_BY_PROPERTY = "createdBy";
+    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
     public static final String CREATED_AT_PROPERTY = "createdAt";
 
     public static <T> Stream<CustomPropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
@@ -73,6 +76,24 @@ public class PropertyMappingHelper
     public static Stream<CustomPropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, TYPE_PROPERTY, NodeResource::getNodeType);
+    }
+
+    public static Stream<CustomPropertyDelta<?>> calculateCreatedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return calculatePropertyDelta(event, CREATED_BY_PROPERTY, nodeResource -> getUserId(nodeResource, NodeResource::getCreatedByUser));
+    }
+
+    public static Stream<CustomPropertyDelta<?>> calculateModifiedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return calculatePropertyDelta(event, MODIFIED_BY_PROPERTY, nodeResource -> getUserId(nodeResource, NodeResource::getModifiedByUser));
+    }
+
+    private static String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)
+    {
+        return ofNullable(node)
+                .map(userInfoGetter)
+                .map(UserInfo::getId)
+                .orElse(null);
     }
 
     public static Stream<CustomPropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)

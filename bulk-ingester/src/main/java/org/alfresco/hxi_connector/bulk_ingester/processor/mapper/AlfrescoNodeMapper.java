@@ -50,6 +50,8 @@ public class AlfrescoNodeMapper
 {
     public static final String CONTENT_PROPERTY = "cm:content";
     public static final String TYPE_PROPERTY = "type";
+    public static final String CREATED_BY_PROPERTY = "createdBy";
+    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
     public static final String CREATED_AT_PROPERTY = "createdAt";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
@@ -68,6 +70,8 @@ public class AlfrescoNodeMapper
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
         allProperties.put(TYPE_PROPERTY, type);
+        allProperties.put(CREATED_BY_PROPERTY, creatorId);
+        allProperties.put(MODIFIED_BY_PROPERTY, modifierId);
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
         ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
@@ -76,8 +80,6 @@ public class AlfrescoNodeMapper
 
         return new Node(
                 nodeId,
-                creatorId,
-                modifierId,
                 aspectNames,
                 content,
                 customProperties);
