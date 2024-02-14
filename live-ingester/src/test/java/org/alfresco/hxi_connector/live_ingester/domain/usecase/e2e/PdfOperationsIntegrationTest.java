@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
 
+import java.net.URL;
+
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +43,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
 
         // given
         containerSupport.prepareSFSToReturnFile("e71dd823-82c7-477c-8490-04cb0e826e66", "test-file.pdf");
-        containerSupport.prepareHxIToReturnStorageLocation();
+        URL url = containerSupport.prepareHxIToReturnStorageLocation();
         containerSupport.prepareHxIToReturnSuccessAfterReceivingFileLocation();
 
         // when
@@ -70,11 +72,11 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
                     "objectId" : "f71dd823-82c7-477c-8490-04cb0e826e67",
                     "eventType" : "update",
                     "properties" : {
-                        "file:content": {
-                           "path": "/ingestion-base-path/test-file.pdf"
+                        "cm:content": {
+                           "path": "%s"
                         }
                     }
-                }""";
+                }""".formatted(url);
         containerSupport.expectHxIMessageWithFileLocationReceived(hxiBody);
     }
 }

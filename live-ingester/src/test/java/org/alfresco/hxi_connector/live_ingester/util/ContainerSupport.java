@@ -25,14 +25,27 @@
  */
 package org.alfresco.hxi_connector.live_ingester.util;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.*;
+import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.BUCKET_NAME;
+import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getHxInsightMock;
+import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getSfsMock;
 import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWithBackoff;
 
-import java.io.*;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -208,7 +221,7 @@ public class ContainerSupport
     }
 
     @SneakyThrows
-    public void prepareHxIToReturnStorageLocation()
+    public URL prepareHxIToReturnStorageLocation()
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
@@ -216,6 +229,7 @@ public class ContainerSupport
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_SUCCESS_CODE)
                         .withBody(hxInsightResponse)));
+        return preSignedUrl;
     }
 
     @SneakyThrows
