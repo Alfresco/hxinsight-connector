@@ -200,6 +200,9 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                  <exclude>docker-compose/volume/**</exclude>
+                </excludes>
             </resource>
         </resources>
         <testResources>
