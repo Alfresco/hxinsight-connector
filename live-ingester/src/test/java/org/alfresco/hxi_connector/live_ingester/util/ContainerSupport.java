@@ -86,7 +86,6 @@ public class ContainerSupport
     public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
     private static final int OK_SUCCESS_CODE = 200;
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
-    private static final String HX_INSIGHT_LOCATION_PATH = "/ingestion-base-path";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
     static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
     private static final String OBJECT_KEY = "dummy-file.pdf";
@@ -253,21 +252,4 @@ public class ContainerSupport
         assertThat(actualBucketContent).contains(OBJECT_KEY);
         assertTrue(IOUtils.contentEquals(expectedInputStream, bucketFileInputStream));
     }
-
-    @SneakyThrows
-    public void prepareHxIToReturnSuccessAfterReceivingFileLocation()
-    {
-        givenThat(post(HX_INSIGHT_LOCATION_PATH)
-                .willReturn(aResponse()
-                        .withStatus(OK_SUCCESS_CODE)));
-    }
-
-    @SneakyThrows
-    public void expectHxIMessageWithFileLocationReceived(String expectedBody)
-    {
-        retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_LOCATION_PATH))
-                .withHeader("Content-Type", equalTo("application/json"))
-                .withRequestBody(equalToJson(expectedBody))));
-    }
-
 }

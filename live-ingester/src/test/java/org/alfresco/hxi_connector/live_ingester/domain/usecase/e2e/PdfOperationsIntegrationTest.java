@@ -44,7 +44,7 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareSFSToReturnFile("e71dd823-82c7-477c-8490-04cb0e826e66", "test-file.pdf");
         URL url = containerSupport.prepareHxIToReturnStorageLocation();
-        containerSupport.prepareHxIToReturnSuccessAfterReceivingFileLocation();
+        containerSupport.prepareHxInsightToReturnSuccess();
 
         // when
         String atsBody = """
@@ -77,6 +77,6 @@ public class PdfOperationsIntegrationTest extends E2ETestBase
                         }
                     }
                 }""".formatted(url);
-        containerSupport.expectHxIMessageWithFileLocationReceived(hxiBody);
+        containerSupport.expectHxIngestMessageReceived(hxiBody);
     }
 }
