@@ -30,6 +30,7 @@ import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -40,6 +41,7 @@ import java.util.stream.Stream;
 import lombok.NoArgsConstructor;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -49,6 +51,7 @@ import org.alfresco.repo.event.v1.model.UserInfo;
 public class PropertyMappingHelper
 {
     public static final String NAME_PROPERTY_KEY = "cm:name";
+    public static final String CONTENT_PROPERTY_KEY = "cm:content";
     public static final String TYPE_PROPERTY = "type";
     public static final String CREATED_BY_PROPERTY = "createdBy";
     public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
@@ -74,6 +77,16 @@ public class PropertyMappingHelper
         return calculatePropertyDelta(event, NAME_PROPERTY_KEY, NodeResource::getName);
     }
 
+    public static Stream<CustomPropertyDelta<?>> calculateContentPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (isContentRemoved(event))
+        {
+            return Stream.of(deleted(CONTENT_PROPERTY_KEY));
+        }
+        // New or updated content can only be sent once the transformation is complete.
+        return Stream.empty();
+    }
+
     public static Stream<CustomPropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, TYPE_PROPERTY, NodeResource::getNodeType);
@@ -87,6 +100,29 @@ public class PropertyMappingHelper
     public static Stream<CustomPropertyDelta<?>> calculateModifiedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, MODIFIED_BY_PROPERTY, nodeResource -> getUserId(nodeResource, NodeResource::getModifiedByUser));
+    }
+
+    private static boolean isContentRemoved(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        Optional<Long> oldSizeOptional = sizeOfContent(event.getData().getResourceBefore());
+        if (oldSizeOptional.isEmpty())
+        {
+            // Content wasn't updated.
+            return false;
+        }
+        long oldSize = oldSizeOptional.get();
+        long newSize = sizeOfContent(event.getData().getResource()).orElse(0L);
+        return newSize == 0 && oldSize != 0;
+    }
+
+    /**
+     * Find the specified content size in bytes, or an empty Optional if it is not mentioned.
+     */
+    private static Optional<Long> sizeOfContent(NodeResource nodeResource)
+    {
+        return ofNullable(nodeResource)
+                .map(NodeResource::getContent)
+                .map(ContentInfo::getSizeInBytes);
     }
 
     private static String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)
