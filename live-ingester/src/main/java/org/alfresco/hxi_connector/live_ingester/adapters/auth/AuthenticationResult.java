@@ -49,7 +49,7 @@ public record AuthenticationResult(
 {
     public AuthenticationResult
     {
-        temporalUnit = ChronoUnit.SECONDS;
+        temporalUnit = requireNonNullElse(temporalUnit, ChronoUnit.SECONDS);
         statusCode = requireNonNullElse(statusCode, EXPECTED_STATUS_CODE);
     }
 }
