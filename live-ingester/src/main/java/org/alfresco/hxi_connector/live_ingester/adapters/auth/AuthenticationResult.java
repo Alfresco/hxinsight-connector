@@ -38,6 +38,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
+@SuppressWarnings("PMD.UnusedAssignment")
 public record AuthenticationResult(
         @NotBlank @JsonProperty("access_token") String accessToken,
         @Positive @JsonProperty("expires_in") int expiresIn,
