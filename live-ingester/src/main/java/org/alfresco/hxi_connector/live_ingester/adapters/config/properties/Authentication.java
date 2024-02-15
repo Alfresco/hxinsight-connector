@@ -23,18 +23,18 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static java.util.Objects.requireNonNullElseGet;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+import jakarta.validation.constraints.NotNull;
+
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
+public record Authentication(@NotNull @NestedConfigurationProperty Retry retry)
 {
-
-    public static void main(String[] args)
+    public Authentication
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        retry = requireNonNullElseGet(retry, Retry::new);
     }
 }

@@ -23,18 +23,31 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static java.util.Objects.requireNonNullElse;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+import static org.alfresco.hxi_connector.live_ingester.adapters.auth.HxAuthenticationClient.EXPECTED_STATUS_CODE;
+
+import java.util.concurrent.TimeUnit;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+public record AuthenticationResult(
+        @NotBlank @JsonProperty("access_token") String accessToken,
+        @Positive @JsonProperty("expires_in") int expiresIn,
+        TimeUnit timeUnit,
+        @NotBlank @JsonProperty("token_type") String tokenType,
+        @NotBlank String scope,
+        Integer statusCode)
 {
-
-    public static void main(String[] args)
+    public AuthenticationResult
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        timeUnit = TimeUnit.SECONDS;
+        statusCode = requireNonNullElse(statusCode, EXPECTED_STATUS_CODE);
     }
 }

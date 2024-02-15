@@ -42,7 +42,7 @@ public record Storage(@NotNull Location location, @NotNull Upload upload)
         upload = requireNonNullElse(upload, new Upload(new Retry()));
     }
 
-    public record Location(@NotBlank String endpoint, @NestedConfigurationProperty @NotNull Retry retry)
+    public record Location(@NotBlank String endpoint, @NotNull @NestedConfigurationProperty Retry retry)
     {
         public Location
         {
