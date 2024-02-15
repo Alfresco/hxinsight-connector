@@ -30,12 +30,11 @@ import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
-import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
@@ -59,7 +58,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRun
 
 @Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthenticationService
 {
     private static final String CLIENT_REGISTRATION_ID = "hyland-experience-auth";
@@ -67,7 +65,7 @@ public class AuthenticationService
     private static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";
     private static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
     private static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
-    private static final int EXPIRATION_OFFSET_SECONDS = 5 * 60;
+    private static final int AUTHENTICATION_SCHEDULE_DELAY_MINUTES = 55;
     private static final int WAIT_FOR_PAUSE_TIME_MILLIS = 100;
 
     private final OAuth2ClientProperties oAuth2ClientProperties;
@@ -76,7 +74,8 @@ public class AuthenticationService
     private final TaskScheduler taskScheduler;
     private final CamelContext camelContext;
 
-    @PostConstruct
+    // Temporary disabled
+    // @PostConstruct
     public void authenticationSchedule()
     {
         SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -85,7 +84,7 @@ public class AuthenticationService
             waitFor(camelContext::isStarted);
             authenticate();
         };
-        delegatingTaskScheduler.scheduleWithFixedDelay(authenticationTask, Duration.ofHours(1).minusSeconds(EXPIRATION_OFFSET_SECONDS));
+        delegatingTaskScheduler.scheduleWithFixedDelay(authenticationTask, Duration.ofMinutes(AUTHENTICATION_SCHEDULE_DELAY_MINUTES));
     }
 
     public void authenticate()
@@ -95,7 +94,7 @@ public class AuthenticationService
 
     public void authenticate(boolean forceAuthentication)
     {
-        if (forceAuthentication || securityContextIsEmpty() || tokenHasOrIsAboutToExpire(EXPIRATION_OFFSET_SECONDS))
+        if (forceAuthentication || securityContextIsEmpty() || tokenHasOrIsAboutToExpire(AUTHENTICATION_SCHEDULE_DELAY_MINUTES))
         {
             String clientName = oAuth2ClientProperties.getRegistration().get(CLIENT_REGISTRATION_ID).getClientName();
             OAuth2AuthenticationToken authenticationToken = createOAuth2AuthenticationToken(clientName);
@@ -129,12 +128,24 @@ public class AuthenticationService
                 || SecurityContextHolder.getContext().getAuthentication() == null;
     }
 
-    private boolean tokenHasOrIsAboutToExpire(int expirationOffsetSeconds)
+    private boolean tokenHasOrIsAboutToExpire(int scheduleDelayMinutes)
     {
         return !(SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2LoginAuthenticationToken authenticationToken)
                 || authenticationToken.getAccessToken() == null
                 || authenticationToken.getAccessToken().getExpiresAt() == null
-                || authenticationToken.getAccessToken().getExpiresAt().plusSeconds(expirationOffsetSeconds).isBefore(Instant.now());
+                || tokenHasOrIsAboutToExpire(authenticationToken.getAccessToken(), scheduleDelayMinutes);
+    }
+
+    private boolean tokenHasOrIsAboutToExpire(OAuth2AccessToken accessToken, int scheduleDelayMinutes)
+    {
+        if (Optional.ofNullable(accessToken.getIssuedAt()).isEmpty() || Optional.ofNullable(accessToken.getExpiresAt()).isEmpty())
+        {
+            return true;
+        }
+
+        Duration expirationOffset = Duration.between(accessToken.getIssuedAt(), accessToken.getExpiresAt()).minusMinutes(scheduleDelayMinutes);
+        long expirationOffsetSeconds = expirationOffset.isNegative() ? 0 : expirationOffset.toSeconds();
+        return Instant.now().isAfter(accessToken.getExpiresAt().minusSeconds(expirationOffsetSeconds));
     }
 
     private OAuth2AuthenticationToken createOAuth2AuthenticationToken(String clientName)

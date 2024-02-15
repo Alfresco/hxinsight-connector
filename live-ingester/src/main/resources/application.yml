@@ -1,4 +1,6 @@
 spring:
+  main:
+    web-application-type: none
   security:
     oauth2:
       client:
@@ -38,7 +40,7 @@ hyland-experience:
   authorization:
     application-name: acs-insight-connector
     service-user: insight-acs
-    environment-key:
+    environment-key: hxai-9682fb09-7f58-4b1a-aab2-306ad7edbc11
   storage:
     location:
       endpoint: "${hyland-experience.insight.base-url}/pre-signed-url\

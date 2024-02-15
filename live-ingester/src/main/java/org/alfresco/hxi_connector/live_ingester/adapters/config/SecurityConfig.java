@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 import java.util.List;
 
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
@@ -44,6 +45,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.auth.HxOAuth2Aut
 @EnableRetry
 @EnableScheduling
 @EnableMethodSecurity
+@EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class SecurityConfig
 {
 
