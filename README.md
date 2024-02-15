@@ -12,6 +12,27 @@ Retry specification default values are:
 - delay multiplier: 2
 
 Above default properties can be overwritten with custom specification, which for particular endpoints may look like, e.g.:
+- authentication request:
+```yaml
+hyland-experience:
+  authentication:
+    retry:
+      attempts: 5
+      initialDelay: 1000
+      delayMultiplier: 1.5
+```
+
+- file download from shared file store:
+```yaml
+alfresco:
+  transform:
+    shared-file-store:
+      retry:
+        attempts: 5
+        initialDelay: 1000
+        delayMultiplier: 1.5
+```
+
 - storage location request:
 ```yaml
 hyland-experience:
@@ -28,17 +49,6 @@ hyland-experience:
 hyland-experience:
   storage:
     upload:
-      retry:
-        attempts: 5
-        initialDelay: 1000
-        delayMultiplier: 1.5
-```
-
-- file download from shared file store:
-```yaml
-alfresco:
-  transform:
-    shared-file-store:
       retry:
         attempts: 5
         initialDelay: 1000

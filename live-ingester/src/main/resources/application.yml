@@ -1,3 +1,20 @@
+spring:
+  main:
+    web-application-type: none
+  security:
+    oauth2:
+      client:
+        registration:
+          hyland-experience-auth:
+            authorization-grant-type: urn:hyland:params:oauth:grant-type:api-credentials
+            client-id: dummy-client-id
+            client-secret: dummy-client-pass
+            client-name: ${hyland-experience.authorization.application-name}
+            scope: hxp.integrations
+        provider:
+          hyland-experience-auth:
+            token-uri: http://localhost:8001/token
+
 camel:
   springboot.main-run-controller: true
   dataformat.jackson.autoDiscoverObjectMapper: true
@@ -19,16 +36,20 @@ alfresco:
       port: 8099
 hyland-experience:
   insight:
-    username: dummy_user
-    password: dummy_pass
     base-url: http://localhost:8001
+  authentication:
+    refresh-delay-minutes: 55
+  authorization:
+    application-name: acs-insight-connector
+    service-user: insight-acs
+    environment-key: hxai-9682fb09-7f58-4b1a-aab2-306ad7edbc11
   storage:
     location:
       endpoint: "${hyland-experience.insight.base-url}/pre-signed-url\
         ?httpMethod=POST\
         &authMethod=Basic\
-        &authUsername=${hyland-experience.insight.username}\
-        &authPassword=${hyland-experience.insight.password}\
+        &authUsername=dummy_user\
+        &authPassword=dummy_pass\
         &authenticationPreemptive=true\
         &throwExceptionOnFailure=false"
   ingester:

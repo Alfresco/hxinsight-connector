@@ -23,31 +23,33 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
+package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 
-import static java.util.Objects.requireNonNullElseGet;
+import static java.util.Objects.requireNonNullElse;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.auth.HxAuthenticationClient.EXPECTED_STATUS_CODE;
+
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.boot.context.properties.bind.DefaultValue;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.springframework.validation.annotation.Validated;
 
-public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore)
+@Validated
+@SuppressWarnings("PMD.UnusedAssignment")
+public record AuthenticationResult(
+        @NotBlank @JsonProperty("access_token") String accessToken,
+        @Positive @JsonProperty("expires_in") int expiresIn,
+        TemporalUnit temporalUnit,
+        @NotBlank @JsonProperty("token_type") String tokenType,
+        @NotBlank String scope,
+        Integer statusCode)
 {
-    public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout)
-    {}
-
-    public record Response(@NotBlank String endpoint, @NotBlank String queueName)
-    {}
-
-    @SuppressWarnings("PMD.UnusedAssignment")
-    public record SharedFileStore(@NotBlank String host, @Positive int port, @NotNull @NestedConfigurationProperty Retry retry)
+    public AuthenticationResult
     {
-        public SharedFileStore
-        {
-            retry = requireNonNullElseGet(retry, Retry::new);
-        }
+        temporalUnit = requireNonNullElse(temporalUnit, ChronoUnit.SECONDS);
+        statusCode = requireNonNullElse(statusCode, EXPECTED_STATUS_CODE);
     }
 }
