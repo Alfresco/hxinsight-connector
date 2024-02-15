@@ -41,6 +41,12 @@ hyland-experience:
     environment-key:
   storage:
     location:
-      endpoint: ${hyland-experience.insight.base-url}/pre-signed-url?httpMethod=POST&throwExceptionOnFailure=false
+      endpoint: "${hyland-experience.insight.base-url}/pre-signed-url\
+        ?httpMethod=POST\
+        &authMethod=Basic\
+        &authUsername=dummy_user\
+        &authPassword=dummy_pass\
+        &authenticationPreemptive=true\
+        &throwExceptionOnFailure=false"
   ingester:
     endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST&throwExceptionOnFailure=false
