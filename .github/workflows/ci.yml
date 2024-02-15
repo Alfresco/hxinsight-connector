@@ -86,6 +86,7 @@ jobs:
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install
 
+
   push_docker_images:
     name: "Push docker images"
     runs-on: ubuntu-latest
