@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
-import static java.util.Objects.requireNonNullElse;
-
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Data;
@@ -42,7 +40,6 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Autho
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retry;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
@@ -71,10 +68,5 @@ public class IntegrationProperties
             @NotNull @NestedConfigurationProperty Authorization authorization,
             @NotNull @NestedConfigurationProperty Storage storage,
             @NotNull @NestedConfigurationProperty Ingester ingester)
-    {
-        public HylandExperience
-        {
-            authentication = requireNonNullElse(authentication, new Authentication(new Retry()));
-        }
-    }
+    {}
 }

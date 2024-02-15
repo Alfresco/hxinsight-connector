@@ -37,6 +37,8 @@ alfresco:
 hyland-experience:
   insight:
     base-url: http://localhost:8001
+  authentication:
+    refresh-delay-minutes: 55
   authorization:
     application-name: acs-insight-connector
     service-user: insight-acs

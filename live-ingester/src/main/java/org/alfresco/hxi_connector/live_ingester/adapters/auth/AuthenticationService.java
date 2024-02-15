@@ -28,9 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -65,7 +63,6 @@ public class AuthenticationService
     private static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";
     private static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
     private static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
-    private static final int AUTH_SCHEDULE_DELAY_MINUTES = 55;
     private static final int WAIT_FOR_PAUSE_TIME_MILLIS = 100;
 
     private final OAuth2ClientProperties oAuth2ClientProperties;
@@ -84,23 +81,15 @@ public class AuthenticationService
             waitFor(camelContext::isStarted);
             authenticate();
         };
-        delegatingTaskScheduler.scheduleWithFixedDelay(authenticationTask, Duration.ofMinutes(AUTH_SCHEDULE_DELAY_MINUTES));
+        delegatingTaskScheduler.scheduleWithFixedDelay(authenticationTask, Duration.ofMinutes(integrationProperties.hylandExperience().authentication().refreshDelayMinutes()));
     }
 
     public void authenticate()
     {
-        authenticate(false);
-    }
-
-    public void authenticate(boolean forceAuthentication)
-    {
-        if (forceAuthentication || securityContextIsEmpty() || tokenHasOrIsAboutToExpire(AUTH_SCHEDULE_DELAY_MINUTES))
-        {
-            String clientName = oAuth2ClientProperties.getRegistration().get(CLIENT_REGISTRATION_ID).getClientName();
-            OAuth2AuthenticationToken authenticationToken = createOAuth2AuthenticationToken(clientName);
-            Authentication authentication = authenticationManager.authenticate(authenticationToken);
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+        String clientName = oAuth2ClientProperties.getRegistration().get(CLIENT_REGISTRATION_ID).getClientName();
+        OAuth2AuthenticationToken authenticationToken = createOAuth2AuthenticationToken(clientName);
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     public static void setAuthorizationToken(Exchange exchange)
@@ -120,32 +109,6 @@ public class AuthenticationService
         {
             throw new LiveIngesterRuntimeException("Spring security context does not contain authentication principal of type " + OAuth2LoginAuthenticationToken.class.getSimpleName());
         }
-    }
-
-    private boolean securityContextIsEmpty()
-    {
-        return SecurityContextHolder.getContext() == null
-                || SecurityContextHolder.getContext().getAuthentication() == null;
-    }
-
-    private boolean tokenHasOrIsAboutToExpire(int scheduleDelayMinutes)
-    {
-        return !(SecurityContextHolder.getContext().getAuthentication() instanceof OAuth2LoginAuthenticationToken authenticationToken)
-                || authenticationToken.getAccessToken() == null
-                || authenticationToken.getAccessToken().getExpiresAt() == null
-                || tokenHasOrIsAboutToExpire(authenticationToken.getAccessToken(), scheduleDelayMinutes);
-    }
-
-    private boolean tokenHasOrIsAboutToExpire(OAuth2AccessToken accessToken, int scheduleDelayMinutes)
-    {
-        if (Optional.ofNullable(accessToken.getIssuedAt()).isEmpty() || Optional.ofNullable(accessToken.getExpiresAt()).isEmpty())
-        {
-            return true;
-        }
-
-        Duration expirationOffset = Duration.between(accessToken.getIssuedAt(), accessToken.getExpiresAt()).minusMinutes(scheduleDelayMinutes);
-        long expirationOffsetSeconds = expirationOffset.isNegative() ? 0 : expirationOffset.toSeconds();
-        return Instant.now().isAfter(accessToken.getExpiresAt().minusSeconds(expirationOffsetSeconds));
     }
 
     private OAuth2AuthenticationToken createOAuth2AuthenticationToken(String clientName)

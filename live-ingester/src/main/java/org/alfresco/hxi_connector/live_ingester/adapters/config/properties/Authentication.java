@@ -28,11 +28,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 import static java.util.Objects.requireNonNullElseGet;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
 @SuppressWarnings("PMD.UnusedAssignment")
-public record Authentication(@NotNull @NestedConfigurationProperty Retry retry)
+public record Authentication(@Positive int refreshDelayMinutes, @NotNull @NestedConfigurationProperty Retry retry)
 {
     public Authentication
     {
