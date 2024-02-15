@@ -26,10 +26,14 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
+import static java.util.Collections.emptySet;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -39,7 +43,7 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -47,84 +51,8 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 
 class PropertiesMapperTest
 {
-    private static final String NODE_TYPE = "test-type";
     private static final String NAME_PROPERTY_KEY = "cm:name";
     PropertiesMapper propertiesMapper = new PropertiesMapper();
-
-    @Test
-    void shouldHandlePropertyUpdate_NodeCreated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_CREATED);
-
-        NodeResource nodeResource = NodeResource.builder()
-                .setNodeType(NODE_TYPE)
-                .build();
-
-        setNodeResource(event, nodeResource);
-
-        // when
-        PropertyDelta<String> nameDelta = propertiesMapper.calculatePropertyDelta(event, NodeResource::getNodeType);
-
-        // then
-        PropertyDelta<String> expectedNameDelta = PropertyDelta.updated(NODE_TYPE);
-
-        assertEquals(expectedNameDelta, nameDelta);
-    }
-
-    @Test
-    void shouldHandlePropertyUpdate_NodeUpdated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_UPDATED);
-
-        NodeResource nodeResourceBefore = NodeResource.builder()
-                .setNodeType("previous type")
-                .build();
-        NodeResource nodeResource = NodeResource.builder()
-                .setNodeType(NODE_TYPE)
-                .build();
-
-        setNodeResourceBefore(event, nodeResourceBefore);
-        setNodeResource(event, nodeResource);
-
-        // when
-        PropertyDelta<String> nameDelta = propertiesMapper.calculatePropertyDelta(event, NodeResource::getNodeType);
-
-        // then
-        PropertyDelta<String> expectedNameDelta = PropertyDelta.updated(NODE_TYPE);
-
-        assertEquals(expectedNameDelta, nameDelta);
-    }
-
-    @Test
-    void shouldHandlePropertyUnchanged_NodeUpdated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_UPDATED);
-
-        NodeResource nodeResourceBefore = NodeResource.builder().build();
-        NodeResource nodeResource = NodeResource.builder()
-                .setNodeType(NODE_TYPE)
-                .build();
-
-        setNodeResourceBefore(event, nodeResourceBefore);
-        setNodeResource(event, nodeResource);
-
-        // when
-        PropertyDelta<String> nameDelta = propertiesMapper.calculatePropertyDelta(event, NodeResource::getNodeType);
-
-        // then
-        PropertyDelta<String> expectedNameDelta = PropertyDelta.unchanged(NODE_TYPE);
-
-        assertEquals(expectedNameDelta, nameDelta);
-    }
 
     @Test
     void shouldHandleAllCustomPropertiesUpdated_NodeCreated()
@@ -332,7 +260,7 @@ class PropertiesMapperTest
         Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(CustomPropertyDelta.deleted("cm:title"));
+        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted("cm:title"));
 
         assertEquals(expectedPropertyDeltas, customPropertyDeltas);
     }
@@ -358,6 +286,66 @@ class PropertiesMapperTest
         // then
         Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(CustomPropertyDelta.unchanged("cm:taggable"));
         assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+    }
+
+    @Test
+    void shouldHandleContentDeleted_NodeUpdated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_UPDATED);
+
+        ContentInfo contentInfo = new ContentInfo(null, 123L, null);
+        NodeResource nodeResourceBefore = NodeResource.builder().setContent(contentInfo).build();
+        setNodeResourceBefore(event, nodeResourceBefore);
+        NodeResource nodeResource = NodeResource.builder().setContent(null).build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+
+        // then
+        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY_KEY));
+        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+    }
+
+    @Test
+    void shouldNotMentionContentCreated_NodeCreated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_CREATED);
+
+        ContentInfo contentInfo = new ContentInfo(null, 123L, null);
+        NodeResource nodeResource = NodeResource.builder().setContent(contentInfo).build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+
+        // then
+        assertEquals(emptySet(), customPropertyDeltas);
+    }
+
+    @Test
+    void shouldNotMentionContentUpdated_NodeUpdated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_UPDATED);
+
+        ContentInfo oldContentInfo = new ContentInfo(null, 123L, null);
+        NodeResource nodeResourceBefore = NodeResource.builder().setContent(oldContentInfo).build();
+        setNodeResourceBefore(event, nodeResourceBefore);
+        ContentInfo newContentInfo = new ContentInfo(null, 456L, null);
+        NodeResource nodeResource = NodeResource.builder().setContent(newContentInfo).build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+
+        // then
+        assertEquals(emptySet(), customPropertyDeltas);
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)

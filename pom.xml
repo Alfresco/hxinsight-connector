@@ -10,7 +10,7 @@
 
     <name>Alfresco Connector for Hyland Experience Insight :: Parent</name>
     <artifactId>alfresco-hxinsight-connector-parent</artifactId>
-    <version>0.0.5-SNAPSHOT</version>
+    <version>0.0.6-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
@@ -200,12 +200,18 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                  <exclude>docker-compose/volume/**</exclude>
+                </excludes>
             </resource>
         </resources>
         <testResources>
             <testResource>
                 <directory>src/test/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>test-file.pdf</exclude>
+                </excludes>
             </testResource>
         </testResources>
 

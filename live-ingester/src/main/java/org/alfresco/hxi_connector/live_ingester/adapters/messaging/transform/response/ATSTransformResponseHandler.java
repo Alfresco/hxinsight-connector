@@ -28,6 +28,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.updated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
@@ -38,6 +44,11 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadContentRenditionCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.RemoteContentLocation;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.ContentPropertyValue;
 
 @Slf4j
 @Component
@@ -46,6 +57,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
 {
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
+    private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
     private final IntegrationProperties integrationProperties;
 
     @Override
@@ -57,6 +69,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)
                 .process(this::uploadContentRendition)
+                .process(this::updateContentLocation)
                 .end();
     }
 
@@ -67,6 +80,18 @@ public class ATSTransformResponseHandler extends RouteBuilder
 
         UploadContentRenditionCommand command = new UploadContentRenditionCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef());
 
-        ingestContentCommandHandler.handle(command);
+        RemoteContentLocation remoteContentLocation = ingestContentCommandHandler.handle(command);
+        exchange.getIn().setBody(remoteContentLocation);
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private void updateContentLocation(Exchange exchange)
+    {
+        RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
+
+        ContentPropertyValue contentPropertyValue = new ContentPropertyValue(remoteContentLocation.url());
+        Set<CustomPropertyDelta<?>> properties = Set.of(updated(CONTENT_PROPERTY_KEY, contentPropertyValue));
+        IngestMetadataCommand command = new IngestMetadataCommand(remoteContentLocation.nodeId(), UPDATE, properties);
+        ingestMetadataCommandHandler.handle(command);
     }
 }

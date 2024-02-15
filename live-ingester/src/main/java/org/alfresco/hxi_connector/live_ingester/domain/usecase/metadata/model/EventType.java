@@ -23,16 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-@Getter
-@EqualsAndHashCode
-@RequiredArgsConstructor
-public class DeleteNodeEvent implements NodeEvent
+public enum EventType
 {
-    private final String objectId;
+    CREATE, UPDATE, DELETE;
 }

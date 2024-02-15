@@ -25,14 +25,17 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import static java.util.Locale.ENGLISH;
 
-@Getter
-@EqualsAndHashCode
-@RequiredArgsConstructor
-public class DeleteNodeEvent implements NodeEvent
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum HxInsightEventType
 {
-    private final String objectId;
+    CREATE, UPDATE, DELETE;
+
+    @JsonValue
+    public String serialise()
+    {
+        return this.toString().toLowerCase(ENGLISH);
+    }
 }
