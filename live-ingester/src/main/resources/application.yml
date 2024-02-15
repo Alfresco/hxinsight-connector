@@ -4,14 +4,14 @@ spring:
       client:
         registration:
           hyland-experience-auth:
-            authorization-grant-type: urn:hyland:params:oauth:grant-type:api-credentials
-            client-id: 6f870beb-504a-40cf-b29f-eccb6202b37a
-            client-secret: KuM0MrzEhWfZet3v8uhnLZwKX+IesqmROKjCw7Jze+Y=
+            authorization-grant-type:
+            client-id:
+            client-secret:
             client-name: ${hyland-experience.authorization.application-name}
-            scope: hxp.integrations
+            scope:
         provider:
           hyland-experience-auth:
-            token-uri: https://auth.iam.staging.experience.hyland.com/idp/connect/token
+            token-uri:
 
 camel:
   springboot.main-run-controller: true
@@ -38,7 +38,7 @@ hyland-experience:
   authorization:
     application-name: acs-insight-connector
     service-user: insight-acs
-    environment-key: hxai-9682fb09-7f58-4b1a-aab2-306ad7edbc11
+    environment-key:
   storage:
     location:
       endpoint: ${hyland-experience.insight.base-url}/pre-signed-url?httpMethod=POST&throwExceptionOnFailure=false
