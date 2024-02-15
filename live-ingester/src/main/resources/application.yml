@@ -4,14 +4,14 @@ spring:
       client:
         registration:
           hyland-experience-auth:
-            authorization-grant-type:
-            client-id:
-            client-secret:
+            authorization-grant-type: urn:hyland:params:oauth:grant-type:api-credentials
+            client-id: dummy-client-id
+            client-secret: dummy-client-pass
             client-name: ${hyland-experience.authorization.application-name}
-            scope:
+            scope: hxp.integrations
         provider:
           hyland-experience-auth:
-            token-uri:
+            token-uri: http://localhost:8001/token
 
 camel:
   springboot.main-run-controller: true
