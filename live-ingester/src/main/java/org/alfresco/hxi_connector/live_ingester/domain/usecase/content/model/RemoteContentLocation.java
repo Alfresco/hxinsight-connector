@@ -23,13 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.ports.storage;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 
 import java.net.URL;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
-
-public interface StorageClient
-{
-    URL upload(File file, String contentType, String nodeId);
-}
+public record RemoteContentLocation(String nodeId, URL url)
+{}
