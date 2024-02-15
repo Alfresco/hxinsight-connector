@@ -61,6 +61,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Cu
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class IngestMetadataCommandHandlerTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
