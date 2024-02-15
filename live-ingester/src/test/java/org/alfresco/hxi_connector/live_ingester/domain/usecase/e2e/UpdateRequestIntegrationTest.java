@@ -154,12 +154,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedBody = """
-                {
-                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType" : "update"
-                }""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
         String expectedATSRequest = """
                 {
                     "requestId": "%s",
@@ -170,6 +164,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectNoHxIngestMessagesReceived();
     }
 
     @Test
@@ -269,12 +264,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedBody = """
-                {
-                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType" : "update"
-                }""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        containerSupport.expectNoHxIngestMessagesReceived();
     }
 
     @Test

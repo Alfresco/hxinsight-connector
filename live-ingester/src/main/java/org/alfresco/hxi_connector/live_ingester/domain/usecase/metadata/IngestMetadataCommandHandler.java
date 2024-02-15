@@ -26,10 +26,15 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
+
 import java.util.List;
 import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
@@ -38,6 +43,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Cu
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class IngestMetadataCommandHandler
@@ -48,6 +54,7 @@ public class IngestMetadataCommandHandler
     public void handle(IngestMetadataCommand command)
     {
         EventType eventType = command.eventType();
+        ensureThat(eventType != DELETE, "Cannot ingest metadata for DELETE event - nodeId %s", command.nodeId());
         UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId(), eventType);
 
         command.properties()
@@ -56,6 +63,13 @@ public class IngestMetadataCommandHandler
                 .flatMap(Optional::stream)
                 .forEach(customPropertyDelta -> customPropertyDelta.applyOn(updateMetadataEvent));
 
+        if (updateMetadataEvent.getEventType() == UPDATE
+                && updateMetadataEvent.getMetadataPropertiesToSet().isEmpty()
+                && updateMetadataEvent.getMetadataPropertiesToUnset().isEmpty())
+        {
+            log.debug("Ignoring empty metadata update: {}", updateMetadataEvent);
+            return;
+        }
         ingestionEngineEventPublisher.publishMessage(updateMetadataEvent);
     }
 
