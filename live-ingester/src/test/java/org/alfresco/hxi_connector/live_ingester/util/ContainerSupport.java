@@ -155,6 +155,12 @@ public class ContainerSupport
     }
 
     @SneakyThrows
+    public void expectNoHxIngestMessagesReceived()
+    {
+        WireMock.verify(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
+    }
+
+    @SneakyThrows
     public void verifyATSRequestReceived(String expectedBody)
     {
         TextMessage received = (TextMessage) retryWithBackoff(() -> {
