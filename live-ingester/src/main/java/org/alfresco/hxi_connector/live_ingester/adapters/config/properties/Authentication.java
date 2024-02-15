@@ -31,6 +31,7 @@ import jakarta.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
+@SuppressWarnings("PMD.UnusedAssignment")
 public record Authentication(@NotNull @NestedConfigurationProperty Retry retry)
 {
     public Authentication

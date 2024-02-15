@@ -77,7 +77,7 @@ public class HxOAuth2AuthenticationProvider implements AuthenticationProvider
                 OAuth2AccessToken.TokenType.BEARER,
                 authenticationResult.accessToken(),
                 Instant.now(),
-                Instant.now().plusSeconds(authenticationResult.expiresIn()),
+                Instant.now().plus(authenticationResult.expiresIn(), authenticationResult.temporalUnit()),
                 Set.of(authenticationResult.scope()));
 
         return new OAuth2LoginAuthenticationToken(clientRegistration, oAuth2AuthorizationExchange, oAuth2User, oAuth2User.getAuthorities(), oAuth2AccessToken);

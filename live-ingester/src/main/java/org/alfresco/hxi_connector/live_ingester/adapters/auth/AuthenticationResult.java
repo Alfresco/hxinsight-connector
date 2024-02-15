@@ -29,7 +29,8 @@ import static java.util.Objects.requireNonNullElse;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.auth.HxAuthenticationClient.EXPECTED_STATUS_CODE;
 
-import java.util.concurrent.TimeUnit;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 
@@ -40,14 +41,14 @@ import org.springframework.validation.annotation.Validated;
 public record AuthenticationResult(
         @NotBlank @JsonProperty("access_token") String accessToken,
         @Positive @JsonProperty("expires_in") int expiresIn,
-        TimeUnit timeUnit,
+        TemporalUnit temporalUnit,
         @NotBlank @JsonProperty("token_type") String tokenType,
         @NotBlank String scope,
         Integer statusCode)
 {
     public AuthenticationResult
     {
-        timeUnit = TimeUnit.SECONDS;
+        temporalUnit = ChronoUnit.SECONDS;
         statusCode = requireNonNullElse(statusCode, EXPECTED_STATUS_CODE);
     }
 }

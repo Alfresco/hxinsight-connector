@@ -51,6 +51,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Trans
 @Validated
 @Data
 @Accessors(fluent = true)
+@SuppressWarnings("PMD.UnusedAssignment")
 public class IntegrationProperties
 {
 
