@@ -65,7 +65,7 @@ public class AuthenticationService
     private static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";
     private static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
     private static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
-    private static final int AUTHENTICATION_SCHEDULE_DELAY_MINUTES = 55;
+    private static final int AUTH_SCHEDULE_DELAY_MINUTES = 55;
     private static final int WAIT_FOR_PAUSE_TIME_MILLIS = 100;
 
     private final OAuth2ClientProperties oAuth2ClientProperties;
@@ -84,7 +84,7 @@ public class AuthenticationService
             waitFor(camelContext::isStarted);
             authenticate();
         };
-        delegatingTaskScheduler.scheduleWithFixedDelay(authenticationTask, Duration.ofMinutes(AUTHENTICATION_SCHEDULE_DELAY_MINUTES));
+        delegatingTaskScheduler.scheduleWithFixedDelay(authenticationTask, Duration.ofMinutes(AUTH_SCHEDULE_DELAY_MINUTES));
     }
 
     public void authenticate()
@@ -94,7 +94,7 @@ public class AuthenticationService
 
     public void authenticate(boolean forceAuthentication)
     {
-        if (forceAuthentication || securityContextIsEmpty() || tokenHasOrIsAboutToExpire(AUTHENTICATION_SCHEDULE_DELAY_MINUTES))
+        if (forceAuthentication || securityContextIsEmpty() || tokenHasOrIsAboutToExpire(AUTH_SCHEDULE_DELAY_MINUTES))
         {
             String clientName = oAuth2ClientProperties.getRegistration().get(CLIENT_REGISTRATION_ID).getClientName();
             OAuth2AuthenticationToken authenticationToken = createOAuth2AuthenticationToken(clientName);
