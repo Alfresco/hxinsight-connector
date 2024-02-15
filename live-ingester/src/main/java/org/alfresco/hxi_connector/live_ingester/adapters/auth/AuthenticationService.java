@@ -77,7 +77,7 @@ public class AuthenticationService
     private final CamelContext camelContext;
 
     @PostConstruct
-    public void authenticateStartScheduled()
+    public void authenticationSchedule()
     {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         DelegatingSecurityContextTaskScheduler delegatingTaskScheduler = new DelegatingSecurityContextTaskScheduler(taskScheduler, securityContext);
