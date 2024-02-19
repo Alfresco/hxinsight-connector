@@ -1980,15 +1980,6 @@ COPY public.act_re_model (id_, rev_, name_, key_, category_, create_time_, last_
 --
 
 COPY public.act_re_procdef (id_, rev_, category_, name_, key_, version_, deployment_id_, resource_name_, dgrm_resource_name_, description_, has_start_form_key_, has_graphical_notation_, suspension_state_, tenant_id_) FROM stdin;
-activitiAdhoc:1:4	1	http://alfresco.org	Adhoc Activiti Process	activitiAdhoc	1	1	8842f71f-334d-4425-9968-f1c2b0fcf461bpmn20.xml	8842f71f-334d-4425-9968-f1c2b0fcf461activitiAdhoc.png	\N	t	t	1	
-activitiReview:1:8	1	http://alfresco.org	Review And Approve Activiti Process	activitiReview	1	5	e05cec22-8df0-41b4-bc62-e30913e29af2bpmn20.xml	e05cec22-8df0-41b4-bc62-e30913e29af2activitiReview.png	\N	t	t	1	
-activitiReviewPooled:1:12	1	http://alfresco.org	Pooled Review And Approve Activiti Process	activitiReviewPooled	1	9	5d8bc39a-5ac4-4c8a-bdcf-dbf9aa80e253bpmn20.xml	5d8bc39a-5ac4-4c8a-bdcf-dbf9aa80e253activitiReviewPooled.png	\N	t	t	1	
-activitiParallelReview:1:16	1	http://alfresco.org	Parallel Review And Approve Activiti Process	activitiParallelReview	1	13	563c2242-5935-49a3-a706-a23a1535bebbbpmn20.xml	563c2242-5935-49a3-a706-a23a1535bebbactivitiParallelReview.png	\N	t	t	1	
-activitiParallelGroupReview:1:20	1	http://alfresco.org	Parallel Group Review And Approve Activiti Process	activitiParallelGroupReview	1	17	73736d67-f472-413a-9b55-92ef702cb7fbbpmn20.xml	73736d67-f472-413a-9b55-92ef702cb7fbactivitiParallelGroupReview.png	\N	t	t	1	
-activitiInvitationModerated:1:23	1	http://alfresco.org/workflows/internal	Moderated activiti invitation process	activitiInvitationModerated	1	21	4efbadec-092a-4569-90c3-2e402e71db22bpmn20.xml	\N	\N	t	f	1	
-activitiInvitationNominated:1:26	1	http://alfresco.org/workflows/internal	Nominated activiti invitation process	activitiInvitationNominated	1	24	ca6eb1aa-229b-437b-9b33-2c9bfb08269dbpmn20.xml	\N	\N	t	f	1	
-activitiInvitationNominatedAddDirect:1:29	1	http://alfresco.org/workflows/internal	Add user activiti invitation process	activitiInvitationNominatedAddDirect	1	27	b18edc1f-0bed-4c2b-9f90-8001ecf0bb65bpmn20.xml	\N	\N	t	f	1	
-resetPassword:1:32	1	http://alfresco.org/workflows/internal	On Premise Reset Password process	resetPassword	1	30	8095d7d0-f403-4576-bd4d-705085944736bpmn20.xml	\N	\N	t	f	1	
 \.
 
 
