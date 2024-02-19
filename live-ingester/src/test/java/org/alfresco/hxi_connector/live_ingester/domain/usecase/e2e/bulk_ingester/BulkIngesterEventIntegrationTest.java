@@ -41,22 +41,22 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
         containerSupport.prepareHxInsightToReturnSuccess();
 
         // when
-        String repoEvent = """
+        String bulkIngesterEvent = """
                 {
                   "nodeId": "5018ff83-ec45-4a11-95c4-681761752aa7",
-                  "type": "cm:category",
-                  "createdAt": 1707153552,
-                  "creatorId": "System",
-                  "modifierId": "admin",
-                  "aspectNames": [
-                    "cm:auditable"
-                  ],
                   "contentInfo": null,
-                  "customProperties": {
-                    "cm:name": "Mexican Spanish"
+                  "properties": {
+                    "cm:name": "Mexican Spanish",
+                    "type": "cm:category",
+                    "createdAt": 1707153552,
+                    "createdByUserWithId": "System",
+                    "modifiedByUserWithId": "admin",
+                    "aspectsNames": [
+                      "cm:auditable"
+                    ]
                   }
                 }""";
-        containerSupport.raiseBulkIngesterEvent(repoEvent);
+        containerSupport.raiseBulkIngesterEvent(bulkIngesterEvent);
 
         // then
         String expectedBody = """
@@ -85,23 +85,23 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
         String repoEvent = """
                 {
                   "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
-                  "type": "cm:content",
-                  "creatorId": "admin",
-                  "modifierId": "hr_user",
-                  "aspectNames": [
-                    "cm:indexControl",
-                    "cm:auditable"
-                  ],
                   "contentInfo": {
                     "contentSize": 330,
                     "encoding": "ISO-8859-1",
                     "mimetype": "text/xml"
                   },
-                  "createdAt": 1308061016,
-                  "customProperties": {
+                  "properties": {
                     "cm:name": "dashboard.xml",
                     "cm:isContentIndexed": true,
-                    "cm:isIndexed": false
+                    "cm:isIndexed": false,
+                    "createdAt": 1308061016,
+                    "type": "cm:content",
+                    "createdByUserWithId": "admin",
+                    "modifiedByUserWithId": "hr_user",
+                    "aspectsNames": [
+                      "cm:indexControl",
+                      "cm:auditable"
+                    ]
                   }
                 }""";
         containerSupport.raiseBulkIngesterEvent(repoEvent);
