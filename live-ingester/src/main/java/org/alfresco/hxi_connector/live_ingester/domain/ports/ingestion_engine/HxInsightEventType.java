@@ -23,18 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
+import static java.util.Locale.ENGLISH;
 
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+import com.fasterxml.jackson.annotation.JsonValue;
+
+public enum HxInsightEventType
 {
+    CREATE, UPDATE, DELETE;
 
-    public static void main(String[] args)
+    @JsonValue
+    public String serialise()
     {
-        SpringApplication.run(LiveIngesterApplication.class, args);
+        return this.toString().toLowerCase(ENGLISH);
     }
 }

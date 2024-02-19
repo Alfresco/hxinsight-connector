@@ -304,7 +304,9 @@ services:
     ports:
       - "4566:4566"
     volumes:
-      - './init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh'
+      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
 
 volumes:
   shared-file-store-volume:

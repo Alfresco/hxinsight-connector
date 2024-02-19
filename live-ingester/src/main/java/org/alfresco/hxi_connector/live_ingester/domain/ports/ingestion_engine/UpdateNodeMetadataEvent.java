@@ -31,9 +31,15 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.ToString;
+
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
 @Getter
+@ToString
+@EqualsAndHashCode
 public class UpdateNodeMetadataEvent implements NodeEvent
 {
     private final String objectId;

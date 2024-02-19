@@ -25,9 +25,11 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.ports.storage;
 
+import java.net.URL;
+
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 public interface StorageClient
 {
-    void upload(File file, String contentType, String nodeId);
+    URL upload(File file, String contentType, String nodeId);
 }

@@ -23,19 +23,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import static java.util.Locale.ENGLISH;
+import static java.util.Objects.requireNonNullElseGet;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-public enum EventType
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
+@SuppressWarnings("PMD.UnusedAssignment")
+public record Authentication(@Positive int refreshDelayMinutes, @NotNull @NestedConfigurationProperty Retry retry)
 {
-    CREATE, UPDATE, DELETE;
-
-    @JsonValue
-    public String serialise()
+    public Authentication
     {
-        return this.toString().toLowerCase(ENGLISH);
+        retry = requireNonNullElseGet(retry, Retry::new);
     }
 }

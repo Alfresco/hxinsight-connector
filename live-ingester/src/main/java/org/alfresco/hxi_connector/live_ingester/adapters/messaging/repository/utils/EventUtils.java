@@ -28,12 +28,17 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.u
 
 import static lombok.AccessLevel.PRIVATE;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import lombok.NoArgsConstructor;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -55,5 +60,22 @@ public final class EventUtils
     public static boolean isEventTypeDeleted(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return NODE_DELETED.getType().equals(event.getType());
+    }
+
+    public static EventType getEventType(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (isEventTypeCreated(event))
+        {
+            return CREATE;
+        }
+        if (isEventTypeUpdated(event))
+        {
+            return UPDATE;
+        }
+        if (isEventTypeDeleted(event))
+        {
+            return DELETE;
+        }
+        throw new LiveIngesterRuntimeException("Unsupported Repo event type " + event.getType());
     }
 }

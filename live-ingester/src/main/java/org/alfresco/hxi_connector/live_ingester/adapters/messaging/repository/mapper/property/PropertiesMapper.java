@@ -27,14 +27,21 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
 import static java.util.Optional.ofNullable;
+import static java.util.function.Function.identity;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateAspectsDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateContentPropertyDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedAtDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedByDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateModifiedByDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.isFieldUnchanged;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,7 +49,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -51,18 +57,6 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class PropertiesMapper
 {
-    private static final String NAME_PROPERTY_KEY = "cm:name";
-
-    public <T> PropertyDelta<T> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, T> fieldGetter)
-    {
-        if (shouldNotUpdateField(event, fieldGetter))
-        {
-            return PropertyDelta.unchanged(fieldGetter.apply(event.getData().getResource()));
-        }
-
-        return PropertyDelta.updated(fieldGetter.apply(event.getData().getResource()));
-    }
-
     public Set<CustomPropertyDelta<?>> calculateCustomPropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         if (isEventTypeCreated(event))
@@ -75,21 +69,30 @@ public class PropertiesMapper
 
     private Set<CustomPropertyDelta<?>> allCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        Stream<CustomPropertyDelta<?>> properties = customPropertiesStream(event.getData().getResource())
+        Stream<CustomPropertyDelta<?>> propertyDeltas = customPropertiesStream(event.getData().getResource())
                 .filter(property -> Objects.nonNull(property.getValue()))
                 .map(property -> CustomPropertyDelta.updated(property.getKey(), property.getValue()));
-
-        Stream<CustomPropertyDelta<?>> nameProperty = calculateNamePropertyDelta(event);
-
-        return Stream.concat(properties, nameProperty)
-                .collect(Collectors.toSet());
+        return streamOfAllProperties(event, propertyDeltas);
     }
 
     private Set<CustomPropertyDelta<?>> someCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        return Stream.concat(
-                calculatePropertiesDelta(event),
-                calculateNamePropertyDelta(event)).collect(Collectors.toSet());
+        Stream<CustomPropertyDelta<?>> propertyDeltas = calculatePropertiesDelta(event);
+        return streamOfAllProperties(event, propertyDeltas);
+    }
+
+    private Set<CustomPropertyDelta<?>> streamOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<CustomPropertyDelta<?>> propertyDeltas)
+    {
+        return Stream.of(propertyDeltas,
+                calculateNamePropertyDelta(event),
+                calculateContentPropertyDelta(event),
+                calculateTypeDelta(event),
+                calculateCreatedByDelta(event),
+                calculateModifiedByDelta(event),
+                calculateAspectsDelta(event),
+                calculateCreatedAtDelta(event))
+                .flatMap(identity())
+                .collect(Collectors.toSet());
     }
 
     private Stream<CustomPropertyDelta<?>> calculatePropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event)
@@ -101,32 +104,6 @@ public class PropertiesMapper
 
         return customPropertiesStream(event.getData().getResourceBefore())
                 .map(oldPropertyEntry -> toCustomPropertyDelta(event.getData(), oldPropertyEntry));
-    }
-
-    private Stream<CustomPropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        if (shouldNotUpdateField(event, NodeResource::getName))
-        {
-            return Stream.empty();
-        }
-
-        return ofNullable(event.getData().getResource().getName())
-                .stream()
-                .filter(Objects::nonNull)
-                .map(name -> CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
-    }
-
-    private boolean shouldNotUpdateField(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
-    {
-        return !isEventTypeCreated(event) && isFieldUnchanged(event, fieldGetter);
-    }
-
-    private boolean isFieldUnchanged(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
-    {
-        return Optional.of(event.getData())
-                .map(DataAttributes::getResourceBefore)
-                .map(fieldGetter::apply)
-                .isEmpty();
     }
 
     private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> eventData, Map.Entry<String, ?> oldPropertyEntry)

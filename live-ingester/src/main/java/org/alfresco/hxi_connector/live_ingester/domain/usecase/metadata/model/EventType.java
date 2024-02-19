@@ -23,18 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
-@SpringBootApplication
-@SuppressWarnings("PMD.UseUtilityClass")
-public class LiveIngesterApplication
+public enum EventType
 {
-
-    public static void main(String[] args)
-    {
-        SpringApplication.run(LiveIngesterApplication.class, args);
-    }
+    CREATE, UPDATE, DELETE;
 }

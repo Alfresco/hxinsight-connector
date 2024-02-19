@@ -110,7 +110,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "properties" : {
                     "cm:title" : "Purchase Order",
                     "aspectsNames" : [ "cm:versionable", "cm:author", "cm:titled" ],
-                    "modifiedByUserWithId" : "abeecher"
+                    "modifiedBy" : "abeecher"
                   },
                   "removedProperties" : [ "cm:versionType", "cm:description" ]
                 }""";
@@ -154,12 +154,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedBody = """
-                {
-                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType" : "update"
-                }""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
         String expectedATSRequest = """
                 {
                     "requestId": "%s",
@@ -170,6 +164,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectNoHxIngestMessagesReceived();
     }
 
     @Test
@@ -269,12 +264,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedBody = """
-                {
-                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType" : "update"
-                }""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        containerSupport.expectNoHxIngestMessagesReceived();
     }
 
     @Test
@@ -410,5 +400,111 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }""";
 
         return repoEvent.formatted(properties, propertiesBefore);
+    }
+
+    @Test
+    void testRemovingContentFromNode()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "ae5dac3c-25d0-438d-b148-2084d1ab05a6",
+                  "data": {
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                      "name": "purchase-order-scan.pdf",
+                      "content": {
+                        "sizeInBytes": 0
+                      },
+                      "properties": {
+                        "cm:title": "Purchase Order"
+                      }
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      }
+                    }
+                  }
+                }""";
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e65",
+                  "eventType" : "update",
+                  "removedProperties" : [ "cm:content" ]
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    @Test
+    void testLogInEvent()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "621573f5-0fb4-46dd-ab1a-88f83c0e1f2b",
+                  "source": "/6cac945d-0919-47cc-ade7-8645e65c4371",
+                  "time": "2024-01-09T11:14:33.615Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "a7a1ef25-2398-4fb9-8178-f3a6ff6d5ed0",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                      "name": "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                      "nodeType": "cm:person",
+                      "createdByUser": null,
+                      "createdAt": null,
+                      "modifiedByUser": null,
+                      "modifiedAt": null,
+                      "content": null,
+                      "properties": {
+                        "cm:homeFolderProvider": "bootstrapHomeFolderProvider",
+                        "cm:homeFolder": {"storeRef": {"protocol": "workspace", "identifier": "SpacesStore"}, "id": "7f1fa040-e840-40c6-a8a0-da457aca2473"},
+                        "sys:cascadeCRC": 1040368885,
+                        "cm:lastName": ""
+                      },
+                      "aspectNames": [ "cm:preferences", "cm:ownable" ],
+                      "isFolder": false,
+                      "isFile": false
+                    },
+                    "resourceBefore": {
+                      "properties": {
+                        "cm:preferenceValues": null
+                      },
+                      "aspectNames": [ "cm:ownable" ]
+                    }
+                  }
+                }""";
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId" : "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                  "eventType" : "update",
+                  "properties" : {
+                    "aspectsNames" : [ "cm:preferences", "cm:ownable" ]
+                  }
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 }
