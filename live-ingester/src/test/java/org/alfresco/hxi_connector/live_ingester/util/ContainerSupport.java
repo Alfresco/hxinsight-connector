@@ -79,6 +79,7 @@ public class ContainerSupport
     public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingest";
     private static final int HX_INSIGHT_SUCCESS_CODE = 201;
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
+    public static final String BULK_INGESTER_QUEUE = "bulk.ingester.queue";
     public static final String ATS_QUEUE = "ats.queue";
     public static final String REQUEST_ID_PLACEHOLDER = "_REQUEST_ID_";
     private static ContainerSupport instance;
@@ -92,6 +93,7 @@ public class ContainerSupport
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";
     private Session session;
     private MessageProducer repoEventProducer;
+    private MessageProducer bulkIngesterEventProducer;
     private MessageConsumer atsConsumer;
     private MessageProducer atsEventProducer;
     private LocalStorageClient localStorageClient;
@@ -110,6 +112,8 @@ public class ContainerSupport
 
         Topic repoTopic = session.createTopic(REPO_EVENT_TOPIC);
         repoEventProducer = session.createProducer(repoTopic);
+        Queue bulkIngesterQueue = session.createQueue(BULK_INGESTER_QUEUE);
+        bulkIngesterEventProducer = session.createProducer(bulkIngesterQueue);
         Queue atsQueue = session.createQueue(ATS_QUEUE);
         atsConsumer = session.createConsumer(atsQueue);
 
@@ -144,6 +148,12 @@ public class ContainerSupport
     public void raiseRepoEvent(String repoEvent)
     {
         repoEventProducer.send(session.createTextMessage(repoEvent));
+    }
+
+    @SneakyThrows
+    public void raiseBulkIngesterEvent(String bulkIngesterEvent)
+    {
+        bulkIngesterEventProducer.send(session.createTextMessage(bulkIngesterEvent));
     }
 
     @SneakyThrows

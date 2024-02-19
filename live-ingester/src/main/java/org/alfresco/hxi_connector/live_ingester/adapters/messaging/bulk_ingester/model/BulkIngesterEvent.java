@@ -28,13 +28,16 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingeste
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.Set;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
+import org.springframework.validation.annotation.Validated;
+
+@Validated
 public record BulkIngesterEvent(
-        String nodeId,
-        Set<String> aspectNames,
+        @NotBlank String nodeId,
         ContentInfo contentInfo,
-        Map<String, Serializable> properties)
+        @NotNull Map<String, Serializable> properties)
 {
     public record ContentInfo(
             long contentSize,
