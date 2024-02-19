@@ -63,6 +63,7 @@ import org.alfresco.hxi_connector.bulk_ingester.util.integration.PostgresIntegra
 @EnableAutoConfiguration
 @SpringBootTest(properties = "logging.level.org.alfresco=DEBUG", classes = BulkIngesterApplication.class)
 @Import(BulkIngestionProcessorIntegrationTest.MockEventPublisherConfiguration.class)
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SimplifyBooleanReturns", "PMD.LooseCoupling"})
 class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
 {
 
