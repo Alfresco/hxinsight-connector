@@ -4108,23 +4108,23 @@ COPY public.alf_locale (id, version, locale_str) FROM stdin;
 --
 
 COPY public.alf_lock (id, version, shared_resource_id, excl_resource_id, lock_token, start_time, expiry_time) FROM stdin;
-2	1	2	2	not-locked	0	0
-1	7	1	1	not-locked	0	0
-3	1	3	3	not-locked	0	0
-4	1	5	4	not-locked	0	0
-5	1	6	4	not-locked	0	0
-6	1	7	4	not-locked	0	0
-7	1	8	4	not-locked	0	0
-8	1	4	4	not-locked	0	0
-9	1	9	9	not-locked	0	0
-10	1	5	10	not-locked	0	0
-11	1	6	10	not-locked	0	0
-12	1	7	10	not-locked	0	0
-13	1	11	10	not-locked	0	0
-14	1	10	10	not-locked	0	0
+1	9	1	1	not-locked	0	0
 35	1	27	27	not-locked	0	0
-15	279	13	13	not-locked	0	0
-16	559	12	12	not-locked	0	0
+2	3	2	2	not-locked	0	0
+3	3	3	3	not-locked	0	0
+15	309	13	13	not-locked	0	0
+4	3	5	4	not-locked	0	0
+5	3	6	4	not-locked	0	0
+6	3	7	4	not-locked	0	0
+7	3	8	4	not-locked	0	0
+8	3	4	4	not-locked	0	0
+9	3	9	9	not-locked	0	0
+16	619	12	12	not-locked	0	0
+10	3	5	10	not-locked	0	0
+11	3	6	10	not-locked	0	0
+12	3	7	10	not-locked	0	0
+13	3	11	10	not-locked	0	0
+14	3	10	10	not-locked	0	0
 17	13	5	15	not-locked	0	0
 18	13	6	15	not-locked	0	0
 19	13	7	15	not-locked	0	0
@@ -4658,7 +4658,6 @@ COPY public.alf_node (id, version, store_id, uuid, transaction_id, type_qname_id
 409	4	6	e636eafd-b138-4f01-a674-2e2716cda9e2	6	51	2	13	System	2024-02-19T07:51:12.623Z	System	2024-02-19T07:51:12.623Z	\N
 410	4	6	64ee9bf8-423b-41ef-ac8d-a976d628970a	6	51	2	13	System	2024-02-19T07:51:12.627Z	System	2024-02-19T07:51:12.627Z	\N
 411	4	6	151911da-7588-4572-a357-38ccce92f87a	6	51	2	13	System	2024-02-19T07:51:12.632Z	System	2024-02-19T07:51:12.632Z	\N
-880	6	6	44545a62-0f64-4d3e-838a-9f8ba23df0c7	32	51	4	11	admin	2024-02-19T08:00:28.040Z	admin	2024-02-19T08:00:28.040Z	\N
 412	4	6	f697f24c-082f-4d19-bbeb-6ca26df76f21	6	51	2	13	System	2024-02-19T07:51:12.636Z	System	2024-02-19T07:51:12.636Z	\N
 413	1	6	faa1af9f-013a-4d5d-a2ba-72d8c4b81caa	6	24	2	13	System	2024-02-19T07:51:12.642Z	System	2024-02-19T07:51:12.642Z	\N
 414	4	6	wf-email-html-ftl	6	51	2	13	System	2024-02-19T07:51:12.645Z	System	2024-02-19T07:51:12.645Z	\N
@@ -4666,9 +4665,10 @@ COPY public.alf_node (id, version, store_id, uuid, transaction_id, type_qname_id
 891	1	4	b6941c17-49f7-4c07-bd67-0b0920cab7f1	38	51	4	60	admin	2024-02-19T08:09:40.839Z	admin	2024-02-19T08:09:40.839Z	\N
 415	4	6	981d7b54-15e4-4145-8653-0a03db8c3b86	6	51	2	13	System	2024-02-19T07:51:12.649Z	System	2024-02-19T07:51:12.649Z	\N
 416	4	6	070602e0-5e12-452a-8563-efd3c176c016	6	51	2	13	System	2024-02-19T07:51:12.655Z	System	2024-02-19T07:51:12.655Z	\N
-889	10	6	f9d6264e-426b-41cd-9f4b-b660dc582311	46	51	4	11	admin	2024-02-19T08:09:40.810Z	admin	2024-02-19T08:09:41.109Z	\N
 417	4	6	0820b627-20f1-4000-8ee1-71ce006dbcac	6	51	2	13	System	2024-02-19T07:51:12.662Z	System	2024-02-19T07:51:12.662Z	\N
+880	8	6	44545a62-0f64-4d3e-838a-9f8ba23df0c7	51	51	4	11	admin	2024-02-19T08:00:28.040Z	admin	2024-02-19T09:31:46.154Z	\N
 418	4	6	2cae564b-005c-4e2e-9f8c-2312cd09d07f	6	51	2	13	System	2024-02-19T07:51:12.667Z	System	2024-02-19T07:51:12.667Z	\N
+889	12	6	f9d6264e-426b-41cd-9f4b-b660dc582311	53	51	4	11	admin	2024-02-19T08:09:40.810Z	admin	2024-02-19T09:32:05.282Z	\N
 419	4	6	077d175e-8ae1-46cd-97b2-011dd7097d16	6	51	2	13	System	2024-02-19T07:51:12.672Z	System	2024-02-19T07:51:12.672Z	\N
 420	4	6	9b6cb045-da19-41a5-91f1-07d0d3e11baa	6	51	2	13	System	2024-02-19T07:51:12.676Z	System	2024-02-19T07:51:12.676Z	\N
 421	2	6	514af9a1-67a3-49e9-b404-082ef4e1aba8	6	51	2	15	System	2024-02-19T07:51:12.683Z	System	2024-02-19T07:51:12.683Z	\N
@@ -4678,9 +4678,9 @@ COPY public.alf_node (id, version, store_id, uuid, transaction_id, type_qname_id
 425	2	6	c933b227-5c38-42bd-a2a9-f611b2e86a14	6	51	2	13	System	2024-02-19T07:51:12.706Z	System	2024-02-19T07:51:12.706Z	\N
 426	2	6	e42dc92b-4c4d-4307-ab22-18b0e46f4933	6	51	2	13	System	2024-02-19T07:51:12.710Z	System	2024-02-19T07:51:12.710Z	\N
 427	2	6	ce9e61cb-2355-47c8-a88b-01f64463de35	6	51	2	13	System	2024-02-19T07:51:12.714Z	System	2024-02-19T07:51:12.714Z	\N
-885	10	6	02acf462-533d-4e1b-9825-05fa934140da	37	51	4	11	admin	2024-02-19T08:09:32.182Z	admin	2024-02-19T08:09:32.523Z	\N
 429	2	6	9ebce2be-0813-4f84-a3da-a9435e1ebfe9	6	51	2	13	System	2024-02-19T07:51:12.723Z	System	2024-02-19T07:51:12.723Z	\N
 430	2	6	9f7a8327-46ac-47fd-96d8-5a16bd4e94af	6	51	2	13	System	2024-02-19T07:51:12.728Z	System	2024-02-19T07:51:12.728Z	\N
+885	12	6	02acf462-533d-4e1b-9825-05fa934140da	52	51	4	11	admin	2024-02-19T08:09:32.182Z	admin	2024-02-19T09:31:54.728Z	\N
 431	2	6	9d84d7a0-0ce7-48bc-9b7d-ec7d550ea9cb	6	51	2	13	System	2024-02-19T07:51:12.732Z	System	2024-02-19T07:51:12.732Z	\N
 432	2	6	fc4116a5-70e2-4276-8bb5-8be387731ac4	6	51	2	13	System	2024-02-19T07:51:12.736Z	System	2024-02-19T07:51:12.736Z	\N
 433	1	6	e19dbdac-65f7-4f20-b779-6870662f0f79	6	24	2	13	System	2024-02-19T07:51:12.739Z	System	2024-02-19T07:51:12.739Z	\N
@@ -4709,10 +4709,10 @@ COPY public.alf_node (id, version, store_id, uuid, transaction_id, type_qname_id
 452	2	6	26bdb6fa-b59d-4447-9208-3c63a429da67	6	24	2	13	System	2024-02-19T07:51:12.817Z	System	2024-02-19T07:51:12.817Z	\N
 454	4	6	a9a9f477-5c57-11dc-ad6c-5136d620963c	6	24	2	13	System	2024-02-19T07:51:12.833Z	System	2024-02-19T07:51:12.833Z	\N
 455	1	6	c317f789-5c57-11dc-ad6c-5136d620963c	6	59	2	13	System	2024-02-19T07:51:12.838Z	System	2024-02-19T07:51:12.838Z	\N
-892	10	6	71b5b65b-d92a-4944-9403-48b7ebf8664c	44	51	4	11	admin	2024-02-19T08:09:40.919Z	admin	2024-02-19T08:09:41.168Z	\N
 896	1	6	077184a9-c028-4619-bee7-f14b4ac04e61	45	141	2	11	admin	2024-02-19T08:09:41.376Z	admin	2024-02-19T08:09:41.376Z	\N
 456	3	6	ceca5a11-5c57-11dc-ad6c-5136d620963c	6	61	2	13	System	2024-02-19T07:51:12.840Z	System	2024-02-19T07:51:12.840Z	\N
 457	2	6	c074eb05-5c57-11dc-ad6c-5136d620963c	6	66	2	13	System	2024-02-19T07:51:12.845Z	System	2024-02-19T07:51:12.845Z	\N
+892	12	6	71b5b65b-d92a-4944-9403-48b7ebf8664c	54	51	4	11	admin	2024-02-19T08:09:40.919Z	admin	2024-02-19T09:32:15.922Z	\N
 458	2	6	c074eb06-5c57-11dc-ad6c-5136d620963c	6	72	2	13	System	2024-02-19T07:51:12.853Z	System	2024-02-19T07:51:12.853Z	\N
 459	2	6	d11a167c-5c57-11dc-ad6c-5136d620963c	6	75	2	13	System	2024-02-19T07:51:12.857Z	System	2024-02-19T07:51:12.857Z	\N
 460	2	6	c074eb07-5c57-11dc-ad6c-5136d620963c	6	79	2	13	System	2024-02-19T07:51:12.860Z	System	2024-02-19T07:51:12.860Z	\N
@@ -6937,6 +6937,14 @@ COPY public.alf_node_aspects (node_id, qname_id) FROM stdin;
 896	234
 896	145
 889	139
+880	237
+885	237
+889	237
+892	237
+880	154
+885	154
+889	154
+892	154
 \.
 
 
@@ -9938,6 +9946,20 @@ COPY public.alf_node_properties (node_id, actual_type_n, persisted_type_n, boole
 895	21	3	f	274	0	0	\N	\N	51	-1	1
 895	2	3	f	608112509	0	0	\N	\N	235	-1	1
 889	6	6	f	0	0	0	doclib:1708330181376	\N	138	0	1
+880	12	6	f	0	0	0	workspace://SpacesStore/25805c3b-dc41-4a3d-9b03-a44ac7963c70	\N	48	0	1
+880	0	0	f	0	0	0	\N	\N	154	-1	1
+885	12	6	f	0	0	0	workspace://SpacesStore/fa6b38cd-442a-4f77-9d3e-dc212a6b809e	\N	48	0	1
+885	0	0	f	0	0	0	\N	\N	154	-1	1
+885	6	6	f	0	0	0		\N	27	-1	2
+885	6	6	f	0	0	0		\N	28	-1	2
+889	12	6	f	0	0	0	workspace://SpacesStore/11dedf84-4ebb-431e-adbf-7e92b2792674	\N	48	0	1
+889	0	0	f	0	0	0	\N	\N	154	-1	1
+889	6	6	f	0	0	0		\N	27	-1	2
+889	6	6	f	0	0	0		\N	28	-1	2
+892	12	6	f	0	0	0	workspace://SpacesStore/11dedf84-4ebb-431e-adbf-7e92b2792674	\N	48	0	1
+892	0	0	f	0	0	0	\N	\N	154	-1	1
+892	6	6	f	0	0	0		\N	27	-1	2
+892	6	6	f	0	0	0		\N	28	-1	2
 \.
 
 
@@ -10021,6 +10043,23 @@ COPY public.alf_prop_link (root_prop_id, prop_index, contained_in, key_prop_id, 
 21	0	0	48	48
 22	0	0	49	49
 23	0	0	50	50
+24	0	0	51	51
+25	0	0	50	50
+26	0	0	52	52
+27	0	0	12	12
+28	0	0	22	22
+29	0	0	54	54
+30	0	0	26	26
+31	0	0	28	28
+32	0	0	55	55
+33	0	0	32	32
+34	0	0	56	56
+35	0	0	37	37
+36	0	0	39	39
+37	0	0	41	41
+38	0	0	44	44
+39	0	0	45	45
+40	0	0	57	57
 \.
 
 
@@ -10052,6 +10091,23 @@ COPY public.alf_prop_root (id, version) FROM stdin;
 21	0
 22	0
 23	0
+24	0
+25	0
+26	0
+27	0
+28	0
+29	0
+30	0
+31	0
+32	0
+33	0
+34	0
+35	0
+36	0
+37	0
+38	0
+39	0
+40	0
 \.
 
 
@@ -10106,6 +10162,8 @@ COPY public.alf_prop_string_value (id, string_value, string_end_lower, string_cr
 34	.empty	.empty	578883388
 35	COMPLETE	complete	2220117103
 36	authorization	authorization	2053999599
+37	172.18.0.5:5701	172.18.0.5:5701	4016186051
+38	172.18.0.5	172.18.0.5	298118519
 \.
 
 
@@ -10115,8 +10173,6 @@ COPY public.alf_prop_string_value (id, string_value, string_end_lower, string_cr
 
 COPY public.alf_prop_unique_ctx (id, version, value1_prop_id, value2_prop_id, value3_prop_id, prop1_id) FROM stdin;
 1	0	1	2	3	1
-4	0	7	8	13	5
-5	0	7	8	15	6
 6	0	16	17	3	7
 7	0	19	20	21	8
 8	0	19	20	23	9
@@ -10124,15 +10180,23 @@ COPY public.alf_prop_unique_ctx (id, version, value1_prop_id, value2_prop_id, va
 10	0	19	20	27	11
 11	0	19	20	29	12
 12	0	19	20	31	13
-13	0	33	34	3	14
-15	0	33	38	3	16
-17	0	33	42	3	\N
-18	0	33	43	3	18
-16	1	33	40	3	19
-14	1	33	36	3	20
 19	0	1	47	3	21
-2	1	7	8	9	22
-3	1	7	8	11	23
+2	2	7	8	9	24
+3	2	7	8	11	25
+4	1	7	8	13	26
+5	1	7	8	15	27
+20	0	19	53	21	28
+21	0	19	53	23	29
+22	0	19	53	25	30
+23	0	19	53	27	31
+24	0	19	53	29	32
+25	0	19	53	31	33
+13	1	33	34	3	34
+15	1	33	38	3	36
+17	1	33	42	3	\N
+18	1	33	43	3	38
+16	3	33	40	3	39
+14	3	33	36	3	40
 \.
 
 
@@ -10191,6 +10255,13 @@ COPY public.alf_prop_value (id, actual_type_id, persisted_type, long_value) FROM
 48	3	4	2
 49	5	1	1708329088977
 50	5	1	1
+51	5	1	1708334944968
+52	5	1	1708334944974
+53	1	3	37
+54	1	3	38
+55	8	1	1708334947128
+56	5	1	1708334947698
+57	5	1	1708334947710
 \.
 
 
@@ -10435,6 +10506,7 @@ COPY public.alf_qname (id, version, ns_id, local_name) FROM stdin;
 234	0	14	rendition2
 235	0	14	contentHashCode
 236	0	5	metadata-versionType
+237	0	6	generalclassifiable
 \.
 
 
@@ -10519,6 +10591,14 @@ COPY public.alf_transaction (id, version, change_txn_id, commit_time_ms) FROM st
 44	1	27c17b7e-0689-49a8-995c-7f5ee46abaeb	1708330181369
 45	1	878408df-0e50-4fdc-b6fd-748336a9ee32	1708330181397
 46	1	a60b6b75-a9c1-436a-b026-05f5256b303e	1708330181406
+47	1	e3ebc9a1-5d1e-4eed-933b-e03fd1038ff7	1708335061889
+48	1	c41f6a74-124f-4c42-b9be-c5e1be322188	1708335070073
+49	1	3be15d06-d77d-4efc-bd5f-888ec72511fe	1708335078277
+50	1	c128984a-4783-418c-bf8d-97b84a2aaed6	1708335083557
+51	1	af775313-7bec-4ee4-a255-9b11932e848a	1708335106182
+52	1	18f6f080-0874-4d64-9101-07539b88dcc6	1708335114766
+53	1	14a602a3-241d-46f4-b5e8-2bad4c1a5f91	1708335125330
+54	1	e27b4710-e4c2-4a8c-a2eb-2933d2936420	1708335135963
 \.
 
 
@@ -10744,7 +10824,7 @@ SELECT pg_catalog.setval('public.alf_prop_double_value_seq', 1, false);
 -- Name: alf_prop_root_seq; Type: SEQUENCE SET; Schema: public; Owner: alfresco
 --
 
-SELECT pg_catalog.setval('public.alf_prop_root_seq', 23, true);
+SELECT pg_catalog.setval('public.alf_prop_root_seq', 40, true);
 
 
 --
@@ -10758,28 +10838,28 @@ SELECT pg_catalog.setval('public.alf_prop_serializable_value_seq', 2, true);
 -- Name: alf_prop_string_value_seq; Type: SEQUENCE SET; Schema: public; Owner: alfresco
 --
 
-SELECT pg_catalog.setval('public.alf_prop_string_value_seq', 36, true);
+SELECT pg_catalog.setval('public.alf_prop_string_value_seq', 38, true);
 
 
 --
 -- Name: alf_prop_unique_ctx_seq; Type: SEQUENCE SET; Schema: public; Owner: alfresco
 --
 
-SELECT pg_catalog.setval('public.alf_prop_unique_ctx_seq', 19, true);
+SELECT pg_catalog.setval('public.alf_prop_unique_ctx_seq', 25, true);
 
 
 --
 -- Name: alf_prop_value_seq; Type: SEQUENCE SET; Schema: public; Owner: alfresco
 --
 
-SELECT pg_catalog.setval('public.alf_prop_value_seq', 50, true);
+SELECT pg_catalog.setval('public.alf_prop_value_seq', 57, true);
 
 
 --
 -- Name: alf_qname_seq; Type: SEQUENCE SET; Schema: public; Owner: alfresco
 --
 
-SELECT pg_catalog.setval('public.alf_qname_seq', 236, true);
+SELECT pg_catalog.setval('public.alf_qname_seq', 237, true);
 
 
 --
@@ -10793,7 +10873,7 @@ SELECT pg_catalog.setval('public.alf_store_seq', 6, true);
 -- Name: alf_transaction_seq; Type: SEQUENCE SET; Schema: public; Owner: alfresco
 --
 
-SELECT pg_catalog.setval('public.alf_transaction_seq', 46, true);
+SELECT pg_catalog.setval('public.alf_transaction_seq', 54, true);
 
 
 --
