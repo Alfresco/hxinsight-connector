@@ -48,6 +48,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 class IngestContentCommandHandlerTest
 {
     static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
+    static final String FILE_ID = "43214321-4321-4321-4321-432143214321";
     static final String PDF_MIMETYPE = "application/pdf";
 
     @Mock
@@ -78,7 +79,7 @@ class IngestContentCommandHandlerTest
     void shouldDownloadContentTransformationAndPassItOn()
     {
         // given
-        UploadContentRenditionCommand command = new UploadContentRenditionCommand(NODE_ID);
+        UploadContentRenditionCommand command = new UploadContentRenditionCommand(FILE_ID, NODE_ID);
 
         File fileToUpload = mock();
         given(transformEngineFileStorageMock.downloadFile(any())).willReturn(fileToUpload);
@@ -87,7 +88,7 @@ class IngestContentCommandHandlerTest
         ingestContentCommandHandler.handle(command);
 
         // then
-        then(transformEngineFileStorageMock).should().downloadFile(NODE_ID);
+        then(transformEngineFileStorageMock).should().downloadFile(FILE_ID);
         then(storageClientMock).should().upload(fileToUpload, PDF_MIMETYPE, NODE_ID);
     }
 }

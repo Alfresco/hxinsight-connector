@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,8 +23,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model;
+import static java.util.Objects.requireNonNullElseGet;
 
-public record ClientData(String nodeRef)
-{}
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
+@SuppressWarnings("PMD.UnusedAssignment")
+public record Authentication(@Positive int refreshDelayMinutes, @NotNull @NestedConfigurationProperty Retry retry)
+{
+    public Authentication
+    {
+        retry = requireNonNullElseGet(retry, Retry::new);
+    }
+}

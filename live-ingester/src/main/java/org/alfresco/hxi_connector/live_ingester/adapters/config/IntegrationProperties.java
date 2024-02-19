@@ -35,6 +35,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Authentication;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Authorization;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
@@ -46,6 +48,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Trans
 @Validated
 @Data
 @Accessors(fluent = true)
+@SuppressWarnings("PMD.UnusedAssignment")
 public class IntegrationProperties
 {
 
@@ -54,14 +57,16 @@ public class IntegrationProperties
 
     @ConfigurationProperties("alfresco")
     public record Alfresco(
-            @NestedConfigurationProperty @NotNull Repository repository,
-            @NestedConfigurationProperty @NotNull BulkIngester bulkIngester,
-            @NestedConfigurationProperty @NotNull Transform transform)
+            @NotNull @NestedConfigurationProperty Repository repository,
+            @NotNull @NestedConfigurationProperty BulkIngester bulkIngester,
+            @NotNull @NestedConfigurationProperty Transform transform)
     {}
 
     @ConfigurationProperties("hyland-experience")
     public record HylandExperience(
-            @NestedConfigurationProperty @NotNull Storage storage,
-            @NestedConfigurationProperty @NotNull Ingester ingester)
+            @NotNull @NestedConfigurationProperty Authentication authentication,
+            @NotNull @NestedConfigurationProperty Authorization authorization,
+            @NotNull @NestedConfigurationProperty Storage storage,
+            @NotNull @NestedConfigurationProperty Ingester ingester)
     {}
 }

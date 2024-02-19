@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
+import java.net.URL;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -35,6 +37,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.Tr
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.RemoteContentLocation;
 
 @Slf4j
 @Component
@@ -53,15 +56,18 @@ public class IngestContentCommandHandler
         transformRequester.requestTransform(transformRequest);
     }
 
-    public void handle(UploadContentRenditionCommand command)
+    public RemoteContentLocation handle(UploadContentRenditionCommand command)
     {
         String fileId = command.transformedFileId();
+        String nodeId = command.nodeId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
 
-        log.debug("Downloaded file {} from SFS", fileId);
+        log.debug("Downloaded node {} content in file {} from SFS", nodeId, fileId);
 
-        storageClient.upload(downloadedFile, PDF_MIMETYPE, fileId);
+        URL uploadedURL = storageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
 
-        log.debug("Uploaded file {} to S3", fileId);
+        log.debug("Uploaded node {} content to S3 URL: {}", nodeId, uploadedURL);
+
+        return new RemoteContentLocation(nodeId, uploadedURL);
     }
 }

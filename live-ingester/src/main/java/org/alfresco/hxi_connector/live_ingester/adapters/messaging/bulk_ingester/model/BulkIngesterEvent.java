@@ -32,13 +32,9 @@ import java.util.Set;
 
 public record BulkIngesterEvent(
         String nodeId,
-        String type,
-        String creatorId,
-        String modifierId,
         Set<String> aspectNames,
         ContentInfo contentInfo,
-        long createdAt,
-        Map<String, Serializable> customProperties)
+        Map<String, Serializable> properties)
 {
     public record ContentInfo(
             long contentSize,

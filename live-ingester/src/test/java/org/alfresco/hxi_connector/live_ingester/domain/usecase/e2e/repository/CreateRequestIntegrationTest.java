@@ -100,8 +100,8 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       "aspectsNames" : [ "cm:versionable", "cm:auditable" ],
                       "cm:name" : "purchase-order-scan.pdf",
                       "type" : "cm:content",
-                      "createdByUserWithId" : "admin",
-                      "modifiedByUserWithId" : "admin"
+                      "createdBy" : "admin",
+                      "modifiedBy" : "admin"
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);

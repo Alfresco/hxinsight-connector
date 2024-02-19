@@ -30,6 +30,10 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Set;
@@ -46,7 +50,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -54,8 +57,6 @@ class BulkIngesterEventProcessorTest
 {
     private static final String NODE_ID = "07659d13-8d64-4905-a329-6b27fe182023";
     private static final String NODE_TYPE = "cm:folder";
-    private static final String CREATOR_ID = "admin";
-    private static final String MODIFIER_ID = "hr_user";
     private static final Set<String> ASPECT_NAMES = Set.of("cm:titled");
     private static final long CREATED_AT = 1000L;
 
@@ -72,16 +73,13 @@ class BulkIngesterEventProcessorTest
         // given
         Map<String, Serializable> properties = Map.of(
                 "cm:name", "test folder",
-                "cm:title", "test folder title");
+                "cm:title", "test folder title",
+                TYPE_PROPERTY, NODE_TYPE);
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
-                NODE_TYPE,
-                CREATOR_ID,
-                MODIFIER_ID,
                 ASPECT_NAMES,
                 null,
-                CREATED_AT,
                 properties);
 
         // when
@@ -90,13 +88,9 @@ class BulkIngesterEventProcessorTest
         // then
         IngestMetadataCommand expectedCommand = new IngestMetadataCommand(
                 NODE_ID,
-                false,
-                PropertyDelta.updated(NODE_TYPE),
-                PropertyDelta.updated(CREATOR_ID),
-                PropertyDelta.updated(MODIFIER_ID),
-                PropertyDelta.updated(ASPECT_NAMES),
-                PropertyDelta.updated(CREATED_AT),
+                CREATE,
                 Set.of(
+                        CustomPropertyDelta.updated(TYPE_PROPERTY, NODE_TYPE),
                         CustomPropertyDelta.updated("cm:name", "test folder"),
                         CustomPropertyDelta.updated("cm:title", "test folder title")));
 
@@ -116,13 +110,10 @@ class BulkIngesterEventProcessorTest
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
-                NODE_TYPE,
-                CREATOR_ID,
-                MODIFIER_ID,
                 ASPECT_NAMES,
                 contentInfo,
-                CREATED_AT,
-                Map.of());
+                Map.of(TYPE_PROPERTY, NODE_TYPE,
+                        CREATED_AT_PROPERTY, CREATED_AT));
 
         // when
         bulkIngesterEventProcessor.process(bulkIngesterEvent);

@@ -26,17 +26,25 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.repo.event.v1.model.EventType.CHILD_ASSOC_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -114,5 +122,58 @@ class EventUtilsTest
 
         // then
         assertFalse(EventUtils.isEventTypeDeleted(event));
+    }
+
+    @Test
+    void shouldConvertCreateEventType()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getType()).willReturn(NODE_CREATED.getType());
+
+        // when
+        EventType eventType = EventUtils.getEventType(event);
+
+        // then
+        assertEquals(CREATE, eventType);
+    }
+
+    @Test
+    void shouldConvertUpdateEventType()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getType()).willReturn(NODE_UPDATED.getType());
+
+        // when
+        EventType eventType = EventUtils.getEventType(event);
+
+        // then
+        assertEquals(UPDATE, eventType);
+    }
+
+    @Test
+    void shouldConvertDeleteEventType()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getType()).willReturn(NODE_DELETED.getType());
+
+        // when
+        EventType eventType = EventUtils.getEventType(event);
+
+        // then
+        assertEquals(DELETE, eventType);
+    }
+
+    @Test
+    void shouldRaiseExceptionForOtherEventType()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getType()).willReturn(CHILD_ASSOC_CREATED.getType());
+
+        // then
+        assertThrows(LiveIngesterRuntimeException.class, () -> EventUtils.getEventType(event));
     }
 }

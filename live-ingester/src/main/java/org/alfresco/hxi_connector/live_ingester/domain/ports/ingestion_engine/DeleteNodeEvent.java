@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.EventType.DELETE;
-
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -37,10 +35,4 @@ import lombok.RequiredArgsConstructor;
 public class DeleteNodeEvent implements NodeEvent
 {
     private final String objectId;
-
-    @Override
-    public EventType getEventType()
-    {
-        return DELETE;
-    }
 }

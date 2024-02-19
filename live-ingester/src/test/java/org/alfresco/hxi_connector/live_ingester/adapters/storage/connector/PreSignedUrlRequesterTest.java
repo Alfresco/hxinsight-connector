@@ -215,7 +215,7 @@ class PreSignedUrlRequesterTest
     private IntegrationProperties integrationPropertiesOf(String endpoint)
     {
         Storage storageProperties = new Storage(new Storage.Location(endpoint, new Retry()), new Storage.Upload(new Retry()));
-        IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
+        IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(null, null, storageProperties, null);
         return new IntegrationProperties(null, hylandExperienceProperties);
     }
 

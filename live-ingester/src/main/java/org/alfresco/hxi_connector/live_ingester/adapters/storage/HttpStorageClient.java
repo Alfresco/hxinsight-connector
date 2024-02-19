@@ -48,9 +48,10 @@ public class HttpStorageClient implements StorageClient
     private final FileUploader fileUploader;
 
     @Override
-    public void upload(File file, String contentType, String nodeId)
+    public URL upload(File file, String contentType, String nodeId)
     {
         URL preSignedUrl = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
         fileUploader.upload(new FileUploadRequest(file, contentType, preSignedUrl));
+        return preSignedUrl;
     }
 }
