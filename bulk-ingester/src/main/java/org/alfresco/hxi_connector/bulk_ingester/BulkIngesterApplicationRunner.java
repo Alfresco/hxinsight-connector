@@ -27,11 +27,12 @@
 package org.alfresco.hxi_connector.bulk_ingester;
 
 import lombok.RequiredArgsConstructor;
-import org.alfresco.hxi_connector.bulk_ingester.processor.BulkIngestionProcessor;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.bulk_ingester.processor.BulkIngestionProcessor;
 
 @Component
 @Profile("!test")
@@ -40,6 +41,7 @@ public class BulkIngesterApplicationRunner implements ApplicationRunner
 {
 
     private final BulkIngestionProcessor bulkIngestionProcessor;
+
     @Override
     public void run(ApplicationArguments args)
     {

@@ -25,8 +25,8 @@
  */
 package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
-import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
-import org.springframework.test.annotation.DirtiesContext;
+import java.time.Duration;
+
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.BindMode;
@@ -35,7 +35,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
-import java.time.Duration;
+import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 
 @Testcontainers
 @SuppressWarnings("PMD.UseUtilityClass")

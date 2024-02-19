@@ -25,11 +25,12 @@
  */
 package org.alfresco.hxi_connector.bulk_ingester;
 
-import org.alfresco.elasticsearch.db.connector.config.DatabaseConfig;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+
+import org.alfresco.elasticsearch.db.connector.config.DatabaseConfig;
 
 @SpringBootApplication
 @ImportAutoConfiguration(DatabaseConfig.class)

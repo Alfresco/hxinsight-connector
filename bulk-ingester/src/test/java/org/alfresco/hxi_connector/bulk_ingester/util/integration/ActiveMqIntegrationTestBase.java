@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
 import java.time.Duration;
 
-import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -37,6 +36,8 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
+
+import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 
 @Testcontainers
 @DirtiesContext // Kills app before testcontainers (activemq) so there are no errors related to lost connection
