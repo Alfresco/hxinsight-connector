@@ -67,10 +67,11 @@ import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 @SpringBootTest(classes = {
         IntegrationProperties.class,
         LocalStorageConfig.class,
-        HttpFileUploader.class})
-@ActiveProfiles("test")
+        HttpFileUploader.class},
+        properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
+@ActiveProfiles("test")
 @Testcontainers
 class HttpFileUploaderIntegrationTest
 {

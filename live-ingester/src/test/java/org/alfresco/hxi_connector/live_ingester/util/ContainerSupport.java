@@ -35,6 +35,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -150,7 +152,8 @@ public class ContainerSupport
     public void expectHxIngestMessageReceived(String expectedBody)
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
-                .withHeader("Content-Type", equalTo("application/json"))
+                .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
+                .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 
@@ -235,7 +238,8 @@ public class ContainerSupport
     public void expectHxIStorageLocationMessageReceived(String expectedBody)
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
-                .withHeader("Content-Type", equalTo("application/json"))
+                .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
+                .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 

@@ -39,6 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -63,11 +65,13 @@ public class ATSTransformResponseHandler extends RouteBuilder
     @Override
     public void configure()
     {
+        SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().transform().response().endpoint())
                 .routeId("transform-events-consumer")
                 .log(DEBUG, "Received transform completed event : ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)
+                .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(this::uploadContentRendition)
                 .process(this::updateContentLocation)
                 .end();
@@ -77,7 +81,6 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private void uploadContentRendition(Exchange exchange)
     {
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
-
         UploadContentRenditionCommand command = new UploadContentRenditionCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef());
 
         RemoteContentLocation remoteContentLocation = ingestContentCommandHandler.handle(command);
@@ -88,10 +91,10 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private void updateContentLocation(Exchange exchange)
     {
         RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
-
         ContentPropertyValue contentPropertyValue = new ContentPropertyValue(remoteContentLocation.url());
         Set<CustomPropertyDelta<?>> properties = Set.of(updated(CONTENT_PROPERTY_KEY, contentPropertyValue));
         IngestMetadataCommand command = new IngestMetadataCommand(remoteContentLocation.nodeId(), UPDATE, properties);
+
         ingestMetadataCommandHandler.handle(command);
     }
 }

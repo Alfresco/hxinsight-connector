@@ -42,9 +42,9 @@ import org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationClie
 import org.alfresco.hxi_connector.live_ingester.adapters.config.auth.HxOAuth2AuthenticationProvider;
 
 @Configuration
+@EnableMethodSecurity
 @EnableRetry
 @EnableScheduling
-@EnableMethodSecurity
 @EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class SecurityConfig
 {
