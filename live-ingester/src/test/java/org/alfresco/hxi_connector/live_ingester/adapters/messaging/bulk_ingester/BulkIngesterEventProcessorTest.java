@@ -57,7 +57,6 @@ class BulkIngesterEventProcessorTest
 {
     private static final String NODE_ID = "07659d13-8d64-4905-a329-6b27fe182023";
     private static final String NODE_TYPE = "cm:folder";
-    private static final Set<String> ASPECT_NAMES = Set.of("cm:titled");
     private static final long CREATED_AT = 1000L;
 
     @Mock
@@ -78,7 +77,6 @@ class BulkIngesterEventProcessorTest
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
-                ASPECT_NAMES,
                 null,
                 properties);
 
@@ -110,7 +108,6 @@ class BulkIngesterEventProcessorTest
 
         BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
                 NODE_ID,
-                ASPECT_NAMES,
                 contentInfo,
                 Map.of(TYPE_PROPERTY, NODE_TYPE,
                         CREATED_AT_PROPERTY, CREATED_AT));

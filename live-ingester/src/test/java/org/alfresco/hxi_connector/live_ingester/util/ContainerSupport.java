@@ -81,6 +81,7 @@ public class ContainerSupport
     public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingest";
     private static final int HX_INSIGHT_SUCCESS_CODE = 201;
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
+    public static final String BULK_INGESTER_QUEUE = "bulk.ingester.queue";
     public static final String ATS_QUEUE = "ats.queue";
     public static final String REQUEST_ID_PLACEHOLDER = "_REQUEST_ID_";
     private static ContainerSupport instance;
@@ -94,6 +95,7 @@ public class ContainerSupport
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";
     private Session session;
     private MessageProducer repoEventProducer;
+    private MessageProducer bulkIngesterEventProducer;
     private MessageConsumer atsConsumer;
     private MessageProducer atsEventProducer;
     private LocalStorageClient localStorageClient;
@@ -112,6 +114,8 @@ public class ContainerSupport
 
         Topic repoTopic = session.createTopic(REPO_EVENT_TOPIC);
         repoEventProducer = session.createProducer(repoTopic);
+        Queue bulkIngesterQueue = session.createQueue(BULK_INGESTER_QUEUE);
+        bulkIngesterEventProducer = session.createProducer(bulkIngesterQueue);
         Queue atsQueue = session.createQueue(ATS_QUEUE);
         atsConsumer = session.createConsumer(atsQueue);
 
@@ -149,12 +153,24 @@ public class ContainerSupport
     }
 
     @SneakyThrows
+    public void raiseBulkIngesterEvent(String bulkIngesterEvent)
+    {
+        bulkIngesterEventProducer.send(session.createTextMessage(bulkIngesterEvent));
+    }
+
+    @SneakyThrows
     public void expectHxIngestMessageReceived(String expectedBody)
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
+    }
+
+    @SneakyThrows
+    public void expectNoHxIngestMessagesReceived()
+    {
+        WireMock.verify(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
     }
 
     @SneakyThrows

@@ -26,11 +26,16 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
+import static java.util.Collections.emptySet;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
+import static org.mockito.BDDMockito.then;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
 import java.util.Collections;
@@ -47,13 +52,16 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class IngestMetadataCommandHandlerTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
@@ -86,11 +94,48 @@ class IngestMetadataCommandHandlerTest
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(NODE_TITLE);
 
-        verify(ingestionEngineEventPublisher).publishMessage(updateNodeMetadataEventCaptor.capture());
+        then(ingestionEngineEventPublisher).should().publishMessage(updateNodeMetadataEventCaptor.capture());
         UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
 
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
         assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
         assertEquals(updateNodeMetadataEvent.getEventType(), CREATE);
+    }
+
+    @Test
+    void shouldNotSendEmptyUpdate()
+    {
+        // given
+        IngestMetadataCommand command = new IngestMetadataCommand(NODE_ID, UPDATE, emptySet());
+
+        // when
+        ingestMetadataCommandHandler.handle(command);
+
+        // then
+        then(ingestionEngineEventPublisher).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void emptyCreateMessageCreatesNode()
+    {
+        // given
+        IngestMetadataCommand command = new IngestMetadataCommand(NODE_ID, CREATE, emptySet());
+
+        // when
+        ingestMetadataCommandHandler.handle(command);
+
+        // then
+        NodeEvent expected = new UpdateNodeMetadataEvent(NODE_ID, CREATE);
+        then(ingestionEngineEventPublisher).should().publishMessage(expected);
+    }
+
+    @Test
+    void emptyDeleteMessageThrowsException()
+    {
+        // given
+        IngestMetadataCommand command = new IngestMetadataCommand(NODE_ID, DELETE, emptySet());
+
+        // then
+        assertThrows(ValidationException.class, () -> ingestMetadataCommandHandler.handle(command));
     }
 }
