@@ -165,7 +165,7 @@ public class E2ETestBase
     @SneakyThrows
     public void setUp()
     {
-        containerSupport = ContainerSupport.getInstance(hxInsightServer, brokerUrl, localStorageClient);
+        containerSupport = ContainerSupport.getInstance(hxInsightMock, brokerUrl, localStorageClient);
     }
 
     @AfterEach

@@ -70,7 +70,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.io.IOUtils;
-import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 
@@ -102,9 +101,9 @@ public class ContainerSupport
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
-    private ContainerSupport(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient localStorageClient)
+    private ContainerSupport(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
     {
-        WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
+        WireMock.configureFor(hxInsightMock);
 
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
         Connection connection = connectionFactory.createConnection();
@@ -125,11 +124,11 @@ public class ContainerSupport
         this.localStorageClient = localStorageClient;
     }
 
-    public static ContainerSupport getInstance(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient localStorageClient)
+    public static ContainerSupport getInstance(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
     {
         if (instance == null)
         {
-            instance = new ContainerSupport(hxInsight, brokerUrl, localStorageClient);
+            instance = new ContainerSupport(hxInsightMock, brokerUrl, localStorageClient);
         }
         return instance;
     }
