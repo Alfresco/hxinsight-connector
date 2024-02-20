@@ -126,15 +126,13 @@ public class E2ETestBase
     {
         AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl());
 
-        registry.add("hyland-experience.insight.base-url", () -> hxInsightServer.getBaseUrl());
-
         brokerUrl = "tcp://localhost:" + activemqBroker.getMappedPort(ACTIVE_MQ_PORT);
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
+        registry.add("hyland-experience.insight.base-url", () -> hxInsightServer.getBaseUrl());
+
         registry.add("alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
-
         registry.add("alfresco.bulk-ingester.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
-
         registry.add("alfresco.transform.request.endpoint", () -> "activemq:queue:" + ATS_QUEUE + "?jmsMessageType=Text");
         registry.add("alfresco.transform.response.endpoint", () -> "activemq:queue:" + ATS_RESPONSE_QUEUE);
         registry.add("alfresco.transform.shared-file-store.host", () -> "http://" + sfsServer.getHost());
@@ -151,8 +149,8 @@ public class E2ETestBase
     public static void beforeAll()
     {
         localStackServer.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
-        hxInsightMock = new WireMock(hxInsightServer.getHost(), hxInsightServer.getPort());
         hxAuthMock = new WireMock(hxAuthServer.getHost(), hxAuthServer.getPort());
+        hxInsightMock = new WireMock(hxInsightServer.getHost(), hxInsightServer.getPort());
         sfsMock = new WireMock(sfsServer.getHost(), sfsServer.getPort());
         WireMock.configureFor(hxAuthMock);
         WireMock.givenThat(post(AuthUtils.TOKEN_PATH)
