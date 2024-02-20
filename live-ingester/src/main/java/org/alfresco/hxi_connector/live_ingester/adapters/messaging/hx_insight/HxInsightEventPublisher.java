@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationService.setAuthorizationToken;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.util.Set;
@@ -39,6 +40,7 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -53,9 +55,10 @@ import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 public class HxInsightEventPublisher extends RouteBuilder implements IngestionEngineEventPublisher
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HxInsightEventPublisher.class.getSimpleName();
+    private static final String ROUTE_ID = "insight-event-publisher";
     private static final int EXPECTED_STATUS_CODE = 200;
 
-    private final CamelContext context;
+    private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
 
     @Override
@@ -68,6 +71,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
             .stop();
 
         from(LOCAL_ENDPOINT)
+            .id(ROUTE_ID)
             .marshal()
             .json()
             .log("Sending event ${body}")
@@ -80,6 +84,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         // @formatter:on
     }
 
+    @PreAuthorize("hasAuthority('OAUTH2_USER')")
     @Retryable(retryFor = EndpointServerErrorException.class,
             maxAttemptsExpression = "#{@integrationProperties.hylandExperience.ingester.retry.attempts}",
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.ingester.retry.initialDelay}",
@@ -87,8 +92,13 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     @Override
     public void publishMessage(NodeEvent event)
     {
-        context.createProducerTemplate()
-                .sendBody(LOCAL_ENDPOINT, event);
+        camelContext.createFluentProducerTemplate()
+                .to(LOCAL_ENDPOINT)
+                .withProcessor(exchange -> {
+                    exchange.getIn().setBody(event);
+                    setAuthorizationToken(exchange);
+                })
+                .request();
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

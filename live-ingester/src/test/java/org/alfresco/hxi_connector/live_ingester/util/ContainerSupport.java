@@ -35,6 +35,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -68,7 +70,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.io.IOUtils;
-import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
 
@@ -100,9 +101,9 @@ public class ContainerSupport
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
-    private ContainerSupport(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient localStorageClient)
+    private ContainerSupport(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
     {
-        WireMock.configureFor(hxInsight.getHost(), hxInsight.getPort());
+        WireMock.configureFor(hxInsightMock);
 
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
         Connection connection = connectionFactory.createConnection();
@@ -123,11 +124,11 @@ public class ContainerSupport
         this.localStorageClient = localStorageClient;
     }
 
-    public static ContainerSupport getInstance(WireMockContainer hxInsight, String brokerUrl, LocalStorageClient localStorageClient)
+    public static ContainerSupport getInstance(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
     {
         if (instance == null)
         {
-            instance = new ContainerSupport(hxInsight, brokerUrl, localStorageClient);
+            instance = new ContainerSupport(hxInsightMock, brokerUrl, localStorageClient);
         }
         return instance;
     }
@@ -160,7 +161,8 @@ public class ContainerSupport
     public void expectHxIngestMessageReceived(String expectedBody)
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
-                .withHeader("Content-Type", equalTo("application/json"))
+                .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
+                .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 
@@ -251,7 +253,8 @@ public class ContainerSupport
     public void expectHxIStorageLocationMessageReceived(String expectedBody)
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
-                .withHeader("Content-Type", equalTo("application/json"))
+                .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
+                .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 

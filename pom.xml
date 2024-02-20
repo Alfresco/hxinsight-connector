@@ -59,6 +59,9 @@
         <acs-event-model.version>0.0.26</acs-event-model.version>
         <spring-boot.version>3.2.2</spring-boot.version>
         <spring-camel.version>4.4.0</spring-camel.version>
+        <commons-lang.version>3.14.0</commons-lang.version>
+        <commons-collections.version>4.4</commons-collections.version>
+        <commons-io.version>2.15.1</commons-io.version>
         <aws-sdk-s3.version>2.24.5</aws-sdk-s3.version>
         <wiremock.version>3.4.0</wiremock.version>
 
@@ -161,6 +164,21 @@
                 <groupId>org.alfresco</groupId>
                 <artifactId>acs-event-model</artifactId>
                 <version>${acs-event-model.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-collections4</artifactId>
+                <version>${commons-collections.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>commons-io</groupId>
+                <artifactId>commons-io</artifactId>
+                <version>${commons-io.version}</version>
             </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>

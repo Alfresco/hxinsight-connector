@@ -25,23 +25,28 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import java.io.InputStream;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -53,12 +58,13 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        SharedFileStoreClient.class})
-@ActiveProfiles("test")
+        SharedFileStoreClient.class},
+        properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
 @Testcontainers
@@ -73,7 +79,8 @@ class SharedFileStoreClientIntegrationTest
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG));
+    static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+            .withEnv("WIREMOCK_OPTIONS", "--verbose");
 
     @SpyBean
     TransformEngineFileStorage sharedFileStoreClient;
@@ -82,6 +89,30 @@ class SharedFileStoreClientIntegrationTest
     static void beforeAll()
     {
         WireMock.configureFor(wireMockServer.getHost(), wireMockServer.getPort());
+    }
+
+    @Test
+    void testDownloadFile()
+    {
+        // given
+        String fileContent = "Dummy's file dummy content";
+        givenThat(get(SFS_DOWNLOAD_FILE_PATH)
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody(fileContent.getBytes())));
+
+        // when
+        File file = sharedFileStoreClient.downloadFile(FILE_ID);
+
+        // then
+        then(sharedFileStoreClient).should().downloadFile(FILE_ID);
+        WireMock.verify(getRequestedFor(urlPathEqualTo(SFS_DOWNLOAD_FILE_PATH)));
+        assertThat(file)
+                .isNotNull()
+                .extracting(File::data)
+                .extracting(SharedFileStoreClientIntegrationTest::mapToBytesArray)
+                .extracting(String::new)
+                .isEqualTo(fileContent);
     }
 
     @Test
@@ -121,5 +152,12 @@ class SharedFileStoreClientIntegrationTest
         registry.add("alfresco.transform.shared-file-store.port", wireMockServer::getPort);
         registry.add("alfresco.transform.shared-file-store.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("alfresco.transform.shared-file-store.retry.initialDelay", () -> RETRY_DELAY_MS);
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private static byte[] mapToBytesArray(InputStream inputStream)
+    {
+        return inputStream.readAllBytes();
     }
 }

@@ -31,6 +31,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.http.common.HttpMethods.POST;
 import static org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED;
+import static org.apache.hc.core5.http.HttpHeaders.HOST;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
@@ -84,8 +85,9 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
             .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .unmarshal()
                 .json(JsonLibrary.Jackson, AuthenticationResult.class)
-                .log(LoggingLevel.DEBUG, log, "Authentication :: authenticated successfully")
+                .log(LoggingLevel.DEBUG, log, "Authentication :: success")
             .otherwise()
+                .log(LoggingLevel.ERROR, log, "Authentication :: failure")
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .endChoice()
             .end();
@@ -108,7 +110,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
                     exchange.getIn().setHeaders(Map.of(
                             AUTH_URL_HEADER, tokenUri,
                             Exchange.HTTP_METHOD, POST.name(),
-                            Exchange.HTTP_HOST, new URI(tokenUri).getHost(),
+                            HOST, new URI(tokenUri).getHost(),
                             Exchange.CONTENT_TYPE, APPLICATION_FORM_URLENCODED.getMimeType(),
                             Exchange.CONTENT_LENGTH, contentLength));
                     exchange.getIn().setBody(body);

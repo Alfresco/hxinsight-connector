@@ -29,7 +29,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
@@ -37,6 +40,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.util.AuthUtils.AUTH_HEADER;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -46,6 +50,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
+import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -53,7 +58,10 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
+import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -65,23 +73,25 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
+import org.alfresco.hxi_connector.live_ingester.util.WithMockOAuth2User;
+import org.alfresco.hxi_connector.live_ingester.util.WithoutAnyUser;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        PreSignedUrlRequester.class})
-@ActiveProfiles("test")
+        PreSignedUrlRequester.class},
+        properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
+@EnableMethodSecurity
 @EnableRetry
 @Testcontainers
+@WithMockOAuth2User
 class PreSignedUrlRequesterIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
     private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
     private static final String NODE_ID = "some-node-ref";
-    private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
-    private static final String HX_INSIGHT_TEST_USERNAME = "mock";
-    private static final String HX_INSIGHT_TEST_PASSWORD = "pass";
-    private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
+    private static final String PRE_SIGNED_URL_PATH = "/pre-signed-url";
+    private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
     private static final int HX_INSIGHT_RESPONSE_CODE = 201;
@@ -90,7 +100,8 @@ class PreSignedUrlRequesterIntegrationTest
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG));
+    static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+            .withEnv("WIREMOCK_OPTIONS", "--verbose");
 
     @SpyBean
     StorageLocationRequester locationRequester;
@@ -107,10 +118,7 @@ class PreSignedUrlRequesterIntegrationTest
         // given
         String preSignedUrl = "http://s3-storage-location";
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
-                .withBasicAuth(HX_INSIGHT_TEST_USERNAME, HX_INSIGHT_TEST_PASSWORD)
-                .withRequestBody(new ContainsPattern(NODE_ID))
-                .withRequestBody(new ContainsPattern(FILE_CONTENT_TYPE))
+        givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
                         .withBody(hxInsightResponse)));
@@ -119,6 +127,10 @@ class PreSignedUrlRequesterIntegrationTest
         URL actualUrl = locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE));
 
         // then
+        WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
+                .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER))
+                .withRequestBody(new ContainsPattern(NODE_ID))
+                .withRequestBody(new ContainsPattern(FILE_CONTENT_TYPE)));
         assertThat(actualUrl).asString().isEqualTo(preSignedUrl);
     }
 
@@ -126,7 +138,7 @@ class PreSignedUrlRequesterIntegrationTest
     void testRequestStorageLocation_serverError_doRetry()
     {
         // given
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(serverError()));
 
         // when
@@ -141,7 +153,7 @@ class PreSignedUrlRequesterIntegrationTest
     void testRequestStorageLocation_clientError_dontRetry()
     {
         // given
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(badRequest()));
 
         // when
@@ -156,7 +168,7 @@ class PreSignedUrlRequesterIntegrationTest
     void testRequestStorageLocation_emptyBody_doRetry()
     {
         // given
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
                         .withBody("")));
@@ -175,7 +187,7 @@ class PreSignedUrlRequesterIntegrationTest
     void testRequestStorageLocation_invalidJsonBody_doRetry()
     {
         // given
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
                         .withBody("{")));
@@ -196,7 +208,7 @@ class PreSignedUrlRequesterIntegrationTest
         // given
         String preSignedUrl = "invalid-url";
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
                         .withBody(hxInsightResponse)));
@@ -215,7 +227,7 @@ class PreSignedUrlRequesterIntegrationTest
     void testRequestStorageLocation_serverDown_doRetry()
     {
         // given
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
 
         // when
@@ -226,6 +238,30 @@ class PreSignedUrlRequesterIntegrationTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(NoHttpResponseException.class);
+    }
+
+    @Test
+    @WithoutAnyUser
+    void testPublishMessage_withoutAuth_dontRetry()
+    {
+        // when
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+
+        // then
+        then(locationRequester).shouldHaveNoInteractions();
+        assertThat(thrown).isInstanceOf(AuthenticationCredentialsNotFoundException.class);
+    }
+
+    @Test
+    @WithAnonymousUser
+    void testPublishMessage_authError_dontRetry()
+    {
+        // when
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+
+        // then
+        then(locationRequester).shouldHaveNoInteractions();
+        assertThat(thrown).isInstanceOf(AccessDeniedException.class);
     }
 
     @DynamicPropertySource
@@ -239,6 +275,6 @@ class PreSignedUrlRequesterIntegrationTest
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static String createEndpointUrl()
     {
-        return CAMEL_ENDPOINT_PATTERN.formatted(wireMockServer.getBaseUrl(), HX_INSIGHT_PRE_SIGNED_URL_PATH, HX_INSIGHT_TEST_USERNAME, HX_INSIGHT_TEST_PASSWORD);
+        return CAMEL_ENDPOINT_PATTERN.formatted(wireMockServer.getBaseUrl(), PRE_SIGNED_URL_PATH);
     }
 }

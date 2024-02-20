@@ -13,7 +13,7 @@ spring:
             scope: hxp.integrations
         provider:
           hyland-experience-auth:
-            token-uri: http://localhost:8001/token
+            token-uri:
 
 camel:
   springboot.main-run-controller: true
@@ -42,15 +42,9 @@ hyland-experience:
   authorization:
     application-name: acs-insight-connector
     service-user: insight-acs
-    environment-key: hxai-9682fb09-7f58-4b1a-aab2-306ad7edbc11
+    environment-key: hxai-env-key
   storage:
     location:
-      endpoint: "${hyland-experience.insight.base-url}/pre-signed-url\
-        ?httpMethod=POST\
-        &authMethod=Basic\
-        &authUsername=dummy_user\
-        &authPassword=dummy_pass\
-        &authenticationPreemptive=true\
-        &throwExceptionOnFailure=false"
+      endpoint: ${hyland-experience.insight.base-url}/pre-signed-url?httpMethod=POST&throwExceptionOnFailure=false
   ingester:
     endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST&throwExceptionOnFailure=false

@@ -31,10 +31,13 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
+import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,12 +59,13 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRun
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationService
 {
     private static final String CLIENT_REGISTRATION_ID = "hyland-experience-auth";
     private static final String APP_NAME_ATTRIBUTE_KEY = "applicationName";
     private static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";
-    private static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
+    public static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
     private static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
     private static final int WAIT_FOR_PAUSE_TIME_MILLIS = 100;
 
@@ -71,17 +75,21 @@ public class AuthenticationService
     private final TaskScheduler taskScheduler;
     private final CamelContext camelContext;
 
-    // Temporary disabled
-    // @PostConstruct
+    @PostConstruct
     public void authenticationSchedule()
     {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        DelegatingSecurityContextTaskScheduler delegatingTaskScheduler = new DelegatingSecurityContextTaskScheduler(taskScheduler, securityContext);
-        Runnable authenticationTask = () -> {
-            waitFor(camelContext::isStarted);
-            authenticate();
-        };
-        delegatingTaskScheduler.scheduleWithFixedDelay(authenticationTask, Duration.ofMinutes(integrationProperties.hylandExperience().authentication().refreshDelayMinutes()));
+        if (isTokenUriNotBlank())
+        {
+            SecurityContext securityContext = SecurityContextHolder.getContext();
+            DelegatingSecurityContextTaskScheduler delegatingTaskScheduler = new DelegatingSecurityContextTaskScheduler(taskScheduler, securityContext);
+            Runnable authenticationTask = () -> {
+                waitFor(camelContext::isStarted);
+                authenticate();
+            };
+            delegatingTaskScheduler.scheduleWithFixedDelay(
+                    authenticationTask,
+                    Duration.ofMinutes(integrationProperties.hylandExperience().authentication().refreshDelayMinutes()));
+        }
     }
 
     public void authenticate()
@@ -104,10 +112,11 @@ public class AuthenticationService
             exchange.getIn().setHeaders(Map.of(
                     AUTHORIZATION, authorization,
                     ENVIRONMENT_KEY_HEADER, principalAttributes.get(ENVIRONMENT_KEY_ATTRIBUTE_KEY)));
+            log.debug("Authorization :: auth header added");
         }
         else
         {
-            throw new LiveIngesterRuntimeException("Spring security context does not contain authentication principal of type " + OAuth2LoginAuthenticationToken.class.getSimpleName());
+            log.warn("Spring security context does not contain authentication principal of type " + OAuth2LoginAuthenticationToken.class.getSimpleName());
         }
     }
 
@@ -121,6 +130,12 @@ public class AuthenticationService
         OAuth2UserAuthority oAuth2UserAuthority = new OAuth2UserAuthority(userAttributes);
         OAuth2User oAuth2User = new DefaultOAuth2User(Set.of(oAuth2UserAuthority), userAttributes, APP_NAME_ATTRIBUTE_KEY);
         return new OAuth2AuthenticationToken(oAuth2User, Set.of(oAuth2UserAuthority), CLIENT_REGISTRATION_ID);
+    }
+
+    private boolean isTokenUriNotBlank()
+    {
+        return oAuth2ClientProperties.getProvider().containsKey(CLIENT_REGISTRATION_ID)
+                && StringUtils.isNotBlank(oAuth2ClientProperties.getProvider().get(CLIENT_REGISTRATION_ID).getTokenUri());
     }
 
     private static void waitFor(Supplier<Boolean> supplier)

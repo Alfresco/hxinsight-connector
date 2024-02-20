@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationService.setAuthorizationToken;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.net.MalformedURLException;
@@ -43,6 +44,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -90,6 +92,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         // @formatter:on
     }
 
+    @PreAuthorize("hasAuthority('OAUTH2_USER')")
     @Retryable(retryFor = EndpointServerErrorException.class,
             maxAttemptsExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.attempts}",
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.initialDelay}",
@@ -102,7 +105,10 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
         return camelContext.createFluentProducerTemplate()
                 .to(LOCAL_ENDPOINT)
-                .withBody(request)
+                .withProcessor(exchange -> {
+                    exchange.getIn().setBody(request);
+                    setAuthorizationToken(exchange);
+                })
                 .request(URL.class);
     }
 
