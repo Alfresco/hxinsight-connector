@@ -83,7 +83,6 @@ public class E2ETestBase
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
     private static final String LOCALSTACK_TAG = DockerTags.getOrDefault("localstack.tag", "3.0.2");
     public static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static String hxInsightUrl;
     private static String brokerUrl;
     private static WireMock hxAuthMock;
     private static WireMock hxInsightMock;
@@ -126,8 +125,8 @@ public class E2ETestBase
     static void configureProperties(DynamicPropertyRegistry registry)
     {
         AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl());
-        hxInsightUrl = hxInsightServer.getBaseUrl();
-        registry.add("hyland-experience.insight.base-url", () -> hxInsightUrl);
+
+        registry.add("hyland-experience.insight.base-url", () -> hxInsightServer.getBaseUrl());
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getMappedPort(ACTIVE_MQ_PORT);
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
