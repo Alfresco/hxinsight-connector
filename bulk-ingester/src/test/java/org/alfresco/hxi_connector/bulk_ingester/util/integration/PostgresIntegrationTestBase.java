@@ -38,7 +38,7 @@ import org.testcontainers.utility.DockerImageName;
 import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 
 @Testcontainers
-@SuppressWarnings("PMD.UseUtilityClass")
+@SuppressWarnings({"PMD.UseUtilityClass", "PMD.UnusedPrivateMethod"})
 public class PostgresIntegrationTestBase
 {
     private static final String POSTGRES_IMAGE = "postgres";

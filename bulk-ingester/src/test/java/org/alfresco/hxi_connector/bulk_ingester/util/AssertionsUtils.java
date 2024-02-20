@@ -40,6 +40,7 @@ import java.util.Map;
 import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = PRIVATE)
+@SuppressWarnings("PMD.LooseCoupling")
 public class AssertionsUtils
 {
     public static void assertMapsEquals(Map<String, Serializable> expected, Map<String, Serializable> actual)
