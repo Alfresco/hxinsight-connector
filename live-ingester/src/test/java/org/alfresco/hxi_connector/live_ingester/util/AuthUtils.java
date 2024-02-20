@@ -30,12 +30,15 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.time.temporal.ChronoUnit;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationResult;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthUtils
 {
     private static final String CLIENT_NAME = "Dummy Client";
@@ -76,9 +79,9 @@ public class AuthUtils
     {
         return ClientRegistration.withRegistrationId("hx-auth-mock")
                 .tokenUri(tokenUri)
-                .clientId(AuthUtils.CLIENT_ID)
-                .clientSecret(AuthUtils.CLIENT_SECRET)
-                .clientName(AuthUtils.CLIENT_NAME)
+                .clientId(CLIENT_ID)
+                .clientSecret(CLIENT_SECRET)
+                .clientName(CLIENT_NAME)
                 .authorizationGrantType(new AuthorizationGrantType(AUTH_GRAND_TYPE))
                 .scope(SCOPE)
                 .build();

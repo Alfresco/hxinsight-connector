@@ -155,6 +155,7 @@ class SharedFileStoreClientIntegrationTest
     }
 
     @SneakyThrows
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private static byte[] mapToBytesArray(InputStream inputStream)
     {
         return inputStream.readAllBytes();
