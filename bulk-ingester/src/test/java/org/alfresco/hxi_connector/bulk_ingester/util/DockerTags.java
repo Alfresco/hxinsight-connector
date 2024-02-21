@@ -42,8 +42,8 @@ import lombok.SneakyThrows;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerTags
 {
-    public static final String POSTGRES_TAG_DEFAULT = "14.4";
-    public static final String ACTIVEMQ_TAG_DEFAULT = "5.18.3-jre17-rockylinux8";
+    private static final String POSTGRES_TAG_DEFAULT = "14.4";
+    private static final String ACTIVEMQ_TAG_DEFAULT = "5.18.3-jre17-rockylinux8";
     private static final String PROPERTIES_FILE = "docker-tags.properties";
 
     private static Properties properties;
@@ -95,6 +95,16 @@ public class DockerTags
         }
 
         return properties.keySet();
+    }
+
+    public static String getPostgresTag()
+    {
+        return getOrDefault("postgres.tag", POSTGRES_TAG_DEFAULT);
+    }
+
+    public static String getActiveMqTag()
+    {
+        return getOrDefault("activemq.tag", ACTIVEMQ_TAG_DEFAULT);
     }
 
     private static void loadProperties()

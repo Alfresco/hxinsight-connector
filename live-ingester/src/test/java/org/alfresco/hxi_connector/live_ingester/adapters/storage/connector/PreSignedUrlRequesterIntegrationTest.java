@@ -41,7 +41,6 @@ import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.util.AuthUtils.AUTH_HEADER;
-import static org.alfresco.hxi_connector.live_ingester.util.DockerTags.WIREMOCK_TAG_DEFAULT;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -89,7 +88,7 @@ import org.alfresco.hxi_connector.live_ingester.util.WithoutAnyUser;
 class PreSignedUrlRequesterIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", WIREMOCK_TAG_DEFAULT);
+    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String NODE_ID = "some-node-ref";
     private static final String PRE_SIGNED_URL_PATH = "/pre-signed-url";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";

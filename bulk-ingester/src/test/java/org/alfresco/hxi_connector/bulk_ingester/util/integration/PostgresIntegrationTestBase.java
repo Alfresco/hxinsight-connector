@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
-import static org.alfresco.hxi_connector.bulk_ingester.util.DockerTags.POSTGRES_TAG_DEFAULT;
-
 import java.time.Duration;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -44,7 +42,7 @@ import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 public class PostgresIntegrationTestBase
 {
     private static final String POSTGRES_IMAGE = "postgres";
-    private static final String POSTGRES_TAG = DockerTags.getOrDefault("postgres.tag", POSTGRES_TAG_DEFAULT);
+    private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     @Container
     private static PostgreSQLContainer<?> postgres = createPostgresContainer();
 
