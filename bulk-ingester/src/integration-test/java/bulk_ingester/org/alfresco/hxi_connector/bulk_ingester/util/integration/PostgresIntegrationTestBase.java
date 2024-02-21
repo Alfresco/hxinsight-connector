@@ -49,7 +49,7 @@ public class PostgresIntegrationTestBase
     private static PostgreSQLContainer<?> createPostgresContainer()
     {
         return new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE).withTag(POSTGRES_TAG))
-                .withFileSystemBind("./src/test/resources/alfresco-dump.sql", "/docker-entrypoint-initdb.d/init-postgres.sql", BindMode.READ_ONLY)
+                .withFileSystemBind("./src/integration-test/resources/alfresco-dump.sql", "/docker-entrypoint-initdb.d/init-postgres.sql", BindMode.READ_ONLY)
                 .withPassword("alfresco")
                 .withUsername("alfresco")
                 .withDatabaseName("alfresco")
