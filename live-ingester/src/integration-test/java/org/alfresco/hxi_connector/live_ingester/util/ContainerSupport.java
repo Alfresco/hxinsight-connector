@@ -217,7 +217,7 @@ public class ContainerSupport
 
         WireMock.configureFor(getSfsMock());
 
-        byte[] fileBytes = Files.readAllBytes(Paths.get("src/test/resources/" + expectedFile));
+        byte[] fileBytes = Files.readAllBytes(Paths.get("src/integration-test/resources/" + expectedFile));
         givenThat(get(SFS_PATH + targetReference)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)
@@ -264,7 +264,7 @@ public class ContainerSupport
 
         List<String> actualBucketContent = localStorageClient.listBucketContent(BUCKET_NAME);
         @Cleanup
-        InputStream expectedInputStream = Files.newInputStream(Paths.get("src/test/resources/" + expectedFile));
+        InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integration-test/resources/" + expectedFile));
         @Cleanup
         InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
