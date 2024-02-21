@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
 import java.net.URL;
 
@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-public class PdfOperationsIntegrationTest extends E2ETestBase
+public class TransferRenditionIntegrationTest extends E2ETestBase
 {
 
     @Test

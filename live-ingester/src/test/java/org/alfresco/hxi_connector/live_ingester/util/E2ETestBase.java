@@ -36,7 +36,10 @@ import static org.apache.http.HttpHeaders.HOST;
 import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
-import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.*;
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_QUEUE;
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_RESPONSE_QUEUE;
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.BULK_INGESTER_QUEUE;
+import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REPO_EVENT_TOPIC;
 
 import java.time.Duration;
 
