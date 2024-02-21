@@ -41,6 +41,8 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import static org.alfresco.hxi_connector.live_ingester.util.DockerTags.WIREMOCK_TAG_DEFAULT;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import org.apache.camel.Exchange;
@@ -74,7 +76,7 @@ import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 class HxAuthenticationClientIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
+    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", WIREMOCK_TAG_DEFAULT);
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
     private static String tokenUri;

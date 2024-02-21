@@ -37,6 +37,9 @@ import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.*;
+import static org.alfresco.hxi_connector.live_ingester.util.DockerTags.ACTIVEMQ_TAG_DEFAULT;
+import static org.alfresco.hxi_connector.live_ingester.util.DockerTags.LOCALSTACK_TAG_DEFAULT;
+import static org.alfresco.hxi_connector.live_ingester.util.DockerTags.WIREMOCK_TAG_DEFAULT;
 
 import java.time.Duration;
 
@@ -76,12 +79,12 @@ import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStor
 public class E2ETestBase
 {
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
-    private static final String ACTIVE_MQ_TAG = DockerTags.getOrDefault("activemq.tag", "5.18.3-jre17-rockylinux8");
+    private static final String ACTIVE_MQ_TAG = DockerTags.getOrDefault("activemq.tag", ACTIVEMQ_TAG_DEFAULT);
     private static final int ACTIVE_MQ_PORT = 61616;
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
+    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", WIREMOCK_TAG_DEFAULT);
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
-    private static final String LOCALSTACK_TAG = DockerTags.getOrDefault("localstack.tag", "3.0.2");
+    private static final String LOCALSTACK_TAG = DockerTags.getOrDefault("localstack.tag", LOCALSTACK_TAG_DEFAULT);
     public static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static String brokerUrl;
     private static WireMock hxAuthMock;

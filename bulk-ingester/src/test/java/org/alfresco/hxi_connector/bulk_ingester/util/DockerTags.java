@@ -25,14 +25,14 @@
  */
 package org.alfresco.hxi_connector.bulk_ingester.util;
 
-import java.io.File;
-import java.nio.file.Files;
+import java.io.InputStream;
 import java.nio.file.NoSuchFileException;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 
@@ -42,8 +42,9 @@ import lombok.SneakyThrows;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerTags
 {
+    public static final String POSTGRES_TAG_DEFAULT = "14.4";
+    public static final String ACTIVEMQ_TAG_DEFAULT = "5.18.3-jre17-rockylinux8";
     private static final String PROPERTIES_FILE = "docker-tags.properties";
-    private static final String PROPERTIES_FILE_PATH = "target/test-classes/" + PROPERTIES_FILE;
 
     private static Properties properties;
 
@@ -104,15 +105,16 @@ public class DockerTags
     @SneakyThrows
     private static void loadProperties(boolean failOnMissingFile)
     {
-        File file = new File(PROPERTIES_FILE_PATH);
-        if (file.exists())
+        @Cleanup
+        InputStream propertiesStream = DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
+        if (propertiesStream != null)
         {
             properties = new Properties();
-            properties.load(Files.newInputStream(file.toPath()));
+            properties.load(propertiesStream);
         }
         else if (failOnMissingFile)
         {
-            throw new NoSuchFileException("File: '" + file + "' not found");
+            throw new NoSuchFileException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
         }
     }
 }

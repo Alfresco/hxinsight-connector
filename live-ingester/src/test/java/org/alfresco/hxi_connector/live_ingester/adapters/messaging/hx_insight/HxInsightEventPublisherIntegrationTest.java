@@ -39,6 +39,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.live_ingester.util.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.live_ingester.util.DockerTags.WIREMOCK_TAG_DEFAULT;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
@@ -83,7 +84,7 @@ import org.alfresco.hxi_connector.live_ingester.util.WithoutAnyUser;
 class HxInsightEventPublisherIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
+    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", WIREMOCK_TAG_DEFAULT);
     private static final String INGEST_PATH = "/ingest";
     private static final String NODE_ID = "node-id";
     private static final int RETRY_ATTEMPTS = 3;
