@@ -40,6 +40,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ma
 @RequiredArgsConstructor
 public class LiveIngesterEventHandler extends RouteBuilder
 {
+    private static final String ROUTE_ID = "repo-events-consumer";
 
     private final EventProcessor eventProcessor;
     private final CamelEventMapper camelEventMapper;
@@ -51,7 +52,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().repository().endpoint())
                 .transacted()
-                .routeId("repo-events-consumer")
+                .routeId(ROUTE_ID)
                 .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(exchange -> eventProcessor.process(camelEventMapper.repoEventFrom(exchange)))

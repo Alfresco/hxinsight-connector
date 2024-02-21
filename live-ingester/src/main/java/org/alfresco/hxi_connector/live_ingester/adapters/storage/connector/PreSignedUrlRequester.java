@@ -57,7 +57,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 public class PreSignedUrlRequester extends RouteBuilder implements StorageLocationRequester
 {
     private static final String LOCAL_ENDPOINT = "direct:" + PreSignedUrlRequester.class.getSimpleName();
-    static final String ROUTE_ID = PreSignedUrlRequester.class.getSimpleName();
+    static final String ROUTE_ID = "presigned-url-requester";
     static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
     static final String NODE_ID_PROPERTY = "objectId";
     static final String CONTENT_TYPE_PROPERTY = "contentType";
