@@ -63,7 +63,7 @@
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.15.1</commons-io.version>
         <aws-sdk-s3.version>2.24.5</aws-sdk-s3.version>
-        <wiremock.version>3.4.0</wiremock.version>
+        <wiremock.version>3.4.1</wiremock.version>
 
         <testcontainers.version>1.19.5</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
