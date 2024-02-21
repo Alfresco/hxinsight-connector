@@ -56,7 +56,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 public class HttpFileUploader extends RouteBuilder implements FileUploader
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HttpFileUploader.class.getSimpleName();
-    static final String ROUTE_ID = HttpFileUploader.class.getSimpleName();
+    static final String ROUTE_ID = "rendition-uploader";
     private static final String STORAGE_LOCATION_HEADER = "storageLocation";
     private static final int EXPECTED_STATUS_CODE = 200;
 

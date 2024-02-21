@@ -74,7 +74,7 @@ import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 class HxAuthenticationClientIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
+    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
     private static String tokenUri;

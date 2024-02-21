@@ -83,7 +83,7 @@ import org.alfresco.hxi_connector.live_ingester.util.WithoutAnyUser;
 class HxInsightEventPublisherIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
+    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String INGEST_PATH = "/ingest";
     private static final String NODE_ID = "node-id";
     private static final int RETRY_ATTEMPTS = 3;

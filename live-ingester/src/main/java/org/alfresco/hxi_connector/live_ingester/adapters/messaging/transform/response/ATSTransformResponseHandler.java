@@ -57,6 +57,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.pr
 @RequiredArgsConstructor
 public class ATSTransformResponseHandler extends RouteBuilder
 {
+    private static final String ROUTE_ID = "transform-events-consumer";
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
@@ -67,7 +68,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     {
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().transform().response().endpoint())
-                .routeId("transform-events-consumer")
+                .routeId(ROUTE_ID)
                 .log(DEBUG, "Received transform completed event : ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)

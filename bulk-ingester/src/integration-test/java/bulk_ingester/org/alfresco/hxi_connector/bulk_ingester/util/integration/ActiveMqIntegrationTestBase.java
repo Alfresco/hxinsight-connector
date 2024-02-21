@@ -45,7 +45,7 @@ import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 public class ActiveMqIntegrationTestBase
 {
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
-    private static final String ACTIVE_MQ_TAG = DockerTags.getOrDefault("activemq.tag", "5.18.3-jre17-rockylinux8");
+    private static final String ACTIVE_MQ_TAG = DockerTags.getActiveMqTag();
     private static final int ACTIVE_MQ_PORT = 61616;
     private static final String BULK_INGESTER_QUEUE = "test.bulk.ingester.queue";
     @Container
