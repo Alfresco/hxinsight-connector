@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
+import static java.util.stream.Collectors.toSet;
 
 import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CONTENT_PROPERTY;
 
@@ -38,10 +39,10 @@ import java.io.ObjectInputStream;
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -62,11 +63,11 @@ public class AlfrescoPropertyMapper
     public Optional<Map.Entry<String, Serializable>> performMapping()
     {
         /* Properties might be duplicated - for example they can have different locale (we can have two descriptions with "en_US_" and "en_UK_" locale) and in this case we want to process them together */
-        List<Serializable> propertyValues = alfrescoNode.getNodeProperties().stream()
+        Set<Serializable> propertyValues = alfrescoNode.getNodeProperties().stream()
                 .filter(nodeProperty -> namespacePrefixMapper.toPrefixedName(nodeProperty.getPropertyKey()).equals(propertyName))
                 .map(nodeProperty -> mapPropertyValue(nodeProperty.getPropertyValue()))
                 .flatMap(Optional::stream)
-                .toList();
+                .collect(toSet());
 
         if (propertyValues.isEmpty())
         {
@@ -74,7 +75,7 @@ public class AlfrescoPropertyMapper
         }
         else if (propertyValues.size() == 1)
         {
-            return of(Map.entry(propertyName, propertyValues.get(0)));
+            return of(Map.entry(propertyName, propertyValues.iterator().next()));
         }
         else
         {

@@ -32,8 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.bulk_ingester.util.AssertionsUtils.assertMapsEquals;
-
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -142,9 +140,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
 
             assertNotNull(publishedNode, format("Node %s not published", node.nodeId()));
 
-            assertEquals(node.nodeId(), publishedNode.nodeId());
-            assertEquals(node.contentInfo(), publishedNode.contentInfo());
-            assertMapsEquals(node.properties(), publishedNode.properties());
+            assertEquals(node, publishedNode);
         }
     }
 
