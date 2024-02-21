@@ -42,7 +42,7 @@ import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
 public class PostgresIntegrationTestBase
 {
     private static final String POSTGRES_IMAGE = "postgres";
-    private static final String POSTGRES_TAG = DockerTags.getOrDefault("postgres.tag", "14.4");
+    private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     @Container
     private static PostgreSQLContainer<?> postgres = createPostgresContainer();
 

@@ -71,7 +71,7 @@ import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 class SharedFileStoreClientIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
+    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String FILE_ID = "file-id";
     private static final String SFS_DOWNLOAD_FILE_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/" + FILE_ID;
     private static final int RETRY_ATTEMPTS = 3;

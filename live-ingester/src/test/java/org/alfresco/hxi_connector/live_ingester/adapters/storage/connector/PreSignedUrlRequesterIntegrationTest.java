@@ -88,7 +88,7 @@ import org.alfresco.hxi_connector.live_ingester.util.WithoutAnyUser;
 class PreSignedUrlRequesterIntegrationTest
 {
     private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getOrDefault("wiremock.tag", "3.3.1");
+    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String NODE_ID = "some-node-ref";
     private static final String PRE_SIGNED_URL_PATH = "/pre-signed-url";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";

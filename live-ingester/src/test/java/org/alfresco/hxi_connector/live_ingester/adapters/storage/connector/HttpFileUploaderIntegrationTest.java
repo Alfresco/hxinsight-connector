@@ -76,7 +76,7 @@ import org.alfresco.hxi_connector.live_ingester.util.DockerTags;
 class HttpFileUploaderIntegrationTest
 {
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
-    private static final String LOCALSTACK_TAG = DockerTags.getOrDefault("localstack.tag", "3.0.2");
+    private static final String LOCALSTACK_TAG = DockerTags.getLocalStackTag();
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final String OBJECT_KEY = "dummy.txt";
     private static final String OBJECT_CONTENT = "Dummy's file dummy content";
