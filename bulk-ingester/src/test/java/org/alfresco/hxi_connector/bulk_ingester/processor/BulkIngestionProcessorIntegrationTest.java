@@ -177,8 +177,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
         {
             value = value.replace("[", "");
             value = value.replace("]", "");
-            value = value.replace(" ", "");
-            String[] valueSplit = value.split(",");
+            String[] valueSplit = value.split(", ");
 
             return (Serializable) Set.of(valueSplit);
         }
