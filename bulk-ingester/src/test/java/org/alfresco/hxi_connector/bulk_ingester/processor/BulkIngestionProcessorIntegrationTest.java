@@ -140,9 +140,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
 
             assertNotNull(publishedNode, format("Node %s not published", node.nodeId()));
 
-            assertEquals(node.nodeId(), publishedNode.nodeId());
-            assertEquals(node.contentInfo(), publishedNode.contentInfo());
-            assertEquals(node.properties(), publishedNode.properties());
+            assertEquals(node, publishedNode);
         }
     }
 
