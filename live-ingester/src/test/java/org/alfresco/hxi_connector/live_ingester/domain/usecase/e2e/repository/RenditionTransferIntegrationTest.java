@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-public class TransferRenditionIntegrationTest extends E2ETestBase
+public class RenditionTransferIntegrationTest extends E2ETestBase
 {
 
     @Test
