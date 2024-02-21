@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.util;
+package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
 import java.time.Duration;
 
@@ -37,9 +37,11 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 
+import org.alfresco.hxi_connector.bulk_ingester.util.DockerTags;
+
 @Testcontainers
 @DirtiesContext // Kills app before testcontainers (activemq) so there are no errors related to lost connection
-@SuppressWarnings("PMD.UseUtilityClass")
+@SuppressWarnings({"PMD.UseUtilityClass", "PMD.UnusedPrivateMethod"})
 public class ActiveMqIntegrationTestBase
 {
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
@@ -49,7 +51,7 @@ public class ActiveMqIntegrationTestBase
     @Container
     private static final GenericContainer<?> ACTIVEMQ = createAMQContainer();
 
-    public static GenericContainer<?> createAMQContainer()
+    private static GenericContainer<?> createAMQContainer()
     {
         return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
@@ -59,7 +61,7 @@ public class ActiveMqIntegrationTestBase
     }
 
     @DynamicPropertySource
-    static void configureProperties(DynamicPropertyRegistry registry)
+    private static void configureProperties(DynamicPropertyRegistry registry)
     {
         registry.add("spring.activemq.broker-url", () -> "tcp://localhost:" + ACTIVEMQ.getMappedPort(ACTIVE_MQ_PORT));
         registry.add("alfresco.bulk.ingest.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);

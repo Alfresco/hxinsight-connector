@@ -115,7 +115,8 @@ public class AlfrescoNodeMapper
     {
         return allProperties.entrySet()
                 .stream()
-                .filter(entry -> !PREDEFINED_PROPERTIES.contains(entry.getKey()))
+                .filter(property -> Objects.nonNull(property.getValue()))
+                .filter(property -> !PREDEFINED_PROPERTIES.contains(property.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 }

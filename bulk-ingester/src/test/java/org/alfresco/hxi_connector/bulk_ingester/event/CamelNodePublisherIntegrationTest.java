@@ -44,8 +44,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
-import org.alfresco.hxi_connector.bulk_ingester.util.ActiveMqIntegrationTestBase;
 import org.alfresco.hxi_connector.bulk_ingester.util.TestCamelConsumer;
+import org.alfresco.hxi_connector.bulk_ingester.util.integration.ActiveMqIntegrationTestBase;
 
 @SpringBootTest(
         classes = {CamelNodePublisher.class, TestCamelConsumer.class},
