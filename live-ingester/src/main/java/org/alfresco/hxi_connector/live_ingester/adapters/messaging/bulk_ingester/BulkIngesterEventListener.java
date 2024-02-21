@@ -45,7 +45,9 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRun
 @RequiredArgsConstructor
 public class BulkIngesterEventListener extends RouteBuilder
 {
-    private final ObjectMapper mapper;
+    private static final String ROUTE_ID = "bulk-ingester-events-consumer";
+
+    private final ObjectMapper objectMapper;
     private final BulkIngesterEventProcessor eventProcessor;
     private final IntegrationProperties integrationProperties;
 
@@ -55,7 +57,7 @@ public class BulkIngesterEventListener extends RouteBuilder
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().bulkIngester().endpoint())
                 .transacted()
-                .routeId("bulk-ingester-events-consumer")
+                .routeId(ROUTE_ID)
                 .log(DEBUG, "Received bulk ingester event : ${header.JMSMessageID}")
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(exchange -> eventProcessor.process(toBulkIngesterEvent(exchange)))
@@ -66,7 +68,7 @@ public class BulkIngesterEventListener extends RouteBuilder
     {
         try
         {
-            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
+            return objectMapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
         }
         catch (JsonProcessingException e)
         {

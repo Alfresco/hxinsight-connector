@@ -61,7 +61,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 public class HxAuthenticationClient extends RouteBuilder implements AuthenticationClient
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HxAuthenticationClient.class.getSimpleName();
-    private static final String ROUTE_ID = HxAuthenticationClient.class.getSimpleName();
+    private static final String ROUTE_ID = "authentication-requester";
     private static final String AUTH_URL_HEADER = "hxAuthUri";
     private static final String BODY_PATTERN = "grant_type=%s&client_id=%s&client_secret=%s&scope=%s";
     public static final int EXPECTED_STATUS_CODE = 200;

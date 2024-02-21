@@ -51,10 +51,11 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.Tr
 public class ATSTransformRequester extends RouteBuilder implements TransformRequester
 {
     private static final String LOCAL_ENDPOINT = "direct:" + ATSTransformRequester.class.getSimpleName();
+    private static final String ROUTE_ID = "transform-request-publisher";
     private static final String WORKSPACE_SPACES_STORE = "workspace://SpacesStore/";
     private static final String TIMEOUT_KEY = "timeout";
 
-    private final CamelContext context;
+    private final CamelContext camelContext;
     private final ObjectMapper objectMapper;
     private final IntegrationProperties integrationProperties;
 
@@ -62,6 +63,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
     public void configure()
     {
         from(LOCAL_ENDPOINT)
+                .routeId(ROUTE_ID)
                 .marshal()
                 .json()
                 .to(integrationProperties.alfresco().transform().request().endpoint());
@@ -72,7 +74,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
     {
         ATSTransformRequest atsTransformRequest = atsTransformRequestFrom(transformRequest);
         log.info("Sending request to ATS: {}", atsTransformRequest);
-        context.createProducerTemplate()
+        camelContext.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
     }
 

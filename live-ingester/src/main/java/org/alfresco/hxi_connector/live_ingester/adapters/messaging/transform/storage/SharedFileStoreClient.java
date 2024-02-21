@@ -54,7 +54,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 public class SharedFileStoreClient extends RouteBuilder implements TransformEngineFileStorage
 {
     private static final String LOCAL_ENDPOINT = "direct:" + SharedFileStoreClient.class.getSimpleName();
-    private static final String ROUTE_ID = SharedFileStoreClient.class.getSimpleName();
+    private static final String ROUTE_ID = "rendition-downloader";
     private static final int EXPECTED_STATUS_CODE = 200;
     private static final String FILE_ID_HEADER = "fileId";
     private static final String ENDPOINT_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET&throwExceptionOnFailure=false";
