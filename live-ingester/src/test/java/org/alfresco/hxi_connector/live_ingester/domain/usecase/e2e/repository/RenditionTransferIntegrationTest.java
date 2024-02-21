@@ -36,7 +36,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
 
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void testPdFOperations()
+    void testTransferRendition()
     {
         // given
         containerSupport.prepareSFSToReturnFile("e71dd823-82c7-477c-8490-04cb0e826e66", "test-file.pdf");
