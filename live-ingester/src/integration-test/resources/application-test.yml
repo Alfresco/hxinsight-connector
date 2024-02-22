@@ -1,0 +1,27 @@
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          hyland-experience-auth:
+            token-uri:
+
+alfresco:
+  transform:
+    shared-file-store:
+      retry:
+        initial-delay: 0
+hyland-experience:
+  authentication:
+    retry:
+      initial-delay: 0
+  storage:
+    location:
+      retry:
+        initial-delay: 0
+    upload:
+      retry:
+        initial-delay: 0
+  ingester:
+    retry:
+      initial-delay: 0

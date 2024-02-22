@@ -62,6 +62,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.test.context.support.WithAnonymousUser;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
@@ -83,6 +84,7 @@ import org.alfresco.hxi_connector.live_ingester.util.WithoutAnyUser;
 @EnableAutoConfiguration
 @EnableMethodSecurity
 @EnableRetry
+@ActiveProfiles("test")
 @Testcontainers
 @WithMockOAuth2User
 class PreSignedUrlRequesterIntegrationTest
