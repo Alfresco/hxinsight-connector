@@ -278,6 +278,25 @@ services:
     ports:
       - "5007:5007"
 
+  bulk-ingester:
+    image: quay.io/alfresco/alfresco-hxinsight-connector-bulk-ingester:${HXINSIGHT_CONNECTOR_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5008,server=y,suspend=n
+      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
+    depends_on:
+      live-indexing:
+        condition: service_started
+      alfresco:
+        condition: service_healthy
+    ports:
+      - "5008:5008"
+
   hxinsight-mock:
     image: wiremock/wiremock:${WIREMOCK_TAG}
     deploy:

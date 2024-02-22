@@ -45,6 +45,13 @@
                                             <classifier>app</classifier>
                                             <outputDirectory>${project.basedir}/target/dependency</outputDirectory>
                                         </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.alfresco</groupId>
+                                            <artifactId>alfresco-hxinsight-connector-bulk-ingester</artifactId>
+                                            <version>${project.version}</version>
+                                            <classifier>app</classifier>
+                                            <outputDirectory>${project.basedir}/target/dependency</outputDirectory>
+                                        </artifactItem>
                                     </artifactItems>
                                 </configuration>
                             </execution>
@@ -62,6 +69,13 @@
                                             <version>${project.version}</version>
                                             <classifier>app</classifier>
                                             <outputDirectory>${project.build.directory}/classes/docker/live-ingester</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.alfresco</groupId>
+                                            <artifactId>alfresco-hxinsight-connector-bulk-ingester</artifactId>
+                                            <version>${project.version}</version>
+                                            <classifier>app</classifier>
+                                            <outputDirectory>${project.build.directory}/classes/docker/bulk-ingester</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>
                                 </configuration>
@@ -122,6 +136,39 @@
                                         </resource>
                                         <resource>
                                             <directory>${project.parent.basedir}/live-ingester/target/generated-resources</directory>
+                                            <includes>
+                                                <include>licenses/*</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>${project.basedir}/src/main/resources</directory>
+                                            <includes>
+                                                <include>Dockerfile</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>${project.basedir}</directory>
+                                            <includes>
+                                                <include>README.md</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-resources-docker-bulk-indexing</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/classes/docker/bulk-ingester</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.parent.basedir}/bulk-ingester/target/generated-sources/license</directory>
+                                        </resource>
+                                        <resource>
+                                            <directory>${project.parent.basedir}/bulk-ingester/target/generated-resources</directory>
                                             <includes>
                                                 <include>licenses/*</include>
                                             </includes>
