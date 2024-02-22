@@ -18,8 +18,8 @@ hyland-experience:
   authentication:
     retry:
       attempts: 5
-      initialDelay: 1000
-      delayMultiplier: 1.5
+      initial-delay: 1000
+      delay-multiplier: 1.5
 ```
 
 - file download from shared file store:
@@ -29,8 +29,8 @@ alfresco:
     shared-file-store:
       retry:
         attempts: 5
-        initialDelay: 1000
-        delayMultiplier: 1.5
+        initial-delay: 1000
+        delay-multiplier: 1.5
 ```
 
 - storage location request:
@@ -40,8 +40,8 @@ hyland-experience:
     location:
       retry:
         attempts: 5
-        initialDelay: 1000
-        delayMultiplier: 1.5
+        initial-delay: 1000
+        delay-multiplier: 1.5
 ```
 
 - file upload to obtained storage location:
@@ -51,8 +51,8 @@ hyland-experience:
     upload:
       retry:
         attempts: 5
-        initialDelay: 1000
-        delayMultiplier: 1.5
+        initial-delay: 1000
+        delay-multiplier: 1.5
 ```
 
 - ingest request:
@@ -61,8 +61,8 @@ hyland-experience:
   ingester:
     retry:
       attempts: 5
-      initialDelay: 1000
-      delayMultiplier: 1.5
+      initial-delay: 1000
+      delay-multiplier: 1.5
 ```
 
 

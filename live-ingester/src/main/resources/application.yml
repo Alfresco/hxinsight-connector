@@ -13,7 +13,7 @@ spring:
             scope: hxp.integrations
         provider:
           hyland-experience-auth:
-            token-uri:
+            token-uri: http://localhost:8001/token
 
 camel:
   springboot.main-run-controller: true
