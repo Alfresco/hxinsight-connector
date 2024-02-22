@@ -73,8 +73,8 @@ As namespace prefixes are not available in db you have to specify mapping betwee
 file. By default, prefixes mappings are specified in [namespace-prefixes.json](bulk-ingester/src/main/resources/namespace-prefixes.json) file -
 you can change it via the `alfresco.bulk.ingest.namespace-prefixes-mapping` property
 
-With use of [namespaces-to-namespace-prefixes-file-generator.py](scripts/utils/namespaces-to-namespace-prefixes-file-generator.py) 
-you can automatically generate `namespace-prefixes.json` with all types in your repository 
+With use of [namespaces-to-namespace-prefixes-file-generator.py](scripts/utils/namespaces-to-namespace-prefixes-file-generator.py)
+you can automatically generate `namespace-prefixes.json` with all types in your repository
 
 ```bash
 python3 scripts/utils/namespaces-to-namespace-prefixes-file-generator.py --help
