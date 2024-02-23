@@ -32,7 +32,7 @@ ENDPOINT = "/alfresco/api/-default-/public/alfresco/versions/1/types"
 
 
 def get_cli_arguments():
-    parser = argparse.ArgumentParser(description='Script with three required arguments.')
+    parser = argparse.ArgumentParser(description='Generate namespace prefix mappings for an ACS Repository.')
 
     parser.add_argument('host', help='Alfresco repository host (ex: localhost:8080)')
     parser.add_argument('username', help='User (ex: admin)')
