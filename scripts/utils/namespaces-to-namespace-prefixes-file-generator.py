@@ -38,7 +38,7 @@ def is_input_valid():
 
 
 def should_print_help():
-    return console_arguments[0] == ["help", "-h", "--help"] or not is_input_valid()
+    return is_input_valid() or console_arguments[0] in ["help", "-h", "--help"]
 
 
 def get_host():
