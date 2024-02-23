@@ -30,21 +30,23 @@ import json
 PAGE_SIZE = 100
 ENDPOINT = "/alfresco/api/-default-/public/alfresco/versions/1/types"
 
+console_arguments = sys.argv[1:]
+
 
 def is_input_valid():
-    return len(sys.argv) == 4 and not (None in sys.argv)
+    return len(console_arguments) == 3
 
 
 def should_print_help():
-    return not is_input_valid() or sys.argv[1] == "help" or sys.argv[1] == "-h" or sys.argv[1] == "--help"
+    return console_arguments[0] == ["help", "-h", "--help"] or not is_input_valid()
 
 
 def get_host():
-    return sys.argv[1]
+    return console_arguments[0]
 
 
 def get_auth_token():
-    return base64.b64encode(f"{sys.argv[2]}:{sys.argv[3]}".encode()).decode()
+    return base64.b64encode(f"{console_arguments[1]}:{console_arguments[2]}".encode()).decode()
 
 
 def is_status_success(status):
