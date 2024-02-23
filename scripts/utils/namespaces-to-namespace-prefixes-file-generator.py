@@ -34,9 +34,9 @@ ENDPOINT = "/alfresco/api/-default-/public/alfresco/versions/1/types"
 def get_cli_arguments():
     parser = argparse.ArgumentParser(description='Script with three required arguments.')
 
-    parser.add_argument('host', type=str, help='Alfresco repository host (ex: localhost:8080)')
-    parser.add_argument('username', type=str, help='User (ex: admin)')
-    parser.add_argument('password', type=str, help='Password (ex: admin)')
+    parser.add_argument('host', help='Alfresco repository host (ex: localhost:8080)')
+    parser.add_argument('username', help='User (ex: admin)')
+    parser.add_argument('password', help='Password (ex: admin)')
 
     return parser.parse_args()
 
