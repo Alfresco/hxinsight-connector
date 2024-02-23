@@ -57,7 +57,7 @@
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
 
         <acs-event-model.version>0.0.27</acs-event-model.version>
-        <spring-boot.version>3.2.2</spring-boot.version>
+        <spring-boot.version>3.2.3</spring-boot.version>
         <spring-camel.version>4.4.0</spring-camel.version>
         <commons-lang.version>3.14.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
