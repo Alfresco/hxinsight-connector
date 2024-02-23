@@ -46,7 +46,10 @@ def get_host():
 
 
 def get_auth_token():
-    return base64.b64encode(f"{console_arguments[1]}:{console_arguments[2]}".encode()).decode()
+    username = console_arguments[1]
+    password = console_arguments[2]
+
+    return base64.b64encode(f"{username}:{password}".encode()).decode()
 
 
 def is_status_success(status):
