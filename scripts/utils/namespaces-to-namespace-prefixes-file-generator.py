@@ -22,34 +22,27 @@
 #  along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
 #  #L%
 
-import sys
+import argparse
 import base64
-import requests
 import json
+import requests
 
 PAGE_SIZE = 100
 ENDPOINT = "/alfresco/api/-default-/public/alfresco/versions/1/types"
 
-console_arguments = sys.argv[1:]
+
+def get_cli_arguments():
+    parser = argparse.ArgumentParser(description='Script with three required arguments.')
+
+    parser.add_argument('host', type=str, help='Alfresco repository host (ex: localhost:8080)')
+    parser.add_argument('username', type=str, help='User (ex: admin)')
+    parser.add_argument('password', type=str, help='Password (ex: admin)')
+
+    return parser.parse_args()
 
 
-def is_input_valid():
-    return len(console_arguments) == 3
-
-
-def should_print_help():
-    return is_input_valid() or console_arguments[0] in ["help", "-h", "--help"]
-
-
-def get_host():
-    return console_arguments[0]
-
-
-def get_auth_token():
-    username = console_arguments[1]
-    password = console_arguments[2]
-
-    return base64.b64encode(f"{username}:{password}".encode()).decode()
+def get_auth_token(console_args):
+    return base64.b64encode(f"{console_args.username}:{console_args.password}".encode()).decode()
 
 
 def is_status_success(status):
@@ -95,24 +88,12 @@ def get_types_info(host, token, page):
 
 
 if __name__ == "__main__":
-    if should_print_help():
-        print(
-            "---- Help ---- \n"
-            "\n"
-            "Usage: \n"
-            "namespaces-to-namespace-prefixes-file-generator.py [alfresco_repository_host] [username] [password] \n"
-            "\n"
-            "Example: \n"
-            "namespaces-to-namespace-prefixes-file-generator.py localhost:8080 admin admin"
-            "\n"
-        )
-
-        exit(0)
+    console_args = get_cli_arguments()
 
     prefix_map = {}
 
-    host = get_host()
-    token = get_auth_token()
+    host = console_args.host
+    token = get_auth_token(console_args)
 
     types_info_response = get_types_info(host, token, 1)
 
