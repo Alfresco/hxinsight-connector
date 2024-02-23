@@ -65,7 +65,7 @@
         <aws-sdk-s3.version>2.24.9</aws-sdk-s3.version>
         <wiremock.version>3.4.1</wiremock.version>
 
-        <testcontainers.version>1.19.5</testcontainers.version>
+        <testcontainers.version>1.19.6</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
