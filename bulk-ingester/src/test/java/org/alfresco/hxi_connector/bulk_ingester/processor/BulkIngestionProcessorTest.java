@@ -52,6 +52,7 @@ import org.alfresco.hxi_connector.bulk_ingester.repository.IdRange;
 import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class BulkIngestionProcessorTest
 {
     @Mock
