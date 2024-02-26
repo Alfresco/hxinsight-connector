@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
@@ -48,7 +48,7 @@ public class IngestContentCommandHandler
 
     private final TransformRequester transformRequester;
     private final TransformEngineFileStorage transformEngineFileStorage;
-    private final StorageClient storageClient;
+    private final IngestionEngineStorageClient ingestionEngineStorageClient;
 
     public void handle(IngestContentCommand command)
     {
@@ -64,7 +64,7 @@ public class IngestContentCommandHandler
 
         log.debug("Downloaded node {} content in file {} from SFS", nodeId, fileId);
 
-        URL uploadedURL = storageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
+        URL uploadedURL = ingestionEngineStorageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
 
         log.debug("Uploaded node {} content to S3 URL: {}", nodeId, uploadedURL);
 

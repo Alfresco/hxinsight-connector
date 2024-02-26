@@ -37,7 +37,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
@@ -56,7 +56,7 @@ class IngestContentCommandHandlerTest
     @Mock
     TransformEngineFileStorage transformEngineFileStorageMock;
     @Mock
-    StorageClient storageClientMock;
+    IngestionEngineStorageClient storageClientMock;
 
     @InjectMocks
     IngestContentCommandHandler ingestContentCommandHandler;

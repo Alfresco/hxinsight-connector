@@ -23,11 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector;
 
-import java.net.URL;
-
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
-
-public record FileUploadRequest(File file, String contentType, URL storageLocation)
-{}
+public interface FileUploader
+{
+    void upload(FileUploadRequest fileUploadRequest);
+}

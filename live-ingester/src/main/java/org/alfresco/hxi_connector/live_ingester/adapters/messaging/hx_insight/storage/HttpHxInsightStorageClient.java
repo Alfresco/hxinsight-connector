@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
 import java.net.URL;
 
@@ -31,17 +31,17 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequester;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.storage.StorageClient;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploadRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class HttpStorageClient implements StorageClient
+public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
 {
 
     private final StorageLocationRequester storageLocationRequester;

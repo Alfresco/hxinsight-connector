@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage.local;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local;
 
 import java.io.InputStream;
 import java.net.URI;

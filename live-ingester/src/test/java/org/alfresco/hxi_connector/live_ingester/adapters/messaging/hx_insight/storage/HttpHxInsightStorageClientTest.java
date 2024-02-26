@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -38,15 +38,15 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.StorageLocationRequester;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploadRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-class HttpStorageClientTest
+class HttpHxInsightStorageClientTest
 {
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String NODE_ID = "node-ref";
@@ -57,7 +57,7 @@ class HttpStorageClientTest
     FileUploader fileUploaderMock;
 
     @InjectMocks
-    HttpStorageClient httpStorageClient;
+    HttpHxInsightStorageClient httpStorageClient;
 
     @Test
     void testUploadDataFromInputStream()
