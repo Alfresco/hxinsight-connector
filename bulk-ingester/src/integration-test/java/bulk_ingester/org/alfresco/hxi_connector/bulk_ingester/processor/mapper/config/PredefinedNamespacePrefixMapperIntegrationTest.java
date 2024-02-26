@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +36,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.hxi_connector.bulk_ingester.exception.BulkIngesterRuntimeException;
 
 @EnableAutoConfiguration
 @SpringBootTest(
@@ -89,44 +91,35 @@ class PredefinedNamespacePrefixMapperIntegrationTest
     }
 
     @Test
-    void shouldNotAddAnyPrefixIfNamespaceIsUnknown()
+    void shouldThrowIfNamespaceIsUnknown()
     {
         // given
         String namespace = "http://www.random_namespace.org";
         String propertyName = "someProperty";
 
-        // when
-        String propertyWithPrefix = namespacePrefixMapper.toPrefixedName(namespace, propertyName);
-
         // then
-        assertEquals("someProperty", propertyWithPrefix);
+        assertThrows(BulkIngesterRuntimeException.class, () -> namespacePrefixMapper.toPrefixedName(namespace, propertyName));
     }
 
     @Test
-    void shouldNotAddAnyPrefixIfNamespaceIsUnknown_qname()
+    void shouldThrowIfNamespaceIsUnknown_qname()
     {
         // given
         QName property = QName.newTransientInstance("http://www.random_namespace.org", "someProperty");
 
-        // when
-        String propertyWithPrefix = namespacePrefixMapper.toPrefixedName(property);
-
         // then
-        assertEquals("someProperty", propertyWithPrefix);
+        assertThrows(BulkIngesterRuntimeException.class, () -> namespacePrefixMapper.toPrefixedName(property));
     }
 
     @Test
-    void shouldNotAddAnyPrefixIfNamespaceIsUnknown_propertyKey()
+    void shouldThrowIfNamespaceIsUnknown_propertyKey()
     {
         // given
         PropertyKey propertyKey = new PropertyKey();
         propertyKey.setUri("http://www.random_namespace.org");
         propertyKey.setLocalName("someProperty");
 
-        // when
-        String propertyWithPrefix = namespacePrefixMapper.toPrefixedName(propertyKey);
-
         // then
-        assertEquals("someProperty", propertyWithPrefix);
+        assertThrows(BulkIngesterRuntimeException.class, () -> namespacePrefixMapper.toPrefixedName(propertyKey));
     }
 }
