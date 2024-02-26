@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper.config;
 
+import static java.lang.String.format;
+
 import java.io.IOException;
 import java.util.Map;
 import jakarta.validation.constraints.NotNull;
@@ -41,6 +43,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.validation.annotation.Validated;
 
+import org.alfresco.hxi_connector.bulk_ingester.exception.BulkIngesterRuntimeException;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
 
 @Data
@@ -60,9 +63,7 @@ public class PredefinedNamespacePrefixMapper implements NamespacePrefixMapper
 
         if (prefix == null)
         {
-            log.warn("Cannot calculate prefixed name of {} (unknown namespace: {})", localName, namespace);
-
-            return localName;
+            throw new BulkIngesterRuntimeException(format("Cannot calculate prefixed name of %s (unknown namespace: %s)", localName, namespace));
         }
 
         return prefix + ":" + localName;
