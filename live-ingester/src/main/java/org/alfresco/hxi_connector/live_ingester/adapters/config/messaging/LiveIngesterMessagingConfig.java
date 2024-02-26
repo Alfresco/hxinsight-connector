@@ -23,19 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import static java.util.Locale.ENGLISH;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.messaging;
 
-import com.fasterxml.jackson.annotation.JsonValue;
+import jakarta.jms.ConnectionFactory;
 
-public enum HxInsightEventType
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.connection.JmsTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+
+@Configuration
+public class LiveIngesterMessagingConfig
 {
-    CREATE, UPDATE, DELETE;
-
-    @JsonValue
-    public String serialise()
+    @Bean
+    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
     {
-        return this.toString().toLowerCase(ENGLISH);
+        return new JmsTransactionManager(connectionFactory);
     }
 }
