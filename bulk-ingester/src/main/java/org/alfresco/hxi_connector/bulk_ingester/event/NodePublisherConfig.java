@@ -32,7 +32,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-@ConfigurationProperties("alfresco.bulk.ingest")
+@ConfigurationProperties("alfresco.bulk.ingest.publisher")
 public record NodePublisherConfig(
         @NotBlank String endpoint)
 {}
