@@ -26,12 +26,16 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor;
 
+import java.util.stream.Stream;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.hxi_connector.bulk_ingester.event.NodePublisher;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper;
+import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
 import org.alfresco.hxi_connector.bulk_ingester.repository.IdRange;
 import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
@@ -56,10 +60,23 @@ public class BulkIngestionProcessor
         IdRange idRange = new IdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
 
         bulkIngesterNodeRepository.find(idRange)
-                .map(alfrescoNodeMapper::map)
+                .flatMap(this::mapToNode)
                 .forEach(nodePublisher::publish);
 
-        applicationManager.shoutDown();
+        applicationManager.shutDown();
+    }
+
+    private Stream<Node> mapToNode(AlfrescoNode node)
+    {
+        try
+        {
+            return Stream.of(alfrescoNodeMapper.map(node));
+        }
+        catch (Exception e)
+        {
+            log.error("Failed to map node {}", node.getId(), e);
+            return Stream.empty();
+        }
     }
 
 }
