@@ -99,7 +99,7 @@ class BulkIngestionProcessorTest
         List<AlfrescoNode> nodes = List.of(mock("10"), mock("11"), mock("12"));
 
         given(bulkIngesterNodeRepository.find(any())).willReturn(nodes.stream());
-        given(alfrescoNodeMapper.map(any())).will((invocation -> {
+        given(alfrescoNodeMapper.map(any())).will(invocation -> {
             AlfrescoNode givenNode = invocation.getArgument(0);
 
             if (givenNode == nodes.get(0))
@@ -108,7 +108,7 @@ class BulkIngestionProcessorTest
             }
 
             return mock(Node.class);
-        }));
+        });
 
         // when
         bulkIngestionProcessor.process();
