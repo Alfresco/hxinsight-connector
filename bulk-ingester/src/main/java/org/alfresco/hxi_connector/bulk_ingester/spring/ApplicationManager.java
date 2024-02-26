@@ -37,7 +37,7 @@ public class ApplicationManager
 {
     private final ApplicationContext context;
 
-    public void shoutDown()
+    public void shutDown()
     {
         ((ConfigurableApplicationContext) context).close();
     }

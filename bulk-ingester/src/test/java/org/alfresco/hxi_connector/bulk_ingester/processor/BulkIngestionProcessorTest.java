@@ -69,7 +69,7 @@ class BulkIngestionProcessorTest
     private BulkIngestionProcessor bulkIngestionProcessor;
 
     @Test
-    public void shouldPublishNodesFromGivenIdRangeAndShoutDownApplication()
+    public void shouldPublishNodesFromGivenIdRangeAndShutDownApplication()
     {
         // given
         IdRange idRange = new IdRange(10, 13);
@@ -89,7 +89,7 @@ class BulkIngestionProcessorTest
         then(alfrescoNodeMapper).should(times(nodes.size())).map(any());
         then(nodePublisher).should(times(nodes.size())).publish(any());
 
-        then(applicationManager).should().shoutDown();
+        then(applicationManager).should().shutDown();
     }
 
     @Test
@@ -117,6 +117,6 @@ class BulkIngestionProcessorTest
         then(alfrescoNodeMapper).should(times(3)).map(any());
         then(nodePublisher).should(times(2)).publish(any());
 
-        then(applicationManager).should().shoutDown();
+        then(applicationManager).should().shutDown();
     }
 }

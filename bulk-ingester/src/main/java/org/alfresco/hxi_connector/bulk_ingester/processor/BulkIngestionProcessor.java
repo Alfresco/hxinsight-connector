@@ -63,7 +63,7 @@ public class BulkIngestionProcessor
                 .flatMap(this::mapToNode)
                 .forEach(nodePublisher::publish);
 
-        applicationManager.shoutDown();
+        applicationManager.shutDown();
     }
 
     private Stream<Node> mapToNode(AlfrescoNode node)
