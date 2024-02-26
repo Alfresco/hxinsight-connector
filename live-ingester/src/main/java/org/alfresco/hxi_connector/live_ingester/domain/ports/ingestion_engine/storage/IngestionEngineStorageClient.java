@@ -23,11 +23,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage;
 
 import java.net.URL;
 
-public interface StorageLocationRequester
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
+
+public interface IngestionEngineStorageClient
 {
-    URL requestStorageLocation(StorageLocationRequest storageLocationRequest);
+    URL upload(File file, String contentType, String nodeId);
 }

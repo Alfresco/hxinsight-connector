@@ -67,8 +67,8 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageConfig;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageConfig;
 
 @SpringBootTest(properties = "logging.level.org.alfresco=DEBUG")
 @Import(LocalStorageConfig.class)

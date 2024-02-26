@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,9 +31,9 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.CONTENT_TYPE_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.NODE_ID_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.CONTENT_TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.NODE_ID_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.MalformedURLException;
 import java.net.URL;

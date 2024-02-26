@@ -23,7 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.storage.connector;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector;
 
-public record StorageLocationRequest(String nodeId, String contentType)
-{}
+import java.net.URL;
+
+public interface StorageLocationRequester
+{
+    URL requestStorageLocation(StorageLocationRequest storageLocationRequest);
+}
