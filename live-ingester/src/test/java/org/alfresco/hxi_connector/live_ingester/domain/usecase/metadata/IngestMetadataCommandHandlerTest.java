@@ -36,7 +36,7 @@ import static org.mockito.BDDMockito.then;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.utils.TestUtils.assertContainsSameElements;
+import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
 import java.util.Collections;
 import java.util.List;

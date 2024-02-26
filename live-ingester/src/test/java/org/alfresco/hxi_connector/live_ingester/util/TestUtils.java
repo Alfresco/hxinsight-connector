@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.utils;
+package org.alfresco.hxi_connector.live_ingester.util;
 
 import static java.lang.String.format;
 import static java.util.function.Predicate.not;

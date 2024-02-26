@@ -34,7 +34,7 @@ import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CONTENT_PROPERTY_KEY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
-import static org.alfresco.hxi_connector.live_ingester.utils.TestUtils.mapWith;
+import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
