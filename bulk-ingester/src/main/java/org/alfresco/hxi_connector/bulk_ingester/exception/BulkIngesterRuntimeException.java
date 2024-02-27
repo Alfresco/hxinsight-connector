@@ -24,21 +24,12 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.spring;
+package org.alfresco.hxi_connector.bulk_ingester.exception;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
-
-@Component
-@RequiredArgsConstructor
-public class ApplicationManager
+public class BulkIngesterRuntimeException extends RuntimeException
 {
-    private final ApplicationContext context;
-
-    public void shutDown()
+    public BulkIngesterRuntimeException(String message)
     {
-        ((ConfigurableApplicationContext) context).close();
+        super(message);
     }
 }

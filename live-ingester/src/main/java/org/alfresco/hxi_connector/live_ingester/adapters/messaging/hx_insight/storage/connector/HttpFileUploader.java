@@ -23,41 +23,42 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.Map;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.http.HttpMethods;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Component
 @RequiredArgsConstructor
-public class SharedFileStoreClient extends RouteBuilder implements TransformEngineFileStorage
+@Slf4j
+public class HttpFileUploader extends RouteBuilder implements FileUploader
 {
-    private static final String LOCAL_ENDPOINT = "direct:" + SharedFileStoreClient.class.getSimpleName();
-    private static final String ROUTE_ID = "rendition-downloader";
+    private static final String LOCAL_ENDPOINT = "direct:" + HttpFileUploader.class.getSimpleName();
+    static final String ROUTE_ID = "rendition-uploader";
+    private static final String STORAGE_LOCATION_HEADER = "storageLocation";
     private static final int EXPECTED_STATUS_CODE = 200;
-    private static final String FILE_ID_HEADER = "fileId";
-    private static final String ENDPOINT_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET&throwExceptionOnFailure=false";
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
@@ -71,15 +72,12 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
             .process(this::wrapErrorIfNecessary)
             .stop();
 
-        Transform.SharedFileStore sfsProperties = integrationProperties.alfresco().transform().sharedFileStore();
-        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.host(), sfsProperties.port());
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
-            .toD(sfsEndpoint)
+            .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
+            .toD("${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false")
             .choice()
-            .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
-                .process(this::convertBodyToFile)
-            .otherwise()
+            .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .endChoice()
             .end();
@@ -87,22 +85,23 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{@integrationProperties.alfresco.transform.sharedFileStore.retry.attempts}",
-            backoff = @Backoff(delayExpression = "#{@integrationProperties.alfresco.transform.sharedFileStore.retry.initialDelay}",
-                    multiplierExpression = "#{@integrationProperties.alfresco.transform.sharedFileStore.retry.delayMultiplier}"))
+            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.attempts}",
+            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.initialDelay}",
+                    multiplierExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.delayMultiplier}"))
     @Override
-    public File downloadFile(String fileId)
+    public void upload(FileUploadRequest fileUploadRequest)
     {
-        return camelContext.createFluentProducerTemplate()
-                .to(LOCAL_ENDPOINT)
-                .withHeader(FILE_ID_HEADER, fileId)
-                .request(File.class);
-    }
+        Map<String, Object> headers = Map.of(STORAGE_LOCATION_HEADER, fileUploadRequest.storageLocation().toString(),
+                Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
-    @SuppressWarnings({"PMD.UnusedPrivateMethod"})
-    private void convertBodyToFile(Exchange exchange)
-    {
-        exchange.getMessage().setBody(new File(exchange.getIn().getBody(InputStream.class)), File.class);
+        try (InputStream fileData = fileUploadRequest.file().data())
+        {
+            camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileData, headers);
+        }
+        catch (IOException e)
+        {
+            throw new LiveIngesterRuntimeException(e);
+        }
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
@@ -121,7 +120,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     private void wrapErrorIfNecessary(Exchange exchange)
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.alfresco().transform().sharedFileStore().retry().reasons();
+        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
 
         ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
     }

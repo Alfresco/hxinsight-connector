@@ -28,10 +28,14 @@ package org.alfresco.hxi_connector.bulk_ingester.event;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
+import java.net.ConnectException;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
@@ -58,6 +62,11 @@ class CamelNodePublisher extends RouteBuilder implements NodePublisher
     }
 
     @Override
+    @Retryable(retryFor = ConnectException.class,
+            maxAttemptsExpression = "${alfresco.bulk.ingest.publisher.retry.attempts}",
+            backoff = @Backoff(
+                    delayExpression = "${alfresco.bulk.ingest.publisher.retry.initial-delay}",
+                    multiplierExpression = "${alfresco.bulk.ingest.publisher.retry.delay-multiplier}"))
     public void publish(Node node)
     {
         context.createProducerTemplate()

@@ -24,21 +24,21 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.spring;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.messaging;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
+import jakarta.jms.ConnectionFactory;
 
-@Component
-@RequiredArgsConstructor
-public class ApplicationManager
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.jms.connection.JmsTransactionManager;
+import org.springframework.transaction.PlatformTransactionManager;
+
+@Configuration
+public class LiveIngesterMessagingConfig
 {
-    private final ApplicationContext context;
-
-    public void shutDown()
+    @Bean
+    public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
     {
-        ((ConfigurableApplicationContext) context).close();
+        return new JmsTransactionManager(connectionFactory);
     }
 }

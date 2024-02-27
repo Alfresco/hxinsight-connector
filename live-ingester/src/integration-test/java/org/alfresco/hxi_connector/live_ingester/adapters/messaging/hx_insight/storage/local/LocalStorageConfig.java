@@ -23,22 +23,31 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local;
 
-package org.alfresco.hxi_connector.bulk_ingester.spring;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Profile;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
-
-@Component
-@RequiredArgsConstructor
-public class ApplicationManager
+@TestConfiguration
+@EnableConfigurationProperties({LocalStorageConfig.Properties.class})
+@Profile("test")
+public class LocalStorageConfig
 {
-    private final ApplicationContext context;
 
-    public void shutDown()
+    @Bean
+    public LocalStorageClient localStorageClient(Properties properties)
     {
-        ((ConfigurableApplicationContext) context).close();
+        return new LocalStorageClient(properties);
     }
+
+    @ConfigurationProperties(prefix = "local.aws")
+    public record Properties(
+            String endpoint,
+            String region,
+            String accessKeyId,
+            String secretAccessKey)
+    {}
 }

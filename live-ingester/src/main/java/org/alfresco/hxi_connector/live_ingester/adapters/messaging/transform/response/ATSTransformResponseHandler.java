@@ -50,7 +50,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Rem
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.ContentPropertyValue;
 
 @Slf4j
 @Component

@@ -23,22 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
-package org.alfresco.hxi_connector.bulk_ingester.spring;
+import java.net.URL;
+import jakarta.validation.constraints.NotNull;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
-
-@Component
-@RequiredArgsConstructor
-public class ApplicationManager
-{
-    private final ApplicationContext context;
-
-    public void shutDown()
-    {
-        ((ConfigurableApplicationContext) context).close();
-    }
-}
+public record ContentPropertyValue(@NotNull URL path)
+{}

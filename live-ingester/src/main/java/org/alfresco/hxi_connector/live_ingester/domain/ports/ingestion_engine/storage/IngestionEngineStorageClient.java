@@ -23,22 +23,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage;
 
-package org.alfresco.hxi_connector.bulk_ingester.spring;
+import java.net.URL;
 
-import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.stereotype.Component;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
-@Component
-@RequiredArgsConstructor
-public class ApplicationManager
+public interface IngestionEngineStorageClient
 {
-    private final ApplicationContext context;
-
-    public void shutDown()
-    {
-        ((ConfigurableApplicationContext) context).close();
-    }
+    URL upload(File file, String contentType, String nodeId);
 }

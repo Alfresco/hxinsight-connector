@@ -13,6 +13,11 @@ alfresco.bulk.ingest:
     fromId: 0
     toId: 20000000000
   repository:
-    pageSize: 100
-  endpoint: activemq:queue:bulk-ingester-events
+    pageSize: 2000
+  publisher:
+    endpoint: activemq:queue:bulk-ingester-events
+    retry:
+      attempts: 10
+      initial-delay: 500
+      delay-multiplier: 2
   namespace-prefixes-mapping: classpath:namespace-prefixes.json

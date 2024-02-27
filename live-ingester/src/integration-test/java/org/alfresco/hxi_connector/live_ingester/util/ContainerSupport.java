@@ -71,7 +71,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.io.IOUtils;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.storage.local.LocalStorageClient;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 
 @Slf4j
 @SuppressWarnings("PMD.NonThreadSafeSingleton")

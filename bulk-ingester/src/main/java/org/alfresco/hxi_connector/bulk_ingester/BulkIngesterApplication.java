@@ -29,9 +29,11 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
+import org.springframework.retry.annotation.EnableRetry;
 
 import org.alfresco.elasticsearch.db.connector.config.DatabaseConfig;
 
+@EnableRetry
 @SpringBootApplication
 @ImportAutoConfiguration(DatabaseConfig.class)
 @ConfigurationPropertiesScan
