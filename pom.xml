@@ -16,6 +16,7 @@
     <modules>
         <module>bulk-ingester</module>
         <module>live-ingester</module>
+        <module>prediction-applier</module>
         <module>distribution</module>
     </modules>
 
