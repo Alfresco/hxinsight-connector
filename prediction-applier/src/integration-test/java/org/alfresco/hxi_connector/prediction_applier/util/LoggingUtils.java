@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.util;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import java.util.Arrays;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -34,8 +36,10 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.read.ListAppender;
+import lombok.NoArgsConstructor;
 import org.slf4j.LoggerFactory;
 
+@NoArgsConstructor(access = PRIVATE)
 public class LoggingUtils
 {
 

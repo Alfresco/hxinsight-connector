@@ -41,6 +41,7 @@ public class PredictionListener extends RouteBuilder
 
     public PredictionListener(@Value("${hyland-experience.insight.prediction.endpoint}") String endpoint)
     {
+        super();
         this.endpoint = endpoint;
     }
 
