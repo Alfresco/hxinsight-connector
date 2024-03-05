@@ -39,9 +39,9 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @Slf4j
 @Component
@@ -49,7 +49,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 public class IngestMetadataCommandHandler
 {
     private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
-    private final List<CustomPropertyResolver<?>> customPropertyResolvers;
+    private final List<PropertyResolver<?>> propertyResolvers;
 
     public void handle(IngestMetadataCommand command)
     {
@@ -61,7 +61,7 @@ public class IngestMetadataCommandHandler
                 .stream()
                 .map(this::resolve)
                 .flatMap(Optional::stream)
-                .forEach(customPropertyDelta -> customPropertyDelta.applyOn(updateMetadataEvent));
+                .forEach(propertyDelta -> propertyDelta.applyOn(updateMetadataEvent));
 
         if (updateMetadataEvent.getEventType() == UPDATE
                 && updateMetadataEvent.getMetadataPropertiesToSet().isEmpty()
@@ -73,14 +73,14 @@ public class IngestMetadataCommandHandler
         ingestionEngineEventPublisher.publishMessage(updateMetadataEvent);
     }
 
-    private Optional<CustomPropertyDelta<?>> resolve(CustomPropertyDelta<?> customPropertyDelta)
+    private Optional<PropertyDelta<?>> resolve(PropertyDelta<?> propertyDelta)
     {
-        Optional<CustomPropertyDelta<?>> resolvedPropertyDelta = Optional.of(customPropertyDelta);
+        Optional<PropertyDelta<?>> resolvedPropertyDelta = Optional.of(propertyDelta);
 
-        for (CustomPropertyResolver<?> propertyResolver : customPropertyResolvers)
+        for (PropertyResolver<?> propertyResolver : propertyResolvers)
         {
             resolvedPropertyDelta = resolvedPropertyDelta.flatMap(
-                    propertyDelta -> propertyDelta.canBeResolvedWith(propertyResolver) ? propertyDelta.resolveWith(propertyResolver) : Optional.of(propertyDelta));
+                    delta -> delta.canBeResolvedWith(propertyResolver) ? delta.resolveWith(propertyResolver) : Optional.of(delta));
         }
 
         return resolvedPropertyDelta;

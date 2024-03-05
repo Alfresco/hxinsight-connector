@@ -168,7 +168,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void shouldCreateCustomProperty()
+    void shouldCreateProperty()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -185,7 +185,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }
                 """;
 
-        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+        String repoEvent = generatePropertiesUpdatedEvent(properties, propertiesBefore);
 
         // when
         containerSupport.raiseRepoEvent(repoEvent);
@@ -203,7 +203,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void shouldUpdateCustomProperty()
+    void shouldUpdateProperty()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -220,7 +220,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }
                 """;
 
-        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+        String repoEvent = generatePropertiesUpdatedEvent(properties, propertiesBefore);
 
         // when
         containerSupport.raiseRepoEvent(repoEvent);
@@ -258,7 +258,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }
                 """;
 
-        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+        String repoEvent = generatePropertiesUpdatedEvent(properties, propertiesBefore);
 
         // when
         containerSupport.raiseRepoEvent(repoEvent);
@@ -268,7 +268,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void shouldDeleteCustomProperty()
+    void shouldDeleteProperty()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -285,7 +285,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }
                 """;
 
-        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+        String repoEvent = generatePropertiesUpdatedEvent(properties, propertiesBefore);
 
         // when
         containerSupport.raiseRepoEvent(repoEvent);
@@ -336,7 +336,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }
                 """;
 
-        String repoEvent = generateCustomPropertiesUpdatedEvent(properties, propertiesBefore);
+        String repoEvent = generatePropertiesUpdatedEvent(properties, propertiesBefore);
 
         // when
         containerSupport.raiseRepoEvent(repoEvent);
@@ -354,7 +354,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
-    private String generateCustomPropertiesUpdatedEvent(String properties, String propertiesBefore)
+    private String generatePropertiesUpdatedEvent(String properties, String propertiesBefore)
     {
         String repoEvent = """
                 {

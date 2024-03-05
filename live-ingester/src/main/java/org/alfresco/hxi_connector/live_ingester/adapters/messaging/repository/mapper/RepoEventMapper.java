@@ -67,7 +67,7 @@ public class RepoEventMapper
         return new IngestMetadataCommand(
                 event.getData().getResource().getId(),
                 eventType,
-                propertiesMapper.calculateCustomPropertiesDelta(event));
+                propertiesMapper.mapProperties(event));
     }
 
     public DeleteNodeCommand mapToDeleteNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)

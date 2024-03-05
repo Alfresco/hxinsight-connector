@@ -31,18 +31,18 @@ import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.
 
 import java.util.Set;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 public record IngestMetadataCommand(
         String nodeId,
         EventType eventType,
-        Set<CustomPropertyDelta<?>> properties)
+        Set<PropertyDelta<?>> properties)
 {
     public IngestMetadataCommand
     {
         ensureNotBlank(nodeId, "Node id cannot be blank");
         ensureNonNull(eventType, "Node %s event type cannot be null", nodeId);
-        ensureNonNull(properties, "Node %s custom properties delta cannot be null", nodeId);
+        ensureNonNull(properties, "Node %s properties delta cannot be null", nodeId);
     }
 }
