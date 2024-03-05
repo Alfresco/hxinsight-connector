@@ -65,11 +65,13 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
 
         String hxiBody = """
                 {
-                    "objectId" : "f71dd823-82c7-477c-8490-04cb0e826e67",
-                    "eventType" : "update",
-                    "properties" : {
+                    "objectId": "f71dd823-82c7-477c-8490-04cb0e826e67",
+                    "eventType": "update",
+                    "properties": {
                         "cm:content": {
-                           "path": "%s"
+                           "value": {
+                             "path": "%s"
+                           }
                         }
                     }
                 }""".formatted(url);

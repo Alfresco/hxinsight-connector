@@ -64,12 +64,12 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                    "objectId" : "5018ff83-ec45-4a11-95c4-681761752aa7",
                    "eventType" : "create",
                    "properties" : {
-                      "type": "cm:category",
-                      "createdAt": 1707153552,
-                      "createdByUserWithId" : "System",
-                      "modifiedByUserWithId" : "admin",
-                      "aspectsNames" : [ "cm:auditable" ],
-                      "cm:name" : "Mexican Spanish"
+                      "type": {"value": "cm:category"},
+                      "createdAt": {"value": 1707153552},
+                      "createdByUserWithId": {"value": "System"},
+                      "modifiedByUserWithId": {"value": "admin"},
+                      "aspectsNames": {"value": ["cm:auditable"]},
+                      "cm:name": {"value": "Mexican Spanish"}
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -112,14 +112,14 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                    "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
                    "eventType" : "create",
                    "properties" : {
-                      "type": "cm:content",
-                      "createdByUserWithId" : "admin",
-                      "modifiedByUserWithId" : "hr_user",
-                      "aspectsNames" : [ "cm:indexControl", "cm:auditable" ],
-                      "createdAt": 1308061016,
-                      "cm:name" : "dashboard.xml",
-                      "cm:isContentIndexed": true,
-                      "cm:isIndexed": false
+                      "type": {"value": "cm:content"},
+                      "createdByUserWithId": {"value": "admin"},
+                      "modifiedByUserWithId": {"value": "hr_user"},
+                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
+                      "createdAt": {"value": 1308061016},
+                      "cm:name": {"value": "dashboard.xml"},
+                      "cm:isContentIndexed": {"value": true},
+                      "cm:isIndexed": {"value": false}
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
