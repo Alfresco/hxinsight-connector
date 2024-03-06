@@ -2,7 +2,11 @@ version: "3.8"
 
 services:
   alfresco:
-    image: quay.io/alfresco/alfresco-content-repository:${ALFRESCO_TAG}
+#    image: quay.io/alfresco/alfresco-content-repository:${ALFRESCO_TAG}
+    image: quay.io/alfresco/alfresco-content-repository-prediction-applier-extension:${HXINSIGHT_CONNECTOR_TAG}
+#    build:
+#      dockerfile: ./Dockerfile
+#      context: ../../../target
     deploy:
       resources:
         limits:

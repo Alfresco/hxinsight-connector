@@ -17,6 +17,7 @@
         <module>bulk-ingester</module>
         <module>live-ingester</module>
         <module>prediction-applier</module>
+        <module>prediction-applier-extension</module>
         <module>distribution</module>
     </modules>
 
@@ -91,6 +92,19 @@
         <dist.search.enterprise.version>4.0.0.1</dist.search.enterprise.version>
         <dist.localstack.version>3.0.2</dist.localstack.version>
         <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
+
+        <alfresco.groupId>org.alfresco</alfresco.groupId>
+        <alfresco.bomDependencyArtifactId>acs-community-packaging</alfresco.bomDependencyArtifactId>
+        <!--<alfresco.platform.version>23.1.0</alfresco.platform.version>-->
+        <alfresco.platform.version>7.1.0</alfresco.platform.version>
+        <alfresco.platform.docker.user>alfresco</alfresco.platform.docker.user>
+        <alfresco.share.version>23.1.0</alfresco.share.version>
+        <alfresco.share.docker.version>23.1.0</alfresco.share.docker.version>
+
+        <!-- Docker images -->
+        <!--<docker.acs.image>alfresco/alfresco-content-repository-community</docker.acs.image>-->
+        <docker.acs.image>quay.io/alfresco/alfresco-content-repository</docker.acs.image>
+        <docker.share.image>alfresco/alfresco-share</docker.share.image>
     </properties>
 
     <repositories>
@@ -383,6 +397,7 @@
                     </execution>
                 </executions>
             </plugin>
+
             <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <configuration>
