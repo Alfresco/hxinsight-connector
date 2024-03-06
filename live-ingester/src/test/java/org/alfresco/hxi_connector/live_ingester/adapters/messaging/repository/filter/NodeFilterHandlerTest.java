@@ -53,7 +53,7 @@ class NodeFilterHandlerTest
     private AspectFilterApplier mockAspectFilterApplier;
 
     @Mock
-    private NodeFilterApplier anotherMockFilterApplier;
+    private TypeFilterApplier mockTypeFilterApplier;
 
     @Mock
     private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
@@ -66,7 +66,7 @@ class NodeFilterHandlerTest
     @BeforeEach
     void setUp()
     {
-        final List<NodeFilterApplier> nodeFilterAppliers = List.of(mockAspectFilterApplier, anotherMockFilterApplier);
+        final List<NodeFilterApplier> nodeFilterAppliers = List.of(mockAspectFilterApplier, mockTypeFilterApplier);
         objectUnderTest = new NodeFilterHandler(nodeFilterAppliers);
     }
 
@@ -74,15 +74,15 @@ class NodeFilterHandlerTest
     void shouldNotFilterOutWhenAllAppliersReturnTrue()
     {
         given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(true);
-        given(anotherMockFilterApplier.applyFilter(any(), any())).willReturn(true);
+        given(mockTypeFilterApplier.applyFilter(any(), any())).willReturn(true);
 
         // when
         final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
 
         then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(anotherMockFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
-        then(anotherMockFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockTypeFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
+        then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
 
         assertTrue(result);
     }
@@ -91,15 +91,15 @@ class NodeFilterHandlerTest
     void shouldFilterOutWhenAtLeastOneApplierReturnFalse()
     {
         given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(true);
-        given(anotherMockFilterApplier.applyFilter(any(), any())).willReturn(false);
+        given(mockTypeFilterApplier.applyFilter(any(), any())).willReturn(false);
 
         // when
         final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
 
         then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(anotherMockFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
-        then(anotherMockFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockTypeFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
+        then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
 
         assertFalse(result);
     }
@@ -114,7 +114,7 @@ class NodeFilterHandlerTest
 
         then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(anotherMockFilterApplier).shouldHaveNoInteractions();
+        then(mockTypeFilterApplier).shouldHaveNoInteractions();
 
         assertFalse(result);
     }
