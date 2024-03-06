@@ -34,6 +34,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.NodeFilterHandler;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 
 @Component
@@ -45,6 +46,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
     private final EventProcessor eventProcessor;
     private final CamelEventMapper camelEventMapper;
     private final IntegrationProperties integrationProperties;
+    private final NodeFilterHandler nodeFilterHandler;
 
     @Override
     public void configure()
@@ -54,6 +56,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .transacted()
                 .routeId(ROUTE_ID)
                 .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
+                .filter(exchange -> nodeFilterHandler.filterNode(camelEventMapper.repoEventFrom(exchange), integrationProperties.alfresco().filter()))
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(exchange -> eventProcessor.process(camelEventMapper.repoEventFrom(exchange)))
                 .end();
