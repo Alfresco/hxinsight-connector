@@ -34,6 +34,10 @@ alfresco:
     shared-file-store:
       host: http://localhost
       port: 8099
+  filter:
+    aspect:
+      allow:
+      deny:
 hyland-experience:
   insight:
     base-url: http://localhost:8001

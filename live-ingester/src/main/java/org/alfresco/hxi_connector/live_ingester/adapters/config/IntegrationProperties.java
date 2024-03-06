@@ -38,6 +38,7 @@ import org.springframework.validation.annotation.Validated;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Authentication;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Authorization;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
@@ -59,7 +60,8 @@ public class IntegrationProperties
     public record Alfresco(
             @NotNull @NestedConfigurationProperty Repository repository,
             @NotNull @NestedConfigurationProperty BulkIngester bulkIngester,
-            @NotNull @NestedConfigurationProperty Transform transform)
+            @NotNull @NestedConfigurationProperty Transform transform,
+            @NotNull @NestedConfigurationProperty Filter filter)
     {}
 
     @ConfigurationProperties("hyland-experience")
