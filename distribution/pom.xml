@@ -61,9 +61,8 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.alfresco</groupId>
-                                            <artifactId>prediction-applier-extension</artifactId>
+                                            <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
                                             <version>${project.version}</version>
-                                            <!--<classifier>ext</classifier>-->
                                             <outputDirectory>${project.basedir}/target/dependency</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>
@@ -100,9 +99,8 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.alfresco</groupId>
-                                            <artifactId>prediction-applier-extension</artifactId>
+                                            <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
                                             <version>${project.version}</version>
-                                            <!--<classifier>ext</classifier>-->
                                             <outputDirectory>${project.build.directory}/classes/docker/prediction-applier-extension</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>
@@ -266,13 +264,6 @@
                                             <includes>
                                                 <include>licenses/*</include>
                                             </includes>
-                                        </resource>
-                                        <resource>
-                                            <directory>${project.basedir}/src/main/resources/docker/prediction-applier-extension</directory>
-                                            <!--<filtering>true</filtering>-->
-                                            <!--<includes>
-                                                <include>Dockerfile</include>
-                                            </includes>-->
                                         </resource>
                                         <resource>
                                             <directory>${project.basedir}</directory>
