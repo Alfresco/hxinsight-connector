@@ -31,6 +31,7 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
-public interface NodeFilterApplier {
+public interface NodeFilterApplier
+{
     boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter);
 }

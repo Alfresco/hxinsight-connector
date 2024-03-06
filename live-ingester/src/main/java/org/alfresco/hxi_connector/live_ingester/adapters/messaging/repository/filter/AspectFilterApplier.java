@@ -31,19 +31,22 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+import org.springframework.util.CollectionUtils;
+
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AspectFilterApplier implements NodeFilterApplier {
+public class AspectFilterApplier implements NodeFilterApplier
+{
     @Override
-    public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter) {
+    public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    {
         final Set<String> aspectNames = repoEvent.getData().getResource().getAspectNames();
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
@@ -53,12 +56,14 @@ public class AspectFilterApplier implements NodeFilterApplier {
         return allow && !deny;
     }
 
-    private boolean filterAllowed(Set<String> aspectNames, List<String> allowed) {
+    private boolean filterAllowed(Set<String> aspectNames, List<String> allowed)
+    {
         return CollectionUtils.isEmpty(aspectNames) ||
                 (allowed.stream().anyMatch(aspectNames::contains) || CollectionUtils.isEmpty(allowed));
     }
 
-    private boolean filterDenied(Set<String> aspectNames, List<String> denied) {
+    private boolean filterDenied(Set<String> aspectNames, List<String> denied)
+    {
         return !CollectionUtils.isEmpty(aspectNames) &&
                 (!CollectionUtils.isEmpty(denied) && denied.stream().anyMatch(aspectNames::contains));
     }

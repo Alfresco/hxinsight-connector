@@ -27,10 +27,10 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import java.util.List;
-
 import jakarta.validation.constraints.NotNull;
 
-public record Filter(@NotNull Aspect aspect) {
+public record Filter(@NotNull Aspect aspect)
+{
     public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
     {}
 }

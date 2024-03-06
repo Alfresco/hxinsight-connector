@@ -30,20 +30,23 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NodeFilterHandler {
+public class NodeFilterHandler
+{
 
     private final List<NodeFilterApplier> nodeFilterAppliers;
 
-    public boolean filterNode(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter) {
+    public boolean filterNode(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    {
         return nodeFilterAppliers.stream()
                 .peek(f -> log.debug("Applying filters {} to repo event of id: {}", filter, repoEvent.getId()))
                 .allMatch(f -> f.applyFilter(repoEvent, filter));

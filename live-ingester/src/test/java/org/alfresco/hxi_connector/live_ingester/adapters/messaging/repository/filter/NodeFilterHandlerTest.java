@@ -34,18 +34,20 @@ import static org.mockito.BDDMockito.then;
 
 import java.util.List;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+
 @ExtendWith(MockitoExtension.class)
-class NodeFilterHandlerTest {
+class NodeFilterHandlerTest
+{
 
     @Mock
     private AspectFilterApplier mockAspectFilterApplier;
@@ -62,17 +64,19 @@ class NodeFilterHandlerTest {
     private NodeFilterHandler objectUnderTest;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         final List<NodeFilterApplier> nodeFilterAppliers = List.of(mockAspectFilterApplier, anotherMockFilterApplier);
         objectUnderTest = new NodeFilterHandler(nodeFilterAppliers);
     }
 
     @Test
-    void shouldNotFilterOutWhenAllAppliersReturnTrue() {
+    void shouldNotFilterOutWhenAllAppliersReturnTrue()
+    {
         given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(true);
         given(anotherMockFilterApplier.applyFilter(any(), any())).willReturn(true);
 
-        //when
+        // when
         final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
 
         then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
@@ -84,11 +88,12 @@ class NodeFilterHandlerTest {
     }
 
     @Test
-    void shouldFilterOutWhenAtLeastOneApplierReturnFalse() {
+    void shouldFilterOutWhenAtLeastOneApplierReturnFalse()
+    {
         given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(true);
         given(anotherMockFilterApplier.applyFilter(any(), any())).willReturn(false);
 
-        //when
+        // when
         final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
 
         then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
@@ -100,10 +105,11 @@ class NodeFilterHandlerTest {
     }
 
     @Test
-    void shouldFilterOutAndFailFastWhenFirstApplierReturnFalse() {
+    void shouldFilterOutAndFailFastWhenFirstApplierReturnFalse()
+    {
         given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(false);
 
-        //when
+        // when
         final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
 
         then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);

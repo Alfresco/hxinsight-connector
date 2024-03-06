@@ -28,13 +28,13 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQUEST_ID_PLACEHOLDER;
 
-import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+
+import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
 @SpringBootTest(properties = {"alfresco.filter.aspect.deny[0]=sc:secured",
         "alfresco.filter.aspect.allow[0]=cm:versionable", "alfresco.filter.aspect.allow[1]=cm:author",
@@ -42,7 +42,8 @@ import org.springframework.test.annotation.DirtiesContext;
         "alfresco.filter.aspect.allow[4]=cm:thumbnailModification", "alfresco.filter.aspect.allow[5]=cm:ownable",
         "alfresco.filter.aspect.allow[6]=cm:auditable"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class RequestFiltersIntegrationTest extends E2ETestBase {
+public class RequestFiltersIntegrationTest extends E2ETestBase
+{
 
     @Test
     @Order(1)
@@ -128,6 +129,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase {
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
+
     @Test
     @Order(2)
     void testCreateRequestWithAspectInDeniedFilter()
@@ -329,6 +331,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase {
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
+
     @Test
     @Order(5)
     void testUpdateRequestWithAspectInDeniedFilter()
