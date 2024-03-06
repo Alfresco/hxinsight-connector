@@ -11,10 +11,6 @@ alfresco:
     shared-file-store:
       retry:
         initial-delay: 0
-  filter:
-    aspect:
-      allow:
-      deny:
 hyland-experience:
   authentication:
     retry:
