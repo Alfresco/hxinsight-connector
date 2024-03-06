@@ -50,7 +50,7 @@ public class AspectFilterApplier implements NodeFilterApplier
         final Set<String> aspectNames = repoEvent.getData().getResource().getAspectNames();
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
-        log.debug("Applying aspect filters on repo event of id: {}. Event aspects: {}. Allowed aspects: {}. Denied aspects: {}", repoEvent.getId(), aspectNames, allowed, denied);
+        log.atDebug().log("Applying aspect filters on repo event of id: {}. Event aspects: {}. Allowed aspects: {}. Denied aspects: {}", repoEvent.getId(), aspectNames, allowed, denied);
         final boolean allow = filterAllowed(aspectNames, allowed);
         final boolean deny = filterDenied(aspectNames, denied);
         return allow && !deny;
@@ -59,12 +59,12 @@ public class AspectFilterApplier implements NodeFilterApplier
     private boolean filterAllowed(Set<String> aspectNames, List<String> allowed)
     {
         return CollectionUtils.isEmpty(aspectNames) ||
-                (allowed.stream().anyMatch(aspectNames::contains) || CollectionUtils.isEmpty(allowed));
+                allowed.stream().anyMatch(aspectNames::contains) || CollectionUtils.isEmpty(allowed);
     }
 
     private boolean filterDenied(Set<String> aspectNames, List<String> denied)
     {
         return !CollectionUtils.isEmpty(aspectNames) &&
-                (!CollectionUtils.isEmpty(denied) && denied.stream().anyMatch(aspectNames::contains));
+                !CollectionUtils.isEmpty(denied) && denied.stream().anyMatch(aspectNames::contains);
     }
 }

@@ -42,6 +42,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
         "alfresco.filter.aspect.allow[4]=cm:thumbnailModification", "alfresco.filter.aspect.allow[5]=cm:ownable",
         "alfresco.filter.aspect.allow[6]=cm:auditable"})
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class RequestFiltersIntegrationTest extends E2ETestBase
 {
 

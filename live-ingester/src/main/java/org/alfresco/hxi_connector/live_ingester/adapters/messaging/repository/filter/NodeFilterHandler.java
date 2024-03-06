@@ -48,7 +48,7 @@ public class NodeFilterHandler
     public boolean filterNode(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
     {
         return nodeFilterAppliers.stream()
-                .peek(f -> log.debug("Applying filters {} to repo event of id: {}", filter, repoEvent.getId()))
+                .peek(f -> log.atDebug().log("Applying filters {} to repo event of id: {}", filter, repoEvent.getId()))
                 .allMatch(f -> f.applyFilter(repoEvent, filter));
     }
 }
