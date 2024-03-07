@@ -57,7 +57,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class PropertiesMapper
 {
-    public Set<PropertyDelta<?>> mapProperties(RepoEvent<DataAttributes<NodeResource>> event)
+    public Set<PropertyDelta<?>> mapToPropertyDeltas(RepoEvent<DataAttributes<NodeResource>> event)
     {
         if (isEventTypeCreated(event))
         {
@@ -72,16 +72,16 @@ public class PropertiesMapper
         Stream<PropertyDelta<?>> propertyDeltas = streamProperties(event.getData().getResource())
                 .filter(property -> Objects.nonNull(property.getValue()))
                 .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
-        return streamOfAllProperties(event, propertyDeltas);
+        return setOfAllProperties(event, propertyDeltas);
     }
 
     private Set<PropertyDelta<?>> somePropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
     {
         Stream<PropertyDelta<?>> propertyDeltas = calculatePropertiesDelta(event);
-        return streamOfAllProperties(event, propertyDeltas);
+        return setOfAllProperties(event, propertyDeltas);
     }
 
-    private Set<PropertyDelta<?>> streamOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<PropertyDelta<?>> propertyDeltas)
+    private Set<PropertyDelta<?>> setOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<PropertyDelta<?>> propertyDeltas)
     {
         return Stream.of(propertyDeltas,
                 calculateNamePropertyDelta(event),

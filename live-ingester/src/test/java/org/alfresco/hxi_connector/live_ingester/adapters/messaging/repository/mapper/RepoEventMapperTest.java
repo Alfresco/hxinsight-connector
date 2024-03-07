@@ -154,7 +154,7 @@ class RepoEventMapperTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
-        given(propertiesMapper.mapProperties(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY_KEY)));
+        given(propertiesMapper.mapToPropertyDeltas(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY_KEY)));
 
         // when
         IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
