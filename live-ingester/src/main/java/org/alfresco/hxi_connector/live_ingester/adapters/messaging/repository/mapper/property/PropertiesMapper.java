@@ -72,16 +72,16 @@ public class PropertiesMapper
         Stream<PropertyDelta<?>> propertyDeltas = streamProperties(event.getData().getResource())
                 .filter(property -> Objects.nonNull(property.getValue()))
                 .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
-        return setOfAllProperties(event, propertyDeltas);
+        return createSetOfAllProperties(event, propertyDeltas);
     }
 
     private Set<PropertyDelta<?>> somePropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
     {
         Stream<PropertyDelta<?>> propertyDeltas = calculatePropertiesDelta(event);
-        return setOfAllProperties(event, propertyDeltas);
+        return createSetOfAllProperties(event, propertyDeltas);
     }
 
-    private Set<PropertyDelta<?>> setOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<PropertyDelta<?>> propertyDeltas)
+    private Set<PropertyDelta<?>> createSetOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<PropertyDelta<?>> propertyDeltas)
     {
         return Stream.of(propertyDeltas,
                 calculateNamePropertyDelta(event),
