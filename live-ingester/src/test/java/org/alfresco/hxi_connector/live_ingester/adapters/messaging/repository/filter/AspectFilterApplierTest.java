@@ -76,7 +76,36 @@ class AspectFilterApplierTest
     }
 
     @Test
-    void shouldNotFilterOutWhenEmptyAllowedAndEmptyDenied()
+    void shouldNotFilterOutNonEmptyAspectsWhenEmptyAllowedAndEmptyDenied()
+    {
+        given(mockResource.getAspectNames()).willReturn(Set.of("aspect1"));
+        given(mockAspect.allow()).willReturn(emptyList());
+        given(mockAspect.deny()).willReturn(emptyList());
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    void shouldFilterOutWhenAspectEmptyAndNonEmptyAllowedAndEmptyDenied()
+    {
+        final String aspect1 = "cm:aspect1";
+        given(mockResource.getAspectNames()).willReturn(emptySet());
+        given(mockAspect.allow()).willReturn(List.of(aspect1));
+        given(mockAspect.deny()).willReturn(emptyList());
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldNotFilterOutEmptyAspectsWhenEmptyAllowedAndEmptyDenied()
     {
         given(mockResource.getAspectNames()).willReturn(emptySet());
         given(mockAspect.allow()).willReturn(emptyList());
