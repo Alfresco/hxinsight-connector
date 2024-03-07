@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
@@ -36,17 +36,17 @@ import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @Getter
 @ToString
 @EqualsAndHashCode(callSuper = true)
-public class CustomPropertyUpdated<T> extends CustomPropertyDelta<T>
+public class PropertyUpdated<T> extends PropertyDelta<T>
 {
     private final T propertyValue;
 
-    public CustomPropertyUpdated(String propertyName, T propertyValue)
+    public PropertyUpdated(String propertyName, T propertyValue)
     {
         super(propertyName);
 
@@ -61,7 +61,7 @@ public class CustomPropertyUpdated<T> extends CustomPropertyDelta<T>
     }
 
     @Override
-    public <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver)
+    public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver)
     {
         return resolver.resolveUpdated(this);
     }

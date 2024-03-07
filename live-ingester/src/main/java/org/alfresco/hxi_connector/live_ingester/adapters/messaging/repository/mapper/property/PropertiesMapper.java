@@ -48,7 +48,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -57,31 +57,31 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class PropertiesMapper
 {
-    public Set<CustomPropertyDelta<?>> calculateCustomPropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public Set<PropertyDelta<?>> mapProperties(RepoEvent<DataAttributes<NodeResource>> event)
     {
         if (isEventTypeCreated(event))
         {
-            return allCustomPropertiesUpdated(event);
+            return allPropertiesUpdated(event);
         }
 
-        return someCustomPropertiesUpdated(event);
+        return somePropertiesUpdated(event);
     }
 
-    private Set<CustomPropertyDelta<?>> allCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
+    private Set<PropertyDelta<?>> allPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        Stream<CustomPropertyDelta<?>> propertyDeltas = customPropertiesStream(event.getData().getResource())
+        Stream<PropertyDelta<?>> propertyDeltas = streamProperties(event.getData().getResource())
                 .filter(property -> Objects.nonNull(property.getValue()))
-                .map(property -> CustomPropertyDelta.updated(property.getKey(), property.getValue()));
+                .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
         return streamOfAllProperties(event, propertyDeltas);
     }
 
-    private Set<CustomPropertyDelta<?>> someCustomPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
+    private Set<PropertyDelta<?>> somePropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        Stream<CustomPropertyDelta<?>> propertyDeltas = calculatePropertiesDelta(event);
+        Stream<PropertyDelta<?>> propertyDeltas = calculatePropertiesDelta(event);
         return streamOfAllProperties(event, propertyDeltas);
     }
 
-    private Set<CustomPropertyDelta<?>> streamOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<CustomPropertyDelta<?>> propertyDeltas)
+    private Set<PropertyDelta<?>> streamOfAllProperties(RepoEvent<DataAttributes<NodeResource>> event, Stream<PropertyDelta<?>> propertyDeltas)
     {
         return Stream.of(propertyDeltas,
                 calculateNamePropertyDelta(event),
@@ -95,18 +95,18 @@ public class PropertiesMapper
                 .collect(Collectors.toSet());
     }
 
-    private Stream<CustomPropertyDelta<?>> calculatePropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    private Stream<PropertyDelta<?>> calculatePropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         if (isFieldUnchanged(event, NodeResource::getProperties))
         {
             return Stream.empty();
         }
 
-        return customPropertiesStream(event.getData().getResourceBefore())
-                .map(oldPropertyEntry -> toCustomPropertyDelta(event.getData(), oldPropertyEntry));
+        return streamProperties(event.getData().getResourceBefore())
+                .map(oldPropertyEntry -> toPropertyDelta(event.getData(), oldPropertyEntry));
     }
 
-    private CustomPropertyDelta<?> toCustomPropertyDelta(DataAttributes<NodeResource> eventData, Map.Entry<String, ?> oldPropertyEntry)
+    private PropertyDelta<?> toPropertyDelta(DataAttributes<NodeResource> eventData, Map.Entry<String, ?> oldPropertyEntry)
     {
         String changedPropertyName = oldPropertyEntry.getKey();
         Object oldValue = oldPropertyEntry.getValue();
@@ -114,16 +114,16 @@ public class PropertiesMapper
 
         if (Objects.equals(propertyValue, oldValue))
         {
-            return CustomPropertyDelta.unchanged(changedPropertyName);
+            return PropertyDelta.unchanged(changedPropertyName);
         }
         if (propertyValue == null)
         {
-            return CustomPropertyDelta.deleted(changedPropertyName);
+            return PropertyDelta.deleted(changedPropertyName);
         }
-        return CustomPropertyDelta.updated(changedPropertyName, propertyValue);
+        return PropertyDelta.updated(changedPropertyName, propertyValue);
     }
 
-    private Stream<Map.Entry<String, ?>> customPropertiesStream(NodeResource node)
+    private Stream<Map.Entry<String, ?>> streamProperties(NodeResource node)
     {
         return ofNullable(node)
                 .map(NodeResource::getProperties)

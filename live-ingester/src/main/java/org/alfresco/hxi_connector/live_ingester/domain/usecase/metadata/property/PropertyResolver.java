@@ -24,35 +24,19 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property;
 
 import java.util.Optional;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
-
-@ToString
-@EqualsAndHashCode(callSuper = true)
-public class CustomPropertyDeleted<T> extends CustomPropertyDelta<T>
+public interface PropertyResolver<T>
 {
-    public CustomPropertyDeleted(String propertyName)
-    {
-        super(propertyName);
-    }
+    boolean canResolve(PropertyDelta<?> propertyDelta);
 
-    @Override
-    public void applyOn(UpdateNodeMetadataEvent event)
-    {
-        event.unset(getPropertyName());
-    }
+    Optional<PropertyDelta<T>> resolveUpdated(PropertyUpdated<?> updatedProperty);
 
-    @Override
-    public <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver)
-    {
-        return resolver.resolveDeleted(this);
-    }
+    Optional<PropertyDelta<T>> resolveDeleted(PropertyDeleted<?> deletedProperty);
 }
