@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -90,10 +90,38 @@ class AspectFilterApplierTest
     }
 
     @Test
-    void shouldFilterOutWhenAspectEmptyAndNonEmptyAllowedAndEmptyDenied()
+    void shouldFilterOutWhenAspectsEmptyAndNonEmptyAllowedAndEmptyDenied()
     {
         final String aspect1 = "cm:aspect1";
         given(mockResource.getAspectNames()).willReturn(emptySet());
+        given(mockAspect.allow()).willReturn(List.of(aspect1));
+        given(mockAspect.deny()).willReturn(emptyList());
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldNotFilterOutNullAspectsWhenEmptyAllowedAndEmptyDenied()
+    {
+        given(mockResource.getAspectNames()).willReturn(null);
+        given(mockAspect.allow()).willReturn(emptyList());
+        given(mockAspect.deny()).willReturn(emptyList());
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+
+        // then
+        assertTrue(result);
+    }
+    @Test
+    void shouldFilterOutWhenAspectsNullAndNonEmptyAllowedAndEmptyDenied()
+    {
+        final String aspect1 = "cm:aspect1";
+        given(mockResource.getAspectNames()).willReturn(null);
         given(mockAspect.allow()).willReturn(List.of(aspect1));
         given(mockAspect.deny()).willReturn(emptyList());
 
