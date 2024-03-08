@@ -31,8 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.updated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.util.List;
 import java.util.Map;
@@ -44,7 +44,7 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 class CategoryPropertyResolverTest
 {
@@ -111,10 +111,10 @@ class CategoryPropertyResolverTest
         List<Object> taggablePropertyValue = getTaggablePropertyValue(propertyDefinition);
 
         // when
-        CustomPropertyDelta<Set<String>> resolvedProperty = categoryPropertyResolver.resolveUpdated(updated(taggable, taggablePropertyValue)).get();
+        PropertyDelta<Set<String>> resolvedProperty = categoryPropertyResolver.resolveUpdated(updated(taggable, taggablePropertyValue)).get();
 
         // then
-        CustomPropertyDelta<Set<String>> expectedProperty = updated("cm:taggable", Set.of("51d0b636-3c3b-4e33-ba1f-098474f53e8c", "a9f57ef6-2acf-4b2a-ae85-82cf552bec58"));
+        PropertyDelta<Set<String>> expectedProperty = updated("cm:taggable", Set.of("51d0b636-3c3b-4e33-ba1f-098474f53e8c", "a9f57ef6-2acf-4b2a-ae85-82cf552bec58"));
 
         assertEquals(expectedProperty, resolvedProperty);
     }
@@ -129,7 +129,7 @@ class CategoryPropertyResolverTest
         var resolvedProperty = categoryPropertyResolver.resolveDeleted(deleted(taggable));
 
         // then
-        CustomPropertyDelta<?> expectedProperty = deleted(taggable);
+        PropertyDelta<?> expectedProperty = deleted(taggable);
 
         assertTrue(resolvedProperty.isPresent());
         assertEquals(expectedProperty, resolvedProperty.get());

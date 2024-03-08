@@ -76,8 +76,8 @@ class UpdateNodeMetadataEventSerializerTest
                   "objectId": "%s",
                   "eventType": "create",
                   "properties": {
-                    "createdAt": 10000,
-                    "modifiedBy": "000-000-000"
+                    "createdAt": {"value": 10000},
+                    "modifiedBy": {"value": "000-000-000"}
                   }
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);
@@ -115,8 +115,8 @@ class UpdateNodeMetadataEventSerializerTest
                   "objectId": "%s",
                   "eventType": "create",
                   "properties": {
-                    "createdBy": null,
-                    "modifiedBy": null
+                    "createdBy": {"value": null},
+                    "modifiedBy": {"value": null}
                   }
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);

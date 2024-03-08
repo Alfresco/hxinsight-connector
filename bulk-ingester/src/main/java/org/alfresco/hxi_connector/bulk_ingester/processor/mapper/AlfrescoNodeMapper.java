@@ -83,12 +83,12 @@ public class AlfrescoNodeMapper
 
         ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
-        Map<String, Serializable> customProperties = getProperties(allProperties);
+        Map<String, Serializable> properties = getProperties(allProperties);
 
         return new Node(
                 nodeId,
                 content,
-                customProperties);
+                properties);
     }
 
     private long getCreatedAt(AlfrescoNode alfrescoNode)

@@ -147,7 +147,7 @@ class AlfrescoNodeMapperTest
     }
 
     @Test
-    void shouldSkipEmptyCustomProperties()
+    void shouldSkipEmptyProperties()
     {
         // given
         AlfrescoNode alfrescoNode = nodeWithDefaultProperties();

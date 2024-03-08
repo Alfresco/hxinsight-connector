@@ -101,17 +101,17 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // then
         String expectedBody = """
                 {
-                   "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e01",
-                   "eventType" : "create",
-                   "properties" : {
-                      "cm:autoVersion" : true,
-                      "createdAt" : 1709378055695,
-                      "cm:versionType" : "MAJOR",
-                      "aspectsNames" : [ "cm:versionable", "cm:auditable" ],
-                      "cm:name" : "purchase-order-scan.pdf",
-                      "type" : "cm:content",
-                      "createdBy" : "admin",
-                      "modifiedBy" : "admin"
+                   "objectId": "d71dd823-82c7-477c-8490-04cb0e826e01",
+                   "eventType": "create",
+                   "properties": {
+                      "cm:autoVersion": {"value": true},
+                      "createdAt": {"value": 1709378055695},
+                      "cm:versionType": {"value": "MAJOR"},
+                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
+                      "cm:name": {"value": "purchase-order-scan.pdf"},
+                      "type": {"value": "cm:content"},
+                      "createdBy": {"value": "admin"},
+                      "modifiedBy": {"value": "admin"}
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -318,14 +318,14 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // then
         String expectedBody = """
                 {
-                  "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e04",
-                  "eventType" : "update",
-                  "properties" : {
-                    "cm:title" : "Purchase Order",
-                    "aspectsNames" : [ "cm:versionable", "cm:auditable" ],
-                    "modifiedBy" : "abeecher"
+                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e04",
+                  "eventType": "update",
+                  "properties": {
+                    "cm:title": {"value": "Purchase Order"},
+                    "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
+                    "modifiedBy": {"value": "abeecher"}
                   },
-                  "removedProperties" : [ "cm:versionType", "cm:description" ]
+                  "removedProperties": ["cm:versionType", "cm:description"]
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }

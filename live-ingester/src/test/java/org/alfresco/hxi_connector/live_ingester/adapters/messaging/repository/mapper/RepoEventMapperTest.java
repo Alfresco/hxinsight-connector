@@ -35,8 +35,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CONTENT_PROPERTY_KEY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -54,7 +54,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationExcep
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -154,13 +154,13 @@ class RepoEventMapperTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
-        given(propertiesMapper.calculateCustomPropertiesDelta(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY_KEY)));
+        given(propertiesMapper.mapProperties(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY_KEY)));
 
         // when
         IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expected = Set.of(deleted(CONTENT_PROPERTY_KEY));
+        Set<PropertyDelta<?>> expected = Set.of(deleted(CONTENT_PROPERTY_KEY));
         assertEquals(expected, ingestMetadataCommand.properties(), "Expected content to be removed");
     }
 

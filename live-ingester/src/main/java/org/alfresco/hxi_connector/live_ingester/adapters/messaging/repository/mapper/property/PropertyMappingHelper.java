@@ -30,7 +30,7 @@ import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 
 import java.time.ZonedDateTime;
 import java.util.Objects;
@@ -40,7 +40,7 @@ import java.util.stream.Stream;
 
 import lombok.NoArgsConstructor;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -58,7 +58,7 @@ public class PropertyMappingHelper
     public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
     public static final String CREATED_AT_PROPERTY = "createdAt";
 
-    public static <T> Stream<CustomPropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
+    public static <T> Stream<PropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
             String propertyKey, Function<NodeResource, T> fieldGetter)
     {
         if (shouldNotUpdateField(event, fieldGetter))
@@ -69,15 +69,15 @@ public class PropertyMappingHelper
         return ofNullable(fieldGetter.apply(event.getData().getResource()))
                 .stream()
                 .filter(Objects::nonNull)
-                .map(value -> CustomPropertyDelta.updated(propertyKey, value));
+                .map(value -> PropertyDelta.updated(propertyKey, value));
     }
 
-    public static Stream<CustomPropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Stream<PropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, NAME_PROPERTY_KEY, NodeResource::getName);
     }
 
-    public static Stream<CustomPropertyDelta<?>> calculateContentPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Stream<PropertyDelta<?>> calculateContentPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         if (isContentRemoved(event))
         {
@@ -87,17 +87,17 @@ public class PropertyMappingHelper
         return Stream.empty();
     }
 
-    public static Stream<CustomPropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Stream<PropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, TYPE_PROPERTY, NodeResource::getNodeType);
     }
 
-    public static Stream<CustomPropertyDelta<?>> calculateCreatedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Stream<PropertyDelta<?>> calculateCreatedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, CREATED_BY_PROPERTY, nodeResource -> getUserId(nodeResource, NodeResource::getCreatedByUser));
     }
 
-    public static Stream<CustomPropertyDelta<?>> calculateModifiedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Stream<PropertyDelta<?>> calculateModifiedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, MODIFIED_BY_PROPERTY, nodeResource -> getUserId(nodeResource, NodeResource::getModifiedByUser));
     }
@@ -133,12 +133,12 @@ public class PropertyMappingHelper
                 .orElse(null);
     }
 
-    public static Stream<CustomPropertyDelta<?>> calculateAspectsDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Stream<PropertyDelta<?>> calculateAspectsDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, ASPECT_NAMES_PROPERTY, NodeResource::getAspectNames);
     }
 
-    public static Stream<CustomPropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Stream<PropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, CREATED_AT_PROPERTY, nodeResource -> toMilliseconds(nodeResource.getCreatedAt()));
     }
