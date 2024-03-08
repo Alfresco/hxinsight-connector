@@ -70,7 +70,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
@@ -98,7 +98,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
@@ -122,7 +122,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
@@ -147,7 +147,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
@@ -177,7 +177,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
@@ -205,7 +205,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.updated("cm:description", "some description"));
@@ -231,7 +231,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.updated("cm:description", "new description"));
@@ -257,7 +257,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted("cm:title"));
@@ -281,7 +281,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.unchanged("cm:taggable"));
@@ -302,7 +302,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY_KEY));
@@ -321,7 +321,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         assertEquals(emptySet(), propertyDeltas);
@@ -342,7 +342,7 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapProperties(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         assertEquals(emptySet(), propertyDeltas);
