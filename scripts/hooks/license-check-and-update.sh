@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-if [[ -e ${GITHUB_MODIFIED_FILES} ]]
+if [[ -z ${GITHUB_MODIFIED_FILES} ]]
 then
-  modified_files=${GITHUB_MODIFIED_FILES}
-else
   modified_files=$(git diff --cached --name-only --diff-filter=ACMR)
+else
+  modified_files=${GITHUB_MODIFIED_FILES}
 fi
 
 mvn validate -DlicenseUpdateHeaders=true
