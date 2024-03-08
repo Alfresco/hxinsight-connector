@@ -117,6 +117,7 @@ class AspectFilterApplierTest
         // then
         assertTrue(result);
     }
+
     @Test
     void shouldFilterOutWhenAspectsNullAndNonEmptyAllowedAndEmptyDenied()
     {

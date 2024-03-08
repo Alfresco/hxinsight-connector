@@ -52,17 +52,17 @@ public class AspectFilterApplier implements NodeFilterApplier
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
         log.atDebug().log("Applying aspect filters on repo event of id: {}. Event aspects: {}. Allowed aspects: {}. Denied aspects: {}", repoEvent.getId(), aspectNames, allowed, denied);
-        final boolean allow = filterAllowed(aspectNames, allowed);
-        final boolean deny = filterDenied(aspectNames, denied);
+        final boolean allow = isAllowed(aspectNames, allowed);
+        final boolean deny = isDenied(aspectNames, denied);
         return allow && !deny;
     }
 
-    private boolean filterAllowed(Set<String> aspectNames, List<String> allowed)
+    private boolean isAllowed(Set<String> aspectNames, List<String> allowed)
     {
         return CollectionUtils.isEmpty(allowed) || allowed.stream().anyMatch(aspectNames::contains);
     }
 
-    private boolean filterDenied(Set<String> aspectNames, List<String> denied)
+    private boolean isDenied(Set<String> aspectNames, List<String> denied)
     {
         return denied.stream().anyMatch(aspectNames::contains);
     }
