@@ -349,7 +349,7 @@
                             <includes>
                                 <include>src/*/java/**/*.java</include>
                             </includes>
-                            <ratchetFrom>origin/master</ratchetFrom> <!-- this means that the whole spottless check/apply will run only against differences to origin/master branch-->
+                            <ratchetFrom>ORIG_HEAD</ratchetFrom> <!-- this means that the whole spottless check/apply will run only against differences to ORIG_HEAD -->
                             <licenseHeader>
                                 <file>license-header</file>
                                 <delimiter>package</delimiter>  <!-- content until first occurrence of the delimiter regex will be interpreted as header section -->
