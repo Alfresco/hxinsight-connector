@@ -3,7 +3,6 @@ repos:
     rev: v4.5.0
     hooks:
       - id: fix-byte-order-marker
-      - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: detect-aws-credentials
@@ -14,11 +13,21 @@ repos:
       - id: check-yaml
       - id: check-json
       - id: check-xml
-  -   repo: local
-      hooks:
-        -   id: spotless-check-and-format
-            name: spotless check and format
-            entry: ./scripts/hooks/spotless-check-and-format.sh
-            language: script
-            files: ".*.java"
-            pass_filenames: false
+  - repo: local
+    hooks:
+      - id: spotless-check-and-format
+        name: spotless check and format
+        entry: ./scripts/hooks/spotless-check-and-format.sh
+        language: script
+        files: ".*.java"
+        pass_filenames: false
+      - id: license-header-check-and-update
+        name: License header check and update
+        entry: ./scripts/hooks/license-check-and-update.sh
+        language: script
+        exclude: ""
+        always_run: true
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
