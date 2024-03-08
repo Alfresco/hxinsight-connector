@@ -50,18 +50,18 @@ public class TypeFilterApplier implements NodeFilterApplier
         final List<String> allowed = filter.type().allow();
         final List<String> denied = filter.type().deny();
         log.atDebug().log("Applying type filters on repo event of id: {}. Event node type: {}. Allowed types: {}. Denied types: {}", repoEvent.getId(), nodeType, allowed, denied);
-        final boolean allow = filterAllowed(nodeType, allowed);
-        final boolean deny = filterDenied(nodeType, denied);
+        final boolean allow = isAllowed(nodeType, allowed);
+        final boolean deny = isDenied(nodeType, denied);
         return allow && !deny;
     }
 
-    private boolean filterAllowed(String nodeType, List<String> allowed)
+    private boolean isAllowed(String nodeType, List<String> allowed)
     {
-        return allowed.stream().anyMatch(a -> a.equals(nodeType)) || CollectionUtils.isEmpty(allowed);
+        return CollectionUtils.isEmpty(allowed) || allowed.contains(nodeType);
     }
 
-    private boolean filterDenied(String nodeType, List<String> denied)
+    private boolean isDenied(String nodeType, List<String> denied)
     {
-        return !CollectionUtils.isEmpty(denied) && denied.stream().anyMatch(d -> d.equals(nodeType));
+        return denied.contains(nodeType);
     }
 }

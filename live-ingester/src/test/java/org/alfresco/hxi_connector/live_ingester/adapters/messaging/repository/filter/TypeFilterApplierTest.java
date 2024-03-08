@@ -50,6 +50,9 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TypeFilterApplierTest
 {
+    private static final String CM_FOLDER = "cm:folder";
+    private static final String CM_CONTENT = "cm:content";
+    private static final String CM_SPECIAL_FOLDER = "cm:special-folder";
     @Mock
     private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
     @Mock
@@ -75,7 +78,7 @@ class TypeFilterApplierTest
     @Test
     void shouldNotFilterOutWhenEmptyAllowedAndEmptyDenied()
     {
-        given(mockResource.getNodeType()).willReturn("cm:folder");
+        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
         given(mockType.allow()).willReturn(emptyList());
         given(mockType.deny()).willReturn(emptyList());
 
@@ -89,10 +92,8 @@ class TypeFilterApplierTest
     @Test
     void shouldNotFilterOutWhenTypeInAllowedAndEmptyDenied()
     {
-        final String type1 = "cm:content";
-        final String type2 = "cm:special-folder";
-        given(mockResource.getNodeType()).willReturn(type1);
-        given(mockType.allow()).willReturn(List.of(type1, type2));
+        given(mockResource.getNodeType()).willReturn(CM_CONTENT);
+        given(mockType.allow()).willReturn(List.of(CM_CONTENT, CM_SPECIAL_FOLDER));
         given(mockType.deny()).willReturn(emptyList());
 
         // when
@@ -105,11 +106,9 @@ class TypeFilterApplierTest
     @Test
     void shouldNotFilterOutWhenEmptyAllowedAndTypeNotInDenied()
     {
-        final String type1 = "cm:folder";
-        final String type2 = "cm:special-folder";
-        given(mockResource.getNodeType()).willReturn(type1);
+        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
         given(mockType.allow()).willReturn(emptyList());
-        given(mockType.deny()).willReturn(List.of(type2));
+        given(mockType.deny()).willReturn(List.of(CM_SPECIAL_FOLDER));
 
         // when
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
@@ -121,11 +120,9 @@ class TypeFilterApplierTest
     @Test
     void shouldNotFilterOutWhenTypeInAllowedAndTypeNotInDenied()
     {
-        final String type1 = "cm:content";
-        final String type2 = "cm:special-folder";
-        given(mockResource.getNodeType()).willReturn(type1);
-        given(mockType.allow()).willReturn(List.of(type1));
-        given(mockType.deny()).willReturn(List.of(type2));
+        given(mockResource.getNodeType()).willReturn(CM_CONTENT);
+        given(mockType.allow()).willReturn(List.of(CM_CONTENT));
+        given(mockType.deny()).willReturn(List.of(CM_SPECIAL_FOLDER));
 
         // when
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
@@ -137,10 +134,8 @@ class TypeFilterApplierTest
     @Test
     void shouldFilterOutWhenTypeNotAllowedAndEmptyDenied()
     {
-        final String type1 = "cm:folder";
-        final String type2 = "cm:special-folder";
-        given(mockResource.getNodeType()).willReturn(type2);
-        given(mockType.allow()).willReturn(List.of(type1));
+        given(mockResource.getNodeType()).willReturn(CM_SPECIAL_FOLDER);
+        given(mockType.allow()).willReturn(List.of(CM_FOLDER));
         given(mockType.deny()).willReturn(emptyList());
 
         // when
@@ -153,11 +148,9 @@ class TypeFilterApplierTest
     @Test
     void shouldFilterOutWhenEmptyAllowedAndTypeInDenied()
     {
-        final String type1 = "cm:folder";
-        final String type2 = "cm:special-folder";
-        given(mockResource.getNodeType()).willReturn(type1);
+        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
         given(mockType.allow()).willReturn(emptyList());
-        given(mockType.deny()).willReturn(List.of(type1, type2));
+        given(mockType.deny()).willReturn(List.of(CM_FOLDER, CM_SPECIAL_FOLDER));
 
         // when
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
