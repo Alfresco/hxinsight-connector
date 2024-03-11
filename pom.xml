@@ -52,6 +52,7 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <project.year>2023</project.year>
         <licenseName>community</licenseName>
+        <licenseUpdateHeaders>false</licenseUpdateHeaders>
         <skipTests>false</skipTests>
         <skipUnitTests>${skipTests}</skipUnitTests>
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
@@ -281,8 +282,9 @@
                         </execution>
                         <execution>
                             <id>check-licenses</id>
-                            <phase>compile</phase>
+                            <phase>validate</phase>
                             <goals>
+                                <goal>update-file-header</goal>
                                 <goal>check-file-header</goal>
                             </goals>
                             <configuration>
@@ -292,12 +294,12 @@
                                 <failOnNotUptodateHeader>true</failOnNotUptodateHeader>
                                 <licenseResolver>classpath://alfresco</licenseResolver>
                                 <licenseName>${licenseName}</licenseName>
+                                <canUpdateCopyright>${licenseUpdateHeaders}</canUpdateCopyright>
                                 <roots>
                                     <root>src</root>
                                 </roots>
                                 <includes>
                                     <include>**/*.java</include>
-                                    <include>**/*.jsp</include>
                                 </includes>
                             </configuration>
                         </execution>
