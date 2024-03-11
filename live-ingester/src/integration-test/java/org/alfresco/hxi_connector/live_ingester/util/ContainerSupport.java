@@ -160,18 +160,16 @@ public class ContainerSupport
     @SneakyThrows
     public void expectHxIngestMessageReceived(String expectedBody)
     {
-        retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
+        retryWithBackoff(() -> getHxInsightMock().verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
-        WireMock.resetAllRequests();
     }
 
     @SneakyThrows
     public void expectNoHxIngestMessagesReceived()
     {
-        WireMock.verify(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
-        WireMock.resetAllRequests();
+        getHxInsightMock().verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
     }
 
     @SneakyThrows
@@ -234,7 +232,7 @@ public class ContainerSupport
     {
         WireMock.configureFor(getSfsMock());
 
-        retryWithBackoff(() -> WireMock.verify(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
+        retryWithBackoff(() -> getSfsMock().verifyThat(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
 
         WireMock.configureFor(getHxInsightMock());
     }

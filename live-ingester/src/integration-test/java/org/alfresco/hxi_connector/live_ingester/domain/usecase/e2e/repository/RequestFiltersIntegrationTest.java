@@ -322,7 +322,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   "eventType": "update",
                   "properties": {
                     "cm:title": {"value": "Purchase Order"},
-                    "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
+                    "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
                     "modifiedBy": {"value": "abeecher"}
                   },
                   "removedProperties": ["cm:versionType", "cm:description"]
