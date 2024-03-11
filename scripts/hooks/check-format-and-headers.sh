@@ -7,11 +7,11 @@ else
   modified_files=${GITHUB_MODIFIED_FILES}
 fi
 
-mvn validate -DlicenseUpdateHeaders=true
+mvn spotless:apply validate -DlicenseUpdateHeaders=true > /dev/null
 
-all_old_headers=$(git diff --name-only --diff-filter=ACMR)
+all_nonconformant_files=$(git diff --name-only --diff-filter=ACMR)
 
-for file in ${all_old_headers}
+for file in ${all_nonconformant_files}
 do
   revert=1
   for modified_file in ${modified_files}

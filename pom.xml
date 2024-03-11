@@ -300,7 +300,6 @@
                                 </roots>
                                 <includes>
                                     <include>**/*.java</include>
-                                    <include>**/*.jsp</include>
                                 </includes>
                             </configuration>
                         </execution>
