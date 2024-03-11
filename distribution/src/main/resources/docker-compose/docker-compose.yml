@@ -298,6 +298,19 @@ services:
     ports:
       - "5008:5008"
 
+  prediction-applier:
+    image: quay.io/alfresco/alfresco-hxinsight-connector-prediction-applier:${HXINSIGHT_CONNECTOR_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
+      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+      CAMEL_COMPONENT_AWS2-SQS_URI-ENDPOINT-OVERRIDE: http://aws-mock:4566
+    ports:
+      - "5009:5009"
+
   hxinsight-mock:
     image: wiremock/wiremock:${WIREMOCK_TAG}
     deploy:
@@ -319,8 +332,9 @@ services:
         limits:
           memory: 256m
     environment:
-      SERVICES: s3
+      SERVICES: s3,sqs
       BUCKET_NAME: hxinsight-bucket-mock
+      SQS_QUEUE_NAME: hxinsight-prediction-queue
     ports:
       - "4566:4566"
     volumes:
