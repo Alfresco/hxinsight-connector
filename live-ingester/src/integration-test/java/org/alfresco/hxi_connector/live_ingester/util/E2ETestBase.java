@@ -42,6 +42,7 @@ import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.BUL
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REPO_EVENT_TOPIC;
 
 import java.time.Duration;
+import java.util.concurrent.TimeUnit;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
@@ -167,12 +168,15 @@ public class E2ETestBase
     public void setUp()
     {
         containerSupport = ContainerSupport.getInstance(hxInsightMock, brokerUrl, localStorageClient);
+        TimeUnit.MILLISECONDS.sleep(200);
     }
 
     @AfterEach
     public void reset()
     {
         WireMock.reset();
+        hxInsightMock.resetRequests();
+        sfsMock.resetRequests();
         containerSupport.clearATSQueue();
     }
 
