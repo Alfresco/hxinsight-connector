@@ -31,7 +31,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -216,7 +215,7 @@ public class ContainerSupport
         WireMock.configureFor(getSfsMock());
 
         byte[] fileBytes = Files.readAllBytes(Paths.get("src/integration-test/resources/" + expectedFile));
-        givenThat(get(SFS_PATH + targetReference)
+        WireMock.givenThat(get(SFS_PATH + targetReference)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)
                         .withBody(fileBytes)
@@ -240,7 +239,7 @@ public class ContainerSupport
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        WireMock.givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_SUCCESS_CODE)
                         .withBody(hxInsightResponse)));
