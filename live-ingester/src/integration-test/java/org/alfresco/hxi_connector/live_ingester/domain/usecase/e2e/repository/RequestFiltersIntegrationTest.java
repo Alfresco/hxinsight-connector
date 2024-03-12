@@ -34,7 +34,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
 @SpringBootTest(properties = {"alfresco.filter.aspect.deny[0]=sc:secured",
-        "alfresco.filter.aspect.allow[0]=cm:versionable", "alfresco.filter.aspect.allow[1]=cm:auditable", "logging.level.org.alfresco=DEBUG"})
+        "alfresco.filter.aspect.allow[0]=cm:versionable", "alfresco.filter.aspect.allow[1]=cm:auditable",
+        "logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class RequestFiltersIntegrationTest extends E2ETestBase
 {
