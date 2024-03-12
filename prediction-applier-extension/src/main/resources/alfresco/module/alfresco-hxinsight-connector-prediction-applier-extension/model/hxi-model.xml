@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<model name="hxi:hxIModel" xmlns="http://www.alfresco.org/model/dictionary/1.0">
+
+    <description>Hyland Experience Insight Connector Model</description>
+    <author>Alfresco</author>
+    <version>1.0</version>
+
+    <imports>
+        <import uri="http://www.alfresco.org/model/dictionary/1.0" prefix="d"/>
+        <import uri="http://www.alfresco.org/model/content/1.0" prefix="cm"/>
+        <import uri="http://www.alfresco.org/model/system/1.0" prefix="sys"/>
+    </imports>
+
+    <namespaces>
+        <namespace uri="http://www.alfresco.org/model/hxi/1.0" prefix="hxi"/>
+    </namespaces>
+
+    <aspects>
+        <aspect name="hxi:predictionApplied">
+            <title>Prediction Applied</title>
+            <description>Indicates whether prediction was applied</description>
+        </aspect>
+    </aspects>
+
+</model>

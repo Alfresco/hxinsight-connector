@@ -49,7 +49,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -88,9 +88,9 @@ class BulkIngesterEventProcessorTest
                 NODE_ID,
                 CREATE,
                 Set.of(
-                        CustomPropertyDelta.updated(TYPE_PROPERTY, NODE_TYPE),
-                        CustomPropertyDelta.updated("cm:name", "test folder"),
-                        CustomPropertyDelta.updated("cm:title", "test folder title")));
+                        PropertyDelta.updated(TYPE_PROPERTY, NODE_TYPE),
+                        PropertyDelta.updated("cm:name", "test folder"),
+                        PropertyDelta.updated("cm:title", "test folder title")));
 
         then(ingestMetadataCommandHandler).should().handle(eq(expectedCommand));
 

@@ -43,7 +43,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @Slf4j
 @Component
@@ -55,14 +55,13 @@ public class BulkIngesterEventProcessor
 
     public void process(BulkIngesterEvent event)
     {
-        Map<String, Serializable> properties = event.properties();
-        Map<String, Serializable> customProperties = properties.entrySet().stream()
+        Map<String, Serializable> properties = event.properties().entrySet().stream()
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
                 event.nodeId(),
                 CREATE,
-                mapToCustomPropertiesDelta(customProperties));
+                mapToPropertiesDelta(properties));
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);
 
@@ -74,11 +73,11 @@ public class BulkIngesterEventProcessor
         }
     }
 
-    private Set<CustomPropertyDelta<?>> mapToCustomPropertiesDelta(Map<String, Serializable> properties)
+    private Set<PropertyDelta<?>> mapToPropertiesDelta(Map<String, Serializable> properties)
     {
         return properties.entrySet()
                 .stream()
-                .map(property -> CustomPropertyDelta.updated(property.getKey(), property.getValue()))
+                .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()))
                 .collect(Collectors.toSet());
     }
 }

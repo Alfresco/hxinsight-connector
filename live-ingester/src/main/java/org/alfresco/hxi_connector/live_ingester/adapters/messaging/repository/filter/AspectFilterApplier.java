@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,6 +31,7 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
@@ -47,24 +48,22 @@ public class AspectFilterApplier implements NodeFilterApplier
     @Override
     public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
     {
-        final Set<String> aspectNames = repoEvent.getData().getResource().getAspectNames();
+        final Set<String> aspectNames = SetUtils.emptyIfNull(repoEvent.getData().getResource().getAspectNames());
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
         log.atDebug().log("Applying aspect filters on repo event of id: {}. Event aspects: {}. Allowed aspects: {}. Denied aspects: {}", repoEvent.getId(), aspectNames, allowed, denied);
-        final boolean allow = filterAllowed(aspectNames, allowed);
-        final boolean deny = filterDenied(aspectNames, denied);
+        final boolean allow = isAllowed(aspectNames, allowed);
+        final boolean deny = isDenied(aspectNames, denied);
         return allow && !deny;
     }
 
-    private boolean filterAllowed(Set<String> aspectNames, List<String> allowed)
+    private boolean isAllowed(Set<String> aspectNames, List<String> allowed)
     {
-        return CollectionUtils.isEmpty(aspectNames) ||
-                allowed.stream().anyMatch(aspectNames::contains) || CollectionUtils.isEmpty(allowed);
+        return CollectionUtils.isEmpty(allowed) || allowed.stream().anyMatch(aspectNames::contains);
     }
 
-    private boolean filterDenied(Set<String> aspectNames, List<String> denied)
+    private boolean isDenied(Set<String> aspectNames, List<String> denied)
     {
-        return !CollectionUtils.isEmpty(aspectNames) &&
-                !CollectionUtils.isEmpty(denied) && denied.stream().anyMatch(aspectNames::contains);
+        return denied.stream().anyMatch(aspectNames::contains);
     }
 }

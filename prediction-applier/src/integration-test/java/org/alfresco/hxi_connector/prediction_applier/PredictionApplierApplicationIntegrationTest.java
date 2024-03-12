@@ -23,35 +23,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom;
+package org.alfresco.hxi_connector.prediction_applier;
 
-import java.util.Optional;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
-
-@ToString
-@EqualsAndHashCode(callSuper = true)
-public class CustomPropertyUnchanged<T> extends CustomPropertyDelta<T>
+@SpringBootTest
+class PredictionApplierApplicationIntegrationTest
 {
-    public CustomPropertyUnchanged(String propertyName)
-    {
-        super(propertyName);
-    }
 
-    @Override
-    public void applyOn(UpdateNodeMetadataEvent event)
+    @Test
+    void contextLoads()
     {
-        // No op
-    }
-
-    @Override
-    public <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver)
-    {
-        return Optional.empty();
+        assertEquals(1, 1);
     }
 }

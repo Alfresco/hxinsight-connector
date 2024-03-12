@@ -35,46 +35,46 @@ import lombok.Getter;
 import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyDeleted;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUnchanged;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.custom.CustomPropertyUpdated;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUnchanged;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @Getter
 @ToString
 @EqualsAndHashCode
-public abstract class CustomPropertyDelta<T>
+public abstract class PropertyDelta<T>
 {
     private final String propertyName;
 
-    public static <T> CustomPropertyUpdated<T> updated(String key, T propertyValue)
+    public static <T> PropertyUpdated<T> updated(String key, T propertyValue)
     {
-        return new CustomPropertyUpdated<>(key, propertyValue);
+        return new PropertyUpdated<>(key, propertyValue);
     }
 
-    public static <T> CustomPropertyDeleted<T> deleted(String key)
+    public static <T> PropertyDeleted<T> deleted(String key)
     {
-        return new CustomPropertyDeleted<>(key);
+        return new PropertyDeleted<>(key);
     }
 
-    public static CustomPropertyDelta<?> unchanged(String key)
+    public static PropertyDelta<?> unchanged(String key)
     {
-        return new CustomPropertyUnchanged<>(key);
+        return new PropertyUnchanged<>(key);
     }
 
-    protected CustomPropertyDelta(String propertyName)
+    protected PropertyDelta(String propertyName)
     {
         ensureNonNull(propertyName, "Property key cannot be null");
 
         this.propertyName = propertyName;
     }
 
-    public boolean canBeResolvedWith(CustomPropertyResolver<?> resolver)
+    public boolean canBeResolvedWith(PropertyResolver<?> resolver)
     {
         return resolver.canResolve(this);
     }
 
     public abstract void applyOn(UpdateNodeMetadataEvent event);
 
-    public abstract <R> Optional<CustomPropertyDelta<R>> resolveWith(CustomPropertyResolver<R> resolver);
+    public abstract <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver);
 }

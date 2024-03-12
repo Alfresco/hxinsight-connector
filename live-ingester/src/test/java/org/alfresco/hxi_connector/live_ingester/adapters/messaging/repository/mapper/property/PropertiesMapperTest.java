@@ -33,7 +33,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CONTENT_PROPERTY_KEY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta.deleted;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -42,7 +42,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
@@ -55,7 +55,7 @@ class PropertiesMapperTest
     PropertiesMapper propertiesMapper = new PropertiesMapper();
 
     @Test
-    void shouldHandleAllCustomPropertiesUpdated_NodeCreated()
+    void shouldHandleAllPropertiesUpdated_NodeCreated()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
@@ -70,19 +70,19 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                CustomPropertyDelta.updated("cm:name", "some name"),
-                CustomPropertyDelta.updated("cm:title", "some title"),
-                CustomPropertyDelta.updated("cm:description", "some description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                PropertyDelta.updated("cm:name", "some name"),
+                PropertyDelta.updated("cm:title", "some title"),
+                PropertyDelta.updated("cm:description", "some description"));
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
-    void shouldPutNameInCustomProperties_NodeCreated()
+    void shouldPutNameInProperties_NodeCreated()
     {
         // given
         String name = "some name";
@@ -98,13 +98,13 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                PropertyDelta.updated(NAME_PROPERTY_KEY, name));
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
@@ -122,16 +122,16 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of();
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
-    void shouldHandleNoCustomPropertiesChange_NodeUpdated()
+    void shouldHandleNoPropertiesChange_NodeUpdated()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
@@ -147,12 +147,12 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of();
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
@@ -177,17 +177,17 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                CustomPropertyDelta.updated(NAME_PROPERTY_KEY, name));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                PropertyDelta.updated(NAME_PROPERTY_KEY, name));
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
-    void shouldHandleCustomPropertyCreation_NodeUpdated()
+    void shouldHandlePropertyCreation_NodeUpdated()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
@@ -205,16 +205,16 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(CustomPropertyDelta.updated("cm:description", "some description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.updated("cm:description", "some description"));
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
-    void shouldHandleCustomPropertyUpdate_NodeUpdated()
+    void shouldHandlePropertyUpdate_NodeUpdated()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
@@ -231,16 +231,16 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(CustomPropertyDelta.updated("cm:description", "new description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.updated("cm:description", "new description"));
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
-    void shouldHandleCustomPropertyDeletion_NodeUpdated()
+    void shouldHandlePropertyDeletion_NodeUpdated()
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
@@ -257,12 +257,12 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted("cm:title"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted("cm:title"));
 
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     /**
@@ -281,11 +281,11 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(CustomPropertyDelta.unchanged("cm:taggable"));
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.unchanged("cm:taggable"));
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
@@ -302,11 +302,11 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<CustomPropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY_KEY));
-        assertEquals(expectedPropertyDeltas, customPropertyDeltas);
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY_KEY));
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     @Test
@@ -321,10 +321,10 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        assertEquals(emptySet(), customPropertyDeltas);
+        assertEquals(emptySet(), propertyDeltas);
     }
 
     @Test
@@ -342,10 +342,10 @@ class PropertiesMapperTest
         setNodeResource(event, nodeResource);
 
         // when
-        Set<CustomPropertyDelta<?>> customPropertyDeltas = propertiesMapper.calculateCustomPropertiesDelta(event);
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        assertEquals(emptySet(), customPropertyDeltas);
+        assertEquals(emptySet(), propertyDeltas);
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)

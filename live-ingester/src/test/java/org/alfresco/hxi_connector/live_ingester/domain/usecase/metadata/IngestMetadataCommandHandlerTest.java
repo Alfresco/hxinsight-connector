@@ -57,8 +57,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.In
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.CustomPropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.CustomPropertyResolver;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -73,7 +73,7 @@ class IngestMetadataCommandHandlerTest
     @Mock
     IngestionEngineEventPublisher ingestionEngineEventPublisher;
     @Spy
-    List<CustomPropertyResolver<?>> customPropertyResolvers = Collections.emptyList();
+    List<PropertyResolver<?>> propertyResolvers = Collections.emptyList();
     @InjectMocks
     IngestMetadataCommandHandler ingestMetadataCommandHandler;
 
@@ -85,7 +85,7 @@ class IngestMetadataCommandHandlerTest
                 NODE_ID,
                 CREATE,
                 NODE_PROPERTIES.stream()
-                        .map(nodeProperty -> CustomPropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
+                        .map(nodeProperty -> PropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
                         .collect(Collectors.toSet()));
 
         // when
