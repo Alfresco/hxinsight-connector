@@ -301,6 +301,8 @@
                                 <licenseResolver>classpath://alfresco</licenseResolver>
                                 <licenseName>${licenseName}</licenseName>
                                 <canUpdateCopyright>${licenseUpdateHeaders}</canUpdateCopyright>
+                                <projectName>Alfresco HX Insight Connector</projectName>
+                                <inceptionYear>2023</inceptionYear>
                                 <roots>
                                     <root>src</root>
                                 </roots>
