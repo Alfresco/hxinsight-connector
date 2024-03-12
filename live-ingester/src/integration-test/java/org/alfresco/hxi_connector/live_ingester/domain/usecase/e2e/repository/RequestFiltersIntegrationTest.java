@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -425,7 +425,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "id": "abeecher",
                         "displayName": "Alice Beecher"
                       },
-                      "modifiedAt": "2024-03-66T10:29:42.529Z",
+                      "modifiedAt": "2024-03-06T10:29:42.529Z",
                       "content": {
                         "mimeType": "application/pdf",
                         "sizeInBytes": 531152,
