@@ -469,7 +469,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testCreateRequestWithEmptyAspectCollection()
+    void testCreateRequestWithEmptyAspectCollectionAndTypeInAllowedFilter()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -527,7 +527,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testCreateRequestWithNoAspectsInEvent()
+    void testCreateRequestWithNoAspectsInEventAndTypeInAllowedFilter()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -584,7 +584,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    @Order(7)
     void testCreateRequestWithAspectInAllowedFilterAndTypeInDeniedFilter()
     {
         // given
@@ -644,7 +643,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    @Order(8)
     void testUpdateRequestWithAspectInAllowedFilterAndTypeInDeniedFilter()
     {
         // given
