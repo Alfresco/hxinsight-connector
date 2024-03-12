@@ -427,7 +427,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "id": "abeecher",
                         "displayName": "Alice Beecher"
                       },
-                      "modifiedAt": "2024-03-66T10:29:42.529Z",
+                      "modifiedAt": "2024-03-06T10:29:42.529Z",
                       "content": {
                         "mimeType": "application/pdf",
                         "sizeInBytes": 531152,
