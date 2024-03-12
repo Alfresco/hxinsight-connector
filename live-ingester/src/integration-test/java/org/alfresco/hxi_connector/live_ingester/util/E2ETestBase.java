@@ -183,7 +183,7 @@ public class E2ETestBase
     {
         String authRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.configureFor(hxAuthMock);
-        hxAuthMock.verifyThat(exactly(1), postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
+        WireMock.verify(exactly(1), postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthServer.getHost() + ":" + hxAuthServer.getPort()))
                 .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
                 .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))

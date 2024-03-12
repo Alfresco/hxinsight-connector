@@ -178,7 +178,19 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        containerSupport.expectNoHxIngestMessagesReceived();
+        // containerSupport.expectNoHxIngestMessagesReceived();
+        String expectedBody = """
+                {
+                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e04",
+                  "eventType": "update",
+                  "properties": {
+                    "cm:title": {"value": "Purchase Order"},
+                    "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
+                    "modifiedBy": {"value": "abeecher"}
+                  },
+                  "removedProperties": ["cm:versionType", "cm:description"]
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
     @Test
