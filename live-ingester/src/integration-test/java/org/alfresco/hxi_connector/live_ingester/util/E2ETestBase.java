@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.util;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -166,24 +167,23 @@ public class E2ETestBase
     @SneakyThrows
     public void setUp()
     {
-        containerSupport = ContainerSupport.getInstance(hxInsightMock, brokerUrl, localStorageClient);
+        WireMock.configureFor(hxInsightMock);
+        containerSupport = ContainerSupport.getInstance(brokerUrl, localStorageClient);
     }
 
     @AfterEach
     public void reset()
     {
         WireMock.reset();
-        hxInsightMock.resetRequests();
-        sfsMock.resetRequests();
         containerSupport.clearATSQueue();
     }
 
     @AfterAll
     public static void tearDown()
     {
-        WireMock.configureFor(hxAuthMock);
         String authRequestBody = AuthUtils.createAuthRequestBody();
-        WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
+        WireMock.configureFor(hxAuthMock);
+        hxAuthMock.verifyThat(exactly(1), postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthServer.getHost() + ":" + hxAuthServer.getPort()))
                 .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
                 .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))

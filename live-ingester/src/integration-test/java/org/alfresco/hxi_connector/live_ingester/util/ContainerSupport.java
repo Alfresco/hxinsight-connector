@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -101,10 +101,8 @@ public class ContainerSupport
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
-    private ContainerSupport(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
+    private ContainerSupport(String brokerUrl, LocalStorageClient localStorageClient)
     {
-        WireMock.configureFor(hxInsightMock);
-
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
         Connection connection = connectionFactory.createConnection();
         connection.start();
@@ -124,11 +122,11 @@ public class ContainerSupport
         this.localStorageClient = localStorageClient;
     }
 
-    public static ContainerSupport getInstance(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
+    public static ContainerSupport getInstance(String brokerUrl, LocalStorageClient localStorageClient)
     {
         if (instance == null)
         {
-            instance = new ContainerSupport(hxInsightMock, brokerUrl, localStorageClient);
+            instance = new ContainerSupport(brokerUrl, localStorageClient);
         }
         return instance;
     }
@@ -140,7 +138,7 @@ public class ContainerSupport
 
     public void prepareHxInsightToReturnSuccess()
     {
-        givenThat(post(HX_INSIGHT_INGEST_ENDPOINT)
+        WireMock.givenThat(post(HX_INSIGHT_INGEST_ENDPOINT)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)));
     }
@@ -160,7 +158,7 @@ public class ContainerSupport
     @SneakyThrows
     public void expectHxIngestMessageReceived(String expectedBody)
     {
-        retryWithBackoff(() -> getHxInsightMock().verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
+        retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
@@ -169,7 +167,7 @@ public class ContainerSupport
     @SneakyThrows
     public void expectNoHxIngestMessagesReceived()
     {
-        getHxInsightMock().verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
+        WireMock.verify(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
     }
 
     @SneakyThrows
@@ -232,7 +230,7 @@ public class ContainerSupport
     {
         WireMock.configureFor(getSfsMock());
 
-        retryWithBackoff(() -> getSfsMock().verifyThat(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
+        retryWithBackoff(() -> WireMock.verify(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
 
         WireMock.configureFor(getHxInsightMock());
     }
