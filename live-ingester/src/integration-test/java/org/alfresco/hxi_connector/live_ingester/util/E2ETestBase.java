@@ -161,21 +161,21 @@ public class E2ETestBase
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withBody(AuthUtils.createAuthResponseBody())));
+        WireMock.configureFor(hxInsightMock);
     }
 
     @BeforeEach
     @SneakyThrows
     public void setUp()
     {
-        WireMock.configureFor(hxInsightMock);
         containerSupport = ContainerSupport.getInstance(brokerUrl, localStorageClient);
     }
 
     @AfterEach
     public void reset()
     {
-        WireMock.reset();
         containerSupport.clearATSQueue();
+        WireMock.reset();
     }
 
     @AfterAll

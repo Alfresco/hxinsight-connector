@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -235,6 +235,23 @@ class AspectFilterApplierTest
         final String aspect3 = "cm:aspect3";
         given(mockResource.getAspectNames()).willReturn(Set.of(aspect2, aspect3));
         given(mockAspect.allow()).willReturn(emptyList());
+        given(mockAspect.deny()).willReturn(List.of(aspect3));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldNotFilterOutWhenAspectsPartiallyInAllowedAndAspectNotInDenied()
+    {
+        final String aspect1 = "cm:aspect1";
+        final String aspect2 = "cm:aspect2";
+        final String aspect3 = "cm:aspect3";
+        given(mockResource.getAspectNames()).willReturn(Set.of(aspect1));
+        given(mockAspect.allow()).willReturn(List.of(aspect1, aspect2));
         given(mockAspect.deny()).willReturn(List.of(aspect3));
 
         // when
