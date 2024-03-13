@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.util;
+package org.alfresco.hxi_connector.common.test.util;
 
 import java.io.InputStream;
 import java.nio.file.NoSuchFileException;
@@ -42,7 +42,10 @@ import lombok.SneakyThrows;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerTags
 {
-    private static final String LOCALSTACK_TAG_DEFAULT = "3.1.0";
+    private static final String POSTGRES_TAG_DEFAULT = "14.4";
+    private static final String ACTIVEMQ_TAG_DEFAULT = "5.18.3-jre17-rockylinux8";
+    private static final String WIREMOCK_TAG_DEFAULT = "3.4.2";
+    private static final String LOCALSTACK_TAG_DEFAULT = "3.2.0";
     private static final String PROPERTIES_FILE = "docker-tags.properties";
 
     private static Properties properties;
@@ -94,6 +97,21 @@ public class DockerTags
         }
 
         return properties.keySet();
+    }
+
+    public static String getPostgresTag()
+    {
+        return getOrDefault("postgres.tag", POSTGRES_TAG_DEFAULT);
+    }
+
+    public static String getActiveMqTag()
+    {
+        return getOrDefault("activemq.tag", ACTIVEMQ_TAG_DEFAULT);
+    }
+
+    public static String getWiremockTag()
+    {
+        return getOrDefault("wiremock.tag", WIREMOCK_TAG_DEFAULT);
     }
 
     public static String getLocalStackTag()

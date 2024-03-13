@@ -15,16 +15,12 @@
     <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <jrebel.version>1.1.8</jrebel.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>org.alfresco</groupId>
                 <artifactId>acs-community-packaging</artifactId>
-                <version>${alfresco.platform.version}</version>
+                <version>${alfresco-platform.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -45,7 +41,6 @@
         <dependency>
             <groupId>org.alfresco.maven</groupId>
             <artifactId>alfresco-rad</artifactId>
-            <version>${alfresco.sdk.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -129,7 +124,7 @@
             <plugin>
                 <groupId>org.zeroturnaround</groupId>
                 <artifactId>jrebel-maven-plugin</artifactId>
-                <version>${jrebel.version}</version>
+                <version>${jrebel-maven-plugin.version}</version>
                 <executions>
                     <execution>
                         <id>generate-rebel-xml</id>

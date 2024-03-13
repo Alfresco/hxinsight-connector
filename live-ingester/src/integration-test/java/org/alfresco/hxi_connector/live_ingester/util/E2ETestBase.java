@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -67,8 +67,10 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.test.util.DockerTags;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageConfig;
+import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 
 @SpringBootTest(properties = "logging.level.org.alfresco=DEBUG")
 @Import(LocalStorageConfig.class)
@@ -180,12 +182,12 @@ public class E2ETestBase
     public static void tearDown()
     {
         WireMock.configureFor(hxAuthMock);
-        String authRequestBody = AuthUtils.createAuthRequestBody();
+        String expectedAuthRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthServer.getHost() + ":" + hxAuthServer.getPort()))
                 .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
-                .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))
-                .withRequestBody(new EqualToPattern(authRequestBody)));
+                .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(expectedAuthRequestBody.getBytes(UTF_8).length)))
+                .withRequestBody(new EqualToPattern(expectedAuthRequestBody)));
         ContainerSupport.removeInstance();
     }
 

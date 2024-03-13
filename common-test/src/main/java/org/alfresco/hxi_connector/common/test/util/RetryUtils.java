@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.util;
+package org.alfresco.hxi_connector.common.test.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -50,7 +50,7 @@ public class RetryUtils
     }
 
     @SneakyThrows
-    public static Object retryWithBackoff(Supplier<Object> supplier)
+    public static <T> T retryWithBackoff(Supplier<T> supplier)
     {
         int attempt = 0;
         int delay = INITIAL_DELAY_MS;
@@ -65,10 +65,10 @@ public class RetryUtils
                 attempt++;
                 if (attempt >= MAX_ATTEMPTS)
                 {
-                    log.debug("Attempt {} failed", attempt);
+                    log.atDebug().log("Attempt {} failed", attempt);
                     throw e;
                 }
-                log.debug("Attempt {} failed, retrying after {}ms", attempt, delay);
+                log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delay);
                 Thread.sleep(delay);
                 delay *= BACKOFF_MULTIPLIER;
             }
