@@ -31,6 +31,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLogsListAppender;
+
 import java.util.List;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -39,7 +41,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 
 @Slf4j
 class BulkIngesterNodeRepositoryTest
@@ -85,7 +86,7 @@ class BulkIngesterNodeRepositoryTest
     void ensureNodeStreamIsLazyEvaluated()
     {
         // given
-        ListAppender<ILoggingEvent> testLogsAppender = LoggingUtils.createLogsListAppender(BulkIngesterNodeRepository.class, BulkIngesterNodeRepositoryTest.class);
+        ListAppender<ILoggingEvent> testLogsAppender = createLogsListAppender(BulkIngesterNodeRepository.class, BulkIngesterNodeRepositoryTest.class);
 
         metadataRepository.setNodes(List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3)));
 
