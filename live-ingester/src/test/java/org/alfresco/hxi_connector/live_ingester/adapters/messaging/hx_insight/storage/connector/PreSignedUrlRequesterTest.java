@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -61,7 +61,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerE
 class PreSignedUrlRequesterTest
 {
     private static final String MOCK_ENDPOINT = "mock:hxi-endpoint";
-    private static final int STATUS_CODE_201 = 201;
+    private static final int STATUS_CODE_200 = 200;
     private static final String NODE_REF = "node-ref";
     private static final String CONTENT_TYPE = "content/type";
     private static final String STORAGE_LOCATION = "http://dummy-url";
@@ -97,7 +97,7 @@ class PreSignedUrlRequesterTest
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
-        mockEndpointWillRespondWith(STATUS_CODE_201, RESPONSE_BODY);
+        mockEndpointWillRespondWith(STATUS_CODE_200, RESPONSE_BODY);
         mockEndpointWillExpectInRequestBody(NODE_ID_PROPERTY, NODE_REF, CONTENT_TYPE_PROPERTY, CONTENT_TYPE);
 
         // when
@@ -146,7 +146,7 @@ class PreSignedUrlRequesterTest
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
         String responseBodyWithoutUrl = createResponseBodyWith("unexpectedProperty", STORAGE_LOCATION);
-        mockEndpointWillRespondWith(STATUS_CODE_201, responseBodyWithoutUrl);
+        mockEndpointWillRespondWith(STATUS_CODE_200, responseBodyWithoutUrl);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
@@ -163,7 +163,7 @@ class PreSignedUrlRequesterTest
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
         String invalidJsonBody = removeLastCharacter(RESPONSE_BODY);
-        mockEndpointWillRespondWith(STATUS_CODE_201, invalidJsonBody);
+        mockEndpointWillRespondWith(STATUS_CODE_200, invalidJsonBody);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
@@ -181,7 +181,7 @@ class PreSignedUrlRequesterTest
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
         String emptyBody = "";
-        mockEndpointWillRespondWith(STATUS_CODE_201, emptyBody);
+        mockEndpointWillRespondWith(STATUS_CODE_200, emptyBody);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
@@ -199,7 +199,7 @@ class PreSignedUrlRequesterTest
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
         String responseBodyWithInvalidUrl = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, "invalidUrl");
-        mockEndpointWillRespondWith(STATUS_CODE_201, responseBodyWithInvalidUrl);
+        mockEndpointWillRespondWith(STATUS_CODE_200, responseBodyWithInvalidUrl);
 
         // when
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
