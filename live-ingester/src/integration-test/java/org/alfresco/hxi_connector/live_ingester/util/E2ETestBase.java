@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.util;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -161,29 +160,33 @@ public class E2ETestBase
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withBody(AuthUtils.createAuthResponseBody())));
-        WireMock.configureFor(hxInsightMock);
     }
 
     @BeforeEach
     @SneakyThrows
     public void setUp()
     {
-        containerSupport = ContainerSupport.getInstance(brokerUrl, localStorageClient);
+        containerSupport = ContainerSupport.getInstance(hxInsightMock, brokerUrl, localStorageClient);
     }
 
     @AfterEach
     public void reset()
     {
-        containerSupport.clearATSQueue();
         WireMock.reset();
+        WireMock.resetAllRequests();
+        hxInsightMock.resetRequests();
+        hxInsightMock.resetMappings();
+        sfsMock.resetRequests();
+        sfsMock.resetMappings();
+        containerSupport.clearATSQueue();
     }
 
     @AfterAll
     public static void tearDown()
     {
-        String authRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.configureFor(hxAuthMock);
-        WireMock.verify(exactly(1), postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
+        String authRequestBody = AuthUtils.createAuthRequestBody();
+        WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthServer.getHost() + ":" + hxAuthServer.getPort()))
                 .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
                 .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))

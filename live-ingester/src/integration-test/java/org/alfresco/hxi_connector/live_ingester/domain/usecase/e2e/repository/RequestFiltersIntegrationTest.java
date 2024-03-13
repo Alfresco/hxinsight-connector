@@ -48,7 +48,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -94,6 +93,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -130,9 +131,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAspectInDeniedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -178,6 +176,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -188,9 +188,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAspectNotPresentInAllowedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -236,6 +233,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -322,6 +321,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     }
                   }
                 }""";
+
         // when
         containerSupport.raiseRepoEvent(repoEvent);
 
@@ -344,8 +344,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testUpdateRequestWithAspectInDeniedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -477,6 +475,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     }
                   }
                 }""";
+
         // when
         containerSupport.raiseRepoEvent(repoEvent);
 
@@ -501,7 +500,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -547,6 +545,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -557,9 +557,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithNoAspectsInEvent()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -604,6 +601,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then

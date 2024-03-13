@@ -31,6 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -100,8 +101,10 @@ public class ContainerSupport
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
-    private ContainerSupport(String brokerUrl, LocalStorageClient localStorageClient)
+    private ContainerSupport(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
     {
+        WireMock.configureFor(hxInsightMock);
+
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
         Connection connection = connectionFactory.createConnection();
         connection.start();
@@ -121,11 +124,11 @@ public class ContainerSupport
         this.localStorageClient = localStorageClient;
     }
 
-    public static ContainerSupport getInstance(String brokerUrl, LocalStorageClient localStorageClient)
+    public static ContainerSupport getInstance(WireMock hxInsightMock, String brokerUrl, LocalStorageClient localStorageClient)
     {
         if (instance == null)
         {
-            instance = new ContainerSupport(brokerUrl, localStorageClient);
+            instance = new ContainerSupport(hxInsightMock, brokerUrl, localStorageClient);
         }
         return instance;
     }
@@ -137,7 +140,7 @@ public class ContainerSupport
 
     public void prepareHxInsightToReturnSuccess()
     {
-        WireMock.givenThat(post(HX_INSIGHT_INGEST_ENDPOINT)
+        givenThat(post(HX_INSIGHT_INGEST_ENDPOINT)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)));
     }
@@ -157,16 +160,28 @@ public class ContainerSupport
     @SneakyThrows
     public void expectHxIngestMessageReceived(String expectedBody)
     {
-        retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
+        retryWithBackoff(() -> getHxInsightMock().verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
+        resetWireMock();
     }
 
     @SneakyThrows
     public void expectNoHxIngestMessagesReceived()
     {
-        WireMock.verify(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
+        getHxInsightMock().verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
+        resetWireMock();
+    }
+
+    private static void resetWireMock()
+    {
+        WireMock.reset();
+        WireMock.resetAllRequests();
+        getHxInsightMock().resetRequests();
+        getHxInsightMock().resetMappings();
+        getSfsMock().resetRequests();
+        getSfsMock().resetMappings();
     }
 
     @SneakyThrows
@@ -215,7 +230,7 @@ public class ContainerSupport
         WireMock.configureFor(getSfsMock());
 
         byte[] fileBytes = Files.readAllBytes(Paths.get("src/integration-test/resources/" + expectedFile));
-        WireMock.givenThat(get(SFS_PATH + targetReference)
+        givenThat(get(SFS_PATH + targetReference)
                 .willReturn(aResponse()
                         .withStatus(OK_SUCCESS_CODE)
                         .withBody(fileBytes)
@@ -229,7 +244,7 @@ public class ContainerSupport
     {
         WireMock.configureFor(getSfsMock());
 
-        retryWithBackoff(() -> WireMock.verify(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
+        retryWithBackoff(() -> getSfsMock().verifyThat(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
 
         WireMock.configureFor(getHxInsightMock());
     }
@@ -239,7 +254,7 @@ public class ContainerSupport
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
-        WireMock.givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_SUCCESS_CODE)
                         .withBody(hxInsightResponse)));
