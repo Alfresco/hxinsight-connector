@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -33,7 +34,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -59,7 +59,18 @@ public class AspectFilterApplier implements NodeFilterApplier
 
     private boolean isAllowed(Set<String> aspectNames, List<String> allowed)
     {
-        return CollectionUtils.isEmpty(allowed) || allowed.stream().anyMatch(aspectNames::contains);
+        if (allowed.isEmpty())
+        {
+            return true;
+        }
+        else if (aspectNames.isEmpty())
+        {
+            return false;
+        }
+        else
+        {
+            return new HashSet<>(allowed).containsAll(aspectNames);
+        }
     }
 
     private boolean isDenied(Set<String> aspectNames, List<String> denied)
