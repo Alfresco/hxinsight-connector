@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -53,6 +53,10 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 class AspectFilterApplierTest
 {
 
+    private static final String CM_ASPECT_1 = "cm:aspect1";
+    private static final String CM_ASPECT_2 = "cm:aspect2";
+    private static final String CM_ASPECT_3 = "cm:aspect3";
+    private static final String CM_ASPECT_4 = "cm:aspect4";
     @Mock
     private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
     @Mock
@@ -78,7 +82,7 @@ class AspectFilterApplierTest
     @Test
     void shouldNotFilterOutNonEmptyAspectsWhenEmptyAllowedAndEmptyDenied()
     {
-        given(mockResource.getAspectNames()).willReturn(Set.of("aspect1"));
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1));
         given(mockAspect.allow()).willReturn(emptyList());
         given(mockAspect.deny()).willReturn(emptyList());
 
@@ -92,9 +96,8 @@ class AspectFilterApplierTest
     @Test
     void shouldFilterOutWhenAspectsEmptyAndNonEmptyAllowedAndEmptyDenied()
     {
-        final String aspect1 = "cm:aspect1";
         given(mockResource.getAspectNames()).willReturn(emptySet());
-        given(mockAspect.allow()).willReturn(List.of(aspect1));
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
@@ -121,9 +124,8 @@ class AspectFilterApplierTest
     @Test
     void shouldFilterOutWhenAspectsNullAndNonEmptyAllowedAndEmptyDenied()
     {
-        final String aspect1 = "cm:aspect1";
         given(mockResource.getAspectNames()).willReturn(null);
-        given(mockAspect.allow()).willReturn(List.of(aspect1));
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
@@ -148,12 +150,10 @@ class AspectFilterApplierTest
     }
 
     @Test
-    void shouldNotFilterOutWhenAspectInAllowedAndEmptyDenied()
+    void shouldNotFilterOutWhenAtLeastOneAspectInAllowedAndEmptyDenied()
     {
-        final String aspect1 = "cm:aspect1";
-        final String aspect2 = "cm:aspect2";
-        given(mockResource.getAspectNames()).willReturn(Set.of(aspect1, aspect2));
-        given(mockAspect.allow()).willReturn(List.of(aspect1));
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1, CM_ASPECT_2));
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
@@ -166,11 +166,9 @@ class AspectFilterApplierTest
     @Test
     void shouldNotFilterOutWhenEmptyAllowedAndAspectNotInDenied()
     {
-        final String aspect1 = "cm:aspect1";
-        final String aspect2 = "cm:aspect2";
-        given(mockResource.getAspectNames()).willReturn(Set.of(aspect1));
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1));
         given(mockAspect.allow()).willReturn(emptyList());
-        given(mockAspect.deny()).willReturn(List.of(aspect2));
+        given(mockAspect.deny()).willReturn(List.of(CM_ASPECT_2));
 
         // when
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
@@ -182,11 +180,9 @@ class AspectFilterApplierTest
     @Test
     void shouldNotFilterOutWhenAspectInAllowedAndAspectNotInDenied()
     {
-        final String aspect1 = "cm:aspect1";
-        final String aspect2 = "cm:aspect2";
-        given(mockResource.getAspectNames()).willReturn(Set.of(aspect1));
-        given(mockAspect.allow()).willReturn(List.of(aspect1));
-        given(mockAspect.deny()).willReturn(List.of(aspect2));
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1));
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
+        given(mockAspect.deny()).willReturn(List.of(CM_ASPECT_2));
 
         // when
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
@@ -198,11 +194,9 @@ class AspectFilterApplierTest
     @Test
     void shouldFilterOutWhenAspectInAllowedAndAspectInDenied()
     {
-        final String aspect1 = "cm:aspect1";
-        final String aspect2 = "cm:aspect2";
-        given(mockResource.getAspectNames()).willReturn(Set.of(aspect1, aspect2));
-        given(mockAspect.allow()).willReturn(List.of(aspect1));
-        given(mockAspect.deny()).willReturn(List.of(aspect2));
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1, CM_ASPECT_2));
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
+        given(mockAspect.deny()).willReturn(List.of(CM_ASPECT_2));
 
         // when
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
@@ -214,11 +208,8 @@ class AspectFilterApplierTest
     @Test
     void shouldFilterOutWhenAspectNotAllowedAndEmptyDenied()
     {
-        final String aspect1 = "cm:aspect1";
-        final String aspect2 = "cm:aspect2";
-        final String aspect3 = "cm:aspect3";
-        given(mockResource.getAspectNames()).willReturn(Set.of(aspect1, aspect2));
-        given(mockAspect.allow()).willReturn(List.of(aspect3));
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1, CM_ASPECT_2));
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_3));
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
@@ -231,16 +222,28 @@ class AspectFilterApplierTest
     @Test
     void shouldFilterOutWhenEmptyAllowedAndAspectInDenied()
     {
-        final String aspect2 = "cm:aspect2";
-        final String aspect3 = "cm:aspect3";
-        given(mockResource.getAspectNames()).willReturn(Set.of(aspect2, aspect3));
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_2, CM_ASPECT_3));
         given(mockAspect.allow()).willReturn(emptyList());
-        given(mockAspect.deny()).willReturn(List.of(aspect3));
+        given(mockAspect.deny()).willReturn(List.of(CM_ASPECT_3));
 
         // when
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
 
         // then
         assertFalse(result);
+    }
+
+    @Test
+    void shouldNotFilterOutWhenAtLeastOneAspectInAllowedAndAspectNotInDenied()
+    {
+        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1, CM_ASPECT_4));
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1, CM_ASPECT_2));
+        given(mockAspect.deny()).willReturn(List.of(CM_ASPECT_3));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+
+        // then
+        assertTrue(result);
     }
 }
