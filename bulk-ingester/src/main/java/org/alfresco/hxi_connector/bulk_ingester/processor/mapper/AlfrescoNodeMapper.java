@@ -57,7 +57,6 @@ public class AlfrescoNodeMapper
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
-
     private final NamespacePrefixMapper namespacePrefixMapper;
 
     @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.

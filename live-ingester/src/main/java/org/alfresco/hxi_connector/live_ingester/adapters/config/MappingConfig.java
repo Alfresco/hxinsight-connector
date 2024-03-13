@@ -46,16 +46,16 @@ public class MappingConfig
     {
         ObjectMapper objectMapper = ObjectMapperFactory.createInstance();
         objectMapper.registerModule(new JavaTimeModule());
-        registerCustomSerializers(objectMapper);
+        objectMapper.registerModule(createModuleWithCustomSerializers());
 
         return objectMapper;
     }
 
-    private void registerCustomSerializers(ObjectMapper objectMapper)
+    private SimpleModule createModuleWithCustomSerializers()
     {
         SimpleModule module = new SimpleModule();
         module.addSerializer(UpdateNodeMetadataEvent.class, new UpdateNodeMetadataEventSerializer());
         module.addSerializer(DeleteNodeEvent.class, new DeleteNodeEventSerializer());
-        objectMapper.registerModule(module);
+        return module;
     }
 }
