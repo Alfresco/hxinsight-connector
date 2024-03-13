@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.util;
+package org.alfresco.hxi_connector.common.test.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -45,7 +45,9 @@ public class LoggingUtils
 
     public static ListAppender<ILoggingEvent> createLogsListAppender(Class<?> classToTrack, Class<?>... classesToTrack)
     {
-        return createLogsAppender(ListAppender<ILoggingEvent>::new, Stream.concat(Stream.of(classToTrack), Arrays.stream(classesToTrack)).toArray(Class[]::new));
+        return createLogsAppender(
+                ListAppender<ILoggingEvent>::new,
+                Stream.concat(Stream.of(classToTrack), Arrays.stream(classesToTrack)).toArray(Class[]::new));
     }
 
     private static <T extends Appender<ILoggingEvent>> T createLogsAppender(Supplier<T> appenderSupplier, Class<?>... classesToTrack)
