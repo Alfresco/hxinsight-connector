@@ -59,7 +59,7 @@ public class AspectFilterApplier implements NodeFilterApplier
 
     private boolean isAllowed(Set<String> aspectNames, List<String> allowed)
     {
-        return CollectionUtils.isEmpty(allowed) || (CollectionUtils.isNotEmpty(aspectNames) && aspectNames.containsAll(allowed));
+        return CollectionUtils.isEmpty(allowed) || allowed.stream().anyMatch(aspectNames::contains);
     }
 
     private boolean isDenied(Set<String> aspectNames, List<String> denied)

@@ -258,6 +258,6 @@ class AspectFilterApplierTest
         boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
 
         // then
-        assertFalse(result);
+        assertTrue(result);
     }
 }
