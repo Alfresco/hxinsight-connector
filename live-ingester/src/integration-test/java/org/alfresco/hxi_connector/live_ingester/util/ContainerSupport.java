@@ -78,7 +78,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
 public class ContainerSupport
 {
     public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingest";
-    private static final int HX_INSIGHT_SUCCESS_CODE = 201;
+    private static final int HX_INSIGHT_SUCCESS_CODE = 200;
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
     public static final String BULK_INGESTER_QUEUE = "bulk.ingester.queue";
     public static final String ATS_QUEUE = "ats.queue";
