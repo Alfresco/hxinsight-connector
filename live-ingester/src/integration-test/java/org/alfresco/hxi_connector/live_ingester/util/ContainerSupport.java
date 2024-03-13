@@ -42,10 +42,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
+import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.BUCKET_NAME;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getHxInsightMock;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getSfsMock;
-import static org.alfresco.hxi_connector.live_ingester.util.RetryUtils.retryWithBackoff;
 
 import java.io.InputStream;
 import java.net.URL;
@@ -72,6 +72,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 import org.apache.commons.io.IOUtils;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
+import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 
 @Slf4j
 @SuppressWarnings("PMD.NonThreadSafeSingleton")
@@ -92,12 +93,12 @@ public class ContainerSupport
     static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
     private static final String OBJECT_KEY = "dummy-file.pdf";
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";
-    private Session session;
-    private MessageProducer repoEventProducer;
-    private MessageProducer bulkIngesterEventProducer;
-    private MessageConsumer atsConsumer;
-    private MessageProducer atsEventProducer;
-    private LocalStorageClient localStorageClient;
+    private final Session session;
+    private final MessageProducer repoEventProducer;
+    private final MessageProducer bulkIngesterEventProducer;
+    private final MessageConsumer atsConsumer;
+    private final MessageProducer atsEventProducer;
+    private final LocalStorageClient localStorageClient;
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
@@ -187,7 +188,7 @@ public class ContainerSupport
     @SneakyThrows
     public void verifyATSRequestReceived(String expectedBody)
     {
-        TextMessage received = (TextMessage) retryWithBackoff(() -> {
+        TextMessage received = retryWithBackoff(() -> {
             TextMessage message = receiveATSTextMessage();
             assertNotNull(message);
             return message;
@@ -226,7 +227,6 @@ public class ContainerSupport
     @SneakyThrows
     public void prepareSFSToReturnFile(String targetReference, String expectedFile)
     {
-
         WireMock.configureFor(getSfsMock());
 
         byte[] fileBytes = Files.readAllBytes(Paths.get("src/integration-test/resources/" + expectedFile));
@@ -273,7 +273,6 @@ public class ContainerSupport
     @SneakyThrows
     public void expectFileUploadedToS3(String expectedFile)
     {
-
         List<String> actualBucketContent = localStorageClient.listBucketContent(BUCKET_NAME);
         @Cleanup
         InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integration-test/resources/" + expectedFile));

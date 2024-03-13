@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,25 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.util;
+package org.alfresco.hxi_connector.live_ingester.util.auth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import org.junit.jupiter.api.Test;
+import org.springframework.security.test.context.support.WithSecurityContext;
 
-class DockerTagsIntegrationTest
-{
-
-    @Test
-    void testMavenPropertyResolution()
-    {
-        // when
-        Throwable thrown = catchThrowable(() -> DockerTags.keySet().stream()
-                .map(String::valueOf)
-                .forEach(DockerTags::getProperty));
-
-        // then
-        assertThat(thrown).doesNotThrowAnyException();
-    }
-}
+@Retention(RetentionPolicy.RUNTIME)
+@WithSecurityContext(factory = WithMockOAuth2UserSecurityContextFactory.class)
+public @interface WithMockOAuth2User
+{}

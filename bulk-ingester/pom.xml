@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
@@ -11,10 +13,6 @@
     <name>Alfresco Connector for Hyland Experience Insight :: Bulk Ingester</name>
     <artifactId>alfresco-hxinsight-connector-bulk-ingester</artifactId>
     <packaging>jar</packaging>
-
-    <properties>
-            <alfresco-db-connector.version>4.0.1</alfresco-db-connector.version>
-    </properties>
 
     <dependencies>
         <dependency>
@@ -35,16 +33,13 @@
             <artifactId>spring-aspects</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-elasticsearch-database-connector</artifactId>
-            <version>${alfresco-db-connector.version}</version>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-elasticsearch-database-connector-api</artifactId>
-            <version>${alfresco-db-connector.version}</version>
         </dependency>
 
         <dependency>
@@ -66,21 +61,25 @@
         </dependency>
 
         <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-hxinsight-connector-common-test</artifactId>
+            <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
-
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
         </dependency>
     </dependencies>
 

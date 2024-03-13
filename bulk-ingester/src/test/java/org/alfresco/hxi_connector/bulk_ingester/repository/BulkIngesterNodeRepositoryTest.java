@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,15 +31,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLogsListAppender;
+
 import java.util.List;
 
-import ch.qos.logback.classic.Level;
-import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
-import org.slf4j.LoggerFactory;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 
@@ -87,7 +86,7 @@ class BulkIngesterNodeRepositoryTest
     void ensureNodeStreamIsLazyEvaluated()
     {
         // given
-        ListAppender<ILoggingEvent> testLogsAppender = createTestLogsAppender();
+        ListAppender<ILoggingEvent> testLogsAppender = createLogsListAppender(BulkIngesterNodeRepository.class, BulkIngesterNodeRepositoryTest.class);
 
         metadataRepository.setNodes(List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3)));
 
@@ -116,24 +115,5 @@ class BulkIngesterNodeRepositoryTest
         when(node.getId()).thenReturn(id);
 
         return node;
-    }
-
-    private ListAppender<ILoggingEvent> createTestLogsAppender()
-    {
-        ListAppender<ILoggingEvent> listAppender = new ListAppender<>();
-
-        addAppenderForLogger(listAppender, BulkIngesterNodeRepository.class);
-        addAppenderForLogger(listAppender, BulkIngesterNodeRepositoryTest.class);
-        listAppender.start();
-
-        return listAppender;
-    }
-
-    private void addAppenderForLogger(ListAppender<ILoggingEvent> appender, Class<?> classToTrack)
-    {
-        Logger logger = (Logger) LoggerFactory.getLogger(classToTrack);
-
-        logger.addAppender(appender);
-        logger.setLevel(Level.DEBUG);
     }
 }
