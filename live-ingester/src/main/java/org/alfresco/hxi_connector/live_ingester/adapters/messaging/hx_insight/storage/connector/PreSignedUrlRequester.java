@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -61,7 +61,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
     static final String NODE_ID_PROPERTY = "objectId";
     static final String CONTENT_TYPE_PROPERTY = "contentType";
-    private static final int EXPECTED_STATUS_CODE = 201;
+    private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;

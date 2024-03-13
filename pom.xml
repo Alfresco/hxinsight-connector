@@ -70,14 +70,14 @@
         <commons-lang.version>3.14.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.15.1</commons-io.version>
-        <aws-sdk-s3.version>2.25.5</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.25.8</aws-sdk-s3.version>
         <wiremock.version>3.4.2</wiremock.version>
 
         <testcontainers.version>1.19.7</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-assembly-plugin.version>3.6.0</maven-assembly-plugin.version>
+        <maven-assembly-plugin.version>3.7.0</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
