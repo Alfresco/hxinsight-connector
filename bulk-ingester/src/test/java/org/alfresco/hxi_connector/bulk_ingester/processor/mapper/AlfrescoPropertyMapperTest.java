@@ -59,7 +59,7 @@ import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @SuppressWarnings({"PMD.TooManyMethods"})
 class AlfrescoPropertyMapperTest

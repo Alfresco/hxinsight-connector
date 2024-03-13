@@ -49,7 +49,7 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMap
 import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
 import org.alfresco.hxi_connector.bulk_ingester.repository.IdRange;
 import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")

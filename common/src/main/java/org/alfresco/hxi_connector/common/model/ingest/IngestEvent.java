@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,14 +23,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.alfresco.hxi_connector.bulk_ingester.processor.model;
+package org.alfresco.hxi_connector.common.model.ingest;
 
 import java.io.Serializable;
 import java.util.Map;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public record Node(
-        String nodeId,
+public record IngestEvent(
+        @NotBlank String nodeId,
         ContentInfo contentInfo,
-        Map<String, Serializable> properties)
-{}
+        @NotNull Map<String, Serializable> properties)
+{
+    public record ContentInfo(
+            long contentSize,
+            String encoding,
+            String mimetype) implements Serializable
+    {}
+}

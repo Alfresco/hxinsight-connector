@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -39,7 +39,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.bulk_ingester.event.NodePublisherConfig;
+import org.alfresco.hxi_connector.bulk_ingester.event.IngestEventPublisherConfig;
 
 @Component
 @RequiredArgsConstructor
@@ -48,7 +48,7 @@ public class TestCamelConsumer extends RouteBuilder
 {
     private static final int DELAY = 100;
 
-    private final NodePublisherConfig config;
+    private final IngestEventPublisherConfig config;
 
     private final List<String> messages;
 

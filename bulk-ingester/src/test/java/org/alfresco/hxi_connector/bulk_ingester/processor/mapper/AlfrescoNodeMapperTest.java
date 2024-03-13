@@ -48,7 +48,7 @@ import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.QName;
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 class AlfrescoNodeMapperTest
 {

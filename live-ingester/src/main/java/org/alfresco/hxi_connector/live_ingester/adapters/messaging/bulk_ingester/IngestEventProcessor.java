@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
@@ -49,7 +49,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BulkIngesterEventProcessor
+public class IngestEventProcessor
 {
     private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;

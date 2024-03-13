@@ -52,9 +52,10 @@ import org.springframework.context.annotation.Primary;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
 import org.alfresco.hxi_connector.bulk_ingester.BulkIngesterApplication;
+import org.alfresco.hxi_connector.bulk_ingester.event.IngestEventPublisher;
 import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
 import org.alfresco.hxi_connector.bulk_ingester.util.integration.PostgresIntegrationTestBase;
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @EnableAutoConfiguration
 @SpringBootTest(properties = "logging.level.org.alfresco=DEBUG", classes = BulkIngesterApplication.class)
@@ -67,7 +68,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
     private BulkIngestionProcessor bulkIngestionProcessor;
 
     @Autowired
-    private IngestEventPublisher ingestEventPublisher;
+    private TestIngestEventPublisher ingestEventPublisher;
 
     @Test
     void shouldPublishAllNodesFromDb()
@@ -101,9 +102,9 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
     {
         @Bean
         @Primary
-        public IngestEventPublisher ingestEventPublisher()
+        public TestIngestEventPublisher ingestEventPublisher()
         {
-            return new IngestEventPublisher();
+            return new TestIngestEventPublisher();
         }
 
         @Bean
@@ -115,7 +116,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
     }
 
     @Slf4j
-    public static class IngestEventPublisher implements org.alfresco.hxi_connector.bulk_ingester.event.IngestEventPublisher
+    public static class TestIngestEventPublisher implements IngestEventPublisher
     {
         private final Map<String, IngestEvent> ingestEvents = new HashMap<>();
 

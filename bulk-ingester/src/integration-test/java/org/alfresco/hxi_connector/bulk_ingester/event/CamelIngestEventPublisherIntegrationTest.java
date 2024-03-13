@@ -44,18 +44,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.bulk_ingester.util.TestCamelConsumer;
 import org.alfresco.hxi_connector.bulk_ingester.util.integration.ActiveMqIntegrationTestBase;
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @SpringBootTest(
-        classes = {CamelNodePublisher.class, TestCamelConsumer.class},
+        classes = {CamelIngestEventPublisher.class, TestCamelConsumer.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @ImportAutoConfiguration(CamelAutoConfiguration.class)
-@EnableConfigurationProperties(NodePublisherConfig.class)
-public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBase
+@EnableConfigurationProperties(IngestEventPublisherConfig.class)
+public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegrationTestBase
 {
     @Autowired
-    CamelNodePublisher nodePublisher;
+    CamelIngestEventPublisher nodePublisher;
 
     @Autowired
     TestCamelConsumer testCamelConsumer;

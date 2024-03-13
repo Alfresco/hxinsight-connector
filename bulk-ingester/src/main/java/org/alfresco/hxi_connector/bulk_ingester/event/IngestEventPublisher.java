@@ -26,7 +26,7 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.event;
 
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 public interface IngestEventPublisher
 {

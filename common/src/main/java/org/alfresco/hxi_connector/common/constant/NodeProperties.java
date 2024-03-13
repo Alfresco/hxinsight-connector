@@ -27,7 +27,11 @@ package org.alfresco.hxi_connector.common.constant;
 
 public class NodeProperties
 {
-
     public static final String NAME_PROPERTY_KEY = "cm:name";
     public static final String CONTENT_PROPERTY_KEY = "cm:content";
+    public static final String TYPE_PROPERTY = "type";
+    public static final String CREATED_BY_PROPERTY = "createdBy";
+    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
+    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
+    public static final String CREATED_AT_PROPERTY = "createdAt";
 }

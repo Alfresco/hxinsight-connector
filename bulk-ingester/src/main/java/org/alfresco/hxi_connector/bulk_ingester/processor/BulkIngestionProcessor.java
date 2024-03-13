@@ -38,7 +38,7 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMap
 import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
 import org.alfresco.hxi_connector.bulk_ingester.repository.IdRange;
 import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
 @Component
@@ -46,13 +46,9 @@ import org.alfresco.hxi_connector.common.model.IngestEvent;
 public class BulkIngestionProcessor
 {
     private final BulkIngesterNodeRepository bulkIngesterNodeRepository;
-
     private final BulkIngesterConfig bulkIngesterConfig;
-
     private final AlfrescoNodeMapper alfrescoNodeMapper;
-
     private final IngestEventPublisher ingestEventPublisher;
-
     private final ApplicationManager applicationManager;
 
     public void process()
@@ -60,13 +56,13 @@ public class BulkIngestionProcessor
         IdRange idRange = new IdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
 
         bulkIngesterNodeRepository.find(idRange)
-                .flatMap(this::mapToNode)
+                .flatMap(this::mapToIngestEventStream)
                 .forEach(ingestEventPublisher::publish);
 
         applicationManager.shutDown();
     }
 
-    private Stream<IngestEvent> mapToNode(AlfrescoNode node)
+    private Stream<IngestEvent> mapToIngestEventStream(AlfrescoNode node)
     {
         try
         {
@@ -78,5 +74,4 @@ public class BulkIngestionProcessor
             return Stream.empty();
         }
     }
-
 }

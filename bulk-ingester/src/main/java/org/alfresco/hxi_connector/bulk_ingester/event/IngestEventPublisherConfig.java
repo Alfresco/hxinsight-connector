@@ -24,24 +24,15 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model;
+package org.alfresco.hxi_connector.bulk_ingester.event;
 
-import java.io.Serializable;
-import java.util.Map;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
-public record BulkIngesterEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
-{
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype)
-    {}
-}
+@ConfigurationProperties("alfresco.bulk.ingest.publisher")
+public record IngestEventPublisherConfig(
+        @NotBlank String endpoint)
+{}

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,6 +29,13 @@ import static java.util.Optional.ofNullable;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 
@@ -50,12 +57,6 @@ import org.alfresco.repo.event.v1.model.UserInfo;
 @NoArgsConstructor(access = PRIVATE)
 public class PropertyMappingHelper
 {
-    /* public static final String NAME_PROPERTY_KEY = "cm:name"; public static final String CONTENT_PROPERTY_KEY = "cm:content"; */
-    public static final String TYPE_PROPERTY = "type";
-    public static final String CREATED_BY_PROPERTY = "createdBy";
-    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
-    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
-    public static final String CREATED_AT_PROPERTY = "createdAt";
 
     public static <T> Stream<PropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
             String propertyKey, Function<NodeResource, T> fieldGetter)

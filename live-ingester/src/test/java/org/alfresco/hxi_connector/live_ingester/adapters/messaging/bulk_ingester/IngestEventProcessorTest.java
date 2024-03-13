@@ -30,8 +30,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.CREATED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 
 import java.io.Serializable;
@@ -44,7 +44,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.common.model.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
@@ -53,7 +53,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-class BulkIngesterEventProcessorTest
+class IngestEventProcessorTest
 {
     private static final String NODE_ID = "07659d13-8d64-4905-a329-6b27fe182023";
     private static final String NODE_TYPE = "cm:folder";
@@ -64,7 +64,7 @@ class BulkIngesterEventProcessorTest
     @Mock
     private IngestContentCommandHandler ingestContentCommandHandler;
     @InjectMocks
-    private BulkIngesterEventProcessor bulkIngesterEventProcessor;
+    private IngestEventProcessor ingestEventProcessor;
 
     @Test
     void shouldIngestJustNodeMetadataIfItDoesNotContainAnyContent()
@@ -81,7 +81,7 @@ class BulkIngesterEventProcessorTest
                 properties);
 
         // when
-        bulkIngesterEventProcessor.process(bulkIngesterEvent);
+        ingestEventProcessor.process(bulkIngesterEvent);
 
         // then
         IngestMetadataCommand expectedCommand = new IngestMetadataCommand(
@@ -113,7 +113,7 @@ class BulkIngesterEventProcessorTest
                         CREATED_AT_PROPERTY, CREATED_AT));
 
         // when
-        bulkIngesterEventProcessor.process(ingestEvent);
+        ingestEventProcessor.process(ingestEvent);
 
         // then
         then(ingestMetadataCommandHandler).should().handle(any());
