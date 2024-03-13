@@ -33,8 +33,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SpringBootTest(properties = {"alfresco.filter.aspect.deny[0]=sc:secured",
-        "alfresco.filter.aspect.allow[0]=cm:versionable", "alfresco.filter.aspect.allow[1]=cm:auditable"})
+@SpringBootTest(properties = {
+        "alfresco.filter.aspect.deny[0]=sc:secured",
+        "alfresco.filter.aspect.allow[0]=cm:versionable",
+        "alfresco.filter.aspect.allow[1]=cm:auditable",
+        "logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class RequestFiltersIntegrationTest extends E2ETestBase
 {
@@ -235,7 +238,22 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        containerSupport.expectNoHxIngestMessagesReceived();
+        String expectedBody = """
+                {
+                   "objectId": "d71dd823-82c7-477c-8490-04cb0e826e03",
+                   "eventType": "create",
+                   "properties": {
+                      "cm:autoVersion": {"value": true},
+                      "createdAt": {"value": 1709378055695},
+                      "cm:versionType": {"value": "MAJOR"},
+                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"]},
+                      "cm:name": {"value": "purchase-order-scan.pdf"},
+                      "type": {"value": "cm:content"},
+                      "createdBy": {"value": "admin"},
+                      "modifiedBy": {"value": "admin"}
+                    }
+                 }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
     @Test
