@@ -175,6 +175,11 @@ public class E2ETestBase
     public void reset()
     {
         WireMock.reset();
+        WireMock.resetAllRequests();
+        hxInsightMock.resetRequests();
+        hxInsightMock.resetMappings();
+        sfsMock.resetRequests();
+        sfsMock.resetMappings();
         containerSupport.clearATSQueue();
     }
 
