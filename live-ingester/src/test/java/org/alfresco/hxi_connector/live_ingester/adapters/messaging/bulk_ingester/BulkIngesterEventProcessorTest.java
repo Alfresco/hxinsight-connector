@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -44,7 +44,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent;
+import org.alfresco.hxi_connector.common.model.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
@@ -75,7 +75,7 @@ class BulkIngesterEventProcessorTest
                 "cm:title", "test folder title",
                 TYPE_PROPERTY, NODE_TYPE);
 
-        BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
+        IngestEvent bulkIngesterEvent = new IngestEvent(
                 NODE_ID,
                 null,
                 properties);
@@ -101,19 +101,19 @@ class BulkIngesterEventProcessorTest
     void shouldIngestContentIfAvailable()
     {
         // given
-        BulkIngesterEvent.ContentInfo contentInfo = new BulkIngesterEvent.ContentInfo(
+        IngestEvent.ContentInfo contentInfo = new IngestEvent.ContentInfo(
                 100L,
                 "UTF-8",
                 "application/pdf");
 
-        BulkIngesterEvent bulkIngesterEvent = new BulkIngesterEvent(
+        IngestEvent ingestEvent = new IngestEvent(
                 NODE_ID,
                 contentInfo,
                 Map.of(TYPE_PROPERTY, NODE_TYPE,
                         CREATED_AT_PROPERTY, CREATED_AT));
 
         // when
-        bulkIngesterEventProcessor.process(bulkIngesterEvent);
+        bulkIngesterEventProcessor.process(ingestEvent);
 
         // then
         then(ingestMetadataCommandHandler).should().handle(any());

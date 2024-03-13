@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -59,7 +59,7 @@ import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
+import org.alfresco.hxi_connector.common.model.IngestEvent;
 
 @SuppressWarnings({"PMD.TooManyMethods"})
 class AlfrescoPropertyMapperTest
@@ -306,7 +306,7 @@ class AlfrescoPropertyMapperTest
         var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
 
         // then
-        ContentInfo expectedContentInfo = new ContentInfo(contentSize, encoding, mimeType);
+        IngestEvent.ContentInfo expectedContentInfo = new IngestEvent.ContentInfo(contentSize, encoding, mimeType);
 
         assertEquals(expectedProperty(prefixedPropertyName, expectedContentInfo), property);
     }

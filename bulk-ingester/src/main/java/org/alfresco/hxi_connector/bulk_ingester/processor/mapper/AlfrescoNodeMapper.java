@@ -41,7 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.common.model.BulkIngesterEvent;
+import org.alfresco.hxi_connector.common.model.IngestEvent;
 
 @Slf4j
 @Component
@@ -61,7 +61,7 @@ public class AlfrescoNodeMapper
     private final NamespacePrefixMapper namespacePrefixMapper;
 
     @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.
-    public BulkIngesterEvent map(AlfrescoNode alfrescoNode)
+    public IngestEvent map(AlfrescoNode alfrescoNode)
     {
         String nodeId = alfrescoNode.getNodeRef();
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
@@ -80,11 +80,11 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
-        BulkIngesterEvent.ContentInfo content = (BulkIngesterEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
         Map<String, Serializable> properties = getProperties(allProperties);
 
-        return new BulkIngesterEvent(
+        return new IngestEvent(
                 nodeId,
                 content,
                 properties);

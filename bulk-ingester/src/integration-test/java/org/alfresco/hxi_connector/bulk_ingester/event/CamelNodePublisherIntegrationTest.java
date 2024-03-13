@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -42,10 +42,9 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 import org.alfresco.hxi_connector.bulk_ingester.util.TestCamelConsumer;
 import org.alfresco.hxi_connector.bulk_ingester.util.integration.ActiveMqIntegrationTestBase;
+import org.alfresco.hxi_connector.common.model.IngestEvent;
 
 @SpringBootTest(
         classes = {CamelNodePublisher.class, TestCamelConsumer.class},
@@ -65,15 +64,15 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
     void shouldPublishNode()
     {
         // given
-        Node node = new Node(
+        IngestEvent ingestEvent = new IngestEvent(
                 "66326096-3bd6-412e-abbe-a07fbabf2fcc",
-                new ContentInfo(1000, "UTF-8", "application/pdf"),
+                new IngestEvent.ContentInfo(1000, "UTF-8", "application/pdf"),
                 Map.of(TYPE_PROPERTY, "file",
                         "cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
                         CREATED_AT_PROPERTY, 2000));
 
         // when
-        nodePublisher.publish(node);
+        nodePublisher.publish(ingestEvent);
 
         // then
         String expectedEvent = """

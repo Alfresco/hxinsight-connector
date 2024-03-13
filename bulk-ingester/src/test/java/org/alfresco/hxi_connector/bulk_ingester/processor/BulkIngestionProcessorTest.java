@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -43,13 +43,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.bulk_ingester.event.NodePublisher;
+import org.alfresco.hxi_connector.bulk_ingester.event.IngestEventPublisher;
 import org.alfresco.hxi_connector.bulk_ingester.exception.BulkIngesterRuntimeException;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
 import org.alfresco.hxi_connector.bulk_ingester.repository.IdRange;
 import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
+import org.alfresco.hxi_connector.common.model.IngestEvent;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -62,7 +62,7 @@ class BulkIngestionProcessorTest
     @Mock
     private AlfrescoNodeMapper alfrescoNodeMapper;
     @Mock
-    private NodePublisher nodePublisher;
+    private IngestEventPublisher ingestEventPublisher;
     @Mock
     private ApplicationManager applicationManager;
     @InjectMocks
@@ -87,7 +87,7 @@ class BulkIngestionProcessorTest
         then(bulkIngesterNodeRepository).should().find(idRange);
 
         then(alfrescoNodeMapper).should(times(nodes.size())).map(any());
-        then(nodePublisher).should(times(nodes.size())).publish(any());
+        then(ingestEventPublisher).should(times(nodes.size())).publish(any());
 
         then(applicationManager).should().shutDown();
     }
@@ -107,7 +107,7 @@ class BulkIngestionProcessorTest
                 throw new BulkIngesterRuntimeException(format("Failed to map node %s", givenNode));
             }
 
-            return mock(Node.class);
+            return mock(IngestEvent.class);
         });
 
         // when
@@ -115,7 +115,7 @@ class BulkIngestionProcessorTest
 
         // then
         then(alfrescoNodeMapper).should(times(3)).map(any());
-        then(nodePublisher).should(times(2)).publish(any());
+        then(ingestEventPublisher).should(times(2)).publish(any());
 
         then(applicationManager).should().shutDown();
     }

@@ -24,21 +24,11 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.common.model;
+package org.alfresco.hxi_connector.bulk_ingester.event;
 
-import java.io.Serializable;
-import java.util.Map;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import org.alfresco.hxi_connector.common.model.IngestEvent;
 
-public record BulkIngesterEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
+public interface IngestEventPublisher
 {
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype) implements Serializable
-    {}
+    void publish(IngestEvent ingestEvent);
 }
