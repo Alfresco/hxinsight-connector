@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -164,12 +164,24 @@ public class ContainerSupport
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
+        resetWireMock();
     }
 
     @SneakyThrows
     public void expectNoHxIngestMessagesReceived()
     {
         getHxInsightMock().verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
+        resetWireMock();
+    }
+
+    private static void resetWireMock()
+    {
+        WireMock.reset();
+        WireMock.resetAllRequests();
+        getHxInsightMock().resetRequests();
+        getHxInsightMock().resetMappings();
+        getSfsMock().resetRequests();
+        getSfsMock().resetMappings();
     }
 
     @SneakyThrows

@@ -47,7 +47,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -93,6 +92,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -129,9 +130,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAspectInDeniedFilterAndTypeInAllowedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -177,6 +175,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -187,9 +187,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAspectNotPresentInAllowedFilterAndTypeInAllowedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -235,6 +232,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -306,6 +305,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     }
                   }
                 }""";
+
         // when
         containerSupport.raiseRepoEvent(repoEvent);
 
@@ -328,8 +328,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testUpdateRequestWithAspectInDeniedFilterAndTypeInAllowedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -461,11 +459,23 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     }
                   }
                 }""";
+
         // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        containerSupport.expectNoHxIngestMessagesReceived();
+        String expectedBody = """
+                {
+                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e06",
+                  "eventType": "update",
+                  "properties": {
+                    "cm:title": {"value": "Purchase Order"},
+                    "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
+                    "modifiedBy": {"value": "abeecher"}
+                  },
+                  "removedProperties": ["cm:versionType", "cm:description"]
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
     @Test
@@ -474,7 +484,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -520,6 +529,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -530,9 +541,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithNoAspectsInEventAndTypeInAllowedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -577,6 +585,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
