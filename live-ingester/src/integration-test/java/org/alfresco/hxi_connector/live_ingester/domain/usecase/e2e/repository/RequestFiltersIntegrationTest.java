@@ -45,7 +45,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -91,6 +90,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -127,9 +128,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAspectInDeniedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -175,6 +173,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -185,9 +185,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAspectNotPresentInAllowedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -233,6 +230,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -304,6 +303,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     }
                   }
                 }""";
+
         // when
         containerSupport.raiseRepoEvent(repoEvent);
 
@@ -326,8 +326,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testUpdateRequestWithAspectInDeniedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -425,7 +423,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "id": "abeecher",
                         "displayName": "Alice Beecher"
                       },
-                      "modifiedAt": "2024-03-66T10:29:42.529Z",
+                      "modifiedAt": "2024-03-06T10:29:42.529Z",
                       "content": {
                         "mimeType": "application/pdf",
                         "sizeInBytes": 531152,
@@ -459,11 +457,23 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     }
                   }
                 }""";
+
         // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        containerSupport.expectNoHxIngestMessagesReceived();
+        String expectedBody = """
+                {
+                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e06",
+                  "eventType": "update",
+                  "properties": {
+                    "cm:title": {"value": "Purchase Order"},
+                    "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
+                    "modifiedBy": {"value": "abeecher"}
+                  },
+                  "removedProperties": ["cm:versionType", "cm:description"]
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
     @Test
@@ -472,7 +482,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -518,6 +527,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
@@ -528,9 +539,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithNoAspectsInEvent()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -575,6 +583,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then

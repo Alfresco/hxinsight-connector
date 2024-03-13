@@ -164,12 +164,24 @@ public class ContainerSupport
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
+        resetWireMock();
     }
 
     @SneakyThrows
     public void expectNoHxIngestMessagesReceived()
     {
         getHxInsightMock().verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
+        resetWireMock();
+    }
+
+    private static void resetWireMock()
+    {
+        WireMock.reset();
+        WireMock.resetAllRequests();
+        getHxInsightMock().resetRequests();
+        getHxInsightMock().resetMappings();
+        getSfsMock().resetRequests();
+        getSfsMock().resetMappings();
     }
 
     @SneakyThrows
