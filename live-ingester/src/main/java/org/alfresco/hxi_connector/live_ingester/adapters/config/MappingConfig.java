@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,6 +45,7 @@ public class MappingConfig
     public ObjectMapper objectMapper()
     {
         ObjectMapper objectMapper = ObjectMapperFactory.createInstance();
+        objectMapper.registerModule(new JavaTimeModule());
         registerCustomSerializers(objectMapper);
 
         return objectMapper;
