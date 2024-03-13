@@ -35,6 +35,10 @@
 
         <dependency>
             <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-hxinsight-connector-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
             <artifactId>alfresco-elasticsearch-database-connector</artifactId>
         </dependency>
         <dependency>

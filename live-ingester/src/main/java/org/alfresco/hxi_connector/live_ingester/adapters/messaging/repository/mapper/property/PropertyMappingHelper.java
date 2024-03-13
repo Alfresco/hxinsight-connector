@@ -50,8 +50,7 @@ import org.alfresco.repo.event.v1.model.UserInfo;
 @NoArgsConstructor(access = PRIVATE)
 public class PropertyMappingHelper
 {
-    public static final String NAME_PROPERTY_KEY = "cm:name";
-    public static final String CONTENT_PROPERTY_KEY = "cm:content";
+    /* public static final String NAME_PROPERTY_KEY = "cm:name"; public static final String CONTENT_PROPERTY_KEY = "cm:content"; */
     public static final String TYPE_PROPERTY = "type";
     public static final String CREATED_BY_PROPERTY = "createdBy";
     public static final String MODIFIED_BY_PROPERTY = "modifiedBy";

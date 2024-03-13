@@ -27,19 +27,17 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingeste
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.model.BulkIngesterEvent;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
 @RequiredArgsConstructor
@@ -59,12 +57,14 @@ public class BulkIngesterEventListener extends RouteBuilder
                 .transacted()
                 .routeId(ROUTE_ID)
                 .log(DEBUG, "Received bulk ingester event : ${header.JMSMessageID}")
+                .unmarshal()
+                .json(JsonLibrary.Jackson, BulkIngesterEvent.class)
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
-                .process(exchange -> eventProcessor.process(toBulkIngesterEvent(exchange)))
+                .process(exchange -> eventProcessor.process(exchange.getMessage(BulkIngesterEvent.class)))
                 .end();
     }
 
-    private BulkIngesterEvent toBulkIngesterEvent(Exchange exchange)
+    /*private BulkIngesterEvent toBulkIngesterEvent(Exchange exchange)
     {
         try
         {
@@ -73,6 +73,6 @@ public class BulkIngesterEventListener extends RouteBuilder
         catch (JsonProcessingException e)
         {
             throw new LiveIngesterRuntimeException("Event deserialization failed", e);
-        }
+      */  }
     }
 }

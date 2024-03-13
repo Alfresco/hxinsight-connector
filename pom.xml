@@ -15,6 +15,7 @@
 
     <modules>
         <module>common-test</module>
+        <module>common</module>
         <module>bulk-ingester</module>
         <module>live-ingester</module>
         <module>prediction-applier</module>
@@ -171,6 +172,11 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>org.alfresco</groupId>
+                <artifactId>alfresco-hxinsight-connector-common</artifactId>
+                <version>${project.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
                 <artifactId>alfresco-hxinsight-connector-common-test</artifactId>

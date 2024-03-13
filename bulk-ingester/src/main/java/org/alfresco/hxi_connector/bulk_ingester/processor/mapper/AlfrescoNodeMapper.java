@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -41,8 +41,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
+import org.alfresco.hxi_connector.common.model.BulkIngesterEvent;
 
 @Slf4j
 @Component
@@ -62,7 +61,7 @@ public class AlfrescoNodeMapper
     private final NamespacePrefixMapper namespacePrefixMapper;
 
     @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.
-    public Node map(AlfrescoNode alfrescoNode)
+    public BulkIngesterEvent map(AlfrescoNode alfrescoNode)
     {
         String nodeId = alfrescoNode.getNodeRef();
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
@@ -81,11 +80,11 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
-        ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        BulkIngesterEvent.ContentInfo content = (BulkIngesterEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
         Map<String, Serializable> properties = getProperties(allProperties);
 
-        return new Node(
+        return new BulkIngesterEvent(
                 nodeId,
                 content,
                 properties);
