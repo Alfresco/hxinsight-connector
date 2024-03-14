@@ -26,6 +26,13 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -48,13 +55,7 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 @RequiredArgsConstructor
 public class AlfrescoNodeMapper
 {
-    public static final String CONTENT_PROPERTY = "cm:content";
-    public static final String TYPE_PROPERTY = "type";
-    public static final String CREATED_BY_PROPERTY = "createdByUserWithId";
-    public static final String MODIFIED_BY_PROPERTY = "modifiedByUserWithId";
-    public static final String CREATED_AT_PROPERTY = "createdAt";
-    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
-    private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
+    private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY_KEY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
     private final NamespacePrefixMapper namespacePrefixMapper;
@@ -79,7 +80,7 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
-        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY_KEY);
 
         Map<String, Serializable> properties = getProperties(allProperties);
 
