@@ -47,8 +47,8 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadContentRenditionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.RemoteContentLocation;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @Slf4j
@@ -59,7 +59,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private static final String ROUTE_ID = "transform-events-consumer";
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
-    private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IntegrationProperties integrationProperties;
 
     @Override
@@ -93,8 +93,8 @@ public class ATSTransformResponseHandler extends RouteBuilder
         RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
         ContentPropertyValue contentPropertyValue = new ContentPropertyValue(remoteContentLocation.url());
         Set<PropertyDelta<?>> properties = Set.of(updated(CONTENT_PROPERTY, contentPropertyValue));
-        IngestMetadataCommand command = new IngestMetadataCommand(remoteContentLocation.nodeId(), UPDATE, properties);
+        IngestNodeCommand command = new IngestNodeCommand(remoteContentLocation.nodeId(), UPDATE, properties);
 
-        ingestMetadataCommandHandler.handle(command);
+        ingestNodeCommandHandler.handle(command);
     }
 }

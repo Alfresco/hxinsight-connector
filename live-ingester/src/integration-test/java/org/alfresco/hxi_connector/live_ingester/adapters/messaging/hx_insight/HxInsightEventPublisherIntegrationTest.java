@@ -67,7 +67,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientE
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.util.auth.WithMockOAuth2User;
 import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
@@ -90,7 +90,7 @@ class HxInsightEventPublisherIntegrationTest
     private static final String NODE_ID = "node-id";
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
-    private static final NodeEvent NODE_EVENT = new UpdateNodeMetadataEvent(NODE_ID, EventType.UPDATE);
+    private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE);
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")

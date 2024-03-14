@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -46,7 +46,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
@@ -64,7 +64,7 @@ class EventProcessorTest
     RepoEventMapper repoEventMapper;
 
     @Mock
-    IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    IngestNodeCommandHandler ingestNodeCommandHandler;
 
     @Mock
     IngestContentCommandHandler ingestContentCommandHandler;
@@ -86,10 +86,10 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).should().mapToIngestNodeCommand(event);
         then(repoEventMapper).shouldHaveNoMoreInteractions();
 
-        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestNodeCommandHandler).should().handle(any());
     }
 
     @Test
@@ -104,10 +104,10 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).should().mapToIngestNodeCommand(event);
         then(repoEventMapper).shouldHaveNoMoreInteractions();
 
-        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestNodeCommandHandler).should().handle(any());
     }
 
     @Test
@@ -126,10 +126,10 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).should().mapToIngestNodeCommand(event);
         then(repoEventMapper).should().mapToIngestContentCommand(event);
 
-        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestNodeCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).should().handle(ingestContentCommand);
     }
 
@@ -146,10 +146,10 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).should().mapToIngestNodeCommand(event);
         then(repoEventMapper).shouldHaveNoMoreInteractions();
 
-        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestNodeCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
     }
 
@@ -170,10 +170,10 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).should().mapToIngestNodeCommand(event);
         then(repoEventMapper).should().mapToIngestContentCommand(event);
 
-        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestNodeCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).should().handle(ingestContentCommand);
     }
 
@@ -191,10 +191,10 @@ class EventProcessorTest
         eventProcessor.process(event);
 
         // then
-        then(repoEventMapper).should().mapToIngestMetadataCommand(event);
+        then(repoEventMapper).should().mapToIngestNodeCommand(event);
         then(repoEventMapper).shouldHaveNoMoreInteractions();
 
-        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestNodeCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
     }
 

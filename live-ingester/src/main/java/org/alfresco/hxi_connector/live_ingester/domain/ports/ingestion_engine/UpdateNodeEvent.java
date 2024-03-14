@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -40,29 +40,29 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
 @Getter
 @ToString
 @EqualsAndHashCode
-public class UpdateNodeMetadataEvent implements NodeEvent
+public class UpdateNodeEvent implements NodeEvent
 {
     private final String objectId;
     private final EventType eventType;
     private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
-    private final Set<String> metadataPropertiesToUnset = new HashSet<>();
+    private final Set<String> propertiesToUnset = new HashSet<>();
 
-    public UpdateNodeMetadataEvent(String objectId, EventType eventType)
+    public UpdateNodeEvent(String objectId, EventType eventType)
     {
         this.objectId = objectId;
         this.eventType = eventType;
     }
 
-    public UpdateNodeMetadataEvent set(NodeProperty<?> metadataProperty)
+    public UpdateNodeEvent addMetadataInstruction(NodeProperty<?> metadataProperty)
     {
         metadataPropertiesToSet.put(metadataProperty.name(), metadataProperty);
 
         return this;
     }
 
-    public UpdateNodeMetadataEvent unset(String metadataPropertyName)
+    public UpdateNodeEvent addUnsetInstruction(String metadataPropertyName)
     {
-        metadataPropertiesToUnset.add(metadataPropertyName);
+        propertiesToUnset.add(metadataPropertyName);
 
         return this;
     }

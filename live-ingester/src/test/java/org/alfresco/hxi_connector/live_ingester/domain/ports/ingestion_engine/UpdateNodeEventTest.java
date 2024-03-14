@@ -35,7 +35,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 
 import org.junit.jupiter.api.Test;
 
-class UpdateNodeMetadataEventTest
+class UpdateNodeEventTest
 {
     private static final String NODE_ID = "node-id";
 
@@ -43,32 +43,32 @@ class UpdateNodeMetadataEventTest
     void shouldOverwriteAlreadySetProperty()
     {
         // given
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = new UpdateNodeMetadataEvent(NODE_ID, UPDATE);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE);
 
         NodeProperty<String> name1 = new NodeProperty<>(CREATED_BY_PROPERTY, "admin");
         NodeProperty<String> name2 = new NodeProperty<>(CREATED_BY_PROPERTY, "hruser");
 
         // when
-        updateNodeMetadataEvent.set(name1);
-        updateNodeMetadataEvent.set(name2);
+        updateNodeEvent.addMetadataInstruction(name1);
+        updateNodeEvent.addMetadataInstruction(name2);
 
         // then
-        assertFalse(updateNodeMetadataEvent.getMetadataPropertiesToSet().containsValue(name1));
-        assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToSet().containsValue(name2));
+        assertFalse(updateNodeEvent.getMetadataPropertiesToSet().containsValue(name1));
+        assertTrue(updateNodeEvent.getMetadataPropertiesToSet().containsValue(name2));
     }
 
     @Test
     void shouldNotDuplicatePropertiesToUnset()
     {
         // given
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = new UpdateNodeMetadataEvent(NODE_ID, UPDATE);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE);
 
         // when
-        updateNodeMetadataEvent.unset(CREATED_BY_PROPERTY);
-        updateNodeMetadataEvent.unset(CREATED_BY_PROPERTY);
+        updateNodeEvent.addUnsetInstruction(CREATED_BY_PROPERTY);
+        updateNodeEvent.addUnsetInstruction(CREATED_BY_PROPERTY);
 
         // then
-        assertEquals(1, updateNodeMetadataEvent.getMetadataPropertiesToUnset().size());
-        assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().contains(CREATED_BY_PROPERTY));
+        assertEquals(1, updateNodeEvent.getPropertiesToUnset().size());
+        assertTrue(updateNodeEvent.getPropertiesToUnset().contains(CREATED_BY_PROPERTY));
     }
 }

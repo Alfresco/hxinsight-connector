@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -40,7 +40,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertiesMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -59,12 +59,12 @@ public class RepoEventMapper
         return new IngestContentCommand(event.getData().getResource().getId());
     }
 
-    public IngestMetadataCommand mapToIngestMetadataCommand(RepoEvent<DataAttributes<NodeResource>> event)
+    public IngestNodeCommand mapToIngestNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
         EventType eventType = getEventType(event);
         ensureThat(eventType == CREATE || eventType == UPDATE, "Unsupported event type");
 
-        return new IngestMetadataCommand(
+        return new IngestNodeCommand(
                 event.getData().getResource().getId(),
                 eventType,
                 propertiesMapper.mapToPropertyDeltas(event));

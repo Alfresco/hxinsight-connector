@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
@@ -46,16 +46,16 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class IngestMetadataCommandHandler
+public class IngestNodeCommandHandler
 {
     private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
     private final List<PropertyResolver<?>> propertyResolvers;
 
-    public void handle(IngestMetadataCommand command)
+    public void handle(IngestNodeCommand command)
     {
         EventType eventType = command.eventType();
         ensureThat(eventType != DELETE, "Cannot ingest metadata for DELETE event - nodeId %s", command.nodeId());
-        UpdateNodeMetadataEvent updateMetadataEvent = new UpdateNodeMetadataEvent(command.nodeId(), eventType);
+        UpdateNodeEvent updateMetadataEvent = new UpdateNodeEvent(command.nodeId(), eventType);
 
         command.properties()
                 .stream()
@@ -65,7 +65,7 @@ public class IngestMetadataCommandHandler
 
         if (updateMetadataEvent.getEventType() == UPDATE
                 && updateMetadataEvent.getMetadataPropertiesToSet().isEmpty()
-                && updateMetadataEvent.getMetadataPropertiesToUnset().isEmpty())
+                && updateMetadataEvent.getPropertiesToUnset().isEmpty())
         {
             log.debug("Ignoring empty metadata update: {}", updateMetadataEvent);
             return;

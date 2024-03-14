@@ -32,9 +32,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.DeleteNodeEventSerializer;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeMetadataEventSerializer;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.repo.event.databind.ObjectMapperFactory;
 
 @Configuration
@@ -54,7 +54,7 @@ public class MappingConfig
     private SimpleModule createModuleWithCustomSerializers()
     {
         SimpleModule module = new SimpleModule();
-        module.addSerializer(UpdateNodeMetadataEvent.class, new UpdateNodeMetadataEventSerializer());
+        module.addSerializer(UpdateNodeEvent.class, new UpdateNodeEventSerializer());
         module.addSerializer(DeleteNodeEvent.class, new DeleteNodeEventSerializer());
         return module;
     }

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -56,32 +56,32 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationExcep
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-class IngestMetadataCommandHandlerTest
+class IngestNodeCommandHandlerTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
 
     @Captor
-    ArgumentCaptor<UpdateNodeMetadataEvent> updateNodeMetadataEventCaptor;
+    ArgumentCaptor<UpdateNodeEvent> updateNodeEventCaptor;
     @Mock
     IngestionEngineEventPublisher ingestionEngineEventPublisher;
     @Spy
     List<PropertyResolver<?>> propertyResolvers = Collections.emptyList();
     @InjectMocks
-    IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    IngestNodeCommandHandler ingestNodeCommandHandler;
 
     @Test
     void shouldSetNewlyCreatedNodeMetadataProperties()
     {
         // given
-        IngestMetadataCommand command = new IngestMetadataCommand(
+        IngestNodeCommand command = new IngestNodeCommand(
                 NODE_ID,
                 CREATE,
                 NODE_PROPERTIES.stream()
@@ -89,27 +89,27 @@ class IngestMetadataCommandHandlerTest
                         .collect(Collectors.toSet()));
 
         // when
-        ingestMetadataCommandHandler.handle(command);
+        ingestNodeCommandHandler.handle(command);
 
         // then
         Set<NodeProperty<?>> expectedNodePropertiesToSet = Set.of(NODE_TITLE);
 
-        then(ingestionEngineEventPublisher).should().publishMessage(updateNodeMetadataEventCaptor.capture());
-        UpdateNodeMetadataEvent updateNodeMetadataEvent = updateNodeMetadataEventCaptor.getValue();
+        then(ingestionEngineEventPublisher).should().publishMessage(updateNodeEventCaptor.capture());
+        UpdateNodeEvent updateNodeEvent = updateNodeEventCaptor.getValue();
 
-        assertContainsSameElements(expectedNodePropertiesToSet, updateNodeMetadataEvent.getMetadataPropertiesToSet().values());
-        assertTrue(updateNodeMetadataEvent.getMetadataPropertiesToUnset().isEmpty(), "There should be no properties to unset");
-        assertEquals(updateNodeMetadataEvent.getEventType(), CREATE);
+        assertContainsSameElements(expectedNodePropertiesToSet, updateNodeEvent.getMetadataPropertiesToSet().values());
+        assertTrue(updateNodeEvent.getPropertiesToUnset().isEmpty(), "There should be no properties to unset");
+        assertEquals(updateNodeEvent.getEventType(), CREATE);
     }
 
     @Test
     void shouldNotSendEmptyUpdate()
     {
         // given
-        IngestMetadataCommand command = new IngestMetadataCommand(NODE_ID, UPDATE, emptySet());
+        IngestNodeCommand command = new IngestNodeCommand(NODE_ID, UPDATE, emptySet());
 
         // when
-        ingestMetadataCommandHandler.handle(command);
+        ingestNodeCommandHandler.handle(command);
 
         // then
         then(ingestionEngineEventPublisher).shouldHaveNoInteractions();
@@ -119,13 +119,13 @@ class IngestMetadataCommandHandlerTest
     void emptyCreateMessageCreatesNode()
     {
         // given
-        IngestMetadataCommand command = new IngestMetadataCommand(NODE_ID, CREATE, emptySet());
+        IngestNodeCommand command = new IngestNodeCommand(NODE_ID, CREATE, emptySet());
 
         // when
-        ingestMetadataCommandHandler.handle(command);
+        ingestNodeCommandHandler.handle(command);
 
         // then
-        NodeEvent expected = new UpdateNodeMetadataEvent(NODE_ID, CREATE);
+        NodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE);
         then(ingestionEngineEventPublisher).should().publishMessage(expected);
     }
 
@@ -133,9 +133,9 @@ class IngestMetadataCommandHandlerTest
     void emptyDeleteMessageThrowsException()
     {
         // given
-        IngestMetadataCommand command = new IngestMetadataCommand(NODE_ID, DELETE, emptySet());
+        IngestNodeCommand command = new IngestNodeCommand(NODE_ID, DELETE, emptySet());
 
         // then
-        assertThrows(ValidationException.class, () -> ingestMetadataCommandHandler.handle(command));
+        assertThrows(ValidationException.class, () -> ingestNodeCommandHandler.handle(command));
     }
 }

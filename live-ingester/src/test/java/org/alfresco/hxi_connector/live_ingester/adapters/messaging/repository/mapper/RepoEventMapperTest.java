@@ -53,7 +53,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ma
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
@@ -92,10 +92,10 @@ class RepoEventMapperTest
         RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_CREATED);
 
         // when
-        IngestMetadataCommand actualEvent = repoEventMapper.mapToIngestMetadataCommand(event);
+        IngestNodeCommand actualEvent = repoEventMapper.mapToIngestNodeCommand(event);
 
         // then
-        IngestMetadataCommand expectedEvent = new IngestMetadataCommand(
+        IngestNodeCommand expectedEvent = new IngestNodeCommand(
                 NODE_ID,
                 CREATE,
                 emptySet());
@@ -110,7 +110,7 @@ class RepoEventMapperTest
         RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
 
         // then
-        assertDoesNotThrow(() -> repoEventMapper.mapToIngestMetadataCommand(event));
+        assertDoesNotThrow(() -> repoEventMapper.mapToIngestNodeCommand(event));
     }
 
     @Test
@@ -121,7 +121,7 @@ class RepoEventMapperTest
         setType(event, NODE_DELETED);
 
         // then
-        assertThrows(ValidationException.class, () -> repoEventMapper.mapToIngestMetadataCommand(event));
+        assertThrows(ValidationException.class, () -> repoEventMapper.mapToIngestNodeCommand(event));
     }
 
     @Test
@@ -157,11 +157,11 @@ class RepoEventMapperTest
         given(propertiesMapper.mapToPropertyDeltas(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY)));
 
         // when
-        IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
+        IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
 
         // then
         Set<PropertyDelta<?>> expected = Set.of(deleted(CONTENT_PROPERTY));
-        assertEquals(expected, ingestMetadataCommand.properties(), "Expected content to be removed");
+        assertEquals(expected, ingestNodeCommand.properties(), "Expected content to be removed");
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
