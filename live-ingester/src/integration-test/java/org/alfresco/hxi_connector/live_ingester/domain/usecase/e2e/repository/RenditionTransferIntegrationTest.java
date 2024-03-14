@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -54,12 +54,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
         // then
         containerSupport.expectSFSMessageReceived("e71dd823-82c7-477c-8490-04cb0e826e66");
 
-        String preSignedUrlBody = """
-                {
-                   "contentType": "application/pdf",
-                   "objectId": "f71dd823-82c7-477c-8490-04cb0e826e67"
-                }""";
-        containerSupport.expectHxIStorageLocationMessageReceived(preSignedUrlBody);
+        containerSupport.expectHxIStorageLocationMessageReceived();
 
         containerSupport.expectFileUploadedToS3("test-file.pdf");
 

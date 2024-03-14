@@ -77,8 +77,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
-            .marshal()
-            .json()
+            .setBody(simple(null))
             .to(integrationProperties.hylandExperience().storage().location().endpoint())
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
