@@ -188,6 +188,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAtLeastOneAspectPresentInAllowedFilterAndTypeInAllowedFilter()
     {
         // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -411,7 +413,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testUpdateRequestWithAspectNotPresentInAllowedFilterAndTypeInAllowedFilter()
+    void testUpdateRequestWithAtLeastOneAspectInAllowedFilterAndTypeInAllowedFilter()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -498,8 +500,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithEmptyAspectCollectionAndTypeInAllowedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -613,9 +613,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testCreateRequestWithAspectInAllowedFilterAndTypeInDeniedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -661,10 +658,10 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-
         containerSupport.expectNoHxIngestMessagesReceived();
     }
 
@@ -672,8 +669,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     void testUpdateRequestWithAspectInAllowedFilterAndTypeInDeniedFilter()
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
         String repoEvent = """
                 {
                   "specversion": "1.0",
