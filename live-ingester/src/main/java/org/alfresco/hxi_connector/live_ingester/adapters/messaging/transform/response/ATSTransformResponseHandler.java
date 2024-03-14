@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
@@ -92,7 +92,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     {
         RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
         ContentPropertyValue contentPropertyValue = new ContentPropertyValue(remoteContentLocation.url());
-        Set<PropertyDelta<?>> properties = Set.of(updated(CONTENT_PROPERTY_KEY, contentPropertyValue));
+        Set<PropertyDelta<?>> properties = Set.of(updated(CONTENT_PROPERTY, contentPropertyValue));
         IngestMetadataCommand command = new IngestMetadataCommand(remoteContentLocation.nodeId(), UPDATE, properties);
 
         ingestMetadataCommandHandler.handle(command);

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -49,8 +49,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "cm:name": "Mexican Spanish",
                     "type": "cm:category",
                     "createdAt": 1707153552,
-                    "createdByUserWithId": "System",
-                    "modifiedByUserWithId": "admin",
+                    "createdBy": "System",
+                    "modifiedBy": "admin",
                     "aspectsNames": [
                       "cm:auditable"
                     ]
@@ -66,8 +66,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                    "properties" : {
                       "type": {"value": "cm:category"},
                       "createdAt": {"value": 1707153552},
-                      "createdByUserWithId": {"value": "System"},
-                      "modifiedByUserWithId": {"value": "admin"},
+                      "createdBy": {"value": "System"},
+                      "modifiedBy": {"value": "admin"},
                       "aspectsNames": {"value": ["cm:auditable"]},
                       "cm:name": {"value": "Mexican Spanish"}
                     }
@@ -96,8 +96,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "cm:isIndexed": false,
                     "createdAt": 1308061016,
                     "type": "cm:content",
-                    "createdByUserWithId": "admin",
-                    "modifiedByUserWithId": "hr_user",
+                    "createdBy": "admin",
+                    "modifiedBy": "hr_user",
                     "aspectsNames": [
                       "cm:indexControl",
                       "cm:auditable"
@@ -113,8 +113,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                    "eventType" : "create",
                    "properties" : {
                       "type": {"value": "cm:content"},
-                      "createdByUserWithId": {"value": "admin"},
-                      "modifiedByUserWithId": {"value": "hr_user"},
+                      "createdBy": {"value": "admin"},
+                      "modifiedBy": {"value": "hr_user"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
                       "createdAt": {"value": 1308061016},
                       "cm:name": {"value": "dashboard.xml"},

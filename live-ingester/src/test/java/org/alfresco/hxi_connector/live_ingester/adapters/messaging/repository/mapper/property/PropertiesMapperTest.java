@@ -32,8 +32,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY_KEY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
@@ -102,7 +102,7 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                PropertyDelta.updated(NAME_PROPERTY_KEY, name));
+                PropertyDelta.updated(NAME_PROPERTY, name));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -181,7 +181,7 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                PropertyDelta.updated(NAME_PROPERTY_KEY, name));
+                PropertyDelta.updated(NAME_PROPERTY, name));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -305,7 +305,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY_KEY));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY));
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 

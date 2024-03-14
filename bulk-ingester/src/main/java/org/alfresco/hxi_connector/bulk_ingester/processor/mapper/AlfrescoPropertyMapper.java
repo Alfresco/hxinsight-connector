@@ -30,7 +30,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -123,7 +123,7 @@ public class AlfrescoPropertyMapper
 
     private Optional<IngestEvent.ContentInfo> getContentValue(Serializable propertyValue)
     {
-        if (!propertyName.equals(CONTENT_PROPERTY_KEY))
+        if (!propertyName.equals(CONTENT_PROPERTY))
         {
             log.info("Found content under property with name {} for node {}. Content different from cm:content won't be ingested.", propertyName, alfrescoNode.getId());
 

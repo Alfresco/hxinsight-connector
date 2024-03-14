@@ -30,11 +30,11 @@ import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY_KEY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
@@ -74,14 +74,14 @@ public class PropertyMappingHelper
 
     public static Stream<PropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        return calculatePropertyDelta(event, NAME_PROPERTY_KEY, NodeResource::getName);
+        return calculatePropertyDelta(event, NAME_PROPERTY, NodeResource::getName);
     }
 
     public static Stream<PropertyDelta<?>> calculateContentPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         if (isContentRemoved(event))
         {
-            return Stream.of(deleted(CONTENT_PROPERTY_KEY));
+            return Stream.of(deleted(CONTENT_PROPERTY));
         }
         // New or updated content can only be sent once the transformation is complete.
         return Stream.empty();
