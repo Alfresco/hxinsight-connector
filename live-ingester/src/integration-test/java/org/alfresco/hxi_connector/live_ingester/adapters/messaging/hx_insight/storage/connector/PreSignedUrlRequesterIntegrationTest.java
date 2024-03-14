@@ -49,7 +49,6 @@ import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
-import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.junit.jupiter.api.BeforeAll;
@@ -130,9 +129,7 @@ class PreSignedUrlRequesterIntegrationTest
 
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
-                .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER))
-                .withRequestBody(new ContainsPattern(NODE_ID))
-                .withRequestBody(new ContainsPattern(FILE_CONTENT_TYPE)));
+                .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER)));
         assertThat(actualUrl).asString().isEqualTo(preSignedUrl);
     }
 

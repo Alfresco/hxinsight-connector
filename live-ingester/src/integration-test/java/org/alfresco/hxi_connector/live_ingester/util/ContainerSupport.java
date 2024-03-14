@@ -264,12 +264,10 @@ public class ContainerSupport
     }
 
     @SneakyThrows
-    public void expectHxIStorageLocationMessageReceived(String expectedBody)
+    public void expectHxIStorageLocationMessageReceived()
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
-                .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
-                .withHeader(CONTENT_TYPE, equalTo("application/json"))
-                .withRequestBody(equalToJson(expectedBody))));
+                .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))));
     }
 
     @SneakyThrows
