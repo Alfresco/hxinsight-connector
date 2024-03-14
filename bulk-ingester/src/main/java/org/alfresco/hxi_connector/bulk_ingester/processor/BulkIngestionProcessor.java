@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -33,12 +33,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.bulk_ingester.event.NodePublisher;
+import org.alfresco.hxi_connector.bulk_ingester.event.IngestEventPublisher;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 import org.alfresco.hxi_connector.bulk_ingester.repository.BulkIngesterNodeRepository;
 import org.alfresco.hxi_connector.bulk_ingester.repository.IdRange;
 import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
 @Component
@@ -46,13 +46,9 @@ import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
 public class BulkIngestionProcessor
 {
     private final BulkIngesterNodeRepository bulkIngesterNodeRepository;
-
     private final BulkIngesterConfig bulkIngesterConfig;
-
     private final AlfrescoNodeMapper alfrescoNodeMapper;
-
-    private final NodePublisher nodePublisher;
-
+    private final IngestEventPublisher ingestEventPublisher;
     private final ApplicationManager applicationManager;
 
     public void process()
@@ -60,13 +56,13 @@ public class BulkIngestionProcessor
         IdRange idRange = new IdRange(bulkIngesterConfig.fromId(), bulkIngesterConfig.toId());
 
         bulkIngesterNodeRepository.find(idRange)
-                .flatMap(this::mapToNode)
-                .forEach(nodePublisher::publish);
+                .flatMap(this::mapToIngestEventStream)
+                .forEach(ingestEventPublisher::publish);
 
         applicationManager.shutDown();
     }
 
-    private Stream<Node> mapToNode(AlfrescoNode node)
+    private Stream<IngestEvent> mapToIngestEventStream(AlfrescoNode node)
     {
         try
         {
@@ -78,5 +74,4 @@ public class BulkIngestionProcessor
             return Stream.empty();
         }
     }
-
 }

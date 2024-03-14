@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,7 +30,7 @@ import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static java.util.stream.Collectors.toSet;
 
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -50,7 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
 import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -121,7 +121,7 @@ public class AlfrescoPropertyMapper
         }
     }
 
-    private Optional<ContentInfo> getContentValue(Serializable propertyValue)
+    private Optional<IngestEvent.ContentInfo> getContentValue(Serializable propertyValue)
     {
         if (!propertyName.equals(CONTENT_PROPERTY))
         {
@@ -134,7 +134,7 @@ public class AlfrescoPropertyMapper
                 .stream()
                 .filter(contentMetadata -> Objects.equals(contentMetadata.getId(), propertyValue))
                 .findFirst()
-                .map(content -> new ContentInfo(content.getContentSize(), content.getEncoding(), content.getMimetypeStr()))
+                .map(content -> new IngestEvent.ContentInfo(content.getContentSize(), content.getEncoding(), content.getMimetypeStr()))
                 .or(() -> {
                     log.error("Content metadata not found for node {}", alfrescoNode.getId());
 

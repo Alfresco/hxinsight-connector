@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -24,13 +24,15 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.bulk_ingester.processor.model;
+package org.alfresco.hxi_connector.bulk_ingester.event;
 
-import java.io.Serializable;
-import java.util.Map;
+import jakarta.validation.constraints.NotBlank;
 
-public record Node(
-        String nodeId,
-        ContentInfo contentInfo,
-        Map<String, Serializable> properties)
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
+
+@Validated
+@ConfigurationProperties("alfresco.bulk.ingest.publisher")
+public record IngestEventPublisherConfig(
+        @NotBlank String endpoint)
 {}

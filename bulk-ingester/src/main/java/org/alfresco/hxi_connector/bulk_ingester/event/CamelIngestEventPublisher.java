@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -38,18 +38,17 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
-class CamelNodePublisher extends RouteBuilder implements NodePublisher
+class CamelIngestEventPublisher extends RouteBuilder implements IngestEventPublisher
 {
-    private static final String LOCAL_ENDPOINT = "direct:" + CamelNodePublisher.class.getSimpleName();
+    private static final String LOCAL_ENDPOINT = "direct:" + CamelIngestEventPublisher.class.getSimpleName();
 
-    private final CamelContext context;
-
-    private final NodePublisherConfig nodePublisherConfig;
+    private final CamelContext camelContext;
+    private final IngestEventPublisherConfig ingestEventPublisherConfig;
 
     @Override
     public void configure()
@@ -58,7 +57,7 @@ class CamelNodePublisher extends RouteBuilder implements NodePublisher
                 .marshal()
                 .json()
                 .log(DEBUG, log, "Sending event ${body}")
-                .to(nodePublisherConfig.endpoint());
+                .to(ingestEventPublisherConfig.endpoint());
     }
 
     @Override
@@ -67,9 +66,9 @@ class CamelNodePublisher extends RouteBuilder implements NodePublisher
             backoff = @Backoff(
                     delayExpression = "${alfresco.bulk.ingest.publisher.retry.initial-delay}",
                     multiplierExpression = "${alfresco.bulk.ingest.publisher.retry.delay-multiplier}"))
-    public void publish(Node node)
+    public void publish(IngestEvent ingestEvent)
     {
-        context.createProducerTemplate()
-                .sendBody(LOCAL_ENDPOINT, node);
+        camelContext.createProducerTemplate()
+                .sendBody(LOCAL_ENDPOINT, ingestEvent);
     }
 }

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,11 +31,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.ASPECT_NAMES_PROPERTY;
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.MODIFIED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
 import java.time.ZonedDateTime;
 import java.util.Map;
@@ -48,8 +48,7 @@ import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
 import org.alfresco.elasticsearch.db.connector.model.QName;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 class AlfrescoNodeMapperTest
 {
@@ -83,16 +82,16 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setNodeProperties(Set.of());
 
         // when
-        Node node = alfrescoNodeMapper.map(alfrescoNode);
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertEquals(NODE_UUID, node.nodeId());
-        assertNull(node.contentInfo());
+        assertEquals(NODE_UUID, ingestEvent.nodeId());
+        assertNull(ingestEvent.contentInfo());
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
                 ASPECT_NAMES_PROPERTY, Set.of(PREFIXED_ASPECT_TITLED),
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
     }
 
     @Test
@@ -111,14 +110,14 @@ class AlfrescoNodeMapperTest
                         namePropertyKey, namePropertyValue)));
 
         // when
-        Node node = alfrescoNodeMapper.map(alfrescoNode);
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
         assertEquals(Map.of(namePropertyKey, namePropertyValue,
                 TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
     }
 
     @Test
@@ -128,7 +127,7 @@ class AlfrescoNodeMapperTest
         AlfrescoNode alfrescoNode = nodeWithDefaultProperties();
 
         String contentPropertyKey = "cm:content";
-        ContentInfo contentInfo = mock();
+        IngestEvent.ContentInfo contentInfo = mock();
 
         alfrescoNode.setNodeProperties(Set.of(mockProperty(contentPropertyKey)));
 
@@ -136,14 +135,14 @@ class AlfrescoNodeMapperTest
                 Optional.of(Map.entry(
                         contentPropertyKey, contentInfo)));
         // when
-        Node node = alfrescoNodeMapper.map(alfrescoNode);
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
-        assertEquals(contentInfo, node.contentInfo());
+        assertEquals(contentInfo, ingestEvent.contentInfo());
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
     }
 
     @Test
@@ -157,13 +156,13 @@ class AlfrescoNodeMapperTest
         given(alfrescoPropertyMapper.performMapping()).willReturn(Optional.empty());
 
         // when
-        Node node = alfrescoNodeMapper.map(alfrescoNode);
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
 
         // then
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), node.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
     }
 
     private NodeProperty mockProperty(String propertyName)

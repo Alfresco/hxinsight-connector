@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,8 +26,8 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.event;
 
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.CREATED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoNodeMapper.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
 import java.io.Serializable;
 import java.util.List;
@@ -42,21 +42,20 @@ import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
 import org.alfresco.hxi_connector.bulk_ingester.util.TestCamelConsumer;
 import org.alfresco.hxi_connector.bulk_ingester.util.integration.ActiveMqIntegrationTestBase;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @SpringBootTest(
-        classes = {CamelNodePublisher.class, TestCamelConsumer.class},
+        classes = {CamelIngestEventPublisher.class, TestCamelConsumer.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @ImportAutoConfiguration(CamelAutoConfiguration.class)
-@EnableConfigurationProperties(NodePublisherConfig.class)
-public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBase
+@EnableConfigurationProperties(IngestEventPublisherConfig.class)
+public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegrationTestBase
 {
     @Autowired
-    CamelNodePublisher nodePublisher;
+    CamelIngestEventPublisher nodePublisher;
 
     @Autowired
     TestCamelConsumer testCamelConsumer;
@@ -65,15 +64,15 @@ public class CamelNodePublisherIntegrationTest extends ActiveMqIntegrationTestBa
     void shouldPublishNode()
     {
         // given
-        Node node = new Node(
+        IngestEvent ingestEvent = new IngestEvent(
                 "66326096-3bd6-412e-abbe-a07fbabf2fcc",
-                new ContentInfo(1000, "UTF-8", "application/pdf"),
+                new IngestEvent.ContentInfo(1000, "UTF-8", "application/pdf"),
                 Map.of(TYPE_PROPERTY, "file",
                         "cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
                         CREATED_AT_PROPERTY, 2000));
 
         // when
-        nodePublisher.publish(node);
+        nodePublisher.publish(ingestEvent);
 
         // then
         String expectedEvent = """

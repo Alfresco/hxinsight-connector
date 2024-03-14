@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -37,18 +37,18 @@ import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
 @RequiredArgsConstructor
-public class BulkIngesterEventListener extends RouteBuilder
+public class IngestEventListener extends RouteBuilder
 {
     private static final String ROUTE_ID = "bulk-ingester-events-consumer";
 
     private final ObjectMapper objectMapper;
-    private final BulkIngesterEventProcessor eventProcessor;
+    private final IngestEventProcessor eventProcessor;
     private final IntegrationProperties integrationProperties;
 
     @Override
@@ -60,11 +60,11 @@ public class BulkIngesterEventListener extends RouteBuilder
                 .routeId(ROUTE_ID)
                 .log(DEBUG, "Received bulk ingester event : ${header.JMSMessageID}")
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
-                .process(exchange -> eventProcessor.process(toBulkIngesterEvent(exchange)))
+                .process(exchange -> eventProcessor.process(mapToIngestEvent(exchange)))
                 .end();
     }
 
-    private BulkIngesterEvent toBulkIngesterEvent(Exchange exchange)
+    private IngestEvent mapToIngestEvent(Exchange exchange)
     {
         try
         {

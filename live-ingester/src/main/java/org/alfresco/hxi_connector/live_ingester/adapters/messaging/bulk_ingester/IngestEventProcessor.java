@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -37,8 +37,9 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.validation.annotation.Validated;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester.model.BulkIngesterEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
@@ -48,26 +49,26 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BulkIngesterEventProcessor
+public class IngestEventProcessor
 {
     private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
 
-    public void process(BulkIngesterEvent event)
+    public void process(@Validated IngestEvent ingestEvent)
     {
-        Map<String, Serializable> properties = event.properties().entrySet().stream()
+        Map<String, Serializable> properties = ingestEvent.properties().entrySet().stream()
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
-                event.nodeId(),
+                ingestEvent.nodeId(),
                 CREATE,
                 mapToPropertiesDelta(properties));
 
         ingestMetadataCommandHandler.handle(ingestMetadataCommand);
 
-        if (event.contentInfo() != null)
+        if (ingestEvent.contentInfo() != null)
         {
-            IngestContentCommand ingestContentCommand = new IngestContentCommand(event.nodeId());
+            IngestContentCommand ingestContentCommand = new IngestContentCommand(ingestEvent.nodeId());
 
             ingestContentCommandHandler.handle(ingestContentCommand);
         }

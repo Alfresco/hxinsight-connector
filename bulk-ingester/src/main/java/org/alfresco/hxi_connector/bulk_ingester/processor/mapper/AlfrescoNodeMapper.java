@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,6 +26,13 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
@@ -41,28 +48,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.ContentInfo;
-import org.alfresco.hxi_connector.bulk_ingester.processor.model.Node;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 public class AlfrescoNodeMapper
 {
-    public static final String CONTENT_PROPERTY = "cm:content";
-    public static final String TYPE_PROPERTY = "type";
-    public static final String CREATED_BY_PROPERTY = "createdByUserWithId";
-    public static final String MODIFIED_BY_PROPERTY = "modifiedByUserWithId";
-    public static final String CREATED_AT_PROPERTY = "createdAt";
-    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
-
     private final NamespacePrefixMapper namespacePrefixMapper;
 
     @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.
-    public Node map(AlfrescoNode alfrescoNode)
+    public IngestEvent map(AlfrescoNode alfrescoNode)
     {
         String nodeId = alfrescoNode.getNodeRef();
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
@@ -81,11 +80,11 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
-        ContentInfo content = (ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
         Map<String, Serializable> properties = getProperties(allProperties);
 
-        return new Node(
+        return new IngestEvent(
                 nodeId,
                 content,
                 properties);

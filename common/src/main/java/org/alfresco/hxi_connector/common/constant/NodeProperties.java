@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,16 +23,15 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.common.constant;
 
-package org.alfresco.hxi_connector.bulk_ingester.event;
-
-import jakarta.validation.constraints.NotBlank;
-
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
-
-@Validated
-@ConfigurationProperties("alfresco.bulk.ingest.publisher")
-public record NodePublisherConfig(
-        @NotBlank String endpoint)
-{}
+public class NodeProperties
+{
+    public static final String NAME_PROPERTY = "cm:name";
+    public static final String CONTENT_PROPERTY = "cm:content";
+    public static final String TYPE_PROPERTY = "type";
+    public static final String CREATED_BY_PROPERTY = "createdBy";
+    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
+    public static final String CREATED_AT_PROPERTY = "createdAt";
+    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
+}
