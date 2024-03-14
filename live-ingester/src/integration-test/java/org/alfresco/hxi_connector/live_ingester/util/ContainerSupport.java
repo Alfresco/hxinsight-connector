@@ -54,6 +54,7 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.MessageConsumer;
@@ -171,6 +172,7 @@ public class ContainerSupport
     @SneakyThrows
     public void expectNoHxIngestMessagesReceived()
     {
+        TimeUnit.MILLISECONDS.sleep(200);
         getHxInsightMock().verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
         resetWireMock();
     }
