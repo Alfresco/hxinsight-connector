@@ -41,18 +41,18 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 
-class UpdateNodeMetadataEventSerializerTest
+class UpdateNodeEventSerializerTest
 {
     private static final String NODE_ID = "node-id";
 
-    private final UpdateNodeMetadataEventSerializer serializer = new UpdateNodeMetadataEventSerializer();
+    private final UpdateNodeEventSerializer serializer = new UpdateNodeEventSerializer();
 
     @Test
     public void shouldSerializeEmptyEvent()
     {
-        UpdateNodeMetadataEvent emptyEvent = new UpdateNodeMetadataEvent(NODE_ID, CREATE);
+        UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE);
 
         String expectedJson = """
                 {
@@ -67,9 +67,9 @@ class UpdateNodeMetadataEventSerializerTest
     @Test
     public void shouldSerializePropertiesToSet()
     {
-        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
-                .set(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
-                .set(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
 
         String expectedJson = """
                 {
@@ -88,9 +88,9 @@ class UpdateNodeMetadataEventSerializerTest
     @Test
     public void shouldSerializePropertiesToUnset()
     {
-        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, UPDATE)
-                .unset(CREATED_AT_PROPERTY)
-                .unset(MODIFIED_BY_PROPERTY);
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, UPDATE)
+                .addUnsetInstruction(CREATED_AT_PROPERTY)
+                .addUnsetInstruction(MODIFIED_BY_PROPERTY);
 
         String expectedJson = """
                 {
@@ -106,9 +106,9 @@ class UpdateNodeMetadataEventSerializerTest
     @Test
     public void canCopeWithNullUsers()
     {
-        UpdateNodeMetadataEvent event = new UpdateNodeMetadataEvent(NODE_ID, CREATE)
-                .set(new NodeProperty<>(CREATED_BY_PROPERTY, null))
-                .set(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, null))
+                .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
 
         String expectedJson = """
                 {
@@ -125,12 +125,12 @@ class UpdateNodeMetadataEventSerializerTest
     }
 
     @SneakyThrows
-    private String serialize(UpdateNodeMetadataEvent eventToSerialize)
+    private String serialize(UpdateNodeEvent eventToSerialize)
     {
         ObjectMapper objectMapper = new ObjectMapper();
 
         SimpleModule module = new SimpleModule();
-        module.addSerializer(UpdateNodeMetadataEvent.class, serializer);
+        module.addSerializer(UpdateNodeEvent.class, serializer);
         objectMapper.registerModule(module);
 
         return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(eventToSerialize);

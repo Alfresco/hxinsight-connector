@@ -47,8 +47,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @ExtendWith(MockitoExtension.class)
@@ -60,7 +60,7 @@ class IngestEventProcessorTest
     private static final long CREATED_AT = 1000L;
 
     @Mock
-    private IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    private IngestNodeCommandHandler ingestNodeCommandHandler;
     @Mock
     private IngestContentCommandHandler ingestContentCommandHandler;
     @InjectMocks
@@ -84,7 +84,7 @@ class IngestEventProcessorTest
         ingestEventProcessor.process(bulkIngesterEvent);
 
         // then
-        IngestMetadataCommand expectedCommand = new IngestMetadataCommand(
+        IngestNodeCommand expectedCommand = new IngestNodeCommand(
                 NODE_ID,
                 CREATE,
                 Set.of(
@@ -92,7 +92,7 @@ class IngestEventProcessorTest
                         PropertyDelta.updated("cm:name", "test folder"),
                         PropertyDelta.updated("cm:title", "test folder title")));
 
-        then(ingestMetadataCommandHandler).should().handle(eq(expectedCommand));
+        then(ingestNodeCommandHandler).should().handle(eq(expectedCommand));
 
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
     }
@@ -116,7 +116,7 @@ class IngestEventProcessorTest
         ingestEventProcessor.process(ingestEvent);
 
         // then
-        then(ingestMetadataCommandHandler).should().handle(any());
+        then(ingestNodeCommandHandler).should().handle(any());
 
         then(ingestContentCommandHandler).should().handle(eq(new IngestContentCommand(NODE_ID)));
     }

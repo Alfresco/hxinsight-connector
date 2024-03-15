@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -34,7 +34,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeMetadataEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUnchanged;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
@@ -74,7 +74,7 @@ public abstract class PropertyDelta<T>
         return resolver.canResolve(this);
     }
 
-    public abstract void applyOn(UpdateNodeMetadataEvent event);
+    public abstract void applyOn(UpdateNodeEvent event);
 
     public abstract <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver);
 }
