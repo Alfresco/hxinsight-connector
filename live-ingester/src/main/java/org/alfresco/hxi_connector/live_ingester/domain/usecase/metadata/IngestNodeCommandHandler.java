@@ -55,22 +55,22 @@ public class IngestNodeCommandHandler
     {
         EventType eventType = command.eventType();
         ensureThat(eventType != DELETE, "Cannot ingest metadata for DELETE event - nodeId %s", command.nodeId());
-        UpdateNodeEvent updateMetadataEvent = new UpdateNodeEvent(command.nodeId(), eventType);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(command.nodeId(), eventType);
 
         command.properties()
                 .stream()
                 .map(this::resolve)
                 .flatMap(Optional::stream)
-                .forEach(propertyDelta -> propertyDelta.applyOn(updateMetadataEvent));
+                .forEach(propertyDelta -> propertyDelta.applyOn(updateNodeEvent));
 
-        if (updateMetadataEvent.getEventType() == UPDATE
-                && updateMetadataEvent.getMetadataPropertiesToSet().isEmpty()
-                && updateMetadataEvent.getPropertiesToUnset().isEmpty())
+        if (updateNodeEvent.getEventType() == UPDATE
+                && updateNodeEvent.getMetadataPropertiesToSet().isEmpty()
+                && updateNodeEvent.getPropertiesToUnset().isEmpty())
         {
-            log.debug("Ignoring empty metadata update: {}", updateMetadataEvent);
+            log.debug("Ignoring empty metadata update: {}", updateNodeEvent);
             return;
         }
-        ingestionEngineEventPublisher.publishMessage(updateMetadataEvent);
+        ingestionEngineEventPublisher.publishMessage(updateNodeEvent);
     }
 
     private Optional<PropertyDelta<?>> resolve(PropertyDelta<?> propertyDelta)
