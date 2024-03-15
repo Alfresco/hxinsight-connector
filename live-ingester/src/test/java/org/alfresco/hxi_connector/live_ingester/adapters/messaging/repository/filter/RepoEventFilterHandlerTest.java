@@ -46,7 +46,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
-class NodeFilterHandlerTest
+class RepoEventFilterHandlerTest
 {
 
     @Mock
@@ -61,13 +61,13 @@ class NodeFilterHandlerTest
     @Mock
     private Filter mockFilter;
 
-    private NodeFilterHandler objectUnderTest;
+    private RepoEventFilterHandler objectUnderTest;
 
     @BeforeEach
     void setUp()
     {
-        final List<NodeFilterApplier> nodeFilterAppliers = List.of(mockAspectFilterApplier, mockTypeFilterApplier);
-        objectUnderTest = new NodeFilterHandler(nodeFilterAppliers);
+        final List<RepoEventFilterApplier> repoEventFilterAppliers = List.of(mockAspectFilterApplier, mockTypeFilterApplier);
+        objectUnderTest = new RepoEventFilterHandler(repoEventFilterAppliers);
     }
 
     @Test

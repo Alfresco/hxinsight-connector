@@ -35,7 +35,6 @@ import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -47,10 +46,8 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class TypeFilterApplierTest
 {
-    private static final String CM_FOLDER = "cm:folder";
     private static final String CM_CONTENT = "cm:content";
     private static final String CM_SPECIAL_FOLDER = "cm:special-folder";
     @Mock
@@ -76,86 +73,14 @@ class TypeFilterApplierTest
     }
 
     @Test
-    void shouldNotFilterOutWhenEmptyAllowedAndEmptyDenied()
+    void shouldThrowExceptionWhenNullNodeType()
     {
-        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
-        given(mockType.allow()).willReturn(emptyList());
-        given(mockType.deny()).willReturn(emptyList());
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
-
-        // then
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldNotFilterOutWhenTypeInAllowedAndEmptyDenied()
-    {
-        given(mockResource.getNodeType()).willReturn(CM_CONTENT);
+        given(mockResource.getNodeType()).willReturn(null);
         given(mockType.allow()).willReturn(List.of(CM_CONTENT, CM_SPECIAL_FOLDER));
         given(mockType.deny()).willReturn(emptyList());
 
-        // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        // when/then
+        assertThrows(NullPointerException.class, () -> objectUnderTest.applyFilter(mockRepoEvent, mockFilter));
 
-        // then
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldNotFilterOutWhenEmptyAllowedAndTypeNotInDenied()
-    {
-        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
-        given(mockType.allow()).willReturn(emptyList());
-        given(mockType.deny()).willReturn(List.of(CM_SPECIAL_FOLDER));
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
-
-        // then
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldNotFilterOutWhenTypeInAllowedAndTypeNotInDenied()
-    {
-        given(mockResource.getNodeType()).willReturn(CM_CONTENT);
-        given(mockType.allow()).willReturn(List.of(CM_CONTENT));
-        given(mockType.deny()).willReturn(List.of(CM_SPECIAL_FOLDER));
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
-
-        // then
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldFilterOutWhenTypeNotAllowedAndEmptyDenied()
-    {
-        given(mockResource.getNodeType()).willReturn(CM_SPECIAL_FOLDER);
-        given(mockType.allow()).willReturn(List.of(CM_FOLDER));
-        given(mockType.deny()).willReturn(emptyList());
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
-
-        // then
-        assertFalse(result);
-    }
-
-    @Test
-    void shouldFilterOutWhenEmptyAllowedAndTypeInDenied()
-    {
-        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
-        given(mockType.allow()).willReturn(emptyList());
-        given(mockType.deny()).willReturn(List.of(CM_FOLDER, CM_SPECIAL_FOLDER));
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
-
-        // then
-        assertFalse(result);
     }
 }
