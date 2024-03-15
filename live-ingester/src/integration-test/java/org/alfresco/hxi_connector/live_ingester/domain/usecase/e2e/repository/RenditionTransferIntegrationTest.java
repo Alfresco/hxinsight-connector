@@ -40,7 +40,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareSFSToReturnFile("e71dd823-82c7-477c-8490-04cb0e826e66", "test-file.pdf");
-        URL url = containerSupport.prepareHxIToReturnStorageLocation();
+        URL url = containerSupport.prepareHxIToReturnStorageLocation("CONTENT ID");
         containerSupport.prepareHxInsightToReturnSuccess();
 
         // when
@@ -65,11 +65,11 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
                     "properties": {
                         "cm:content": {
                            "value": {
-                             "path": "%s"
+                             "id": "CONTENT ID"
                            }
                         }
                     }
-                }""".formatted(url);
+                }""";
         containerSupport.expectHxIngestMessageReceived(hxiBody);
     }
 }

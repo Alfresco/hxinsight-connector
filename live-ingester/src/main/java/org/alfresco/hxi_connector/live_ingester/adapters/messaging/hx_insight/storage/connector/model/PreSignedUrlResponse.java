@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023-2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,12 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
+import java.net.URL;
 
-public interface IngestionEngineStorageClient
-{
-    IngestContentResponse upload(File file, String contentType, String nodeId);
-}
+public record PreSignedUrlResponse(URL url, String id)
+{}

@@ -90,8 +90,7 @@ public class ContainerSupport
     public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
     private static final int OK_SUCCESS_CODE = 200;
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
-    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
-    static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
+    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"%s\": \"%s\"}]";
     private static final String OBJECT_KEY = "dummy-file.pdf";
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";
     private final Session session;
@@ -252,10 +251,10 @@ public class ContainerSupport
     }
 
     @SneakyThrows
-    public URL prepareHxIToReturnStorageLocation()
+    public URL prepareHxIToReturnStorageLocation(String contentId)
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
-        String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
+        String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted("url", preSignedUrl, "id", contentId);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_SUCCESS_CODE)

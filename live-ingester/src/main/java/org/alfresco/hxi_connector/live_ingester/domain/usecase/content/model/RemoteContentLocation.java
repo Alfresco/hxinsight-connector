@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,5 +27,5 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 
 import java.net.URL;
 
-public record RemoteContentLocation(String nodeId, URL url)
+public record RemoteContentLocation(String nodeId, URL url, String id)
 {}
