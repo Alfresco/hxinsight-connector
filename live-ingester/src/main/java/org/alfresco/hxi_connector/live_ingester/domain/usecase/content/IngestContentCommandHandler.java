@@ -61,11 +61,11 @@ public class IngestContentCommandHandler
         String nodeId = command.nodeId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
 
-        log.debug("Downloaded node {} content in file {} from SFS", nodeId, fileId);
+        log.atDebug().log("Downloaded node {} content in file {} from SFS", nodeId, fileId);
 
         IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
 
-        log.debug("Uploaded node {} content to S3 URL: {}", nodeId, ingestContentResponse.url());
+        log.atDebug().log("Uploaded node {} content to S3 URL: {}", nodeId, ingestContentResponse.url());
 
         return new RemoteContentLocation(nodeId, ingestContentResponse.url(), ingestContentResponse.contentId());
     }

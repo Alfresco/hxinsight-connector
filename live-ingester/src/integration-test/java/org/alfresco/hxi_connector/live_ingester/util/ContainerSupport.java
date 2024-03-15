@@ -158,7 +158,6 @@ public class ContainerSupport
         bulkIngesterEventProducer.send(session.createTextMessage(bulkIngesterEvent));
     }
 
-    @SneakyThrows
     public void expectHxIngestMessageReceived(String expectedBody)
     {
         retryWithBackoff(() -> getHxInsightMock().verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
@@ -204,7 +203,6 @@ public class ContainerSupport
         assertEquals(expectedMap, receivedMap);
     }
 
-    @SneakyThrows
     public void clearATSQueue()
     {
         while (receiveATSTextMessage() != null)
@@ -240,7 +238,6 @@ public class ContainerSupport
         WireMock.configureFor(getHxInsightMock());
     }
 
-    @SneakyThrows
     public void expectSFSMessageReceived(String targetReference)
     {
         WireMock.configureFor(getSfsMock());
@@ -250,8 +247,7 @@ public class ContainerSupport
         WireMock.configureFor(getHxInsightMock());
     }
 
-    @SneakyThrows
-    public URL prepareHxIToReturnStorageLocation(String contentId)
+    public void prepareHxIToReturnStorageLocation(String contentId)
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted("url", preSignedUrl, "id", contentId);
@@ -259,10 +255,8 @@ public class ContainerSupport
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_SUCCESS_CODE)
                         .withBody(hxInsightResponse)));
-        return preSignedUrl;
     }
 
-    @SneakyThrows
     public void expectHxIStorageLocationMessageReceived()
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
