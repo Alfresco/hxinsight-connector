@@ -77,7 +77,7 @@
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-assembly-plugin.version>3.7.0</maven-assembly-plugin.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.3.0</maven-jar-plugin.version>
         <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.11</jacoco-maven-plugin.version>
