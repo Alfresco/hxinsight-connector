@@ -23,36 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model;
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property;
+import lombok.Getter;
 
-import java.util.Optional;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
-
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class PropertyDeleted<T> extends PropertyDelta<T>
+@Getter
+public class FileMetadata
 {
-    public PropertyDeleted(String propertyName)
-    {
-        super(propertyName);
-    }
+    private String id;
 
-    @Override
-    public void applyOn(UpdateNodeEvent event)
+    public FileMetadata(ContentProperty contentProperty)
     {
-        event.addUnsetInstruction(getPropertyName());
-    }
-
-    @Override
-    public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver)
-    {
-        return resolver.resolveDeleted(this);
+        id = contentProperty.id();
     }
 }

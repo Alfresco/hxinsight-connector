@@ -28,6 +28,9 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static java.util.Locale.ENGLISH;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.FILE;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
+
 import java.io.IOException;
 import java.util.Set;
 
@@ -37,7 +40,8 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FileMetadata;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
@@ -66,10 +70,11 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 
             jgen.writeStringField("eventType", serializeEventType(event.getEventType()));
 
-            if (!event.getMetadataPropertiesToSet().isEmpty())
+            if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
             {
                 jgen.writeObjectFieldStart("properties");
-                event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, property));
+                event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
+                event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
                 jgen.writeEndObject();
             }
 
@@ -89,12 +94,12 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    private void writeProperty(JsonGenerator jgen, NodeProperty<?> property)
+    private void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value)
     {
         try
         {
-            jgen.writeObjectFieldStart(property.name());
-            jgen.writeObjectField("value", property.value());
+            jgen.writeObjectFieldStart(name);
+            jgen.writeObjectField(getLowerCase(fieldType), value);
             jgen.writeEndObject();
         }
         catch (IOException e)
@@ -117,6 +122,11 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 
     private String serializeEventType(EventType eventType)
     {
-        return eventType.toString().toLowerCase(ENGLISH);
+        return getLowerCase(eventType);
+    }
+
+    private String getLowerCase(Object object)
+    {
+        return object.toString().toLowerCase(ENGLISH);
     }
 }

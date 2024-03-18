@@ -23,36 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
-import java.util.Optional;
-
-import lombok.EqualsAndHashCode;
-import lombok.ToString;
-
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
-
-@ToString(callSuper = true)
-@EqualsAndHashCode(callSuper = true)
-public class PropertyDeleted<T> extends PropertyDelta<T>
+public record ContentProperty(String propertyName, String id)
 {
-    public PropertyDeleted(String propertyName)
+    public ContentProperty
     {
-        super(propertyName);
-    }
-
-    @Override
-    public void applyOn(UpdateNodeEvent event)
-    {
-        event.addUnsetInstruction(getPropertyName());
-    }
-
-    @Override
-    public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver)
-    {
-        return resolver.resolveDeleted(this);
+        ensureNotBlank(propertyName, "File property name cannot be blank");
     }
 }

@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,36 +23,64 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property;
 
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PropertyDeleted<T> extends PropertyDelta<T>
+public class ContentPropertyUpdated extends PropertyDelta<String>
 {
-    public PropertyDeleted(String propertyName)
+    private String id;
+
+    public ContentPropertyUpdated(String propertyName, String id)
     {
         super(propertyName);
+        this.id = id;
     }
 
     @Override
     public void applyOn(UpdateNodeEvent event)
     {
-        event.addUnsetInstruction(getPropertyName());
+        ContentProperty contentProperty = new ContentProperty(getPropertyName(), id);
+        event.addContentInstruction(contentProperty);
     }
 
     @Override
     public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver)
     {
-        return resolver.resolveDeleted(this);
+        return Optional.empty();
+    }
+
+    public static ContentPropertyUpdatedBuilder builder(String propertyName)
+    {
+        return new ContentPropertyUpdatedBuilder(propertyName);
+    }
+
+    @RequiredArgsConstructor
+    public static class ContentPropertyUpdatedBuilder
+    {
+        private final String propertyName;
+        private String id;
+
+        public ContentPropertyUpdatedBuilder id(String id)
+        {
+            this.id = id;
+            return this;
+        }
+
+        public ContentPropertyUpdated build()
+        {
+            return new ContentPropertyUpdated(propertyName, id);
+        }
     }
 }

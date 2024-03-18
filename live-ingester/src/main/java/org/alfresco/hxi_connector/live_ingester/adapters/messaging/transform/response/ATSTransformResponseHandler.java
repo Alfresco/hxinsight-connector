@@ -30,7 +30,7 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
 
 import java.util.Set;
 
@@ -91,8 +91,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private void updateContentLocation(Exchange exchange)
     {
         RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
-        ContentPropertyValue contentPropertyValue = new ContentPropertyValue(remoteContentLocation.id());
-        Set<PropertyDelta<?>> properties = Set.of(updated(CONTENT_PROPERTY, contentPropertyValue));
+        Set<PropertyDelta<?>> properties = Set.of(contentPropertyUpdated(CONTENT_PROPERTY, remoteContentLocation.id()));
         IngestNodeCommand command = new IngestNodeCommand(remoteContentLocation.nodeId(), UPDATE, properties);
 
         ingestNodeCommandHandler.handle(command);

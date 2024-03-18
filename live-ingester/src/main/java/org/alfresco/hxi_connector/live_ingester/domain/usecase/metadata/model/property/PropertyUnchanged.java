@@ -34,7 +34,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.Up
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
-@ToString
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class PropertyUnchanged<T> extends PropertyDelta<T>
 {

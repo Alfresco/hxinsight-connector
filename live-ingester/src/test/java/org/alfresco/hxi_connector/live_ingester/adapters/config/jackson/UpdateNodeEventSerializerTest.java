@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
@@ -40,6 +41,7 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 
@@ -117,6 +119,29 @@ class UpdateNodeEventSerializerTest
                   "properties": {
                     "createdBy": {"value": null},
                     "modifiedBy": {"value": null}
+                  }
+                }""".formatted(NODE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSetContentProperty()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id"));
+
+        String expectedJson = """
+                {
+                  "objectId": "%s",
+                  "eventType": "create",
+                  "properties": {
+                    "cm:content": {
+                      "file": {
+                        "id": "content-id"
+                      }
+                    }
                   }
                 }""".formatted(NODE_ID);
         String actualJson = serialize(event);

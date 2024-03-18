@@ -45,12 +45,19 @@ public class UpdateNodeEvent implements NodeEvent
     private final String objectId;
     private final EventType eventType;
     private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
+    private final Map<String, ContentProperty> contentPropertiesToSet = new HashMap<>();
     private final Set<String> propertiesToUnset = new HashSet<>();
 
     public UpdateNodeEvent(String objectId, EventType eventType)
     {
         this.objectId = objectId;
         this.eventType = eventType;
+    }
+
+    public UpdateNodeEvent addContentInstruction(ContentProperty contentProperty)
+    {
+        contentPropertiesToSet.put(contentProperty.propertyName(), contentProperty);
+        return this;
     }
 
     public UpdateNodeEvent addMetadataInstruction(NodeProperty<?> metadataProperty)

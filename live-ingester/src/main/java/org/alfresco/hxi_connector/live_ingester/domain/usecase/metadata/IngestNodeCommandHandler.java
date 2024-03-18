@@ -64,6 +64,7 @@ public class IngestNodeCommandHandler
                 .forEach(propertyDelta -> propertyDelta.applyOn(updateNodeEvent));
 
         if (updateNodeEvent.getEventType() == UPDATE
+                && updateNodeEvent.getContentPropertiesToSet().isEmpty()
                 && updateNodeEvent.getMetadataPropertiesToSet().isEmpty()
                 && updateNodeEvent.getPropertiesToUnset().isEmpty())
         {
