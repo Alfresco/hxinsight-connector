@@ -99,7 +99,7 @@
         <dist.control.center.version>8.3.0</dist.control.center.version>
         <dist.nginx.version>3.4.2</dist.nginx.version>
         <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
-        <dist.search.enterprise.version>4.0.0.1</dist.search.enterprise.version>
+        <dist.search.enterprise.version>4.0.1</dist.search.enterprise.version>
         <dist.localstack.version>3.2.0</dist.localstack.version>
         <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
     </properties>
