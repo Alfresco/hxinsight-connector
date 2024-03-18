@@ -91,7 +91,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private void updateContentLocation(Exchange exchange)
     {
         RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
-        ContentPropertyValue contentPropertyValue = new ContentPropertyValue(remoteContentLocation.url());
+        ContentPropertyValue contentPropertyValue = new ContentPropertyValue(remoteContentLocation.id());
         Set<PropertyDelta<?>> properties = Set.of(updated(CONTENT_PROPERTY, contentPropertyValue));
         IngestNodeCommand command = new IngestNodeCommand(remoteContentLocation.nodeId(), UPDATE, properties);
 

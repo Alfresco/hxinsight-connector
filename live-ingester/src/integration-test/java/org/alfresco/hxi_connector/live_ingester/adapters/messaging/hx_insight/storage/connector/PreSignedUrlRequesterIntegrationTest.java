@@ -71,6 +71,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.util.DockerTags;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.util.auth.WithMockOAuth2User;
@@ -92,9 +93,10 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String NODE_ID = "some-node-ref";
     private static final String PRE_SIGNED_URL_PATH = "/pre-signed-url";
+    private static final String CONTENT_ID = "CONTENT ID";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";
     private static final String FILE_CONTENT_TYPE = "plain/text";
-    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
+    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"id\": \"CONTENT ID\"}]";
     private static final int HX_INSIGHT_RESPONSE_CODE = 200;
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
@@ -114,7 +116,7 @@ class PreSignedUrlRequesterIntegrationTest
     }
 
     @Test
-    void testRequestStorageLocation()
+    void testRequestStorageLocation() throws Exception
     {
         // given
         String preSignedUrl = "http://s3-storage-location";
@@ -125,12 +127,13 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody(hxInsightResponse)));
 
         // when
-        URL actualUrl = locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE));
+        PreSignedUrlResponse preSignedUrlResponse = locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE));
 
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
                 .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER)));
-        assertThat(actualUrl).asString().isEqualTo(preSignedUrl);
+        PreSignedUrlResponse expected = new PreSignedUrlResponse(new URL(preSignedUrl), CONTENT_ID);
+        assertThat(preSignedUrlResponse).isEqualTo(expected);
     }
 
     @Test
@@ -189,7 +192,7 @@ class PreSignedUrlRequesterIntegrationTest
         givenThat(post(PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_RESPONSE_CODE)
-                        .withBody("{")));
+                        .withBody("[")));
 
         // when
         Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));

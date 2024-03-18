@@ -90,8 +90,7 @@ public class ContainerSupport
     public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
     private static final int OK_SUCCESS_CODE = 200;
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
-    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
-    static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
+    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"%s\": \"%s\"}]";
     private static final String OBJECT_KEY = "dummy-file.pdf";
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";
     private final Session session;
@@ -159,7 +158,6 @@ public class ContainerSupport
         bulkIngesterEventProducer.send(session.createTextMessage(bulkIngesterEvent));
     }
 
-    @SneakyThrows
     public void expectHxIngestMessageReceived(String expectedBody)
     {
         retryWithBackoff(() -> getHxInsightMock().verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
@@ -205,7 +203,6 @@ public class ContainerSupport
         assertEquals(expectedMap, receivedMap);
     }
 
-    @SneakyThrows
     public void clearATSQueue()
     {
         while (receiveATSTextMessage() != null)
@@ -241,7 +238,6 @@ public class ContainerSupport
         WireMock.configureFor(getHxInsightMock());
     }
 
-    @SneakyThrows
     public void expectSFSMessageReceived(String targetReference)
     {
         WireMock.configureFor(getSfsMock());
@@ -251,19 +247,16 @@ public class ContainerSupport
         WireMock.configureFor(getHxInsightMock());
     }
 
-    @SneakyThrows
-    public URL prepareHxIToReturnStorageLocation()
+    public void prepareHxIToReturnStorageLocation(String contentId)
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
-        String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted(STORAGE_LOCATION_PROPERTY, preSignedUrl);
+        String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted("url", preSignedUrl, "id", contentId);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
                         .withStatus(HX_INSIGHT_SUCCESS_CODE)
                         .withBody(hxInsightResponse)));
-        return preSignedUrl;
     }
 
-    @SneakyThrows
     public void expectHxIStorageLocationMessageReceived()
     {
         retryWithBackoff(() -> WireMock.verify(postRequestedFor(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
