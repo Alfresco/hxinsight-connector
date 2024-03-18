@@ -23,24 +23,12 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.model.ingest;
 
-import java.io.Serializable;
-import java.util.Map;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
 
-import lombok.Builder;
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 
-@Builder
-public record IngestEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
+public interface AlfrescoNodeFilterApplier
 {
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype) implements Serializable
-    {}
+    boolean applyFilter(AlfrescoNode alfrescoNode, NodeFilterConfig filterConfig);
 }
