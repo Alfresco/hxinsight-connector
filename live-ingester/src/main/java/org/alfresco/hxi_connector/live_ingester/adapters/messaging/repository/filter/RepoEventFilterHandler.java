@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -40,14 +40,14 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NodeFilterHandler
+public class RepoEventFilterHandler
 {
 
-    private final List<NodeFilterApplier> nodeFilterAppliers;
+    private final List<RepoEventFilterApplier> repoEventFilterAppliers;
 
     public boolean filterNode(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
     {
-        return nodeFilterAppliers.stream()
+        return repoEventFilterAppliers.stream()
                 .peek(f -> log.atDebug().log("Applying filters {} to repo event of id: {}", filter, repoEvent.getId()))
                 .allMatch(f -> f.applyFilter(repoEvent, filter));
     }
