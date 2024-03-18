@@ -70,22 +70,22 @@ class AspectFilterTest
     private static Stream<Arguments> provideParameters()
     {
         return Stream.of(
-                composeArguments(Set.of(CM_ASPECT_1), emptyList(), emptyList(), true),
-                composeArguments(emptySet(), List.of(CM_ASPECT_1), emptyList(), false),
-                composeArguments(emptySet(), emptyList(), emptyList(), true),
-                composeArguments(Set.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_1), emptyList(), true),
-                composeArguments(Set.of(CM_ASPECT_1), emptyList(), List.of(CM_ASPECT_2), true),
-                composeArguments(Set.of(CM_ASPECT_1), List.of(CM_ASPECT_1), List.of(CM_ASPECT_2), true),
-                composeArguments(Set.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_1), List.of(CM_ASPECT_2), false),
-                composeArguments(Set.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_3), emptyList(), false),
-                composeArguments(Set.of(CM_ASPECT_2, CM_ASPECT_3), emptyList(), List.of(CM_ASPECT_3), false),
-                composeArguments(Set.of(CM_ASPECT_1, CM_ASPECT_4), List.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_3), true));
+                composeArguments(true, Set.of(CM_ASPECT_1), emptyList(), emptyList()),
+                composeArguments(false, emptySet(), List.of(CM_ASPECT_1), emptyList()),
+                composeArguments(true, emptySet(), emptyList(), emptyList()),
+                composeArguments(true, Set.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_1), emptyList()),
+                composeArguments(true, Set.of(CM_ASPECT_1), emptyList(), List.of(CM_ASPECT_2)),
+                composeArguments(true, Set.of(CM_ASPECT_1), List.of(CM_ASPECT_1), List.of(CM_ASPECT_2)),
+                composeArguments(false, Set.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_1), List.of(CM_ASPECT_2)),
+                composeArguments(false, Set.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_3), emptyList()),
+                composeArguments(false, Set.of(CM_ASPECT_2, CM_ASPECT_3), emptyList(), List.of(CM_ASPECT_3)),
+                composeArguments(true, Set.of(CM_ASPECT_1, CM_ASPECT_4), List.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_3)));
     }
 
-    private static Arguments composeArguments(Set<String> aspects, List<String> allowed, List<String> denied, boolean result)
+    private static Arguments composeArguments(boolean allowNode, Set<String> aspects, List<String> allowed, List<String> denied)
     {
 
-        return Arguments.of(named(result ? ALLOW_NODE : DENY_NODE, result), named(ASPECTS + aspects, aspects),
+        return Arguments.of(named(allowNode ? ALLOW_NODE : DENY_NODE, allowNode), named(ASPECTS + aspects, aspects),
                 named(ALLOWED + allowed, allowed), named(DENIED + denied, denied));
     }
 }

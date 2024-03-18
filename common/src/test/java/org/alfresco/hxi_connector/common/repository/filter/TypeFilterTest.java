@@ -69,18 +69,18 @@ class TypeFilterTest
     private static Stream<Arguments> provideParameters()
     {
         return Stream.of(
-                composeArguments(CM_FOLDER, emptyList(), emptyList(), true),
-                composeArguments(CM_CONTENT, List.of(CM_CONTENT, CM_SPECIAL_FOLDER), emptyList(), true),
-                composeArguments(CM_FOLDER, emptyList(), List.of(CM_SPECIAL_FOLDER), true),
-                composeArguments(CM_CONTENT, List.of(CM_CONTENT), List.of(CM_SPECIAL_FOLDER), true),
-                composeArguments(CM_SPECIAL_FOLDER, List.of(CM_FOLDER), emptyList(), false),
-                composeArguments(CM_FOLDER, emptyList(), List.of(CM_FOLDER, CM_SPECIAL_FOLDER), false));
+                composeArguments(true, CM_FOLDER, emptyList(), emptyList()),
+                composeArguments(true, CM_CONTENT, List.of(CM_CONTENT, CM_SPECIAL_FOLDER), emptyList()),
+                composeArguments(true, CM_FOLDER, emptyList(), List.of(CM_SPECIAL_FOLDER)),
+                composeArguments(true, CM_CONTENT, List.of(CM_CONTENT), List.of(CM_SPECIAL_FOLDER)),
+                composeArguments(false, CM_SPECIAL_FOLDER, List.of(CM_FOLDER), emptyList()),
+                composeArguments(false, CM_FOLDER, emptyList(), List.of(CM_FOLDER, CM_SPECIAL_FOLDER)));
     }
 
-    private static Arguments composeArguments(String nodeType, List<String> allowed, List<String> denied, boolean result)
+    private static Arguments composeArguments(boolean allowNode, String nodeType, List<String> allowed, List<String> denied)
     {
 
-        return Arguments.of(named(result ? ALLOW_NODE : DENY_NODE, result), named(TYPE + nodeType, nodeType),
+        return Arguments.of(named(allowNode ? ALLOW_NODE : DENY_NODE, allowNode), named(TYPE + nodeType, nodeType),
                 named(ALLOWED + allowed, allowed), named(DENIED + denied, denied));
     }
 
