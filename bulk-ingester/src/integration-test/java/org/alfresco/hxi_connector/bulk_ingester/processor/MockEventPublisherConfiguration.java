@@ -38,9 +38,9 @@ public class MockEventPublisherConfiguration
 {
     @Bean
     @Primary
-    public TestIngestEventPublisher ingestEventPublisher()
+    public DummyIngestEventPublisher ingestEventPublisher()
     {
-        return new TestIngestEventPublisher();
+        return new DummyIngestEventPublisher();
     }
 
     @Bean

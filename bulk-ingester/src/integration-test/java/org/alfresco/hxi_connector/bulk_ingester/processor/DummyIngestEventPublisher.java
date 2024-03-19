@@ -41,7 +41,7 @@ import org.alfresco.hxi_connector.bulk_ingester.event.IngestEventPublisher;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
-public class TestIngestEventPublisher implements IngestEventPublisher
+public class DummyIngestEventPublisher implements IngestEventPublisher
 {
     private final Map<String, IngestEvent> ingestEvents = new HashMap<>();
 

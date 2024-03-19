@@ -51,7 +51,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
     private BulkIngestionProcessor bulkIngestionProcessor;
 
     @Autowired
-    private TestIngestEventPublisher ingestEventPublisher;
+    private DummyIngestEventPublisher ingestEventPublisher;
 
     @Test
     void shouldPublishAllNodesFromDb()

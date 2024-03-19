@@ -31,10 +31,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import org.testcontainers.shaded.org.apache.commons.lang3.StringUtils;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class IngestEventPropertyParser
 {
 
@@ -77,14 +78,9 @@ public final class IngestEventPropertyParser
             return Long.parseLong(value);
         }
 
-        if (value.equals("true"))
+        if (value.equals("true") || value.equals("false"))
         {
-            return true;
-        }
-
-        if (value.equals("false"))
-        {
-            return false;
+            return Boolean.parseBoolean(value);
         }
 
         return value;
