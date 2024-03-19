@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.common.test.util;
 
+import static java.util.function.Predicate.not;
+
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -125,17 +127,25 @@ public class DockerContainers
         @Cleanup
         Stream<Path> files = Files.list(Paths.get("target"));
 
-        return files.filter(matchExtensionPredicate("jar"))
-                .filter(f -> !f.getFileName().toString().contains("-tests"))
+        return files.filter(matchExtension("jar"))
+                .filter(not(namesContaining("-tests")))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("JAR file not found in target/ directory"));
+                .orElseThrow(() -> new IllegalStateException("JAR file not found in target/ directory"));
     }
 
-    private static Predicate<Path> matchExtensionPredicate(final String extension)
+    private static Predicate<Path> matchExtension(final String extension)
     {
         return path -> path != null && path.getFileName()
                 .toString()
                 .toLowerCase(Locale.ENGLISH)
                 .endsWith(extension.startsWith(".") ? extension.toLowerCase(Locale.ENGLISH) : "." + extension.toLowerCase(Locale.ENGLISH));
+    }
+
+    private static Predicate<Path> namesContaining(final String phrase)
+    {
+        return path -> path != null && path.getFileName()
+                .toString()
+                .toLowerCase(Locale.ENGLISH)
+                .contains(phrase);
     }
 }
