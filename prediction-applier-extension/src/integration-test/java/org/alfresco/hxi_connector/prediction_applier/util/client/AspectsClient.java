@@ -107,7 +107,7 @@ public class AspectsClient
         String responseBody = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
         if (statusCode != HttpStatus.SC_OK)
         {
-            throw new RuntimeException("Call to %s endpoint returned unexpected response %s".formatted(aspectsUrl, statusCode));
+            throw new IllegalStateException("Call to %s endpoint returned unexpected response %s".formatted(aspectsUrl, statusCode));
         }
 
         return responseBody;

@@ -42,6 +42,7 @@ import org.alfresco.rest.api.model.AbstractClass;
 import org.alfresco.rest.api.model.Aspect;
 
 @Testcontainers
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionApplierExtensionIntegrationTest
 {
     private static final int TIMEOUT_SECONDS = 300;

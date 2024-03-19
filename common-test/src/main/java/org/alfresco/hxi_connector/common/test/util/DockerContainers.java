@@ -29,10 +29,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import lombok.AccessLevel;
 import lombok.Cleanup;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -41,6 +45,7 @@ import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
     private static final String REPOSITORY_IMAGE = "alfresco/alfresco-content-repository-community";
@@ -120,9 +125,17 @@ public class DockerContainers
         @Cleanup
         Stream<Path> files = Files.list(Paths.get("target"));
 
-        return files.filter(new MatchExtensionPredicate("jar"))
+        return files.filter(matchExtensionPredicate("jar"))
                 .filter(f -> !f.getFileName().toString().contains("-tests"))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("JAR file not found in target/ directory"));
+    }
+
+    private static Predicate<Path> matchExtensionPredicate(final String extension)
+    {
+        return path -> path != null && path.getFileName()
+                .toString()
+                .toLowerCase(Locale.ENGLISH)
+                .endsWith(extension.startsWith(".") ? extension.toLowerCase(Locale.ENGLISH) : "." + extension.toLowerCase(Locale.ENGLISH));
     }
 }
