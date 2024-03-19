@@ -35,6 +35,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInfo;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -42,6 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.hxi_connector.bulk_ingester.exception.BulkIngesterRuntimeException;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
 
 @ExtendWith(MockitoExtension.class)
@@ -62,9 +64,12 @@ class AspectFilterApplierTest
     private AspectFilterApplier objectUnderTest;
 
     @BeforeEach
-    void mockBasicData()
+    void mockBasicData(TestInfo info)
     {
-        given(mockFilter.aspect()).willReturn(mockAspect);
+        if (!info.getDisplayName().equals("shouldThrowExceptionWhenNamespacePrefixMappingNotFound()"))
+        {
+            given(mockFilter.aspect()).willReturn(mockAspect);
+        }
     }
 
     @Test
@@ -109,5 +114,16 @@ class AspectFilterApplierTest
 
         // then
         assertTrue(result);
+    }
+
+    @Test
+    void shouldThrowExceptionWhenNamespacePrefixMappingNotFound()
+    {
+        QName aspect = QName.newTransientInstance("cm", "aspect1");
+        given(mockPrefixMapper.toPrefixedName(aspect)).willThrow(BulkIngesterRuntimeException.class);
+        given(mockAlfrescoNode.getAspects()).willReturn(Set.of(aspect));
+
+        // when / then
+        assertThrows(BulkIngesterRuntimeException.class, () -> objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter));
     }
 }
