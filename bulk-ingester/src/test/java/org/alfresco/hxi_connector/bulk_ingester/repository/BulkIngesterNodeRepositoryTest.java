@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.bulk_ingester.repository;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,17 +40,30 @@ import java.util.List;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFilterHandler;
 
 @Slf4j
+@ExtendWith(MockitoExtension.class)
 class BulkIngesterNodeRepositoryTest
 {
     private static final int PAGE_SIZE = 2;
     private final InMemoryAlfrescoMetadataRepository metadataRepository = new InMemoryAlfrescoMetadataRepository();
     private final BulkIngesterRepositoryConfig repositoryConfig = new BulkIngesterRepositoryConfig(PAGE_SIZE);
-    private final BulkIngesterNodeRepository nodeRepository = new BulkIngesterNodeRepository(metadataRepository, repositoryConfig);
+
+    private final AlfrescoNodeFilterHandler mockFilterHandler = mock(AlfrescoNodeFilterHandler.class);
+    private final BulkIngesterNodeRepository nodeRepository = new BulkIngesterNodeRepository(metadataRepository, repositoryConfig, mockFilterHandler);
+
+    @BeforeEach
+    void mockNodeFilter()
+    {
+        given(mockFilterHandler.filterNode(any())).willReturn(true);
+    }
 
     @Test
     void shouldFindAllNodes()

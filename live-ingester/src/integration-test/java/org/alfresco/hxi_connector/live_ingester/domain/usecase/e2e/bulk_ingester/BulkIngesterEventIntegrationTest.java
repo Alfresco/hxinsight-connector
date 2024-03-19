@@ -129,7 +129,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\"}",
+                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"application/pdf\\"}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);

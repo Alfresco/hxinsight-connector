@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,15 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model;
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
+import java.net.URL;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
-
-public interface NodeFilterApplier
-{
-    boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter);
-}
+public record IngestContentResponse(URL url, String contentId, String mimeType)
+{}

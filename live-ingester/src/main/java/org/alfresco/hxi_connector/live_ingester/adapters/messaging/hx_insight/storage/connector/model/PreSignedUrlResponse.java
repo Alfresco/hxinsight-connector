@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,26 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model;
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
+import java.net.URL;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
-
-import java.util.Set;
-
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-
-public record IngestMetadataCommand(
-        String nodeId,
-        EventType eventType,
-        Set<PropertyDelta<?>> properties)
-{
-    public IngestMetadataCommand
-    {
-        ensureNotBlank(nodeId, "Node id cannot be blank");
-        ensureNonNull(eventType, "Node %s event type cannot be null", nodeId);
-        ensureNonNull(properties, "Node %s properties delta cannot be null", nodeId);
-    }
-}
+public record PreSignedUrlResponse(URL url, String id)
+{}

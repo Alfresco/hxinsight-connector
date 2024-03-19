@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,13 +26,12 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import java.net.URL;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
@@ -62,12 +61,12 @@ public class IngestContentCommandHandler
         String nodeId = command.nodeId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
 
-        log.debug("Downloaded node {} content in file {} from SFS", nodeId, fileId);
+        log.atDebug().log("Downloaded node {} content in file {} from SFS", nodeId, fileId);
 
-        URL uploadedURL = ingestionEngineStorageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
+        IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
 
-        log.debug("Uploaded node {} content to S3 URL: {}", nodeId, uploadedURL);
+        log.atDebug().log("Uploaded node {} content to S3 URL: {}", nodeId, ingestContentResponse.url());
 
-        return new RemoteContentLocation(nodeId, uploadedURL);
+        return new RemoteContentLocation(nodeId, ingestContentResponse.url(), ingestContentResponse.contentId(), ingestContentResponse.mimeType());
     }
 }

@@ -70,7 +70,7 @@
         <commons-lang.version>3.14.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.15.1</commons-io.version>
-        <aws-sdk-s3.version>2.25.9</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.25.11</aws-sdk-s3.version>
         <wiremock.version>3.4.2</wiremock.version>
 
         <testcontainers.version>1.19.7</testcontainers.version>
@@ -99,7 +99,7 @@
         <dist.control.center.version>8.3.0</dist.control.center.version>
         <dist.nginx.version>3.4.2</dist.nginx.version>
         <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
-        <dist.search.enterprise.version>4.0.0.1</dist.search.enterprise.version>
+        <dist.search.enterprise.version>4.0.1</dist.search.enterprise.version>
         <dist.localstack.version>3.2.0</dist.localstack.version>
         <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
     </properties>

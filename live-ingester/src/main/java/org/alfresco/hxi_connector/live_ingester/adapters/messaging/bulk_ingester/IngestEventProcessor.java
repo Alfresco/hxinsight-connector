@@ -42,8 +42,8 @@ import org.springframework.validation.annotation.Validated;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @Slf4j
@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 @RequiredArgsConstructor
 public class IngestEventProcessor
 {
-    private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
 
     public void process(@Validated IngestEvent ingestEvent)
@@ -59,12 +59,12 @@ public class IngestEventProcessor
         Map<String, Serializable> properties = ingestEvent.properties().entrySet().stream()
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
-        IngestMetadataCommand ingestMetadataCommand = new IngestMetadataCommand(
+        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(
                 ingestEvent.nodeId(),
                 CREATE,
                 mapToPropertiesDelta(properties));
 
-        ingestMetadataCommandHandler.handle(ingestMetadataCommand);
+        ingestNodeCommandHandler.handle(ingestNodeCommand);
 
         if (ingestEvent.contentInfo() != null)
         {

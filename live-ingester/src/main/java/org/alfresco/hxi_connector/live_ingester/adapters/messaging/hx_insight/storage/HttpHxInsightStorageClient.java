@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -35,7 +35,9 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @Component
@@ -48,10 +50,11 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
     private final FileUploader fileUploader;
 
     @Override
-    public URL upload(File file, String contentType, String nodeId)
+    public IngestContentResponse upload(File file, String contentType, String nodeId)
     {
-        URL preSignedUrl = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
+        PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
+        URL preSignedUrl = preSignedUrlResponse.url();
         fileUploader.upload(new FileUploadRequest(file, contentType, preSignedUrl));
-        return preSignedUrl;
+        return new IngestContentResponse(preSignedUrl, preSignedUrlResponse.id(), contentType);
     }
 }

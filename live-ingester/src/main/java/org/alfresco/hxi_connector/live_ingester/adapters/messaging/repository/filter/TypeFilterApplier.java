@@ -31,8 +31,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 
+import org.alfresco.hxi_connector.common.repository.filter.TypeFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -41,7 +41,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class TypeFilterApplier implements NodeFilterApplier
+public class TypeFilterApplier implements RepoEventFilterApplier
 {
     @Override
     public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
@@ -49,19 +49,7 @@ public class TypeFilterApplier implements NodeFilterApplier
         final String nodeType = repoEvent.getData().getResource().getNodeType();
         final List<String> allowed = filter.type().allow();
         final List<String> denied = filter.type().deny();
-        log.atDebug().log("Applying type filters on repo event of id: {}. Event node type: {}. Allowed types: {}. Denied types: {}", repoEvent.getId(), nodeType, allowed, denied);
-        final boolean allow = isAllowed(nodeType, allowed);
-        final boolean deny = isDenied(nodeType, denied);
-        return allow && !deny;
-    }
-
-    private boolean isAllowed(String nodeType, List<String> allowed)
-    {
-        return CollectionUtils.isEmpty(allowed) || allowed.contains(nodeType);
-    }
-
-    private boolean isDenied(String nodeType, List<String> denied)
-    {
-        return denied.contains(nodeType);
+        log.atDebug().log("Applying type filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
+        return TypeFilter.filter(nodeType, allowed, denied);
     }
 }

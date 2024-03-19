@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
+package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
 
 import java.util.List;
 
@@ -32,23 +32,24 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
+import org.alfresco.hxi_connector.common.repository.filter.TypeFilter;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class NodeFilterHandler
+public class TypeFilterApplier implements AlfrescoNodeFilterApplier
 {
+    private final NamespacePrefixMapper predefinedNamespacePrefixMapper;
 
-    private final List<NodeFilterApplier> nodeFilterAppliers;
-
-    public boolean filterNode(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    @Override
+    public boolean applyFilter(AlfrescoNode alfrescoNode, NodeFilterConfig filterConfig)
     {
-        return nodeFilterAppliers.stream()
-                .peek(f -> log.atDebug().log("Applying filters {} to repo event of id: {}", filter, repoEvent.getId()))
-                .allMatch(f -> f.applyFilter(repoEvent, filter));
+        final String nodeType = predefinedNamespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
+        final List<String> allowed = filterConfig.type().allow();
+        final List<String> denied = filterConfig.type().deny();
+        log.atDebug().log("Applying type filters on Alfresco node of id: {}", alfrescoNode.getId());
+        return TypeFilter.filter(nodeType, allowed, denied);
     }
 }

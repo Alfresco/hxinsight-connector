@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.CONTENT_ID_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.CONTENT_TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.NODE_ID_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
@@ -54,6 +55,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retry;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 
@@ -65,7 +67,7 @@ class PreSignedUrlRequesterTest
     private static final String NODE_REF = "node-ref";
     private static final String CONTENT_TYPE = "content/type";
     private static final String STORAGE_LOCATION = "http://dummy-url";
-    private static final String RESPONSE_BODY_PATTERN = "{\"%s\": \"%s\"}";
+    private static final String CONTENT_ID = "CONTENT ID";
     private static final String RESPONSE_BODY = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, STORAGE_LOCATION);
 
     CamelContext camelContext;
@@ -93,7 +95,7 @@ class PreSignedUrlRequesterTest
     }
 
     @Test
-    void testRequestStorageLocation() throws InterruptedException
+    void testRequestStorageLocation() throws Exception
     {
         // given
         StorageLocationRequest request = createStorageLocationRequestMock();
@@ -101,11 +103,12 @@ class PreSignedUrlRequesterTest
         mockEndpointWillExpectInRequestBody(NODE_ID_PROPERTY, NODE_REF, CONTENT_TYPE_PROPERTY, CONTENT_TYPE);
 
         // when
-        URL url = preSignedUrlRequester.requestStorageLocation(request);
+        PreSignedUrlResponse preSignedUrlResponse = preSignedUrlRequester.requestStorageLocation(request);
 
         // then
         mockEndpoint.assertIsSatisfied();
-        assertThat(url).asString().isEqualTo(STORAGE_LOCATION);
+        PreSignedUrlResponse expected = new PreSignedUrlResponse(new URL(STORAGE_LOCATION), CONTENT_ID);
+        assertThat(preSignedUrlResponse).isEqualTo(expected);
     }
 
     @Test
@@ -246,9 +249,9 @@ class PreSignedUrlRequesterTest
         Stream.of(expectedProperties).forEach(property -> mockEndpoint.message(0).body(String.class).contains(property));
     }
 
-    private static String createResponseBodyWith(String propertyName, String propertyValue)
+    private static String createResponseBodyWith(String storageLocationProperty, String storageLocation)
     {
-        return String.format(RESPONSE_BODY_PATTERN, propertyName, propertyValue);
+        return String.format("[{\"%s\": \"%s\", \"%s\": \"%s\"}]", storageLocationProperty, storageLocation, CONTENT_ID_PROPERTY, CONTENT_ID);
     }
 
     private static String removeLastCharacter(String string)

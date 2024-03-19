@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -43,8 +43,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestMetadataCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -55,7 +55,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class EventProcessor
 {
-    private final IngestMetadataCommandHandler ingestMetadataCommandHandler;
+    private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final DeleteNodeCommandHandler deleteNodeCommandHandler;
     private final RepoEventMapper repoEventMapper;
@@ -71,9 +71,9 @@ public class EventProcessor
     {
         if (isEventTypeCreated(event) || isEventTypeUpdated(event))
         {
-            IngestMetadataCommand ingestMetadataCommand = repoEventMapper.mapToIngestMetadataCommand(event);
+            IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
 
-            ingestMetadataCommandHandler.handle(ingestMetadataCommand);
+            ingestNodeCommandHandler.handle(ingestNodeCommand);
         }
     }
 

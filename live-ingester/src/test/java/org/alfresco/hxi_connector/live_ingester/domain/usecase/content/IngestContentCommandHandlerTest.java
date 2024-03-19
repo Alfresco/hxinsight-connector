@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -38,6 +37,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
@@ -82,7 +82,9 @@ class IngestContentCommandHandlerTest
         UploadContentRenditionCommand command = new UploadContentRenditionCommand(FILE_ID, NODE_ID);
 
         File fileToUpload = mock();
-        given(transformEngineFileStorageMock.downloadFile(any())).willReturn(fileToUpload);
+        given(transformEngineFileStorageMock.downloadFile(FILE_ID)).willReturn(fileToUpload);
+        IngestContentResponse ingestContentResponse = mock();
+        given(storageClientMock.upload(fileToUpload, PDF_MIMETYPE, NODE_ID)).willReturn(ingestContentResponse);
 
         // when
         ingestContentCommandHandler.handle(command);

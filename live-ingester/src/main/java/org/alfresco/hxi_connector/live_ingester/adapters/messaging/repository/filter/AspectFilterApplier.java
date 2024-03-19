@@ -31,10 +31,10 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.repository.filter.AspectFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -43,7 +43,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AspectFilterApplier implements NodeFilterApplier
+public class AspectFilterApplier implements RepoEventFilterApplier
 {
     @Override
     public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
@@ -51,19 +51,8 @@ public class AspectFilterApplier implements NodeFilterApplier
         final Set<String> aspectNames = SetUtils.emptyIfNull(repoEvent.getData().getResource().getAspectNames());
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
-        log.atDebug().log("Applying aspect filters on repo event of id: {}. Event aspects: {}. Allowed aspects: {}. Denied aspects: {}", repoEvent.getId(), aspectNames, allowed, denied);
-        final boolean allow = isAllowed(aspectNames, allowed);
-        final boolean deny = isDenied(aspectNames, denied);
-        return allow && !deny;
+        log.atDebug().log("Applying aspect filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
+        return AspectFilter.filter(aspectNames, allowed, denied);
     }
 
-    private boolean isAllowed(Set<String> aspectNames, List<String> allowed)
-    {
-        return CollectionUtils.isEmpty(allowed) || allowed.stream().anyMatch(aspectNames::contains);
-    }
-
-    private boolean isDenied(Set<String> aspectNames, List<String> denied)
-    {
-        return denied.stream().anyMatch(aspectNames::contains);
-    }
 }

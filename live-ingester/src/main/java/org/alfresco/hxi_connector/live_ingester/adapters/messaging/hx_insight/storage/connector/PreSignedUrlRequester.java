@@ -32,6 +32,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.U
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,6 +49,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
@@ -58,7 +60,8 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 {
     private static final String LOCAL_ENDPOINT = "direct:" + PreSignedUrlRequester.class.getSimpleName();
     static final String ROUTE_ID = "presigned-url-requester";
-    static final String STORAGE_LOCATION_PROPERTY = "preSignedUrl";
+    static final String STORAGE_LOCATION_PROPERTY = "url";
+    static final String CONTENT_ID_PROPERTY = "id";
     static final String NODE_ID_PROPERTY = "objectId";
     static final String CONTENT_TYPE_PROPERTY = "contentType";
     private static final int EXPECTED_STATUS_CODE = 200;
@@ -77,14 +80,13 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
-            .marshal()
-            .json()
+            .setBody(simple(null))
             .to(integrationProperties.hylandExperience().storage().location().endpoint())
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .unmarshal()
-                .json(JsonLibrary.Jackson, Map.class)
-                .process(this::extractUrl)
+                .json(JsonLibrary.Jackson, List.class)
+                .process(this::extractResponse)
             .otherwise()
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .endChoice()
@@ -98,7 +100,8 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.initialDelay}",
                     multiplierExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.delayMultiplier}"))
     @Override
-    public URL requestStorageLocation(StorageLocationRequest storageLocationRequest)
+    @SuppressWarnings("unchecked")
+    public PreSignedUrlResponse requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {
         Map<String, String> request = Map.of(NODE_ID_PROPERTY, storageLocationRequest.nodeId(),
                 CONTENT_TYPE_PROPERTY, storageLocationRequest.contentType());
@@ -109,32 +112,42 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
                     exchange.getIn().setBody(request);
                     setAuthorizationToken(exchange);
                 })
-                .request(URL.class);
+                .request(PreSignedUrlResponse.class);
     }
 
     @SuppressWarnings({"unchecked", "PMD.UnusedPrivateMethod"})
-    private void extractUrl(Exchange exchange)
+    private void extractResponse(Exchange exchange)
     {
-        exchange.getMessage().setBody(extractStorageLocationUrl(exchange.getIn().getBody(Map.class)), URL.class);
+        exchange.getMessage()
+                .setBody(extractStorageResponse(exchange.getIn().getBody(List.class)), PreSignedUrlResponse.class);
     }
 
-    private URL extractStorageLocationUrl(Map<String, Object> map)
+    private PreSignedUrlResponse extractStorageResponse(List<Map<String, Object>> response)
     {
-        if (map.containsKey(STORAGE_LOCATION_PROPERTY))
+        if (response.isEmpty())
         {
-            try
-            {
-                return new URL(String.valueOf(map.get(STORAGE_LOCATION_PROPERTY)));
-            }
-            catch (MalformedURLException e)
-            {
-                throw new EndpointServerErrorException("Parsing URL from response property failed!", e);
-            }
+            throw new EndpointServerErrorException("Unable to extract list of pre-signed URL responses");
         }
-        else
+        Map<String, Object> map = response.get(0);
+        if (!map.containsKey(STORAGE_LOCATION_PROPERTY))
         {
             throw new EndpointServerErrorException("Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
         }
+        URL url;
+        try
+        {
+            url = new URL(String.valueOf(map.get(STORAGE_LOCATION_PROPERTY)));
+        }
+        catch (MalformedURLException e)
+        {
+            throw new EndpointServerErrorException("Parsing URL from response property failed!", e);
+        }
+        if (!map.containsKey(CONTENT_ID_PROPERTY))
+        {
+            throw new EndpointServerErrorException("Missing " + CONTENT_ID_PROPERTY + " property in response!");
+        }
+        String contentId = (String) map.get(CONTENT_ID_PROPERTY);
+        return new PreSignedUrlResponse(url, contentId);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

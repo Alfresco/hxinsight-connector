@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
-import static org.mockito.ArgumentMatchers.any;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -42,6 +42,8 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +52,7 @@ class HttpHxInsightStorageClientTest
 {
     private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String NODE_ID = "node-ref";
+    private static final String CONTENT_ID = "CONTENT ID";
 
     @Mock
     StorageLocationRequester storageLocationRequesterMock;
@@ -63,14 +66,17 @@ class HttpHxInsightStorageClientTest
     void testUploadDataFromInputStream()
     {
         // given
-        File testData = mock(File.class);
-        URL url = mock(URL.class);
-        given(storageLocationRequesterMock.requestStorageLocation(any())).willReturn(url);
+        StorageLocationRequest storageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
+        URL url = mock();
+        PreSignedUrlResponse preSignedUrlResponse = new PreSignedUrlResponse(url, CONTENT_ID);
+        given(storageLocationRequesterMock.requestStorageLocation(storageLocationRequest)).willReturn(preSignedUrlResponse);
+        File testData = mock();
 
         // when
-        httpStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
+        IngestContentResponse ingestContentResponse = httpStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
+        assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(url, CONTENT_ID, FILE_CONTENT_TYPE));
         StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
         then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
         FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(testData, FILE_CONTENT_TYPE, url);
