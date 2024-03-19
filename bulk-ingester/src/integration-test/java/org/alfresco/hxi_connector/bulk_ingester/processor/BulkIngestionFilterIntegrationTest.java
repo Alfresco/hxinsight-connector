@@ -42,7 +42,9 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 @EnableAutoConfiguration
 @SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG",
         "alfresco.filter.aspect.allow[0]=cm:titled",
-        "alfresco.filter.aspect.deny[0]=cm:author"},
+        "alfresco.filter.aspect.deny[0]=cm:author",
+        "alfresco.filter.type.allow[0]=cm:category", "alfresco.filter.type.allow[1]=cm:content",
+        "alfresco.filter.type.deny[0]=cm:folder"},
         classes = BulkIngesterApplication.class)
 @Import(MockEventPublisherConfiguration.class)
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SimplifyBooleanReturns", "PMD.LooseCoupling"})
@@ -89,7 +91,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
 
         // then
         ingestEventPublisher.assertNodeNotPublished(category);
-        ingestEventPublisher.assertPublishedNode(folder);
+        ingestEventPublisher.assertNodeNotPublished(folder);
         ingestEventPublisher.assertPublishedNode(textFile);
         ingestEventPublisher.assertNodeNotPublished(pdfFile);
     }

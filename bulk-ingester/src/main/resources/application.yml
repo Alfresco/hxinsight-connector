@@ -28,3 +28,6 @@ alfresco:
     aspect:
       allow:
       deny:
+    type:
+      allow:
+      deny:
