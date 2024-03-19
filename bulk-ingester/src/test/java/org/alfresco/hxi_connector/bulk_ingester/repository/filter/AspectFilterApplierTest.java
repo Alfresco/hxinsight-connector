@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
 
 @ExtendWith(MockitoExtension.class)
 class AspectFilterApplierTest
@@ -52,6 +55,8 @@ class AspectFilterApplierTest
     private NodeFilterConfig mockFilter;
     @Mock
     private NodeFilterConfig.Aspect mockAspect;
+    @Mock
+    private NamespacePrefixMapper mockPrefixMapper;
 
     @InjectMocks
     private AspectFilterApplier objectUnderTest;
@@ -88,5 +93,21 @@ class AspectFilterApplierTest
 
         // then
         assertFalse(result);
+    }
+
+    @Test
+    void shouldNotFilterOutWhenEmptyAllowedAndEmptyDenied()
+    {
+        QName aspect = QName.newTransientInstance("cm", "aspect1");
+        given(mockPrefixMapper.toPrefixedName(aspect)).willReturn(CM_ASPECT_1);
+        given(mockAlfrescoNode.getAspects()).willReturn(Set.of(aspect));
+        given(mockAspect.allow()).willReturn(emptyList());
+        given(mockAspect.deny()).willReturn(emptyList());
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
+
+        // then
+        assertTrue(result);
     }
 }

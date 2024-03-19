@@ -40,8 +40,8 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @EnableAutoConfiguration
 @SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG",
-        "alfresco.filter.aspect.allow[0]=http://www.alfresco.org/model/content/1.0:auditable",
-        "alfresco.filter.aspect.deny[0]=http://www.alfresco.org/model/content/1.0:author"},
+        "alfresco.filter.aspect.allow[0]=cm:auditable",
+        "alfresco.filter.aspect.deny[0]=cm:author"},
         classes = BulkIngesterApplication.class)
 @Import(MockEventPublisherConfiguration.class)
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SimplifyBooleanReturns", "PMD.LooseCoupling"})

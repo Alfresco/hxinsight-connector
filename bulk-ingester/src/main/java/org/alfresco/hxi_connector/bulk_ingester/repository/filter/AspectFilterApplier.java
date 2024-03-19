@@ -36,6 +36,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
 import org.alfresco.hxi_connector.common.repository.filter.AspectFilter;
 
 @Component
@@ -43,11 +44,13 @@ import org.alfresco.hxi_connector.common.repository.filter.AspectFilter;
 @Slf4j
 public class AspectFilterApplier implements AlfrescoNodeFilterApplier
 {
+    private final NamespacePrefixMapper predefinedNamespacePrefixMapper;
+
     @Override
     public boolean applyFilter(AlfrescoNode alfrescoNode, NodeFilterConfig filterConfig)
     {
         final Set<QName> nodeAspects = SetUtils.emptyIfNull(alfrescoNode.getAspects());
-        final Set<String> aspectNames = SetUtils.emptyIfNull(nodeAspects.stream().map(a -> a.getUri() + ":" + a.getLocalName()).collect(Collectors.toSet()));
+        final Set<String> aspectNames = SetUtils.emptyIfNull(nodeAspects.stream().map(predefinedNamespacePrefixMapper::toPrefixedName).collect(Collectors.toSet()));
         final List<String> allowed = filterConfig.aspect().allow();
         final List<String> denied = filterConfig.aspect().deny();
         log.atDebug().log("Applying aspect filters on Alfresco node of id: {}", alfrescoNode.getId());

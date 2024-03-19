@@ -1,5 +1,6 @@
 {
   "prefixUriMap": {
-    "http://www.alfresco.org": "alf"
+    "http://www.alfresco.org": "alf",
+    "http://www.alfresco.org/model/content/1.0": "cm"
   }
 }
