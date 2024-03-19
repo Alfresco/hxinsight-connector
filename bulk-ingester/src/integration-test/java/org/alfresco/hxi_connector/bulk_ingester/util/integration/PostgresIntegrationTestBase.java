@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -40,7 +41,10 @@ public class PostgresIntegrationTestBase
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainer();
+    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainer()
+            .withFileSystemBind("./src/integration-test/resources/alfresco-dump.sql", "/docker-entrypoint-initdb.d/init-postgres.sql", BindMode.READ_ONLY)
+            .withCommand("-N 500")
+            .withReuse(true);
 
     @DynamicPropertySource
     private static void configureProperties(DynamicPropertyRegistry registry)
