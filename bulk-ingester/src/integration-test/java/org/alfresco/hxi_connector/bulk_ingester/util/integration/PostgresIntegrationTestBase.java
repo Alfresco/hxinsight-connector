@@ -39,6 +39,7 @@ public class PostgresIntegrationTestBase
 {
 
     @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainer();
 
     @DynamicPropertySource

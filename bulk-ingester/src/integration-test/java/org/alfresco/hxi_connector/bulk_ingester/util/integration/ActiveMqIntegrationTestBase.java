@@ -42,6 +42,7 @@ public class ActiveMqIntegrationTestBase
 {
     private static final String BULK_INGESTER_QUEUE = "test.bulk.ingester.queue";
     @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainer();
 
     @DynamicPropertySource
