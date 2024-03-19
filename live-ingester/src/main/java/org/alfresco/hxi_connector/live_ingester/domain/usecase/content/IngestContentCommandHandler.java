@@ -67,6 +67,6 @@ public class IngestContentCommandHandler
 
         log.atDebug().log("Uploaded node {} content to S3 URL: {}", nodeId, ingestContentResponse.url());
 
-        return new RemoteContentLocation(nodeId, ingestContentResponse.url(), ingestContentResponse.contentId());
+        return new RemoteContentLocation(nodeId, ingestContentResponse.url(), ingestContentResponse.contentId(), ingestContentResponse.mimeType());
     }
 }

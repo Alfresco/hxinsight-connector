@@ -63,7 +63,8 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
                     "properties": {
                         "cm:content": {
                            "file": {
-                             "id": "CONTENT ID"
+                             "id": "CONTENT ID",
+                             "content-type": "application/pdf"
                            }
                         }
                     }

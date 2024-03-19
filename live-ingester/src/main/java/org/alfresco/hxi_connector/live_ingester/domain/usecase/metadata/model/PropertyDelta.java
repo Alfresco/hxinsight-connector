@@ -53,9 +53,9 @@ public abstract class PropertyDelta<T>
         return new PropertyUpdated<>(key, propertyValue);
     }
 
-    public static ContentPropertyUpdated contentPropertyUpdated(String key, String id)
+    public static ContentPropertyUpdated contentPropertyUpdated(String key, String id, String mimeType)
     {
-        return ContentPropertyUpdated.builder(key).id(id).build();
+        return ContentPropertyUpdated.builder(key).id(id).mimeType(mimeType).build();
     }
 
     public static <T> PropertyDeleted<T> deleted(String key)

@@ -55,6 +55,6 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
         PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
         URL preSignedUrl = preSignedUrlResponse.url();
         fileUploader.upload(new FileUploadRequest(file, contentType, preSignedUrl));
-        return new IngestContentResponse(preSignedUrl, preSignedUrlResponse.id());
+        return new IngestContentResponse(preSignedUrl, preSignedUrlResponse.id(), contentType);
     }
 }

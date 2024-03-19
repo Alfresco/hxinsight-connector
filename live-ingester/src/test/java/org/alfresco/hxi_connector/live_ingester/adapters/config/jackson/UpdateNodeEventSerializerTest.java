@@ -130,7 +130,7 @@ class UpdateNodeEventSerializerTest
     public void shouldSetContentProperty()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
-                .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id"));
+                .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf"));
 
         String expectedJson = """
                 {
@@ -139,7 +139,8 @@ class UpdateNodeEventSerializerTest
                   "properties": {
                     "cm:content": {
                       "file": {
-                        "id": "content-id"
+                        "id": "content-id",
+                        "content-type": "application/pdf"
                       }
                     }
                   }

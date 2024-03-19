@@ -41,17 +41,19 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 public class ContentPropertyUpdated extends PropertyDelta<String>
 {
     private String id;
+    private String mimeType;
 
-    public ContentPropertyUpdated(String propertyName, String id)
+    public ContentPropertyUpdated(String propertyName, String id, String mimeType)
     {
         super(propertyName);
         this.id = id;
+        this.mimeType = mimeType;
     }
 
     @Override
     public void applyOn(UpdateNodeEvent event)
     {
-        ContentProperty contentProperty = new ContentProperty(getPropertyName(), id);
+        ContentProperty contentProperty = new ContentProperty(getPropertyName(), id, mimeType);
         event.addContentInstruction(contentProperty);
     }
 
@@ -71,6 +73,7 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
     {
         private final String propertyName;
         private String id;
+        private String mimeType;
 
         public ContentPropertyUpdatedBuilder id(String id)
         {
@@ -78,9 +81,15 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
             return this;
         }
 
+        public ContentPropertyUpdatedBuilder mimeType(String mimeType)
+        {
+            this.mimeType = mimeType;
+            return this;
+        }
+
         public ContentPropertyUpdated build()
         {
-            return new ContentPropertyUpdated(propertyName, id);
+            return new ContentPropertyUpdated(propertyName, id, mimeType);
         }
     }
 }
