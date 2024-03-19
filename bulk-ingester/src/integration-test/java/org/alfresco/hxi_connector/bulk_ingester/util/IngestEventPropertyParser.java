@@ -25,10 +25,11 @@
  */
 package org.alfresco.hxi_connector.bulk_ingester.util;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import lombok.AccessLevel;
@@ -66,11 +67,11 @@ public final class IngestEventPropertyParser
     {
         if (value.startsWith("["))
         {
-            value = value.replace("[", "");
-            value = value.replace("]", "");
-            String[] valueSplit = value.split(", ");
+            value = value.replace("[", "").replace("]", "");
 
-            return (Serializable) Set.of(valueSplit);
+            return (Serializable) Arrays.stream(value.split(","))
+                    .map(String::stripLeading)
+                    .collect(toSet());
         }
 
         if (StringUtils.isNumeric(value))

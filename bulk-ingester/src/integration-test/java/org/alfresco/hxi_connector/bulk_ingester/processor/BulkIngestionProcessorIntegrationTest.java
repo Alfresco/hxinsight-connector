@@ -30,6 +30,7 @@ import static org.alfresco.hxi_connector.bulk_ingester.util.IngestEventPropertyP
 
 import java.util.List;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -51,6 +52,12 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
 
     @Autowired
     private DummyIngestEventPublisher ingestEventPublisher;
+
+    @AfterEach
+    void cleanUp()
+    {
+        ingestEventPublisher.cleanUpEvents();
+    }
 
     @Test
     void shouldPublishAllNodesFromDb()

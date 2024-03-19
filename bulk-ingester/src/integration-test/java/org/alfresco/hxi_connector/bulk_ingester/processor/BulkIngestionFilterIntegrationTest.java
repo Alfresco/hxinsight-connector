@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.bulk_ingester.processor;
 
 import static org.alfresco.hxi_connector.bulk_ingester.util.IngestEventPropertyParser.parseProperties;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -40,7 +41,7 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @EnableAutoConfiguration
 @SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG",
-        "alfresco.filter.aspect.allow[0]=cm:auditable",
+        "alfresco.filter.aspect.allow[0]=cm:titled",
         "alfresco.filter.aspect.deny[0]=cm:author"},
         classes = BulkIngesterApplication.class)
 @Import(MockEventPublisherConfiguration.class)
@@ -54,8 +55,14 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
     @Autowired
     private DummyIngestEventPublisher ingestEventPublisher;
 
+    @AfterEach
+    void cleanUp()
+    {
+        ingestEventPublisher.cleanUpEvents();
+    }
+
     @Test
-    void shouldFilterOutNodeWithDeniedAspect()
+    void shouldFilterOutNodesWithoutAllowedAspectOrWithDeniedAspect()
     {
         // given
         IngestEvent category = IngestEvent.builder()
@@ -81,7 +88,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         bulkIngestionProcessor.process();
 
         // then
-        ingestEventPublisher.assertPublishedNode(category);
+        ingestEventPublisher.assertNodeNotPublished(category);
         ingestEventPublisher.assertPublishedNode(folder);
         ingestEventPublisher.assertPublishedNode(textFile);
         ingestEventPublisher.assertNodeNotPublished(pdfFile);

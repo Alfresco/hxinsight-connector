@@ -73,4 +73,9 @@ public class DummyIngestEventPublisher implements IngestEventPublisher
 
         assertNull(publishedIngestEvent, format("Node %s should have not been published.", ingestEvent.nodeId()));
     }
+
+    public void cleanUpEvents()
+    {
+        ingestEvents.clear();
+    }
 }
