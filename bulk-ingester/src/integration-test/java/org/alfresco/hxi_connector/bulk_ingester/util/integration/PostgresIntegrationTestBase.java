@@ -25,44 +25,27 @@
  */
 package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
-import java.time.Duration;
-
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-import org.alfresco.hxi_connector.common.test.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 
 @Testcontainers
 @SuppressWarnings({"PMD.UseUtilityClass", "PMD.UnusedPrivateMethod"})
 public class PostgresIntegrationTestBase
 {
-    private static final String POSTGRES_IMAGE = "postgres";
-    private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
-    @Container
-    private static PostgreSQLContainer<?> postgres = createPostgresContainer();
 
-    private static PostgreSQLContainer<?> createPostgresContainer()
-    {
-        return new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE).withTag(POSTGRES_TAG))
-                .withFileSystemBind("./src/integration-test/resources/alfresco-dump.sql", "/docker-entrypoint-initdb.d/init-postgres.sql", BindMode.READ_ONLY)
-                .withPassword("alfresco")
-                .withUsername("alfresco")
-                .withDatabaseName("alfresco")
-                .withCommand("-N 500")
-                .withStartupTimeout(Duration.ofMinutes(2))
-                .withReuse(true);
-    }
+    @Container
+    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainer();
 
     @DynamicPropertySource
     private static void configureProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("spring.datasource.url", () -> postgres.getJdbcUrl());
-        registry.add("spring.datasource.username", () -> postgres.getUsername());
-        registry.add("spring.datasource.password", () -> postgres.getPassword());
+        registry.add("spring.datasource.url", postgres::getJdbcUrl);
+        registry.add("spring.datasource.username", postgres::getUsername);
+        registry.add("spring.datasource.password", postgres::getPassword);
     }
 }

@@ -54,9 +54,8 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-import org.alfresco.hxi_connector.common.test.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageConfig;
@@ -75,8 +74,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 @Testcontainers
 class HttpFileUploaderIntegrationTest
 {
-    private static final String LOCALSTACK_IMAGE = "localstack/localstack";
-    private static final String LOCALSTACK_TAG = DockerTags.getLocalStackTag();
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final String OBJECT_KEY = "dummy.txt";
     private static final String OBJECT_CONTENT = "Dummy's file dummy content";
@@ -86,7 +83,7 @@ class HttpFileUploaderIntegrationTest
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final LocalStackContainer localStackServer = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
+    static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainer();
 
     @Autowired
     LocalStorageClient s3StorageMock;

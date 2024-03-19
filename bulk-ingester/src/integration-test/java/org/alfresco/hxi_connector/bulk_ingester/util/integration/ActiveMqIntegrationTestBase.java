@@ -26,44 +26,28 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.util.integration;
 
-import java.time.Duration;
-
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-import org.alfresco.hxi_connector.common.test.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 
 @Testcontainers
 @DirtiesContext // Kills app before testcontainers (activemq) so there are no errors related to lost connection
 @SuppressWarnings({"PMD.UseUtilityClass", "PMD.UnusedPrivateMethod"})
 public class ActiveMqIntegrationTestBase
 {
-    private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
-    private static final String ACTIVE_MQ_TAG = DockerTags.getActiveMqTag();
-    private static final int ACTIVE_MQ_PORT = 61616;
     private static final String BULK_INGESTER_QUEUE = "test.bulk.ingester.queue";
     @Container
-    private static final GenericContainer<?> ACTIVEMQ = createAMQContainer();
-
-    private static GenericContainer<?> createAMQContainer()
-    {
-        return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
-                .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
-                .waitingFor(Wait.forListeningPort())
-                .withStartupTimeout(Duration.ofMinutes(2))
-                .withExposedPorts(ACTIVE_MQ_PORT, 8161, 5672, 61613);
-    }
+    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainer();
 
     @DynamicPropertySource
     private static void configureProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("spring.activemq.broker-url", () -> "tcp://localhost:" + ACTIVEMQ.getMappedPort(ACTIVE_MQ_PORT));
+        registry.add("spring.activemq.broker-url", () -> "tcp://localhost:" + activemq.getFirstMappedPort());
         registry.add("alfresco.bulk.ingest.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
     }
 

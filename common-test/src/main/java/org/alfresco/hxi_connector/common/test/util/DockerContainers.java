@@ -43,9 +43,11 @@ import lombok.SneakyThrows;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
@@ -56,6 +58,10 @@ public class DockerContainers
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
     private static final String ACTIVE_MQ_TAG = DockerTags.getActiveMqTag();
+    private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
+    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
+    private static final String LOCALSTACK_IMAGE = "localstack/localstack";
+    private static final String LOCALSTACK_TAG = DockerTags.getLocalStackTag();
     private static final String DB_USER = "alfresco";
     private static final String DB_PASS = "alfresco";
     private static final String DB_NAME = "alfresco";
@@ -65,33 +71,40 @@ public class DockerContainers
 
     public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network)
     {
+        // @formatter:off
         Path jarFile = findTargetJar();
         GenericContainer<?> repository = new GenericContainer<>(new ImageFromDockerfile("localhost/alfresco/alfresco-content-repository-prediction-applier-extension")
-                .withFileFromPath(jarFile.toString(), jarFile)
-                .withDockerfileFromBuilder(builder -> builder
-                        .from(DockerImageName.parse(REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
-                        .user("root")
-                        .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
-                        .run("chown -R -h alfresco /usr/local/tomcat")
-                        .user("alfresco")
-                        .build()))
-                                .withEnv("CATALINA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n")
-                                .withEnv("JAVA_TOOL_OPTIONS", """
-                                        -Dencryption.keystore.type=JCEKS
-                                        -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
-                                        -Dencryption.keyAlgorithm=DESede
-                                        -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
-                                        -Dmetadata-keystore.password=mp6yc0UD9e
-                                        -Dmetadata-keystore.aliases=metadata
-                                        -Dmetadata-keystore.metadata.password=oKIWzVdEdA
-                                        -Dmetadata-keystore.metadata.algorithm=DESede
-                                        """.replace("\n", " "))
-                                .withExposedPorts(8080, 8000)
-                                .withReuse(true);
+            .withFileFromPath(jarFile.toString(), jarFile)
+            .withDockerfileFromBuilder(builder -> builder
+                .from(DockerImageName.parse(REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
+                .user("root")
+                .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
+                .run("chown -R -h alfresco /usr/local/tomcat")
+                .user("alfresco")
+                .build()))
+            .withEnv("CATALINA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n")
+            .withEnv("JAVA_TOOL_OPTIONS", """
+            -Dencryption.keystore.type=JCEKS
+            -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
+            -Dencryption.keyAlgorithm=DESede
+            -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
+            -Dmetadata-keystore.password=mp6yc0UD9e
+            -Dmetadata-keystore.aliases=metadata
+            -Dmetadata-keystore.metadata.password=oKIWzVdEdA
+            -Dmetadata-keystore.metadata.algorithm=DESede
+            """.replace("\n", " "))
+            .withExposedPorts(8080, 8000)
+            .withStartupTimeout(Duration.ofMinutes(5));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
 
         return repository;
+        // @formatter:on
+    }
+
+    public static PostgreSQLContainer<?> createPostgresContainer()
+    {
+        return createPostgresContainerWithin(null);
     }
 
     public static PostgreSQLContainer<?> createPostgresContainerWithin(Network network)
@@ -108,6 +121,11 @@ public class DockerContainers
         return postgres;
     }
 
+    public static GenericContainer<?> createActiveMqContainer()
+    {
+        return createActiveMqContainerWithin(null);
+    }
+
     public static GenericContainer<?> createActiveMqContainerWithin(Network network)
     {
         GenericContainer<?> activeMq = new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
@@ -119,6 +137,17 @@ public class DockerContainers
         Optional.ofNullable(network).ifPresent(n -> activeMq.withNetwork(n).withNetworkAliases(ACTIVE_MQ_ALIAS));
 
         return activeMq;
+    }
+
+    public static WireMockContainer createWireMockContainer()
+    {
+        return new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+                .withEnv("WIREMOCK_OPTIONS", "--verbose");
+    }
+
+    public static LocalStackContainer createLocalStackContainer()
+    {
+        return new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
     }
 
     @SneakyThrows
