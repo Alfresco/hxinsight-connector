@@ -58,13 +58,13 @@ public class AspectsClient
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final String host;
     private final int port;
-    private final int timeout;
+    private final int timeoutSeconds;
 
     public AspectsClient(String host, int port, int timeoutSeconds)
     {
         this.host = host;
         this.port = port;
-        this.timeout = timeoutSeconds;
+        this.timeoutSeconds = timeoutSeconds;
     }
 
     @SneakyThrows
@@ -93,9 +93,9 @@ public class AspectsClient
         request.setHeader(new BasicScheme(StandardCharsets.UTF_8).authenticate(credentials, request, null));
 
         RequestConfig config = RequestConfig.custom()
-                .setConnectTimeout(timeout * 1000)
-                .setConnectionRequestTimeout(timeout * 1000)
-                .setSocketTimeout(timeout * 1000)
+                .setConnectTimeout(timeoutSeconds * 1000)
+                .setConnectionRequestTimeout(timeoutSeconds * 1000)
+                .setSocketTimeout(timeoutSeconds * 1000)
                 .build();
 
         @Cleanup
