@@ -110,7 +110,16 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "cm:name": {"value": "purchase-order-scan.pdf"},
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "admin"}
+                      "modifiedBy": {"value": "admin"},
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "name": "purchase-order-scan.pdf",
+                            "size": 531152,
+                            "content-type": "application/pdf"
+                          }
+                        }
+                      }
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -252,7 +261,16 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "cm:name": {"value": "purchase-order-scan.pdf"},
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "admin"}
+                      "modifiedBy": {"value": "admin"},
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "name": "purchase-order-scan.pdf",
+                            "size": 531152,
+                            "content-type": "application/pdf"
+                          }
+                        }
+                      }
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);

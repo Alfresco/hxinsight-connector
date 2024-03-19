@@ -45,7 +45,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
         String atsBody = """
                 {
                     "targetReference": "e71dd823-82c7-477c-8490-04cb0e826e66",
-                    "clientData": "{\\"nodeRef\\":\\"f71dd823-82c7-477c-8490-04cb0e826e67\\"}"
+                    "clientData": "{\\"nodeRef\\":\\"f71dd823-82c7-477c-8490-04cb0e826e67\\",\\"targetMimeType\\":\\"application/pdf\\"}"
                 }""";
         containerSupport.raiseTransformationCompletedATSEvent(atsBody);
 

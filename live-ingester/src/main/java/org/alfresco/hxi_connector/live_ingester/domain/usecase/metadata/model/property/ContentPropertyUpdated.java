@@ -42,18 +42,24 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
 {
     private String id;
     private String mimeType;
+    private String sourceMimeType;
+    private Long sourceSizeInBytes;
+    private String sourceFileName;
 
-    public ContentPropertyUpdated(String propertyName, String id, String mimeType)
+    public ContentPropertyUpdated(String propertyName, String id, String mimeType, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName)
     {
         super(propertyName);
         this.id = id;
         this.mimeType = mimeType;
+        this.sourceMimeType = sourceMimeType;
+        this.sourceSizeInBytes = sourceSizeInBytes;
+        this.sourceFileName = sourceFileName;
     }
 
     @Override
     public void applyOn(UpdateNodeEvent event)
     {
-        ContentProperty contentProperty = new ContentProperty(getPropertyName(), id, mimeType);
+        ContentProperty contentProperty = new ContentProperty(getPropertyName(), id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName);
         event.addContentInstruction(contentProperty);
     }
 
@@ -74,6 +80,9 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
         private final String propertyName;
         private String id;
         private String mimeType;
+        private String sourceMimeType;
+        private Long sourceSizeInBytes;
+        private String sourceFileName;
 
         public ContentPropertyUpdatedBuilder id(String id)
         {
@@ -87,9 +96,27 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
             return this;
         }
 
+        public ContentPropertyUpdatedBuilder sourceMimeType(String sourceMimeType)
+        {
+            this.sourceMimeType = sourceMimeType;
+            return this;
+        }
+
+        public ContentPropertyUpdatedBuilder sourceSizeInBytes(Long sourceSizeInBytes)
+        {
+            this.sourceSizeInBytes = sourceSizeInBytes;
+            return this;
+        }
+
+        public ContentPropertyUpdatedBuilder sourceFileName(String sourceFileName)
+        {
+            this.sourceFileName = sourceFileName;
+            return this;
+        }
+
         public ContentPropertyUpdated build()
         {
-            return new ContentPropertyUpdated(propertyName, id, mimeType);
+            return new ContentPropertyUpdated(propertyName, id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName);
         }
     }
 }

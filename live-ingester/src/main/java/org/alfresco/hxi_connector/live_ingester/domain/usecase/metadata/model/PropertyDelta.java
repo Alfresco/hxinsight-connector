@@ -58,6 +58,14 @@ public abstract class PropertyDelta<T>
         return ContentPropertyUpdated.builder(key).id(id).mimeType(mimeType).build();
     }
 
+    public static ContentPropertyUpdated contentMetadataUpdated(String key, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName)
+    {
+        return ContentPropertyUpdated.builder(key)
+                .sourceMimeType(sourceMimeType)
+                .sourceSizeInBytes(sourceSizeInBytes)
+                .sourceFileName(sourceFileName).build();
+    }
+
     public static <T> PropertyDeleted<T> deleted(String key)
     {
         return new PropertyDeleted<>(key);

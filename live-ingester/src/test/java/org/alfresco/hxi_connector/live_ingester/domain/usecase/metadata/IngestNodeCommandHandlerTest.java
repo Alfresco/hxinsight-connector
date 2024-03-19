@@ -112,7 +112,7 @@ class IngestNodeCommandHandlerTest
         IngestNodeCommand command = new IngestNodeCommand(
                 NODE_ID,
                 CREATE,
-                Set.of(new ContentPropertyUpdated(CONTENT_PROPERTY, "content-id", "application/pdf")));
+                Set.of(new ContentPropertyUpdated(CONTENT_PROPERTY, "content-id", "application/pdf", "application/msword", 123L, "something.doc")));
 
         // when
         ingestNodeCommandHandler.handle(command);
@@ -122,7 +122,7 @@ class IngestNodeCommandHandlerTest
         UpdateNodeEvent updateNodeEvent = updateNodeEventCaptor.getValue();
 
         UpdateNodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE);
-        expected.addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf"));
+        expected.addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf", "application/msword", 123L, "something.doc"));
         assertEquals(expected, updateNodeEvent);
     }
 

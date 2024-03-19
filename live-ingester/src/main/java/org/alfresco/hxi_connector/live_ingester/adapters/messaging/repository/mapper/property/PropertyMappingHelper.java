@@ -37,9 +37,12 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -83,8 +86,22 @@ public class PropertyMappingHelper
         {
             return Stream.of(deleted(CONTENT_PROPERTY));
         }
-        // New or updated content can only be sent once the transformation is complete.
-        return Stream.empty();
+
+        if (shouldNotUpdateContentField(event))
+        {
+            return Stream.empty();
+        }
+
+        // Note that we cannot include the reference to the rendition until it is generated.
+        Optional<ContentInfo> contentInfo = ofNullable(event.getData().getResource().getContent());
+        String sourceFileName = event.getData().getResource().getName();
+        String sourceMimeType = contentInfo.map(ContentInfo::getMimeType).orElse(null);
+        Long sourceSizeInBytes = contentInfo.map(ContentInfo::getSizeInBytes).orElse(null);
+        if (sourceMimeType == null && sourceSizeInBytes == null && sourceFileName == null)
+        {
+            return Stream.empty();
+        }
+        return Stream.of(contentMetadataUpdated(CONTENT_PROPERTY, sourceMimeType, sourceSizeInBytes, sourceFileName));
     }
 
     public static Stream<PropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
@@ -146,6 +163,30 @@ public class PropertyMappingHelper
     private static Long toMilliseconds(ZonedDateTime time)
     {
         return time == null ? null : time.toInstant().toEpochMilli();
+    }
+
+    public static boolean shouldNotUpdateContentField(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        Function<NodeResource, Serializable> nameGetter = NodeResource::getName;
+        Function<NodeResource, Optional<ContentInfo>> contentInfoGetter = resource -> ofNullable(resource.getContent());
+        Function<NodeResource, Serializable> mimeTypeGetter = resource -> contentInfoGetter.apply(resource).map(ContentInfo::getMimeType).orElse(null);
+        Function<NodeResource, Serializable> sizeGetter = resource -> contentInfoGetter.apply(resource).map(ContentInfo::getSizeInBytes).orElse(null);
+
+        if (isEventTypeCreated(event))
+        {
+            return false;
+        }
+
+        for (Function<NodeResource, Serializable> fieldGetter : List.of(nameGetter, mimeTypeGetter, sizeGetter))
+        {
+            Serializable oldValue = fieldGetter.apply(event.getData().getResourceBefore());
+            Serializable newValue = fieldGetter.apply(event.getData().getResource());
+            if (oldValue != null && !oldValue.equals(newValue))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     public static boolean shouldNotUpdateField(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)

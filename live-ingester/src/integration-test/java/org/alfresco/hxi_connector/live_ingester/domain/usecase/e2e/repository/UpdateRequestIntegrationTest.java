@@ -123,6 +123,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
+        // Repo event showing the content was updated, but the content metadata stayed the same.
         String repoEvent = """
                 {
                   "type": "org.alfresco.event.node.Updated",
@@ -137,7 +138,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "nodeType": "cm:content",
                       "content": {
                         "mimeType": "application/pdf",
-                        "sizeInBytes": 456,
+                        "sizeInBytes": 123,
                         "encoding": "UTF-8"
                       }
                     },
