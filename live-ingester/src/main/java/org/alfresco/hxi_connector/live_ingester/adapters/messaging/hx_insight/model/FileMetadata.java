@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
@@ -33,9 +34,12 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.Co
 public class FileMetadata
 {
     private String id;
+    @JsonProperty("content-type")
+    private String contentType;
 
     public FileMetadata(ContentProperty contentProperty)
     {
         id = contentProperty.id();
+        contentType = contentProperty.mimeType();
     }
 }

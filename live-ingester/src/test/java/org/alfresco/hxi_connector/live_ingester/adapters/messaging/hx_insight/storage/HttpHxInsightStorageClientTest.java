@@ -76,7 +76,7 @@ class HttpHxInsightStorageClientTest
         IngestContentResponse ingestContentResponse = httpStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
-        assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(url, CONTENT_ID));
+        assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(url, CONTENT_ID, FILE_CONTENT_TYPE));
         StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
         then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
         FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(testData, FILE_CONTENT_TYPE, url);

@@ -27,5 +27,5 @@ package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.s
 
 import java.net.URL;
 
-public record IngestContentResponse(URL url, String contentId)
+public record IngestContentResponse(URL url, String contentId, String mimeType)
 {}

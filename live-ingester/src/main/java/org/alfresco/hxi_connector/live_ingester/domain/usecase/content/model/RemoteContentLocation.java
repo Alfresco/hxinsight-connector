@@ -27,5 +27,5 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 
 import java.net.URL;
 
-public record RemoteContentLocation(String nodeId, URL url, String id)
+public record RemoteContentLocation(String nodeId, URL url, String id, String mimeType)
 {}
