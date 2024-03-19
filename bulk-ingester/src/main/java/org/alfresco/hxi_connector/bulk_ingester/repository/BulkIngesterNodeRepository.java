@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,6 +30,7 @@ import static java.util.function.Predicate.not;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -40,6 +41,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.elasticsearch.db.connector.AlfrescoMetadataRepository;
 import org.alfresco.elasticsearch.db.connector.NodeParams;
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFilterHandler;
 
 @Slf4j
 @Component
@@ -49,6 +51,8 @@ public class BulkIngesterNodeRepository
     private final AlfrescoMetadataRepository metadataRepository;
 
     private final BulkIngesterRepositoryConfig bulkIngesterRepositoryConfig;
+
+    private final AlfrescoNodeFilterHandler alfrescoNodeFilterHandler;
 
     public Stream<AlfrescoNode> find(IdRange idRange)
     {
@@ -66,6 +70,8 @@ public class BulkIngesterNodeRepository
     {
         log.debug("Looking for nodes: {}", nodeParams);
 
-        return metadataRepository.getAlfrescoNodes(nodeParams);
+        return metadataRepository.getAlfrescoNodes(nodeParams).stream()
+                .filter(alfrescoNodeFilterHandler::filterNode)
+                .collect(Collectors.toList());
     }
 }

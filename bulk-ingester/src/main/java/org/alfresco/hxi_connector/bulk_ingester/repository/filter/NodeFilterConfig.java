@@ -23,24 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.model.ingest;
 
-import java.io.Serializable;
-import java.util.Map;
-import jakarta.validation.constraints.NotBlank;
+package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
+
+import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
-import lombok.Builder;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
-@Builder
-public record IngestEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
+@Validated
+@ConfigurationProperties("alfresco.filter")
+public record NodeFilterConfig(@NotNull Aspect aspect)
 {
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype) implements Serializable
+    public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
     {}
 }

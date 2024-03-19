@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,24 +23,30 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.model.ingest;
+package org.alfresco.hxi_connector.bulk_ingester.processor;
 
-import java.io.Serializable;
-import java.util.Map;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import static org.mockito.Mockito.mock;
 
-import lombok.Builder;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 
-@Builder
-public record IngestEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
+import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
+
+@TestConfiguration
+public class MockEventPublisherConfiguration
 {
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype) implements Serializable
-    {}
+    @Bean
+    @Primary
+    public DummyIngestEventPublisher ingestEventPublisher()
+    {
+        return new DummyIngestEventPublisher();
+    }
+
+    @Bean
+    @Primary
+    public ApplicationManager applicationManager()
+    {
+        return mock();
+    }
 }

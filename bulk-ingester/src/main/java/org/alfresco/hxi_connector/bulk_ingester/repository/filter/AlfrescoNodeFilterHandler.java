@@ -23,24 +23,31 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.model.ingest;
 
-import java.io.Serializable;
-import java.util.Map;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
 
-import lombok.Builder;
+import java.util.List;
 
-@Builder
-public record IngestEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class AlfrescoNodeFilterHandler
 {
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype) implements Serializable
-    {}
+
+    private final List<AlfrescoNodeFilterApplier> alfrescoNodeFilterAppliers;
+    private final NodeFilterConfig nodeFilterConfig;
+
+    public boolean filterNode(AlfrescoNode alfrescoNode)
+    {
+
+        return alfrescoNodeFilterAppliers.stream()
+                .peek(f -> log.atDebug().log("Applying filters {} to repo node of id: {}", nodeFilterConfig, alfrescoNode.getId()))
+                .allMatch(f -> f.applyFilter(alfrescoNode, nodeFilterConfig));
+    }
 }
