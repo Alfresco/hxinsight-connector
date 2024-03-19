@@ -87,11 +87,6 @@ public class DockerContainers
         return repository;
     }
 
-    public static PostgreSQLContainer<?> createPostgresContainer()
-    {
-        return createPostgresContainerWithin(null);
-    }
-
     public static PostgreSQLContainer<?> createPostgresContainerWithin(Network network)
     {
         PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE).withTag(POSTGRES_TAG))
@@ -104,11 +99,6 @@ public class DockerContainers
         Optional.ofNullable(network).ifPresent(n -> postgres.withNetwork(n).withNetworkAliases(POSTGRES_ALIAS));
 
         return postgres;
-    }
-
-    public static GenericContainer<?> createActiveMqContainer()
-    {
-        return createActiveMqContainerWithin(null);
     }
 
     public static GenericContainer<?> createActiveMqContainerWithin(Network network)
@@ -135,6 +125,4 @@ public class DockerContainers
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("JAR file not found in target/ directory"));
     }
-
-    /* public static GenericContainer<?> createAlfrescoSearchServiceContainer(Network network) { return new GenericContainer<>(DockerImageName.parse("alfresco/alfresco-search-services").withTag("2.0.3")) .withNetwork(network) .withNetworkAliases("search-service") .withEnv("SOLR_ALFRESCO_HOST", "repository") .withEnv("SOLR_ALFRESCO_PORT", "8080") .withEnv("SOLR_SOLR_HOST", "search-service") .withEnv("SOLR_SOLR_PORT", "8983") .withEnv("SOLR_CREATE_ALFRESCO_DEFAULTS", "alfresco,archive") .withEnv("ALFRESCO_SECURE_COMMS", "secret") .withEnv("JAVA_TOOL_OPTIONS", "-Dalfresco.secureComms.secret=secret") .withExposedPorts(8983); } */
 }
