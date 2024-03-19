@@ -62,7 +62,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "properties": {
                         "cm:content": {
-                           "value": {
+                           "file": {
                              "id": "CONTENT ID"
                            }
                         }

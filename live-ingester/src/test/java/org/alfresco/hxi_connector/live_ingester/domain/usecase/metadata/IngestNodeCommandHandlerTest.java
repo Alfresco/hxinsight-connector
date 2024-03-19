@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.then;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
@@ -53,11 +54,13 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
@@ -100,6 +103,27 @@ class IngestNodeCommandHandlerTest
         assertContainsSameElements(expectedNodePropertiesToSet, updateNodeEvent.getMetadataPropertiesToSet().values());
         assertTrue(updateNodeEvent.getPropertiesToUnset().isEmpty(), "There should be no properties to unset");
         assertEquals(updateNodeEvent.getEventType(), CREATE);
+    }
+
+    @Test
+    void shouldSetContentProperty()
+    {
+        // given
+        IngestNodeCommand command = new IngestNodeCommand(
+                NODE_ID,
+                CREATE,
+                Set.of(new ContentPropertyUpdated(CONTENT_PROPERTY, "content-id")));
+
+        // when
+        ingestNodeCommandHandler.handle(command);
+
+        // then
+        then(ingestionEngineEventPublisher).should().publishMessage(updateNodeEventCaptor.capture());
+        UpdateNodeEvent updateNodeEvent = updateNodeEventCaptor.getValue();
+
+        UpdateNodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE);
+        expected.addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id"));
+        assertEquals(expected, updateNodeEvent);
     }
 
     @Test

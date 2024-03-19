@@ -35,6 +35,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUnchanged;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
@@ -50,6 +51,11 @@ public abstract class PropertyDelta<T>
     public static <T> PropertyUpdated<T> updated(String key, T propertyValue)
     {
         return new PropertyUpdated<>(key, propertyValue);
+    }
+
+    public static ContentPropertyUpdated contentPropertyUpdated(String key, String id)
+    {
+        return ContentPropertyUpdated.builder(key).id(id).build();
     }
 
     public static <T> PropertyDeleted<T> deleted(String key)

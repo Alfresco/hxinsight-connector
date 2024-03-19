@@ -40,7 +40,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @Getter
-@ToString
+@ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
 public class PropertyUpdated<T> extends PropertyDelta<T>
 {
