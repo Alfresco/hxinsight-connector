@@ -27,18 +27,29 @@
 package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
 
 import java.util.List;
-import jakarta.validation.constraints.NotNull;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.validation.annotation.Validated;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
 
-@Validated
-@ConfigurationProperties("alfresco.filter")
-public record NodeFilterConfig(@NotNull Aspect aspect, @NotNull Type type)
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
+import org.alfresco.hxi_connector.common.repository.filter.TypeFilter;
+
+@Component
+@RequiredArgsConstructor
+@Slf4j
+public class TypeFilterApplier implements AlfrescoNodeFilterApplier
 {
-    public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
+    private final NamespacePrefixMapper predefinedNamespacePrefixMapper;
 
-    public record Type(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
+    @Override
+    public boolean applyFilter(AlfrescoNode alfrescoNode, NodeFilterConfig filterConfig)
+    {
+        final String nodeType = predefinedNamespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
+        final List<String> allowed = filterConfig.type().allow();
+        final List<String> denied = filterConfig.type().deny();
+        log.atDebug().log("Applying type filters on Alfresco node of id: {}", alfrescoNode.getId());
+        return TypeFilter.filter(nodeType, allowed, denied);
+    }
 }

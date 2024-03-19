@@ -4,7 +4,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/alfresco
     username: alfresco
     password: alfresco
-    hikari.maximumPoolSize: 20
+    hikari:
+      maximumPoolSize: 20
 
 alfresco:
   reindex:
@@ -26,5 +27,8 @@ alfresco:
       namespace-prefixes-mapping: classpath:namespace-prefixes.json
   filter:
     aspect:
+      allow:
+      deny:
+    type:
       allow:
       deny:
