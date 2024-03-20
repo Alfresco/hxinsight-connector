@@ -62,12 +62,21 @@ public class DockerContainers
     private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String LOCALSTACK_IMAGE = "localstack/localstack";
     private static final String LOCALSTACK_TAG = DockerTags.getLocalStackTag();
+    private static final String TRANSFORM_ROUTER_IMAGE = "quay.io/alfresco/alfresco-transform-router";
+    private static final String TRANSFORM_ROUTER_TAG = DockerTags.getTransformRouterTag();
+    private static final String TRANSFORM_CORE_AIO_IMAGE = "quay.io/alfresco/alfresco-transform-core-aio";
+    private static final String TRANSFORM_CORE_AIO_TAG = DockerTags.getTransformCoreAioTag();
+    private static final String SFS_IMAGE = "quay.io/alfresco/alfresco-shared-file-store";
+    private static final String SFS_TAG = DockerTags.getSfsTag();
     private static final String DB_USER = "alfresco";
     private static final String DB_PASS = "alfresco";
     private static final String DB_NAME = "alfresco";
     private static final String REPOSITORY_ALIAS = "repository";
     private static final String POSTGRES_ALIAS = "postgres";
     private static final String ACTIVE_MQ_ALIAS = "activemq";
+    private static final String TRANSFORM_ROUTER_ALIAS = "transform_router";
+    private static final String TRANSFORM_CORE_AIO_ALIAS = "transform_core_aio";
+    private static final String SFS_ALIAS = "sfs";
 
     public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network)
     {
@@ -139,6 +148,52 @@ public class DockerContainers
         return activeMq;
     }
 
+    public static GenericContainer createTransformRouterContainerWithin(Network network)
+    {
+        GenericContainer<?> transformRouter = new GenericContainer<>(DockerImageName.parse(TRANSFORM_ROUTER_IMAGE).withTag(TRANSFORM_ROUTER_TAG))
+                .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
+                .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
+                .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
+                .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
+                .withExposedPorts(8095)
+                .waitingFor(Wait.forListeningPort())
+                .withStartupTimeout(Duration.ofMinutes(2));
+
+        Optional.ofNullable(network).ifPresent(n -> transformRouter.withNetwork(n).withNetworkAliases(TRANSFORM_ROUTER_ALIAS));
+
+        return transformRouter;
+    }
+
+    public static GenericContainer createTransformCoreAioContainerWithin(Network network)
+    {
+        GenericContainer<?> transformCoreAio = new GenericContainer<>(DockerImageName.parse(TRANSFORM_CORE_AIO_IMAGE).withTag(TRANSFORM_CORE_AIO_TAG))
+                .withEnv("JAVA_OPTS", "-Xms512m -Xmx1024m")
+                .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
+                .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
+                .withExposedPorts(8090)
+                .waitingFor(Wait.forListeningPort())
+                .withStartupTimeout(Duration.ofMinutes(2));
+
+        Optional.ofNullable(network).ifPresent(n -> transformCoreAio.withNetwork(n).withNetworkAliases(TRANSFORM_CORE_AIO_ALIAS));
+
+        return transformCoreAio;
+    }
+
+    public static GenericContainer createSfsContainer(Network network)
+    {
+        GenericContainer<?> sfs = new GenericContainer<>(DockerImageName.parse(SFS_IMAGE).withTag(SFS_TAG))
+                .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
+                .withEnv("scheduler.content.age.millis", "86400000")
+                .withEnv("scheduler.cleanup.interval", "86400000")
+                .withExposedPorts(8099)
+                .waitingFor(Wait.forListeningPort())
+                .withStartupTimeout(Duration.ofMinutes(2));
+
+        Optional.ofNullable(network).ifPresent(n -> sfs.withNetwork(n).withNetworkAliases(SFS_ALIAS));
+
+        return sfs;
+    }
+
     public static WireMockContainer createWireMockContainer()
     {
         return new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
@@ -154,7 +209,8 @@ public class DockerContainers
     private static Path findTargetJar()
     {
         String path = "target";
-        String nameSnippet = "alfresco-hxinsight-connector-prediction-applier-extension";
+//        String nameSnippet = "alfresco-hxinsight-connector-prediction-applier-extension";
+        String nameSnippet = "alfresco-hxinsight-connector-e2e-test";
         String extension = "jar";
         @Cleanup
         Stream<Path> files = Files.list(Paths.get(path));
