@@ -77,7 +77,6 @@ public class AspectsClient
     private List<Aspect> mapResponse(String responseBody) throws JsonProcessingException
     {
         Map<String, Map<String, Object>> response = objectMapper.readValue(responseBody, Map.class);
-
         List<Map<String, Object>> entries = ((List<Map<String, Map<String, Object>>>) response.get("list").get("entries")).stream()
                 .map(e -> e.get("entry"))
                 .collect(Collectors.toList());

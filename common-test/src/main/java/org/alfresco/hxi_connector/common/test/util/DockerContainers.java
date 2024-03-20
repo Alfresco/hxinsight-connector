@@ -65,33 +65,35 @@ public class DockerContainers
 
     public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network)
     {
+        // @formatter:off
         Path jarFile = findTargetJar();
         GenericContainer<?> repository = new GenericContainer<>(new ImageFromDockerfile("localhost/alfresco/alfresco-content-repository-prediction-applier-extension")
-                .withFileFromPath(jarFile.toString(), jarFile)
-                .withDockerfileFromBuilder(builder -> builder
-                        .from(DockerImageName.parse(REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
-                        .user("root")
-                        .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
-                        .run("chown -R -h alfresco /usr/local/tomcat")
-                        .user("alfresco")
-                        .build()))
-                                .withEnv("CATALINA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n")
-                                .withEnv("JAVA_TOOL_OPTIONS", """
-                                        -Dencryption.keystore.type=JCEKS
-                                        -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
-                                        -Dencryption.keyAlgorithm=DESede
-                                        -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
-                                        -Dmetadata-keystore.password=mp6yc0UD9e
-                                        -Dmetadata-keystore.aliases=metadata
-                                        -Dmetadata-keystore.metadata.password=oKIWzVdEdA
-                                        -Dmetadata-keystore.metadata.algorithm=DESede
-                                        """.replace("\n", " "))
-                                .withExposedPorts(8080, 8000)
-                                .withReuse(true);
+            .withFileFromPath(jarFile.toString(), jarFile)
+            .withDockerfileFromBuilder(builder -> builder
+                .from(DockerImageName.parse(REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
+                .user("root")
+                .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
+                .run("chown -R -h alfresco /usr/local/tomcat")
+                .user("alfresco")
+                .build()))
+            .withEnv("CATALINA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n")
+            .withEnv("JAVA_TOOL_OPTIONS", """
+            -Dencryption.keystore.type=JCEKS
+            -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
+            -Dencryption.keyAlgorithm=DESede
+            -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
+            -Dmetadata-keystore.password=mp6yc0UD9e
+            -Dmetadata-keystore.aliases=metadata
+            -Dmetadata-keystore.metadata.password=oKIWzVdEdA
+            -Dmetadata-keystore.metadata.algorithm=DESede
+            """.replace("\n", " "))
+            .withExposedPorts(8080, 8000)
+            .withStartupTimeout(Duration.ofMinutes(5));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
 
         return repository;
+        // @formatter:on
     }
 
     public static PostgreSQLContainer<?> createPostgresContainerWithin(Network network)

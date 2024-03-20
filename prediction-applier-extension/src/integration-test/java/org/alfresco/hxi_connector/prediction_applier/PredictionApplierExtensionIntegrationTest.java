@@ -70,25 +70,27 @@ public class PredictionApplierExtensionIntegrationTest
 
     private static GenericContainer<?> createRepositoryContainer()
     {
+        // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
-                .withEnv("JAVA_OPTS", """
-                        -Ddb.driver=org.postgresql.Driver
-                        -Ddb.username=%s
-                        -Ddb.password=%s
-                        -Ddb.url=jdbc:postgresql://%s:5432/%s
-                        -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
-                        -Dalfresco.host=localhost
-                        -Dalfresco.port=8080
-                        -Dtransform.service.enabled=false
-                        -Dalfresco.restApi.basicAuthScheme=true
-                        -Ddeployment.method=DOCKER_COMPOSE
-                        -Xms1500m -Xmx1500m
-                        """.formatted(
-                        postgres.getUsername(),
-                        postgres.getPassword(),
-                        postgres.getNetworkAliases().stream().findFirst().get(),
-                        postgres.getDatabaseName(),
-                        activemq.getNetworkAliases().stream().findFirst().get())
-                        .replace("\n", " "));
+            .withEnv("JAVA_OPTS", """
+            -Ddb.driver=org.postgresql.Driver
+            -Ddb.username=%s
+            -Ddb.password=%s
+            -Ddb.url=jdbc:postgresql://%s:5432/%s
+            -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
+            -Dalfresco.host=localhost
+            -Dalfresco.port=8080
+            -Dtransform.service.enabled=false
+            -Dalfresco.restApi.basicAuthScheme=true
+            -Ddeployment.method=DOCKER_COMPOSE
+            -Xms1500m -Xmx1500m
+            """.formatted(
+                postgres.getUsername(),
+                postgres.getPassword(),
+                postgres.getNetworkAliases().stream().findFirst().get(),
+                postgres.getDatabaseName(),
+                activemq.getNetworkAliases().stream().findFirst().get())
+            .replace("\n", " "));
+        // @formatter:on
     }
 }
