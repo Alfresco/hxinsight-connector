@@ -58,10 +58,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.test.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
@@ -84,8 +83,6 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
 @WithMockOAuth2User
 class HxInsightEventPublisherIntegrationTest
 {
-    private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String INGEST_PATH = "/ingest";
     private static final String NODE_ID = "node-id";
     private static final int RETRY_ATTEMPTS = 3;
@@ -94,8 +91,7 @@ class HxInsightEventPublisherIntegrationTest
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
-            .withEnv("WIREMOCK_OPTIONS", "--verbose");
+    static final WireMockContainer wireMockServer = DockerContainers.createWireMockContainer();
 
     @SpyBean
     IngestionEngineEventPublisher ingestionEngineEventPublisher;

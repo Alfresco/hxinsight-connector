@@ -47,9 +47,8 @@ import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 
-import org.alfresco.hxi_connector.common.test.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.prediction_applier.util.local.LocalSqsPublisher;
@@ -63,13 +62,11 @@ import org.alfresco.hxi_connector.prediction_applier.util.local.LocalSqsPublishe
 @Testcontainers
 class PredictionListenerIntegrationTest
 {
-    private static final String LOCALSTACK_IMAGE = "localstack/localstack";
-    private static final String LOCALSTACK_TAG = DockerTags.getLocalStackTag();
     private static final String QUEUE_NAME = "hxinsight-prediction-queue";
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final LocalStackContainer localStackServer = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
+    static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainer();
 
     @Autowired
     LocalSqsPublisher localSqsPublisher;

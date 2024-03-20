@@ -43,9 +43,11 @@ import lombok.SneakyThrows;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
@@ -56,6 +58,10 @@ public class DockerContainers
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
     private static final String ACTIVE_MQ_TAG = DockerTags.getActiveMqTag();
+    private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
+    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
+    private static final String LOCALSTACK_IMAGE = "localstack/localstack";
+    private static final String LOCALSTACK_TAG = DockerTags.getLocalStackTag();
     private static final String DB_USER = "alfresco";
     private static final String DB_PASS = "alfresco";
     private static final String DB_NAME = "alfresco";
@@ -96,6 +102,11 @@ public class DockerContainers
         // @formatter:on
     }
 
+    public static PostgreSQLContainer<?> createPostgresContainer()
+    {
+        return createPostgresContainerWithin(null);
+    }
+
     public static PostgreSQLContainer<?> createPostgresContainerWithin(Network network)
     {
         PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE).withTag(POSTGRES_TAG))
@@ -108,6 +119,11 @@ public class DockerContainers
         Optional.ofNullable(network).ifPresent(n -> postgres.withNetwork(n).withNetworkAliases(POSTGRES_ALIAS));
 
         return postgres;
+    }
+
+    public static GenericContainer<?> createActiveMqContainer()
+    {
+        return createActiveMqContainerWithin(null);
     }
 
     public static GenericContainer<?> createActiveMqContainerWithin(Network network)
@@ -123,16 +139,32 @@ public class DockerContainers
         return activeMq;
     }
 
+    public static WireMockContainer createWireMockContainer()
+    {
+        return new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+                .withEnv("WIREMOCK_OPTIONS", "--verbose");
+    }
+
+    public static LocalStackContainer createLocalStackContainer()
+    {
+        return new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
+    }
+
     @SneakyThrows
     private static Path findTargetJar()
     {
+        String path = "target";
+        String nameSnippet = "alfresco-hxinsight-connector-prediction-applier-extension";
+        String extension = "jar";
         @Cleanup
-        Stream<Path> files = Files.list(Paths.get("target"));
+        Stream<Path> files = Files.list(Paths.get(path));
 
-        return files.filter(matchExtension("jar"))
-                .filter(not(namesContaining("-tests")))
+        return files.filter(matchExtension(extension))
+                .filter(nameContains(nameSnippet))
+                .filter(not(nameContains("-tests")))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("JAR file not found in target/ directory"));
+                .orElseThrow(() -> new IllegalStateException("%s file with name containing: '%s' not found in directory: '%s/'"
+                        .formatted(extension.toUpperCase(Locale.ENGLISH), nameSnippet, path)));
     }
 
     private static Predicate<Path> matchExtension(final String extension)
@@ -143,11 +175,11 @@ public class DockerContainers
                 .endsWith(extension.startsWith(".") ? extension.toLowerCase(Locale.ENGLISH) : "." + extension.toLowerCase(Locale.ENGLISH));
     }
 
-    private static Predicate<Path> namesContaining(final String phrase)
+    private static Predicate<Path> nameContains(final String snippet)
     {
         return path -> path != null && path.getFileName()
                 .toString()
                 .toLowerCase(Locale.ENGLISH)
-                .contains(phrase);
+                .contains(snippet);
     }
 }

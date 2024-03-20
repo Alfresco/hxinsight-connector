@@ -66,10 +66,9 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.test.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
@@ -89,8 +88,6 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
 @WithMockOAuth2User
 class PreSignedUrlRequesterIntegrationTest
 {
-    private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
     private static final String NODE_ID = "some-node-ref";
     private static final String PRE_SIGNED_URL_PATH = "/pre-signed-url";
     private static final String CONTENT_ID = "CONTENT ID";
@@ -103,8 +100,7 @@ class PreSignedUrlRequesterIntegrationTest
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final WireMockContainer wireMockServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
-            .withEnv("WIREMOCK_OPTIONS", "--verbose");
+    static final WireMockContainer wireMockServer = DockerContainers.createWireMockContainer();
 
     @SpyBean
     StorageLocationRequester locationRequester;

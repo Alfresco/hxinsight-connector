@@ -41,8 +41,6 @@ import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.BULK_INGESTER_QUEUE;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REPO_EVENT_TOPIC;
 
-import java.time.Duration;
-
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import lombok.NoArgsConstructor;
@@ -61,13 +59,11 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.test.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageConfig;
 import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
@@ -78,15 +74,9 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
 @NoArgsConstructor(access = PROTECTED)
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class E2ETestBase
 {
-    private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
-    private static final String ACTIVE_MQ_TAG = DockerTags.getActiveMqTag();
-    private static final int ACTIVE_MQ_PORT = 61616;
-    private static final String WIREMOCK_IMAGE = "wiremock/wiremock";
-    private static final String WIREMOCK_TAG = DockerTags.getWiremockTag();
-    private static final String LOCALSTACK_IMAGE = "localstack/localstack";
-    private static final String LOCALSTACK_TAG = DockerTags.getLocalStackTag();
     public static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static String brokerUrl;
     private static WireMock hxAuthMock;
@@ -98,43 +88,25 @@ public class E2ETestBase
     private LocalStorageClient localStorageClient;
 
     @Container
-    private static GenericContainer<?> activemqBroker = createAMQContainer();
-
+    static final GenericContainer<?> activemqBroker = DockerContainers.createActiveMqContainer();
     @Container
-    private static WireMockContainer hxAuthServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
-            .withEnv("WIREMOCK_OPTIONS", "--verbose");
-
+    static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainer();
     @Container
-    private static WireMockContainer hxInsightServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
-            .withEnv("WIREMOCK_OPTIONS", "--verbose");
-
+    static final WireMockContainer hxInsightServer = DockerContainers.createWireMockContainer();
     @Container
-    @SuppressWarnings("PMD.FieldNamingConventions")
-    private static final WireMockContainer sfsServer = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
-            .withEnv("WIREMOCK_OPTIONS", "--verbose");
-
+    static final WireMockContainer sfsServer = DockerContainers.createWireMockContainer();
     @Container
-    @SuppressWarnings("PMD.FieldNamingConventions")
-    private static final LocalStackContainer localStackServer = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
-
-    private static GenericContainer<?> createAMQContainer()
-    {
-        return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
-                .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
-                .waitingFor(Wait.forListeningPort())
-                .withStartupTimeout(Duration.ofMinutes(2))
-                .withExposedPorts(ACTIVE_MQ_PORT, 8161, 5672, 61613);
-    }
+    static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainer();
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
         AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl());
 
-        brokerUrl = "tcp://localhost:" + activemqBroker.getMappedPort(ACTIVE_MQ_PORT);
+        brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
-        registry.add("hyland-experience.insight.base-url", () -> hxInsightServer.getBaseUrl());
+        registry.add("hyland-experience.insight.base-url", hxInsightServer::getBaseUrl);
 
         registry.add("alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
         registry.add("alfresco.bulk-ingester.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
