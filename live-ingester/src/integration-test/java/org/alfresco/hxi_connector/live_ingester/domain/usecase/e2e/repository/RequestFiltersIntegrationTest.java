@@ -37,13 +37,15 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
         "alfresco.filter.aspect.allow[0]=cm:versionable", "alfresco.filter.aspect.allow[1]=cm:auditable",
         "alfresco.filter.type.deny[0]=cm:folder",
         "alfresco.filter.type.allow[0]=cm:content",
+        "alfresco.filter.path.allow[0]=5f355d16-f824-4173-bf4b-b1ec37ef5549", "alfresco.filter.path.allow[1]=93f7edf5-e4d8-4749-9b4c-e45097e2e19d",
+        "alfresco.filter.path.deny[0]=93f7edf5-e4d8-4749-9b4c-e45097e2e19e",
         "logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class RequestFiltersIntegrationTest extends E2ETestBase
 {
 
     @Test
-    void testCreateRequestWithAspectInAllowedFilterAndTypeInAllowedFilter()
+    void testCreateRequestWithAspectInAllowedFilterAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -128,7 +130,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testCreateRequestWithAspectInDeniedFilterAndTypeInAllowedFilter()
+    void testCreateRequestWithAspectInDeniedFilterAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         String repoEvent = """
@@ -185,7 +187,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testCreateRequestWithAtLeastOneAspectPresentInAllowedFilterAndTypeInAllowedFilter()
+    void testCreateRequestWithAtLeastOneAspectPresentInAllowedFilterAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -259,7 +261,64 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testUpdateRequestWithAspectInAllowedFilterAndTypeInAllowedFilter()
+    void testCreateRequestWithAtLeastOneAspectPresentInAllowedFilterAndTypeInAllowedFilterAndAncestorInDeniedFilter()
+    {
+        // given
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Created",
+                  "id": "368818d9-dddd-4b8b-8eab-e050253d7f03",
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2021-01-21T11:14:16.42372Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeCreated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "4004ca99-9d2a-400d-9d80-8f840e223503",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-82c7-477c-8490-04cb0e826e03",
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19e" ],
+                      "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2024-03-02T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "modifiedAt": "2024-03-06T11:14:15.695Z",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "cm:autoVersion": true,
+                        "cm:versionType": "MAJOR",
+                        "cm:taggable": null
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:auditable", "cm:classifiable" ],
+                      "isFolder": false,
+                      "isFile": true
+                    },
+                    "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
+                    "resourceDeniedAuthorities": []
+                  }
+                }""";
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        containerSupport.expectNoHxIngestMessagesReceived();
+    }
+
+    @Test
+    void testUpdateRequestWithAspectInAllowedFilterAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -278,6 +337,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resource": {
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e04",
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
                       "name": "purchase-order-scan.pdf",
                       "nodeType": "cm:content",
                       "createdByUser": {
@@ -343,7 +403,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testUpdateRequestWithAspectInDeniedFilterAndTypeInAllowedFilter()
+    void testUpdateRequestWithAspectInDeniedFilterAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         String repoEvent = """
@@ -413,7 +473,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testUpdateRequestWithAtLeastOneAspectInAllowedFilterAndTypeInAllowedFilter()
+    void testUpdateRequestWithAtLeastOneAspectInAllowedFilterAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -432,6 +492,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resource": {
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e06",
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
                       "name": "purchase-order-scan.pdf",
                       "nodeType": "cm:content",
                       "createdByUser": {
@@ -497,7 +558,79 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testCreateRequestWithEmptyAspectCollectionAndTypeInAllowedFilter()
+    void testUpdateRequestWithAtLeastOneAspectInAllowedFilterAndTypeInAllowedFilterAndAncestorInDeniedFilter()
+    {
+        // given
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "ae5dac3c-25d0-438d-b148-2084d1ab0506",
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2021-01-26T10:29:42.99524Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "b5b1ebfe-45fc-4f86-b71b-421996482806",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-82c7-477c-8490-04cb0e826e06",
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19e" ],
+                      "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2024-03-02T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "abeecher",
+                        "displayName": "Alice Beecher"
+                      },
+                      "modifiedAt": "2024-03-06T10:29:42.529Z",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "cm:title": "Purchase Order",
+                        "cm:versionType": null,
+                        "cm:versionLabel": "1.0",
+                        "cm:taggable": null
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ],
+                      "isFolder": false,
+                      "isFile": true
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "modifiedAt": "2024-03-02T11:14:25.223Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "properties": {
+                        "cm:title": null,
+                        "cm:versionType": "MAJOR",
+                        "cm:versionLabel": "1.0",
+                        "cm:taggable": null,
+                        "cm:description": "Old Description"
+                      },
+                      "aspectNames": [ "cm:versionable" ]
+                    }
+                  }
+                }""";
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        containerSupport.expectNoHxIngestMessagesReceived();
+    }
+
+    @Test
+    void testCreateRequestWithEmptyAspectCollectionAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         String repoEvent = """
@@ -554,7 +687,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testCreateRequestWithNoAspectsInEventAndTypeInAllowedFilter()
+    void testCreateRequestWithNoAspectsInEventAndTypeInAllowedFilterAndAncestorInAllowedFilter()
     {
         // given
         String repoEvent = """
@@ -610,7 +743,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testCreateRequestWithAspectInAllowedFilterAndTypeInDeniedFilter()
+    void testCreateRequestWithAspectInAllowedFilterAndTypeInDeniedFilterAndAncestorInAllowedFilter()
     {
         // given
         String repoEvent = """
@@ -666,7 +799,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testUpdateRequestWithAspectInAllowedFilterAndTypeInDeniedFilter()
+    void testUpdateRequestWithAspectInAllowedFilterAndTypeInDeniedFilterAndAncestorInAllowedFilter()
     {
         // given
         String repoEvent = """

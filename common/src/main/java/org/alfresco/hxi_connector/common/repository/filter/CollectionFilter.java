@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.common.repository.filter;
 
-import java.util.List;
+import java.util.Collection;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.AccessLevel;
@@ -34,24 +34,25 @@ import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
-public final class TypeFilter
+public final class CollectionFilter
 {
-    public static boolean filter(String nodeType, List<String> allowed, List<String> denied)
+
+    public static boolean filter(Collection<String> fields, Collection<String> allowed, Collection<String> denied)
     {
-        final boolean allow = isAllowed(nodeType, allowed);
-        final boolean deny = isDenied(nodeType, denied);
+        final boolean allow = isAllowed(fields, allowed);
+        final boolean deny = isDenied(fields, denied);
         boolean result = allow && !deny;
-        log.atDebug().log("Node type: {}. Allowed types: {}. Denied types: {}. Is allowed: {}", nodeType, allowed, denied, result);
+        log.atDebug().log("Node fields collection: {}. Allowed values: {}. Denied values: {}. Is allowed: {}", fields, allowed, denied, result);
         return result;
     }
 
-    private static boolean isAllowed(@NotNull String nodeType, @NotNull List<String> allowed)
+    private static boolean isAllowed(@NotNull Collection<String> fields, @NotNull Collection<String> allowed)
     {
-        return allowed.isEmpty() || allowed.contains(nodeType);
+        return allowed.isEmpty() || allowed.stream().anyMatch(fields::contains);
     }
 
-    private static boolean isDenied(@NotNull String nodeType, @NotNull List<String> denied)
+    private static boolean isDenied(@NotNull Collection<String> fields, @NotNull Collection<String> denied)
     {
-        return denied.contains(nodeType);
+        return denied.stream().anyMatch(fields::contains);
     }
 }

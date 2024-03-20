@@ -37,7 +37,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class TypeFilterTest
+class FieldFilterTest
 {
 
     private static final String ALLOW_NODE = "Allow node when: ";
@@ -47,14 +47,14 @@ class TypeFilterTest
     private static final String CM_FOLDER = "cm:folder";
     private static final String CM_CONTENT = "cm:content";
     private static final String CM_SPECIAL_FOLDER = "cm:special-folder";
-    private static final String TYPE = "Node type: ";
+    private static final String FIELD = "Field value: ";
 
     @ParameterizedTest
-    @MethodSource("provideParameters")
-    void testAspectFiltering(boolean expected, String nodeType, List<String> allowed, List<String> denied)
+    @MethodSource("provideTypeParameters")
+    void testTypeFiltering(boolean expected, String nodeType, List<String> allowed, List<String> denied)
     {
         // when
-        boolean result = TypeFilter.filter(nodeType, allowed, denied);
+        boolean result = FieldFilter.filter(nodeType, allowed, denied);
         // then
         if (expected)
         {
@@ -66,7 +66,7 @@ class TypeFilterTest
         }
     }
 
-    private static Stream<Arguments> provideParameters()
+    private static Stream<Arguments> provideTypeParameters()
     {
         return Stream.of(
                 composeArguments(true, CM_FOLDER, emptyList(), emptyList()),
@@ -79,8 +79,7 @@ class TypeFilterTest
 
     private static Arguments composeArguments(boolean allowNode, String nodeType, List<String> allowed, List<String> denied)
     {
-
-        return Arguments.of(named(allowNode ? ALLOW_NODE : DENY_NODE, allowNode), named(TYPE + nodeType, nodeType),
+        return Arguments.of(named(allowNode ? ALLOW_NODE : DENY_NODE, allowNode), named(FIELD + nodeType, nodeType),
                 named(ALLOWED + allowed, allowed), named(DENIED + denied, denied));
     }
 

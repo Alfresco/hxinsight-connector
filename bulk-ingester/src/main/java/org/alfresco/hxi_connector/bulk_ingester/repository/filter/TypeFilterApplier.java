@@ -34,7 +34,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
-import org.alfresco.hxi_connector.common.repository.filter.TypeFilter;
+import org.alfresco.hxi_connector.common.repository.filter.FieldFilter;
 
 @Component
 @RequiredArgsConstructor
@@ -50,6 +50,6 @@ public class TypeFilterApplier implements AlfrescoNodeFilterApplier
         final List<String> allowed = filterConfig.type().allow();
         final List<String> denied = filterConfig.type().deny();
         log.atDebug().log("Applying type filters on Alfresco node of id: {}", alfrescoNode.getId());
-        return TypeFilter.filter(nodeType, allowed, denied);
+        return FieldFilter.filter(nodeType, allowed, denied);
     }
 }

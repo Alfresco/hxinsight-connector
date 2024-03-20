@@ -41,6 +41,9 @@ alfresco:
     type:
       allow:
       deny:
+    path:
+      allow:
+      deny:
 hyland-experience:
   insight:
     base-url: http://localhost:8001

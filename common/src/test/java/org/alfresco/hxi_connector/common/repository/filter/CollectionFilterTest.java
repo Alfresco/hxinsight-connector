@@ -31,6 +31,7 @@ import static java.util.Collections.emptySet;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Named.named;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -39,24 +40,28 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-class AspectFilterTest
+class CollectionFilterTest
 {
 
     private static final String CM_ASPECT_1 = "cm:aspect1";
     private static final String CM_ASPECT_2 = "cm:aspect2";
     private static final String CM_ASPECT_3 = "cm:aspect3";
     private static final String CM_ASPECT_4 = "cm:aspect4";
+    private static final String ROOT_NODE_ID = "root-node-id";
+    private static final String PARENT_NODE_ID = "parent-node-id";
+    private static final String GRANDPARENT_NODE_ID = "grandparent-node-id";
+    private static final String CHILD_NODE_ID = "child-node-id";
     private static final String ALLOW_NODE = "Allow node when: ";
     private static final String DENY_NODE = "Deny node when: ";
     private static final String DENIED = "Denied: ";
     private static final String ALLOWED = "Allowed: ";
-    private static final String ASPECTS = "Aspects: ";
+    private static final String VALUES = "Values: ";
 
     @ParameterizedTest
-    @MethodSource("provideParameters")
+    @MethodSource("provideAspectParameters")
     void testAspectFiltering(boolean expected, Set<String> aspects, List<String> allowed, List<String> denied)
     {
-        boolean result = AspectFilter.filter(aspects, allowed, denied);
+        boolean result = CollectionFilter.filter(aspects, allowed, denied);
         if (expected)
         {
             assertTrue(result);
@@ -67,7 +72,22 @@ class AspectFilterTest
         }
     }
 
-    private static Stream<Arguments> provideParameters()
+    @ParameterizedTest
+    @MethodSource("provideAncestorParameters")
+    void testAncestorFiltering(boolean expected, List<String> aspects, List<String> allowed, List<String> denied)
+    {
+        boolean result = CollectionFilter.filter(aspects, allowed, denied);
+        if (expected)
+        {
+            assertTrue(result);
+        }
+        else
+        {
+            assertFalse(result);
+        }
+    }
+
+    private static Stream<Arguments> provideAspectParameters()
     {
         return Stream.of(
                 composeArguments(true, Set.of(CM_ASPECT_1), emptyList(), emptyList()),
@@ -82,10 +102,24 @@ class AspectFilterTest
                 composeArguments(true, Set.of(CM_ASPECT_1, CM_ASPECT_4), List.of(CM_ASPECT_1, CM_ASPECT_2), List.of(CM_ASPECT_3)));
     }
 
-    private static Arguments composeArguments(boolean allowNode, Set<String> aspects, List<String> allowed, List<String> denied)
+    private static Stream<Arguments> provideAncestorParameters()
+    {
+        return Stream.of(
+                composeArguments(true, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID), emptyList(), emptyList()),
+                composeArguments(true, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID), List.of(GRANDPARENT_NODE_ID), emptyList()),
+                composeArguments(true, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID), emptyList(), List.of(PARENT_NODE_ID)),
+                composeArguments(true, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID), List.of(GRANDPARENT_NODE_ID), List.of(PARENT_NODE_ID)),
+                composeArguments(false, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID, PARENT_NODE_ID), List.of(PARENT_NODE_ID), List.of(GRANDPARENT_NODE_ID)),
+                composeArguments(false, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID), List.of(PARENT_NODE_ID), emptyList()),
+                composeArguments(false, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID, PARENT_NODE_ID), emptyList(), List.of(GRANDPARENT_NODE_ID)),
+                composeArguments(true, List.of(ROOT_NODE_ID, GRANDPARENT_NODE_ID, PARENT_NODE_ID), List.of(GRANDPARENT_NODE_ID, PARENT_NODE_ID), List.of(
+                        CHILD_NODE_ID)));
+    }
+
+    private static Arguments composeArguments(boolean allowNode, Collection<String> values, Collection<String> allowed, Collection<String> denied)
     {
 
-        return Arguments.of(named(allowNode ? ALLOW_NODE : DENY_NODE, allowNode), named(ASPECTS + aspects, aspects),
+        return Arguments.of(named(allowNode ? ALLOW_NODE : DENY_NODE, allowNode), named(VALUES + values, values),
                 named(ALLOWED + allowed, allowed), named(DENIED + denied, denied));
     }
 }

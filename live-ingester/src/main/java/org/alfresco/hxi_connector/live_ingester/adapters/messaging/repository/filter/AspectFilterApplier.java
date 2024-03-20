@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.repository.filter.AspectFilter;
+import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -52,7 +52,7 @@ public class AspectFilterApplier implements RepoEventFilterApplier
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
         log.atDebug().log("Applying aspect filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
-        return AspectFilter.filter(aspectNames, allowed, denied);
+        return CollectionFilter.filter(aspectNames, allowed, denied);
     }
 
 }
