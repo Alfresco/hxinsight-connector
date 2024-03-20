@@ -153,13 +153,18 @@ public class DockerContainers
     @SneakyThrows
     private static Path findTargetJar()
     {
+        String path = "target";
+        String nameSnippet = "alfresco-hxinsight-connector-prediction-applier-extension";
+        String extension = "jar";
         @Cleanup
-        Stream<Path> files = Files.list(Paths.get("target"));
+        Stream<Path> files = Files.list(Paths.get(path));
 
-        return files.filter(matchExtension("jar"))
-                .filter(not(namesContaining("-tests")))
+        return files.filter(matchExtension(extension))
+                .filter(nameContains(nameSnippet))
+                .filter(not(nameContains("-tests")))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("JAR file not found in target/ directory"));
+                .orElseThrow(() -> new IllegalStateException("%s file with name containing: '%s' not found in directory: '%s/'"
+                        .formatted(extension.toUpperCase(Locale.ENGLISH), nameSnippet, path)));
     }
 
     private static Predicate<Path> matchExtension(final String extension)
@@ -170,11 +175,11 @@ public class DockerContainers
                 .endsWith(extension.startsWith(".") ? extension.toLowerCase(Locale.ENGLISH) : "." + extension.toLowerCase(Locale.ENGLISH));
     }
 
-    private static Predicate<Path> namesContaining(final String phrase)
+    private static Predicate<Path> nameContains(final String snippet)
     {
         return path -> path != null && path.getFileName()
                 .toString()
                 .toLowerCase(Locale.ENGLISH)
-                .contains(phrase);
+                .contains(snippet);
     }
 }
