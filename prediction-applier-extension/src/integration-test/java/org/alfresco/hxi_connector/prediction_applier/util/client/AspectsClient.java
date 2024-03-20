@@ -27,15 +27,14 @@ package org.alfresco.hxi_connector.prediction_applier.util.client;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -51,7 +50,7 @@ import org.alfresco.rest.api.model.Aspect;
 
 public class AspectsClient
 {
-    private static final String ASPECTS_URL = "http://%s:%s/alfresco/api/-default-/public/alfresco/versions/1/aspects?maxItems=%s";
+    private static final String ASPECTS_URL = "http://%s:%s/alfresco/api/-default-/public/alfresco/versions/1/aspects/%s";
     private static final String USER = "admin";
     private static final String PASS = "admin";
 
@@ -68,25 +67,25 @@ public class AspectsClient
     }
 
     @SneakyThrows
-    public List<Aspect> getAspects(int maxItems)
+    public Aspect getAspectById(String aspectId)
     {
-        return mapResponse(requestAspects(maxItems));
+        return mapResponse(requestAspects(aspectId));
     }
 
-    @SuppressWarnings("unchecked")
-    private List<Aspect> mapResponse(String responseBody) throws JsonProcessingException
+    private Aspect mapResponse(String responseBody) throws JsonProcessingException
     {
-        Map<String, Map<String, Object>> response = objectMapper.readValue(responseBody, Map.class);
-        List<Map<String, Object>> entries = ((List<Map<String, Map<String, Object>>>) response.get("list").get("entries")).stream()
-                .map(e -> e.get("entry"))
-                .collect(Collectors.toList());
+        Map<String, Map<String, Object>> response = objectMapper.readValue(responseBody, new TypeReference<>() {});
+        if (MapUtils.isEmpty(response) || !response.containsKey("entry"))
+        {
+            return null;
+        }
 
-        return objectMapper.convertValue(entries, new TypeReference<>() {});
+        return objectMapper.convertValue(response.get("entry"), Aspect.class);
     }
 
-    private String requestAspects(int maxItems) throws IOException, AuthenticationException
+    private String requestAspects(String aspectId) throws IOException, AuthenticationException
     {
-        String aspectsUrl = ASPECTS_URL.formatted(host, port, maxItems);
+        String aspectsUrl = ASPECTS_URL.formatted(host, port, aspectId);
         HttpGet request = new HttpGet(aspectsUrl);
         UsernamePasswordCredentials credentials = new UsernamePasswordCredentials(USER, PASS);
         request.setHeader(new BasicScheme(StandardCharsets.UTF_8).authenticate(credentials, request, null));

@@ -27,8 +27,6 @@ package org.alfresco.hxi_connector.prediction_applier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -38,7 +36,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.util.client.AspectsClient;
-import org.alfresco.rest.api.model.AbstractClass;
 import org.alfresco.rest.api.model.Aspect;
 
 @Testcontainers
@@ -46,7 +43,6 @@ import org.alfresco.rest.api.model.Aspect;
 public class PredictionApplierExtensionIntegrationTest
 {
     private static final int TIMEOUT_SECONDS = 300;
-    private static final int MAX_ITEMS = 500;
 
     static final Network network = Network.newNetwork();
     @Container
@@ -61,11 +57,9 @@ public class PredictionApplierExtensionIntegrationTest
     @Test
     void testHxIModelInstallation()
     {
-        List<Aspect> aspects = aspectsClient.getAspects(MAX_ITEMS);
+        Aspect actualAspect = aspectsClient.getAspectById("hxi:predictionApplied");
 
-        assertThat(aspects)
-                .isNotEmpty()
-                .extracting(AbstractClass::getId).contains("hxi:predictionApplied");
+        assertThat(actualAspect).isNotNull();
     }
 
     private static GenericContainer<?> createRepositoryContainer()
