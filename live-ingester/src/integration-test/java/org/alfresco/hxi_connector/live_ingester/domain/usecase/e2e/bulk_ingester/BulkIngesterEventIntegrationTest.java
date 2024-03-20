@@ -119,7 +119,16 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "createdAt": {"value": 1308061016},
                       "cm:name": {"value": "dashboard.xml"},
                       "cm:isContentIndexed": {"value": true},
-                      "cm:isIndexed": {"value": false}
+                      "cm:isIndexed": {"value": false},
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "name": "dashboard.xml",
+                            "size": 330,
+                            "content-type": "text/xml"
+                          }
+                        }
+                      }
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);

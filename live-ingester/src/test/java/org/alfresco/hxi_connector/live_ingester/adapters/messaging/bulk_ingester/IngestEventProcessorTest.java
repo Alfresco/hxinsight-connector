@@ -26,13 +26,15 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.then;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.io.Serializable;
 import java.util.Map;
@@ -49,7 +51,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @ExtendWith(MockitoExtension.class)
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
@@ -88,9 +89,9 @@ class IngestEventProcessorTest
                 NODE_ID,
                 CREATE,
                 Set.of(
-                        PropertyDelta.updated(TYPE_PROPERTY, NODE_TYPE),
-                        PropertyDelta.updated("cm:name", "test folder"),
-                        PropertyDelta.updated("cm:title", "test folder title")));
+                        updated(TYPE_PROPERTY, NODE_TYPE),
+                        updated("cm:name", "test folder"),
+                        updated("cm:title", "test folder title")));
 
         then(ingestNodeCommandHandler).should().handle(eq(expectedCommand));
 
@@ -116,7 +117,14 @@ class IngestEventProcessorTest
         ingestEventProcessor.process(ingestEvent);
 
         // then
-        then(ingestNodeCommandHandler).should().handle(any());
+        IngestNodeCommand expectedCommand = new IngestNodeCommand(
+                NODE_ID,
+                CREATE,
+                Set.of(
+                        contentMetadataUpdated(CONTENT_PROPERTY, "application/pdf", 100L, null),
+                        updated(TYPE_PROPERTY, NODE_TYPE),
+                        updated(CREATED_AT_PROPERTY, CREATED_AT)));
+        then(ingestNodeCommandHandler).should().handle(expectedCommand);
 
         then(ingestContentCommandHandler).should().handle(eq(new IngestContentCommand(NODE_ID)));
     }

@@ -508,4 +508,43 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
+
+    @Test
+    void testUpdateFolderName()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String repoEvent = """
+                {
+                  "type": "org.alfresco.event.node.Updated",
+                  "time": "2021-01-26T10:29:42.99524Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "data": {
+                    "eventGroupId": "b5b1ebfe-45fc-4f86-b71b-421996482881",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "82c7d723-1dd8-477c-8490-04cb0e826e65",
+                      "name": "New Folder",
+                      "nodeType": "cm:folder"
+                    },
+                    "resourceBefore": {
+                      "name": "Old Folder"
+                    }
+                  }
+                }""";
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                {
+                  "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
+                  "eventType": "update",
+                  "properties": {
+                    "cm:name": {"value": "New Folder"}
+                  }
+                }""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
 }

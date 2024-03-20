@@ -42,7 +42,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -87,7 +86,7 @@ public class PropertyMappingHelper
             return Stream.of(deleted(CONTENT_PROPERTY));
         }
 
-        if (shouldNotUpdateContentField(event))
+        if (!shouldUpdateContentField(event))
         {
             return Stream.empty();
         }
@@ -165,28 +164,31 @@ public class PropertyMappingHelper
         return time == null ? null : time.toInstant().toEpochMilli();
     }
 
-    public static boolean shouldNotUpdateContentField(RepoEvent<DataAttributes<NodeResource>> event)
+    public static boolean shouldUpdateContentField(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        Function<NodeResource, Serializable> nameGetter = NodeResource::getName;
         Function<NodeResource, Optional<ContentInfo>> contentInfoGetter = resource -> ofNullable(resource.getContent());
         Function<NodeResource, Serializable> mimeTypeGetter = resource -> contentInfoGetter.apply(resource).map(ContentInfo::getMimeType).orElse(null);
         Function<NodeResource, Serializable> sizeGetter = resource -> contentInfoGetter.apply(resource).map(ContentInfo::getSizeInBytes).orElse(null);
+        DataAttributes<NodeResource> data = event.getData();
+        boolean contentPresent = (mimeTypeGetter.apply(data.getResource()) != null) || (sizeGetter.apply(data.getResource()) != null);
 
         if (isEventTypeCreated(event))
         {
-            return false;
+            return contentPresent;
         }
 
-        for (Function<NodeResource, Serializable> fieldGetter : List.of(nameGetter, mimeTypeGetter, sizeGetter))
-        {
-            Serializable oldValue = fieldGetter.apply(event.getData().getResourceBefore());
-            Serializable newValue = fieldGetter.apply(event.getData().getResource());
-            if (oldValue != null && !oldValue.equals(newValue))
-            {
-                return false;
-            }
-        }
-        return true;
+        boolean mimeTypeUpdated = fieldValueUpdated(data, mimeTypeGetter);
+        boolean sizeUpdated = fieldValueUpdated(data, sizeGetter);
+        boolean nameUpdated = fieldValueUpdated(data, NodeResource::getName);
+
+        return mimeTypeUpdated || sizeUpdated || (nameUpdated && contentPresent);
+    }
+
+    private static boolean fieldValueUpdated(DataAttributes<NodeResource> data, Function<NodeResource, Serializable> fieldGetter)
+    {
+        Serializable oldValue = fieldGetter.apply(data.getResourceBefore());
+        Serializable newValue = fieldGetter.apply(data.getResource());
+        return oldValue != null && !oldValue.equals(newValue);
     }
 
     public static boolean shouldNotUpdateField(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
