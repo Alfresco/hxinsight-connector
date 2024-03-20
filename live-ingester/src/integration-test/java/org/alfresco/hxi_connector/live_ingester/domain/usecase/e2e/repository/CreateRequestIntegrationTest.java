@@ -56,7 +56,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
                       "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
-                      "name": "purchase-order-scan.pdf",
+                      "name": "purchase-order-scan.doc",
                       "nodeType": "cm:content",
                       "createdByUser": {
                         "id": "admin",
@@ -69,7 +69,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       },
                       "modifiedAt": "2021-01-21T11:14:15.695Z",
                       "content": {
-                        "mimeType": "application/pdf",
+                        "mimeType": "application/msword",
                         "sizeInBytes": 531152,
                         "encoding": "UTF-8"
                       },
@@ -98,10 +98,19 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       "createdAt": {"value": 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                      "cm:name": {"value": "purchase-order-scan.pdf"},
+                      "cm:name": {"value": "purchase-order-scan.doc"},
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "admin"}
+                      "modifiedBy": {"value": "admin"},
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "size": 531152,
+                            "name": "purchase-order-scan.doc",
+                            "content-type": "application/msword"
+                          }
+                        }
+                      }
                     }
                  }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);

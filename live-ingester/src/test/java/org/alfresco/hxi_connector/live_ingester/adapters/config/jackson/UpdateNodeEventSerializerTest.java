@@ -130,7 +130,8 @@ class UpdateNodeEventSerializerTest
     public void shouldSetContentProperty()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
-                .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf"));
+                .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf",
+                        "application/msword", 123L, "something.doc"));
 
         String expectedJson = """
                 {
@@ -140,7 +141,38 @@ class UpdateNodeEventSerializerTest
                     "cm:content": {
                       "file": {
                         "id": "content-id",
-                        "content-type": "application/pdf"
+                        "content-type": "application/pdf",
+                        "content-metadata": {
+                          "size": 123,
+                          "name": "something.doc",
+                          "content-type": "application/msword"
+                        }
+                      }
+                    }
+                  }
+                }""".formatted(NODE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldOnlySendUpdatedContentMetadata()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, null, null,
+                        "application/msword", null, null));
+
+        String expectedJson = """
+                {
+                  "objectId": "%s",
+                  "eventType": "create",
+                  "properties": {
+                    "cm:content": {
+                      "file": {
+                        "content-metadata": {
+                          "content-type": "application/msword"
+                        }
                       }
                     }
                   }

@@ -25,21 +25,31 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 
 @Getter
+@JsonInclude(NON_NULL)
 public class FileMetadata
 {
     private String id;
     @JsonProperty("content-type")
     private String contentType;
+    @JsonProperty("content-metadata")
+    private ContentMetadata contentMetadata;
 
     public FileMetadata(ContentProperty contentProperty)
     {
         id = contentProperty.id();
         contentType = contentProperty.mimeType();
+        if (contentProperty.sourceMimeType() != null || contentProperty.sourceSizeInBytes() != null || contentProperty.sourceFileName() != null)
+        {
+            contentMetadata = new ContentMetadata(contentProperty.sourceMimeType(), contentProperty.sourceSizeInBytes(), contentProperty.sourceFileName());
+        }
     }
 }

@@ -26,13 +26,19 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -40,6 +46,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent.ContentInfo;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
@@ -62,7 +69,7 @@ public class IngestEventProcessor
         IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(
                 ingestEvent.nodeId(),
                 CREATE,
-                mapToPropertiesDelta(properties));
+                mapToPropertiesDelta(ingestEvent.contentInfo(), properties));
 
         ingestNodeCommandHandler.handle(ingestNodeCommand);
 
@@ -74,11 +81,16 @@ public class IngestEventProcessor
         }
     }
 
-    private Set<PropertyDelta<?>> mapToPropertiesDelta(Map<String, Serializable> properties)
+    private Set<PropertyDelta<?>> mapToPropertiesDelta(ContentInfo contentInfo, Map<String, Serializable> properties)
     {
-        return properties.entrySet()
+        Stream<PropertyDelta<?>> metadataDelta = properties.entrySet()
                 .stream()
-                .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()))
-                .collect(Collectors.toSet());
+                .map(property -> updated(property.getKey(), property.getValue()));
+        if (contentInfo != null && (contentInfo.mimetype() != null || !Objects.equals(contentInfo.contentSize(), 0L)))
+        {
+            PropertyDelta<?> contentDelta = contentMetadataUpdated(CONTENT_PROPERTY, contentInfo.mimetype(), contentInfo.contentSize(), (String) properties.get(NAME_PROPERTY));
+            metadataDelta = Stream.concat(metadataDelta, Stream.of(contentDelta));
+        }
+        return metadataDelta.collect(Collectors.toSet());
     }
 }

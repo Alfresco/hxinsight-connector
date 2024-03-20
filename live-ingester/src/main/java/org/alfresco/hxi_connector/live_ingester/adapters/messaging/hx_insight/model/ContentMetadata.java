@@ -23,14 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-public record ContentProperty(String propertyName, String id, String mimeType, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName)
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+@Getter
+@JsonInclude(NON_NULL)
+@RequiredArgsConstructor
+public class ContentMetadata
 {
-    public ContentProperty
-    {
-        ensureNotBlank(propertyName, "File property name cannot be blank");
-    }
+    @JsonProperty("content-type")
+    private final String sourceMimeType;
+    private final Long size;
+    private final String name;
 }

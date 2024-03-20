@@ -37,8 +37,10 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
@@ -83,8 +85,22 @@ public class PropertyMappingHelper
         {
             return Stream.of(deleted(CONTENT_PROPERTY));
         }
-        // New or updated content can only be sent once the transformation is complete.
-        return Stream.empty();
+
+        if (!shouldUpdateContentField(event))
+        {
+            return Stream.empty();
+        }
+
+        // Note that we cannot include the reference to the rendition until it is generated.
+        Optional<ContentInfo> contentInfo = ofNullable(event.getData().getResource().getContent());
+        String sourceFileName = event.getData().getResource().getName();
+        String sourceMimeType = contentInfo.map(ContentInfo::getMimeType).orElse(null);
+        Long sourceSizeInBytes = contentInfo.map(ContentInfo::getSizeInBytes).orElse(null);
+        if (sourceMimeType == null && sourceSizeInBytes == null && sourceFileName == null)
+        {
+            return Stream.empty();
+        }
+        return Stream.of(contentMetadataUpdated(CONTENT_PROPERTY, sourceMimeType, sourceSizeInBytes, sourceFileName));
     }
 
     public static Stream<PropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
@@ -146,6 +162,33 @@ public class PropertyMappingHelper
     private static Long toMilliseconds(ZonedDateTime time)
     {
         return time == null ? null : time.toInstant().toEpochMilli();
+    }
+
+    public static boolean shouldUpdateContentField(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        Function<NodeResource, Optional<ContentInfo>> contentInfoGetter = resource -> ofNullable(resource.getContent());
+        Function<NodeResource, Serializable> mimeTypeGetter = resource -> contentInfoGetter.apply(resource).map(ContentInfo::getMimeType).orElse(null);
+        Function<NodeResource, Serializable> sizeGetter = resource -> contentInfoGetter.apply(resource).map(ContentInfo::getSizeInBytes).orElse(null);
+        DataAttributes<NodeResource> data = event.getData();
+        boolean contentPresent = (mimeTypeGetter.apply(data.getResource()) != null) || (sizeGetter.apply(data.getResource()) != null);
+
+        if (isEventTypeCreated(event))
+        {
+            return contentPresent;
+        }
+
+        boolean mimeTypeUpdated = fieldValueUpdated(data, mimeTypeGetter);
+        boolean sizeUpdated = fieldValueUpdated(data, sizeGetter);
+        boolean nameUpdated = fieldValueUpdated(data, NodeResource::getName);
+
+        return mimeTypeUpdated || sizeUpdated || (nameUpdated && contentPresent);
+    }
+
+    private static boolean fieldValueUpdated(DataAttributes<NodeResource> data, Function<NodeResource, Serializable> fieldGetter)
+    {
+        Serializable oldValue = fieldGetter.apply(data.getResourceBefore());
+        Serializable newValue = fieldGetter.apply(data.getResource());
+        return oldValue != null && !oldValue.equals(newValue);
     }
 
     public static boolean shouldNotUpdateField(RepoEvent<DataAttributes<NodeResource>> event, Function<NodeResource, ?> fieldGetter)
