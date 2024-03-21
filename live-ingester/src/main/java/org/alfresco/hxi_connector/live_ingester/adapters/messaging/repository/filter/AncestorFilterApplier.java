@@ -23,37 +23,33 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.SetUtils;
+import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.QName;
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
 import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class AspectFilterApplier implements AlfrescoNodeFilterApplier
+public class AncestorFilterApplier implements RepoEventFilterApplier
 {
-    private final NamespacePrefixMapper predefinedNamespacePrefixMapper;
-
     @Override
-    public boolean applyFilter(AlfrescoNode alfrescoNode, NodeFilterConfig filterConfig)
+    public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
     {
-        final Set<QName> nodeAspects = SetUtils.emptyIfNull(alfrescoNode.getAspects());
-        final Set<String> aspectNames = SetUtils.emptyIfNull(nodeAspects.stream().map(predefinedNamespacePrefixMapper::toPrefixedName).collect(Collectors.toSet()));
-        final List<String> allowed = filterConfig.aspect().allow();
-        final List<String> denied = filterConfig.aspect().deny();
-        log.atDebug().log("Applying aspect filters on Alfresco node of id: {}", alfrescoNode.getId());
-        return CollectionFilter.filter(aspectNames, allowed, denied);
+        final List<String> primaryHierarchy = ListUtils.emptyIfNull(repoEvent.getData().getResource().getPrimaryHierarchy());
+        final List<String> allowed = filter.path().allow();
+        final List<String> denied = filter.path().deny();
+        log.atDebug().log("Applying ancestor filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
+        return CollectionFilter.filter(primaryHierarchy, allowed, denied);
     }
 }

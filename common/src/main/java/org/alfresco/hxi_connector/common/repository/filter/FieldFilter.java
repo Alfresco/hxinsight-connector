@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.common.repository.filter;
 
 import java.util.List;
-import java.util.Set;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.AccessLevel;
@@ -35,25 +34,24 @@ import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
-public final class AspectFilter
+public final class FieldFilter
 {
-
-    public static boolean filter(Set<String> aspectNames, List<String> allowed, List<String> denied)
+    public static boolean filter(String nodeField, List<String> allowed, List<String> denied)
     {
-        final boolean allow = isAllowed(aspectNames, allowed);
-        final boolean deny = isDenied(aspectNames, denied);
+        final boolean allow = isAllowed(nodeField, allowed);
+        final boolean deny = isDenied(nodeField, denied);
         boolean result = allow && !deny;
-        log.atDebug().log("Node aspects: {}. Allowed aspects: {}. Denied aspects: {}. Is allowed: {}", aspectNames, allowed, denied, result);
+        log.atDebug().log("Node field: {}. Allowed values: {}. Denied values: {}. Is allowed: {}", nodeField, allowed, denied, result);
         return result;
     }
 
-    private static boolean isAllowed(@NotNull Set<String> aspectNames, @NotNull List<String> allowed)
+    private static boolean isAllowed(@NotNull String nodeField, @NotNull List<String> allowed)
     {
-        return allowed.isEmpty() || allowed.stream().anyMatch(aspectNames::contains);
+        return allowed.isEmpty() || allowed.contains(nodeField);
     }
 
-    private static boolean isDenied(@NotNull Set<String> aspectNames, @NotNull List<String> denied)
+    private static boolean isDenied(@NotNull String nodeField, @NotNull List<String> denied)
     {
-        return denied.stream().anyMatch(aspectNames::contains);
+        return denied.contains(nodeField);
     }
 }
