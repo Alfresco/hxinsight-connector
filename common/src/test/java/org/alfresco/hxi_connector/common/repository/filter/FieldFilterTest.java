@@ -56,14 +56,7 @@ class FieldFilterTest
         // when
         boolean result = FieldFilter.filter(nodeType, allowed, denied);
         // then
-        if (expected)
-        {
-            assertTrue(result);
-        }
-        else
-        {
-            assertFalse(result);
-        }
+        assertEquals(expected, result, "Unexpected result from filter");
     }
 
     private static Stream<Arguments> provideTypeParameters()

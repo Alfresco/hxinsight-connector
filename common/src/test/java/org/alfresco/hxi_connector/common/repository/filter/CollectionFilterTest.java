@@ -62,14 +62,7 @@ class CollectionFilterTest
     void testAspectFiltering(boolean expected, Set<String> aspects, List<String> allowed, List<String> denied)
     {
         boolean result = CollectionFilter.filter(aspects, allowed, denied);
-        if (expected)
-        {
-            assertTrue(result);
-        }
-        else
-        {
-            assertFalse(result);
-        }
+        assertEquals(expected, result, "Unexpected result from filter");
     }
 
     @ParameterizedTest
@@ -77,14 +70,7 @@ class CollectionFilterTest
     void testAncestorFiltering(boolean expected, List<String> ancestors, List<String> allowed, List<String> denied)
     {
         boolean result = CollectionFilter.filter(ancestors, allowed, denied);
-        if (expected)
-        {
-            assertTrue(result);
-        }
-        else
-        {
-            assertFalse(result);
-        }
+        assertEquals(expected, result, "Unexpected result from filter");
     }
 
     private static Stream<Arguments> provideAspectParameters()

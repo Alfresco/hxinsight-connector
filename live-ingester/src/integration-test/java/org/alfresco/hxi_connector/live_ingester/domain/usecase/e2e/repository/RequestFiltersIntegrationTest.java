@@ -38,7 +38,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
         "alfresco.filter.type.deny[0]=cm:folder",
         "alfresco.filter.type.allow[0]=cm:content",
         "alfresco.filter.path.allow[0]=5f355d16-f824-4173-bf4b-b1ec37ef5549", "alfresco.filter.path.allow[1]=93f7edf5-e4d8-4749-9b4c-e45097e2e19d",
-        "alfresco.filter.path.deny[0]=93f7edf5-e4d8-4749-9b4c-e45097e2e19e",
+        "alfresco.filter.path.deny[0]=11111111-1111-1111-1111-111111111111",
         "logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class RequestFiltersIntegrationTest extends E2ETestBase
@@ -278,7 +278,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resource": {
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e03",
-                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19e" ],
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "11111111-1111-1111-1111-111111111111" ],
                       "name": "purchase-order-scan.pdf",
                       "nodeType": "cm:content",
                       "createdByUser": {
@@ -575,7 +575,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "resource": {
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e06",
-                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19e" ],
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "11111111-1111-1111-1111-111111111111" ],
                       "name": "purchase-order-scan.pdf",
                       "nodeType": "cm:content",
                       "createdByUser": {
