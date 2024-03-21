@@ -74,9 +74,9 @@ class CollectionFilterTest
 
     @ParameterizedTest
     @MethodSource("provideAncestorParameters")
-    void testAncestorFiltering(boolean expected, List<String> aspects, List<String> allowed, List<String> denied)
+    void testAncestorFiltering(boolean expected, List<String> ancestors, List<String> allowed, List<String> denied)
     {
-        boolean result = CollectionFilter.filter(aspects, allowed, denied);
+        boolean result = CollectionFilter.filter(ancestors, allowed, denied);
         if (expected)
         {
             assertTrue(result);
