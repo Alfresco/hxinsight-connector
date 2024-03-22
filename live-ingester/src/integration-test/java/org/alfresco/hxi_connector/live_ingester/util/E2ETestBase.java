@@ -35,6 +35,7 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.apache.http.HttpHeaders.HOST;
 import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
+import static software.amazon.awssdk.http.HttpStatusCode.OK;
 
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_QUEUE;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_RESPONSE_QUEUE;
@@ -132,7 +133,7 @@ public class E2ETestBase
         WireMock.configureFor(hxAuthMock);
         WireMock.givenThat(post(AuthUtils.TOKEN_PATH)
                 .willReturn(aResponse()
-                        .withStatus(200)
+                        .withStatus(OK)
                         .withBody(AuthUtils.createAuthResponseBody())));
     }
 

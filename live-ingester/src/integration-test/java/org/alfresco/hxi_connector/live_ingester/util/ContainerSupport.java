@@ -79,8 +79,9 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 @SuppressWarnings("PMD.NonThreadSafeSingleton")
 public class ContainerSupport
 {
+    private static final int HTTP_OK_STATUS = 200;
+    private static final int HTTP_ACCEPTED_STATUS = 202;
     public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingestion-events";
-    private static final int HX_INSIGHT_SUCCESS_CODE = 200;
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
     public static final String BULK_INGESTER_QUEUE = "bulk.ingester.queue";
     public static final String ATS_QUEUE = "ats.queue";
@@ -88,7 +89,6 @@ public class ContainerSupport
     private static ContainerSupport instance;
     public static final String ATS_RESPONSE_QUEUE = "ats.response.queue";
     public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
-    private static final int OK_SUCCESS_CODE = 200;
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/presigned-urls";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"%s\": \"%s\"}]";
     private static final String OBJECT_KEY = "dummy-file.pdf";
@@ -143,7 +143,7 @@ public class ContainerSupport
     {
         givenThat(post(HX_INSIGHT_INGEST_ENDPOINT)
                 .willReturn(aResponse()
-                        .withStatus(OK_SUCCESS_CODE)));
+                        .withStatus(HTTP_ACCEPTED_STATUS)));
     }
 
     @SneakyThrows
@@ -231,7 +231,7 @@ public class ContainerSupport
         byte[] fileBytes = Files.readAllBytes(Paths.get("src/integration-test/resources/" + expectedFile));
         givenThat(get(SFS_PATH + targetReference)
                 .willReturn(aResponse()
-                        .withStatus(OK_SUCCESS_CODE)
+                        .withStatus(HTTP_OK_STATUS)
                         .withBody(fileBytes)
                         .withHeader("Content-Type", "application/pdf")));
 
@@ -253,7 +253,7 @@ public class ContainerSupport
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted("url", preSignedUrl, "id", contentId);
         givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
                 .willReturn(aResponse()
-                        .withStatus(HX_INSIGHT_SUCCESS_CODE)
+                        .withStatus(HTTP_OK_STATUS)
                         .withBody(hxInsightResponse)));
     }
 
