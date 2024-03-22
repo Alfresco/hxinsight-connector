@@ -87,6 +87,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
                 .contentInfo(new IngestEvent.ContentInfo(119625, "UTF-8", "application/pdf"))
                 .properties(parseProperties("cm:name=carp.pdf", "type=cm:content", "cm:autoVersion=true", "cm:title=", "cm:versionType=MAJOR", "cm:versionLabel=1.0", "cm:autoVersionOnUpdateProps=false", "aspectsNames=[cm:generalclassifiable, cm:versionable, cm:author, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]", "cm:categories=fa6b38cd-442a-4f77-9d3e-dc212a6b809e", "cm:lastThumbnailModification=doclib:1708330172467", "cm:description=", "createdAt=1708330172", "cm:initialVersion=true", "createdBy=admin", "modifiedBy=admin"))
                 .build();
+        // below node is located in Data dictionary which is in denied ancestors filter (in BulkIngestionProcessorIntegrationTest this node gets processed as it uses empty filters)
         IngestEvent emailTemplate = IngestEvent.builder()
                 .nodeId("3d022f89-1ee0-49af-ac54-55c16702b188")
                 .contentInfo(new IngestEvent.ContentInfo(6156, "UTF-8", "text/plain"))
