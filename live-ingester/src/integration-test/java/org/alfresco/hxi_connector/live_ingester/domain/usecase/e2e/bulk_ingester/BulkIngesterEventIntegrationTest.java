@@ -60,10 +60,11 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                   "objectId" : "5018ff83-ec45-4a11-95c4-681761752aa7",
-                   "eventType" : "create",
-                   "properties" : {
+                [
+                  {
+                    "objectId" : "5018ff83-ec45-4a11-95c4-681761752aa7",
+                    "eventType" : "create",
+                    "properties" : {
                       "type": {"value": "cm:category"},
                       "createdAt": {"value": 1707153552},
                       "createdBy": {"value": "System"},
@@ -71,7 +72,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "aspectsNames": {"value": ["cm:auditable"]},
                       "cm:name": {"value": "Mexican Spanish"}
                     }
-                 }""";
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -108,10 +110,11 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                   "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
-                   "eventType" : "create",
-                   "properties" : {
+                [
+                  {
+                    "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
+                    "eventType" : "create",
+                    "properties" : {
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "hr_user"},
@@ -130,7 +133,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                         }
                       }
                     }
-                 }""";
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
 
         String expectedATSRequest = """

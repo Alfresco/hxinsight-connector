@@ -104,16 +104,18 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType": "update",
-                  "properties": {
-                    "cm:title": {"value": "Purchase Order"},
-                    "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
-                    "modifiedBy": {"value": "abeecher"}
-                  },
-                  "removedProperties": ["cm:versionType", "cm:description"]
-                }""";
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:title": {"value": "Purchase Order"},
+                      "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
+                      "modifiedBy": {"value": "abeecher"}
+                    },
+                    "removedProperties": ["cm:versionType", "cm:description"]
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -193,13 +195,15 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType": "update",
-                  "properties": {
-                    "cm:title": {"value": "Purchase Order"}
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:title": {"value": "Purchase Order"}
+                    }
                   }
-                }""";
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -228,13 +232,15 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType": "update",
-                  "properties": {
-                    "cm:title": {"value": "Summary for year 2024"}
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:title": {"value": "Summary for year 2024"}
+                    }
                   }
-                }""";
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -293,11 +299,13 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType": "update",
-                  "removedProperties": ["cm:title"]
-                }""";
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "eventType": "update",
+                    "removedProperties": ["cm:title"]
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -344,14 +352,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType": "update",
-                  "properties": {
-                    "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
-                    "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]}
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
+                      "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]}
+                    }
                   }
-                }""";
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -441,11 +451,13 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                  "eventType": "update",
-                  "removedProperties": ["cm:content"]
-                }""";
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "eventType": "update",
+                    "removedProperties": ["cm:content"]
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -499,13 +511,15 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
-                  "eventType": "update",
-                  "properties": {
-                    "aspectsNames": {"value": ["cm:preferences", "cm:ownable"]}
+                [
+                  {
+                    "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                    "eventType": "update",
+                    "properties": {
+                      "aspectsNames": {"value": ["cm:preferences", "cm:ownable"]}
+                    }
                   }
-                }""";
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -538,13 +552,15 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
-                  "eventType": "update",
-                  "properties": {
-                    "cm:name": {"value": "New Folder"}
+                [
+                  {
+                    "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:name": {"value": "New Folder"}
+                    }
                   }
-                }""";
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 }
