@@ -79,7 +79,7 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 @SuppressWarnings("PMD.NonThreadSafeSingleton")
 public class ContainerSupport
 {
-    public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingest";
+    public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingestion-events";
     private static final int HX_INSIGHT_SUCCESS_CODE = 200;
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
     public static final String BULK_INGESTER_QUEUE = "bulk.ingester.queue";
@@ -89,7 +89,7 @@ public class ContainerSupport
     public static final String ATS_RESPONSE_QUEUE = "ats.response.queue";
     public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
     private static final int OK_SUCCESS_CODE = 200;
-    private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/pre-signed-url";
+    private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/presigned-urls";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"%s\": \"%s\"}]";
     private static final String OBJECT_KEY = "dummy-file.pdf";
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";
