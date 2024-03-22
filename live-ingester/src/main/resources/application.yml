@@ -55,6 +55,6 @@ hyland-experience:
     environment-key: hxai-env-key
   storage:
     location:
-      endpoint: ${hyland-experience.insight.base-url}/pre-signed-url?httpMethod=POST&throwExceptionOnFailure=false
+      endpoint: ${hyland-experience.insight.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
   ingester:
-    endpoint: ${hyland-experience.insight.base-url}/ingest?httpMethod=POST&throwExceptionOnFailure=false
+    endpoint: ${hyland-experience.insight.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false

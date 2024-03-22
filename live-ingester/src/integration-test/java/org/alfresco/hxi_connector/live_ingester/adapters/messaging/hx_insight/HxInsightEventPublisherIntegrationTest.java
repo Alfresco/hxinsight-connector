@@ -83,7 +83,7 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
 @WithMockOAuth2User
 class HxInsightEventPublisherIntegrationTest
 {
-    private static final String INGEST_PATH = "/ingest";
+    private static final String INGEST_PATH = "/ingestion-events";
     private static final String NODE_ID = "node-id";
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;

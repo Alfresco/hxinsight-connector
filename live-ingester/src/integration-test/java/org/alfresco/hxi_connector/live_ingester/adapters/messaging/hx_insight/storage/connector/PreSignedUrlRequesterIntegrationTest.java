@@ -89,7 +89,7 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
 class PreSignedUrlRequesterIntegrationTest
 {
     private static final String NODE_ID = "some-node-ref";
-    private static final String PRE_SIGNED_URL_PATH = "/pre-signed-url";
+    private static final String PRE_SIGNED_URL_PATH = "/presigned-urls";
     private static final String CONTENT_ID = "CONTENT ID";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";
     private static final String FILE_CONTENT_TYPE = "plain/text";
