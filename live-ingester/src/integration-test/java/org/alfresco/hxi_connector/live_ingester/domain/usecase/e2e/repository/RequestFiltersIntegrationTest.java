@@ -101,10 +101,11 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                   "objectId": "d71dd823-82c7-477c-8490-04cb0e826e01",
-                   "eventType": "create",
-                   "properties": {
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e01",
+                    "eventType": "create",
+                    "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1709378055695},
                       "cm:versionType": {"value": "MAJOR"},
@@ -123,7 +124,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         }
                       }
                     }
-                 }""";
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
 
         String expectedATSRequest = """
@@ -252,10 +254,11 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                   "objectId": "d71dd823-82c7-477c-8490-04cb0e826e03",
-                   "eventType": "create",
-                   "properties": {
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e03",
+                    "eventType": "create",
+                    "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1709378055695},
                       "cm:versionType": {"value": "MAJOR"},
@@ -274,7 +277,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         }
                       }
                     }
-                 }""";
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -407,16 +411,18 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e04",
-                  "eventType": "update",
-                  "properties": {
-                    "cm:title": {"value": "Purchase Order"},
-                    "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
-                    "modifiedBy": {"value": "abeecher"}
-                  },
-                  "removedProperties": ["cm:versionType", "cm:description"]
-                }""";
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e04",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:title": {"value": "Purchase Order"},
+                      "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
+                      "modifiedBy": {"value": "abeecher"}
+                    },
+                    "removedProperties": ["cm:versionType", "cm:description"]
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -562,16 +568,18 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                  "objectId": "d71dd823-82c7-477c-8490-04cb0e826e06",
-                  "eventType": "update",
-                  "properties": {
-                    "cm:title": {"value": "Purchase Order"},
-                    "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
-                    "modifiedBy": {"value": "abeecher"}
-                  },
-                  "removedProperties": ["cm:versionType", "cm:description"]
-                }""";
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e06",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:title": {"value": "Purchase Order"},
+                      "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
+                      "modifiedBy": {"value": "abeecher"}
+                    },
+                    "removedProperties": ["cm:versionType", "cm:description"]
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
