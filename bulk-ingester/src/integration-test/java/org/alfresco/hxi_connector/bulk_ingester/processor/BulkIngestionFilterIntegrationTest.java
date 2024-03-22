@@ -44,7 +44,9 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
         "alfresco.filter.aspect.allow[0]=cm:titled",
         "alfresco.filter.aspect.deny[0]=cm:author",
         "alfresco.filter.type.allow[0]=cm:category", "alfresco.filter.type.allow[1]=cm:content",
-        "alfresco.filter.type.deny[0]=cm:folder"},
+        "alfresco.filter.type.deny[0]=cm:folder",
+        "alfresco.filter.path.allow[0]=6d7c466b-efd0-4b88-b77f-a941f3a2f025", // company home
+        "alfresco.filter.path.deny[0]=811e21ac-7d5a-469b-ab6e-ec3c8cd8a864"}, // data dictionary
         classes = BulkIngesterApplication.class)
 @Import(MockEventPublisherConfiguration.class)
 @SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.SimplifyBooleanReturns", "PMD.LooseCoupling"})
@@ -85,6 +87,11 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
                 .contentInfo(new IngestEvent.ContentInfo(119625, "UTF-8", "application/pdf"))
                 .properties(parseProperties("cm:name=carp.pdf", "type=cm:content", "cm:autoVersion=true", "cm:title=", "cm:versionType=MAJOR", "cm:versionLabel=1.0", "cm:autoVersionOnUpdateProps=false", "aspectsNames=[cm:generalclassifiable, cm:versionable, cm:author, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]", "cm:categories=fa6b38cd-442a-4f77-9d3e-dc212a6b809e", "cm:lastThumbnailModification=doclib:1708330172467", "cm:description=", "createdAt=1708330172", "cm:initialVersion=true", "createdBy=admin", "modifiedBy=admin"))
                 .build();
+        IngestEvent emailTemplate = IngestEvent.builder()
+                .nodeId("3d022f89-1ee0-49af-ac54-55c16702b188")
+                .contentInfo(new IngestEvent.ContentInfo(6156, "UTF-8", "text/plain"))
+                .properties(parseProperties("cm:title=invite-email_it.html.ftl", "createdAt=1708329073", "createdBy=System", "cm:name=invite-email_it.html.ftl", "app:editInline=true", "aspectsNames=[app:inlineeditable, cm:titled, cm:auditable]", "modifiedBy=System", "type=cm:content", "cm:description=Email template used to generate the invite email for Alfresco Share - Italian version"))
+                .build();
 
         // when
         bulkIngestionProcessor.process();
@@ -94,6 +101,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         ingestEventPublisher.assertNodeNotPublished(folder);
         ingestEventPublisher.assertPublishedNode(textFile);
         ingestEventPublisher.assertNodeNotPublished(pdfFile);
+        ingestEventPublisher.assertNodeNotPublished(emailTemplate);
     }
 
 }

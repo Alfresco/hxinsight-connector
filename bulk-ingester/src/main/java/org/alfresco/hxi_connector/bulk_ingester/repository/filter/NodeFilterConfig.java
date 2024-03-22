@@ -34,11 +34,14 @@ import org.springframework.validation.annotation.Validated;
 
 @Validated
 @ConfigurationProperties("alfresco.filter")
-public record NodeFilterConfig(@NotNull Aspect aspect, @NotNull Type type)
+public record NodeFilterConfig(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path path)
 {
     public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
     {}
 
     public record Type(@NotNull List<String> allow, @NotNull List<String> deny)
+    {}
+
+    public record Path(@NotNull List<String> allow, @NotNull List<String> deny)
     {}
 }
