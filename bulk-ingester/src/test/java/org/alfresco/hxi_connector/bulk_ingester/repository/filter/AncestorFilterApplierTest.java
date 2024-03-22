@@ -113,6 +113,7 @@ class AncestorFilterApplierTest
         boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
 
         then(mockMetadataRepository).should(times(1)).getChildAssocMetaData(any());
+        then(mockMetadataRepository).shouldHaveNoMoreInteractions();
         assertTrue(result);
     }
 
@@ -137,6 +138,7 @@ class AncestorFilterApplierTest
         boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
 
         then(mockMetadataRepository).should(times(2)).getChildAssocMetaData(any());
+        then(mockMetadataRepository).shouldHaveNoMoreInteractions();
         assertTrue(result);
     }
 
@@ -161,6 +163,7 @@ class AncestorFilterApplierTest
         boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
 
         then(mockMetadataRepository).should(times(2)).getChildAssocMetaData(any());
+        then(mockMetadataRepository).shouldHaveNoMoreInteractions();
         Assertions.assertFalse(result);
     }
 
@@ -184,7 +187,8 @@ class AncestorFilterApplierTest
         // when
         boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
 
-        // then
+        then(mockMetadataRepository).should(times(2)).getChildAssocMetaData(any());
+        then(mockMetadataRepository).shouldHaveNoMoreInteractions();
         Assertions.assertFalse(result);
     }
 
