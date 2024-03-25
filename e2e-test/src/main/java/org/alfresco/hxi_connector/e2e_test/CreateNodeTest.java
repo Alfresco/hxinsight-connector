@@ -25,51 +25,91 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import io.restassured.response.Response;
+import lombok.SneakyThrows;
 import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 import static io.restassured.RestAssured.given;
+
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class CreateNodeTest  {
 
+    public static final String BUCKET_NAME = "test-hxinsight-bucket";
     static final Network network = Network.newNetwork();
+
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
     @Container
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
     static final GenericContainer<?> repository = createRepositoryContainer();
-
     @Container
     static final GenericContainer<?> transform_router = DockerContainers.createTransformRouterContainerWithin(network);
+//            .dependsOn(activemq);
     @Container
     private static final GenericContainer<?> transform_core_aio = DockerContainers.createTransformCoreAioContainerWithin(network);
-//    @Container
-//    static final GenericContainer<?> transform_router = createTransformRouterContainer();
-//    @Container
-//    static final GenericContainer<?> transform_core_aio = createTransformCoreAioContainer();
+//            .dependsOn(activemq);
     @Container
-    static final GenericContainer<?> sfs = DockerContainers.createSfsContainer(network);
+    static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
+    @Container
+    static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainerWithin(network)
+            .withFileSystemBind("./src/main/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
+    @Container
+    private static final GenericContainer<?> live_ingester = createLiveIngesterContainer();
+    @Container
+    static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainerWithin(network);
+//            .withFileSystemBind("./src/main/resources", "/etc/localstack/init/ready.d/init-aws.sh", BindMode.READ_ONLY);
+//            .withFileSystemBind("./src/main/resources", "${LOCALSTACK_VOLUME_DIR:-./volume}", BindMode.READ_ONLY)
+//            .withFileSystemBind("./src/main/resources", "/var/run/docker.sock", BindMode.READ_ONLY);
+
+
+    @BeforeAll
+    @SneakyThrows
+    public static void beforeAll() {
+        localStackServer.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
+    }
+
 
     @Test
     void testCreateFile() {
 
+        Response response =
         given().auth().basic("admin","admin")
                 .contentType("application/json")
                 .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
                 .when()
                 .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
                 .then()
-                .statusCode(201);
+//                .statusCode(201)
+                .extract().response();
 //                .body("list.entries", notNullValue());
 
+        Assertions.assertEquals(201, response.statusCode());
+//        Assertions.assertEquals("abc", response.jsonPath().getString("entry"));
+//        Assertions.assertEquals("abc", response.jsonPath().get("entry.id"));
+        Assertions.assertNotNull(response.jsonPath().get("entry.id"));
+//        System.out.println(response);
+
+        given().auth().basic("admin","admin")
+                .contentType("application/json")
+//                .body("{\"contentBodyUpdate\": \"this is the file text\"}")
+                .body("{\"contentBodyUpdate\": \"this is the file text\"}")
+                .when()
+                .put("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/"+ response.jsonPath().get("entry.id") +"/content")
+                .then()
+                .statusCode(200);
 
     }
 
@@ -105,19 +145,22 @@ public class CreateNodeTest  {
                         .replace("\n", " "));
     }
 
-//    private static GenericContainer<?> createTransformRouterContainer()
-//    {
-//        return DockerContainers.createTransformRouterContainerWithin(network)
-//                .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
-//                .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
-//                .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file");
-//    }
+    private static GenericContainer<?> createLiveIngesterContainer()
+    {
+        return DockerContainers.createLiveIngesterContainerWithin(network)
+                .dependsOn(activemq)
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://%s:8080"
+                        .formatted(
+                                hxAuthServer.getNetworkAliases().stream().findFirst().get()))
+
+                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://%s:8080/token"
+                        .formatted(
+                                hxAuthServer.getNetworkAliases().stream().findFirst().get()));
+//                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://"+ hxAuthServer.getHost() + ":8080")
 //
-//    private static GenericContainer<?> createTransformCoreAioContainer()
-//    {
-//        return DockerContainers.createTransformCoreAioContainerWithin(network)
-//                .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
-//                .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file");
-//    }
+//                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://"+ hxInsightServer.getHost() + ":8080/token");
+
+    }
+
 
 }

@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.common.test.util;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static java.util.function.Predicate.not;
 
 import java.nio.file.Files;
@@ -36,6 +38,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.AccessLevel;
 import lombok.Cleanup;
 import lombok.NoArgsConstructor;
@@ -68,15 +71,18 @@ public class DockerContainers
     private static final String TRANSFORM_CORE_AIO_TAG = DockerTags.getTransformCoreAioTag();
     private static final String SFS_IMAGE = "quay.io/alfresco/alfresco-shared-file-store";
     private static final String SFS_TAG = DockerTags.getSfsTag();
+    private static final String LIVE_INGESTER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-live-ingester";
+    private static final String LIVE_INGESTER_TAG = DockerTags.getHxiConnectorTag();
     private static final String DB_USER = "alfresco";
     private static final String DB_PASS = "alfresco";
     private static final String DB_NAME = "alfresco";
     private static final String REPOSITORY_ALIAS = "repository";
     private static final String POSTGRES_ALIAS = "postgres";
     private static final String ACTIVE_MQ_ALIAS = "activemq";
-    private static final String TRANSFORM_ROUTER_ALIAS = "transform_router";
-    private static final String TRANSFORM_CORE_AIO_ALIAS = "transform_core_aio";
-    private static final String SFS_ALIAS = "sfs";
+    private static final String TRANSFORM_ROUTER_ALIAS = "transform-router";
+    private static final String TRANSFORM_CORE_AIO_ALIAS = "transform-core-aio";
+    private static final String SFS_ALIAS = "shared-file-store";
+    private static final String LIVE_INGESTER_ALIAS = "live-ingester";
 
     public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network)
     {
@@ -139,7 +145,7 @@ public class DockerContainers
     {
         GenericContainer<?> activeMq = new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
-                .withExposedPorts(61616, 8161, 5672, 61613)
+                .withExposedPorts(8161, 5672, 61616, 61613)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
 
@@ -179,7 +185,7 @@ public class DockerContainers
         return transformCoreAio;
     }
 
-    public static GenericContainer createSfsContainer(Network network)
+    public static GenericContainer createSfsContainerWithin(Network network)
     {
         GenericContainer<?> sfs = new GenericContainer<>(DockerImageName.parse(SFS_IMAGE).withTag(SFS_TAG))
                 .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
@@ -194,10 +200,40 @@ public class DockerContainers
         return sfs;
     }
 
+    public static GenericContainer createLiveIngesterContainerWithin(Network network)
+    {
+        GenericContainer<?> liveIngester = new GenericContainer<>(DockerImageName.parse(LIVE_INGESTER_IMAGE).withTag(LIVE_INGESTER_TAG))
+                .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n")
+                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
+                .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
+//                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://hxinsight-mock:8080")
+                .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST", "http://shared-file-store")
+                .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT", "8099")
+//                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://hxinsight-mock:8080/token")
+                .withExposedPorts(5007)
+                .waitingFor(Wait.forListeningPort())
+                .withStartupTimeout(Duration.ofMinutes(2));
+
+        Optional.ofNullable(network).ifPresent(n -> liveIngester.withNetwork(n).withNetworkAliases(LIVE_INGESTER_ALIAS));
+
+        return liveIngester;
+    }
+
     public static WireMockContainer createWireMockContainer()
     {
         return new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
                 .withEnv("WIREMOCK_OPTIONS", "--verbose");
+    }
+
+    public static WireMockContainer createWireMockContainerWithin(Network network)
+    {
+        WireMockContainer wireMock = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+                .withEnv("WIREMOCK_OPTIONS", "--verbose");
+
+        Optional.ofNullable(network).ifPresent(wireMock::withNetwork);
+//        Optional.ofNullable(network).ifPresent(n -> wireMock.withNetwork(n).withNetworkAliases(HXINSIGHT_MOCK_ALIAS));
+
+        return wireMock;
     }
 
     public static LocalStackContainer createLocalStackContainer()
@@ -205,12 +241,21 @@ public class DockerContainers
         return new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
     }
 
+    public static LocalStackContainer createLocalStackContainerWithin(Network network)
+    {
+        LocalStackContainer localStack = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG))
+                .withExposedPorts(4566);
+
+        Optional.ofNullable(network).ifPresent(localStack::withNetwork);
+
+        return localStack;
+    }
+
     @SneakyThrows
     private static Path findTargetJar()
     {
         String path = "target";
-//        String nameSnippet = "alfresco-hxinsight-connector-prediction-applier-extension";
-        String nameSnippet = "alfresco-hxinsight-connector-e2e-test";
+        String nameSnippet = "alfresco-hxinsight-connector-prediction-applier-extension";
         String extension = "jar";
         @Cleanup
         Stream<Path> files = Files.list(Paths.get(path));
