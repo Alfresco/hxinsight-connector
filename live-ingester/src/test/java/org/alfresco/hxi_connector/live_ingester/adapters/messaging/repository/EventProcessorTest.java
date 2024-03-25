@@ -35,12 +35,14 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import org.apache.camel.Exchange;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
@@ -72,6 +74,12 @@ class EventProcessorTest
     @Mock
     DeleteNodeCommandHandler deleteNodeCommandHandler;
 
+    @Mock
+    private CamelEventMapper mockCamelEventMapper;
+
+    @Mock
+    private Exchange mockExchange;
+
     @InjectMocks
     EventProcessor eventProcessor;
 
@@ -80,10 +88,11 @@ class EventProcessorTest
     {
         // given
         RepoEvent<DataAttributes<NodeResource>> event = prepareMockCreatedEvent();
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(event);
         given(event.getData().getResource().getContent()).willReturn(null);
 
         // when
-        eventProcessor.process(event);
+        eventProcessor.process(mockExchange);
 
         // then
         then(repoEventMapper).should().mapToIngestNodeCommand(event);
@@ -99,9 +108,10 @@ class EventProcessorTest
         RepoEvent<DataAttributes<NodeResource>> event = mock();
         given(event.getType()).willReturn(NODE_UPDATED.getType());
         given(event.getData()).willReturn(mock());
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(event);
 
         // when
-        eventProcessor.process(event);
+        eventProcessor.process(mockExchange);
 
         // then
         then(repoEventMapper).should().mapToIngestNodeCommand(event);
@@ -118,12 +128,13 @@ class EventProcessorTest
         ContentInfo contentInfo = mock();
         given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
         given(event.getData().getResource().getContent()).willReturn(contentInfo);
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(event);
 
         IngestContentCommand ingestContentCommand = mock();
         given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(ingestContentCommand);
 
         // when
-        eventProcessor.process(event);
+        eventProcessor.process(mockExchange);
 
         // then
         then(repoEventMapper).should().mapToIngestNodeCommand(event);
@@ -141,9 +152,10 @@ class EventProcessorTest
         ContentInfo contentInfo = mock();
         given(contentInfo.getSizeInBytes()).willReturn(NO_CONTENT);
         given(event.getData().getResource().getContent()).willReturn(contentInfo);
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(event);
 
         // when
-        eventProcessor.process(event);
+        eventProcessor.process(mockExchange);
 
         // then
         then(repoEventMapper).should().mapToIngestNodeCommand(event);
@@ -162,12 +174,13 @@ class EventProcessorTest
         given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
         given(event.getData().getResource().getContent()).willReturn(contentInfo);
         given(event.getData().getResourceBefore().getContent()).willReturn(mock());
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(event);
 
         IngestContentCommand ingestContentCommand = mock();
         given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(ingestContentCommand);
 
         // when
-        eventProcessor.process(event);
+        eventProcessor.process(mockExchange);
 
         // then
         then(repoEventMapper).should().mapToIngestNodeCommand(event);
@@ -186,9 +199,10 @@ class EventProcessorTest
         given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
         given(event.getData().getResource().getContent()).willReturn(contentInfo);
         given(event.getData().getResourceBefore().getContent()).willReturn(null);
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(event);
 
         // when
-        eventProcessor.process(event);
+        eventProcessor.process(mockExchange);
 
         // then
         then(repoEventMapper).should().mapToIngestNodeCommand(event);
@@ -205,11 +219,12 @@ class EventProcessorTest
         RepoEvent<DataAttributes<NodeResource>> event = mock();
         given(event.getType()).willReturn(NODE_DELETED.getType());
         given(event.getData()).willReturn(mock());
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(event);
         DeleteNodeCommand deleteNodeCommand = mock();
         given(repoEventMapper.mapToDeleteNodeCommand(event)).willReturn(deleteNodeCommand);
 
         // when
-        eventProcessor.process(event);
+        eventProcessor.process(mockExchange);
 
         // then
         then(deleteNodeCommandHandler).should().handle(deleteNodeCommand);

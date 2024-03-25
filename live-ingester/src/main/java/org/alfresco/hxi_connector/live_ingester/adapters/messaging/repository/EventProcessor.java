@@ -36,8 +36,10 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
@@ -59,9 +61,11 @@ public class EventProcessor
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final DeleteNodeCommandHandler deleteNodeCommandHandler;
     private final RepoEventMapper repoEventMapper;
+    private final CamelEventMapper camelEventMapper;
 
-    public void process(RepoEvent<DataAttributes<NodeResource>> event)
+    public void process(Exchange exchange)
     {
+        RepoEvent<DataAttributes<NodeResource>> event = camelEventMapper.repoEventFrom(exchange);
         handleMetadataPropertiesChange(event);
         handleContentChange(event);
         handleNodeDeleteEvent(event);
