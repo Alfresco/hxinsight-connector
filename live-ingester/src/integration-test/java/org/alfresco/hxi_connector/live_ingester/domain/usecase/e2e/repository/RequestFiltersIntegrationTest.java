@@ -1287,4 +1287,75 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
+
+    @Test
+    void testUpdateRequestWhenSingleFilterDeniedNodeBeforeAndAnotherSingleFilterDeniesCurrentNode()
+    {
+        // given
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "ae5dac3c-25d0-438d-b148-2084d1ab0517",
+                  "primaryHierarchy": [ "11111111-1111-1111-1111-111111111111", "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2021-01-26T10:29:42.99524Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "b5b1ebfe-45fc-4f86-b71b-421996482817",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-82c7-477c-8490-04cb0e826e17",
+                      "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:folder",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2024-03-02T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "abeecher",
+                        "displayName": "Alice Beecher"
+                      },
+                      "modifiedAt": "2024-03-06T10:29:42.529Z",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "cm:title": "Purchase Order",
+                        "cm:versionType": null,
+                        "cm:versionLabel": "1.0",
+                        "cm:taggable": null
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
+                      "isFolder": false,
+                      "isFile": true
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "modifiedAt": "2024-03-02T11:14:25.223Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "properties": {
+                        "cm:title": null,
+                        "cm:versionType": "MAJOR",
+                        "cm:versionLabel": "1.0",
+                        "cm:taggable": null,
+                        "cm:description": "Old Description"
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:thumbnailModification", "sc:secured" ]
+                    }
+                  }
+                }""";
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        containerSupport.expectNoHxIngestMessagesReceived();
+    }
 }
