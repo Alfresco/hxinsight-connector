@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static software.amazon.awssdk.http.HttpStatusCode.OK;
 
 import java.io.InputStream;
 
@@ -96,7 +97,7 @@ class SharedFileStoreClientIntegrationTest
         String fileContent = "Dummy's file dummy content";
         givenThat(get(SFS_DOWNLOAD_FILE_PATH)
                 .willReturn(aResponse()
-                        .withStatus(200)
+                        .withStatus(OK)
                         .withBody(fileContent.getBytes())));
 
         // when

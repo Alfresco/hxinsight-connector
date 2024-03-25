@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
 import static org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils.AUTH_HEADER;
 
@@ -107,7 +108,7 @@ class HxInsightEventPublisherIntegrationTest
     {
         // given
         givenThat(post(INGEST_PATH)
-                .willReturn(aResponse().withStatus(200)));
+                .willReturn(aResponse().withStatus(ACCEPTED)));
 
         // when
         Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
