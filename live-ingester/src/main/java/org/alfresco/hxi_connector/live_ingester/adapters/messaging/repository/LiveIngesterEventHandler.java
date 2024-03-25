@@ -56,7 +56,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .transacted()
                 .routeId(ROUTE_ID)
                 .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
-                .filter(exchange -> repoEventFilterHandler.filterNode(camelEventMapper.repoEventFrom(exchange), integrationProperties.alfresco().filter()))
+                .filter(exchange -> repoEventFilterHandler.filterNode(exchange, integrationProperties.alfresco().filter()))
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(exchange -> eventProcessor.process(camelEventMapper.repoEventFrom(exchange)))
                 .end();
