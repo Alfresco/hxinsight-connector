@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,12 +25,16 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector;
 
+import static java.net.URLDecoder.decode;
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 
@@ -41,6 +45,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpMethods;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -57,7 +62,8 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HttpFileUploader.class.getSimpleName();
     static final String ROUTE_ID = "rendition-uploader";
-    private static final String STORAGE_LOCATION_HEADER = "storageLocation";
+    static final String AMZ_SECURITY_TOKEN = "X-Amz-Security-Token=";
+    static final String STORAGE_LOCATION_HEADER = "storageLocation";
     private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
@@ -91,7 +97,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     @Override
     public void upload(FileUploadRequest fileUploadRequest)
     {
-        Map<String, Object> headers = Map.of(STORAGE_LOCATION_HEADER, fileUploadRequest.storageLocation().toString(),
+        Map<String, Object> headers = Map.of(STORAGE_LOCATION_HEADER, wrapRawToken(fileUploadRequest.storageLocation()),
                 Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
         try (InputStream fileData = fileUploadRequest.file().data())
@@ -102,6 +108,23 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         {
             throw new LiveIngesterRuntimeException(e);
         }
+    }
+
+    private String wrapRawToken(URL preSignedUrl)
+    {
+        String query = preSignedUrl.getQuery();
+        if (query != null && query.contains(AMZ_SECURITY_TOKEN))
+        {
+            String token = StringUtils.substringBetween(query, AMZ_SECURITY_TOKEN, "&");
+            if (StringUtils.isEmpty(token))
+            {
+                token = StringUtils.substringAfter(query, AMZ_SECURITY_TOKEN);
+            }
+
+            return preSignedUrl.toString().replace(token, "RAW(%s)".formatted(decode(token, UTF_8)));
+        }
+
+        return preSignedUrl.toString();
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
