@@ -80,7 +80,6 @@ public class ATSTransformResponseHandler extends RouteBuilder
                     .process(this::updateContentLocation)
                 .doCatch(TransformationFailedException.class)
                     .log(DEBUG, log, "Transformation failed: ${exception.message}")
-                    .stop()
                 .end();
         // @formatter:on
     }
