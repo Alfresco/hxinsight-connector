@@ -72,15 +72,23 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
     @Override
     public void requestTransform(TransformRequest transformRequest)
     {
-        ATSTransformRequest atsTransformRequest = atsTransformRequestFrom(transformRequest);
+        ATSTransformRequest atsTransformRequest = atsTransformRequestFrom(transformRequest, 0);
         log.info("Sending request to ATS: {}", atsTransformRequest);
         camelContext.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
     }
 
-    private ATSTransformRequest atsTransformRequestFrom(TransformRequest transformRequest)
+    public void requestTransformRetry(TransformRequest transformRequest, int attempt)
     {
-        String clientDataString = makeClientDataString(transformRequest);
+        ATSTransformRequest atsTransformRequest = atsTransformRequestFrom(transformRequest, attempt);
+        log.info("Retrying transformation. request: {} attempt: {}", atsTransformRequest, attempt);
+        camelContext.createProducerTemplate()
+                .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
+    }
+
+    private ATSTransformRequest atsTransformRequestFrom(TransformRequest transformRequest, int attempt)
+    {
+        String clientDataString = makeClientDataString(transformRequest, attempt);
         return ATSTransformRequest.builder()
                 .requestId(UUID.randomUUID().toString())
                 .nodeRef(WORKSPACE_SPACES_STORE + transformRequest.nodeRef())
@@ -96,9 +104,9 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         return Map.of(TIMEOUT_KEY, String.valueOf(transformProperties.request().timeout()));
     }
 
-    private String makeClientDataString(TransformRequest transformRequest)
+    private String makeClientDataString(TransformRequest transformRequest, int attempt)
     {
-        ClientData clientData = new ClientData(transformRequest.nodeRef(), transformRequest.targetMimeType());
+        ClientData clientData = new ClientData(transformRequest.nodeRef(), transformRequest.targetMimeType(), attempt);
         try
         {
             return objectMapper.writeValueAsString(clientData);

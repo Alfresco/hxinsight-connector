@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,7 +26,22 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 
+import java.io.IOException;
 import java.io.InputStream;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+
 public record File(InputStream data)
-{}
+{
+    public boolean isEmpty()
+    {
+        try
+        {
+            return data.available() == 0;
+        }
+        catch (IOException e)
+        {
+            throw new LiveIngesterRuntimeException("Failed to check if file is empty", e);
+        }
+    }
+}
