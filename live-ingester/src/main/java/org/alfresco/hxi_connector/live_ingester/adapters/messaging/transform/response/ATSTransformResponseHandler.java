@@ -76,12 +76,11 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .doTry()
                     .process(this::ensureTransformationSucceeded)
+                    .process(this::uploadContentRendition)
+                    .process(this::updateContentLocation)
                 .doCatch(TransformationFailedException.class)
                     .log(DEBUG, log, "Transformation failed: ${exception.message}")
                     .stop()
-                .doFinally()
-                .process(this::uploadContentRendition)
-                .process(this::updateContentLocation)
                 .end();
         // @formatter:on
     }
