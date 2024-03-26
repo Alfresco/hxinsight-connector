@@ -31,7 +31,6 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
-import static org.apache.camel.LoggingLevel.ERROR;
 
 import java.util.Set;
 
