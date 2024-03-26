@@ -36,7 +36,6 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.TransformationFailedException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -45,6 +44,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.TransformationFailedException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadContentRenditionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.RemoteContentLocation;
@@ -86,10 +86,12 @@ public class ATSTransformResponseHandler extends RouteBuilder
         // @formatter:on
     }
 
-    private void ensureTransformationSucceeded(Exchange exchange) {
+    private void ensureTransformationSucceeded(Exchange exchange)
+    {
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
 
-        if(transformResponse.status() == 400) {
+        if (transformResponse.status() == 400)
+        {
             throw new TransformationFailedException(transformResponse.clientData(), transformResponse.errorDetails());
         }
     }

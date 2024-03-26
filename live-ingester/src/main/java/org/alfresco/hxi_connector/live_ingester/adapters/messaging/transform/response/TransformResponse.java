@@ -25,20 +25,21 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import org.springframework.validation.annotation.Validated;
+
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataDeserializer;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
-import org.springframework.validation.annotation.Validated;
 
 @Validated
 public record TransformResponse(
         @NotBlank String targetReference,
         @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) ClientData clientData,
         @Positive int status,
-        String errorDetails
-)
+        String errorDetails)
 
 {}
