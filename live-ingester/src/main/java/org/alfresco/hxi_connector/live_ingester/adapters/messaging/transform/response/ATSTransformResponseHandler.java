@@ -31,11 +31,13 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
+import static org.apache.camel.LoggingLevel.ERROR;
 
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.TransformationFailedException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -65,6 +67,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     @Override
     public void configure()
     {
+        // @formatter:off
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().transform().response().endpoint())
                 .routeId(ROUTE_ID)
@@ -72,9 +75,24 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
+                .doTry()
+                    .process(this::ensureTransformationSucceeded)
+                .doCatch(TransformationFailedException.class)
+                    .log(DEBUG, log, "Transformation failed: ${exception.message}")
+                    .stop()
+                .doFinally()
                 .process(this::uploadContentRendition)
                 .process(this::updateContentLocation)
                 .end();
+        // @formatter:on
+    }
+
+    private void ensureTransformationSucceeded(Exchange exchange) {
+        TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
+
+        if(transformResponse.status() == 400) {
+            throw new TransformationFailedException(transformResponse.clientData(), transformResponse.errorDetails());
+        }
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

@@ -23,22 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataDeserializer;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
-import org.springframework.validation.annotation.Validated;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model;
 
-@Validated
-public record TransformResponse(
-        @NotBlank String targetReference,
-        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) ClientData clientData,
-        @Positive int status,
-        String errorDetails
-)
+import static java.lang.String.format;
 
-{}
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+
+public class TransformationFailedException extends LiveIngesterRuntimeException
+{
+    public TransformationFailedException(ClientData clientData, String errorDetails)
+    {
+        super(format("Rendition of node %s to type %s failed. Details: %s", clientData.nodeRef(), clientData.targetMimeType(), errorDetails));
+    }
+}
