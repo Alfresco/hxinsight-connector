@@ -86,6 +86,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
         // @formatter:on
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void ensureTransformationSucceeded(Exchange exchange)
     {
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
