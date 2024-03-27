@@ -64,6 +64,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     static final String ROUTE_ID = "rendition-uploader";
     static final String AMZ_SECURITY_TOKEN = "X-Amz-Security-Token=";
     static final String STORAGE_LOCATION_HEADER = "storageLocation";
+    private static final String GZIP_ENCODING = "gzip";
     private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
@@ -97,16 +98,35 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     @Override
     public void upload(FileUploadRequest fileUploadRequest)
     {
-        Map<String, Object> headers = Map.of(STORAGE_LOCATION_HEADER, wrapRawToken(fileUploadRequest.storageLocation()),
-                Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
+        InputStream fileData = fileUploadRequest.file().data();
+        try
+        {
+            Map<String, Object> headers = Map.of(
+                    STORAGE_LOCATION_HEADER, wrapRawToken(fileUploadRequest.storageLocation()),
+                    Exchange.CONTENT_TYPE, fileUploadRequest.contentType(),
+                    Exchange.CONTENT_ENCODING, GZIP_ENCODING);
 
-        try (InputStream fileData = fileUploadRequest.file().data())
-        {
-            camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileData, headers);
+            log.atDebug().log("Uploading file of size {} to S3", fileData.available());
+
+            camelContext
+                    .createFluentProducerTemplate()
+                    .to(LOCAL_ENDPOINT)
+                    .withHeaders(headers)
+                    .withBody(fileData)
+                    .request();
+
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new LiveIngesterRuntimeException(e);
+            try
+            {
+                fileData.reset();
+                throw e;
+            }
+            catch (IOException ioe)
+            {
+                throw new LiveIngesterRuntimeException(ioe);
+            }
         }
     }
 

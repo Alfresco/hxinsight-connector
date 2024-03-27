@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -54,7 +57,14 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
     {
         PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
         URL preSignedUrl = preSignedUrlResponse.url();
-        fileUploader.upload(new FileUploadRequest(file, contentType, preSignedUrl));
+        try (InputStream fileData = file.data())
+        {
+            fileUploader.upload(new FileUploadRequest(new File(fileData), contentType, preSignedUrl));
+        }
+        catch (IOException e)
+        {
+            throw new LiveIngesterRuntimeException(e);
+        }
         return new IngestContentResponse(preSignedUrl, preSignedUrlResponse.id(), contentType);
     }
 }
