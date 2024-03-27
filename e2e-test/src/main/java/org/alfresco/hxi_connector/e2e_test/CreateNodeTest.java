@@ -27,7 +27,9 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import io.restassured.response.Response;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -39,9 +41,13 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
+
+import java.io.File;
+
 import static io.restassured.RestAssured.given;
 
 
+@Slf4j
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class CreateNodeTest  {
@@ -70,10 +76,6 @@ public class CreateNodeTest  {
     private static final GenericContainer<?> live_ingester = createLiveIngesterContainer();
     @Container
     static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainerWithin(network);
-//            .withFileSystemBind("./src/main/resources", "/etc/localstack/init/ready.d/init-aws.sh", BindMode.READ_ONLY);
-//            .withFileSystemBind("./src/main/resources", "${LOCALSTACK_VOLUME_DIR:-./volume}", BindMode.READ_ONLY)
-//            .withFileSystemBind("./src/main/resources", "/var/run/docker.sock", BindMode.READ_ONLY);
-
 
     @BeforeAll
     @SneakyThrows
@@ -81,35 +83,48 @@ public class CreateNodeTest  {
         localStackServer.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
     }
 
-
     @Test
     void testCreateFile() {
 
         Response response =
-        given().auth().basic("admin","admin")
-                .contentType("application/json")
-                .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
-                .when()
-                .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
-                .then()
+                given().auth().basic("admin","admin")
+                        .contentType("multipart/form-data")
+//                        .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
+                        .multiPart("filedata", new File("./src/main/resources/Alfresco Content Services 7.4.docx"))
+                        .when()
+                        .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
+                        .then()
 //                .statusCode(201)
-                .extract().response();
-//                .body("list.entries", notNullValue());
+                        .extract().response();
 
         Assertions.assertEquals(201, response.statusCode());
-//        Assertions.assertEquals("abc", response.jsonPath().getString("entry"));
-//        Assertions.assertEquals("abc", response.jsonPath().get("entry.id"));
         Assertions.assertNotNull(response.jsonPath().get("entry.id"));
-//        System.out.println(response);
 
-        given().auth().basic("admin","admin")
-                .contentType("application/json")
+//        Response response =
+//        given().auth().basic("admin","admin")
+//                .contentType("application/json")
+//                .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
+//                .when()
+//                .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
+//                .then()
+////                .statusCode(201)
+//                .extract().response();
+////                .body("list.entries", notNullValue());
+//
+//        Assertions.assertEquals(201, response.statusCode());
+////        Assertions.assertEquals("abc", response.jsonPath().getString("entry"));
+////        Assertions.assertEquals("abc", response.jsonPath().get("entry.id"));
+//        Assertions.assertNotNull(response.jsonPath().get("entry.id"));
+////        System.out.println(response);
+//
+//        given().auth().basic("admin","admin")
+//                .contentType("application/json")
+////                .body("{\"contentBodyUpdate\": \"this is the file text\"}")
 //                .body("{\"contentBodyUpdate\": \"this is the file text\"}")
-                .body("{\"contentBodyUpdate\": \"this is the file text\"}")
-                .when()
-                .put("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/"+ response.jsonPath().get("entry.id") +"/content")
-                .then()
-                .statusCode(200);
+//                .when()
+//                .put("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/"+ response.jsonPath().get("entry.id") +"/content")
+//                .then()
+//                .statusCode(200);
 
     }
 
@@ -141,7 +156,6 @@ public class CreateNodeTest  {
                                 postgres.getNetworkAliases().stream().findFirst().get(),
                                 postgres.getDatabaseName(),
                                 activemq.getNetworkAliases().stream().findFirst().get())
-//                                transform_router.getFirstMappedPort())
                         .replace("\n", " "));
     }
 
@@ -156,10 +170,6 @@ public class CreateNodeTest  {
                 .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://%s:8080/token"
                         .formatted(
                                 hxAuthServer.getNetworkAliases().stream().findFirst().get()));
-//                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://"+ hxAuthServer.getHost() + ":8080")
-//
-//                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://"+ hxInsightServer.getHost() + ":8080/token");
-
     }
 
 

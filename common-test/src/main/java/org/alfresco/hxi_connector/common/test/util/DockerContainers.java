@@ -97,6 +97,7 @@ public class DockerContainers
                 .run("chown -R -h alfresco /usr/local/tomcat")
                 .user("alfresco")
                 .build()))
+
             .withEnv("CATALINA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n")
             .withEnv("JAVA_TOOL_OPTIONS", """
             -Dencryption.keystore.type=JCEKS
@@ -161,6 +162,7 @@ public class DockerContainers
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
+                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "TRACE")
                 .withExposedPorts(8095)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
@@ -176,6 +178,7 @@ public class DockerContainers
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1024m")
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
+                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "TRACE")
                 .withExposedPorts(8090)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
