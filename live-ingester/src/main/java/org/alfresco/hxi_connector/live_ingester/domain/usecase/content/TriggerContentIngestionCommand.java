@@ -23,9 +23,15 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 
-import java.net.URL;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-public record RemoteContentLocation(String nodeId, URL url, String id, String mimeType)
-{}
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
+
+public record TriggerContentIngestionCommand(String nodeId)
+{
+    public TriggerContentIngestionCommand
+    {
+        ensureNotBlank(nodeId, "Node id cannot be blank");
+    }
+}

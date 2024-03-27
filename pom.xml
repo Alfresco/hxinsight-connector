@@ -61,16 +61,16 @@
         <skipUnitTests>${skipTests}</skipUnitTests>
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
 
-        <alfresco-platform.version>23.1.0</alfresco-platform.version>
+        <alfresco-platform.version>23.2.1</alfresco-platform.version>
         <alfresco-sdk.version>4.7.0</alfresco-sdk.version>
         <alfresco-db-connector.version>4.0.1</alfresco-db-connector.version>
         <alfresco-event-model.version>0.0.27</alfresco-event-model.version>
-        <spring-boot.version>3.2.3</spring-boot.version>
+        <spring-boot.version>3.2.4</spring-boot.version>
         <spring-camel.version>4.4.1</spring-camel.version>
         <commons-lang.version>3.14.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.15.1</commons-io.version>
-        <aws-sdk-s3.version>2.25.14</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.25.18</aws-sdk-s3.version>
         <wiremock.version>3.4.2</wiremock.version>
 
         <testcontainers.version>1.19.7</testcontainers.version>
