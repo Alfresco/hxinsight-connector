@@ -31,7 +31,7 @@ import java.util.Set;
 
 import lombok.NoArgsConstructor;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage.ResourceNotFoundException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.ResourceNotFoundException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
