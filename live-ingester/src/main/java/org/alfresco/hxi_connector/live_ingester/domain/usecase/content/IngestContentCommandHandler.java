@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
 
@@ -82,7 +83,7 @@ public class IngestContentCommandHandler
         log.atDebug().log("Uploaded node {} content to S3 URL: {}", nodeId, ingestContentResponse.url());
 
         Set<PropertyDelta<?>> properties = Set.of(
-                contentPropertyUpdated(ingestContentResponse.contentId(), ingestContentResponse.mimeType()));
+                contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.contentId(), ingestContentResponse.mimeType()));
 
         IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, UPDATE, properties);
 

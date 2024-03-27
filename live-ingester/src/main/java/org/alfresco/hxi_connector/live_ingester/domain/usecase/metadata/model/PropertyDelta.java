@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
 
 import java.util.Optional;
@@ -54,9 +53,9 @@ public abstract class PropertyDelta<T>
         return new PropertyUpdated<>(key, propertyValue);
     }
 
-    public static ContentPropertyUpdated contentPropertyUpdated(String id, String mimeType)
+    public static ContentPropertyUpdated contentPropertyUpdated(String key, String id, String mimeType)
     {
-        return ContentPropertyUpdated.builder(CONTENT_PROPERTY).id(id).mimeType(mimeType).build();
+        return ContentPropertyUpdated.builder(key).id(id).mimeType(mimeType).build();
     }
 
     public static ContentPropertyUpdated contentMetadataUpdated(String key, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName)
