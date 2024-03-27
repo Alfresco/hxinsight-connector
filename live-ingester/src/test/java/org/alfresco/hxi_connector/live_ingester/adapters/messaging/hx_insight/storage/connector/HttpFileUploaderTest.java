@@ -36,6 +36,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.HttpFileUploader.ROUTE_ID;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.HttpFileUploader.STORAGE_LOCATION_HEADER;
 
+import java.io.InputStream;
 import java.net.URL;
 
 import lombok.SneakyThrows;
@@ -178,15 +179,17 @@ class HttpFileUploaderTest
         return createFileUploadRequestMock(mock(URL.class));
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private FileUploadRequest createFileUploadRequestMock(URL url)
     {
-        FileUploadRequest request = mock(FileUploadRequest.class);
-        File file = mock(File.class);
-        given(request.file()).willReturn(file);
-        given(request.contentType()).willReturn(CONTENT_TYPE);
-        given(request.storageLocation()).willReturn(url);
+        FileUploadRequest requestMock = mock(FileUploadRequest.class);
+        InputStream inputStreamMock = mock(InputStream.class);
+        File file = new File(inputStreamMock);
+        given(requestMock.file()).willReturn(file);
+        given(requestMock.contentType()).willReturn(CONTENT_TYPE);
+        given(requestMock.storageLocation()).willReturn(url);
         given(url.toString()).willReturn(MOCK_ENDPOINT);
-        return request;
+        return requestMock;
     }
 
     private void mockEndpointWillRespondWith(int statusCode)
