@@ -28,12 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
-
-import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
@@ -44,12 +38,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadContentRenditionCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.RemoteContentLocation;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.TransformationFailedException;
 
 @Slf4j
 @Component
@@ -59,12 +50,12 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private static final String ROUTE_ID = "transform-events-consumer";
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
-    private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()
     {
+        // @formatter:off
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().transform().response().endpoint())
                 .routeId(ROUTE_ID)
@@ -72,28 +63,21 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
-                .process(this::uploadContentRendition)
-                .process(this::updateContentLocation)
+                .doTry()
+                    .process(this::ingestContent)
+                .doCatch(TransformationFailedException.class)
+                    .log(DEBUG, log, "Transformation failed: ${exception.message}")
                 .end();
+        // @formatter:on
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void uploadContentRendition(Exchange exchange)
+    private void ingestContent(Exchange exchange)
     {
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
-        UploadContentRenditionCommand command = new UploadContentRenditionCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef());
+        IngestContentCommand command = new IngestContentCommand(transformResponse.status(), transformResponse.targetReference(), transformResponse.clientData().nodeRef());
 
-        RemoteContentLocation remoteContentLocation = ingestContentCommandHandler.handle(command);
-        exchange.getIn().setBody(remoteContentLocation);
+        ingestContentCommandHandler.handle(command);
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void updateContentLocation(Exchange exchange)
-    {
-        RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
-        Set<PropertyDelta<?>> properties = Set.of(contentPropertyUpdated(CONTENT_PROPERTY, remoteContentLocation.id(), remoteContentLocation.mimeType()));
-        IngestNodeCommand command = new IngestNodeCommand(remoteContentLocation.nodeId(), UPDATE, properties);
-
-        ingestNodeCommandHandler.handle(command);
-    }
 }

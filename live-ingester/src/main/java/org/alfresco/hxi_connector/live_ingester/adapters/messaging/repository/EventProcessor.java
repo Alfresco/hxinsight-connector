@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
@@ -81,7 +81,7 @@ public class EventProcessor
     {
         if (containsNewContent(event))
         {
-            IngestContentCommand command = repoEventMapper.mapToIngestContentCommand(event);
+            TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
 
             ingestContentCommandHandler.handle(command);
         }
