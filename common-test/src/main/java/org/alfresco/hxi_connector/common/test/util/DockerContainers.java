@@ -97,7 +97,6 @@ public class DockerContainers
                 .run("chown -R -h alfresco /usr/local/tomcat")
                 .user("alfresco")
                 .build()))
-
             .withEnv("CATALINA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n")
             .withEnv("JAVA_TOOL_OPTIONS", """
             -Dencryption.keystore.type=JCEKS
@@ -110,6 +109,7 @@ public class DockerContainers
             -Dmetadata-keystore.metadata.algorithm=DESede
             """.replace("\n", " "))
             .withExposedPorts(8080, 8000)
+                .waitingFor(Wait.forListeningPort())
             .withStartupTimeout(Duration.ofMinutes(5));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));

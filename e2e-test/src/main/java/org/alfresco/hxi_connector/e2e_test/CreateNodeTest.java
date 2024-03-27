@@ -60,20 +60,32 @@ public class CreateNodeTest  {
     @Container
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    static final GenericContainer<?> repository = createRepositoryContainer();
-    @Container
-    static final GenericContainer<?> transform_router = DockerContainers.createTransformRouterContainerWithin(network);
-//            .dependsOn(activemq);
-    @Container
-    private static final GenericContainer<?> transform_core_aio = DockerContainers.createTransformCoreAioContainerWithin(network);
-//            .dependsOn(activemq);
-    @Container
     static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
+
+    @Container
+    private static final GenericContainer<?> transform_core_aio = DockerContainers.createTransformCoreAioContainerWithin(network)
+            .dependsOn(activemq)
+            .dependsOn(sfs);
+    @Container
+    static final GenericContainer<?> transform_router = DockerContainers.createTransformRouterContainerWithin(network)
+            .dependsOn(activemq)
+            .dependsOn(transform_core_aio)
+            .dependsOn(sfs);
+    @Container
+    static final GenericContainer<?> repository = createRepositoryContainer()
+            .dependsOn(postgres)
+            .dependsOn(activemq)
+            .dependsOn(transform_router)
+            .dependsOn(transform_core_aio)
+            .dependsOn(sfs);
     @Container
     static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("./src/main/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    private static final GenericContainer<?> live_ingester = createLiveIngesterContainer();
+    private static final GenericContainer<?> live_ingester = createLiveIngesterContainer()
+            .dependsOn(activemq)
+            .dependsOn(sfs)
+            .dependsOn(repository);
     @Container
     static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainerWithin(network);
 
@@ -90,7 +102,7 @@ public class CreateNodeTest  {
                 given().auth().basic("admin","admin")
                         .contentType("multipart/form-data")
 //                        .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
-                        .multiPart("filedata", new File("./src/main/resources/Alfresco Content Services 7.4.docx"))
+                        .multiPart("filedata", new File("src/main/resources/Alfresco Content Services 7.4.docx"))
                         .when()
                         .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
                         .then()
@@ -126,6 +138,7 @@ public class CreateNodeTest  {
 //                .then()
 //                .statusCode(200);
 
+
     }
 
     private static GenericContainer<?> createRepositoryContainer()
@@ -157,12 +170,19 @@ public class CreateNodeTest  {
                                 postgres.getDatabaseName(),
                                 activemq.getNetworkAliases().stream().findFirst().get())
                         .replace("\n", " "));
+//                .dependsOn(postgres)
+//                .dependsOn(activemq)
+//                .dependsOn(transform_router)
+//                .dependsOn(transform_core_aio)
+//                .dependsOn(sfs);
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
         return DockerContainers.createLiveIngesterContainerWithin(network)
-                .dependsOn(activemq)
+//                .dependsOn(activemq)
+//                .dependsOn(sfs)
+//                .dependsOn(repository)
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://%s:8080"
                         .formatted(
                                 hxAuthServer.getNetworkAliases().stream().findFirst().get()))
@@ -171,6 +191,5 @@ public class CreateNodeTest  {
                         .formatted(
                                 hxAuthServer.getNetworkAliases().stream().findFirst().get()));
     }
-
 
 }
