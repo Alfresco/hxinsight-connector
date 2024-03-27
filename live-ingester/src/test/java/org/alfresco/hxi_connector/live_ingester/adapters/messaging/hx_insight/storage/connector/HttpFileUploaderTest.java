@@ -179,6 +179,7 @@ class HttpFileUploaderTest
         return createFileUploadRequestMock(mock(URL.class));
     }
 
+    @SuppressWarnings("PMD.CloseResource")
     private FileUploadRequest createFileUploadRequestMock(URL url)
     {
         FileUploadRequest requestMock = mock(FileUploadRequest.class);

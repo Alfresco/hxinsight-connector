@@ -64,6 +64,7 @@ class HttpHxInsightStorageClientTest
     HttpHxInsightStorageClient httpStorageClient;
 
     @Test
+    @SuppressWarnings("PMD.CloseResource")
     void testUploadDataFromInputStream()
     {
         // given
