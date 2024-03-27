@@ -31,10 +31,6 @@ alfresco:
     response:
       queue-name: org.alfresco.hxinsight-connector.transform.response
       endpoint: activemq:queue:${alfresco.transform.response.queue-name}
-      retry:
-        attempts: 5
-        initial-delay: 100
-        delay-multiplier: 1
     shared-file-store:
       host: http://localhost
       port: 8099
