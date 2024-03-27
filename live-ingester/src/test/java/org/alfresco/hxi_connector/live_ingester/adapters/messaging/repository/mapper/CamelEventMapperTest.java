@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,64 +23,56 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
-
-import static java.util.Collections.emptyList;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-import java.util.List;
-import java.util.Optional;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import lombok.SneakyThrows;
+import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
-class TypeFilterApplierTest
+class CamelEventMapperTest
 {
-    private static final String CM_CONTENT = "cm:content";
-    private static final String CM_SPECIAL_FOLDER = "cm:special-folder";
-    private static final String CM_FOLDER = "cm:folder";
+
     @Mock
-    private NodeResource mockResource;
+    private Exchange mockExchange;
     @Mock
-    private Filter mockFilter;
-    @Mock
-    private Filter.Type mockType;
+    private Message mockMessage;
 
     @InjectMocks
-    private TypeFilterApplier objectUnderTest;
+    private CamelEventMapper objectUnderTest;
 
     @Test
-    void givenNonEmptyFilters_whenNullCurrentNodeType_thenExceptionIsThrown()
+    @SneakyThrows
+    void givenExchangePropertyNotPresent_whenMapping_thenEventTypeNotAltered()
     {
-        given(mockFilter.type()).willReturn(mockType);
-        given(mockResource.getNodeType()).willReturn(null);
-        given(mockType.allow()).willReturn(List.of(CM_CONTENT, CM_SPECIAL_FOLDER));
-        given(mockType.deny()).willReturn(emptyList());
+        given(mockExchange.getIn()).willReturn(mockMessage);
+        final String eventType = NODE_DELETED.getType();
+        RepoEvent<DataAttributes<NodeResource>> originalEvent = RepoEvent.<DataAttributes<NodeResource>> builder()
+                .setType(NODE_UPDATED.getType())
+                .build();
+        given(mockMessage.getBody(any())).willReturn(originalEvent);
 
-        // when/then
-        assertThrows(NullPointerException.class, () -> objectUnderTest.allowNode(mockResource, mockFilter));
-
+        // when
+        RepoEvent<DataAttributes<NodeResource>> repoEvent = objectUnderTest.alterRepoEvent(mockExchange, eventType);
+        //
+        // then
+        assertEquals(eventType, repoEvent.getType());
+        assertNotEquals(originalEvent.getType(), repoEvent.getType());
     }
-
-    @Test
-    void whenNullPreviousNodeType_thenUnresolved()
-    {
-        given(mockResource.getNodeType()).willReturn(null);
-
-        // when/then
-        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
-
-        assertTrue(result.isEmpty());
-    }
-
 }

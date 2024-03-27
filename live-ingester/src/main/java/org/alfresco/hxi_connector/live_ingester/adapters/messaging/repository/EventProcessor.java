@@ -36,6 +36,7 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
@@ -60,8 +61,9 @@ public class EventProcessor
     private final DeleteNodeCommandHandler deleteNodeCommandHandler;
     private final RepoEventMapper repoEventMapper;
 
-    public void process(RepoEvent<DataAttributes<NodeResource>> event)
+    public void process(Exchange exchange)
     {
+        final RepoEvent<DataAttributes<NodeResource>> event = exchange.getIn().getBody(RepoEvent.class);
         handleMetadataPropertiesChange(event);
         handleContentChange(event);
         handleNodeDeleteEvent(event);

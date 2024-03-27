@@ -28,10 +28,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.f
 
 import static java.util.Collections.emptyList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -41,19 +43,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class AspectFilterApplierTest
 {
 
     private static final String CM_ASPECT_1 = "cm:aspect1";
-    @Mock
-    private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
-    @Mock
-    private DataAttributes<NodeResource> mockData;
+    private static final String CM_ASPECT_2 = "cm:aspect2";
     @Mock
     private NodeResource mockResource;
     @Mock
@@ -67,36 +64,63 @@ class AspectFilterApplierTest
     @BeforeEach
     void mockBasicData()
     {
-        given(mockRepoEvent.getData()).willReturn(mockData);
-        given(mockData.getResource()).willReturn(mockResource);
         given(mockFilter.aspect()).willReturn(mockAspect);
     }
 
     @Test
-    void shouldNotFilterOutNullAspectsWhenEmptyAllowedAndEmptyDenied()
+    void givenEmptyAllowedAndEmptyDeniedFilters_whenCurrentNodeHasNullAspects_thenAllowNode()
     {
         given(mockResource.getAspectNames()).willReturn(null);
         given(mockAspect.allow()).willReturn(emptyList());
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
 
         // then
         assertTrue(result);
     }
 
     @Test
-    void shouldFilterOutWhenAspectsNullAndNonEmptyAllowedAndEmptyDenied()
+    void givenNonEmptyAllowedAndEmptyDeniedFilters_whenCurrentNodeHasNullAspects_thenDenyNode()
     {
         given(mockResource.getAspectNames()).willReturn(null);
         given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
 
         // then
         assertFalse(result);
     }
+
+    @Test
+    void givenEmptyAllowedAndEmptyDeniedFilters_whenPreviousNodeHasNullAspects_thenAllowNode()
+    {
+        given(mockResource.getAspectNames()).willReturn(null);
+        given(mockAspect.allow()).willReturn(emptyList());
+        given(mockAspect.deny()).willReturn(emptyList());
+
+        // when
+        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
+
+        // then
+        assertTrue(result.get());
+    }
+
+    @Test
+    void givenNonEmptyAllowedAndEmptyDeniedFilters_whenPreviousNodeHasNullAspects_thenDenyNode()
+    {
+        given(mockResource.getAspectNames()).willReturn(null);
+        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
+        given(mockAspect.deny()).willReturn(emptyList());
+
+        // when
+        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
+
+        // then
+        assertFalse(result.get());
+    }
+
 }
