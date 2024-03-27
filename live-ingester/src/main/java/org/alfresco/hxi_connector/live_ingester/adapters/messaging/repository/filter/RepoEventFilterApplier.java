@@ -26,14 +26,14 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
-import org.apache.camel.Exchange;
+import java.util.Optional;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 public interface RepoEventFilterApplier
 {
-    boolean applyFilter(Exchange exchange, RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter);
+    boolean allowNode(NodeResource nodeResource, Filter filter);
+
+    Optional<Boolean> allowNodeBefore(NodeResource nodeResourceBefore, Filter filter);
 }

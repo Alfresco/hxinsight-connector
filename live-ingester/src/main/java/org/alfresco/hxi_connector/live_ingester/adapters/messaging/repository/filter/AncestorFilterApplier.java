@@ -26,20 +26,16 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -47,20 +43,24 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class AncestorFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean applyFilter(Exchange exchange, RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    public boolean allowNode(NodeResource nodeResource, Filter filter)
     {
-        final List<String> primaryHierarchy = ListUtils.emptyIfNull(repoEvent.getData().getResource().getPrimaryHierarchy());
+        final List<String> primaryHierarchy = ListUtils.emptyIfNull(nodeResource.getPrimaryHierarchy());
         final List<String> allowed = filter.path().allow();
         final List<String> denied = filter.path().deny();
-        log.atDebug().log("Applying ancestor filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
-        boolean result = CollectionFilter.filter(primaryHierarchy, allowed, denied);
-        if (EventUtils.isEventTypeUpdated(repoEvent))
+        log.atDebug().log("Applying ancestor filters on repo node id: {}", nodeResource.getId());
+        return CollectionFilter.filter(primaryHierarchy, allowed, denied);
+    }
+
+    @Override
+    public Optional<Boolean> allowNodeBefore(NodeResource nodeResourceBefore, Filter filter)
+    {
+        log.atDebug().log("Applying ancestor filters on previous version of repo node id: {}", nodeResourceBefore.getId());
+        final List<String> primaryHierarchy = nodeResourceBefore.getPrimaryHierarchy();
+        if (primaryHierarchy == null)
         {
-            final List<String> primaryHierarchyBefore = repoEvent.getData().getResourceBefore().getPrimaryHierarchy();
-            boolean resultBefore = primaryHierarchyBefore == null ? result : CollectionFilter.filter(primaryHierarchyBefore, allowed, denied);
-            ExchangeEnricher.enrichExchangeAfterFiltering(exchange, resultBefore, result);
-            return resultBefore || result;
+            return Optional.empty();
         }
-        return result;
+        return Optional.of(allowNode(nodeResourceBefore, filter));
     }
 }

@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -49,27 +48,17 @@ public class CamelEventMapper
     private final ObjectMapper mapper;
 
     /**
-     * This method maps/unmarshalls repo event from Camel exchange to Java object It can alter the original type of event basing on custom Camel exchange property which can be set during node filtering.
+     * Unmarshalls Camel exchange body to RepoEvent POJO
      *
      * @param exchange
-     *            Camel exchange object
-     * @return mapped repo event
+     *            Camel Exchange object
+     * @return RepoEvent
      */
     public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
     {
         try
         {
-            final RepoEvent<DataAttributes<NodeResource>> repoEventOriginal = mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
-            return RepoEvent.<DataAttributes<NodeResource>> builder()
-                    .setData(repoEventOriginal.getData())
-                    .setDatacontenttype(repoEventOriginal.getDatacontenttype())
-                    .setDataschema(repoEventOriginal.getDataschema())
-                    .setExtensionAttributes(repoEventOriginal.getExtensionAttributes())
-                    .setId(repoEventOriginal.getId())
-                    .setSource(repoEventOriginal.getSource())
-                    .setTime(repoEventOriginal.getTime())
-                    .setType(determineEventType(repoEventOriginal, exchange))
-                    .build();
+            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
         }
         catch (JsonProcessingException e)
         {
@@ -78,24 +67,27 @@ public class CamelEventMapper
     }
 
     /**
-     * This method will determine repo event type based on whether custom Camel exchange property is present.
+     * This method alters the original type of repo event.
      *
-     * @param repoEventOriginal
-     *            original repo event
      * @param exchange
      *            Camel exchange object
-     * @return event type we want to ingest
+     * @param newEventType
+     *            event type to be altered
+     * @return altered repo event
      */
-    private String determineEventType(RepoEvent<DataAttributes<NodeResource>> repoEventOriginal, Exchange exchange)
+    public RepoEvent<DataAttributes<NodeResource>> alterRepoEvent(Exchange exchange, String newEventType)
     {
-        String eventTypeProperty = exchange.getProperty(ExchangeEnricher.UPDATED_EVENT_TYPE_PROP, String.class);
-        if (eventTypeProperty == null)
-        {
-            return repoEventOriginal.getType();
-        }
-        else
-        {
-            return eventTypeProperty;
-        }
+        final RepoEvent<DataAttributes<NodeResource>> repoEventOriginal = exchange.getIn().getBody(RepoEvent.class);
+        log.atDebug().log("Altering repo event type from {} to {}. Repo Event id: {}", repoEventOriginal.getType(), newEventType, repoEventOriginal.getId());
+        return RepoEvent.<DataAttributes<NodeResource>> builder()
+                .setData(repoEventOriginal.getData())
+                .setDatacontenttype(repoEventOriginal.getDatacontenttype())
+                .setDataschema(repoEventOriginal.getDataschema())
+                .setExtensionAttributes(repoEventOriginal.getExtensionAttributes())
+                .setId(repoEventOriginal.getId())
+                .setSource(repoEventOriginal.getSource())
+                .setTime(repoEventOriginal.getTime())
+                .setType(newEventType)
+                .build();
     }
 }

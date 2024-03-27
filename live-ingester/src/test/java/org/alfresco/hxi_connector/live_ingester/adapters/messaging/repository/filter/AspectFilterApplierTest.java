@@ -27,22 +27,14 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher.UPDATED_EVENT_TYPE_PROP;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Optional;
 
-import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,9 +43,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class AspectFilterApplierTest
@@ -62,19 +52,11 @@ class AspectFilterApplierTest
     private static final String CM_ASPECT_1 = "cm:aspect1";
     private static final String CM_ASPECT_2 = "cm:aspect2";
     @Mock
-    private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
-    @Mock
-    private DataAttributes<NodeResource> mockData;
-    @Mock
     private NodeResource mockResource;
-    @Mock
-    private NodeResource mockResourceBefore;
     @Mock
     private Filter mockFilter;
     @Mock
     private Filter.Aspect mockAspect;
-    @Mock
-    private Exchange mockExchange;
 
     @InjectMocks
     private AspectFilterApplier objectUnderTest;
@@ -82,120 +64,63 @@ class AspectFilterApplierTest
     @BeforeEach
     void mockBasicData()
     {
-        given(mockRepoEvent.getData()).willReturn(mockData);
-        given(mockData.getResource()).willReturn(mockResource);
         given(mockFilter.aspect()).willReturn(mockAspect);
     }
 
     @Test
-    void shouldNotFilterOutNullAspectsWhenEmptyAllowedAndEmptyDenied()
+    void givenEmptyAllowedAndEmptyDeniedFilters_whenCurrentNodeHasNullAspects_thenAllowNode()
     {
         given(mockResource.getAspectNames()).willReturn(null);
         given(mockAspect.allow()).willReturn(emptyList());
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
 
         // then
         assertTrue(result);
     }
 
     @Test
-    void shouldFilterOutWhenAspectsNullAndNonEmptyAllowedAndEmptyDenied()
+    void givenNonEmptyAllowedAndEmptyDeniedFilters_whenCurrentNodeHasNullAspects_thenDenyNode()
     {
         given(mockResource.getAspectNames()).willReturn(null);
         given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
 
         // then
         assertFalse(result);
     }
 
     @Test
-    void shouldNotEnrichExchangeWhenRepoEventTypeCreate()
+    void givenEmptyAllowedAndEmptyDeniedFilters_whenPreviousNodeHasNullAspects_thenAllowNode()
     {
-        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
-        given(mockAspect.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_CREATED.getType());
         given(mockResource.getAspectNames()).willReturn(null);
+        given(mockAspect.allow()).willReturn(emptyList());
+        given(mockAspect.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
 
-        then(mockExchange).shouldHaveNoInteractions();
-        assertFalse(result);
+        // then
+        assertTrue(result.get());
     }
 
     @Test
-    void shouldNotEnrichExchangeWhenRepoEventTypeDelete()
+    void givenNonEmptyAllowedAndEmptyDeniedFilters_whenPreviousNodeHasNullAspects_thenDenyNode()
     {
-        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
-        given(mockAspect.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_DELETED.getType());
         given(mockResource.getAspectNames()).willReturn(null);
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
-
-        then(mockExchange).shouldHaveNoInteractions();
-        assertFalse(result);
-    }
-
-    @Test
-    void shouldNotEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultNotChanged()
-    {
         given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
         given(mockAspect.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
-        given(mockResource.getAspectNames()).willReturn(null);
-        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
-        given(mockResourceBefore.getAspectNames()).willReturn(emptySet());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
 
-        then(mockExchange).shouldHaveNoInteractions();
-        assertFalse(result);
+        // then
+        assertFalse(result.get());
     }
 
-    @Test
-    void shouldEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultChangedFromAllowedToDenied()
-    {
-        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
-        given(mockAspect.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
-        given(mockResource.getAspectNames()).willReturn(null);
-        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
-        given(mockResourceBefore.getAspectNames()).willReturn(Set.of(CM_ASPECT_1));
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
-
-        then(mockExchange).should().setProperty(UPDATED_EVENT_TYPE_PROP, NODE_DELETED.getType());
-        then(mockExchange).shouldHaveNoMoreInteractions();
-        // needs to further process delete event
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultChangedFromDeniedToAllowed()
-    {
-        given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
-        given(mockAspect.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
-        given(mockResource.getAspectNames()).willReturn(Set.of(CM_ASPECT_1));
-        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
-        given(mockResourceBefore.getAspectNames()).willReturn(Set.of(CM_ASPECT_2));
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
-
-        then(mockExchange).should().setProperty(UPDATED_EVENT_TYPE_PROP, NODE_CREATED.getType());
-        then(mockExchange).shouldHaveNoMoreInteractions();
-        assertTrue(result);
-    }
 }

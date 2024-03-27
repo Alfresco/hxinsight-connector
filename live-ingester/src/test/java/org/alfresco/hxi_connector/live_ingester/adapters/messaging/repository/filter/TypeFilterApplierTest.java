@@ -30,17 +30,10 @@ import static java.util.Collections.emptyList;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher.UPDATED_EVENT_TYPE_PROP;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import java.util.List;
+import java.util.Optional;
 
-import org.apache.camel.Exchange;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -48,9 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class TypeFilterApplierTest
@@ -59,124 +50,37 @@ class TypeFilterApplierTest
     private static final String CM_SPECIAL_FOLDER = "cm:special-folder";
     private static final String CM_FOLDER = "cm:folder";
     @Mock
-    private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
-    @Mock
-    private DataAttributes<NodeResource> mockData;
-    @Mock
     private NodeResource mockResource;
-    @Mock
-    private NodeResource mockResourceBefore;
     @Mock
     private Filter mockFilter;
     @Mock
     private Filter.Type mockType;
-    @Mock
-    private Exchange mockExchange;
 
     @InjectMocks
     private TypeFilterApplier objectUnderTest;
 
-    @BeforeEach
-    void mockBasicData()
-    {
-        given(mockRepoEvent.getData()).willReturn(mockData);
-        given(mockData.getResource()).willReturn(mockResource);
-        given(mockFilter.type()).willReturn(mockType);
-    }
-
     @Test
-    void shouldThrowExceptionWhenNullNodeType()
+    void givenNonEmptyFilters_whenNullCurrentNodeType_thenExceptionIsThrown()
     {
+        given(mockFilter.type()).willReturn(mockType);
         given(mockResource.getNodeType()).willReturn(null);
         given(mockType.allow()).willReturn(List.of(CM_CONTENT, CM_SPECIAL_FOLDER));
         given(mockType.deny()).willReturn(emptyList());
 
         // when/then
-        assertThrows(NullPointerException.class, () -> objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter));
+        assertThrows(NullPointerException.class, () -> objectUnderTest.allowNode(mockResource, mockFilter));
 
     }
 
     @Test
-    void shouldNotEnrichExchangeWhenRepoEventTypeCreate()
+    void whenNullPreviousNodeType_thenUnresolved()
     {
-        given(mockType.allow()).willReturn(emptyList());
-        given(mockType.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_CREATED.getType());
-        given(mockResource.getNodeType()).willReturn(CM_CONTENT);
+        given(mockResource.getNodeType()).willReturn(null);
 
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        // when/then
+        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
 
-        then(mockExchange).shouldHaveNoInteractions();
-        assertTrue(result);
+        assertTrue(result.isEmpty());
     }
 
-    @Test
-    void shouldNotEnrichExchangeWhenRepoEventTypeDelete()
-    {
-        given(mockType.allow()).willReturn(emptyList());
-        given(mockType.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_DELETED.getType());
-        given(mockResource.getNodeType()).willReturn(CM_CONTENT);
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
-
-        then(mockExchange).shouldHaveNoInteractions();
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldNotEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultNotChanged()
-    {
-        given(mockType.allow()).willReturn(List.of(CM_CONTENT));
-        given(mockType.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
-        given(mockResource.getNodeType()).willReturn(CM_CONTENT);
-        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
-        given(mockResourceBefore.getNodeType()).willReturn(CM_CONTENT);
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
-
-        then(mockExchange).shouldHaveNoInteractions();
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultChangedFromAllowedToDenied()
-    {
-        given(mockType.allow()).willReturn(List.of(CM_SPECIAL_FOLDER));
-        given(mockType.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
-        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
-        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
-        given(mockResourceBefore.getNodeType()).willReturn(CM_SPECIAL_FOLDER);
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
-
-        then(mockExchange).should().setProperty(UPDATED_EVENT_TYPE_PROP, NODE_DELETED.getType());
-        then(mockExchange).shouldHaveNoMoreInteractions();
-        // needs to further process delete event
-        assertTrue(result);
-    }
-
-    @Test
-    void shouldEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultChangedFromDeniedToAllowed()
-    {
-        given(mockType.allow()).willReturn(List.of(CM_FOLDER));
-        given(mockType.deny()).willReturn(emptyList());
-        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
-        given(mockResource.getNodeType()).willReturn(CM_FOLDER);
-        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
-        given(mockResourceBefore.getNodeType()).willReturn(CM_SPECIAL_FOLDER);
-
-        // when
-        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
-
-        then(mockExchange).should().setProperty(UPDATED_EVENT_TYPE_PROP, NODE_CREATED.getType());
-        then(mockExchange).shouldHaveNoMoreInteractions();
-        assertTrue(result);
-    }
 }

@@ -26,15 +26,22 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
+
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.LiveIngesterEventHandler.DENY_NODE;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +55,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class RepoEventFilterHandlerTest
 {
 
@@ -58,6 +66,12 @@ class RepoEventFilterHandlerTest
     private TypeFilterApplier mockTypeFilterApplier;
 
     @Mock
+    private AncestorFilterApplier mockAncestorFilterApplier;
+
+    @Mock
+    private CamelEventMapper mockCamelEventMapper;
+
+    @Mock
     private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
 
     @Mock
@@ -65,65 +79,207 @@ class RepoEventFilterHandlerTest
     @Mock
     private Exchange mockExchange;
     @Mock
-    private CamelEventMapper mockCamelEventMapper;
+    private Message mockMessage;
+    @Mock
+    private DataAttributes<NodeResource> mockData;
+    @Mock
+    private NodeResource mockResource;
+    @Mock
+    private NodeResource mockResourceBefore;
 
     private RepoEventFilterHandler objectUnderTest;
 
     @BeforeEach
     void setUp()
     {
-        final List<RepoEventFilterApplier> repoEventFilterAppliers = List.of(mockAspectFilterApplier, mockTypeFilterApplier);
-        objectUnderTest = new RepoEventFilterHandler(mockCamelEventMapper, repoEventFilterAppliers);
-        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(mockRepoEvent);
+        final List<RepoEventFilterApplier> repoEventFilterAppliers = List.of(mockAspectFilterApplier, mockTypeFilterApplier, mockAncestorFilterApplier);
+        objectUnderTest = new RepoEventFilterHandler(repoEventFilterAppliers, mockCamelEventMapper);
+        given(mockExchange.getIn()).willReturn(mockMessage);
+        given(mockMessage.getBody(RepoEvent.class)).willReturn(mockRepoEvent);
+        given(mockRepoEvent.getData()).willReturn(mockData);
+        given(mockData.getResource()).willReturn(mockResource);
     }
 
     @Test
-    void shouldNotFilterOutWhenAllAppliersReturnTrue()
+    void givenCreateEvent_whenAllFiltersAllow_thenAllowNodeAndNoOtherActions()
     {
-        given(mockAspectFilterApplier.applyFilter(any(), any(), any())).willReturn(true);
-        given(mockTypeFilterApplier.applyFilter(any(), any(), any())).willReturn(true);
+        given(mockRepoEvent.getType()).willReturn(NODE_CREATED.getType());
+        given(mockAspectFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockTypeFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
 
         // when
-        final boolean result = objectUnderTest.filterNode(mockExchange, mockFilter);
+        objectUnderTest.handle(mockExchange, mockFilter);
 
-        then(mockAspectFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(mockTypeFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        assertTrue(result);
+        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
+        then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
     }
 
     @Test
-    void shouldFilterOutWhenAtLeastOneApplierReturnFalse()
+    void givenCreateEvent_whenOneFilterDenies_thenDenyNodeAndNoOtherActions()
     {
-        given(mockAspectFilterApplier.applyFilter(any(), any(), any())).willReturn(true);
-        given(mockTypeFilterApplier.applyFilter(any(), any(), any())).willReturn(false);
+        given(mockRepoEvent.getType()).willReturn(NODE_CREATED.getType());
+        given(mockAspectFilterApplier.allowNode(mockResource, mockFilter)).willReturn(false);
+        given(mockTypeFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
 
         // when
-        final boolean result = objectUnderTest.filterNode(mockExchange, mockFilter);
+        objectUnderTest.handle(mockExchange, mockFilter);
 
-        then(mockAspectFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(mockTypeFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        assertFalse(result);
+        then(mockExchange).should().setProperty(DENY_NODE, true);
+        then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
     }
 
     @Test
-    void shouldFilterOutAndFailFastWhenFirstApplierReturnFalse()
+    void givenDeleteEvent_whenAllFiltersAllow_thenAllowNodeAndNoOtherActions()
     {
-        given(mockAspectFilterApplier.applyFilter(any(), any(), any())).willReturn(false);
+        given(mockRepoEvent.getType()).willReturn(NODE_DELETED.getType());
+        given(mockAspectFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockTypeFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
 
         // when
-        final boolean result = objectUnderTest.filterNode(mockExchange, mockFilter);
+        objectUnderTest.handle(mockExchange, mockFilter);
 
-        then(mockAspectFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
+        then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(mockTypeFilterApplier).shouldHaveNoInteractions();
+        then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        assertFalse(result);
+        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
+        then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
+    }
+
+    @Test
+    void givenUpdateEvent_whenAllFiltersAllowCurrentAndPreviousVersion_thenAllowNodeAndNoOtherActions()
+    {
+        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockAspectFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockTypeFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAspectFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.of(true));
+        given(mockTypeFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.of(true));
+        given(mockAncestorFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.empty());
+        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
+
+        // when
+        objectUnderTest.handle(mockExchange, mockFilter);
+
+        then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAspectFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockTypeFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAncestorFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
+
+        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
+        then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
+    }
+
+    @Test
+    void givenUpdateEvent_whenPreviousVersionDeniedAndCurrentVersionDeniedByDifferentFilter_thenDenyAndNoOtherActions()
+    {
+        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockAspectFilterApplier.allowNode(mockResource, mockFilter)).willReturn(false);
+        given(mockTypeFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAspectFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.of(true));
+        given(mockTypeFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.of(false));
+        given(mockAncestorFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.empty());
+        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
+
+        // when
+        objectUnderTest.handle(mockExchange, mockFilter);
+
+        then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAspectFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockTypeFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAncestorFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
+
+        then(mockExchange).should().setProperty(DENY_NODE, true);
+        then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
+    }
+
+    @Test
+    void givenUpdateEvent_whenPreviousVersionDeniedAndCurrentVersionAllowed_thenAllowAndAlterEventTypeToCreated()
+    {
+        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockAspectFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockTypeFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAspectFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.of(true));
+        given(mockTypeFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.empty());
+        given(mockAncestorFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.of(false));
+        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
+
+        // when
+        objectUnderTest.handle(mockExchange, mockFilter);
+
+        then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAspectFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockTypeFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAncestorFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
+
+        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
+        then(mockCamelEventMapper).should().alterRepoEvent(mockExchange, NODE_CREATED.getType());
+    }
+
+    @Test
+    void givenUpdateEvent_whenPreviousVersionAllowedAndCurrentVersionDenied_thenAllowAndAlterEventTypeToDeleted()
+    {
+        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockAspectFilterApplier.allowNode(mockResource, mockFilter)).willReturn(false);
+        given(mockTypeFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
+        given(mockAspectFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.of(true));
+        given(mockTypeFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.empty());
+        given(mockAncestorFilterApplier.allowNodeBefore(mockResourceBefore, mockFilter)).willReturn(Optional.empty());
+        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
+
+        // when
+        objectUnderTest.handle(mockExchange, mockFilter);
+
+        then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAspectFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockTypeFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
+        then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
+        then(mockAncestorFilterApplier).should().allowNodeBefore(mockResourceBefore, mockFilter);
+        then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
+
+        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
+        then(mockCamelEventMapper).should().alterRepoEvent(mockExchange, NODE_DELETED.getType());
     }
 
 }

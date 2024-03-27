@@ -27,21 +27,17 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -49,21 +45,20 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class AspectFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean applyFilter(Exchange exchange, RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    public boolean allowNode(NodeResource nodeResource, Filter filter)
     {
-        final Set<String> aspectNames = SetUtils.emptyIfNull(repoEvent.getData().getResource().getAspectNames());
+        final Set<String> aspectNames = SetUtils.emptyIfNull(nodeResource.getAspectNames());
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
-        log.atDebug().log("Applying aspect filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
-        boolean result = CollectionFilter.filter(aspectNames, allowed, denied);
-        if (EventUtils.isEventTypeUpdated(repoEvent))
-        {
-            final Set<String> aspectNamesBefore = SetUtils.emptyIfNull(repoEvent.getData().getResourceBefore().getAspectNames());
-            boolean resultBefore = CollectionFilter.filter(aspectNamesBefore, allowed, denied);
-            ExchangeEnricher.enrichExchangeAfterFiltering(exchange, resultBefore, result);
-            return resultBefore || result;
-        }
-        return result;
+        log.atDebug().log("Applying aspect filters on node id: {}", nodeResource.getId());
+        return CollectionFilter.filter(aspectNames, allowed, denied);
+    }
+
+    @Override
+    public Optional<Boolean> allowNodeBefore(NodeResource nodeResourceBefore, Filter filter)
+    {
+        log.atDebug().log("Applying aspect filters on previous version of repo node id: {}", nodeResourceBefore.getId());
+        return Optional.of(allowNode(nodeResourceBefore, filter));
     }
 
 }

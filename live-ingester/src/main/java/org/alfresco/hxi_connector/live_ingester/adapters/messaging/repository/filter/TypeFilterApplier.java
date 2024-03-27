@@ -27,19 +27,15 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import java.util.List;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.repository.filter.FieldFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -47,20 +43,24 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class TypeFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean applyFilter(Exchange exchange, RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    public boolean allowNode(NodeResource nodeResource, Filter filter)
     {
-        final String nodeType = repoEvent.getData().getResource().getNodeType();
+        final String nodeType = nodeResource.getNodeType();
         final List<String> allowed = filter.type().allow();
         final List<String> denied = filter.type().deny();
-        log.atDebug().log("Applying type filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
-        boolean result = FieldFilter.filter(nodeType, allowed, denied);
-        if (EventUtils.isEventTypeUpdated(repoEvent))
+        log.atDebug().log("Applying type filters on node id: {}", nodeResource.getId());
+        return FieldFilter.filter(nodeType, allowed, denied);
+    }
+
+    @Override
+    public Optional<Boolean> allowNodeBefore(NodeResource nodeResourceBefore, Filter filter)
+    {
+        log.atDebug().log("Applying type filters on previous version of repo node id: {}", nodeResourceBefore.getId());
+        final String nodeType = nodeResourceBefore.getNodeType();
+        if (nodeType == null)
         {
-            final String nodeTypeBefore = repoEvent.getData().getResourceBefore().getNodeType();
-            boolean resultBefore = nodeTypeBefore == null ? result : FieldFilter.filter(nodeTypeBefore, allowed, denied);
-            ExchangeEnricher.enrichExchangeAfterFiltering(exchange, resultBefore, result);
-            return resultBefore || result;
+            return Optional.empty();
         }
-        return result;
+        return Optional.of(allowNode(nodeResourceBefore, filter));
     }
 }

@@ -26,7 +26,12 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.LiveIngesterEventHandler.DENY_NODE;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
+
 import java.util.List;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,6 +40,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -44,14 +50,65 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @Slf4j
 public class RepoEventFilterHandler
 {
-    private final CamelEventMapper camelEventMapper;
     private final List<RepoEventFilterApplier> repoEventFilterAppliers;
+    private final CamelEventMapper camelEventMapper;
 
-    public boolean filterNode(Exchange exchange, Filter filter)
+    /**
+     * Method handles event/node filtering. When node is denied by any of filters, a custom property "DENY_NODE: true" in Camel Exchange is created (used to filter out in main route). In case of update event: - when current version of the node is allowed but previous version was denied, then the type of the event is altered to 'Created'. - when current version of the node is denied but previous version was allowed, then the type of the event is altered to 'Deleted'.
+     *
+     * @param exchange
+     *            Camel Exchange Object
+     * @param filter
+     *            Filter configuration
+     */
+    public void handle(Exchange exchange, Filter filter)
     {
-        RepoEvent<DataAttributes<NodeResource>> repoEvent = camelEventMapper.repoEventFrom(exchange);
-        return repoEventFilterAppliers.stream()
-                .peek(f -> log.atDebug().log("Applying filters {} to repo event of id: {}", filter, repoEvent.getId()))
-                .allMatch(f -> f.applyFilter(exchange, repoEvent, filter));
+        final FilteringResults filteringResults = calculateFilteringResults(exchange, filter);
+        final boolean allowNode = filteringResults.allowed;
+        if (!allowNode)
+        {
+            exchange.setProperty(DENY_NODE, true);
+        }
+        filteringResults.newEventType.ifPresent(type -> exchange.getIn().setBody(camelEventMapper.alterRepoEvent(exchange, type)));
     }
+
+    private FilteringResults calculateFilteringResults(Exchange exchange, Filter filter)
+    {
+        final RepoEvent<DataAttributes<NodeResource>> repoEvent = exchange.getIn().getBody(RepoEvent.class);
+        boolean allowCurrentNode = true;
+        boolean allowPreviousNode = true;
+        final boolean eventTypeUpdated = EventUtils.isEventTypeUpdated(repoEvent);
+        for (RepoEventFilterApplier filterApplier : repoEventFilterAppliers)
+        {
+            log.atDebug().log("Applying filters {} to current repo event of id: {}", filter, repoEvent.getId());
+            final boolean allow = filterApplier.allowNode(repoEvent.getData().getResource(), filter);
+            allowCurrentNode = allowCurrentNode && allow;
+            if (eventTypeUpdated)
+            {
+                log.atDebug().log("Applying filters {} to previous version of repo event of id: {}", filter, repoEvent.getId());
+                final boolean allowPrevious = filterApplier.allowNodeBefore(repoEvent.getData().getResourceBefore(), filter).orElse(allow);
+                allowPreviousNode = allowPreviousNode && allowPrevious;
+            }
+        }
+        final Optional<String> newEventType = eventTypeUpdated ? resolveEventType(allowPreviousNode, allowCurrentNode) : Optional.empty();
+        final boolean overallResult = allowCurrentNode || (allowPreviousNode && eventTypeUpdated);
+        log.atDebug().log("Overall filtering results. Allow: {}, allow current: {}, allow previous: {}", overallResult, allowCurrentNode, allowPreviousNode);
+        return new FilteringResults(overallResult, newEventType);
+    }
+
+    private Optional<String> resolveEventType(boolean resultBefore, boolean result)
+    {
+        if (resultBefore && !result)
+        {
+            return Optional.of(NODE_DELETED.getType());
+        }
+        if (!resultBefore && result)
+        {
+            return Optional.of(NODE_CREATED.getType());
+        }
+        return Optional.empty();
+    }
+
+    record FilteringResults(Boolean allowed, Optional<String> newEventType)
+    {}
 }

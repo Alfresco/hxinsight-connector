@@ -29,13 +29,9 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher.UPDATED_EVENT_TYPE_PROP;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -54,8 +50,6 @@ class CamelEventMapperTest
 {
 
     @Mock
-    private ObjectMapper mockMapper;
-    @Mock
     private Exchange mockExchange;
     @Mock
     private Message mockMessage;
@@ -68,40 +62,17 @@ class CamelEventMapperTest
     void givenExchangePropertyNotPresent_whenMapping_thenEventTypeNotAltered()
     {
         given(mockExchange.getIn()).willReturn(mockMessage);
-        final String mockBody = "mockBody";
-        given(mockMessage.getBody(any())).willReturn(mockBody);
-        final String eventType = NODE_UPDATED.getType();
+        final String eventType = NODE_DELETED.getType();
         RepoEvent<DataAttributes<NodeResource>> originalEvent = RepoEvent.<DataAttributes<NodeResource>> builder()
-                .setType(eventType)
+                .setType(NODE_UPDATED.getType())
                 .build();
-        given(mockMapper.readValue(any(String.class), any(TypeReference.class))).willReturn(originalEvent);
+        given(mockMessage.getBody(any())).willReturn(originalEvent);
 
         // when
-        RepoEvent<DataAttributes<NodeResource>> repoEvent = objectUnderTest.repoEventFrom(mockExchange);
-
+        RepoEvent<DataAttributes<NodeResource>> repoEvent = objectUnderTest.alterRepoEvent(mockExchange, eventType);
+        //
         // then
         assertEquals(eventType, repoEvent.getType());
-    }
-
-    @Test
-    @SneakyThrows
-    void givenExchangePropertyPresent_whenMapping_thenEventTypeIsAltered()
-    {
-        given(mockExchange.getIn()).willReturn(mockMessage);
-        final String mockBody = "mockBody";
-        given(mockMessage.getBody(any())).willReturn(mockBody);
-        final String eventType = NODE_CREATED.getType();
-        RepoEvent<DataAttributes<NodeResource>> originalEvent = RepoEvent.<DataAttributes<NodeResource>> builder()
-                .setType(eventType)
-                .build();
-        final String nodeDeletedType = NODE_DELETED.getType();
-        given(mockExchange.getProperty(UPDATED_EVENT_TYPE_PROP, String.class)).willReturn(nodeDeletedType);
-        given(mockMapper.readValue(any(String.class), any(TypeReference.class))).willReturn(originalEvent);
-
-        // when
-        final RepoEvent<DataAttributes<NodeResource>> repoEvent = objectUnderTest.repoEventFrom(mockExchange);
-
-        // then
-        assertEquals(nodeDeletedType, repoEvent.getType());
+        assertNotEquals(originalEvent.getType(), repoEvent.getType());
     }
 }
