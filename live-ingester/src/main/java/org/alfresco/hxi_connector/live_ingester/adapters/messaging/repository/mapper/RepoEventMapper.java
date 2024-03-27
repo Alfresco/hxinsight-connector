@@ -38,7 +38,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertiesMapper;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
@@ -52,11 +52,11 @@ public class RepoEventMapper
 {
     private final PropertiesMapper propertiesMapper;
 
-    public IngestContentCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
+    public TriggerContentIngestionCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
         ensureThat(isEventTypeCreated(event) || isEventTypeUpdated(event), "Unsupported event type");
 
-        return new IngestContentCommand(event.getData().getResource().getId());
+        return new TriggerContentIngestionCommand(event.getData().getResource().getId());
     }
 
     public IngestNodeCommand mapToIngestNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)

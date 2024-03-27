@@ -47,8 +47,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 
@@ -126,6 +126,6 @@ class IngestEventProcessorTest
                         updated(CREATED_AT_PROPERTY, CREATED_AT)));
         then(ingestNodeCommandHandler).should().handle(expectedCommand);
 
-        then(ingestContentCommandHandler).should().handle(eq(new IngestContentCommand(NODE_ID)));
+        then(ingestContentCommandHandler).should().handle(eq(new TriggerContentIngestionCommand(NODE_ID)));
     }
 }

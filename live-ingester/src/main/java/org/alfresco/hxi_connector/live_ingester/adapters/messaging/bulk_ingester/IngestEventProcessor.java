@@ -47,8 +47,8 @@ import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent.ContentInfo;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
@@ -75,9 +75,9 @@ public class IngestEventProcessor
 
         if (ingestEvent.contentInfo() != null)
         {
-            IngestContentCommand ingestContentCommand = new IngestContentCommand(ingestEvent.nodeId());
+            TriggerContentIngestionCommand triggerContentIngestionCommand = new TriggerContentIngestionCommand(ingestEvent.nodeId());
 
-            ingestContentCommandHandler.handle(ingestContentCommand);
+            ingestContentCommandHandler.handle(triggerContentIngestionCommand);
         }
     }
 
