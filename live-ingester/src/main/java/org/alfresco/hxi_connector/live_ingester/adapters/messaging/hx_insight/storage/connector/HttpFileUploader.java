@@ -108,8 +108,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
 
             log.atDebug().log("Uploading file of size {} to S3", fileData.available());
 
-            camelContext
-                    .createFluentProducerTemplate()
+            camelContext.createFluentProducerTemplate()
                     .to(LOCAL_ENDPOINT)
                     .withHeaders(headers)
                     .withBody(fileData)
