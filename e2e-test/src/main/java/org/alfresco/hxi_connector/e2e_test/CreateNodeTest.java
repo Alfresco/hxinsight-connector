@@ -25,11 +25,13 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static io.restassured.RestAssured.given;
+
+import java.io.File;
+
 import io.restassured.response.Response;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -42,15 +44,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import java.io.File;
-
-import static io.restassured.RestAssured.given;
-
+import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 
 @Slf4j
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
-public class CreateNodeTest  {
+public class CreateNodeTest
+{
 
     public static final String BUCKET_NAME = "test-hxinsight-bucket";
     static final Network network = Network.newNetwork();
@@ -91,53 +91,36 @@ public class CreateNodeTest  {
 
     @BeforeAll
     @SneakyThrows
-    public static void beforeAll() {
+    public static void beforeAll()
+    {
         localStackServer.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
     }
 
     @Test
-    void testCreateFile() {
+    void testCreateFile()
+    {
 
-        Response response =
-                given().auth().basic("admin","admin")
-                        .contentType("multipart/form-data")
-//                        .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
-                        .multiPart("filedata", new File("src/main/resources/test-files/Alfresco Content Services 7.4.docx"))
-                        .when()
-                        .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
-                        .then()
-//                .statusCode(201)
-                        .extract().response();
+        Response acsResponse = given().auth().basic("admin", "admin")
+                .contentType("multipart/form-data")
+                .multiPart("filedata", new File("src/main/resources/test-files/Alfresco Content Services 7.4.docx"))
+                .when()
+                .post("http://" + repository.getHost() + ":" + repository.getFirstMappedPort() + "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
+                .then()
+                .extract().response();
 
-        Assertions.assertEquals(201, response.statusCode());
-        Assertions.assertNotNull(response.jsonPath().get("entry.id"));
+        Assertions.assertEquals(201, acsResponse.statusCode());
+        Assertions.assertNotNull(acsResponse.jsonPath().get("entry.id"));
 
-//        Response response =
-//        given().auth().basic("admin","admin")
-//                .contentType("application/json")
-//                .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
-//                .when()
-//                .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
-//                .then()
-////                .statusCode(201)
-//                .extract().response();
-////                .body("list.entries", notNullValue());
-//
-//        Assertions.assertEquals(201, response.statusCode());
-////        Assertions.assertEquals("abc", response.jsonPath().getString("entry"));
-////        Assertions.assertEquals("abc", response.jsonPath().get("entry.id"));
-//        Assertions.assertNotNull(response.jsonPath().get("entry.id"));
-////        System.out.println(response);
-//
-//        given().auth().basic("admin","admin")
-//                .contentType("application/json")
-////                .body("{\"contentBodyUpdate\": \"this is the file text\"}")
-//                .body("{\"contentBodyUpdate\": \"this is the file text\"}")
-//                .when()
-//                .put("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/"+ response.jsonPath().get("entry.id") +"/content")
-//                .then()
-//                .statusCode(200);
+        Response s3Response = given()
+                .contentType("application/xml")
+                .when()
+                .get("http://localhost:" + localStackServer.getFirstMappedPort() + "/test-hxinsight-bucket/")
+                .then()
+                .extract().response();
 
+        Assertions.assertEquals(200, s3Response.statusCode());
+        // String stringS3response = s3Response.asString();
+        // Assertions.assertTrue(stringS3response.contains("Contents"));
 
     }
 
@@ -164,25 +147,17 @@ public class CreateNodeTest  {
                         -Dalfresco.restApi.basicAuthScheme=true
                         -Xms1500m -Xmx1500m
                         """.formatted(
-                                postgres.getUsername(),
-                                postgres.getPassword(),
-                                postgres.getNetworkAliases().stream().findFirst().get(),
-                                postgres.getDatabaseName(),
-                                activemq.getNetworkAliases().stream().findFirst().get())
+                        postgres.getUsername(),
+                        postgres.getPassword(),
+                        postgres.getNetworkAliases().stream().findFirst().get(),
+                        postgres.getDatabaseName(),
+                        activemq.getNetworkAliases().stream().findFirst().get())
                         .replace("\n", " "));
-//                .dependsOn(postgres)
-//                .dependsOn(activemq)
-//                .dependsOn(transform_router)
-//                .dependsOn(transform_core_aio)
-//                .dependsOn(sfs);
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
         return DockerContainers.createLiveIngesterContainerWithin(network)
-//                .dependsOn(activemq)
-//                .dependsOn(sfs)
-//                .dependsOn(repository)
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://%s:8080"
                         .formatted(
                                 hxAuthServer.getNetworkAliases().stream().findFirst().get()))

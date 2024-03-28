@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.common.test.util;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static java.util.function.Predicate.not;
 
 import java.nio.file.Files;
@@ -38,7 +36,6 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.AccessLevel;
 import lombok.Cleanup;
 import lombok.NoArgsConstructor;
@@ -55,7 +52,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
-    private static final String REPOSITORY_IMAGE = "alfresco/alfresco-content-repository-community";
+    private static final String REPOSITORY_IMAGE = "quay.io/alfresco/alfresco-content-repository";
     private static final String REPOSITORY_TAG = DockerTags.getRepositoryTag();
     private static final String POSTGRES_IMAGE = "postgres";
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
@@ -109,7 +106,6 @@ public class DockerContainers
             -Dmetadata-keystore.metadata.algorithm=DESede
             """.replace("\n", " "))
             .withExposedPorts(8080, 8000)
-                .waitingFor(Wait.forListeningPort())
             .withStartupTimeout(Duration.ofMinutes(5));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
@@ -162,7 +158,6 @@ public class DockerContainers
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
-                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "TRACE")
                 .withExposedPorts(8095)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
@@ -178,7 +173,6 @@ public class DockerContainers
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1024m")
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
-                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "TRACE")
                 .withExposedPorts(8090)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
@@ -209,10 +203,8 @@ public class DockerContainers
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n")
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
-//                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://hxinsight-mock:8080")
                 .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST", "http://shared-file-store")
                 .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT", "8099")
-//                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://hxinsight-mock:8080/token")
                 .withExposedPorts(5007)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
@@ -224,8 +216,7 @@ public class DockerContainers
 
     public static WireMockContainer createWireMockContainer()
     {
-        return new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
-                .withEnv("WIREMOCK_OPTIONS", "--verbose");
+        return createWireMockContainerWithin(null);
     }
 
     public static WireMockContainer createWireMockContainerWithin(Network network)
@@ -234,14 +225,13 @@ public class DockerContainers
                 .withEnv("WIREMOCK_OPTIONS", "--verbose");
 
         Optional.ofNullable(network).ifPresent(wireMock::withNetwork);
-//        Optional.ofNullable(network).ifPresent(n -> wireMock.withNetwork(n).withNetworkAliases(HXINSIGHT_MOCK_ALIAS));
 
         return wireMock;
     }
 
     public static LocalStackContainer createLocalStackContainer()
     {
-        return new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG));
+        return createLocalStackContainerWithin(null);
     }
 
     public static LocalStackContainer createLocalStackContainerWithin(Network network)
