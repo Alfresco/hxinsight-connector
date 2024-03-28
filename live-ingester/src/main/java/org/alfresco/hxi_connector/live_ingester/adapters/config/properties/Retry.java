@@ -35,8 +35,10 @@ import jakarta.validation.constraints.PositiveOrZero;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
@@ -44,6 +46,8 @@ import org.apache.hc.core5.http.NoHttpResponseException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Getter(AccessLevel.NONE)
 public class Retry
 {
