@@ -47,7 +47,6 @@ class TypeFilterApplierTest
 {
     private static final String CM_CONTENT = "cm:content";
     private static final String CM_SPECIAL_FOLDER = "cm:special-folder";
-    private static final String CM_FOLDER = "cm:folder";
     @Mock
     private NodeResource mockResource;
     @Mock

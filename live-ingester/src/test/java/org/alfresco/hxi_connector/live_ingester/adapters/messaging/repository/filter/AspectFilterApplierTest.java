@@ -49,7 +49,6 @@ class AspectFilterApplierTest
 {
 
     private static final String CM_ASPECT_1 = "cm:aspect1";
-    private static final String CM_ASPECT_2 = "cm:aspect2";
     @Mock
     private NodeResource mockResource;
     @Mock

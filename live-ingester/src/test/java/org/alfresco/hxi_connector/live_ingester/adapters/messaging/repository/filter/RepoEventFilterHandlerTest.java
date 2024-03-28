@@ -55,7 +55,6 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class RepoEventFilterHandlerTest
 {
 

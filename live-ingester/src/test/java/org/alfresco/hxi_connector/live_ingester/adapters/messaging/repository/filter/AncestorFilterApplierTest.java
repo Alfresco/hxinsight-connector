@@ -46,7 +46,6 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 class AncestorFilterApplierTest
 {
     private static final String ANCESTOR = "parent-node-id";
-    private static final String GRAND_ANCESTOR = "grandparent-node-id";
     @Mock
     private NodeResource mockResource;
     @Mock
@@ -56,12 +55,6 @@ class AncestorFilterApplierTest
 
     @InjectMocks
     private AncestorFilterApplier objectUnderTest;
-    //
-    // @BeforeEach
-    // void mockBasicData()
-    // {
-    // given(mockFilter.path()).willReturn(mockPath);
-    // }
 
     @Test
     void givenEmptyAllowedAndEmptyDeniedFilters_whenNullPrimaryHierarchyOnCurrentNode_thenAllowNode()
