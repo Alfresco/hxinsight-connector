@@ -63,6 +63,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
         properties = {"logging.level.org.alfresco=DEBUG"},
         classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class, CamelContext.class})
 @EnableAutoConfiguration
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.FieldNamingConventions"})
 class ATSTransformResponseHandlerTest
 {
     private static final String RESPONSE_ENDPOINT = "direct:transform-response-test";
