@@ -44,6 +44,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.RepoEventFilterHandler;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
@@ -84,13 +87,28 @@ class EventProcessorTest
     @Mock
     private RepoEvent<DataAttributes<NodeResource>> mockEvent;
 
+    @Mock
+    private RepoEventFilterHandler mockRepoEventFilterHandler;
+
+    @Mock
+    private IntegrationProperties mockIntegrationProperties;
+
+    @Mock
+    private IntegrationProperties.Alfresco mockAlfrescoProperties;
+    @Mock
+    private Filter mockFilter;
+
     @InjectMocks
     EventProcessor eventProcessor;
 
     @BeforeEach
-    void mockMessage()
+    void mockBasicData()
     {
+        given(mockIntegrationProperties.alfresco()).willReturn(mockAlfrescoProperties);
+        given(mockAlfrescoProperties.filter()).willReturn(mockFilter);
         given(mockExchange.getIn()).willReturn(mockMessage);
+        given(mockMessage.getBody(RepoEvent.class)).willReturn(mockEvent);
+        given(mockRepoEventFilterHandler.handleAndGetAllowed(mockExchange, mockFilter)).willReturn(true);
     }
 
     @Test
@@ -235,6 +253,27 @@ class EventProcessorTest
         // then
         then(deleteNodeCommandHandler).should().handle(deleteNodeCommand);
         then(deleteNodeCommandHandler).shouldHaveNoMoreInteractions();
+    }
+
+    @Test
+    void shouldNotProcessWhenFilterDeniesEvent()
+    {
+        given(mockRepoEventFilterHandler.handleAndGetAllowed(mockExchange, mockFilter)).willReturn(false);
+        given(mockEvent.getId()).willReturn("event-id");
+
+        // when
+        eventProcessor.process(mockExchange);
+
+        // then
+        then(repoEventMapper).shouldHaveNoInteractions();
+        then(ingestNodeCommandHandler).shouldHaveNoInteractions();
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+        then(deleteNodeCommandHandler).shouldHaveNoInteractions();
+        // then(repoEventMapper).should(never()).mapToIngestNodeCommand(any());
+        // then(ingestNodeCommandHandler).should(never()).handle(any());
+        // then(repoEventMapper).should(never()).mapToIngestContentCommand(any());
+        // then(ingestContentCommandHandler).should(never()).handle(any(TriggerContentIngestionCommand.class));
+        // then(deleteNodeCommandHandler).should(never()).handle(any());
     }
 
     RepoEvent<DataAttributes<NodeResource>> prepareMockCreatedEvent()

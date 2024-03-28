@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.LiveIngesterEventHandler.DENY_NODE;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 
@@ -61,15 +60,11 @@ public class RepoEventFilterHandler
      * @param filter
      *            Filter configuration
      */
-    public void handle(Exchange exchange, Filter filter)
+    public boolean handleAndGetAllowed(Exchange exchange, Filter filter)
     {
         final FilteringResults filteringResults = calculateFilteringResults(exchange, filter);
-        final boolean allowNode = filteringResults.allowed;
-        if (!allowNode)
-        {
-            exchange.setProperty(DENY_NODE, true);
-        }
         filteringResults.newEventType.ifPresent(type -> exchange.getIn().setBody(camelEventMapper.alterRepoEvent(exchange, type)));
+        return filteringResults.allowed;
     }
 
     private FilteringResults calculateFilteringResults(Exchange exchange, Filter filter)

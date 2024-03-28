@@ -26,13 +26,14 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.never;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.LiveIngesterEventHandler.DENY_NODE;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -108,8 +109,9 @@ class RepoEventFilterHandlerTest
         given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
 
         // when
-        objectUnderTest.handle(mockExchange, mockFilter);
+        boolean allow = objectUnderTest.handleAndGetAllowed(mockExchange, mockFilter);
 
+        assertTrue(allow);
         then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
         then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
@@ -117,7 +119,6 @@ class RepoEventFilterHandlerTest
         then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
         then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
     }
 
@@ -130,8 +131,9 @@ class RepoEventFilterHandlerTest
         given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
 
         // when
-        objectUnderTest.handle(mockExchange, mockFilter);
+        boolean allow = objectUnderTest.handleAndGetAllowed(mockExchange, mockFilter);
 
+        assertFalse(allow);
         then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
         then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
@@ -139,7 +141,6 @@ class RepoEventFilterHandlerTest
         then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        then(mockExchange).should().setProperty(DENY_NODE, true);
         then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
     }
 
@@ -152,8 +153,9 @@ class RepoEventFilterHandlerTest
         given(mockAncestorFilterApplier.allowNode(mockResource, mockFilter)).willReturn(true);
 
         // when
-        objectUnderTest.handle(mockExchange, mockFilter);
+        boolean allow = objectUnderTest.handleAndGetAllowed(mockExchange, mockFilter);
 
+        assertTrue(allow);
         then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
         then(mockTypeFilterApplier).should().allowNode(mockResource, mockFilter);
@@ -161,7 +163,6 @@ class RepoEventFilterHandlerTest
         then(mockAncestorFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
         then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
     }
 
@@ -178,8 +179,9 @@ class RepoEventFilterHandlerTest
         given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
 
         // when
-        objectUnderTest.handle(mockExchange, mockFilter);
+        boolean allow = objectUnderTest.handleAndGetAllowed(mockExchange, mockFilter);
 
+        assertTrue(allow);
         then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).should().allowNodeBefore(true, mockResourceBefore, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
@@ -190,7 +192,6 @@ class RepoEventFilterHandlerTest
         then(mockAncestorFilterApplier).should().allowNodeBefore(true, mockResourceBefore, mockFilter);
         then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
         then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
     }
 
@@ -207,8 +208,9 @@ class RepoEventFilterHandlerTest
         given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
 
         // when
-        objectUnderTest.handle(mockExchange, mockFilter);
+        boolean allow = objectUnderTest.handleAndGetAllowed(mockExchange, mockFilter);
 
+        assertFalse(allow);
         then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).should().allowNodeBefore(false, mockResourceBefore, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
@@ -219,7 +221,6 @@ class RepoEventFilterHandlerTest
         then(mockAncestorFilterApplier).should().allowNodeBefore(true, mockResourceBefore, mockFilter);
         then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        then(mockExchange).should().setProperty(DENY_NODE, true);
         then(mockCamelEventMapper).should(never()).alterRepoEvent(eq(mockExchange), any(String.class));
     }
 
@@ -236,8 +237,9 @@ class RepoEventFilterHandlerTest
         given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
 
         // when
-        objectUnderTest.handle(mockExchange, mockFilter);
+        boolean allow = objectUnderTest.handleAndGetAllowed(mockExchange, mockFilter);
 
+        assertTrue(allow);
         then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).should().allowNodeBefore(true, mockResourceBefore, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
@@ -248,7 +250,6 @@ class RepoEventFilterHandlerTest
         then(mockAncestorFilterApplier).should().allowNodeBefore(true, mockResourceBefore, mockFilter);
         then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
         then(mockCamelEventMapper).should().alterRepoEvent(mockExchange, NODE_CREATED.getType());
     }
 
@@ -265,8 +266,9 @@ class RepoEventFilterHandlerTest
         given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
 
         // when
-        objectUnderTest.handle(mockExchange, mockFilter);
+        boolean allow = objectUnderTest.handleAndGetAllowed(mockExchange, mockFilter);
 
+        assertTrue(allow);
         then(mockAspectFilterApplier).should().allowNode(mockResource, mockFilter);
         then(mockAspectFilterApplier).should().allowNodeBefore(false, mockResourceBefore, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
@@ -277,7 +279,6 @@ class RepoEventFilterHandlerTest
         then(mockAncestorFilterApplier).should().allowNodeBefore(true, mockResourceBefore, mockFilter);
         then(mockAncestorFilterApplier).shouldHaveNoMoreInteractions();
 
-        then(mockExchange).should(never()).setProperty(eq(DENY_NODE), any());
         then(mockCamelEventMapper).should().alterRepoEvent(mockExchange, NODE_DELETED.getType());
     }
 

@@ -29,13 +29,11 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.RepoEventFilterHandler;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 
 @Component
@@ -47,7 +45,6 @@ public class LiveIngesterEventHandler extends RouteBuilder
 
     private final EventProcessor eventProcessor;
     private final IntegrationProperties integrationProperties;
-    private final RepoEventFilterHandler repoEventFilterHandler;
     private final CamelEventMapper camelEventMapper;
 
     @Override
@@ -59,9 +56,6 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .routeId(ROUTE_ID)
                 .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
                 .setBody(camelEventMapper::repoEventFrom)
-                .process(exchange -> repoEventFilterHandler.handle(exchange, integrationProperties.alfresco().filter()))
-                .filter(exchange -> !exchange.getIn().getBody().equals("empty"))
-                .filter(exchange -> BooleanUtils.isNotTrue(exchange.getProperty(DENY_NODE, Boolean.class)))
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)
                 .end();
