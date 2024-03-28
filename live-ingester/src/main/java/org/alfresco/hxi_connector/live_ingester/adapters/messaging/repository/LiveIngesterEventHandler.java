@@ -41,7 +41,6 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ma
 public class LiveIngesterEventHandler extends RouteBuilder
 {
     private static final String ROUTE_ID = "repo-events-consumer";
-    public static final String DENY_NODE = "DENY_NODE";
 
     private final EventProcessor eventProcessor;
     private final IntegrationProperties integrationProperties;
