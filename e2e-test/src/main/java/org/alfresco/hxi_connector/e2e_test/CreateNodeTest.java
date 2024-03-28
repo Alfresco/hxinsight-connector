@@ -102,7 +102,7 @@ public class CreateNodeTest  {
                 given().auth().basic("admin","admin")
                         .contentType("multipart/form-data")
 //                        .body("{\"name\": \"testFile1.docx\", \"nodeType\": \"cm:content\"}")
-                        .multiPart("filedata", new File("src/main/resources/Alfresco Content Services 7.4.docx"))
+                        .multiPart("filedata", new File("src/main/resources/test-files/Alfresco Content Services 7.4.docx"))
                         .when()
                         .post("http://"+ repository.getHost() + ":"+ repository.getFirstMappedPort()+ "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
                         .then()
