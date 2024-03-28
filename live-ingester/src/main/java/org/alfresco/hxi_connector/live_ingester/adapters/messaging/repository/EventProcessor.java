@@ -36,8 +36,11 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.RepoEventFilterHandler;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
@@ -59,12 +62,23 @@ public class EventProcessor
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final DeleteNodeCommandHandler deleteNodeCommandHandler;
     private final RepoEventMapper repoEventMapper;
+    private final RepoEventFilterHandler repoEventFilterHandler;
+    private final IntegrationProperties integrationProperties;
 
-    public void process(RepoEvent<DataAttributes<NodeResource>> event)
+    public void process(Exchange exchange)
     {
-        handleMetadataPropertiesChange(event);
-        handleContentChange(event);
-        handleNodeDeleteEvent(event);
+        boolean allowEvent = repoEventFilterHandler.handleAndGetAllowed(exchange, integrationProperties.alfresco().filter());
+        final RepoEvent<DataAttributes<NodeResource>> event = exchange.getIn().getBody(RepoEvent.class);
+        if (allowEvent)
+        {
+            handleMetadataPropertiesChange(event);
+            handleContentChange(event);
+            handleNodeDeleteEvent(event);
+        }
+        else
+        {
+            log.atDebug().log("Repository event of id: {} is denied for further processing", event.getId());
+        }
     }
 
     private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)

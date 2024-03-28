@@ -34,9 +34,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -44,12 +42,24 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class AncestorFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    public boolean allowNode(NodeResource nodeResource, Filter filter)
     {
-        final List<String> primaryHierarchy = ListUtils.emptyIfNull(repoEvent.getData().getResource().getPrimaryHierarchy());
+        final List<String> primaryHierarchy = ListUtils.emptyIfNull(nodeResource.getPrimaryHierarchy());
         final List<String> allowed = filter.path().allow();
         final List<String> denied = filter.path().deny();
-        log.atDebug().log("Applying ancestor filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
+        log.atDebug().log("Applying ancestor filters on repo node id: {}", nodeResource.getId());
         return CollectionFilter.filter(primaryHierarchy, allowed, denied);
+    }
+
+    @Override
+    public boolean allowNodeBefore(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
+    {
+        log.atDebug().log("Applying ancestor filters on previous version of repo node id: {}", nodeResourceBefore.getId());
+        final List<String> primaryHierarchy = nodeResourceBefore.getPrimaryHierarchy();
+        if (primaryHierarchy == null)
+        {
+            return currentlyAllowed;
+        }
+        return allowNode(nodeResourceBefore, filter);
     }
 }

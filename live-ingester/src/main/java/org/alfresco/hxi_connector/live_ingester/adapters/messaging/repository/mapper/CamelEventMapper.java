@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -47,6 +47,13 @@ public class CamelEventMapper
 
     private final ObjectMapper mapper;
 
+    /**
+     * Unmarshalls Camel exchange body to RepoEvent POJO
+     *
+     * @param exchange
+     *            Camel Exchange object
+     * @return RepoEvent
+     */
     public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
     {
         try
@@ -57,5 +64,30 @@ public class CamelEventMapper
         {
             throw new LiveIngesterRuntimeException("Event deserialization failed", e);
         }
+    }
+
+    /**
+     * This method alters the original type of repo event.
+     *
+     * @param exchange
+     *            Camel exchange object
+     * @param newEventType
+     *            event type to be altered
+     * @return altered repo event
+     */
+    public RepoEvent<DataAttributes<NodeResource>> alterRepoEvent(Exchange exchange, String newEventType)
+    {
+        final RepoEvent<DataAttributes<NodeResource>> repoEventOriginal = exchange.getIn().getBody(RepoEvent.class);
+        log.atDebug().log("Altering repo event type from {} to {}. Repo Event id: {}", repoEventOriginal.getType(), newEventType, repoEventOriginal.getId());
+        return RepoEvent.<DataAttributes<NodeResource>> builder()
+                .setData(repoEventOriginal.getData())
+                .setDatacontenttype(repoEventOriginal.getDatacontenttype())
+                .setDataschema(repoEventOriginal.getDataschema())
+                .setExtensionAttributes(repoEventOriginal.getExtensionAttributes())
+                .setId(repoEventOriginal.getId())
+                .setSource(repoEventOriginal.getSource())
+                .setTime(repoEventOriginal.getTime())
+                .setType(newEventType)
+                .build();
     }
 }

@@ -27,12 +27,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.f
 
 import static java.util.Collections.emptyList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,18 +40,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class AncestorFilterApplierTest
 {
     private static final String ANCESTOR = "parent-node-id";
-    @Mock
-    private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
-    @Mock
-    private DataAttributes<NodeResource> mockData;
     @Mock
     private NodeResource mockResource;
     @Mock
@@ -62,39 +56,49 @@ class AncestorFilterApplierTest
     @InjectMocks
     private AncestorFilterApplier objectUnderTest;
 
-    @BeforeEach
-    void mockBasicData()
-    {
-        given(mockRepoEvent.getData()).willReturn(mockData);
-        given(mockData.getResource()).willReturn(mockResource);
-        given(mockFilter.path()).willReturn(mockPath);
-    }
-
     @Test
-    void shouldNotFilterOutNullPrimaryHierarchyWhenEmptyAllowedAndEmptyDenied()
+    void givenEmptyAllowedAndEmptyDeniedFilters_whenNullPrimaryHierarchyOnCurrentNode_thenAllowNode()
     {
+        given(mockFilter.path()).willReturn(mockPath);
         given(mockResource.getPrimaryHierarchy()).willReturn(null);
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
 
         // then
         assertTrue(result);
     }
 
     @Test
-    void shouldFilterOutWhenPrimaryHierarchyNullAndNonEmptyAllowedAndEmptyDenied()
+    void givenNonEmptyAllowedAndEmptyDeniedFilters_whenNullPrimaryHierarchyOnCurrentNode_thenDenyNode()
     {
+        given(mockFilter.path()).willReturn(mockPath);
         given(mockResource.getPrimaryHierarchy()).willReturn(null);
         given(mockPath.allow()).willReturn(List.of(ANCESTOR));
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
 
         // then
         assertFalse(result);
     }
+
+    @Test
+    void whenNullPrimaryHierarchyOnPreviousNode_thenReturnCurrentlyAllowed()
+    {
+        given(mockResource.getPrimaryHierarchy()).willReturn(null);
+        final boolean currentlyAllowed = true;
+
+        // when
+        boolean resultForCurrentlyAllowed = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
+        boolean resultForCurrentlyDenied = objectUnderTest.allowNodeBefore(!currentlyAllowed, mockResource, mockFilter);
+
+        // then
+        assertTrue(resultForCurrentlyAllowed);
+        assertFalse(resultForCurrentlyDenied);
+    }
+
 }

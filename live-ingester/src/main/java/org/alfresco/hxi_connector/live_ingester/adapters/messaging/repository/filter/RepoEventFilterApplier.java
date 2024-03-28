@@ -27,11 +27,14 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 public interface RepoEventFilterApplier
 {
-    boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter);
+    boolean allowNode(NodeResource nodeResource, Filter filter);
+
+    default boolean allowNodeBefore(boolean currentlyAllowed, NodeResource nodeResource, Filter filter)
+    {
+        return allowNode(nodeResource, filter);
+    }
 }
