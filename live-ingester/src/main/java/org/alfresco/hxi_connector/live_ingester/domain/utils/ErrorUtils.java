@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -34,6 +34,7 @@ import lombok.NoArgsConstructor;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.ResourceNotFoundException;
 
 @NoArgsConstructor(access = PRIVATE)
 public class ErrorUtils
@@ -42,7 +43,11 @@ public class ErrorUtils
 
     public static void throwExceptionOnUnexpectedStatusCode(int actualStatusCode, int expectedStatusCode)
     {
-        if (actualStatusCode >= 400 && actualStatusCode <= 499)
+        if (actualStatusCode == 404)
+        {
+            throw new ResourceNotFoundException(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(expectedStatusCode, actualStatusCode));
+        }
+        else if (actualStatusCode >= 400 && actualStatusCode <= 499)
         {
             throw new EndpointClientErrorException(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(expectedStatusCode, actualStatusCode));
         }

@@ -23,10 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
+import java.io.IOException;
 
-public record ClientData(@NotBlank String nodeRef, @NotBlank String targetMimeType, @PositiveOrZero int retryAttempt)
-{}
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
+public abstract class RawJsonSerializer<T> extends StdSerializer<T>
+{
+    ObjectMapper objectMapper = new ObjectMapper();
+
+    protected RawJsonSerializer(Class<T> vc)
+    {
+        super(vc);
+    }
+
+    @Override
+    public void serialize(T t, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException
+    {
+        jsonGenerator.writeString(objectMapper.writeValueAsString(t));
+    }
+
+}
