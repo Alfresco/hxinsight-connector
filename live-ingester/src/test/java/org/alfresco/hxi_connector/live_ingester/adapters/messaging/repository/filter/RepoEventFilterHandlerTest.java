@@ -34,6 +34,7 @@ import static org.mockito.BDDMockito.then;
 
 import java.util.List;
 
+import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +42,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -60,6 +62,10 @@ class RepoEventFilterHandlerTest
 
     @Mock
     private Filter mockFilter;
+    @Mock
+    private Exchange mockExchange;
+    @Mock
+    private CamelEventMapper mockCamelEventMapper;
 
     private RepoEventFilterHandler objectUnderTest;
 
@@ -67,21 +73,22 @@ class RepoEventFilterHandlerTest
     void setUp()
     {
         final List<RepoEventFilterApplier> repoEventFilterAppliers = List.of(mockAspectFilterApplier, mockTypeFilterApplier);
-        objectUnderTest = new RepoEventFilterHandler(repoEventFilterAppliers);
+        objectUnderTest = new RepoEventFilterHandler(mockCamelEventMapper, repoEventFilterAppliers);
+        given(mockCamelEventMapper.repoEventFrom(mockExchange)).willReturn(mockRepoEvent);
     }
 
     @Test
     void shouldNotFilterOutWhenAllAppliersReturnTrue()
     {
-        given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(true);
-        given(mockTypeFilterApplier.applyFilter(any(), any())).willReturn(true);
+        given(mockAspectFilterApplier.applyFilter(any(), any(), any())).willReturn(true);
+        given(mockTypeFilterApplier.applyFilter(any(), any(), any())).willReturn(true);
 
         // when
-        final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
+        final boolean result = objectUnderTest.filterNode(mockExchange, mockFilter);
 
-        then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
+        then(mockAspectFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(mockTypeFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
+        then(mockTypeFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
         then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
 
         assertTrue(result);
@@ -90,15 +97,15 @@ class RepoEventFilterHandlerTest
     @Test
     void shouldFilterOutWhenAtLeastOneApplierReturnFalse()
     {
-        given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(true);
-        given(mockTypeFilterApplier.applyFilter(any(), any())).willReturn(false);
+        given(mockAspectFilterApplier.applyFilter(any(), any(), any())).willReturn(true);
+        given(mockTypeFilterApplier.applyFilter(any(), any(), any())).willReturn(false);
 
         // when
-        final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
+        final boolean result = objectUnderTest.filterNode(mockExchange, mockFilter);
 
-        then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
+        then(mockAspectFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
-        then(mockTypeFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
+        then(mockTypeFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
         then(mockTypeFilterApplier).shouldHaveNoMoreInteractions();
 
         assertFalse(result);
@@ -107,12 +114,12 @@ class RepoEventFilterHandlerTest
     @Test
     void shouldFilterOutAndFailFastWhenFirstApplierReturnFalse()
     {
-        given(mockAspectFilterApplier.applyFilter(any(), any())).willReturn(false);
+        given(mockAspectFilterApplier.applyFilter(any(), any(), any())).willReturn(false);
 
         // when
-        final boolean result = objectUnderTest.filterNode(mockRepoEvent, mockFilter);
+        final boolean result = objectUnderTest.filterNode(mockExchange, mockFilter);
 
-        then(mockAspectFilterApplier).should().applyFilter(mockRepoEvent, mockFilter);
+        then(mockAspectFilterApplier).should().applyFilter(mockExchange, mockRepoEvent, mockFilter);
         then(mockAspectFilterApplier).shouldHaveNoMoreInteractions();
         then(mockTypeFilterApplier).shouldHaveNoInteractions();
 

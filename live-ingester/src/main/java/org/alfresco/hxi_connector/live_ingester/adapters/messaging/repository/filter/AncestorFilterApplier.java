@@ -29,11 +29,14 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.apache.commons.collections4.ListUtils;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -44,12 +47,20 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class AncestorFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    public boolean applyFilter(Exchange exchange, RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
     {
         final List<String> primaryHierarchy = ListUtils.emptyIfNull(repoEvent.getData().getResource().getPrimaryHierarchy());
         final List<String> allowed = filter.path().allow();
         final List<String> denied = filter.path().deny();
         log.atDebug().log("Applying ancestor filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
-        return CollectionFilter.filter(primaryHierarchy, allowed, denied);
+        boolean result = CollectionFilter.filter(primaryHierarchy, allowed, denied);
+        if (EventUtils.isEventTypeUpdated(repoEvent))
+        {
+            final List<String> primaryHierarchyBefore = repoEvent.getData().getResourceBefore().getPrimaryHierarchy();
+            boolean resultBefore = primaryHierarchyBefore == null ? result : CollectionFilter.filter(primaryHierarchyBefore, allowed, denied);
+            ExchangeEnricher.enrichExchangeAfterFiltering(exchange, resultBefore, result);
+            return resultBefore || result;
+        }
+        return result;
     }
 }

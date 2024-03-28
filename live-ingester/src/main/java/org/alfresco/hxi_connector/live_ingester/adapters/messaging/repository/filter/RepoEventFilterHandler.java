@@ -30,9 +30,11 @@ import java.util.List;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -42,13 +44,14 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @Slf4j
 public class RepoEventFilterHandler
 {
-
+    private final CamelEventMapper camelEventMapper;
     private final List<RepoEventFilterApplier> repoEventFilterAppliers;
 
-    public boolean filterNode(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    public boolean filterNode(Exchange exchange, Filter filter)
     {
+        RepoEvent<DataAttributes<NodeResource>> repoEvent = camelEventMapper.repoEventFrom(exchange);
         return repoEventFilterAppliers.stream()
                 .peek(f -> log.atDebug().log("Applying filters {} to repo event of id: {}", filter, repoEvent.getId()))
-                .allMatch(f -> f.applyFilter(repoEvent, filter));
+                .allMatch(f -> f.applyFilter(exchange, repoEvent, filter));
     }
 }

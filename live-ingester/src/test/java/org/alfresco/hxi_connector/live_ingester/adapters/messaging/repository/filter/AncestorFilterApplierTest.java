@@ -27,11 +27,19 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.f
 
 import static java.util.Collections.emptyList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.ExchangeEnricher.UPDATED_EVENT_TYPE_PROP;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import java.util.List;
 
+import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +56,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 class AncestorFilterApplierTest
 {
     private static final String ANCESTOR = "parent-node-id";
+    private static final String GRAND_ANCESTOR = "grandparent-node-id";
     @Mock
     private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
     @Mock
@@ -55,9 +64,13 @@ class AncestorFilterApplierTest
     @Mock
     private NodeResource mockResource;
     @Mock
+    private NodeResource mockResourceBefore;
+    @Mock
     private Filter mockFilter;
     @Mock
     private Filter.Path mockPath;
+    @Mock
+    private Exchange mockExchange;
 
     @InjectMocks
     private AncestorFilterApplier objectUnderTest;
@@ -78,7 +91,7 @@ class AncestorFilterApplierTest
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
 
         // then
         assertTrue(result);
@@ -92,9 +105,93 @@ class AncestorFilterApplierTest
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
 
         // then
         assertFalse(result);
+    }
+
+    @Test
+    void shouldNotEnrichExchangeWhenRepoEventTypeCreate()
+    {
+        given(mockPath.allow()).willReturn(List.of(GRAND_ANCESTOR));
+        given(mockPath.deny()).willReturn(emptyList());
+        given(mockRepoEvent.getType()).willReturn(NODE_CREATED.getType());
+        given(mockResource.getPrimaryHierarchy()).willReturn(List.of(ANCESTOR));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+
+        then(mockExchange).shouldHaveNoInteractions();
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldNotEnrichExchangeWhenRepoEventTypeDelete()
+    {
+        given(mockPath.allow()).willReturn(List.of(GRAND_ANCESTOR));
+        given(mockPath.deny()).willReturn(emptyList());
+        given(mockRepoEvent.getType()).willReturn(NODE_DELETED.getType());
+        given(mockResource.getPrimaryHierarchy()).willReturn(List.of(ANCESTOR));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+
+        then(mockExchange).shouldHaveNoInteractions();
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldNotEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultNotChanged()
+    {
+        given(mockPath.allow()).willReturn(List.of(GRAND_ANCESTOR));
+        given(mockPath.deny()).willReturn(emptyList());
+        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockResource.getPrimaryHierarchy()).willReturn(List.of(ANCESTOR));
+        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
+        given(mockResourceBefore.getPrimaryHierarchy()).willReturn(List.of(ANCESTOR));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+
+        then(mockExchange).shouldHaveNoInteractions();
+        assertFalse(result);
+    }
+
+    @Test
+    void shouldEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultChangedFromAllowedToDenied()
+    {
+        given(mockPath.allow()).willReturn(emptyList());
+        given(mockPath.deny()).willReturn(List.of(GRAND_ANCESTOR));
+        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockResource.getPrimaryHierarchy()).willReturn(List.of(GRAND_ANCESTOR, ANCESTOR));
+        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
+        given(mockResourceBefore.getPrimaryHierarchy()).willReturn(List.of(ANCESTOR));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+
+        then(mockExchange).should().setProperty(UPDATED_EVENT_TYPE_PROP, NODE_DELETED.getType());
+        then(mockExchange).shouldHaveNoMoreInteractions();
+        // needs to further process delete event
+        assertTrue(result);
+    }
+
+    @Test
+    void shouldEnrichExchangeWhenRepoEventTypeUpdateAndFilteringResultChangedFromDeniedToAllowed()
+    {
+        given(mockPath.allow()).willReturn(List.of(GRAND_ANCESTOR));
+        given(mockPath.deny()).willReturn(emptyList());
+        given(mockRepoEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockResource.getPrimaryHierarchy()).willReturn(List.of(GRAND_ANCESTOR, ANCESTOR));
+        given(mockData.getResourceBefore()).willReturn(mockResourceBefore);
+        given(mockResourceBefore.getPrimaryHierarchy()).willReturn(List.of(ANCESTOR));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockExchange, mockRepoEvent, mockFilter);
+
+        then(mockExchange).should().setProperty(UPDATED_EVENT_TYPE_PROP, NODE_CREATED.getType());
+        then(mockExchange).shouldHaveNoMoreInteractions();
+        assertTrue(result);
     }
 }
