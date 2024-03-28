@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -95,15 +94,18 @@ class AncestorFilterApplierTest
     }
 
     @Test
-    void whenNullPrimaryHierarchyOnPreviousNode_thenUnresolved()
+    void whenNullPrimaryHierarchyOnPreviousNode_thenReturnCurrentlyAllowed()
     {
         given(mockResource.getPrimaryHierarchy()).willReturn(null);
+        final boolean currentlyAllowed = true;
 
         // when
-        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
+        boolean resultForCurrentlyAllowed = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
+        boolean resultForCurrentlyDenied = objectUnderTest.allowNodeBefore(!currentlyAllowed, mockResource, mockFilter);
 
         // then
-        assertTrue(result.isEmpty());
+        assertTrue(resultForCurrentlyAllowed);
+        assertFalse(resultForCurrentlyDenied);
     }
 
 }

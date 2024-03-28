@@ -33,7 +33,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -101,12 +100,13 @@ class AspectFilterApplierTest
         given(mockResource.getAspectNames()).willReturn(null);
         given(mockAspect.allow()).willReturn(emptyList());
         given(mockAspect.deny()).willReturn(emptyList());
+        final boolean currentlyAllowed = true;
 
         // when
-        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
+        boolean result = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
 
         // then
-        assertTrue(result.get());
+        assertTrue(result);
     }
 
     @Test
@@ -115,12 +115,13 @@ class AspectFilterApplierTest
         given(mockResource.getAspectNames()).willReturn(null);
         given(mockAspect.allow()).willReturn(List.of(CM_ASPECT_1));
         given(mockAspect.deny()).willReturn(emptyList());
+        final boolean currentlyAllowed = false;
 
         // when
-        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
+        boolean result = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
 
         // then
-        assertFalse(result.get());
+        assertFalse(result);
     }
 
 }

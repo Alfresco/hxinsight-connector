@@ -32,7 +32,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -76,11 +75,15 @@ class TypeFilterApplierTest
     void whenNullPreviousNodeType_thenUnresolved()
     {
         given(mockResource.getNodeType()).willReturn(null);
+        final boolean currentlyAllowed = true;
 
-        // when/then
-        Optional<Boolean> result = objectUnderTest.allowNodeBefore(mockResource, mockFilter);
+        // when
+        boolean resultForCurrentlyAllowed = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
+        boolean resultForCurrentlyDenied = objectUnderTest.allowNodeBefore(!currentlyAllowed, mockResource, mockFilter);
 
-        assertTrue(result.isEmpty());
+        // then
+        assertTrue(resultForCurrentlyAllowed);
+        assertFalse(resultForCurrentlyDenied);
     }
 
 }

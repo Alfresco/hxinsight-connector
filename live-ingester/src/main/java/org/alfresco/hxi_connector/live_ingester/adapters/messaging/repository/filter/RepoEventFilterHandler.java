@@ -86,7 +86,7 @@ public class RepoEventFilterHandler
             if (eventTypeUpdated)
             {
                 log.atDebug().log("Applying filters {} to previous version of repo event of id: {}", filter, repoEvent.getId());
-                final boolean allowPrevious = filterApplier.allowNodeBefore(repoEvent.getData().getResourceBefore(), filter).orElse(allow);
+                final boolean allowPrevious = filterApplier.allowNodeBefore(allow, repoEvent.getData().getResourceBefore(), filter);
                 allowPreviousNode = allowPreviousNode && allowPrevious;
             }
         }

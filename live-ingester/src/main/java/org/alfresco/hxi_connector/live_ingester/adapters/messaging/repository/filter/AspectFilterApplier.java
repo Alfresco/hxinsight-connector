@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
@@ -52,13 +51,6 @@ public class AspectFilterApplier implements RepoEventFilterApplier
         final List<String> denied = filter.aspect().deny();
         log.atDebug().log("Applying aspect filters on node id: {}", nodeResource.getId());
         return CollectionFilter.filter(aspectNames, allowed, denied);
-    }
-
-    @Override
-    public Optional<Boolean> allowNodeBefore(NodeResource nodeResourceBefore, Filter filter)
-    {
-        log.atDebug().log("Applying aspect filters on previous version of repo node id: {}", nodeResourceBefore.getId());
-        return Optional.of(allowNode(nodeResourceBefore, filter));
     }
 
 }

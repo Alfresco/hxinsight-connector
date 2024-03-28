@@ -60,6 +60,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
                 .setBody(camelEventMapper::repoEventFrom)
                 .process(exchange -> repoEventFilterHandler.handle(exchange, integrationProperties.alfresco().filter()))
+                .filter(exchange -> !exchange.getIn().getBody().equals("empty"))
                 .filter(exchange -> BooleanUtils.isNotTrue(exchange.getProperty(DENY_NODE, Boolean.class)))
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)

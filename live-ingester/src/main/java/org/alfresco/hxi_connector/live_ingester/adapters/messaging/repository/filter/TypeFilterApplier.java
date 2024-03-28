@@ -27,7 +27,6 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import java.util.List;
-import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,14 +52,14 @@ public class TypeFilterApplier implements RepoEventFilterApplier
     }
 
     @Override
-    public Optional<Boolean> allowNodeBefore(NodeResource nodeResourceBefore, Filter filter)
+    public boolean allowNodeBefore(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
     {
         log.atDebug().log("Applying type filters on previous version of repo node id: {}", nodeResourceBefore.getId());
         final String nodeType = nodeResourceBefore.getNodeType();
         if (nodeType == null)
         {
-            return Optional.empty();
+            return currentlyAllowed;
         }
-        return Optional.of(allowNode(nodeResourceBefore, filter));
+        return allowNode(nodeResourceBefore, filter);
     }
 }
