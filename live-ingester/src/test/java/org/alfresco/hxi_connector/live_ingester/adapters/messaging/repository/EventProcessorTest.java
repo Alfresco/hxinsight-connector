@@ -269,11 +269,6 @@ class EventProcessorTest
         then(ingestNodeCommandHandler).shouldHaveNoInteractions();
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
         then(deleteNodeCommandHandler).shouldHaveNoInteractions();
-        // then(repoEventMapper).should(never()).mapToIngestNodeCommand(any());
-        // then(ingestNodeCommandHandler).should(never()).handle(any());
-        // then(repoEventMapper).should(never()).mapToIngestContentCommand(any());
-        // then(ingestContentCommandHandler).should(never()).handle(any(TriggerContentIngestionCommand.class));
-        // then(deleteNodeCommandHandler).should(never()).handle(any());
     }
 
     RepoEvent<DataAttributes<NodeResource>> prepareMockCreatedEvent()
