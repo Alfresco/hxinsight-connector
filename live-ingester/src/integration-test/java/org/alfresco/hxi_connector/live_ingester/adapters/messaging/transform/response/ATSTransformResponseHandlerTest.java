@@ -26,19 +26,15 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+
+import java.util.Set;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retry;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.ATSTransformRequester;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.ResourceNotFoundException;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.EmptyRenditionException;
 import org.apache.camel.CamelContext;
 import org.apache.camel.CamelExecutionException;
 import org.junit.jupiter.api.Test;
@@ -51,17 +47,21 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 
-import java.util.Set;
-
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retry;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.ATSTransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.ResourceNotFoundException;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.EmptyRenditionException;
 
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
-        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class, CamelContext.class}
-)
+        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class, CamelContext.class})
 @EnableAutoConfiguration
 class ATSTransformResponseHandlerTest
 {
@@ -70,14 +70,12 @@ class ATSTransformResponseHandlerTest
             5,
             0,
             0,
-            Set.of()
-    );
+            Set.of());
     private static final Retry retryTransformation = new Retry(
             5,
             0,
             0,
-            Set.of()
-    );
+            Set.of());
 
     @MockBean
     private ATSTransformRequester atsTransformRequester;
@@ -94,11 +92,9 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 "e5bcc533-853c-44f1-a02d-3ab1e36a03e6",
                 new ClientData(
-                        "dcc9e89b-c1c0-48a4-814f-98eafab72fdb", "application/pdf", 0
-                ),
+                        "dcc9e89b-c1c0-48a4-814f-98eafab72fdb", "application/pdf", 0),
                 400,
-                "Something went wrong!"
-        );
+                "Something went wrong!");
 
         // when
         simulateResponse(transformResponse);
@@ -117,16 +113,13 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 transformedFileId,
                 new ClientData(
-                        nodeId, "application/pdf", 0
-                ),
+                        nodeId, "application/pdf", 0),
                 202,
-                ""
-        );
+                "");
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
-                nodeId
-        );
+                nodeId);
 
         doThrow(new LiveIngesterRuntimeException("Some exception")).when(ingestContentCommandHandler).handle(expectedCommand);
 
@@ -134,7 +127,9 @@ class ATSTransformResponseHandlerTest
         try
         {
             simulateResponse(transformResponse);
-        } catch (CamelExecutionException ignored) {}
+        }
+        catch (CamelExecutionException ignored)
+        {}
 
         // then
         then(ingestContentCommandHandler).should(times(retryIngestion.attempts() + 1)).handle(expectedCommand);
@@ -153,16 +148,13 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 transformedFileId,
                 new ClientData(
-                        nodeId, targetMimeType, 0
-                ),
+                        nodeId, targetMimeType, 0),
                 202,
-                ""
-        );
+                "");
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
-                nodeId
-        );
+                nodeId);
 
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 
@@ -172,7 +164,9 @@ class ATSTransformResponseHandlerTest
         try
         {
             simulateResponse(transformResponse);
-        } catch (CamelExecutionException ignored) {}
+        }
+        catch (CamelExecutionException ignored)
+        {}
 
         // then
         then(ingestContentCommandHandler).should(times(1)).handle(expectedCommand);
@@ -191,16 +185,13 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 transformedFileId,
                 new ClientData(
-                        nodeId, targetMimeType, retryTransformation.attempts()
-                ),
+                        nodeId, targetMimeType, retryTransformation.attempts()),
                 202,
-                ""
-        );
+                "");
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
-                nodeId
-        );
+                nodeId);
 
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 
@@ -208,7 +199,9 @@ class ATSTransformResponseHandlerTest
         try
         {
             simulateResponse(transformResponse);
-        } catch (CamelExecutionException ignored) {}
+        }
+        catch (CamelExecutionException ignored)
+        {}
 
         // then
         then(ingestContentCommandHandler).should(times(1)).handle(expectedCommand);
@@ -241,14 +234,10 @@ class ATSTransformResponseHandlerTest
                                             RESPONSE_ENDPOINT,
                                             RESPONSE_ENDPOINT,
                                             retryIngestion,
-                                            retryTransformation
-                                    ),
-                                    mock()
-                            ),
-                            mock()
-                    ),
-                    mock()
-            );
+                                            retryTransformation),
+                                    mock()),
+                            mock()),
+                    mock());
         }
     }
 }
