@@ -36,7 +36,6 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.apache.camel.CamelExecutionException;
 import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -126,12 +125,7 @@ class ATSTransformResponseHandlerTest
         doThrow(new LiveIngesterRuntimeException("Some exception")).when(ingestContentCommandHandler).handle(expectedCommand);
 
         // when
-        try
-        {
-            simulateResponse(transformResponse);
-        }
-        catch (CamelExecutionException ignored)
-        {}
+        catchThrowable(() -> simulateResponse(transformResponse));
 
         // then
         then(ingestContentCommandHandler).should(times(retryIngestion.attempts() + 1)).handle(expectedCommand);
