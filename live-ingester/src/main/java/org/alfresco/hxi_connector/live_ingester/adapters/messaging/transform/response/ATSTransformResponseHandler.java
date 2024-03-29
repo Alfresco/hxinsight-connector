@@ -61,7 +61,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     public void configure()
     {
         onException(EmptyRenditionException.class, ResourceNotFoundException.class)
-                .process(this::retryContentIngestion);
+                .process(this::retryContentTransformation);
 
         onException(Exception.class)
                 .log(ERROR, log, "Retrying ${routeId}, attempt ${header.CamelRedeliveryCounter} due to ${exception.message}")
@@ -97,7 +97,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void retryContentIngestion(Exchange exchange)
+    private void retryContentTransformation(Exchange exchange)
     {
         Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
