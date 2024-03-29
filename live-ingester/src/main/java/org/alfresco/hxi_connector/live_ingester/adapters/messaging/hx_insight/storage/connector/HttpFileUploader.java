@@ -52,7 +52,6 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Component
@@ -64,7 +63,6 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     static final String ROUTE_ID = "rendition-uploader";
     static final String AMZ_SECURITY_TOKEN = "X-Amz-Security-Token=";
     static final String STORAGE_LOCATION_HEADER = "storageLocation";
-    private static final String GZIP_ENCODING = "gzip";
     private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
@@ -75,12 +73,13 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     {
         // @formatter:off
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .log(LoggingLevel.ERROR, log, "Upload :: Unexpected response while uploading to S3. Body: ${body}")
             .process(this::wrapErrorIfNecessary)
             .stop();
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
+            .noStreamCaching()
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
             .toD("${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false")
             .choice()
@@ -104,17 +103,13 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         {
             Map<String, Object> headers = Map.of(
                     STORAGE_LOCATION_HEADER, wrapRawToken(fileUploadRequest.storageLocation()),
-                    Exchange.CONTENT_TYPE, fileUploadRequest.contentType(),
-                    Exchange.CONTENT_ENCODING, GZIP_ENCODING);
-
-            log.atDebug().log("Uploading file of size {} to S3", fileData.available());
+                    Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
             camelContext.createFluentProducerTemplate()
                     .to(LOCAL_ENDPOINT)
                     .withHeaders(headers)
                     .withBody(fileData)
                     .request();
-
         }
         catch (Exception e)
         {
@@ -125,7 +120,8 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
             }
             catch (IOException ioe)
             {
-                throw new LiveIngesterRuntimeException(ioe);
+                log.atDebug().log("Upload :: Stream reset failed due to: {}", ioe.getMessage());
+                throw e;
             }
         }
     }

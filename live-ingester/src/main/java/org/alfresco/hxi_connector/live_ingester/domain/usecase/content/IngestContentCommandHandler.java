@@ -75,20 +75,14 @@ public class IngestContentCommandHandler
         String fileId = command.transformedFileId();
         String nodeId = command.nodeId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
-
-        log.atDebug().log("Downloaded node {} content in file {} from SFS", nodeId, fileId);
+        log.atDebug().log("Transform :: Downloaded from SFS content of node: {} in file with ID: {}", nodeId, fileId);
 
         IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
 
-        log.atDebug().log("Uploaded node {} content to S3 URL: {}", nodeId, ingestContentResponse.url());
-
         Set<PropertyDelta<?>> properties = Set.of(
-                contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.contentId(), ingestContentResponse.mimeType()));
-
+                contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.transferId(), ingestContentResponse.mimeType()));
         IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, UPDATE, properties);
-
-        log.atDebug().log("Ingesting node {} content", nodeId);
-
+        log.atDebug().log("Ingestion :: Notifying about node: {} content upload within transfer with ID: {}", nodeId, ingestContentResponse.transferId());
         ingestNodeCommandHandler.handle(ingestNodeCommand);
     }
 }

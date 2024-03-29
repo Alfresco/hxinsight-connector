@@ -58,16 +58,16 @@ public class ATSTransformResponseHandler extends RouteBuilder
         // @formatter:off
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().transform().response().endpoint())
-                .routeId(ROUTE_ID)
-                .log(DEBUG, "Received transform completed event : ${body}")
-                .unmarshal()
-                .json(JsonLibrary.Jackson, TransformResponse.class)
-                .process(exchange -> SecurityContextHolder.setContext(securityContext))
-                .doTry()
-                    .process(this::ingestContent)
-                .doCatch(TransformationFailedException.class)
-                    .log(DEBUG, log, "Transformation failed: ${exception.message}")
-                .end();
+            .routeId(ROUTE_ID)
+            .log(DEBUG, log, "Transform :: Received completed event : ${body}")
+            .unmarshal()
+            .json(JsonLibrary.Jackson, TransformResponse.class)
+            .process(exchange -> SecurityContextHolder.setContext(securityContext))
+            .doTry()
+                .process(this::ingestContent)
+            .doCatch(TransformationFailedException.class)
+                .log(DEBUG, log, "Ingestion :: Content update failed: ${exception.message}")
+            .end();
         // @formatter:on
     }
 

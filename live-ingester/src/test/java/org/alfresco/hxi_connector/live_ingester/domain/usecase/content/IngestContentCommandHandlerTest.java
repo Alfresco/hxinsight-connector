@@ -33,7 +33,6 @@ import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 
-import java.net.URL;
 import java.util.Set;
 
 import lombok.SneakyThrows;
@@ -100,10 +99,7 @@ class IngestContentCommandHandlerTest
 
         File fileToUpload = mock();
         given(transformEngineFileStorageMock.downloadFile(FILE_ID)).willReturn(fileToUpload);
-        IngestContentResponse ingestContentResponse = new IngestContentResponse(
-                new URL("https://test_url.com"),
-                UPLOADED_CONTENT_ID,
-                PDF_MIMETYPE);
+        IngestContentResponse ingestContentResponse = new IngestContentResponse(UPLOADED_CONTENT_ID, PDF_MIMETYPE);
         given(storageClientMock.upload(fileToUpload, PDF_MIMETYPE, NODE_ID)).willReturn(ingestContentResponse);
 
         // when

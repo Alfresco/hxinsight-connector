@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,7 +30,7 @@ import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
-import java.io.InputStream;
+import java.io.ByteArrayInputStream;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
@@ -102,7 +102,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     @SuppressWarnings({"PMD.UnusedPrivateMethod"})
     private void convertBodyToFile(Exchange exchange)
     {
-        exchange.getMessage().setBody(new File(exchange.getIn().getBody(InputStream.class)), File.class);
+        exchange.getMessage().setBody(new File(exchange.getIn().getBody(ByteArrayInputStream.class)), File.class);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
