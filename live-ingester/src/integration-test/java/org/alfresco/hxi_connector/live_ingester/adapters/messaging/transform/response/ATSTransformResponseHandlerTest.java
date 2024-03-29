@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
+import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -162,12 +163,7 @@ class ATSTransformResponseHandlerTest
         TransformRequest expectedTransformRequest = new TransformRequest(nodeId, targetMimeType);
 
         // when
-        try
-        {
-            simulateResponse(transformResponse);
-        }
-        catch (CamelExecutionException ignored)
-        {}
+        catchThrowable(() -> simulateResponse(transformResponse));
 
         // then
         then(ingestContentCommandHandler).should(times(1)).handle(expectedCommand);
@@ -197,12 +193,7 @@ class ATSTransformResponseHandlerTest
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 
         // when
-        try
-        {
-            simulateResponse(transformResponse);
-        }
-        catch (CamelExecutionException ignored)
-        {}
+        catchThrowable(() -> simulateResponse(transformResponse));
 
         // then
         then(ingestContentCommandHandler).should(times(1)).handle(expectedCommand);
