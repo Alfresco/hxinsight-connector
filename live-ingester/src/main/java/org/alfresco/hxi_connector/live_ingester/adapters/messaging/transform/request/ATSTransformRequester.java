@@ -26,11 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request;
 
-import java.util.Map;
-import java.util.UUID;
-
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
@@ -38,10 +33,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ATSTransformRequest;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
@@ -52,11 +45,8 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
 {
     private static final String LOCAL_ENDPOINT = "direct:" + ATSTransformRequester.class.getSimpleName();
     private static final String ROUTE_ID = "transform-request-publisher";
-    private static final String WORKSPACE_SPACES_STORE = "workspace://SpacesStore/";
-    private static final String TIMEOUT_KEY = "timeout";
 
     private final CamelContext camelContext;
-    private final ObjectMapper objectMapper;
     private final IntegrationProperties integrationProperties;
 
     @Override
@@ -72,7 +62,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
     @Override
     public void requestTransform(TransformRequest transformRequest)
     {
-        ATSTransformRequest atsTransformRequest = atsTransformRequestFrom(transformRequest, 0);
+        ATSTransformRequest atsTransformRequest = toTransformRequest(transformRequest, 0);
         log.info("Sending request to ATS: {}", atsTransformRequest);
         camelContext.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
@@ -80,40 +70,20 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
 
     public void requestTransformRetry(TransformRequest transformRequest, int attempt)
     {
-        ATSTransformRequest atsTransformRequest = atsTransformRequestFrom(transformRequest, attempt);
+        ATSTransformRequest atsTransformRequest = toTransformRequest(transformRequest, attempt);
         log.info("Retrying transformation. request: {} attempt: {}", atsTransformRequest, attempt);
         camelContext.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
     }
 
-    private ATSTransformRequest atsTransformRequestFrom(TransformRequest transformRequest, int attempt)
+    private ATSTransformRequest toTransformRequest(TransformRequest transformRequest, int attempt)
     {
-        String clientDataString = makeClientDataString(transformRequest, attempt);
-        return ATSTransformRequest.builder()
-                .requestId(UUID.randomUUID().toString())
-                .nodeRef(WORKSPACE_SPACES_STORE + transformRequest.nodeRef())
-                .targetMediaType(transformRequest.targetMimeType())
-                .replyQueue(integrationProperties.alfresco().transform().response().queueName())
-                .transformOptions(getTransformRequestOptions(integrationProperties.alfresco().transform()))
-                .clientData(clientDataString)
-                .build();
+        return new ATSTransformRequest(
+                transformRequest.nodeRef(),
+                transformRequest.targetMimeType(),
+                new ClientData(transformRequest.nodeRef(), transformRequest.targetMimeType(), attempt),
+                integrationProperties.alfresco().transform().request().timeout(),
+                integrationProperties.alfresco().transform().response().queueName());
     }
 
-    private Map<String, String> getTransformRequestOptions(Transform transformProperties)
-    {
-        return Map.of(TIMEOUT_KEY, String.valueOf(transformProperties.request().timeout()));
-    }
-
-    private String makeClientDataString(TransformRequest transformRequest, int attempt)
-    {
-        ClientData clientData = new ClientData(transformRequest.nodeRef(), transformRequest.targetMimeType(), attempt);
-        try
-        {
-            return objectMapper.writeValueAsString(clientData);
-        }
-        catch (JsonProcessingException e)
-        {
-            throw new LiveIngesterRuntimeException("Failed to construct client data string for Transform Service request.", e);
-        }
-    }
 }
