@@ -30,15 +30,17 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataDeserializer;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataSerializer;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 
 @Validated
 public record TransformResponse(
         @NotBlank String targetReference,
-        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) ClientData clientData,
+        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) @JsonSerialize(using = ClientDataSerializer.class) ClientData clientData,
         @Positive int status,
         String errorDetails)
 

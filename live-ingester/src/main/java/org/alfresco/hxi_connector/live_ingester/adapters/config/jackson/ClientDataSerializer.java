@@ -23,10 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 
-public record ClientData(@NotBlank String nodeRef, @NotBlank String targetMimeType, @PositiveOrZero int retryAttempt)
-{}
+public class ClientDataSerializer extends RawJsonSerializer<ClientData>
+{
+    public ClientDataSerializer()
+    {
+        super(ClientData.class);
+    }
+}

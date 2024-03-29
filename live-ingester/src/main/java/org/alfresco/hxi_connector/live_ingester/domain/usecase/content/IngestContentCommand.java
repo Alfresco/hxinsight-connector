@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
 public record IngestContentCommand(
-        int transformationStatus,
         String transformedFileId,
         String nodeId)
 {}

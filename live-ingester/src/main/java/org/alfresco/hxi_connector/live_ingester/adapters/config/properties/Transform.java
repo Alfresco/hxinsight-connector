@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -39,8 +39,19 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
     public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout)
     {}
 
-    public record Response(@NotBlank String endpoint, @NotBlank String queueName)
-    {}
+    @SuppressWarnings("PMD.UnusedAssignment")
+    public record Response(
+            @NotBlank String endpoint,
+            @NotBlank String queueName,
+            @NotNull @NestedConfigurationProperty Retry retryIngestion,
+            @NotNull @NestedConfigurationProperty Retry retryTransformation)
+    {
+        public Response
+        {
+            retryIngestion = requireNonNullElseGet(retryTransformation, Retry::new);
+            retryTransformation = requireNonNullElseGet(retryTransformation, Retry::new);
+        }
+    }
 
     @SuppressWarnings("PMD.UnusedAssignment")
     public record SharedFileStore(@NotBlank String host, @Positive int port, @NotNull @NestedConfigurationProperty Retry retry)
