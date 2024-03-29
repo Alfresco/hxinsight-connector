@@ -36,8 +36,8 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.apache.camel.CamelContext;
 import org.apache.camel.CamelExecutionException;
+import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -62,7 +62,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
 
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
-        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class, CamelContext.class})
+        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class})
 @EnableAutoConfiguration
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.FieldNamingConventions"})
 class ATSTransformResponseHandlerTest
@@ -85,7 +85,7 @@ class ATSTransformResponseHandlerTest
     private IngestContentCommandHandler ingestContentCommandHandler;
 
     @Autowired
-    private CamelContext camelContext;
+    private ProducerTemplate producerTemplate;
 
     @Test
     void shouldSkipProcessingIfTransformationFailedWith400Error()
@@ -205,8 +205,7 @@ class ATSTransformResponseHandlerTest
     {
         ObjectMapper objectMapper = new ObjectMapper();
 
-        camelContext.createProducerTemplate()
-                .sendBody(RESPONSE_ENDPOINT, objectMapper.writeValueAsString(response));
+        producerTemplate.sendBody(RESPONSE_ENDPOINT, objectMapper.writeValueAsString(response));
     }
 
     @TestConfiguration
