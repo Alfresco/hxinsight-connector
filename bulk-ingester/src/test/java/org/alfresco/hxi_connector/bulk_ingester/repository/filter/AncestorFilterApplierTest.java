@@ -62,6 +62,7 @@ class AncestorFilterApplierTest
     private static final String DENIED_NODE_REF = "denied-node-ref";
     private static final String PARENT_NODE_REF = "parent-node-ref";
     private static final String GRANDPARENT_NODE_REF = "grandparent-node-ref";
+    private static final String NODE_REF = "node-ref";
     private static final int CHILD_ID = 3;
     private static final int PARENT_ID = 2;
     private static final int GRANDPARENT_ID = 1;
@@ -102,6 +103,7 @@ class AncestorFilterApplierTest
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
@@ -123,6 +125,7 @@ class AncestorFilterApplierTest
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
@@ -148,6 +151,7 @@ class AncestorFilterApplierTest
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
@@ -173,6 +177,7 @@ class AncestorFilterApplierTest
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);

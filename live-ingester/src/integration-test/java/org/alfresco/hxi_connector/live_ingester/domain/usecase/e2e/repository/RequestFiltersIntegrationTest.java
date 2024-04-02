@@ -1358,4 +1358,61 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
         // then
         containerSupport.expectNoHxIngestMessagesReceived();
     }
+
+    @Test
+    void testCreateRequestWithAspectInAllowedFilterAndTypeInAllowedFilterAndAncestorInAllowedFilterAndFilteredNodeIdInDenied()
+    {
+        // given
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Created",
+                  "id": "368818d9-dddd-4b8b-8eab-e050253d7f02",
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2021-01-21T11:14:16.42372Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeCreated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "4004ca99-9d2a-400d-9d80-8f840e223502",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "11111111-1111-1111-1111-111111111111",
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
+                      "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2024-03-02T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "modifiedAt": "2024-03-06T11:14:15.695Z",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "cm:autoVersion": true,
+                        "cm:versionType": "MAJOR",
+                        "cm:taggable": null
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:auditable" ],
+                      "isFolder": false,
+                      "isFile": true
+                    },
+                    "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
+                    "resourceDeniedAuthorities": []
+                  }
+                }""";
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        containerSupport.expectNoHxIngestMessagesReceived();
+    }
 }

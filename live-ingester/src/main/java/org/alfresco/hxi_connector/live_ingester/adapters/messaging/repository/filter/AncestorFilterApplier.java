@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,8 @@ public class AncestorFilterApplier implements RepoEventFilterApplier
     @Override
     public boolean allowNode(NodeResource nodeResource, Filter filter)
     {
-        final List<String> primaryHierarchy = ListUtils.emptyIfNull(nodeResource.getPrimaryHierarchy());
+        final List<String> primaryHierarchy = new ArrayList<>(ListUtils.emptyIfNull(nodeResource.getPrimaryHierarchy()));
+        primaryHierarchy.add(nodeResource.getId());
         final List<String> allowed = filter.path().allow();
         final List<String> denied = filter.path().deny();
         log.atDebug().log("Applying ancestor filters on repo node id: {}", nodeResource.getId());
