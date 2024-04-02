@@ -40,6 +40,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static software.amazon.awssdk.http.HttpStatusCode.OK;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
@@ -100,7 +101,7 @@ class HxAuthenticationClientIntegrationTest
         // given
         givenThat(post(AuthUtils.TOKEN_PATH)
                 .willReturn(aResponse()
-                        .withStatus(200)
+                        .withStatus(OK)
                         .withBody(AuthUtils.createAuthResponseBody())));
 
         // when

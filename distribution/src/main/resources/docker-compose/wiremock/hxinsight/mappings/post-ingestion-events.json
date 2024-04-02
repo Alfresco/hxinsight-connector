@@ -1,9 +1,9 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/ingest"
+    "urlPath": "/ingestion-events"
   },
   "response": {
-    "status": 200
+    "status": 202
   }
 }

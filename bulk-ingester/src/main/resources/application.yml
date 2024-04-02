@@ -32,3 +32,6 @@ alfresco:
     type:
       allow:
       deny:
+    path:
+      allow:
+      deny:

@@ -26,6 +26,13 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
+
+import java.util.Set;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -35,8 +42,11 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.st
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.EmptyRenditionException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.RemoteContentLocation;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
 @Slf4j
 @Component
@@ -46,20 +56,23 @@ public class IngestContentCommandHandler
     private static final String PDF_MIMETYPE = "application/pdf";
 
     private final TransformRequester transformRequester;
+    private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final TransformEngineFileStorage transformEngineFileStorage;
     private final IngestionEngineStorageClient ingestionEngineStorageClient;
 
-    public void handle(IngestContentCommand command)
+    public void handle(TriggerContentIngestionCommand command)
     {
         TransformRequest transformRequest = new TransformRequest(command.nodeId(), PDF_MIMETYPE);
         transformRequester.requestTransform(transformRequest);
     }
 
-    public RemoteContentLocation handle(UploadContentRenditionCommand command)
+    public void handle(IngestContentCommand command)
     {
         String fileId = command.transformedFileId();
         String nodeId = command.nodeId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
+
+        ensureThat(!downloadedFile.isEmpty(), () -> new EmptyRenditionException(nodeId));
 
         log.atDebug().log("Downloaded node {} content in file {} from SFS", nodeId, fileId);
 
@@ -67,6 +80,13 @@ public class IngestContentCommandHandler
 
         log.atDebug().log("Uploaded node {} content to S3 URL: {}", nodeId, ingestContentResponse.url());
 
-        return new RemoteContentLocation(nodeId, ingestContentResponse.url(), ingestContentResponse.contentId(), ingestContentResponse.mimeType());
+        Set<PropertyDelta<?>> properties = Set.of(
+                contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.contentId(), ingestContentResponse.mimeType()));
+
+        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, UPDATE, properties);
+
+        log.atDebug().log("Ingesting node {} content", nodeId);
+
+        ingestNodeCommandHandler.handle(ingestNodeCommand);
     }
 }

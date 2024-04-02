@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,35 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.repository.filter;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-import java.util.List;
-import jakarta.validation.constraints.NotNull;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
-@Slf4j
-public final class TypeFilter
+public class ClientDataSerializer extends RawJsonSerializer<ClientData>
 {
-    public static boolean filter(String nodeType, List<String> allowed, List<String> denied)
+    public ClientDataSerializer()
     {
-        final boolean allow = isAllowed(nodeType, allowed);
-        final boolean deny = isDenied(nodeType, denied);
-        boolean result = allow && !deny;
-        log.atDebug().log("Node type: {}. Allowed types: {}. Denied types: {}. Is allowed: {}", nodeType, allowed, denied, result);
-        return result;
-    }
-
-    private static boolean isAllowed(@NotNull String nodeType, @NotNull List<String> allowed)
-    {
-        return allowed.isEmpty() || allowed.contains(nodeType);
-    }
-
-    private static boolean isDenied(@NotNull String nodeType, @NotNull List<String> denied)
-    {
-        return denied.contains(nodeType);
+        super(ClientData.class);
     }
 }

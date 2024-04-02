@@ -57,10 +57,12 @@ class UpdateNodeEventSerializerTest
         UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE);
 
         String expectedJson = """
-                {
-                  "objectId": "%s",
-                  "eventType": "create"
-                }""".formatted(NODE_ID);
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create"
+                  }
+                ]""".formatted(NODE_ID);
         String actualJson = serialize(emptyEvent);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -74,14 +76,16 @@ class UpdateNodeEventSerializerTest
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
 
         String expectedJson = """
-                {
-                  "objectId": "%s",
-                  "eventType": "create",
-                  "properties": {
-                    "createdAt": {"value": 10000},
-                    "modifiedBy": {"value": "000-000-000"}
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdAt": {"value": 10000},
+                      "modifiedBy": {"value": "000-000-000"}
+                    }
                   }
-                }""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -95,11 +99,13 @@ class UpdateNodeEventSerializerTest
                 .addUnsetInstruction(MODIFIED_BY_PROPERTY);
 
         String expectedJson = """
-                {
-                  "objectId": "%s",
-                  "eventType": "update",
-                  "removedProperties": [ "createdAt", "modifiedBy" ]
-                }""".formatted(NODE_ID);
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "update",
+                    "removedProperties": [ "createdAt", "modifiedBy" ]
+                  }
+                ]""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -113,14 +119,16 @@ class UpdateNodeEventSerializerTest
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
 
         String expectedJson = """
-                {
-                  "objectId": "%s",
-                  "eventType": "create",
-                  "properties": {
-                    "createdBy": {"value": null},
-                    "modifiedBy": {"value": null}
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdBy": {"value": null},
+                      "modifiedBy": {"value": null}
+                    }
                   }
-                }""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -134,23 +142,25 @@ class UpdateNodeEventSerializerTest
                         "application/msword", 123L, "something.doc"));
 
         String expectedJson = """
-                {
-                  "objectId": "%s",
-                  "eventType": "create",
-                  "properties": {
-                    "cm:content": {
-                      "file": {
-                        "id": "content-id",
-                        "content-type": "application/pdf",
-                        "content-metadata": {
-                          "size": 123,
-                          "name": "something.doc",
-                          "content-type": "application/msword"
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "cm:content": {
+                        "file": {
+                          "id": "content-id",
+                          "content-type": "application/pdf",
+                          "content-metadata": {
+                            "size": 123,
+                            "name": "something.doc",
+                            "content-type": "application/msword"
+                          }
                         }
                       }
                     }
                   }
-                }""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -164,19 +174,21 @@ class UpdateNodeEventSerializerTest
                         "application/msword", null, null));
 
         String expectedJson = """
-                {
-                  "objectId": "%s",
-                  "eventType": "create",
-                  "properties": {
-                    "cm:content": {
-                      "file": {
-                        "content-metadata": {
-                          "content-type": "application/msword"
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "content-type": "application/msword"
+                          }
                         }
                       }
                     }
                   }
-                }""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);

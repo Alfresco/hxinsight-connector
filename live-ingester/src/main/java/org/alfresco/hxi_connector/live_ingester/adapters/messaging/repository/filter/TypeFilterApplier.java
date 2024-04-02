@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.repository.filter.TypeFilter;
+import org.alfresco.hxi_connector.common.repository.filter.FieldFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -50,6 +50,6 @@ public class TypeFilterApplier implements RepoEventFilterApplier
         final List<String> allowed = filter.type().allow();
         final List<String> denied = filter.type().deny();
         log.atDebug().log("Applying type filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
-        return TypeFilter.filter(nodeType, allowed, denied);
+        return FieldFilter.filter(nodeType, allowed, denied);
     }
 }

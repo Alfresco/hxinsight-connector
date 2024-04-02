@@ -37,6 +37,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
+import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
 import static org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils.AUTH_HEADER;
 
@@ -83,7 +84,7 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
 @WithMockOAuth2User
 class HxInsightEventPublisherIntegrationTest
 {
-    private static final String INGEST_PATH = "/ingest";
+    private static final String INGEST_PATH = "/ingestion-events";
     private static final String NODE_ID = "node-id";
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
@@ -107,7 +108,7 @@ class HxInsightEventPublisherIntegrationTest
     {
         // given
         givenThat(post(INGEST_PATH)
-                .willReturn(aResponse().withStatus(200)));
+                .willReturn(aResponse().withStatus(ACCEPTED)));
 
         // when
         Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));

@@ -23,20 +23,12 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.domain.exception;
 
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
-
-import java.util.List;
-import jakarta.validation.constraints.NotNull;
-
-public record Filter(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path path)
+public class ResourceNotFoundException extends EndpointClientErrorException
 {
-    public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
-
-    public record Type(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
-
-    public record Path(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
+    public ResourceNotFoundException(String message)
+    {
+        super(message);
+    }
 }

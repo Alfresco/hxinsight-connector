@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.PositiveOrZero;
 
-public record ClientData(@NotBlank String nodeRef, @NotBlank String targetMimeType)
+public record ClientData(@NotBlank String nodeRef, @NotBlank String targetMimeType, @PositiveOrZero int retryAttempt)
 {}

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -32,7 +32,9 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.HttpFileUploader.AMZ_SECURITY_TOKEN;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.HttpFileUploader.ROUTE_ID;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.HttpFileUploader.STORAGE_LOCATION_HEADER;
 
 import java.net.URL;
 
@@ -44,6 +46,7 @@ import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.ToDynamicDefinition;
 import org.apache.camel.model.language.ConstantExpression;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
@@ -79,6 +82,12 @@ class HttpFileUploaderTest
         mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
     }
 
+    @AfterEach
+    void tearDown()
+    {
+        mockEndpoint.reset();
+    }
+
     @AfterAll
     void afterAll()
     {
@@ -92,6 +101,28 @@ class HttpFileUploaderTest
         FileUploadRequest request = createFileUploadRequestMock();
         mockEndpointWillRespondWith(200);
         mockEndpointWillExpectInRequestHeader(Exchange.CONTENT_TYPE, CONTENT_TYPE);
+
+        // when
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
+
+        // then
+        mockEndpoint.assertIsSatisfied();
+        assertThat(thrown).doesNotThrowAnyException();
+    }
+
+    @Test
+    void testUpload_verifyRawQueryParam() throws InterruptedException
+    {
+        // given
+        URL url = mock(URL.class);
+        FileUploadRequest request = createFileUploadRequestMock(url);
+        String securityTokenQueryParam = AMZ_SECURITY_TOKEN + "token%2B%2F%3D";
+        given(url.getQuery()).willReturn(securityTokenQueryParam);
+        given(url.toString()).willReturn(MOCK_ENDPOINT + "?" + securityTokenQueryParam);
+
+        String expectedRawUrl = "%s?%sRAW(%s)".formatted(MOCK_ENDPOINT, AMZ_SECURITY_TOKEN, "token+/=");
+        mockEndpointWillRespondWith(200);
+        mockEndpointWillExpectInRequestHeader(STORAGE_LOCATION_HEADER, expectedRawUrl);
 
         // when
         Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
@@ -144,8 +175,12 @@ class HttpFileUploaderTest
 
     private FileUploadRequest createFileUploadRequestMock()
     {
+        return createFileUploadRequestMock(mock(URL.class));
+    }
+
+    private FileUploadRequest createFileUploadRequestMock(URL url)
+    {
         FileUploadRequest request = mock(FileUploadRequest.class);
-        URL url = mock(URL.class);
         File file = mock(File.class);
         given(request.file()).willReturn(file);
         given(request.contentType()).willReturn(CONTENT_TYPE);

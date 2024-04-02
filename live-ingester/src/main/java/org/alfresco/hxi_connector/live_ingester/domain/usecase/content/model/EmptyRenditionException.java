@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,9 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
-public record UploadContentRenditionCommand(
-        String transformedFileId,
-        String nodeId)
-{}
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
+
+import static java.lang.String.format;
+
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+
+public class EmptyRenditionException extends LiveIngesterRuntimeException
+{
+    public EmptyRenditionException(String nodeId)
+    {
+        super(format("Rendition of node %s content is empty", nodeId));
+    }
+}

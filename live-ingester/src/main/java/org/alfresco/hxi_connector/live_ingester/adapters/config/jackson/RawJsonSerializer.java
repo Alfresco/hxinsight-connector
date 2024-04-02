@@ -23,20 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
+import java.io.IOException;
 
-import java.util.List;
-import jakarta.validation.constraints.NotNull;
+import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
-public record Filter(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path path)
+public abstract class RawJsonSerializer<T> extends StdSerializer<T>
 {
-    public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
+    ObjectMapper objectMapper = new ObjectMapper();
 
-    public record Type(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
+    protected RawJsonSerializer(Class<T> vc)
+    {
+        super(vc);
+    }
 
-    public record Path(@NotNull List<String> allow, @NotNull List<String> deny)
-    {}
+    @Override
+    public void serialize(T t, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException
+    {
+        jsonGenerator.writeString(objectMapper.writeValueAsString(t));
+    }
+
 }

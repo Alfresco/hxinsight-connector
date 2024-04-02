@@ -1,0 +1,6 @@
+[
+  {
+    "id": "12341234-1234-1234-1234-123412341234",
+    "url": "http://{{ systemValue type='ENVIRONMENT' key='AWS_HOST' }}:{{ systemValue type='ENVIRONMENT' key='AWS_PORT' }}/{{ systemValue type='ENVIRONMENT' key='AWS_S3_BUCKET_NAME' }}/dummy-{{ now format='HHmmssSSS' }}-{{ randomValue length=7 type='ALPHABETIC' }}.pdf?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20240109T154539Z&X-Amz-SignedHeaders=content-type%3Bhost&X-Amz-Credential=test%2F20240109%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Expires=60&X-Amz-Signature=31cf819142af9946947f6447d18f624bbad7f69d78ab72959a6cbb0048550f3c"
+  }
+]

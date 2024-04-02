@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,15 +27,21 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataDeserializer;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataSerializer;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 
 @Validated
 public record TransformResponse(
         @NotBlank String targetReference,
-        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) ClientData clientData)
+        @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) @JsonSerialize(using = ClientDataSerializer.class) ClientData clientData,
+        @Positive int status,
+        String errorDetails)
+
 {}

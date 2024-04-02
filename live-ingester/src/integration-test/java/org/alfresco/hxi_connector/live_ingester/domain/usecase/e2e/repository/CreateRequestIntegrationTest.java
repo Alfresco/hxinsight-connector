@@ -90,10 +90,11 @@ public class CreateRequestIntegrationTest extends E2ETestBase
 
         // then
         String expectedBody = """
-                {
-                   "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                   "eventType": "create",
-                   "properties": {
+                [
+                  {
+                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "eventType": "create",
+                    "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
@@ -112,7 +113,8 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                         }
                       }
                     }
-                 }""";
+                  }
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
 
         String expectedATSRequest = """
@@ -120,7 +122,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\"}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);

@@ -64,6 +64,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     {
         try
         {
+            jgen.writeStartArray();
             jgen.writeStartObject();
 
             jgen.writeStringField("objectId", event.getObjectId());
@@ -87,6 +88,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             }
 
             jgen.writeEndObject();
+            jgen.writeEndArray();
         }
         catch (Exception e)
         {

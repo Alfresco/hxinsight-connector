@@ -27,12 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.response;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
-
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
-
-import java.util.Set;
+import static org.apache.camel.LoggingLevel.ERROR;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -44,12 +39,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.ATSTransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.ResourceNotFoundException;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.UploadContentRenditionCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.RemoteContentLocation;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.EmptyRenditionException;
 
 @Slf4j
 @Component
@@ -59,41 +54,67 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private static final String ROUTE_ID = "transform-events-consumer";
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
-    private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IntegrationProperties integrationProperties;
+    private final ATSTransformRequester atsTransformRequester;
 
     @Override
     public void configure()
     {
+        onException(EmptyRenditionException.class, ResourceNotFoundException.class)
+                .process(this::retryContentTransformation);
+
+        onException(Exception.class)
+                .log(ERROR, log, "Retrying ${routeId}, attempt ${header.CamelRedeliveryCounter} due to ${exception.message}")
+                .maximumRedeliveries(integrationProperties.alfresco().transform().response().retryIngestion().attempts())
+                .redeliveryDelay(integrationProperties.alfresco().transform().response().retryIngestion().initialDelay())
+                .backOffMultiplier(integrationProperties.alfresco().transform().response().retryIngestion().delayMultiplier());
+
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().transform().response().endpoint())
                 .routeId(ROUTE_ID)
-                .log(DEBUG, "Received transform completed event : ${body}")
+                .log(DEBUG, log, "Received transform completed event : ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
-                .process(this::uploadContentRendition)
-                .process(this::updateContentLocation)
+                .process(this::ingestContent)
                 .end();
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void uploadContentRendition(Exchange exchange)
+    private void ingestContent(Exchange exchange)
     {
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
-        UploadContentRenditionCommand command = new UploadContentRenditionCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef());
 
-        RemoteContentLocation remoteContentLocation = ingestContentCommandHandler.handle(command);
-        exchange.getIn().setBody(remoteContentLocation);
+        if (transformResponse.status() == 400)
+        {
+            log.atDebug().log("Rendition of node {} failed with status {}. Details: {}", transformResponse.clientData().nodeRef(), transformResponse.status(), transformResponse.errorDetails());
+            return;
+        }
+
+        IngestContentCommand command = new IngestContentCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef());
+
+        ingestContentCommandHandler.handle(command);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void updateContentLocation(Exchange exchange)
+    private void retryContentTransformation(Exchange exchange)
     {
-        RemoteContentLocation remoteContentLocation = exchange.getIn().getBody(RemoteContentLocation.class);
-        Set<PropertyDelta<?>> properties = Set.of(contentPropertyUpdated(CONTENT_PROPERTY, remoteContentLocation.id(), remoteContentLocation.mimeType()));
-        IngestNodeCommand command = new IngestNodeCommand(remoteContentLocation.nodeId(), UPDATE, properties);
+        Exception exception = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+        TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
 
-        ingestNodeCommandHandler.handle(command);
+        int maxAttempts = integrationProperties.alfresco().transform().response().retryTransformation().attempts();
+        int retryAttempt = transformResponse.clientData().retryAttempt() + 1;
+
+        if (retryAttempt > maxAttempts)
+        {
+            log.error("Transformation of node {} failed with error {}, max number of retries ({}) exceeded", transformResponse.clientData().nodeRef(), exception.getMessage(), maxAttempts);
+            return;
+        }
+
+        log.error("Transformation of node {} failed with error {}, retrying (attempt: {})", transformResponse.clientData().nodeRef(), exception.getMessage(), retryAttempt);
+
+        TransformRequest transformRequest = new TransformRequest(transformResponse.clientData().nodeRef(), transformResponse.clientData().targetMimeType());
+        atsTransformRequester.requestTransformRetry(transformRequest, retryAttempt);
     }
+
 }
