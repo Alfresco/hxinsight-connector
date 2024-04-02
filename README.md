@@ -111,30 +111,3 @@ mvn clean install -Pdistribution && \
 cd distribution/src/main/resources/docker-compose && \
 docker compose --file docker-compose-ingesterless.yml --project-name dev up
 ```
-
-### Secret Detection
-
-We are using [detect-secrets](https://github.com/Yelp/detect-secrets) to try to avoid accidentally publishing secret keys.
-If you have pre-commit installed then this should run automatically when making a commit. Usually there should be no issues,
-but if it finds a potential issue (e.g. a high entropy string) then you will see the following:
-
-```shell
-Detect secrets...........................................................Failed
-- hook id: detect-secrets
-- exit code: 1
-
-ERROR: Potential secrets about to be committed to git repo!
-
-Secret Type: Secret Keyword
-Location:    test.txt:1
-```
-
-If this is a false positive and you actually want to commit the string then run these two commands:
-
-```shell
-detect-secrets scan --baseline .secrets.baseline
-detect-secrets audit .secrets.baseline
-```
-
-This will update the baseline file to include your new code and then allow you to review the detected secret and mark it as a false positive.
-Once you are finished then you can add `.secrets.baseline` to the staged changes and you should be able to create a commit.

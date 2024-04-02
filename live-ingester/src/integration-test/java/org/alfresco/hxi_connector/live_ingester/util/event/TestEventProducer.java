@@ -24,32 +24,21 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
-
-import java.util.List;
+package org.alfresco.hxi_connector.live_ingester.util.event;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+import lombok.SneakyThrows;
+import org.apache.camel.ProducerTemplate;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
-
-@Component
 @RequiredArgsConstructor
-@Slf4j
-public class RepoEventFilterHandler
+public class TestEventProducer
 {
+    private final ProducerTemplate producerTemplate;
+    private final String endpoint;
 
-    private final List<RepoEventFilterApplier> repoEventFilterAppliers;
-    private final IntegrationProperties integrationProperties;
-
-    public boolean filterNode(RepoEvent<DataAttributes<NodeResource>> repoEvent)
+    @SneakyThrows
+    public void receivesMessage(String message)
     {
-        return repoEventFilterAppliers.stream()
-                .peek(f -> log.atDebug().log("Applying filters {} to repo event of id: {}", integrationProperties.alfresco().filter(), repoEvent.getId()))
-                .allMatch(f -> f.applyFilter(repoEvent, integrationProperties.alfresco().filter()));
+        producerTemplate.sendBody(endpoint, message);
     }
 }

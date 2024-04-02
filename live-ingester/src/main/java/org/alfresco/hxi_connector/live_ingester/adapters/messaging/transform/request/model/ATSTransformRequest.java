@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import java.io.Serializable;
 import java.util.Map;
-import java.util.UUID;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
@@ -51,10 +50,10 @@ public record ATSTransformRequest(String requestId,
     private static final String WORKSPACE_SPACES_STORE = "workspace://SpacesStore/";
     private static final String TIMEOUT_KEY = "timeout";
 
-    public ATSTransformRequest(String nodeRef, String targetMediaType, ClientData clientData, int timeout, String replyQueue)
+    public ATSTransformRequest(String requestId, String nodeRef, String targetMediaType, ClientData clientData, int timeout, String replyQueue)
     {
         this(
-                UUID.randomUUID().toString(),
+                requestId,
                 WORKSPACE_SPACES_STORE + nodeRef,
                 targetMediaType,
                 clientData,

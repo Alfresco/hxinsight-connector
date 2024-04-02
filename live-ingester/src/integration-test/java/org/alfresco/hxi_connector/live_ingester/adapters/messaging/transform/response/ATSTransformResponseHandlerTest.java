@@ -34,9 +34,7 @@ import static org.mockito.Mockito.times;
 
 import java.util.Set;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -58,10 +56,11 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.Tr
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.EmptyRenditionException;
+import org.alfresco.hxi_connector.live_ingester.util.event.TestEventProducer;
 
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
-        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class})
+        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class, TestEventProducer.class})
 @EnableAutoConfiguration
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.FieldNamingConventions"})
 class ATSTransformResponseHandlerTest
@@ -84,7 +83,7 @@ class ATSTransformResponseHandlerTest
     private IngestContentCommandHandler ingestContentCommandHandler;
 
     @Autowired
-    private ProducerTemplate producerTemplate;
+    private TestEventProducer testEventProducer;
 
     @Test
     void shouldSkipProcessingIfTransformationFailedWith400Error()
@@ -98,7 +97,7 @@ class ATSTransformResponseHandlerTest
                 "Something went wrong!");
 
         // when
-        simulateResponse(transformResponse);
+        simulateATSResponse(transformResponse);
 
         // then
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
@@ -125,7 +124,7 @@ class ATSTransformResponseHandlerTest
         doThrow(new LiveIngesterRuntimeException("Some exception")).when(ingestContentCommandHandler).handle(expectedCommand);
 
         // when
-        catchThrowable(() -> simulateResponse(transformResponse));
+        catchThrowable(() -> simulateATSResponse(transformResponse));
 
         // then
         then(ingestContentCommandHandler).should(times(retryIngestion.attempts() + 1)).handle(expectedCommand);
@@ -157,7 +156,7 @@ class ATSTransformResponseHandlerTest
         TransformRequest expectedTransformRequest = new TransformRequest(nodeId, targetMimeType);
 
         // when
-        catchThrowable(() -> simulateResponse(transformResponse));
+        catchThrowable(() -> simulateATSResponse(transformResponse));
 
         // then
         then(ingestContentCommandHandler).should(times(1)).handle(expectedCommand);
@@ -187,7 +186,7 @@ class ATSTransformResponseHandlerTest
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 
         // when
-        catchThrowable(() -> simulateResponse(transformResponse));
+        catchThrowable(() -> simulateATSResponse(transformResponse));
 
         // then
         then(ingestContentCommandHandler).should(times(1)).handle(expectedCommand);
@@ -195,11 +194,9 @@ class ATSTransformResponseHandlerTest
     }
 
     @SneakyThrows
-    private void simulateResponse(TransformResponse response)
+    private void simulateATSResponse(TransformResponse response)
     {
-        ObjectMapper objectMapper = new ObjectMapper();
-
-        producerTemplate.sendBody(RESPONSE_ENDPOINT, objectMapper.writeValueAsString(response));
+        // testEventProducer.sendEventTo(response, RESPONSE_ENDPOINT);
     }
 
     @TestConfiguration
