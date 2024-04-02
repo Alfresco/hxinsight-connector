@@ -126,7 +126,7 @@ public class CreateNodeTest
 
     private static GenericContainer<?> createRepositoryContainer()
     {
-        return DockerContainers.createExtendedRepositoryContainerWithin(network)
+        return DockerContainers.createExtendedRepositoryContainerWithin(network, true)
                 .withEnv("JAVA_OPTS", """
                         -Ddb.driver=org.postgresql.Driver
                         -Ddb.username=%s

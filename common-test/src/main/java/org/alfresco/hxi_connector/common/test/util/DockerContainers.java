@@ -52,7 +52,8 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
-    private static final String REPOSITORY_IMAGE = "quay.io/alfresco/alfresco-content-repository";
+    private static final String REPOSITORY_ENT_IMAGE = "quay.io/alfresco/alfresco-content-repository";
+    private static final String REPOSITORY_IMAGE = "alfresco/alfresco-content-repository-community";
     private static final String REPOSITORY_TAG = DockerTags.getRepositoryTag();
     private static final String POSTGRES_IMAGE = "postgres";
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
@@ -83,12 +84,17 @@ public class DockerContainers
 
     public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network)
     {
+        return createExtendedRepositoryContainerWithin(network, false);
+    }
+
+    public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network, boolean isEnterprise)
+    {
         // @formatter:off
         Path jarFile = findTargetJar();
         GenericContainer<?> repository = new GenericContainer<>(new ImageFromDockerfile("localhost/alfresco/alfresco-content-repository-prediction-applier-extension")
             .withFileFromPath(jarFile.toString(), jarFile)
             .withDockerfileFromBuilder(builder -> builder
-                .from(DockerImageName.parse(REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
+                .from(DockerImageName.parse(isEnterprise ? REPOSITORY_ENT_IMAGE : REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
                 .user("root")
                 .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
                 .run("chown -R -h alfresco /usr/local/tomcat")
@@ -142,7 +148,7 @@ public class DockerContainers
     {
         GenericContainer<?> activeMq = new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
-                .withExposedPorts(8161, 5672, 61616, 61613)
+                .withExposedPorts(61616, 8161, 5672, 61613)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
 
