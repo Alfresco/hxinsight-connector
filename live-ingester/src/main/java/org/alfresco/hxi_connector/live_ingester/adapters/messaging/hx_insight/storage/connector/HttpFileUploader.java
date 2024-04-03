@@ -79,8 +79,9 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
-            .noStreamCaching()
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
+            .marshal()
+            .mimeMultipart()
             .toD("${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false")
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
