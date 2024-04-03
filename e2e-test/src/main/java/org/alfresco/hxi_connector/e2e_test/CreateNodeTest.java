@@ -52,47 +52,47 @@ public class CreateNodeTest
 {
 
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final Network network = Network.newNetwork();
+    private static final Network NETWORK = Network.newNetwork();
 
     @Container
-    private static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
+    private static final PostgreSQLContainer<?> POSTGRES = DockerContainers.createPostgresContainerWithin(NETWORK);
     @Container
-    private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
+    private static final GenericContainer<?> ACTIVEMQ = DockerContainers.createActiveMqContainerWithin(NETWORK);
     @Container
-    private static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
+    private static final GenericContainer<?> SFS = DockerContainers.createSfsContainerWithin(NETWORK);
 
     @Container
-    private static final GenericContainer<?> transform_core_aio = DockerContainers.createTransformCoreAioContainerWithin(network)
-            .dependsOn(activemq)
-            .dependsOn(sfs);
+    private static final GenericContainer<?> TRANSFORM_CORE_AIO = DockerContainers.createTransformCoreAioContainerWithin(NETWORK)
+            .dependsOn(ACTIVEMQ)
+            .dependsOn(SFS);
     @Container
-    private static final GenericContainer<?> transform_router = DockerContainers.createTransformRouterContainerWithin(network)
-            .dependsOn(activemq)
-            .dependsOn(transform_core_aio)
-            .dependsOn(sfs);
+    private static final GenericContainer<?> TRANSFORM_ROUTER = DockerContainers.createTransformRouterContainerWithin(NETWORK)
+            .dependsOn(ACTIVEMQ)
+            .dependsOn(TRANSFORM_CORE_AIO)
+            .dependsOn(SFS);
     @Container
-    private static final GenericContainer<?> repository = createRepositoryContainer()
-            .dependsOn(postgres)
-            .dependsOn(activemq)
-            .dependsOn(transform_router)
-            .dependsOn(transform_core_aio)
-            .dependsOn(sfs);
+    private static final GenericContainer<?> REPOSITORY = createRepositoryContainer()
+            .dependsOn(POSTGRES)
+            .dependsOn(ACTIVEMQ)
+            .dependsOn(TRANSFORM_ROUTER)
+            .dependsOn(TRANSFORM_CORE_AIO)
+            .dependsOn(SFS);
     @Container
-    private static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainerWithin(network)
+    private static final WireMockContainer HX_AUTH_SERVER = DockerContainers.createWireMockContainerWithin(NETWORK)
             .withFileSystemBind("./src/main/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    private static final GenericContainer<?> live_ingester = createLiveIngesterContainer()
-            .dependsOn(activemq)
-            .dependsOn(sfs)
-            .dependsOn(repository);
+    private static final GenericContainer<?> LIVE_INGESTER = createLiveIngesterContainer()
+            .dependsOn(ACTIVEMQ)
+            .dependsOn(SFS)
+            .dependsOn(REPOSITORY);
     @Container
-    private static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainerWithin(network);
+    private static final LocalStackContainer LOCAL_STACK_SERVER = DockerContainers.createLocalStackContainerWithin(NETWORK);
 
     @BeforeAll
     @SneakyThrows
     public static void beforeAll()
     {
-        localStackServer.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
+        LOCAL_STACK_SERVER.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class CreateNodeTest
                 .contentType("multipart/form-data")
                 .multiPart("filedata", new File("src/main/resources/test-files/Alfresco Content Services 7.4.docx"))
                 .when()
-                .post("http://" + repository.getHost() + ":" + repository.getFirstMappedPort() + "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
+                .post("http://" + REPOSITORY.getHost() + ":" + REPOSITORY.getFirstMappedPort() + "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
                 .then()
                 .extract().response();
 
@@ -113,7 +113,7 @@ public class CreateNodeTest
         Response s3Response = given()
                 .contentType("application/xml")
                 .when()
-                .get("http://localhost:" + localStackServer.getFirstMappedPort() + "/test-hxinsight-bucket/")
+                .get("http://localhost:" + LOCAL_STACK_SERVER.getFirstMappedPort() + "/test-hxinsight-bucket/")
                 .then()
                 .extract().response();
 
@@ -125,7 +125,7 @@ public class CreateNodeTest
 
     private static GenericContainer<?> createRepositoryContainer()
     {
-        return DockerContainers.createExtendedRepositoryContainerWithin(network, true)
+        return DockerContainers.createExtendedRepositoryContainerWithin(NETWORK, true)
                 .withEnv("JAVA_OPTS", """
                         -Ddb.driver=org.postgresql.Driver
                         -Ddb.username=%s
@@ -146,24 +146,24 @@ public class CreateNodeTest
                         -Dalfresco.restApi.basicAuthScheme=true
                         -Xms1500m -Xmx1500m
                         """.formatted(
-                        postgres.getUsername(),
-                        postgres.getPassword(),
-                        postgres.getNetworkAliases().stream().findFirst().get(),
-                        postgres.getDatabaseName(),
-                        activemq.getNetworkAliases().stream().findFirst().get())
+                        POSTGRES.getUsername(),
+                        POSTGRES.getPassword(),
+                        POSTGRES.getNetworkAliases().stream().findFirst().get(),
+                        POSTGRES.getDatabaseName(),
+                        ACTIVEMQ.getNetworkAliases().stream().findFirst().get())
                         .replace("\n", " "));
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerWithin(network)
+        return DockerContainers.createLiveIngesterContainerWithin(NETWORK)
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://%s:8080"
                         .formatted(
-                                hxAuthServer.getNetworkAliases().stream().findFirst().get()))
+                                HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()))
 
                 .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://%s:8080/token"
                         .formatted(
-                                hxAuthServer.getNetworkAliases().stream().findFirst().get()));
+                                HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()));
     }
 
 }
