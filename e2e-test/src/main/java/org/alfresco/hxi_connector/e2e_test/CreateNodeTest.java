@@ -48,38 +48,37 @@ import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 
 @Slf4j
 @Testcontainers
-@SuppressWarnings("PMD.FieldNamingConventions")
 public class CreateNodeTest
 {
 
-    public static final String BUCKET_NAME = "test-hxinsight-bucket";
-    static final Network network = Network.newNetwork();
+    private static final String BUCKET_NAME = "test-hxinsight-bucket";
+    private static final Network network = Network.newNetwork();
 
     @Container
-    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
+    private static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
     @Container
-    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
+    private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
+    private static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
 
     @Container
     private static final GenericContainer<?> transform_core_aio = DockerContainers.createTransformCoreAioContainerWithin(network)
             .dependsOn(activemq)
             .dependsOn(sfs);
     @Container
-    static final GenericContainer<?> transform_router = DockerContainers.createTransformRouterContainerWithin(network)
+    private static final GenericContainer<?> transform_router = DockerContainers.createTransformRouterContainerWithin(network)
             .dependsOn(activemq)
             .dependsOn(transform_core_aio)
             .dependsOn(sfs);
     @Container
-    static final GenericContainer<?> repository = createRepositoryContainer()
+    private static final GenericContainer<?> repository = createRepositoryContainer()
             .dependsOn(postgres)
             .dependsOn(activemq)
             .dependsOn(transform_router)
             .dependsOn(transform_core_aio)
             .dependsOn(sfs);
     @Container
-    static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainerWithin(network)
+    private static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("./src/main/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final GenericContainer<?> live_ingester = createLiveIngesterContainer()
@@ -87,7 +86,7 @@ public class CreateNodeTest
             .dependsOn(sfs)
             .dependsOn(repository);
     @Container
-    static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainerWithin(network);
+    private static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainerWithin(network);
 
     @BeforeAll
     @SneakyThrows
