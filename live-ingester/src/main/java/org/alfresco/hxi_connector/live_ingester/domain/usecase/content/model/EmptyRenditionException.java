@@ -29,12 +29,11 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model;
 import static java.lang.String.format;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
 
-public class TransformationFailedException extends LiveIngesterRuntimeException
+public class EmptyRenditionException extends LiveIngesterRuntimeException
 {
-    public TransformationFailedException(IngestContentCommand command)
+    public EmptyRenditionException(String nodeId)
     {
-        super(format("Rendition of node %s failed with status %s", command.nodeId(), command.transformationStatus()));
+        super(format("Rendition of node %s content is empty", nodeId));
     }
 }

@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
+import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
 
 import java.util.Set;
 
@@ -41,8 +42,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.st
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.EmptyRenditionException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.TransformationFailedException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
@@ -67,14 +68,12 @@ public class IngestContentCommandHandler
 
     public void handle(IngestContentCommand command)
     {
-        if (command.transformationStatus() == 400)
-        {
-            throw new TransformationFailedException(command);
-        }
-
         String fileId = command.transformedFileId();
         String nodeId = command.nodeId();
         File downloadedFile = transformEngineFileStorage.downloadFile(fileId);
+
+        ensureThat(!downloadedFile.isEmpty(), () -> new EmptyRenditionException(nodeId));
+
         log.atDebug().log("Transform :: Downloaded from SFS content of node: {} in file with ID: {}", nodeId, fileId);
 
         IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
