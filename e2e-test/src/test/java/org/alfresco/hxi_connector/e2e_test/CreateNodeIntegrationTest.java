@@ -48,7 +48,7 @@ import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 
 @Slf4j
 @Testcontainers
-public class CreateNodeTest
+public class CreateNodeIntegrationTest
 {
 
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
@@ -79,7 +79,7 @@ public class CreateNodeTest
             .dependsOn(SFS);
     @Container
     private static final WireMockContainer HX_AUTH_SERVER = DockerContainers.createWireMockContainerWithin(NETWORK)
-            .withFileSystemBind("./src/main/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
+            .withFileSystemBind("./src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final GenericContainer<?> LIVE_INGESTER = createLiveIngesterContainer()
             .dependsOn(ACTIVEMQ)
@@ -101,7 +101,7 @@ public class CreateNodeTest
 
         Response acsResponse = given().auth().basic("admin", "admin")
                 .contentType("multipart/form-data")
-                .multiPart("filedata", new File("src/main/resources/test-files/Alfresco Content Services 7.4.docx"))
+                .multiPart("filedata", new File("src/test/resources/test-files/Alfresco Content Services 7.4.docx"))
                 .when()
                 .post("http://" + REPOSITORY.getHost() + ":" + REPOSITORY.getFirstMappedPort() + "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
                 .then()
