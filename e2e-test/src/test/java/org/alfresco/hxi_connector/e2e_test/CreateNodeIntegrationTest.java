@@ -79,7 +79,7 @@ public class CreateNodeIntegrationTest
             .dependsOn(SFS);
     @Container
     private static final WireMockContainer HX_AUTH_SERVER = DockerContainers.createWireMockContainerWithin(NETWORK)
-            .withFileSystemBind("./src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
+            .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final GenericContainer<?> LIVE_INGESTER = createLiveIngesterContainer()
             .dependsOn(ACTIVEMQ)
