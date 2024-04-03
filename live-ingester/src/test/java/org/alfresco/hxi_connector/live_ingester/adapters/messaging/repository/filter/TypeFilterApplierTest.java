@@ -71,7 +71,7 @@ class TypeFilterApplierTest
     }
 
     @Test
-    void whenNullPreviousNodeType_thenUnresolved()
+    void whenNullPreviousNodeType_thenResultSameAsForCurrent()
     {
         given(mockResource.getNodeType()).willReturn(null);
         final boolean currentlyAllowed = true;
