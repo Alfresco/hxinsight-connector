@@ -30,7 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
@@ -81,7 +80,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "eventType": "create",
                     "properties": {
-                      "createdAt": {"value": 10000},
+                      "createdAt": {"value": "10000"},
                       "modifiedBy": {"value": "000-000-000"}
                     }
                   }
@@ -104,29 +103,6 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "eventType": "update",
                     "removedProperties": [ "createdAt", "modifiedBy" ]
-                  }
-                ]""".formatted(NODE_ID);
-        String actualJson = serialize(event);
-
-        assertJsonEquals(expectedJson, actualJson);
-    }
-
-    @Test
-    public void canCopeWithNullUsers()
-    {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
-                .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, null))
-                .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
-
-        String expectedJson = """
-                [
-                  {
-                    "objectId": "%s",
-                    "eventType": "create",
-                    "properties": {
-                      "createdBy": {"value": null},
-                      "modifiedBy": {"value": null}
-                    }
                   }
                 ]""".formatted(NODE_ID);
         String actualJson = serialize(event);

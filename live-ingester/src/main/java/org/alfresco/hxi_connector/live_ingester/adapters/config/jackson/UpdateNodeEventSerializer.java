@@ -32,16 +32,19 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
 
 import java.io.IOException;
+import java.util.Objects;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FileMetadata;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
@@ -74,7 +77,11 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
             {
                 jgen.writeObjectFieldStart("properties");
-                event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
+                event.getMetadataPropertiesToSet().values().stream()
+                        .filter(property -> property.value() != null)
+                        .map(property -> new NodeProperty<>(property.name(), Objects.toString(property.value())))
+                        .filter(property -> StringUtils.isNotEmpty(property.value()))
+                        .forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
                 jgen.writeEndObject();
             }
