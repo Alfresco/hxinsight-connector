@@ -32,12 +32,9 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -86,23 +83,9 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                 event.getMetadataPropertiesToSet().values().stream()
                     .filter(property -> property.value() != null)
                     .map(property -> Optional.of(property)
-                        .filter(p -> p.value() instanceof Collection)
-                        .map(p -> new NodeProperty(p.name(), ((Collection<?>) p.value()).stream()
-                            .filter(Objects::nonNull)
-                            .map(Objects::toString)
-                            .collect(Collectors.toList())))
-                        .orElse(property))
-                    .map(property -> Optional.of(property)
-                        .filter(p -> p.value() instanceof Map)
-                        .map(p -> new NodeProperty(p.name(), ((Map<?, ?>) p.value()).entrySet().stream()
-                            .filter(entry -> Objects.nonNull(entry.getValue()))
-                            .map(entry -> Map.entry(entry.getKey(), Objects.toString(entry.getValue())))
-                            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue))))
-                        .orElse(property))
-                    .map(property -> Optional.of(property)
                         .filter(p -> ClassUtils.isPrimitiveOrWrapper(p.value().getClass()) || p.value() instanceof String)
-                        .map(p -> new NodeProperty<>(p.name(), Objects.toString(p.value())))
-                        .filter(p -> StringUtils.isNotEmpty(p.value()))
+                        .map(p -> new NodeProperty(p.name(), Objects.toString(p.value())))
+                        .filter(p -> StringUtils.isNotEmpty((String) p.value()))
                         .orElse(property))
                     .forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
                 // @formatter:on
