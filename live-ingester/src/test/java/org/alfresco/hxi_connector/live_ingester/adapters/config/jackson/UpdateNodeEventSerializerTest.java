@@ -148,7 +148,7 @@ class UpdateNodeEventSerializerTest
                 .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
                 .addMetadataInstruction(new NodeProperty<>("someProperty", new Object() {
                     @Getter
-                    final String key = "val";
+                    String key = "val";
                 }));
 
         String actualJson = serialize(event);

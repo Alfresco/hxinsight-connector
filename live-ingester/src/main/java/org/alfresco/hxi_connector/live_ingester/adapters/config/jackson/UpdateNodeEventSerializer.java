@@ -84,9 +84,9 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                     .filter(property -> property.value() != null)
                     .map(property -> Optional.of(property)
                         .filter(p -> ClassUtils.isPrimitiveOrWrapper(p.value().getClass()) || p.value() instanceof String)
-                        .map(p -> new NodeProperty(p.name(), Objects.toString(p.value())))
-                        .filter(p -> StringUtils.isNotEmpty((String) p.value()))
-                        .orElse(property))
+                        .map(p -> new NodeProperty<>(p.name(), Objects.toString(p.value())))
+                        .filter(p -> StringUtils.isNotEmpty(p.value()))
+                        .orElse((NodeProperty<String>) property))
                     .forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
                 // @formatter:on
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
