@@ -30,6 +30,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
+import java.io.InputStream;
 import java.net.URL;
 
 import org.junit.jupiter.api.Test;
@@ -63,23 +64,25 @@ class HttpHxInsightStorageClientTest
     HttpHxInsightStorageClient httpStorageClient;
 
     @Test
+    @SuppressWarnings("PMD.CloseResource")
     void testUploadDataFromInputStream()
     {
         // given
         StorageLocationRequest storageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
-        URL url = mock();
-        PreSignedUrlResponse preSignedUrlResponse = new PreSignedUrlResponse(url, CONTENT_ID);
+        URL urlMock = mock(URL.class);
+        PreSignedUrlResponse preSignedUrlResponse = new PreSignedUrlResponse(urlMock, CONTENT_ID);
         given(storageLocationRequesterMock.requestStorageLocation(storageLocationRequest)).willReturn(preSignedUrlResponse);
-        File testData = mock();
+        InputStream inputStreamMock = mock(InputStream.class);
+        File testData = new File(inputStreamMock);
 
         // when
         IngestContentResponse ingestContentResponse = httpStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
-        assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(url, CONTENT_ID, FILE_CONTENT_TYPE));
+        assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(CONTENT_ID, FILE_CONTENT_TYPE));
         StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
         then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
-        FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(testData, FILE_CONTENT_TYPE, url);
+        FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(new File(inputStreamMock), FILE_CONTENT_TYPE, urlMock);
         then(fileUploaderMock).should().upload(expectedFileUploadRequest);
     }
 }

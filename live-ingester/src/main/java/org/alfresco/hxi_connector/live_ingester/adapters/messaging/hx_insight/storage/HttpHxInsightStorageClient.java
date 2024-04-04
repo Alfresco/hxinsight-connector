@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -53,8 +56,18 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
     public IngestContentResponse upload(File file, String contentType, String nodeId)
     {
         PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
+        log.atDebug().log("Storage :: Received target location with transfer ID: {} for node: {}", preSignedUrlResponse.id(), nodeId);
         URL preSignedUrl = preSignedUrlResponse.url();
-        fileUploader.upload(new FileUploadRequest(file, contentType, preSignedUrl));
-        return new IngestContentResponse(preSignedUrl, preSignedUrlResponse.id(), contentType);
+        try (InputStream fileData = file.data())
+        {
+            log.atDebug().log("Upload :: Transferring to S3 content of node: {} with size of {} bytes", nodeId, fileData.available());
+            fileUploader.upload(new FileUploadRequest(new File(fileData), contentType, preSignedUrl));
+        }
+        catch (IOException e)
+        {
+            throw new LiveIngesterRuntimeException(e);
+        }
+
+        return new IngestContentResponse(preSignedUrlResponse.id(), contentType);
     }
 }

@@ -40,7 +40,6 @@ import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.BUCKET_NAME;
@@ -70,7 +69,6 @@ import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.commons.io.IOUtils;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
@@ -273,6 +271,6 @@ public class ContainerSupport
         InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
         assertThat(actualBucketContent).contains(OBJECT_KEY);
-        assertTrue(IOUtils.contentEquals(expectedInputStream, bucketFileInputStream));
+        assertThat(expectedInputStream).hasSameContentAs(bucketFileInputStream);
     }
 }
