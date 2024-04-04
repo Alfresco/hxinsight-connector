@@ -50,7 +50,7 @@ public class DockerTags
     private static final String TRANSFORM_ROUTER_TAG_DEFAULT = "4.0.1";
     private static final String TRANSFORM_CORE_AIO_TAG_DEFAULT = "5.0.1";
     private static final String SFS_TAG_DEFAULT = "4.0.1";
-    private static final String HXI_CONNECTOR_TAG_DEFAULT = "0.0.6-SNAPSHOT";
+    private static final String HXI_CONNECTOR_TAG_DEFAULT = "0.0.6";
     private static final String PROPERTIES_FILE = "docker-tags.properties";
 
     private static Properties properties;
