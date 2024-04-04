@@ -28,15 +28,20 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
@@ -87,6 +92,78 @@ class UpdateNodeEventSerializerTest
                 ]""".formatted(NODE_ID);
         String actualJson = serialize(event);
 
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeCollectionPropertiesToSet()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>(ASPECT_NAMES_PROPERTY, List.of("aspect1", "aspect2")));
+
+        String actualJson = serialize(event);
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdAt": {"value": "10000"},
+                      "aspectsNames": {"value": [ "aspect1", "aspect2" ]}
+                    }
+                  }
+                ]""".formatted(NODE_ID);
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeMapPropertiesToSet()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>("someProperty", Map.of("key", "val")));
+
+        String actualJson = serialize(event);
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdAt": {"value": "10000"},
+                      "someProperty": {"value": { "key": "val" }}
+                    }
+                  }
+                ]""".formatted(NODE_ID);
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeObjectPropertiesToSet()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>("someProperty", new Object() {
+                    @Getter
+                    final String key = "val";
+                }));
+
+        String actualJson = serialize(event);
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdAt": {"value": "10000"},
+                      "someProperty": {"value": { "key": "val" }}
+                    }
+                  }
+                ]""".formatted(NODE_ID);
         assertJsonEquals(expectedJson, actualJson);
     }
 
