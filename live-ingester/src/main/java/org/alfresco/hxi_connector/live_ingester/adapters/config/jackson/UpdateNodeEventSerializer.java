@@ -65,7 +65,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     }
 
     @Override
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings({"unchecked"})
     public void serialize(UpdateNodeEvent event, JsonGenerator jgen, SerializerProvider provider)
     {
         try
