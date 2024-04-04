@@ -52,7 +52,6 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Component
@@ -74,13 +73,15 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     {
         // @formatter:off
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .log(LoggingLevel.ERROR, log, "Upload :: Unexpected response while uploading to S3. Body: ${body}")
             .process(this::wrapErrorIfNecessary)
             .stop();
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
+            .marshal()
+            .mimeMultipart()
             .toD("${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false")
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
@@ -95,18 +96,34 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.initialDelay}",
                     multiplierExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.delayMultiplier}"))
     @Override
+    @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
     public void upload(FileUploadRequest fileUploadRequest)
     {
-        Map<String, Object> headers = Map.of(STORAGE_LOCATION_HEADER, wrapRawToken(fileUploadRequest.storageLocation()),
-                Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
+        InputStream fileData = fileUploadRequest.file().data();
+        try
+        {
+            Map<String, Object> headers = Map.of(
+                    STORAGE_LOCATION_HEADER, wrapRawToken(fileUploadRequest.storageLocation()),
+                    Exchange.CONTENT_TYPE, fileUploadRequest.contentType());
 
-        try (InputStream fileData = fileUploadRequest.file().data())
-        {
-            camelContext.createProducerTemplate().sendBodyAndHeaders(LOCAL_ENDPOINT, fileData, headers);
+            camelContext.createFluentProducerTemplate()
+                    .to(LOCAL_ENDPOINT)
+                    .withHeaders(headers)
+                    .withBody(fileData)
+                    .request();
         }
-        catch (IOException e)
+        catch (Exception e)
         {
-            throw new LiveIngesterRuntimeException(e);
+            try
+            {
+                fileData.reset();
+                throw e;
+            }
+            catch (IOException ioe)
+            {
+                log.atDebug().log("Upload :: Stream reset failed due to: {}", ioe.getMessage());
+                throw e;
+            }
         }
     }
 
