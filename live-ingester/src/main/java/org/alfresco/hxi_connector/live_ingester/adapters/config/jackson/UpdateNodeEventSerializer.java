@@ -35,7 +35,6 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -69,7 +68,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     }
 
     @Override
-    @SuppressWarnings({"unchecked"})
     public void serialize(UpdateNodeEvent event, JsonGenerator jgen, SerializerProvider provider)
     {
         try
@@ -84,9 +82,9 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             {
                 jgen.writeObjectFieldStart("properties");
                 event.getMetadataPropertiesToSet().values().stream()
-                        .map(this::filterNonEmptyValueAndMap)
-                        .forEach(optionalProperty -> optionalProperty
-                                .ifPresent(property -> writeProperty(jgen, VALUE, property.name(), property.value())));
+                        .filter(this::nonEmptyPropertyValue)
+                        .map(this::propertyValueToStringIfPrimitive)
+                        .forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
                 jgen.writeEndObject();
             }
@@ -108,22 +106,23 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    private Optional<NodeProperty<?>> filterNonEmptyValueAndMap(NodeProperty<?> property)
+    private boolean nonEmptyPropertyValue(NodeProperty<?> property)
     {
-        if (property == null || property.value() == null
-                || property.value() instanceof String propertyString && StringUtils.isEmpty(propertyString)
-                || property.value() instanceof Collection<?> propertyCollection && CollectionUtils.isEmpty(propertyCollection)
-                || property.value() instanceof Map<?, ?> propertyMap && MapUtils.isEmpty(propertyMap))
+        return property != null && property.value() != null
+                && (!(property.value() instanceof String stringProperty) || StringUtils.isNotEmpty(stringProperty))
+                && (!(property.value() instanceof Collection<?> collectionProperty) || CollectionUtils.isNotEmpty(collectionProperty))
+                && (!(property.value() instanceof Map<?, ?> mapProperty) || MapUtils.isNotEmpty(mapProperty));
+    }
+
+    private NodeProperty<?> propertyValueToStringIfPrimitive(NodeProperty<?> property)
+    {
+        if (ClassUtils.isPrimitiveOrWrapper(property.value().getClass()))
         {
-            return Optional.empty();
-        }
-        else if (ClassUtils.isPrimitiveOrWrapper(property.value().getClass()))
-        {
-            return Optional.of(new NodeProperty<>(property.name(), Objects.toString(property.value())));
+            return new NodeProperty<>(property.name(), Objects.toString(property.value()));
         }
         else
         {
-            return Optional.of(property);
+            return property;
         }
     }
 
