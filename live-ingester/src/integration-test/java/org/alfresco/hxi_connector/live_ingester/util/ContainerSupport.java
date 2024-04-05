@@ -51,7 +51,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import jakarta.jms.Connection;
@@ -264,13 +263,15 @@ public class ContainerSupport
     @SneakyThrows
     public void expectFileUploadedToS3(String expectedFile)
     {
-        List<String> actualBucketContent = localStorageClient.listBucketContent(BUCKET_NAME);
+        retryWithBackoff(() -> {
+            assertThat(localStorageClient.listBucketContent(BUCKET_NAME)).contains(OBJECT_KEY);
+        });
+
         @Cleanup
         InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integration-test/resources/" + expectedFile));
         @Cleanup
         InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
-        assertThat(actualBucketContent).contains(OBJECT_KEY);
         assertThat(expectedInputStream).hasSameContentAs(bucketFileInputStream);
     }
 }
