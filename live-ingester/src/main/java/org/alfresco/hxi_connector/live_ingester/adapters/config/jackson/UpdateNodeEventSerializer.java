@@ -32,13 +32,16 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.ClassUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
@@ -79,16 +82,10 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
             {
                 jgen.writeObjectFieldStart("properties");
-                // @formatter:off
                 event.getMetadataPropertiesToSet().values().stream()
-                    .filter(property -> property.value() != null)
-                    .map(property -> Optional.of(property)
-                        .filter(p -> ClassUtils.isPrimitiveOrWrapper(p.value().getClass()) || p.value() instanceof String)
-                        .map(p -> new NodeProperty<>(p.name(), Objects.toString(p.value())))
-                        .filter(p -> StringUtils.isNotEmpty(p.value()))
-                        .orElse((NodeProperty<String>) property))
-                    .forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
-                // @formatter:on
+                        .map(this::filterNonEmptyValueAndMap)
+                        .filter(Objects::nonNull)
+                        .forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
                 jgen.writeEndObject();
             }
@@ -107,6 +104,35 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         catch (Exception e)
         {
             throw new JsonSerializationException("Property serialization failed", e);
+        }
+    }
+
+    private NodeProperty<?> filterNonEmptyValueAndMap(NodeProperty<?> property)
+    {
+        if (property == null || property.value() == null)
+        {
+            return null;
+        }
+
+        if (property.value() instanceof String propertyValue && StringUtils.isEmpty(propertyValue))
+        {
+            return null;
+        }
+        else if (property.value() instanceof Collection<?> propertyValue && CollectionUtils.isEmpty(propertyValue))
+        {
+            return null;
+        }
+        else if (property.value() instanceof Map<?, ?> propertyValue && MapUtils.isEmpty(propertyValue))
+        {
+            return null;
+        }
+        else if (ClassUtils.isPrimitiveOrWrapper(property.value().getClass()))
+        {
+            return new NodeProperty<>(property.name(), Objects.toString(property.value()));
+        }
+        else
+        {
+            return property;
         }
     }
 

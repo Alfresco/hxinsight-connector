@@ -168,6 +168,72 @@ class UpdateNodeEventSerializerTest
     }
 
     @Test
+    public void shouldNotSerializeEmptyPropertyToSet()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>("someProperty", ""));
+
+        String actualJson = serialize(event);
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdAt": {"value": "10000"}
+                    }
+                  }
+                ]""".formatted(NODE_ID);
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldNotSerializeEmptyCollectionToSet()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>("someProperty", List.of()));
+
+        String actualJson = serialize(event);
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdAt": {"value": "10000"}
+                    }
+                  }
+                ]""".formatted(NODE_ID);
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldNotSerializeEmptyMapToSet()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>("someProperty", Map.of()));
+
+        String actualJson = serialize(event);
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "eventType": "create",
+                    "properties": {
+                      "createdAt": {"value": "10000"}
+                    }
+                  }
+                ]""".formatted(NODE_ID);
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
     public void shouldSerializePropertiesToUnset()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, UPDATE)
