@@ -35,6 +35,7 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -84,8 +85,8 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                 jgen.writeObjectFieldStart("properties");
                 event.getMetadataPropertiesToSet().values().stream()
                         .map(this::filterNonEmptyValueAndMap)
-                        .filter(Objects::nonNull)
-                        .forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
+                        .forEach(optionalProperty -> optionalProperty
+                                .ifPresent(property -> writeProperty(jgen, VALUE, property.name(), property.value())));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
                 jgen.writeEndObject();
             }
@@ -107,32 +108,22 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    private NodeProperty<?> filterNonEmptyValueAndMap(NodeProperty<?> property)
+    private Optional<NodeProperty<?>> filterNonEmptyValueAndMap(NodeProperty<?> property)
     {
-        if (property == null || property.value() == null)
+        if (property == null || property.value() == null
+                || property.value() instanceof String propertyString && StringUtils.isEmpty(propertyString)
+                || property.value() instanceof Collection<?> propertyCollection && CollectionUtils.isEmpty(propertyCollection)
+                || property.value() instanceof Map<?, ?> propertyMap && MapUtils.isEmpty(propertyMap))
         {
-            return null;
-        }
-
-        if (property.value() instanceof String propertyValue && StringUtils.isEmpty(propertyValue))
-        {
-            return null;
-        }
-        else if (property.value() instanceof Collection<?> propertyValue && CollectionUtils.isEmpty(propertyValue))
-        {
-            return null;
-        }
-        else if (property.value() instanceof Map<?, ?> propertyValue && MapUtils.isEmpty(propertyValue))
-        {
-            return null;
+            return Optional.empty();
         }
         else if (ClassUtils.isPrimitiveOrWrapper(property.value().getClass()))
         {
-            return new NodeProperty<>(property.name(), Objects.toString(property.value()));
+            return Optional.of(new NodeProperty<>(property.name(), Objects.toString(property.value())));
         }
         else
         {
-            return property;
+            return Optional.of(property);
         }
     }
 
