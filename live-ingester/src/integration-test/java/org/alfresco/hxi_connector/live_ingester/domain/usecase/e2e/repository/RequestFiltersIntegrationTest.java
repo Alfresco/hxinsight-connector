@@ -976,7 +976,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : 1709378055695
+                         "value" : "1709378055695"
                        },
                        "cm:versionLabel" : {
                          "value" : "1.0"
@@ -1253,7 +1253,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : 1709378055695
+                         "value" : "1709378055695"
                        },
                        "cm:versionLabel" : {
                          "value" : "1.0"
