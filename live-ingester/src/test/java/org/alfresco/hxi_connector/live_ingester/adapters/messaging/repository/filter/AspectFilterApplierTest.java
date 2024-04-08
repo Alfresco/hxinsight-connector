@@ -73,7 +73,7 @@ class AspectFilterApplierTest
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertTrue(result);
@@ -87,7 +87,7 @@ class AspectFilterApplierTest
         given(mockAspect.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertFalse(result);
@@ -102,7 +102,7 @@ class AspectFilterApplierTest
         final boolean currentlyAllowed = true;
 
         // when
-        boolean result = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeBeforeAllowed(currentlyAllowed, mockResource, mockFilter);
 
         // then
         assertTrue(result);
@@ -117,7 +117,7 @@ class AspectFilterApplierTest
         final boolean currentlyAllowed = false;
 
         // when
-        boolean result = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeBeforeAllowed(currentlyAllowed, mockResource, mockFilter);
 
         // then
         assertFalse(result);

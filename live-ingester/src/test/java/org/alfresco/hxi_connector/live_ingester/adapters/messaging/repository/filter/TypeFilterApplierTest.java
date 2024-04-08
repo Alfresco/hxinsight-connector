@@ -35,6 +35,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -66,23 +68,21 @@ class TypeFilterApplierTest
         given(mockType.deny()).willReturn(emptyList());
 
         // when/then
-        assertThrows(NullPointerException.class, () -> objectUnderTest.allowNode(mockResource, mockFilter));
+        assertThrows(NullPointerException.class, () -> objectUnderTest.isNodeAllowed(mockResource, mockFilter));
 
     }
 
-    @Test
-    void whenNullPreviousNodeType_thenResultSameAsForCurrent()
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void whenNullPreviousNodeType_thenResultSameAsForCurrent(boolean currentlyAllowed)
     {
         given(mockResource.getNodeType()).willReturn(null);
-        final boolean currentlyAllowed = true;
 
         // when
-        boolean resultForCurrentlyAllowed = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
-        boolean resultForCurrentlyDenied = objectUnderTest.allowNodeBefore(!currentlyAllowed, mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeBeforeAllowed(currentlyAllowed, mockResource, mockFilter);
 
         // then
-        assertTrue(resultForCurrentlyAllowed);
-        assertFalse(resultForCurrentlyDenied);
+        assertEquals(currentlyAllowed, result);
     }
 
 }

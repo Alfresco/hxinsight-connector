@@ -31,10 +31,28 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 
 public interface RepoEventFilterApplier
 {
-    boolean allowNode(NodeResource nodeResource, Filter filter);
+    /**
+     * @param nodeResource
+     *            Current node resource
+     * @param filter
+     *            configuration
+     * @return If node is allowed by supplied filter configuration
+     */
+    boolean isNodeAllowed(NodeResource nodeResource, Filter filter);
 
-    default boolean allowNodeBefore(boolean currentlyAllowed, NodeResource nodeResource, Filter filter)
+    /**
+     * Default implementation can be used to filter based on properties that are always present in the "before" resource. It is not suitable if the property is omitted when unchanged and therefore needs a specific implementation.
+     *
+     * @param currentlyAllowed
+     *            If current version of the node is allowed
+     * @param nodeResourceBefore
+     *            Previous version of the resource
+     * @param filter
+     *            configuration
+     * @return whether previous version of a node is allowed by supplied filter configuration
+     */
+    default boolean isNodeBeforeAllowed(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
     {
-        return allowNode(nodeResource, filter);
+        return isNodeAllowed(nodeResourceBefore, filter);
     }
 }

@@ -43,7 +43,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 public class AncestorFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean allowNode(NodeResource nodeResource, Filter filter)
+    public boolean isNodeAllowed(NodeResource nodeResource, Filter filter)
     {
         final List<String> primaryHierarchy = new ArrayList<>(ListUtils.emptyIfNull(nodeResource.getPrimaryHierarchy()));
         primaryHierarchy.add(nodeResource.getId());
@@ -54,7 +54,7 @@ public class AncestorFilterApplier implements RepoEventFilterApplier
     }
 
     @Override
-    public boolean allowNodeBefore(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
+    public boolean isNodeBeforeAllowed(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
     {
         log.atDebug().log("Applying ancestor filters on previous version of repo node id: {}", nodeResourceBefore.getId());
         final List<String> primaryHierarchy = nodeResourceBefore.getPrimaryHierarchy();
@@ -62,6 +62,6 @@ public class AncestorFilterApplier implements RepoEventFilterApplier
         {
             return currentlyAllowed;
         }
-        return allowNode(nodeResourceBefore, filter);
+        return isNodeAllowed(nodeResourceBefore, filter);
     }
 }

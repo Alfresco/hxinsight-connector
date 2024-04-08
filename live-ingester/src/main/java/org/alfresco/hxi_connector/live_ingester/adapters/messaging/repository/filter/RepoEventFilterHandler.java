@@ -53,7 +53,19 @@ public class RepoEventFilterHandler
     private final CamelEventMapper camelEventMapper;
 
     /**
-     * Method handles event/node filtering. When node is denied by any of filters, a custom property "DENY_NODE: true" in Camel Exchange is created (used to filter out in main route). In case of update event: - when current version of the node is allowed but previous version was denied, then the type of the event is altered to 'Created'. - when current version of the node is denied but previous version was allowed, then the type of the event is altered to 'Deleted'.
+     * <p>
+     * Method handles event/node filtering.
+     * </p>
+     * <p>
+     * Returns whether node is allowed to be further processed.
+     * </p>
+     * <p>
+     * In case of update event:
+     * </p>
+     * <ul>
+     * <li>When current version of the node is allowed but previous version was denied, then the type of the event is altered to 'Created'.</li>
+     * <li>When current version of the node is denied but previous version was allowed, then the type of the event is altered to 'Deleted'.</li>
+     * </ul>
      *
      * @param exchange
      *            Camel Exchange Object
@@ -63,7 +75,7 @@ public class RepoEventFilterHandler
     public boolean handleAndGetAllowed(Exchange exchange, Filter filter)
     {
         final FilteringResults filteringResults = calculateFilteringResults(exchange, filter);
-        filteringResults.newEventType.ifPresent(type -> exchange.getIn().setBody(camelEventMapper.alterRepoEvent(exchange, type)));
+        filteringResults.eventTypeOverride.ifPresent(type -> exchange.getIn().setBody(camelEventMapper.alterRepoEvent(exchange, type)));
         return filteringResults.allowed;
     }
 
@@ -76,19 +88,18 @@ public class RepoEventFilterHandler
         for (RepoEventFilterApplier filterApplier : repoEventFilterAppliers)
         {
             log.atDebug().log("Applying filters {} to current repo event of id: {}", filter, repoEvent.getId());
-            final boolean allow = filterApplier.allowNode(repoEvent.getData().getResource(), filter);
+            final boolean allow = filterApplier.isNodeAllowed(repoEvent.getData().getResource(), filter);
             allowCurrentNode = allowCurrentNode && allow;
-            if (eventTypeUpdated)
+            if (eventTypeUpdated && allowPreviousNode)
             {
                 log.atDebug().log("Applying filters {} to previous version of repo event of id: {}", filter, repoEvent.getId());
-                final boolean allowPrevious = filterApplier.allowNodeBefore(allow, repoEvent.getData().getResourceBefore(), filter);
-                allowPreviousNode = allowPreviousNode && allowPrevious;
+                allowPreviousNode = filterApplier.isNodeBeforeAllowed(allow, repoEvent.getData().getResourceBefore(), filter);
             }
         }
-        final Optional<String> newEventType = eventTypeUpdated ? resolveEventType(allowPreviousNode, allowCurrentNode) : Optional.empty();
+        final Optional<String> eventTypeOverride = eventTypeUpdated ? resolveEventType(allowPreviousNode, allowCurrentNode) : Optional.empty();
         final boolean overallResult = allowCurrentNode || (allowPreviousNode && eventTypeUpdated);
         log.atDebug().log("Overall filtering results. Allow: {}, allow current: {}, allow previous: {}", overallResult, allowCurrentNode, allowPreviousNode);
-        return new FilteringResults(overallResult, newEventType);
+        return new FilteringResults(overallResult, eventTypeOverride);
     }
 
     private Optional<String> resolveEventType(boolean resultBefore, boolean result)
@@ -104,6 +115,6 @@ public class RepoEventFilterHandler
         return Optional.empty();
     }
 
-    record FilteringResults(Boolean allowed, Optional<String> newEventType)
+    record FilteringResults(Boolean allowed, Optional<String> eventTypeOverride)
     {}
 }

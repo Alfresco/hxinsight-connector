@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.f
 
 import static java.util.Collections.emptyList;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
@@ -37,6 +38,8 @@ import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -75,7 +78,7 @@ class AncestorFilterApplierTest
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertTrue(result);
@@ -90,25 +93,23 @@ class AncestorFilterApplierTest
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertFalse(result);
     }
 
-    @Test
-    void whenNullPrimaryHierarchyOnPreviousNode_thenReturnCurrentlyAllowed()
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void whenNullPrimaryHierarchyOnPreviousNode_thenReturnCurrentlyAllowed(boolean currentlyAllowed)
     {
         given(mockResource.getPrimaryHierarchy()).willReturn(null);
-        final boolean currentlyAllowed = true;
 
         // when
-        boolean resultForCurrentlyAllowed = objectUnderTest.allowNodeBefore(currentlyAllowed, mockResource, mockFilter);
-        boolean resultForCurrentlyDenied = objectUnderTest.allowNodeBefore(!currentlyAllowed, mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeBeforeAllowed(currentlyAllowed, mockResource, mockFilter);
 
         // then
-        assertTrue(resultForCurrentlyAllowed);
-        assertFalse(resultForCurrentlyDenied);
+        assertEquals(currentlyAllowed, result);
     }
 
     @Test
@@ -120,7 +121,7 @@ class AncestorFilterApplierTest
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertTrue(result);
@@ -135,7 +136,7 @@ class AncestorFilterApplierTest
         given(mockPath.deny()).willReturn(List.of(ANCESTOR_ID, NODE_ID));
 
         // when
-        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertFalse(result);
@@ -150,7 +151,7 @@ class AncestorFilterApplierTest
         given(mockPath.deny()).willReturn(List.of(GRAND_ANCESTOR_ID));
 
         // when
-        boolean result = objectUnderTest.allowNode(mockResource, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertFalse(result);

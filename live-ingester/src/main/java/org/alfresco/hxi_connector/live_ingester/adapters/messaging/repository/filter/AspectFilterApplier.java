@@ -44,7 +44,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 public class AspectFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean allowNode(NodeResource nodeResource, Filter filter)
+    public boolean isNodeAllowed(NodeResource nodeResource, Filter filter)
     {
         final Set<String> aspectNames = SetUtils.emptyIfNull(nodeResource.getAspectNames());
         final List<String> allowed = filter.aspect().allow();

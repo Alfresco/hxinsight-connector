@@ -42,7 +42,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 public class TypeFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean allowNode(NodeResource nodeResource, Filter filter)
+    public boolean isNodeAllowed(NodeResource nodeResource, Filter filter)
     {
         final String nodeType = nodeResource.getNodeType();
         final List<String> allowed = filter.type().allow();
@@ -52,7 +52,7 @@ public class TypeFilterApplier implements RepoEventFilterApplier
     }
 
     @Override
-    public boolean allowNodeBefore(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
+    public boolean isNodeBeforeAllowed(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
     {
         log.atDebug().log("Applying type filters on previous version of repo node id: {}", nodeResourceBefore.getId());
         final String nodeType = nodeResourceBefore.getNodeType();
@@ -60,6 +60,6 @@ public class TypeFilterApplier implements RepoEventFilterApplier
         {
             return currentlyAllowed;
         }
-        return allowNode(nodeResourceBefore, filter);
+        return isNodeAllowed(nodeResourceBefore, filter);
     }
 }
