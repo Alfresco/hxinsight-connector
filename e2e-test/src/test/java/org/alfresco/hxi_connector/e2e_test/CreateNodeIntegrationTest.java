@@ -118,8 +118,6 @@ public class CreateNodeIntegrationTest
                 .extract().response();
 
         Assertions.assertEquals(200, s3Response.statusCode());
-        // String stringS3response = s3Response.asString();
-        // Assertions.assertTrue(stringS3response.contains("Contents"));
 
     }
 
