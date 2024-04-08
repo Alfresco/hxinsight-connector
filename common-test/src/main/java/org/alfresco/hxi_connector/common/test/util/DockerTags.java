@@ -47,6 +47,10 @@ public class DockerTags
     private static final String ACTIVEMQ_TAG_DEFAULT = "5.18.3-jre17-rockylinux8";
     private static final String WIREMOCK_TAG_DEFAULT = "3.4.2";
     private static final String LOCALSTACK_TAG_DEFAULT = "3.2.0";
+    private static final String TRANSFORM_ROUTER_TAG_DEFAULT = "4.0.1";
+    private static final String TRANSFORM_CORE_AIO_TAG_DEFAULT = "5.0.1";
+    private static final String SFS_TAG_DEFAULT = "4.0.1";
+    private static final String HXI_CONNECTOR_TAG_DEFAULT = "0.0.6";
     private static final String PROPERTIES_FILE = "docker-tags.properties";
 
     private static Properties properties;
@@ -123,6 +127,26 @@ public class DockerTags
     public static String getLocalStackTag()
     {
         return getOrDefault("localstack.tag", LOCALSTACK_TAG_DEFAULT);
+    }
+
+    public static String getTransformRouterTag()
+    {
+        return getOrDefault("transform.router.tag", TRANSFORM_ROUTER_TAG_DEFAULT);
+    }
+
+    public static String getTransformCoreAioTag()
+    {
+        return getOrDefault("transform.core.aio.tag", TRANSFORM_CORE_AIO_TAG_DEFAULT);
+    }
+
+    public static String getSfsTag()
+    {
+        return getOrDefault("sfs.tag", SFS_TAG_DEFAULT);
+    }
+
+    public static String getHxiConnectorTag()
+    {
+        return getOrDefault("hxi.connector.tag", HXI_CONNECTOR_TAG_DEFAULT);
     }
 
     private static void loadProperties()

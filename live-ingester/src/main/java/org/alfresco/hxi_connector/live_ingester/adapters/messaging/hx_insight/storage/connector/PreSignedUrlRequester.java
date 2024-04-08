@@ -74,7 +74,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     {
         // @formatter:off
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .log(LoggingLevel.ERROR, log, "Storage :: Unexpected response while requesting pre-signed URL. Body: ${body}")
             .process(this::wrapErrorIfNecessary)
             .stop();
 
@@ -100,7 +100,6 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.initialDelay}",
                     multiplierExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.delayMultiplier}"))
     @Override
-    @SuppressWarnings("unchecked")
     public PreSignedUrlResponse requestStorageLocation(StorageLocationRequest storageLocationRequest)
     {
         Map<String, String> request = Map.of(NODE_ID_PROPERTY, storageLocationRequest.nodeId(),
@@ -126,12 +125,12 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     {
         if (response.isEmpty())
         {
-            throw new EndpointServerErrorException("Unable to extract list of pre-signed URL responses");
+            throw new EndpointServerErrorException("Storage :: Unable to extract list of pre-signed URL responses");
         }
         Map<String, Object> map = response.get(0);
         if (!map.containsKey(STORAGE_LOCATION_PROPERTY))
         {
-            throw new EndpointServerErrorException("Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
+            throw new EndpointServerErrorException("Storage :: Missing " + STORAGE_LOCATION_PROPERTY + " property in response!");
         }
         URL url;
         try
@@ -140,11 +139,11 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         }
         catch (MalformedURLException e)
         {
-            throw new EndpointServerErrorException("Parsing URL from response property failed!", e);
+            throw new EndpointServerErrorException("Storage :: Parsing URL from response property failed!", e);
         }
         if (!map.containsKey(CONTENT_ID_PROPERTY))
         {
-            throw new EndpointServerErrorException("Missing " + CONTENT_ID_PROPERTY + " property in response!");
+            throw new EndpointServerErrorException("Storage :: Missing " + CONTENT_ID_PROPERTY + " property in response!");
         }
         String contentId = (String) map.get(CONTENT_ID_PROPERTY);
         return new PreSignedUrlResponse(url, contentId);

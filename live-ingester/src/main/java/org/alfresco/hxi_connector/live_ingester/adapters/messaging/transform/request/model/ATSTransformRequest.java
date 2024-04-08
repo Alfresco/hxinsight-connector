@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,19 +28,37 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.UUID;
 
-import lombok.Builder;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+
+import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.ClientDataSerializer;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 
 /**
  * Model used for Transform Request Events.
  *
  * This is a mirror of org.alfresco.repo.rendition2.TransformRequest in Alfresco Repository project.
  */
-@Builder
 public record ATSTransformRequest(String requestId,
         String nodeRef,
         String targetMediaType,
-        String clientData,
+        @JsonSerialize(using = ClientDataSerializer.class) ClientData clientData,
         Map<String, String> transformOptions,
         String replyQueue) implements Serializable
-{}
+{
+
+    private static final String WORKSPACE_SPACES_STORE = "workspace://SpacesStore/";
+    private static final String TIMEOUT_KEY = "timeout";
+
+    public ATSTransformRequest(String nodeRef, String targetMediaType, ClientData clientData, int timeout, String replyQueue)
+    {
+        this(
+                UUID.randomUUID().toString(),
+                WORKSPACE_SPACES_STORE + nodeRef,
+                targetMediaType,
+                clientData,
+                Map.of(TIMEOUT_KEY, String.valueOf(timeout)),
+                replyQueue);
+    }
+}

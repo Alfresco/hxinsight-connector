@@ -40,7 +40,6 @@ import static org.apache.http.HttpHeaders.CONTENT_TYPE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.BUCKET_NAME;
@@ -52,7 +51,6 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import jakarta.jms.Connection;
@@ -70,7 +68,6 @@ import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.apache.commons.io.IOUtils;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
@@ -266,13 +263,15 @@ public class ContainerSupport
     @SneakyThrows
     public void expectFileUploadedToS3(String expectedFile)
     {
-        List<String> actualBucketContent = localStorageClient.listBucketContent(BUCKET_NAME);
+        retryWithBackoff(() -> {
+            assertThat(localStorageClient.listBucketContent(BUCKET_NAME)).contains(OBJECT_KEY);
+        });
+
         @Cleanup
         InputStream expectedInputStream = Files.newInputStream(Paths.get("src/integration-test/resources/" + expectedFile));
         @Cleanup
         InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
-        assertThat(actualBucketContent).contains(OBJECT_KEY);
-        assertTrue(IOUtils.contentEquals(expectedInputStream, bucketFileInputStream));
+        assertThat(expectedInputStream).hasSameContentAs(bucketFileInputStream);
     }
 }

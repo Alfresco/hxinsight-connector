@@ -106,8 +106,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e01",
                     "eventType": "create",
                     "properties": {
-                      "cm:autoVersion": {"value": true},
-                      "createdAt": {"value": 1709378055695},
+                      "cm:autoVersion": {"value": "true"},
+                      "createdAt": {"value": "1709378055695"},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
                       "cm:name": {"value": "purchase-order-scan.pdf"},
@@ -133,7 +133,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e01",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e01\\",\\"targetMimeType\\":\\"application/pdf\\"}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e01\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
@@ -259,8 +259,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e03",
                     "eventType": "create",
                     "properties": {
-                      "cm:autoVersion": {"value": true},
-                      "createdAt": {"value": 1709378055695},
+                      "cm:autoVersion": {"value": "true"},
+                      "createdAt": {"value": "1709378055695"},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"]},
                       "cm:name": {"value": "purchase-order-scan.pdf"},

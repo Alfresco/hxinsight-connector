@@ -66,7 +66,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "eventType" : "create",
                     "properties" : {
                       "type": {"value": "cm:category"},
-                      "createdAt": {"value": 1707153552},
+                      "createdAt": {"value": "1707153552"},
                       "createdBy": {"value": "System"},
                       "modifiedBy": {"value": "admin"},
                       "aspectsNames": {"value": ["cm:auditable"]},
@@ -119,10 +119,10 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "hr_user"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
-                      "createdAt": {"value": 1308061016},
+                      "createdAt": {"value": "1308061016"},
                       "cm:name": {"value": "dashboard.xml"},
-                      "cm:isContentIndexed": {"value": true},
-                      "cm:isIndexed": {"value": false},
+                      "cm:isContentIndexed": {"value": "true"},
+                      "cm:isIndexed": {"value": "false"},
                       "cm:content": {
                         "file": {
                           "content-metadata": {
@@ -142,7 +142,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"application/pdf\\"}",
+                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
