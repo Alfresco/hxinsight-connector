@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/token"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "access-token.json"
+  }
+}

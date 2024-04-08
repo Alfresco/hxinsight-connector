@@ -21,6 +21,7 @@
         <module>prediction-applier</module>
         <module>prediction-applier-extension</module>
         <module>distribution</module>
+        <module>e2e-test</module>
     </modules>
 
     <scm>
