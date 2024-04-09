@@ -97,17 +97,6 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     multiplierExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.delayMultiplier}"))
     @Override
     @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
-    public void upload(FileUploadRequest fileUploadRequest)
-    {
-        upload(fileUploadRequest, null);
-    }
-
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.attempts}",
-            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.initialDelay}",
-                    multiplierExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.delayMultiplier}"))
-    @Override
-    @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
     public void upload(FileUploadRequest fileUploadRequest, String nodeId)
     {
         InputStream fileData = fileUploadRequest.file().data();

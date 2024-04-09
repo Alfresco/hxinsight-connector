@@ -27,8 +27,5 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.s
 
 public interface FileUploader
 {
-    @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
-    void upload(FileUploadRequest fileUploadRequest);
-
     void upload(FileUploadRequest fileUploadRequest, String nodeId);
 }
