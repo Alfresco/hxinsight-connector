@@ -33,27 +33,22 @@ import static org.mockito.BDDMockito.given;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class TypeFilterApplierTest
 {
     private static final String CM_CONTENT = "cm:content";
     private static final String CM_SPECIAL_FOLDER = "cm:special-folder";
-    @Mock
-    private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
-    @Mock
-    private DataAttributes<NodeResource> mockData;
     @Mock
     private NodeResource mockResource;
     @Mock
@@ -64,23 +59,30 @@ class TypeFilterApplierTest
     @InjectMocks
     private TypeFilterApplier objectUnderTest;
 
-    @BeforeEach
-    void mockBasicData()
-    {
-        given(mockRepoEvent.getData()).willReturn(mockData);
-        given(mockData.getResource()).willReturn(mockResource);
-        given(mockFilter.type()).willReturn(mockType);
-    }
-
     @Test
-    void shouldThrowExceptionWhenNullNodeType()
+    void givenNonEmptyFilters_whenNullCurrentNodeType_thenExceptionIsThrown()
     {
+        given(mockFilter.type()).willReturn(mockType);
         given(mockResource.getNodeType()).willReturn(null);
         given(mockType.allow()).willReturn(List.of(CM_CONTENT, CM_SPECIAL_FOLDER));
         given(mockType.deny()).willReturn(emptyList());
 
         // when/then
-        assertThrows(NullPointerException.class, () -> objectUnderTest.applyFilter(mockRepoEvent, mockFilter));
+        assertThrows(NullPointerException.class, () -> objectUnderTest.isNodeAllowed(mockResource, mockFilter));
 
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void whenNullPreviousNodeType_thenResultSameAsForCurrent(boolean currentlyAllowed)
+    {
+        given(mockResource.getNodeType()).willReturn(null);
+
+        // when
+        boolean result = objectUnderTest.isNodeBeforeAllowed(currentlyAllowed, mockResource, mockFilter);
+
+        // then
+        assertEquals(currentlyAllowed, result);
+    }
+
 }

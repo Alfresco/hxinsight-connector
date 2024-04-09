@@ -33,6 +33,7 @@ import static org.alfresco.elasticsearch.db.connector.ParentChildAssociationOrdi
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.ArrayDeque;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 import java.util.Set;
@@ -68,6 +69,7 @@ public class AncestorFilterApplier implements AlfrescoNodeFilterApplier
             return true;
         }
         final List<String> primaryHierarchy = getPrimaryHierarchy(alfrescoNode);
+        primaryHierarchy.add(alfrescoNode.getNodeRef());
         log.atDebug().log("Applying primary ancestor filters on Alfresco node of id: {}", alfrescoNode.getId());
         return CollectionFilter.filter(primaryHierarchy, allowed, denied);
     }
@@ -85,6 +87,6 @@ public class AncestorFilterApplier implements AlfrescoNodeFilterApplier
             Set<ChildAssocMetaData> childAssocMetaData = SetUtils.emptyIfNull(metadataRepository.getChildAssocMetaData(childAssocParams));
             primaryParentAssociation = childAssocMetaData.isEmpty() ? null : childAssocMetaData.iterator().next();
         }
-        return primaryHierarchy.stream().toList();
+        return new ArrayList<>(primaryHierarchy);
     }
 }

@@ -27,31 +27,32 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.f
 
 import static java.util.Collections.emptyList;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class AncestorFilterApplierTest
 {
-    private static final String ANCESTOR = "parent-node-id";
-    @Mock
-    private RepoEvent<DataAttributes<NodeResource>> mockRepoEvent;
-    @Mock
-    private DataAttributes<NodeResource> mockData;
+    private static final String ANCESTOR_ID = "parent-node-id";
+    private static final String GRAND_ANCESTOR_ID = "grandparent-node-id";
+    private static final String NODE_ID = "node-id";
     @Mock
     private NodeResource mockResource;
     @Mock
@@ -63,38 +64,97 @@ class AncestorFilterApplierTest
     private AncestorFilterApplier objectUnderTest;
 
     @BeforeEach
-    void mockBasicData()
+    void mockNodeId()
     {
-        given(mockRepoEvent.getData()).willReturn(mockData);
-        given(mockData.getResource()).willReturn(mockResource);
-        given(mockFilter.path()).willReturn(mockPath);
+        given(mockResource.getId()).willReturn(NODE_ID);
     }
 
     @Test
-    void shouldNotFilterOutNullPrimaryHierarchyWhenEmptyAllowedAndEmptyDenied()
+    void givenEmptyAllowedAndEmptyDeniedFilters_whenNullPrimaryHierarchyOnCurrentNode_thenAllowNode()
     {
+        given(mockFilter.path()).willReturn(mockPath);
         given(mockResource.getPrimaryHierarchy()).willReturn(null);
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertTrue(result);
     }
 
     @Test
-    void shouldFilterOutWhenPrimaryHierarchyNullAndNonEmptyAllowedAndEmptyDenied()
+    void givenNonEmptyAllowedAndEmptyDeniedFilters_whenNullPrimaryHierarchyOnCurrentNode_thenDenyNode()
     {
+        given(mockFilter.path()).willReturn(mockPath);
         given(mockResource.getPrimaryHierarchy()).willReturn(null);
-        given(mockPath.allow()).willReturn(List.of(ANCESTOR));
+        given(mockPath.allow()).willReturn(List.of(ANCESTOR_ID));
         given(mockPath.deny()).willReturn(emptyList());
 
         // when
-        boolean result = objectUnderTest.applyFilter(mockRepoEvent, mockFilter);
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
 
         // then
         assertFalse(result);
     }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {true, false})
+    void whenNullPrimaryHierarchyOnPreviousNode_thenReturnCurrentlyAllowed(boolean currentlyAllowed)
+    {
+        given(mockResource.getPrimaryHierarchy()).willReturn(null);
+
+        // when
+        boolean result = objectUnderTest.isNodeBeforeAllowed(currentlyAllowed, mockResource, mockFilter);
+
+        // then
+        assertEquals(currentlyAllowed, result);
+    }
+
+    @Test
+    void givenFilteredNodeInAllowedAndEmptyDeniedFilters_whenNullPrimaryHierarchyOnCurrentNode_thenAllowNode()
+    {
+        given(mockFilter.path()).willReturn(mockPath);
+        given(mockResource.getPrimaryHierarchy()).willReturn(null);
+        given(mockPath.allow()).willReturn(List.of(ANCESTOR_ID, NODE_ID));
+        given(mockPath.deny()).willReturn(emptyList());
+
+        // when
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
+    void givenFilteredNodeInDeniedAndEmptyAllowedFilters_whenNullPrimaryHierarchyOnCurrentNode_thenDenyNode()
+    {
+        given(mockFilter.path()).willReturn(mockPath);
+        given(mockResource.getPrimaryHierarchy()).willReturn(null);
+        given(mockPath.allow()).willReturn(emptyList());
+        given(mockPath.deny()).willReturn(List.of(ANCESTOR_ID, NODE_ID));
+
+        // when
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
+
+        // then
+        assertFalse(result);
+    }
+
+    @Test
+    void givenFilteredNodeInAllowedAndNonEmptyDeniedFilters_whenAncestorDeniedOnCurrentNode_thenDenyNode()
+    {
+        given(mockFilter.path()).willReturn(mockPath);
+        given(mockResource.getPrimaryHierarchy()).willReturn(Stream.of(ANCESTOR_ID, GRAND_ANCESTOR_ID).toList());
+        given(mockPath.allow()).willReturn(List.of(NODE_ID));
+        given(mockPath.deny()).willReturn(List.of(GRAND_ANCESTOR_ID));
+
+        // when
+        boolean result = objectUnderTest.isNodeAllowed(mockResource, mockFilter);
+
+        // then
+        assertFalse(result);
+    }
+
 }

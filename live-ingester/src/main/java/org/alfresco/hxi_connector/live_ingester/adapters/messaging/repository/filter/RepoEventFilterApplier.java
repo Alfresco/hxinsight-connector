@@ -27,11 +27,32 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 public interface RepoEventFilterApplier
 {
-    boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter);
+    /**
+     * @param nodeResource
+     *            Current node resource
+     * @param filter
+     *            configuration
+     * @return If node is allowed by supplied filter configuration
+     */
+    boolean isNodeAllowed(NodeResource nodeResource, Filter filter);
+
+    /**
+     * Default implementation can be used to filter based on properties that are always present in the "before" resource. It is not suitable if the property is omitted when unchanged and therefore needs a specific implementation.
+     *
+     * @param currentlyAllowed
+     *            If current version of the node is allowed
+     * @param nodeResourceBefore
+     *            Previous version of the resource
+     * @param filter
+     *            configuration
+     * @return whether previous version of a node is allowed by supplied filter configuration
+     */
+    default boolean isNodeBeforeAllowed(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
+    {
+        return isNodeAllowed(nodeResourceBefore, filter);
+    }
 }

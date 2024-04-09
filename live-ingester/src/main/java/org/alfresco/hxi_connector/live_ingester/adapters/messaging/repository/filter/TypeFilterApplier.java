@@ -34,9 +34,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.repository.filter.FieldFilter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Component
 @RequiredArgsConstructor
@@ -44,12 +42,24 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class TypeFilterApplier implements RepoEventFilterApplier
 {
     @Override
-    public boolean applyFilter(RepoEvent<DataAttributes<NodeResource>> repoEvent, Filter filter)
+    public boolean isNodeAllowed(NodeResource nodeResource, Filter filter)
     {
-        final String nodeType = repoEvent.getData().getResource().getNodeType();
+        final String nodeType = nodeResource.getNodeType();
         final List<String> allowed = filter.type().allow();
         final List<String> denied = filter.type().deny();
-        log.atDebug().log("Applying type filters on repo event of id: {}, node id: {}", repoEvent.getId(), repoEvent.getData().getResource().getId());
+        log.atDebug().log("Applying type filters on node id: {}", nodeResource.getId());
         return FieldFilter.filter(nodeType, allowed, denied);
+    }
+
+    @Override
+    public boolean isNodeBeforeAllowed(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
+    {
+        log.atDebug().log("Applying type filters on previous version of repo node id: {}", nodeResourceBefore.getId());
+        final String nodeType = nodeResourceBefore.getNodeType();
+        if (nodeType == null)
+        {
+            return currentlyAllowed;
+        }
+        return isNodeAllowed(nodeResourceBefore, filter);
     }
 }

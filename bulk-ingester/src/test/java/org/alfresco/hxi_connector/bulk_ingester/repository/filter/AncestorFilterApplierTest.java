@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -62,6 +63,9 @@ class AncestorFilterApplierTest
     private static final String DENIED_NODE_REF = "denied-node-ref";
     private static final String PARENT_NODE_REF = "parent-node-ref";
     private static final String GRANDPARENT_NODE_REF = "grandparent-node-ref";
+    private static final String NODE_REF = "node-ref";
+    private static final String NODE_REF2 = "node-ref2";
+
     private static final int CHILD_ID = 3;
     private static final int PARENT_ID = 2;
     private static final int GRANDPARENT_ID = 1;
@@ -84,7 +88,7 @@ class AncestorFilterApplierTest
     }
 
     @Test
-    void shouldNotFilterOutWhenNoFiltersDefined()
+    void givenNoFiltersDefined_whenFilterAppliedOnAnyNode_thenAllowNode()
     {
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(emptyList());
@@ -97,11 +101,12 @@ class AncestorFilterApplierTest
     }
 
     @Test
-    void shouldNotFilterOutWhenSingleAncestorNotInDenied()
+    void givenEmptyAllowedAndNonEmptyDenied_whenParentAndNodeNotInDenied_thenAllowNode()
     {
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
@@ -118,11 +123,12 @@ class AncestorFilterApplierTest
     }
 
     @Test
-    void shouldNotFilterOutWhenNoneOfAncestorsInDenied()
+    void givenEmptyAllowedAndNonEmptyDenied_whenNoneFromPathInDenied_thenAllowNode()
     {
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
@@ -143,11 +149,12 @@ class AncestorFilterApplierTest
     }
 
     @Test
-    void shouldFilterOutWhenFirstAncestorInDenied()
+    void givenEmptyAllowedAndNonEmptyDenied_whenParentInDenied_thenDenyNode()
     {
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
@@ -168,11 +175,12 @@ class AncestorFilterApplierTest
     }
 
     @Test
-    void shouldFilterOutWhenNextAncestorInDenied()
+    void givenEmptyAllowedAndNonEmptyDenied_whenAncestorInDenied_thenDenyNode()
     {
         given(mockPath.allow()).willReturn(emptyList());
         given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
         given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
         final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
         given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
         ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
@@ -190,6 +198,84 @@ class AncestorFilterApplierTest
         then(mockMetadataRepository).should(times(2)).getChildAssocMetaData(any());
         then(mockMetadataRepository).shouldHaveNoMoreInteractions();
         Assertions.assertFalse(result);
+    }
+
+    @Test
+    void givenEmptyAllowedAndNonEmptyDenied_whenNodeRefInDenied_thenDenyNode()
+    {
+        given(mockPath.allow()).willReturn(emptyList());
+        given(mockPath.deny()).willReturn(List.of(DENIED_NODE_REF));
+        given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(DENIED_NODE_REF);
+        final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
+        given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
+        ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
+        parentAssoc.setParentUuid(PARENT_NODE_REF);
+        given(mockAlfrescoNode.getPrimaryParentAssociation()).willReturn(parentAssoc);
+        final Set<ParentChildAssociationOrdinality> ordinalities = Set.of(PRIMARY);
+        ChildAssocParams childAssocParams = new ChildAssocParams(ordinalities, PARENT_ID, nodeTimestamp);
+        ChildAssocMetaData grandParentAssoc = new ChildAssocMetaData(PARENT_ID, GRANDPARENT_ID, null, null);
+        grandParentAssoc.setParentUuid(GRANDPARENT_NODE_REF);
+        given(mockMetadataRepository.getChildAssocMetaData(childAssocParams)).willReturn(Set.of(grandParentAssoc));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
+
+        then(mockMetadataRepository).should(times(2)).getChildAssocMetaData(any());
+        then(mockMetadataRepository).shouldHaveNoMoreInteractions();
+        Assertions.assertFalse(result);
+    }
+
+    @Test
+    void givenNonEmptyAllowedAndEmptyDenied_whenNodeRefInAllowed_thenAllowNode()
+    {
+        given(mockPath.allow()).willReturn(List.of(NODE_REF));
+        given(mockPath.deny()).willReturn(emptyList());
+        given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
+        final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
+        given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
+        ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
+        parentAssoc.setParentUuid(PARENT_NODE_REF);
+        given(mockAlfrescoNode.getPrimaryParentAssociation()).willReturn(parentAssoc);
+        final Set<ParentChildAssociationOrdinality> ordinalities = Set.of(PRIMARY);
+        ChildAssocParams childAssocParams = new ChildAssocParams(ordinalities, PARENT_ID, nodeTimestamp);
+        ChildAssocMetaData grandParentAssoc = new ChildAssocMetaData(PARENT_ID, GRANDPARENT_ID, null, null);
+        grandParentAssoc.setParentUuid(GRANDPARENT_NODE_REF);
+        given(mockMetadataRepository.getChildAssocMetaData(childAssocParams)).willReturn(Set.of(grandParentAssoc));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
+
+        then(mockMetadataRepository).should(times(2)).getChildAssocMetaData(any());
+        then(mockMetadataRepository).shouldHaveNoMoreInteractions();
+        Assertions.assertTrue(result);
+    }
+
+    @Test
+    void givenNonEmptyAllowedAndEmptyDenied_whenNoneFromPathInAllowed_thenDenyNode()
+    {
+        given(mockPath.allow()).willReturn(List.of(NODE_REF2));
+        given(mockPath.deny()).willReturn(emptyList());
+        given(mockAlfrescoNode.getId()).willReturn(Long.valueOf(CHILD_ID));
+        given(mockAlfrescoNode.getNodeRef()).willReturn(NODE_REF);
+        final ZonedDateTime nodeTimestamp = ZonedDateTime.now().truncatedTo(ChronoUnit.MILLIS);
+        given(mockAlfrescoNode.getTimestamp()).willReturn(nodeTimestamp.toInstant().toEpochMilli());
+        ChildAssocMetaData parentAssoc = new ChildAssocMetaData(CHILD_ID, PARENT_ID, null, null);
+        parentAssoc.setParentUuid(PARENT_NODE_REF);
+        given(mockAlfrescoNode.getPrimaryParentAssociation()).willReturn(parentAssoc);
+        final Set<ParentChildAssociationOrdinality> ordinalities = Set.of(PRIMARY);
+        ChildAssocParams childAssocParams = new ChildAssocParams(ordinalities, PARENT_ID, nodeTimestamp);
+        ChildAssocMetaData grandParentAssoc = new ChildAssocMetaData(PARENT_ID, GRANDPARENT_ID, null, null);
+        grandParentAssoc.setParentUuid(GRANDPARENT_NODE_REF);
+        given(mockMetadataRepository.getChildAssocMetaData(childAssocParams)).willReturn(Set.of(grandParentAssoc));
+
+        // when
+        boolean result = objectUnderTest.applyFilter(mockAlfrescoNode, mockFilter);
+
+        then(mockMetadataRepository).should(times(2)).getChildAssocMetaData(any());
+        then(mockMetadataRepository).shouldHaveNoMoreInteractions();
+        assertFalse(result);
     }
 
 }
