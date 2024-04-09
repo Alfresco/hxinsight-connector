@@ -64,6 +64,7 @@ class HttpFileUploaderTest
 {
     private static final String MOCK_ENDPOINT = "mock:s3-endpoint";
     private static final String CONTENT_TYPE = "content/type";
+    private static final String NODE_ID = "node-ref";
 
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
@@ -104,7 +105,7 @@ class HttpFileUploaderTest
         mockEndpointWillExpectInRequestHeader(Exchange.CONTENT_TYPE, CONTENT_TYPE);
 
         // when
-        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request, NODE_ID));
 
         // then
         mockEndpoint.assertIsSatisfied();
@@ -126,7 +127,7 @@ class HttpFileUploaderTest
         mockEndpointWillExpectInRequestHeader(STORAGE_LOCATION_HEADER, expectedRawUrl);
 
         // when
-        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request, NODE_ID));
 
         // then
         mockEndpoint.assertIsSatisfied();
@@ -141,7 +142,7 @@ class HttpFileUploaderTest
         mockEndpointWillRespondWith(500);
 
         // when
-        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request, NODE_ID));
 
         // then
         assertThat(thrown)
@@ -158,7 +159,7 @@ class HttpFileUploaderTest
         mockEndpointWillRespondWith(400);
 
         // when
-        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request));
+        Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request, NODE_ID));
 
         // then
         assertThat(thrown)

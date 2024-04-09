@@ -97,7 +97,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     multiplierExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.delayMultiplier}"))
     @Override
     @SuppressWarnings({"PMD.CloseResource", "PMD.PreserveStackTrace"})
-    public void upload(FileUploadRequest fileUploadRequest)
+    public void upload(FileUploadRequest fileUploadRequest, String nodeId)
     {
         InputStream fileData = fileUploadRequest.file().data();
         try
@@ -111,6 +111,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     .withHeaders(headers)
                     .withBody(fileData)
                     .request();
+            log.atDebug().log("Upload :: PDF rendition of the node: {} successfully uploaded to pre-signed URL: {}", nodeId, fileUploadRequest.storageLocation().getPath());
         }
         catch (Exception e)
         {

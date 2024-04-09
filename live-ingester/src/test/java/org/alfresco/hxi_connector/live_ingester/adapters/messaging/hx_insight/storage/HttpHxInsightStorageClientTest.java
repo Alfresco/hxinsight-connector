@@ -83,6 +83,6 @@ class HttpHxInsightStorageClientTest
         StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
         then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
         FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(new File(inputStreamMock), FILE_CONTENT_TYPE, urlMock);
-        then(fileUploaderMock).should().upload(expectedFileUploadRequest);
+        then(fileUploaderMock).should().upload(expectedFileUploadRequest, NODE_ID);
     }
 }

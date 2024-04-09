@@ -80,6 +80,7 @@ class HttpFileUploaderIntegrationTest
     private static final String OBJECT_CONTENT_TYPE = "plain/text";
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
+    private static final String NODE_ID = "node-ref";
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
@@ -110,7 +111,7 @@ class HttpFileUploaderIntegrationTest
         FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
 
         // when
-        fileUploader.upload(fileUploadRequest);
+        fileUploader.upload(fileUploadRequest, NODE_ID);
 
         // then
         List<String> actualBucketContent = s3StorageMock.listBucketContent(BUCKET_NAME);
@@ -132,10 +133,10 @@ class HttpFileUploaderIntegrationTest
         FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
 
         // when
-        Throwable thrown = catchThrowable(() -> fileUploader.upload(fileUploadRequest));
+        Throwable thrown = catchThrowable(() -> fileUploader.upload(fileUploadRequest, NODE_ID));
 
         // then
-        then(fileUploader).should(times(RETRY_ATTEMPTS)).upload(any());
+        then(fileUploader).should(times(RETRY_ATTEMPTS)).upload(any(), any());
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .rootCause().isInstanceOf(HttpHostConnectException.class)
@@ -154,10 +155,10 @@ class HttpFileUploaderIntegrationTest
         FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
 
         // when
-        Throwable thrown = catchThrowable(() -> fileUploader.upload(fileUploadRequest));
+        Throwable thrown = catchThrowable(() -> fileUploader.upload(fileUploadRequest, NODE_ID));
 
         // then
-        then(fileUploader).should(times(1)).upload(any());
+        then(fileUploader).should(times(1)).upload(any(), any());
         assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
     }
 
