@@ -61,7 +61,7 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
         try (InputStream fileData = file.data())
         {
             log.atDebug().log("Upload :: Transferring to S3 content of node: {} with size of {} bytes", nodeId, fileData.available());
-            fileUploader.upload(new FileUploadRequest(new File(fileData), contentType, preSignedUrl));
+            fileUploader.upload(new FileUploadRequest(new File(fileData), contentType, preSignedUrl), nodeId);
         }
         catch (IOException e)
         {
