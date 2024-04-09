@@ -111,7 +111,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     .withHeaders(headers)
                     .withBody(fileData)
                     .request();
-            log.atDebug().log("Upload :: PDF rendition of the node: {} to presignedUrl: {}", nodeId, fileUploadRequest.storageLocation().getPath());
+            log.atDebug().log("Upload :: PDF rendition of the node: {} successfully uploaded to pre-signed URL: {}", nodeId, fileUploadRequest.storageLocation().getPath());
         }
         catch (Exception e)
         {
