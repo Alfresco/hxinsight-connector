@@ -71,7 +71,7 @@
         <commons-lang.version>3.14.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.16.0</commons-io.version>
-        <aws-sdk-s3.version>2.25.25</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.25.29</aws-sdk-s3.version>
         <wiremock.version>3.5.2</wiremock.version>
 
         <testcontainers.version>1.19.7</testcontainers.version>
