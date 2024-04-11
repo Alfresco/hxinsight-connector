@@ -220,6 +220,7 @@ class ATSTransformResponseHandlerTest
                                             RESPONSE_ENDPOINT,
                                             retryIngestion,
                                             retryTransformation),
+                                    mock(),
                                     mock()),
                             mock()),
                     mock());
