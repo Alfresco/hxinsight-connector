@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Set;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -64,7 +65,7 @@ public class Retry
             NoHttpResponseException.class,
             MalformedChunkCodingException.class);
 
-    @PositiveOrZero
+    @Min(-1)
     private int attempts = RETRY_ATTEMPTS_DEFAULT;
     @PositiveOrZero
     private int initialDelay = RETRY_INITIAL_DELAY_DEFAULT;
