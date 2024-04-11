@@ -87,6 +87,7 @@ public class UpdateNodeIntegrationTest
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testUpdateFile() throws IOException
     {
         // given
