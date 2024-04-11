@@ -94,6 +94,7 @@ class PredictionListenerIntegrationTest
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testReceiveMessage()
     {
         // given
