@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import static java.util.Objects.requireNonNullElseGet;
 
+import java.util.Map;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -34,7 +35,7 @@ import jakarta.validation.constraints.Positive;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
-public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore)
+public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore, @NotNull MimeType mimeType)
 {
     public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout)
     {}
@@ -61,4 +62,7 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
             retry = requireNonNullElseGet(retry, Retry::new);
         }
     }
+
+    public record MimeType(Map<String, String> mapping)
+    {}
 }
