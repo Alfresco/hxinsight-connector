@@ -90,6 +90,7 @@ class NodesClientIntegrationTest
             }""".formatted(NODE_ID, ASPECT);
 
     @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
     static final WireMockContainer repositoryMock = DockerContainers.createWireMockContainer();
 
     @SpyBean

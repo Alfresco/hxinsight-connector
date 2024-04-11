@@ -62,7 +62,7 @@ public class ErrorUtils
         wrapErrorIfNecessary(cause, retryReasons, HxInsightConnectorRuntimeException.class);
     }
 
-    public static void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
+    public static <T extends RuntimeException> void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<T> runtimeExceptionType)
     {
         if (cause instanceof EndpointServerErrorException)
         {
@@ -82,15 +82,17 @@ public class ErrorUtils
         }
         else
         {
+            T exception;
             try
             {
-                throw runtimeExceptionType.getDeclaredConstructor(Throwable.class).newInstance(cause);
+                exception = runtimeExceptionType.getDeclaredConstructor(Throwable.class).newInstance(cause);
             }
             catch (Exception e)
             {
-                throw new RuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
+                throw new HxInsightConnectorRuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
                         .formatted(runtimeExceptionType.getSimpleName(), e.getMessage()), cause);
             }
+            throw exception;
         }
     }
 }

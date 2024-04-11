@@ -63,6 +63,7 @@ public class PredictionListener extends RouteBuilder
                 .end();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void processPrediction(Exchange exchange)
     {
         Prediction prediction = exchange.getIn().getBody(Prediction.class);
