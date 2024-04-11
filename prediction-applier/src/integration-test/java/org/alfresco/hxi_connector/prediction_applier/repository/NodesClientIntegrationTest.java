@@ -61,11 +61,9 @@ import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.common.test.util.DockerContainers;
-import org.alfresco.hxi_connector.prediction_applier.util.local.TestNodesClient;
 
 @SpringBootTest(classes = {
-        NodesClient.class,
-        TestNodesClient.class},
+        NodesClient.class},
         properties = {
                 "alfresco.repository.nodes.username=admin",
                 "alfresco.repository.nodes.password=admin",
