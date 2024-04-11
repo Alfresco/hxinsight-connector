@@ -31,6 +31,8 @@ alfresco:
     response:
       queue-name: org.alfresco.hxinsight-connector.transform.response
       endpoint: activemq:queue:${alfresco.transform.response.queue-name}
+      retry-ingestion:
+        attempts: -1
     shared-file-store:
       host: http://localhost
       port: 8099
