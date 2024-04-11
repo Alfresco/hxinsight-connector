@@ -62,6 +62,7 @@ public class ErrorUtils
         wrapErrorIfNecessary(cause, retryReasons, HxInsightConnectorRuntimeException.class);
     }
 
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static <T extends RuntimeException> void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<T> runtimeExceptionType)
     {
         if (cause instanceof EndpointServerErrorException)
