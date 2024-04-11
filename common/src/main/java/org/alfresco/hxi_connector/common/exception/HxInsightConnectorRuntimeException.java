@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,20 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier;
+package org.alfresco.hxi_connector.common.exception;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.retry.annotation.EnableRetry;
-
-@SpringBootApplication
-@EnableRetry
-@SuppressWarnings("PMD.UseUtilityClass")
-public class PredictionApplierApplication
+public class HxInsightConnectorRuntimeException extends RuntimeException
 {
-
-    public static void main(String[] args)
+    public HxInsightConnectorRuntimeException(String message)
     {
-        SpringApplication.run(PredictionApplierApplication.class, args);
+        super(message);
+    }
+
+    public HxInsightConnectorRuntimeException(Throwable cause)
+    {
+        super(cause);
+    }
+
+    public HxInsightConnectorRuntimeException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }

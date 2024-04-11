@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,14 +25,14 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.util.local;
 
-import java.util.Map;
-
 import lombok.SneakyThrows;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 
 @Component
 @Profile("test")
@@ -57,11 +57,11 @@ public class LocalSqsPublisher extends RouteBuilder
     }
 
     @SneakyThrows
-    public void publish(String endpoint, Map<String, Object> message)
+    public void publish(String endpoint, Prediction prediction)
     {
         camelContext.createFluentProducerTemplate()
                 .withHeader(ENDPOINT_HEADER, endpoint)
-                .withBody(message)
+                .withBody(prediction)
                 .to(LOCAL_ENDPOINT)
                 .send();
     }

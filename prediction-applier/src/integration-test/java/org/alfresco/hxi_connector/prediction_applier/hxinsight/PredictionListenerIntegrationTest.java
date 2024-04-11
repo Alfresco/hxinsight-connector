@@ -25,12 +25,11 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hxinsight;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.SQS;
 
 import java.io.IOException;
-import java.util.List;
-import java.util.Map;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -41,6 +40,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -48,9 +48,11 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.common.test.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.prediction_applier.repository.NodesClient;
 import org.alfresco.hxi_connector.prediction_applier.util.local.LocalSqsPublisher;
 
 @SpringBootTest(classes = {
@@ -72,6 +74,10 @@ class PredictionListenerIntegrationTest
     LocalSqsPublisher localSqsPublisher;
     @Value("${hyland-experience.insight.prediction.endpoint}")
     String predictionEndpoint;
+    @MockBean
+    PredictionMapper predictionMapper;
+    @MockBean
+    NodesClient nodesClient;
 
     ListAppender<ILoggingEvent> predictionListenerLogsAppender;
 
@@ -91,21 +97,16 @@ class PredictionListenerIntegrationTest
     void testReceiveMessage()
     {
         // given
-        String predictionProperty = "prediction-id";
-        String predictionValue = "prediction-value";
-        Map<String, Object> message = Map.of(predictionProperty, predictionValue);
+        Prediction prediction = new Prediction("prediction-id", "node-id");
 
         // when
-        localSqsPublisher.publish(predictionEndpoint, message);
+        localSqsPublisher.publish(predictionEndpoint, prediction);
 
         // then
-        List<String> actualLogs = RetryUtils.retryWithBackoff(() -> {
-            List<String> logs = predictionListenerLogsAppender.list.stream().map(Object::toString).toList();
-            assertThat(logs).isNotEmpty();
-            return logs;
+        RetryUtils.retryWithBackoff(() -> {
+            then(predictionMapper).should().map(prediction);
+            then(nodesClient).should().updateNode(any());
         });
-        List<String> expectedLogs = List.of("[DEBUG] Prediction body: {\"%s\":\"%s\"}".formatted(predictionProperty, predictionValue));
-        assertThat(actualLogs).isEqualTo(expectedLogs);
     }
 
     @DynamicPropertySource

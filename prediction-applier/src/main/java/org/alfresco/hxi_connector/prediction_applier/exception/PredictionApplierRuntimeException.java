@@ -23,20 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.retry.annotation.EnableRetry;
+package org.alfresco.hxi_connector.prediction_applier.exception;
 
-@SpringBootApplication
-@EnableRetry
-@SuppressWarnings("PMD.UseUtilityClass")
-public class PredictionApplierApplication
+public class PredictionApplierRuntimeException extends RuntimeException
 {
-
-    public static void main(String[] args)
+    public PredictionApplierRuntimeException(String message)
     {
-        SpringApplication.run(PredictionApplierApplication.class, args);
+        super(message);
+    }
+
+    public PredictionApplierRuntimeException(Throwable cause)
+    {
+        super(cause);
+    }
+
+    public PredictionApplierRuntimeException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }
