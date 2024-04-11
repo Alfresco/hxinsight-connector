@@ -36,10 +36,14 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.model.PullResponseItem;
 import lombok.AccessLevel;
 import lombok.Cleanup;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
@@ -90,11 +94,16 @@ public class DockerContainers
     public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network, boolean isEnterprise)
     {
         // @formatter:off
+        DockerImageName baseRepositoryImage = DockerImageName.parse(isEnterprise ? REPOSITORY_ENT_IMAGE : REPOSITORY_IMAGE).withTag(REPOSITORY_TAG);
+
+        // workaround - for some reason testcontainers cannot pull repository image from quay while it dynamically creates new image (withDockerfileFromBuilder(...))
+        pullImage(baseRepositoryImage);
+
         Path jarFile = findTargetJar();
         GenericContainer<?> repository = new GenericContainer<>(new ImageFromDockerfile("localhost/alfresco/alfresco-content-repository-prediction-applier-extension")
             .withFileFromPath(jarFile.toString(), jarFile)
             .withDockerfileFromBuilder(builder -> builder
-                .from(DockerImageName.parse(isEnterprise ? REPOSITORY_ENT_IMAGE : REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
+                .from(baseRepositoryImage.toString())
                 .user("root")
                 .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
                 .run("chown -R -h alfresco /usr/local/tomcat")
@@ -281,5 +290,24 @@ public class DockerContainers
                 .toString()
                 .toLowerCase(Locale.ENGLISH)
                 .contains(snippet);
+    }
+
+    @SneakyThrows
+    private static void pullImage(DockerImageName dockerImageName)
+    {
+        try (DockerClient dockerClient = DockerClientFactory.instance().client())
+        {
+
+            PullImageResultCallback callback = new PullImageResultCallback() {
+                @Override
+                public void onNext(PullResponseItem item)
+                {
+                    super.onNext(item);
+                }
+            };
+
+            dockerClient.pullImageCmd(dockerImageName.toString())
+                    .exec(callback);
+        }
     }
 }
