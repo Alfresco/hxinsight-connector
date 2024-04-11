@@ -34,7 +34,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.util.client.AspectsClient;
 import org.alfresco.rest.api.model.Aspect;
 
@@ -50,9 +51,9 @@ public class PredictionApplierExtensionIntegrationTest
     @Container
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    static final GenericContainer<?> repository = createRepositoryContainer();
+    static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
 
-    AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getFirstMappedPort(), TIMEOUT_SECONDS);
+    AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
 
     @Test
     void testHxIModelInstallation()
@@ -62,7 +63,7 @@ public class PredictionApplierExtensionIntegrationTest
         assertThat(actualAspect).isNotNull();
     }
 
-    private static GenericContainer<?> createRepositoryContainer()
+    private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)

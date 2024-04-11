@@ -60,7 +60,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.model.repository.Node;
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @SpringBootTest(classes = {
         NodesClient.class},

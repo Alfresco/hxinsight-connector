@@ -49,7 +49,7 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.alfresco.hxi_connector.common.model.prediction.Prediction;
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.prediction_applier.repository.NodesClient;

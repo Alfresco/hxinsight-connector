@@ -55,7 +55,7 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageConfig;
@@ -170,7 +170,7 @@ class HttpFileUploaderIntegrationTest
         registry.add("local.aws.access-key-id", localStackServer::getAccessKey);
         registry.add("local.aws.secret-access-key", localStackServer::getSecretKey);
         registry.add("hyland-experience.storage.upload.retry.attempts", () -> RETRY_ATTEMPTS);
-        registry.add("hyland-experience.storage.upload.retry.initialDelay", () -> RETRY_DELAY_MS);
+        registry.add("hyland-experience.storage.upload.retry.initial-delay", () -> RETRY_DELAY_MS);
     }
 
     private static List<String> differencesBetween(List<String> firstList, List<String> secondList)
