@@ -35,6 +35,7 @@ import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.common.model.repository.NodeEntry;
 
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class TestNodesClient
 {
     private static final String URI_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/%s";

@@ -53,6 +53,7 @@ import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.util.client.TestNodesClient;
 
 @Testcontainers
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class UpdateNodeIntegrationTest
 {
     private static final String QUEUE_NAME = "hxinsight-prediction-queue";

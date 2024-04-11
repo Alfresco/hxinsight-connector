@@ -31,14 +31,14 @@ import org.testcontainers.utility.DockerImageName;
 
 import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 
+@SuppressWarnings("PMD.LongVariable")
 public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoRepositoryContainer>
 {
     static final String REPOSITORY_IMAGE_DEFAULT = "alfresco/alfresco-content-repository-community";
     static final String REPOSITORY_ENTERPRISE_IMAGE_DEFAULT = "quay.io/alfresco/alfresco-content-repository";
-    static final String LOCAL_IMAGE_DEFAULT = "localhost/alfresco/alfresco-content-repository-extended";
     static final String REPOSITORY_TAG = DockerTags.getRepositoryTag();
-    private final int REPO_PORT_DEFAULT = 8080;
-    private final int REPO_DEBUG_PORT_DEFAULT = 8000;
+    private static final int REPO_PORT_DEFAULT = 8080;
+    private static final int REPO_DEBUG_PORT_DEFAULT = 8000;
 
     public AlfrescoRepositoryContainer()
     {

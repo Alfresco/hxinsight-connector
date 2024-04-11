@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.common.test.docker.repository;
 
 import static java.util.function.Predicate.not;
 
-import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.LOCAL_IMAGE_DEFAULT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_ENTERPRISE_IMAGE_DEFAULT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_IMAGE_DEFAULT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_TAG;
@@ -47,6 +46,7 @@ import org.testcontainers.utility.DockerImageName;
 
 public class AlfrescoRepositoryExtension extends ImageFromDockerfile
 {
+    private static final String LOCAL_IMAGE_DEFAULT = "localhost/alfresco/alfresco-content-repository-extended";
 
     public AlfrescoRepositoryExtension(@NonNull String extension)
     {
