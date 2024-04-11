@@ -39,7 +39,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 public class MimeTypeMapper
 {
 
-    public static String EMPTY_MIME_TYPE = "";
+    public static final String EMPTY_MIME_TYPE = "";
     static final String DEFAULT_MIME_TYPE = "application/pdf";
     private final IntegrationProperties integrationProperties;
 
@@ -57,12 +57,9 @@ public class MimeTypeMapper
     {
         for (Map.Entry<String, String> mapping : mappings.entrySet())
         {
-            if (mapping.getKey().endsWith("/*"))
+            if (mapping.getKey().endsWith("/*") && getType(inputType).equals(getType(mapping.getKey())))
             {
-                if (getType(inputType).equals(getType(mapping.getKey())))
-                {
-                    return StringUtils.defaultIfBlank(mapping.getValue(), EMPTY_MIME_TYPE);
-                }
+                return StringUtils.defaultIfBlank(mapping.getValue(), EMPTY_MIME_TYPE);
             }
         }
         return mappings.entrySet().stream()
