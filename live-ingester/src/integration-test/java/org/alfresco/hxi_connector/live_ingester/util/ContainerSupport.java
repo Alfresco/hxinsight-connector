@@ -200,6 +200,12 @@ public class ContainerSupport
         assertEquals(expectedMap, receivedMap);
     }
 
+    @SneakyThrows
+    public void verifyNoATSRequestReceived(long timeoutMillis)
+    {
+        assertThat(atsConsumer.receive(timeoutMillis)).isNull();
+    }
+
     public void clearATSQueue()
     {
         while (receiveATSTextMessage() != null)

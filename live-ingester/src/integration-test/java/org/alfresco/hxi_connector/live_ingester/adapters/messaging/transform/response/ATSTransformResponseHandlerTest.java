@@ -120,7 +120,8 @@ class ATSTransformResponseHandlerTest
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
-                nodeId);
+                nodeId,
+                transformResponse.clientData().targetMimeType());
 
         doThrow(new LiveIngesterRuntimeException("Some exception")).when(ingestContentCommandHandler).handle(expectedCommand);
 
@@ -150,7 +151,8 @@ class ATSTransformResponseHandlerTest
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
-                nodeId);
+                nodeId,
+                transformResponse.clientData().targetMimeType());
 
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 
@@ -182,7 +184,8 @@ class ATSTransformResponseHandlerTest
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
-                nodeId);
+                nodeId,
+                transformResponse.clientData().targetMimeType());
 
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 

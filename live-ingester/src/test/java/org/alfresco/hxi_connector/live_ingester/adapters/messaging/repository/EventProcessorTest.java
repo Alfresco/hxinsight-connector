@@ -47,6 +47,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.RepoEventFilterHandler;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
@@ -269,6 +270,31 @@ class EventProcessorTest
         then(ingestNodeCommandHandler).shouldHaveNoInteractions();
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
         then(deleteNodeCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldNotIngestContentWhenMimeTypeMappedToEmpty()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = prepareMockCreatedEvent();
+        ContentInfo contentInfo = mock();
+        given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
+        given(event.getData().getResource().getContent()).willReturn(contentInfo);
+        given(mockMessage.getBody(RepoEvent.class)).willReturn(event);
+
+        TriggerContentIngestionCommand triggerContentIngestionCommand = mock();
+        given(triggerContentIngestionCommand.mimeType()).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
+        given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(triggerContentIngestionCommand);
+
+        // when
+        eventProcessor.process(mockExchange);
+
+        // then
+        then(repoEventMapper).should().mapToIngestNodeCommand(event);
+        then(repoEventMapper).should().mapToIngestContentCommand(event);
+
+        then(ingestNodeCommandHandler).should().handle(any());
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
     }
 
     RepoEvent<DataAttributes<NodeResource>> prepareMockCreatedEvent()

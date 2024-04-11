@@ -77,7 +77,7 @@ class IngestContentCommandHandlerTest
     void shouldRequestNodeContentTransformation()
     {
         // given
-        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID);
+        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, PDF_MIMETYPE);
 
         // when
         ingestContentCommandHandler.handle(command);
@@ -92,7 +92,7 @@ class IngestContentCommandHandlerTest
     void shouldSendTransformedContentToIngestionEngine()
     {
         // given
-        IngestContentCommand command = new IngestContentCommand(FILE_ID, NODE_ID);
+        IngestContentCommand command = new IngestContentCommand(FILE_ID, NODE_ID, PDF_MIMETYPE);
 
         File fileToUpload = mock();
         given(transformEngineFileStorageMock.downloadFile(FILE_ID)).willReturn(fileToUpload);

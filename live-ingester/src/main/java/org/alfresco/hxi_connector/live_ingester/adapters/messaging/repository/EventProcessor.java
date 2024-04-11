@@ -41,6 +41,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.RepoEventFilterHandler;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
@@ -96,6 +97,13 @@ public class EventProcessor
         if (containsNewContent(event))
         {
             TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
+            if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(command.mimeType()))
+            {
+                NodeResource resource = event.getData().getResource();
+                String sourceMimeType = resource.getContent().getMimeType();
+                log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}.", resource.getId(), sourceMimeType);
+                return;
+            }
 
             ingestContentCommandHandler.handle(command);
         }

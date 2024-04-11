@@ -62,7 +62,7 @@ public class IngestContentCommandHandler
 
     public void handle(TriggerContentIngestionCommand command)
     {
-        TransformRequest transformRequest = new TransformRequest(command.nodeId(), PDF_MIMETYPE);
+        TransformRequest transformRequest = new TransformRequest(command.nodeId(), command.mimeType());
         transformRequester.requestTransform(transformRequest);
     }
 
