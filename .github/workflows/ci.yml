@@ -80,7 +80,7 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
       matrix:
-        repositoryVersion: [ 23.1.0, 23.2.1 ]
+        repoVersion: [ 23.1.0, 23.2.1 ]
     steps:
       - uses: actions/checkout@v3
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v1.35.2
@@ -92,7 +92,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Test application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -Drepository.tag=${{ matrix.repoVersion }}
 
 
   push_docker_images:
