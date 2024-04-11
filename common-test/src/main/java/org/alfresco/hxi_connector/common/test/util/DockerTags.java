@@ -57,6 +57,16 @@ public class DockerTags
 
     public static String getProperty(String key)
     {
+        String systemProperty = System.getProperty(key);
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
+        System.out.println("key = " + key);
+        System.out.println("property = " + systemProperty);
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
+        if (systemProperty != null)
+        {
+            return systemProperty;
+        }
+
         if (properties == null)
         {
             loadProperties();
@@ -77,6 +87,13 @@ public class DockerTags
 
     public static String getOrDefault(String propertyKey, String defaultValue)
     {
+        String systemProperty = System.getProperty(propertyKey);
+
+        if (systemProperty != null)
+        {
+            return systemProperty;
+        }
+
         if (properties == null)
         {
             loadProperties(false);
