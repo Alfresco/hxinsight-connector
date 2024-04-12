@@ -106,8 +106,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e01",
                     "eventType": "create",
                     "properties": {
-                      "cm:autoVersion": {"value": "true"},
-                      "createdAt": {"value": "1709378055695"},
+                      "cm:autoVersion": {"value": true},
+                      "createdAt": {"value": 1709378055695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
                       "cm:name": {"value": "purchase-order-scan.pdf"},
@@ -259,8 +259,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e03",
                     "eventType": "create",
                     "properties": {
-                      "cm:autoVersion": {"value": "true"},
-                      "createdAt": {"value": "1709378055695"},
+                      "cm:autoVersion": {"value": true},
+                      "createdAt": {"value": 1709378055695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"]},
                       "cm:name": {"value": "purchase-order-scan.pdf"},
@@ -976,7 +976,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : "1709378055695"
+                         "value" : 1709378055695
                        },
                        "cm:versionLabel" : {
                          "value" : "1.0"
@@ -1253,7 +1253,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : "1709378055695"
+                         "value" : 1709378055695
                        },
                        "cm:versionLabel" : {
                          "value" : "1.0"
