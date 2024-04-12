@@ -78,12 +78,6 @@ public class DockerTags
 
     public static String getOrDefault(String propertyKey, String defaultValue)
     {
-        String systemProperty = System.getProperty(propertyKey);
-
-        if (systemProperty != null)
-        {
-            return systemProperty;
-        }
 
         if (properties == null)
         {
