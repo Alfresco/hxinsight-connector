@@ -90,9 +90,6 @@ public class DockerContainers
     public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network, boolean isEnterprise)
     {
         // @formatter:off
-        System.out.println("------------------------------------------------------------------------------------------------------------------------");
-        System.out.println(REPOSITORY_TAG);
-        System.out.println("------------------------------------------------------------------------------------------------------------------------");
         Path jarFile = findTargetJar();
         GenericContainer<?> repository = new GenericContainer<>(new ImageFromDockerfile("localhost/alfresco/alfresco-content-repository-prediction-applier-extension")
             .withFileFromPath(jarFile.toString(), jarFile)
