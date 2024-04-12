@@ -57,7 +57,6 @@ public class DockerTags
 
     public static String getProperty(String key)
     {
-
         if (properties == null)
         {
             loadProperties();
@@ -78,7 +77,6 @@ public class DockerTags
 
     public static String getOrDefault(String propertyKey, String defaultValue)
     {
-
         if (properties == null)
         {
             loadProperties(false);
