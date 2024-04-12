@@ -57,15 +57,6 @@ public class DockerTags
 
     public static String getProperty(String key)
     {
-        String systemProperty = System.getProperty(key);
-        System.out.println("------------------------------------------------------------------------------------------------------------------------");
-        System.out.println("key = " + key);
-        System.out.println("property = " + systemProperty);
-        System.out.println("------------------------------------------------------------------------------------------------------------------------");
-        if (systemProperty != null)
-        {
-            return systemProperty;
-        }
 
         if (properties == null)
         {
@@ -123,6 +114,13 @@ public class DockerTags
 
     public static String getRepositoryTag()
     {
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
+        System.out.println(getOrDefault("repository.tag", REPOSITORY_TAG_DEFAULT));
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
+        System.out.println("------------------------------------------------------------------------------------------------------------------------");
         return getOrDefault("repository.tag", REPOSITORY_TAG_DEFAULT);
     }
 

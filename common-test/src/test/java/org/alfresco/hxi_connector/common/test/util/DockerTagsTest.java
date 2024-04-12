@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.common.test.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.NoSuchElementException;
 
@@ -35,35 +34,6 @@ import org.junit.jupiter.api.Test;
 
 class DockerTagsTest
 {
-    @Test
-    void testGetOverriddenProperty()
-    {
-        // given
-        String propertyName = "test.property";
-        String propertyValue = "something";
-
-        System.setProperty(propertyName, propertyValue);
-        // when
-        String retrievedProperty = DockerTags.getProperty(propertyName);
-
-        // then
-        assertEquals(propertyValue, retrievedProperty);
-    }
-
-    @Test
-    void testGetOverriddenProperty_2()
-    {
-        // given
-        String propertyName = "test.property";
-        String propertyValue = "something";
-
-        System.setProperty(propertyName, propertyValue);
-        // when
-        String retrievedProperty = DockerTags.getOrDefault(propertyName, "default");
-
-        // then
-        assertEquals(propertyValue, retrievedProperty);
-    }
 
     @Test
     void testGetNonExistingProperty()
