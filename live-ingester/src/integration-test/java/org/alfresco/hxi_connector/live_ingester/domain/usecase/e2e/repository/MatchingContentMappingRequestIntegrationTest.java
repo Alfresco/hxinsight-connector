@@ -33,13 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[image/png]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/bmp]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/raw]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/gif]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/*]=image/jpeg",
-        "alfresco.transform.mime-type.mapping.[*]=application/pdf",
-        "logging.level.org.alfresco=DEBUG"})
+@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
 {
@@ -51,7 +45,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
             "text/html,application/pdf"
     })
     void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
-            String sourceMimeType, String targetMimeType)
+            String sourceMimeType, String expectedTargetMimeType)
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -111,8 +105,8 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "eventType": "create",
                     "properties": {
-                      "cm:autoVersion": {"value": "true"},
-                      "createdAt": {"value": "1611227655695"},
+                      "cm:autoVersion": {"value": true},
+                      "createdAt": {"value": 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
                       "cm:name": {"value": "purchase-order-scan.bmp"},
@@ -141,7 +135,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "clientData": "{\\"nodeRef\\":\\"d71dd823-01c7-477c-8490-04cb0e826e61\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER, targetMimeType, targetMimeType);
+                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
 }

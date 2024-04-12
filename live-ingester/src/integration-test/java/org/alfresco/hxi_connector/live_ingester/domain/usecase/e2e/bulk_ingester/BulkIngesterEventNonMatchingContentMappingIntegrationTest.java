@@ -31,19 +31,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[image/png]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/bmp]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/raw]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/gif]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/*]=image/jpeg",
-        "alfresco.transform.mime-type.mapping.[application/*]=application/pdf",
-        "logging.level.org.alfresco=DEBUG"})
+@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E2ETestBase
 {
 
     @ParameterizedTest
-    @ValueSource(strings = {"text/plain", "text/html", "text/richtext"})
+    @ValueSource(strings = {"nonmatchingtext/plain", "nonmatchingtext/html", "nonmatchingtext/richtext"})
     void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithNotMatchingTypeIngested_thenProcessWithoutTransformRequest(
             String sourceMimeType)
     {
@@ -86,10 +80,10 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "hr_user"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
-                      "createdAt": {"value": "1308061016"},
+                      "createdAt": {"value": 1308061016},
                       "cm:name": {"value": "dashboard.xml"},
-                      "cm:isContentIndexed": {"value": "true"},
-                      "cm:isIndexed": {"value": "false"},
+                      "cm:isContentIndexed": {"value": true},
+                      "cm:isIndexed": {"value": false},
                       "cm:content": {
                         "file": {
                           "content-metadata": {

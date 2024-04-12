@@ -35,8 +35,9 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_
 import java.util.Set;
 
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -59,7 +60,6 @@ class IngestContentCommandHandlerTest
     static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
     static final String FILE_ID = "43214321-4321-4321-4321-432143214321";
     static final String UPLOADED_CONTENT_ID = "11112222-4321-4321-4321-333343214444";
-    static final String PDF_MIMETYPE = "application/pdf";
 
     @Mock
     TransformRequester transformRequesterMock;
@@ -73,31 +73,33 @@ class IngestContentCommandHandlerTest
     @InjectMocks
     IngestContentCommandHandler ingestContentCommandHandler;
 
-    @Test
-    void shouldRequestNodeContentTransformation()
+    @ParameterizedTest
+    @ValueSource(strings = {"application/pdf", "image/png", "image/jpeg"})
+    void shouldRequestNodeContentTransformation(String mimeType)
     {
         // given
-        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, PDF_MIMETYPE);
+        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, mimeType);
 
         // when
         ingestContentCommandHandler.handle(command);
 
         // then
-        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, PDF_MIMETYPE);
+        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, mimeType);
         then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
     }
 
-    @Test
+    @ParameterizedTest
+    @ValueSource(strings = {"application/pdf", "image/png", "image/jpeg"})
     @SneakyThrows
-    void shouldSendTransformedContentToIngestionEngine()
+    void shouldSendTransformedContentToIngestionEngine(String mimeType)
     {
         // given
-        IngestContentCommand command = new IngestContentCommand(FILE_ID, NODE_ID, PDF_MIMETYPE);
+        IngestContentCommand command = new IngestContentCommand(FILE_ID, NODE_ID, mimeType);
 
         File fileToUpload = mock();
         given(transformEngineFileStorageMock.downloadFile(FILE_ID)).willReturn(fileToUpload);
-        IngestContentResponse ingestContentResponse = new IngestContentResponse(UPLOADED_CONTENT_ID, PDF_MIMETYPE);
-        given(storageClientMock.upload(fileToUpload, PDF_MIMETYPE, NODE_ID)).willReturn(ingestContentResponse);
+        IngestContentResponse ingestContentResponse = new IngestContentResponse(UPLOADED_CONTENT_ID, mimeType);
+        given(storageClientMock.upload(fileToUpload, mimeType, NODE_ID)).willReturn(ingestContentResponse);
 
         // when
         ingestContentCommandHandler.handle(command);
@@ -106,10 +108,10 @@ class IngestContentCommandHandlerTest
         IngestNodeCommand expectedIngestNodeCommand = new IngestNodeCommand(
                 NODE_ID,
                 EventType.UPDATE,
-                Set.of(ContentPropertyUpdated.builder(CONTENT_PROPERTY).id(UPLOADED_CONTENT_ID).mimeType(PDF_MIMETYPE).build()));
+                Set.of(ContentPropertyUpdated.builder(CONTENT_PROPERTY).id(UPLOADED_CONTENT_ID).mimeType(mimeType).build()));
 
         then(transformEngineFileStorageMock).should().downloadFile(FILE_ID);
-        then(storageClientMock).should().upload(fileToUpload, PDF_MIMETYPE, NODE_ID);
+        then(storageClientMock).should().upload(fileToUpload, mimeType, NODE_ID);
         then(ingestNodeCommandHandler).should().handle(expectedIngestNodeCommand);
     }
 }

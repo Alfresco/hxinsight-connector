@@ -33,13 +33,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[image/png]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/bmp]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/raw]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/gif]=image/png",
-        "alfresco.transform.mime-type.mapping.[image/*]=image/jpeg",
-        "alfresco.transform.mime-type.mapping.[*]=application/pdf",
-        "logging.level.org.alfresco=DEBUG"})
+@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ETestBase
 {
@@ -52,7 +46,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
             "text/plain,application/pdf", "text/html,application/pdf"
     })
     void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
-            String sourceMimeType, String targetMimeType)
+            String sourceMimeType, String expectedTargetMimeType)
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -93,10 +87,10 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "hr_user"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
-                      "createdAt": {"value": "1308061016"},
+                      "createdAt": {"value": 1308061016},
                       "cm:name": {"value": "dashboard.xml"},
-                      "cm:isContentIndexed": {"value": "true"},
-                      "cm:isIndexed": {"value": "false"},
+                      "cm:isContentIndexed": {"value": true},
+                      "cm:isIndexed": {"value": false},
                       "cm:content": {
                         "file": {
                           "content-metadata": {
@@ -119,7 +113,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER, targetMimeType, targetMimeType);
+                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
 
     }
