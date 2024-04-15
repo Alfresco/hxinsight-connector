@@ -23,19 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.model.repository;
+package org.alfresco.hxi_connector.prediction_applier.config;
 
-import java.util.Set;
-import jakarta.validation.constraints.NotBlank;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record Node(@NotBlank String id, @JsonProperty("aspectNames") Set<String> aspects)
+@ConfigurationProperties("alfresco.repository.nodes")
+public record NodesApiProperties(String baseUrl, String username, String password, Retry retry)
 {
-    public Node(String id)
-    {
-        this(id, null);
-    }
+
+    public record Retry(int attempts, int initialDelay, int delayMultiplier)
+    {}
 }
