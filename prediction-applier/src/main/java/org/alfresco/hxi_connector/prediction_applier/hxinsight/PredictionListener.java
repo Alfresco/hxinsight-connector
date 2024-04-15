@@ -39,7 +39,7 @@ import org.alfresco.hxi_connector.prediction_applier.repository.NodesClient;
 @Slf4j
 public class PredictionListener extends RouteBuilder
 {
-    public static final String ROUTE_ID = "prediction-listener";
+    static final String ROUTE_ID = "prediction-listener";
 
     private final PredictionMapper predictionMapper;
     private final String endpoint;
@@ -54,6 +54,10 @@ public class PredictionListener extends RouteBuilder
     @Override
     public void configure()
     {
+        onException(Exception.class)
+                .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
+                .stop();
+
         from(endpoint)
                 .routeId(ROUTE_ID)
                 .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")

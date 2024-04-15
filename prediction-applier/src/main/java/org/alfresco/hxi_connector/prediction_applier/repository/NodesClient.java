@@ -53,7 +53,7 @@ public class NodesClient extends RouteBuilder
 {
     public static final String DIRECT_ENDPOINT = "direct:" + NodesClient.class.getSimpleName();
     private static final String RETRYABLE_ROUTE = "direct:retryable-" + NodesClient.class.getSimpleName();
-    public static final String ROUTE_ID = "repository-nodes";
+    static final String ROUTE_ID = "repository-nodes";
     private static final String NODE_ID_HEADER = "nodeId";
     private static final String URI_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/${headers.%s}?httpMethod=PUT&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
     private static final int EXPECTED_STATUS_CODE = 200;
