@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -65,5 +65,31 @@ class DeleteRequestIntegrationTest extends E2ETestBase
                     "eventType": "delete"
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    @Test
+    void testDeleteRequestWithNoResource()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        // when
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Deleted",
+                  "id": "df329995-d744-427c-bafb-4a31ba7d50e3",
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2021-01-27T10:57:02.586606Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeDeleted",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "acb8e25f-a340-48b5-8de8-249ae5bac670"
+                  }
+                }""";
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        containerSupport.expectNoHxIngestMessagesReceived();
     }
 }
