@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,32 +25,91 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hxinsight;
 
+import static org.apache.camel.LoggingLevel.DEBUG;
+
+import java.util.List;
+
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.LoggingLevel;
+import org.apache.camel.Predicate;
+import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.beans.factory.annotation.Value;
+import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-@Component
+import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+
 @Slf4j
+@Component
+@RequiredArgsConstructor
 public class PredictionListener extends RouteBuilder
 {
-    private static final String ROUTE_ID = "prediction-listener";
+    private static final String PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID = "prediction-processor-trigger-route";
+    private static final String PREDICTION_PROCESSOR_ROUTE_ID = "prediction-processor-route";
+    private static final String PREDICTION_PROCESSOR = "direct:prediction-processor";
 
-    private final String endpoint;
-
-    public PredictionListener(@Value("${hyland-experience.insight.prediction.endpoint}") String endpoint)
-    {
-        super();
-        this.endpoint = endpoint;
-    }
+    private final PredictionListenerConfig config;
 
     @Override
     public void configure()
     {
-        from(endpoint)
-                .routeId(ROUTE_ID)
-                .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")
-                .end();
+        // @formatter:off
+        getContext().getRegistry().bind("is-prediction-processing-pending", false);
+
+        from(config.predictionProcessorTriggerEndpoint())
+                .routeId(PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID)
+                .choice()
+                .when(isProcessingPending())
+                    .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
+                .otherwise()
+                    .log(DEBUG, log, "Triggering prediction processing")
+                    .to(PREDICTION_PROCESSOR);
+
+
+        from(PREDICTION_PROCESSOR)
+                .routeId(PREDICTION_PROCESSOR_ROUTE_ID)
+                .process(setIsProcessingPending(true))
+                .loopDoWhile(hasNextPage())
+                    .to(config.predictionsEndpoint())
+                    .unmarshal(new JacksonDataFormat(List.class))
+                    .process(exchange -> {
+                        log.info("Processing exchange: {}", exchange.getIn().getBody(List.class));
+                    })
+                .end()
+                .log(DEBUG, log, "Finished processing predictions")
+                .process(setIsProcessingPending(false));
+        // @formatter:on
+    }
+
+    Predicate isProcessingPending()
+    {
+        return exchange -> getContext().getRegistry().lookupByNameAndType("is-prediction-processing-pending", Boolean.class);
+    }
+
+    Processor setIsProcessingPending(boolean isProcessingPending)
+    {
+        return exchange -> {
+            exchange.getIn().setBody(null);
+            getContext().getRegistry().bind("is-prediction-processing-pending", isProcessingPending);
+        };
+    }
+
+    Predicate hasNextPage()
+    {
+        return exchange -> {
+            Object body = exchange.getIn().getBody();
+
+            if (body == null)
+            {
+                return true;
+            }
+
+            if (body instanceof List<?> list)
+            {
+                return !list.isEmpty();
+            }
+
+            throw new RuntimeException("Unexpected body type: " + body.getClass().getName());
+        };
     }
 }
