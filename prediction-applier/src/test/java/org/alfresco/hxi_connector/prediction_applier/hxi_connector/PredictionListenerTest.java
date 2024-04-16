@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.hxinsight;
+package org.alfresco.hxi_connector.prediction_applier.hxi_connector;
 
 import static org.apache.camel.builder.AdviceWith.adviceWith;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +33,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.prediction_applier.hxinsight.PredictionListener.ROUTE_ID;
+import static org.alfresco.hxi_connector.prediction_applier.hxi_connector.PredictionListener.ROUTE_ID;
 
 import java.util.stream.Stream;
 
