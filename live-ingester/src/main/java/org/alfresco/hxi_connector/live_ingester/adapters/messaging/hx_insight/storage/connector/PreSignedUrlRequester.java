@@ -27,8 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.s
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 import static org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationService.setAuthorizationToken;
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -48,10 +48,11 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
 @Slf4j
@@ -167,6 +168,6 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
 
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 }

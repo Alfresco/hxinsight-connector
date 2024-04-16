@@ -23,18 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.utils;
+package org.alfresco.hxi_connector.common.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import lombok.NoArgsConstructor;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.ResourceNotFoundException;
+import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
+import org.alfresco.hxi_connector.common.exception.ResourceNotFoundException;
 
 @NoArgsConstructor(access = PRIVATE)
 public class ErrorUtils
@@ -59,6 +60,12 @@ public class ErrorUtils
 
     public static void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons)
     {
+        wrapErrorIfNecessary(cause, retryReasons, HxInsightConnectorRuntimeException.class);
+    }
+
+    @SuppressWarnings("PMD.PreserveStackTrace")
+    public static void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
+    {
         if (cause instanceof EndpointServerErrorException)
         {
             throw (EndpointServerErrorException) cause;
@@ -71,13 +78,21 @@ public class ErrorUtils
         {
             throw (EndpointClientErrorException) cause;
         }
-        else if (cause instanceof LiveIngesterRuntimeException)
+        else if (runtimeExceptionType.isAssignableFrom(cause.getClass()))
         {
-            throw (LiveIngesterRuntimeException) cause;
+            throw runtimeExceptionType.cast(cause);
         }
         else
         {
-            throw new LiveIngesterRuntimeException(cause);
+            try
+            {
+                throw runtimeExceptionType.getDeclaredConstructor(Throwable.class).newInstance(cause);
+            }
+            catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e)
+            {
+                throw new HxInsightConnectorRuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
+                        .formatted(runtimeExceptionType.getSimpleName(), e.getMessage()), cause);
+            }
         }
     }
 }

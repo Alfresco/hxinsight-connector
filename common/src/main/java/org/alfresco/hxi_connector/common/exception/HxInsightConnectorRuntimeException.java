@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,12 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.exception;
+package org.alfresco.hxi_connector.common.exception;
 
-public class ResourceNotFoundException extends EndpointClientErrorException
+public class HxInsightConnectorRuntimeException extends RuntimeException
 {
-    public ResourceNotFoundException(String message)
+    public HxInsightConnectorRuntimeException(String message)
     {
         super(message);
+    }
+
+    public HxInsightConnectorRuntimeException(Throwable cause)
+    {
+        super(cause);
+    }
+
+    public HxInsightConnectorRuntimeException(String message, Throwable cause)
+    {
+        super(message, cause);
     }
 }

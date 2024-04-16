@@ -44,7 +44,7 @@ import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 
 @Data
 @NoArgsConstructor
