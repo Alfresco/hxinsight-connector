@@ -30,7 +30,6 @@ import static org.apache.camel.builder.AdviceWith.adviceWith;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.DIRECT_ENDPOINT;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
 
 import java.util.Set;
@@ -102,7 +101,7 @@ class NodesClientTest
         mockEndpoint.expectedMessageCount(1);
 
         // when
-        Node actualNode = producerTemplate.to(DIRECT_ENDPOINT)
+        Node actualNode = producerTemplate.to(NodesClient.NODES_DIRECT_ENDPOINT)
                 .withBody(node)
                 .request(NodeEntry.class)
                 .node();
@@ -120,7 +119,7 @@ class NodesClientTest
         mockEndpoint.expectedMessageCount(1);
 
         // when
-        Throwable thrown = catchThrowable(() -> producerTemplate.to(DIRECT_ENDPOINT).request());
+        Throwable thrown = catchThrowable(() -> producerTemplate.to(NodesClient.NODES_DIRECT_ENDPOINT).request());
 
         // then
         mockEndpoint.assertIsSatisfied();
@@ -137,7 +136,7 @@ class NodesClientTest
         mockEndpoint.expectedMessageCount(RETRY_ATTEMPTS + 1);
 
         // when
-        Throwable thrown = catchThrowable(() -> producerTemplate.to(DIRECT_ENDPOINT).request());
+        Throwable thrown = catchThrowable(() -> producerTemplate.to(NodesClient.NODES_DIRECT_ENDPOINT).request());
 
         // then
         mockEndpoint.assertIsSatisfied();
