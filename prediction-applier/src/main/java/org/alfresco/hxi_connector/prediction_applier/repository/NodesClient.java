@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
 @RequiredArgsConstructor
 public class NodesClient extends RouteBuilder
 {
-    public static final String DIRECT_ENDPOINT = "direct:" + NodesClient.class.getSimpleName();
+    public static final String NODES_DIRECT_ENDPOINT = "direct:" + NodesClient.class.getSimpleName();
     private static final String RETRYABLE_ROUTE = "direct:retryable-" + NodesClient.class.getSimpleName();
     static final String ROUTE_ID = "repository-nodes";
     private static final String NODE_ID_HEADER = "nodeId";
