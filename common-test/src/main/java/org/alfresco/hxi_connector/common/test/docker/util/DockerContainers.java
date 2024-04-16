@@ -23,38 +23,27 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.test.util;
+package org.alfresco.hxi_connector.common.test.docker.util;
 
-import static java.util.function.Predicate.not;
-
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Predicate;
-import java.util.stream.Stream;
 
 import lombok.AccessLevel;
-import lombok.Cleanup;
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
+
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryExtension;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
-    private static final String REPOSITORY_ENT_IMAGE = "quay.io/alfresco/alfresco-content-repository";
-    private static final String REPOSITORY_IMAGE = "alfresco/alfresco-content-repository-community";
-    private static final String REPOSITORY_TAG = DockerTags.getRepositoryTag();
     private static final String POSTGRES_IMAGE = "postgres";
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
@@ -71,6 +60,8 @@ public class DockerContainers
     private static final String SFS_TAG = DockerTags.getSfsTag();
     private static final String LIVE_INGESTER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-live-ingester";
     private static final String LIVE_INGESTER_TAG = DockerTags.getHxiConnectorTag();
+    private static final String PREDICTION_APPLIER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-prediction-applier";
+    private static final String PREDICTION_APPLIER_TAG = DockerTags.getHxiConnectorTag();
     private static final String DB_USER = "alfresco";
     private static final String DB_PASS = "alfresco";
     private static final String DB_NAME = "alfresco";
@@ -81,38 +72,21 @@ public class DockerContainers
     private static final String TRANSFORM_CORE_AIO_ALIAS = "transform-core-aio";
     private static final String SFS_ALIAS = "shared-file-store";
     private static final String LIVE_INGESTER_ALIAS = "live-ingester";
+    private static final String PREDICTION_APPLIER_ALIAS = "prediction-applier";
+    private static final String LOCALSTACK_ALIAS = "aws-mock";
 
-    public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network)
+    public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network)
     {
         return createExtendedRepositoryContainerWithin(network, false);
     }
 
-    public static GenericContainer<?> createExtendedRepositoryContainerWithin(Network network, boolean isEnterprise)
+    public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network, boolean enterprise)
     {
-        // @formatter:off
-        Path jarFile = findTargetJar();
-        GenericContainer<?> repository = new GenericContainer<>(new ImageFromDockerfile("localhost/alfresco/alfresco-content-repository-prediction-applier-extension")
-            .withFileFromPath(jarFile.toString(), jarFile)
-            .withDockerfileFromBuilder(builder -> builder
-                .from(DockerImageName.parse(isEnterprise ? REPOSITORY_ENT_IMAGE : REPOSITORY_IMAGE).withTag(REPOSITORY_TAG).toString())
-                .user("root")
-                .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
-                .run("chown -R -h alfresco /usr/local/tomcat")
-                .user("alfresco")
-                .build()))
-            .withEnv("CATALINA_OPTS", "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n")
-            .withEnv("JAVA_TOOL_OPTIONS", """
-            -Dencryption.keystore.type=JCEKS
-            -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
-            -Dencryption.keyAlgorithm=DESede
-            -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
-            -Dmetadata-keystore.password=mp6yc0UD9e
-            -Dmetadata-keystore.aliases=metadata
-            -Dmetadata-keystore.metadata.password=oKIWzVdEdA
-            -Dmetadata-keystore.metadata.algorithm=DESede
-            """.replace("\n", " "))
-            .withExposedPorts(8080, 8000)
-            .withStartupTimeout(Duration.ofMinutes(5));
+        AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(new AlfrescoRepositoryExtension(
+                "alfresco-hxinsight-connector-prediction-applier-extension",
+                "localhost/alfresco/alfresco-content-repository-prediction-applier-extension",
+                enterprise))
+                        .withStartupTimeout(Duration.ofMinutes(5));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
 
@@ -122,42 +96,38 @@ public class DockerContainers
 
     public static PostgreSQLContainer<?> createPostgresContainer()
     {
-        return createPostgresContainerWithin(null);
-    }
-
-    public static PostgreSQLContainer<?> createPostgresContainerWithin(Network network)
-    {
-        PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE).withTag(POSTGRES_TAG))
+        return new PostgreSQLContainer<>(DockerImageName.parse(POSTGRES_IMAGE).withTag(POSTGRES_TAG))
                 .withUsername(DB_USER)
                 .withPassword(DB_PASS)
                 .withDatabaseName(DB_NAME)
                 .withExposedPorts(5432)
                 .withStartupTimeout(Duration.ofMinutes(2));
+    }
 
-        Optional.ofNullable(network).ifPresent(n -> postgres.withNetwork(n).withNetworkAliases(POSTGRES_ALIAS));
-
-        return postgres;
+    public static PostgreSQLContainer<?> createPostgresContainerWithin(Network network)
+    {
+        return createPostgresContainer()
+                .withNetwork(network)
+                .withNetworkAliases(POSTGRES_ALIAS);
     }
 
     public static GenericContainer<?> createActiveMqContainer()
     {
-        return createActiveMqContainerWithin(null);
-    }
-
-    public static GenericContainer<?> createActiveMqContainerWithin(Network network)
-    {
-        GenericContainer<?> activeMq = new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
+        return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
                 .withExposedPorts(61616, 8161, 5672, 61613)
                 .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
-
-        Optional.ofNullable(network).ifPresent(n -> activeMq.withNetwork(n).withNetworkAliases(ACTIVE_MQ_ALIAS));
-
-        return activeMq;
     }
 
-    public static GenericContainer createTransformRouterContainerWithin(Network network)
+    public static GenericContainer<?> createActiveMqContainerWithin(Network network)
+    {
+        return createActiveMqContainer()
+                .withNetwork(network)
+                .withNetworkAliases(ACTIVE_MQ_ALIAS);
+    }
+
+    public static GenericContainer<?> createTransformRouterContainerWithin(Network network)
     {
         GenericContainer<?> transformRouter = new GenericContainer<>(DockerImageName.parse(TRANSFORM_ROUTER_IMAGE).withTag(TRANSFORM_ROUTER_TAG))
                 .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
@@ -173,7 +143,7 @@ public class DockerContainers
         return transformRouter;
     }
 
-    public static GenericContainer createTransformCoreAioContainerWithin(Network network)
+    public static GenericContainer<?> createTransformCoreAioContainerWithin(Network network)
     {
         GenericContainer<?> transformCoreAio = new GenericContainer<>(DockerImageName.parse(TRANSFORM_CORE_AIO_IMAGE).withTag(TRANSFORM_CORE_AIO_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1024m")
@@ -188,7 +158,7 @@ public class DockerContainers
         return transformCoreAio;
     }
 
-    public static GenericContainer createSfsContainerWithin(Network network)
+    public static GenericContainer<?> createSfsContainerWithin(Network network)
     {
         GenericContainer<?> sfs = new GenericContainer<>(DockerImageName.parse(SFS_IMAGE).withTag(SFS_TAG))
                 .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
@@ -203,7 +173,7 @@ public class DockerContainers
         return sfs;
     }
 
-    public static GenericContainer createLiveIngesterContainerWithin(Network network)
+    public static GenericContainer<?> createLiveIngesterContainerWithin(Network network)
     {
         GenericContainer<?> liveIngester = new GenericContainer<>(DockerImageName.parse(LIVE_INGESTER_IMAGE).withTag(LIVE_INGESTER_TAG))
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n")
@@ -220,66 +190,42 @@ public class DockerContainers
         return liveIngester;
     }
 
+    public static GenericContainer<?> createPredictionApplierContainerWithin(Network network)
+    {
+        GenericContainer<?> predictionApplier = new GenericContainer<>(DockerImageName.parse(PREDICTION_APPLIER_IMAGE).withTag(PREDICTION_APPLIER_TAG))
+                .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n")
+                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
+                .withExposedPorts(5009)
+                .waitingFor(Wait.forListeningPort())
+                .withStartupTimeout(Duration.ofMinutes(2));
+
+        Optional.ofNullable(network).ifPresent(n -> predictionApplier.withNetwork(n).withNetworkAliases(PREDICTION_APPLIER_ALIAS));
+
+        return predictionApplier;
+    }
+
     public static WireMockContainer createWireMockContainer()
     {
-        return createWireMockContainerWithin(null);
+        return new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
+                .withEnv("WIREMOCK_OPTIONS", "--verbose");
     }
 
     public static WireMockContainer createWireMockContainerWithin(Network network)
     {
-        WireMockContainer wireMock = new WireMockContainer(DockerImageName.parse(WIREMOCK_IMAGE).withTag(WIREMOCK_TAG))
-                .withEnv("WIREMOCK_OPTIONS", "--verbose");
-
-        Optional.ofNullable(network).ifPresent(wireMock::withNetwork);
-
-        return wireMock;
+        return createWireMockContainer()
+                .withNetwork(network);
     }
 
     public static LocalStackContainer createLocalStackContainer()
     {
-        return createLocalStackContainerWithin(null);
+        return new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG))
+                .withExposedPorts(4566);
     }
 
     public static LocalStackContainer createLocalStackContainerWithin(Network network)
     {
-        LocalStackContainer localStack = new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG))
-                .withExposedPorts(4566);
-
-        Optional.ofNullable(network).ifPresent(localStack::withNetwork);
-
-        return localStack;
-    }
-
-    @SneakyThrows
-    private static Path findTargetJar()
-    {
-        String path = "target";
-        String nameSnippet = "alfresco-hxinsight-connector-prediction-applier-extension";
-        String extension = "jar";
-        @Cleanup
-        Stream<Path> files = Files.list(Paths.get(path));
-
-        return files.filter(matchExtension(extension))
-                .filter(nameContains(nameSnippet))
-                .filter(not(nameContains("-tests")))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("%s file with name containing: '%s' not found in directory: '%s/'"
-                        .formatted(extension.toUpperCase(Locale.ENGLISH), nameSnippet, path)));
-    }
-
-    private static Predicate<Path> matchExtension(final String extension)
-    {
-        return path -> path != null && path.getFileName()
-                .toString()
-                .toLowerCase(Locale.ENGLISH)
-                .endsWith(extension.startsWith(".") ? extension.toLowerCase(Locale.ENGLISH) : "." + extension.toLowerCase(Locale.ENGLISH));
-    }
-
-    private static Predicate<Path> nameContains(final String snippet)
-    {
-        return path -> path != null && path.getFileName()
-                .toString()
-                .toLowerCase(Locale.ENGLISH)
-                .contains(snippet);
+        return createLocalStackContainer()
+                .withNetwork(network)
+                .withNetworkAliases(LOCALSTACK_ALIAS);
     }
 }
