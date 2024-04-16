@@ -30,7 +30,7 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
+import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -50,9 +50,10 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
 @RequiredArgsConstructor
@@ -163,6 +164,6 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
 
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 }
