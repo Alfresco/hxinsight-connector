@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.st
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
+import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.io.InputStream;
 import java.util.Set;
@@ -42,12 +42,13 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
-import org.alfresco.hxi_connector.live_ingester.domain.utils.ErrorUtils;
 
 @Component
 @RequiredArgsConstructor
@@ -123,6 +124,6 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.alfresco().transform().sharedFileStore().retry().reasons();
 
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 }

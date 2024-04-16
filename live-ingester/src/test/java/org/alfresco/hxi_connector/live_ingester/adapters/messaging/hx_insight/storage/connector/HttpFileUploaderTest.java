@@ -52,11 +52,11 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retry;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,21 +23,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.exception;
+package org.alfresco.hxi_connector.common.exception;
 
-public class EndpointServerErrorException extends RuntimeException
+public class EndpointClientErrorException extends RuntimeException
 {
-    public EndpointServerErrorException(String message)
+    public EndpointClientErrorException(String message)
     {
         super(message);
     }
 
-    public EndpointServerErrorException(Throwable cause)
+    public EndpointClientErrorException(Throwable cause)
     {
         super(cause);
     }
 
-    public EndpointServerErrorException(String message, Throwable cause)
+    public EndpointClientErrorException(String message, Throwable cause)
     {
         super(message, cause);
     }

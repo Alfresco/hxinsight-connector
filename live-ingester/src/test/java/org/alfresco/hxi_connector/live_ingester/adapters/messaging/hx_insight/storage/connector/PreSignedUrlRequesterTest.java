@@ -52,12 +52,12 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Retry;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointClientErrorException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.EndpointServerErrorException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PreSignedUrlRequesterTest
