@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.common.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 import lombok.NoArgsConstructor;
@@ -62,6 +63,7 @@ public class ErrorUtils
         wrapErrorIfNecessary(cause, retryReasons, HxInsightConnectorRuntimeException.class);
     }
 
+    @SuppressWarnings("PMD.PreserveStackTrace")
     public static void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
     {
         if (cause instanceof EndpointServerErrorException)
@@ -86,9 +88,9 @@ public class ErrorUtils
             {
                 throw runtimeExceptionType.getDeclaredConstructor(Throwable.class).newInstance(cause);
             }
-            catch (Exception e)
+            catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e)
             {
-                throw new RuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
+                throw new HxInsightConnectorRuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
                         .formatted(runtimeExceptionType.getSimpleName(), e.getMessage()), cause);
             }
         }
