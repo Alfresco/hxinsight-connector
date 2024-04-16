@@ -34,7 +34,6 @@ import java.util.UUID;
 
 import lombok.Cleanup;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
@@ -78,12 +77,6 @@ public class UpdateNodeIntegrationTest
     public static void beforeAll() throws IOException, InterruptedException
     {
         awsMock.execInContainer("awslocal", "sqs", "create-queue", "--queue-name", QUEUE_NAME);
-    }
-
-    @AfterAll
-    static void afterAll()
-    {
-        repository.getHost();
     }
 
     @Test
