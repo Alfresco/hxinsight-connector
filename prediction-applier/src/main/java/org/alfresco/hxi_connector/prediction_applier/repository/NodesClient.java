@@ -28,13 +28,11 @@ package org.alfresco.hxi_connector.prediction_applier.repository;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import java.net.UnknownHostException;
-import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.RequiredArgsConstructor;
-import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -42,50 +40,64 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.common.model.repository.NodeEntry;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
-import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
+import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
 
 @Component
 @RequiredArgsConstructor
 public class NodesClient extends RouteBuilder
 {
-    private static final String LOCAL_ENDPOINT = "direct:" + NodesClient.class.getSimpleName();
-    private static final String ROUTE_ID = "repository-nodes";
+    public static final String NODES_DIRECT_ENDPOINT = "direct:" + NodesClient.class.getSimpleName();
+    private static final String RETRYABLE_ROUTE = "direct:retryable-" + NodesClient.class.getSimpleName();
+    static final String ROUTE_ID = "repository-nodes";
     private static final String NODE_ID_HEADER = "nodeId";
     private static final String URI_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/${headers.%s}?httpMethod=PUT&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
     private static final int EXPECTED_STATUS_CODE = 200;
     public static final String UNEXPECTED_STATUS_CODE_MESSAGE = "Unexpected response status code - expecting: %d, received: %d";
+    private static final Set<Class<? extends Throwable>> RETRY_REASONS = Set.of(
+            EndpointServerErrorException.class,
+            UnknownHostException.class,
+            JsonEOFException.class,
+            MismatchedInputException.class,
+            HttpHostConnectException.class,
+            NoHttpResponseException.class,
+            MalformedChunkCodingException.class);
 
-    private final CamelContext camelContext;
-    @Value("${alfresco.repository.nodes.base-url}")
-    private String baseUrl;
-    @Value("${alfresco.repository.nodes.username}")
-    private String username;
-    @Value("${alfresco.repository.nodes.password}")
-    private String password;
+    private final NodesApiProperties nodesApiProperties;
 
     @Override
+    @SuppressWarnings("unchecked")
     public void configure() throws Exception
     {
         // @formatter:off
-        onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Nodes :: Unexpected response while updating node. Body: ${body}")
-            .process(this::wrapErrorIfNecessary)
+        onException(RETRY_REASONS.toArray(Class[]::new))
+            .retryAttemptedLogLevel(LoggingLevel.WARN)
+            .logExhaustedMessageBody(true)
+            .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
+            .maximumRedeliveries(nodesApiProperties.retry().attempts())
+            .redeliveryDelay(nodesApiProperties.retry().initialDelay())
+            .backOffMultiplier(nodesApiProperties.retry().delayMultiplier())
             .stop();
 
-        from(LOCAL_ENDPOINT)
-            .id(ROUTE_ID)
+        onException(Exception.class)
+            .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
+            .stop();
+
+        from(NODES_DIRECT_ENDPOINT)
+            .setHeader(NODE_ID_HEADER, simple("${body.id}"))
             .marshal()
             .json(JsonLibrary.Jackson)
-            .toD(URI_PATTERN.formatted(baseUrl, NODE_ID_HEADER, username, password))
+            .to(RETRYABLE_ROUTE)
+            .end();
+
+        from(RETRYABLE_ROUTE)
+            .id(ROUTE_ID)
+            .errorHandler(noErrorHandler())
+            .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl(), NODE_ID_HEADER, nodesApiProperties.username(), nodesApiProperties.password()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
@@ -95,22 +107,6 @@ public class NodesClient extends RouteBuilder
             .endChoice()
             .end();
         // @formatter:on
-    }
-
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "${alfresco.repository.nodes.retry.attempts}",
-            backoff = @Backoff(
-                    delayExpression = "${alfresco.repository.nodes.retry.initial-delay}",
-                    multiplierExpression = "${alfresco.repository.nodes.retry.delay-multiplier}"))
-    public Node updateNode(Node node)
-    {
-        return camelContext
-                .createFluentProducerTemplate()
-                .to(LOCAL_ENDPOINT)
-                .withHeaders(Map.of(NODE_ID_HEADER, node.id()))
-                .withBody(node)
-                .request(NodeEntry.class)
-                .node();
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
@@ -123,21 +119,5 @@ public class NodesClient extends RouteBuilder
         }
 
         ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = Set.of(
-                EndpointServerErrorException.class,
-                UnknownHostException.class,
-                JsonEOFException.class,
-                MismatchedInputException.class,
-                HttpHostConnectException.class,
-                NoHttpResponseException.class,
-                MalformedChunkCodingException.class);
-
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, PredictionApplierRuntimeException.class);
     }
 }

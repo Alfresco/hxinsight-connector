@@ -25,14 +25,14 @@
  */
 package org.alfresco.hxi_connector.common.model.repository;
 
-import java.util.List;
+import java.util.Set;
 import jakarta.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record Node(@NotBlank String id, @JsonProperty("aspectNames") List<String> aspects)
+public record Node(@NotBlank String id, @JsonProperty("aspectNames") Set<String> aspects)
 {
     public Node(String id)
     {

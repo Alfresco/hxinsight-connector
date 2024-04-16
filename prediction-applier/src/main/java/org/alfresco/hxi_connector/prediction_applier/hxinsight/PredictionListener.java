@@ -25,9 +25,7 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hxinsight;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -35,39 +33,38 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.model.prediction.Prediction;
-import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.prediction_applier.repository.NodesClient;
 
 @Component
-@RequiredArgsConstructor
 @Slf4j
 public class PredictionListener extends RouteBuilder
 {
-    private static final String ROUTE_ID = "prediction-listener";
-
-    @Value("${hyland-experience.insight.prediction.endpoint}")
-    private String endpoint;
+    static final String ROUTE_ID = "prediction-listener";
 
     private final PredictionMapper predictionMapper;
-    private final NodesClient nodesClient;
+    private final String endpoint;
+
+    public PredictionListener(PredictionMapper predictionMapper, @Value("${hyland-experience.insight.prediction.endpoint}") String endpoint)
+    {
+        super();
+        this.predictionMapper = predictionMapper;
+        this.endpoint = endpoint;
+    }
 
     @Override
     public void configure()
     {
+        onException(Exception.class)
+                .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
+                .stop();
+
         from(endpoint)
                 .routeId(ROUTE_ID)
                 .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, Prediction.class)
-                .process(this::processPrediction)
+                .setBody(exchange -> predictionMapper.map(exchange.getIn().getBody(Prediction.class)))
+                .to(NodesClient.NODES_DIRECT_ENDPOINT)
                 .end();
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void processPrediction(Exchange exchange)
-    {
-        Prediction prediction = exchange.getIn().getBody(Prediction.class);
-        Node updatedNode = nodesClient.updateNode(predictionMapper.map(prediction));
-        log.atDebug().log("Updated node: {}", updatedNode);
     }
 }

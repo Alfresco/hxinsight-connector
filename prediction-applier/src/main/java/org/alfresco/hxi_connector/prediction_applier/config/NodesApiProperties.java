@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,22 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.exception;
+package org.alfresco.hxi_connector.prediction_applier.config;
 
-public class EndpointServerErrorException extends RuntimeException
+import org.springframework.boot.context.properties.ConfigurationProperties;
+
+@ConfigurationProperties("alfresco.repository.nodes")
+public record NodesApiProperties(String baseUrl, String username, String password, Retry retry)
 {
-    public EndpointServerErrorException(String message)
-    {
-        super(message);
-    }
 
-    public EndpointServerErrorException(Throwable cause)
-    {
-        super(cause);
-    }
-
-    public EndpointServerErrorException(String message, Throwable cause)
-    {
-        super(message, cause);
-    }
+    public record Retry(int attempts, int initialDelay, int delayMultiplier)
+    {}
 }
