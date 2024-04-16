@@ -64,7 +64,7 @@ public class PredictionListener extends RouteBuilder
                 .unmarshal()
                 .json(JsonLibrary.Jackson, Prediction.class)
                 .setBody(exchange -> predictionMapper.map(exchange.getIn().getBody(Prediction.class)))
-                .to(NodesClient.DIRECT_ENDPOINT)
+                .to(NodesClient.NODES_DIRECT_ENDPOINT)
                 .end();
     }
 }

@@ -87,7 +87,7 @@ public class NodesClient extends RouteBuilder
             .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
             .stop();
 
-        from(DIRECT_ENDPOINT)
+        from(NODES_DIRECT_ENDPOINT)
             .setHeader(NODE_ID_HEADER, simple("${body.id}"))
             .marshal()
             .json(JsonLibrary.Jackson)
