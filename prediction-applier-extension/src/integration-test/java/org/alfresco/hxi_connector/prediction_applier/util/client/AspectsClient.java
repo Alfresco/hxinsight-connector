@@ -69,7 +69,7 @@ public class AspectsClient
     @SneakyThrows
     public Aspect getAspectById(String aspectId)
     {
-        return mapResponse(requestAspects(aspectId));
+        return mapResponse(requestAspect(aspectId));
     }
 
     private Aspect mapResponse(String responseBody) throws JsonProcessingException
@@ -83,7 +83,7 @@ public class AspectsClient
         return objectMapper.convertValue(response.get("entry"), Aspect.class);
     }
 
-    private String requestAspects(String aspectId) throws IOException, AuthenticationException
+    private String requestAspect(String aspectId) throws IOException, AuthenticationException
     {
         String aspectsUrl = ASPECTS_URL.formatted(host, port, aspectId);
         HttpGet request = new HttpGet(aspectsUrl);

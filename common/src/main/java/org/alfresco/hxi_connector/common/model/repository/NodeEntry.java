@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,22 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier;
+package org.alfresco.hxi_connector.common.model.repository;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@ConfigurationPropertiesScan
-@SuppressWarnings("PMD.UseUtilityClass")
-public class PredictionApplierApplication
-{
-
-    public static void main(String[] args)
-    {
-        SpringApplication.run(PredictionApplierApplication.class, args);
-    }
-}
+public record NodeEntry(@JsonProperty("entry") Node node)
+{}

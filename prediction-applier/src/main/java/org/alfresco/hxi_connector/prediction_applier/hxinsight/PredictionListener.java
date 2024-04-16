@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,29 +28,43 @@ package org.alfresco.hxi_connector.prediction_applier.hxinsight;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.common.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.repository.NodesClient;
 
 @Component
 @Slf4j
 public class PredictionListener extends RouteBuilder
 {
-    private static final String ROUTE_ID = "prediction-listener";
+    static final String ROUTE_ID = "prediction-listener";
 
+    private final PredictionMapper predictionMapper;
     private final String endpoint;
 
-    public PredictionListener(@Value("${hyland-experience.insight.prediction.endpoint}") String endpoint)
+    public PredictionListener(PredictionMapper predictionMapper, @Value("${hyland-experience.insight.prediction.endpoint}") String endpoint)
     {
         super();
+        this.predictionMapper = predictionMapper;
         this.endpoint = endpoint;
     }
 
     @Override
     public void configure()
     {
+        onException(Exception.class)
+                .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
+                .stop();
+
         from(endpoint)
                 .routeId(ROUTE_ID)
                 .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")
+                .unmarshal()
+                .json(JsonLibrary.Jackson, Prediction.class)
+                .setBody(exchange -> predictionMapper.map(exchange.getIn().getBody(Prediction.class)))
+                .to(NodesClient.NODES_DIRECT_ENDPOINT)
                 .end();
     }
 }

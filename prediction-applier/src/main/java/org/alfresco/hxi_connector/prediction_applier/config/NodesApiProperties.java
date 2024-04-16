@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,22 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier;
+package org.alfresco.hxi_connector.prediction_applier.config;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@SpringBootApplication
-@EnableConfigurationProperties
-@ConfigurationPropertiesScan
-@SuppressWarnings("PMD.UseUtilityClass")
-public class PredictionApplierApplication
+@ConfigurationProperties("alfresco.repository.nodes")
+public record NodesApiProperties(String baseUrl, String username, String password, Retry retry)
 {
 
-    public static void main(String[] args)
-    {
-        SpringApplication.run(PredictionApplierApplication.class, args);
-    }
+    public record Retry(int attempts, int initialDelay, int delayMultiplier)
+    {}
 }

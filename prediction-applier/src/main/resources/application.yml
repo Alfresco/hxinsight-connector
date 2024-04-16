@@ -12,3 +12,13 @@ hyland-experience:
   insight:
     prediction:
       endpoint: aws2-sqs://arn:aws:sqs:us-east-1:000000000000:hxinsight-prediction-queue
+alfresco:
+  repository:
+    nodes:
+      base-url: http://localhost:8080
+      username:
+      password:
+      retry:
+        attempts: 10
+        initial-delay: 500
+        delay-multiplier: 2
