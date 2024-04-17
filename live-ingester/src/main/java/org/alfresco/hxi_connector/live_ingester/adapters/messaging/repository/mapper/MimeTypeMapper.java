@@ -44,6 +44,7 @@ public class MimeTypeMapper
             "image/bmp", "image/png",
             "image/tiff", "image/png",
             "image/gif", "image/png",
+            "image/raw", "image/png",
             "image/*", "image/jpg",
             "application/*", "application/pdf",
             "text/*", "application/pdf");
