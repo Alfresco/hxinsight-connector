@@ -45,7 +45,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationResult;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 
 public class WithMockOAuth2UserSecurityContextFactory implements WithSecurityContextFactory<WithMockOAuth2User>
 {

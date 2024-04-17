@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.auth;
+package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -37,7 +37,6 @@ import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATU
 
 import java.net.URI;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,17 +48,13 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-@Component
 @RequiredArgsConstructor
 @Slf4j
-public class HxAuthenticationClient extends RouteBuilder implements AuthenticationClient
+public abstract class HxAuthenticationClient extends RouteBuilder implements AuthenticationClient
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HxAuthenticationClient.class.getSimpleName();
     private static final String ROUTE_ID = "authentication-requester";
@@ -68,7 +63,6 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
     public static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
-    private final IntegrationProperties integrationProperties;
 
     @Override
     public void configure()
@@ -140,12 +134,5 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
         ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
-
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
+    protected abstract void wrapErrorIfNecessary(Exchange exchange);
 }
