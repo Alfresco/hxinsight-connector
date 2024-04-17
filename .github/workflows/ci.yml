@@ -97,8 +97,9 @@ jobs:
     needs:
       - pre_commit
     if: >
+      !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
-      !contains(github.event.head_commit.message, '[skip build]')
+      !contains(github.event.head_commit.message, '[skip e2es]')
     strategy:
       matrix:
         repoVersion: [ 7.3.0.8, 7.4.1.6, 23.2.1 ]
@@ -113,8 +114,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'common-test,e2e-test' -Drepository.tag=${{ matrix.repoVersion }}
-
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'common-test,common,e2e-test' -DskipUnitTests -DskipIntegrationTests -Drepository.tag=${{ matrix.repoVersion }}
 
   push_docker_images:
     name: "Push docker images"
