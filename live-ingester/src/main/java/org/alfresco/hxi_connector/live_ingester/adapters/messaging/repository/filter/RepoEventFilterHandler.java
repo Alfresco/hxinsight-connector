@@ -39,7 +39,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.utils.EventUtils;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;

@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureThat;
 
 import java.util.List;
 import java.util.Optional;
