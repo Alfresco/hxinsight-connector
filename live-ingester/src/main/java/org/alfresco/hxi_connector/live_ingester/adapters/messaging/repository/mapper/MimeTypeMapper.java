@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
@@ -52,11 +52,7 @@ public class MimeTypeMapper
 
     public String mapMimeType(String inputType)
     {
-        Map<String, String> mappings = MapUtils.emptyIfNull(integrationProperties.alfresco().transform().mimeType().mapping());
-        if (mappings.isEmpty())
-        {
-            mappings = DEFAULT_MIME_TYPES;
-        }
+        final Map<String, String> mappings = ObjectUtils.defaultIfNull(integrationProperties.alfresco().transform().mimeType().mapping(), DEFAULT_MIME_TYPES);
         return mappings.getOrDefault(inputType, determineWildcardMapping(inputType, mappings));
     }
 
