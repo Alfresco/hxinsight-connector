@@ -110,6 +110,8 @@ public class CreateNodeIntegrationTest
         Assertions.assertEquals(201, acsResponse.statusCode());
         Assertions.assertNotNull(acsResponse.jsonPath().get("entry.id"));
 
+        pauseExecution(5000);
+
         Response s3Response = given()
                 .contentType("application/xml")
                 .when()
@@ -118,6 +120,8 @@ public class CreateNodeIntegrationTest
                 .extract().response();
 
         Assertions.assertEquals(200, s3Response.statusCode());
+        String stringS3response = s3Response.asString();
+        Assertions.assertTrue(stringS3response.contains("Contents"));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -158,6 +162,18 @@ public class CreateNodeIntegrationTest
                         "http://%s:8080".formatted(HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI",
                         "http://%s:8080/token".formatted(HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()));
+    }
+
+    private static void pauseExecution(long millis)
+    {
+        try
+        {
+            Thread.sleep(millis);
+        }
+        catch (InterruptedException e)
+        {
+            e.printStackTrace();
+        }
     }
 
 }
