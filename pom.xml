@@ -62,6 +62,7 @@
         <skipTests>false</skipTests>
         <skipUnitTests>${skipTests}</skipUnitTests>
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
+        <skipE2eTests>${skipTests}</skipE2eTests>
 
         <alfresco-platform.version>23.2.1</alfresco-platform.version>
         <alfresco-sdk.version>4.7.0</alfresco-sdk.version>

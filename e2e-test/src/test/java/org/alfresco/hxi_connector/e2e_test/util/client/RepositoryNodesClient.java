@@ -35,8 +35,7 @@ import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.common.model.repository.NodeEntry;
 
 @RequiredArgsConstructor
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
-public class TestNodesClient
+public class RepositoryNodesClient
 {
     private static final String URI_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/%s";
 
@@ -44,9 +43,9 @@ public class TestNodesClient
     private final String username;
     private final String password;
 
-    public Node createFileNode(String parentId, String filename, InputStream fileContent, String mimeType)
+    public Node createFileNode(String parentNodeId, String filename, InputStream fileContent, String mimeType)
     {
-        String uri = URI_PATTERN.formatted(baseUri, parentId) + "/children";
+        String uri = URI_PATTERN.formatted(baseUri, parentNodeId) + "/children";
         return given().auth().preemptive().basic(username, password)
                 .contentType("multipart/form-data")
                 .multiPart("filedata", filename, fileContent, mimeType)

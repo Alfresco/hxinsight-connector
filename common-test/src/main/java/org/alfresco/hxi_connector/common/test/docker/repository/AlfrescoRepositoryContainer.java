@@ -53,11 +53,13 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
     public AlfrescoRepositoryContainer(@NonNull DockerImageName dockerImageName)
     {
         super(dockerImageName);
+        this.addExposedPorts(REPO_PORT_DEFAULT, REPO_DEBUG_PORT_DEFAULT);
     }
 
     public AlfrescoRepositoryContainer(@NonNull AlfrescoRepositoryExtension repositoryExtension)
     {
         super(repositoryExtension);
+        this.addExposedPorts(REPO_PORT_DEFAULT, REPO_DEBUG_PORT_DEFAULT);
     }
 
     public int getPort()
@@ -102,7 +104,6 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
                         -Dmetadata-keystore.aliases=metadata
                         -Dmetadata-keystore.metadata.password=oKIWzVdEdA
                         -Dmetadata-keystore.metadata.algorithm=DESede
-                        """.replace("\n", " "))
-                .withExposedPorts(REPO_PORT_DEFAULT, REPO_DEBUG_PORT_DEFAULT);
+                        """.replace("\n", " "));
     }
 }

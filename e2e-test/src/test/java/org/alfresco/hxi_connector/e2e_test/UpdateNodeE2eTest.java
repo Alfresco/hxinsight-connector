@@ -49,11 +49,11 @@ import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.TestNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
-public class UpdateNodeIntegrationTest
+public class UpdateNodeE2eTest
 {
     private static final String QUEUE_NAME = "hxinsight-prediction-queue";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
@@ -71,7 +71,7 @@ public class UpdateNodeIntegrationTest
     @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer();
 
-    TestNodesClient testNodesClient = new TestNodesClient(repository.getBaseUrl(), "admin", "admin");
+    RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
 
     @BeforeAll
     public static void beforeAll() throws IOException, InterruptedException
@@ -86,14 +86,14 @@ public class UpdateNodeIntegrationTest
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = testNodesClient.createFileNode("-my-", "dummy.txt", fileContent, "text/plaint");
+        Node createdNode = repositoryNodesClient.createFileNode("-my-", "dummy.txt", fileContent, "text/plaint");
 
         // when
         publishPrediction(mockPredictionFor(createdNode.id()));
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode = testNodesClient.getNode(createdNode.id());
+            Node actualNode = repositoryNodesClient.getNode(createdNode.id());
             assertThat(actualNode.aspects())
                     .contains(PREDICTION_APPLIED_ASPECT);
         });
