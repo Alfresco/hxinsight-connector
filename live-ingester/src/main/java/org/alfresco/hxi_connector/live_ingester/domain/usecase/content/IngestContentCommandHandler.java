@@ -53,8 +53,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 @RequiredArgsConstructor
 public class IngestContentCommandHandler
 {
-    private static final String PDF_MIMETYPE = "application/pdf";
-
     private final TransformRequester transformRequester;
     private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final TransformEngineFileStorage transformEngineFileStorage;
@@ -62,7 +60,7 @@ public class IngestContentCommandHandler
 
     public void handle(TriggerContentIngestionCommand command)
     {
-        TransformRequest transformRequest = new TransformRequest(command.nodeId(), PDF_MIMETYPE);
+        TransformRequest transformRequest = new TransformRequest(command.nodeId(), command.mimeType());
         transformRequester.requestTransform(transformRequest);
     }
 
@@ -76,7 +74,7 @@ public class IngestContentCommandHandler
 
         log.atDebug().log("Transform :: Downloaded from SFS content of node: {} in file with ID: {}", nodeId, fileId);
 
-        IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, PDF_MIMETYPE, nodeId);
+        IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, command.mimeType(), nodeId);
 
         Set<PropertyDelta<?>> properties = Set.of(
                 contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.transferId(), ingestContentResponse.mimeType()));

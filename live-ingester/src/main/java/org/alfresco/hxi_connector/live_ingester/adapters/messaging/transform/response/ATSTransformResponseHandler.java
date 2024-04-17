@@ -91,7 +91,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
             return;
         }
 
-        IngestContentCommand command = new IngestContentCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef());
+        IngestContentCommand command = new IngestContentCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef(), transformResponse.clientData().targetMimeType());
 
         ingestContentCommandHandler.handle(command);
     }

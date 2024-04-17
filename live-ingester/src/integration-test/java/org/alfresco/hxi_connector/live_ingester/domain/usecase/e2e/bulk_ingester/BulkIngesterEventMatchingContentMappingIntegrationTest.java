@@ -27,7 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.bulk_ingeste
 
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQUEST_ID_PLACEHOLDER;
 
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
@@ -35,53 +36,18 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 @SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[text/*]=application/pdf",
         "logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-public class BulkIngesterEventIntegrationTest extends E2ETestBase
+public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ETestBase
 {
-    @Test
-    void shouldIngestOnlyMetadataIfThereIsNoContent()
-    {
-        // given
-        containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
-        String bulkIngesterEvent = """
-                {
-                  "nodeId": "5018ff83-ec45-4a11-95c4-681761752aa7",
-                  "contentInfo": null,
-                  "properties": {
-                    "cm:name": "Mexican Spanish",
-                    "type": "cm:category",
-                    "createdAt": 1707153552,
-                    "createdBy": "System",
-                    "modifiedBy": "admin",
-                    "aspectsNames": [
-                      "cm:auditable"
-                    ]
-                  }
-                }""";
-        containerSupport.raiseBulkIngesterEvent(bulkIngesterEvent);
-
-        // then
-        String expectedBody = """
-                [
-                  {
-                    "objectId" : "5018ff83-ec45-4a11-95c4-681761752aa7",
-                    "eventType" : "create",
-                    "properties" : {
-                      "type": {"value": "cm:category"},
-                      "createdAt": {"value": 1707153552},
-                      "createdBy": {"value": "System"},
-                      "modifiedBy": {"value": "admin"},
-                      "aspectsNames": {"value": ["cm:auditable"]},
-                      "cm:name": {"value": "Mexican Spanish"}
-                    }
-                  }
-                ]""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
-    }
-
-    @Test
-    void shouldIngestMetadataAndContent()
+    @ParameterizedTest
+    @CsvSource({
+            "image/gif,image/png", "image/bmp,image/png", "image/png,image/png", "image/raw,image/png",
+            "image/jpeg,image/jpeg", "image/heic,image/jpeg", "image/webp,image/jpeg",
+            "application/msword,application/pdf", "application/pdf,application/pdf",
+            "text/plain,application/pdf", "text/html,application/pdf"
+    })
+    void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
+            String sourceMimeType, String expectedTargetMimeType)
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
@@ -93,7 +59,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                   "contentInfo": {
                     "contentSize": 330,
                     "encoding": "ISO-8859-1",
-                    "mimetype": "text/xml"
+                    "mimetype": "%s"
                   },
                   "properties": {
                     "cm:name": "dashboard.xml",
@@ -108,7 +74,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "cm:auditable"
                     ]
                   }
-                }""";
+                }""".formatted(sourceMimeType);
         containerSupport.raiseBulkIngesterEvent(repoEvent);
 
         // then
@@ -131,24 +97,24 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                           "content-metadata": {
                             "name": "dashboard.xml",
                             "size": 330,
-                            "content-type": "text/xml"
+                            "content-type": "%s"
                           }
                         }
                       }
                     }
                   }
-                ]""";
+                ]""".formatted(sourceMimeType);
         containerSupport.expectHxIngestMessageReceived(expectedBody);
 
         String expectedATSRequest = """
                 {
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0}",
+                    "targetMediaType": "%s",
+                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
+                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
 
     }

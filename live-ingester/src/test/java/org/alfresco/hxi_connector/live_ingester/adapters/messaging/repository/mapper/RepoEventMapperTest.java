@@ -55,6 +55,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerCo
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
@@ -67,6 +68,8 @@ class RepoEventMapperTest
 
     @Mock
     PropertiesMapper propertiesMapper;
+    @Mock
+    private MimeTypeMapper mimeTypeMapper;
     @InjectMocks
     RepoEventMapper repoEventMapper;
 
@@ -74,13 +77,15 @@ class RepoEventMapperTest
     void shouldMapToIngestNodeContentCommand()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_CREATED);
+        String mimeType = "application/pdf";
+        given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(mimeType);
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_CREATED, mimeType);
 
         // when
         TriggerContentIngestionCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
 
         // then
-        TriggerContentIngestionCommand expectedCommand = new TriggerContentIngestionCommand(NODE_ID);
+        TriggerContentIngestionCommand expectedCommand = new TriggerContentIngestionCommand(NODE_ID, mimeType);
 
         assertEquals(expectedCommand, actualCommand);
     }
@@ -198,5 +203,19 @@ class RepoEventMapperTest
         given(nodeResource.getId()).willReturn(NODE_ID);
         setNodeResource(event, nodeResource);
         return event;
+    }
+
+    private static RepoEvent<DataAttributes<NodeResource>> mockMinimalEvent(EventType eventType, String mimeType)
+    {
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(eventType);
+        mockMimeType(event.getData().getResource(), mimeType);
+        return event;
+    }
+
+    private static void mockMimeType(NodeResource nodeResource, String mimeType)
+    {
+        ContentInfo mockContentInfo = mock();
+        given(nodeResource.getContent()).willReturn(mockContentInfo);
+        given(mockContentInfo.getMimeType()).willReturn(mimeType);
     }
 }
