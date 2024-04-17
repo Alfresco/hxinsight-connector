@@ -40,7 +40,13 @@ public class MimeTypeMapper
 {
 
     public static final String EMPTY_MIME_TYPE = "";
-    static final String DEFAULT_MIME_TYPE = "application/pdf";
+    static final Map<String, String> DEFAULT_MIME_TYPES = Map.of("image/png", "image/png",
+            "image/bmp", "image/png",
+            "image/tiff", "image/png",
+            "image/gif", "image/png",
+            "image/*", "image/jpg",
+            "application/*", "application/pdf",
+            "text/*", "application/pdf");
     private final IntegrationProperties integrationProperties;
 
     public String mapMimeType(String inputType)
@@ -48,7 +54,7 @@ public class MimeTypeMapper
         Map<String, String> mappings = MapUtils.emptyIfNull(integrationProperties.alfresco().transform().mimeType().mapping());
         if (mappings.isEmpty())
         {
-            return DEFAULT_MIME_TYPE;
+            mappings = DEFAULT_MIME_TYPES;
         }
         return mappings.getOrDefault(inputType, determineWildcardMapping(inputType, mappings));
     }
@@ -69,7 +75,7 @@ public class MimeTypeMapper
                 .orElse(EMPTY_MIME_TYPE);
     }
 
-    private static String getType(String inputType)
+    static String getType(String inputType)
     {
         return inputType.split("/")[0];
     }

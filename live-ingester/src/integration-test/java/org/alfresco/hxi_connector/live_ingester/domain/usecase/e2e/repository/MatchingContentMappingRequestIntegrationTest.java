@@ -33,7 +33,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
+@SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[text/*]=application/pdf",
+        "logging.level.org.alfresco=DEBUG"})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
 {

@@ -37,7 +37,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
 {
 
     @ParameterizedTest
-    @ValueSource(strings = {"nonmatchingtext/plain", "nonmatchingtext/html", "nonmatchingtext/richtext"})
+    @ValueSource(strings = {"text/plain", "text/html", "text/richtext"})
     void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithNotMatchingTypeIngested_thenProcessWithoutTransformRequest(
             String sourceMimeType)
     {
