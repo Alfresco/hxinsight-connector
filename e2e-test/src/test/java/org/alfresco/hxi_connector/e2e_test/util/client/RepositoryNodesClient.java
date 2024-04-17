@@ -43,9 +43,9 @@ public class RepositoryNodesClient
     private final String username;
     private final String password;
 
-    public Node createFileNode(String parentId, String filename, InputStream fileContent, String mimeType)
+    public Node createFileNode(String parentNodeId, String filename, InputStream fileContent, String mimeType)
     {
-        String uri = URI_PATTERN.formatted(baseUri, parentId) + "/children";
+        String uri = URI_PATTERN.formatted(baseUri, parentNodeId) + "/children";
         return given().auth().preemptive().basic(username, password)
                 .contentType("multipart/form-data")
                 .multiPart("filedata", filename, fileContent, mimeType)
