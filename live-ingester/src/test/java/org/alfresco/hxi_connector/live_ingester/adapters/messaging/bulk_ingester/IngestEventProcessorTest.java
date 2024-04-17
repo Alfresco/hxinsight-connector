@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
@@ -47,6 +48,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
@@ -64,6 +66,8 @@ class IngestEventProcessorTest
     private IngestNodeCommandHandler ingestNodeCommandHandler;
     @Mock
     private IngestContentCommandHandler ingestContentCommandHandler;
+    @Mock
+    private MimeTypeMapper mimeTypeMapper;
     @InjectMocks
     private IngestEventProcessor ingestEventProcessor;
 
@@ -102,16 +106,18 @@ class IngestEventProcessorTest
     void shouldIngestContentIfAvailable()
     {
         // given
+        String mimeType = "application/pdf";
         IngestEvent.ContentInfo contentInfo = new IngestEvent.ContentInfo(
                 100L,
                 "UTF-8",
-                "application/pdf");
+                mimeType);
 
         IngestEvent ingestEvent = new IngestEvent(
                 NODE_ID,
                 contentInfo,
                 Map.of(TYPE_PROPERTY, NODE_TYPE,
                         CREATED_AT_PROPERTY, CREATED_AT));
+        given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(mimeType);
 
         // when
         ingestEventProcessor.process(ingestEvent);
@@ -121,11 +127,46 @@ class IngestEventProcessorTest
                 NODE_ID,
                 CREATE,
                 Set.of(
-                        contentMetadataUpdated(CONTENT_PROPERTY, "application/pdf", 100L, null),
+                        contentMetadataUpdated(CONTENT_PROPERTY, mimeType, 100L, null),
                         updated(TYPE_PROPERTY, NODE_TYPE),
                         updated(CREATED_AT_PROPERTY, CREATED_AT)));
         then(ingestNodeCommandHandler).should().handle(expectedCommand);
 
-        then(ingestContentCommandHandler).should().handle(eq(new TriggerContentIngestionCommand(NODE_ID)));
+        then(mimeTypeMapper).should().mapMimeType(mimeType);
+        then(ingestContentCommandHandler).should().handle(eq(new TriggerContentIngestionCommand(NODE_ID, mimeType)));
+    }
+
+    @Test
+    void shouldNotIngestContentIfAvailableButMimeTypeMappedToEmpty()
+    {
+        // given
+        String mimeType = "application/octetstream";
+        IngestEvent.ContentInfo contentInfo = new IngestEvent.ContentInfo(
+                100L,
+                "UTF-8",
+                mimeType);
+
+        IngestEvent ingestEvent = new IngestEvent(
+                NODE_ID,
+                contentInfo,
+                Map.of(TYPE_PROPERTY, NODE_TYPE,
+                        CREATED_AT_PROPERTY, CREATED_AT));
+        given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
+
+        // when
+        ingestEventProcessor.process(ingestEvent);
+
+        // then
+        IngestNodeCommand expectedCommand = new IngestNodeCommand(
+                NODE_ID,
+                CREATE,
+                Set.of(
+                        contentMetadataUpdated(CONTENT_PROPERTY, mimeType, 100L, null),
+                        updated(TYPE_PROPERTY, NODE_TYPE),
+                        updated(CREATED_AT_PROPERTY, CREATED_AT)));
+        then(ingestNodeCommandHandler).should().handle(expectedCommand);
+
+        then(mimeTypeMapper).should().mapMimeType(mimeType);
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
     }
 }

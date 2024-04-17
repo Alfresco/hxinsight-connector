@@ -51,12 +51,15 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class RepoEventMapper
 {
     private final PropertiesMapper propertiesMapper;
+    private final MimeTypeMapper mimeTypeMapper;
 
     public TriggerContentIngestionCommand mapToIngestContentCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
         ensureThat(isEventTypeCreated(event) || isEventTypeUpdated(event), "Unsupported event type");
 
-        return new TriggerContentIngestionCommand(event.getData().getResource().getId());
+        final NodeResource resource = event.getData().getResource();
+        String mimeType = mimeTypeMapper.mapMimeType(resource.getContent().getMimeType());
+        return new TriggerContentIngestionCommand(resource.getId(), mimeType);
     }
 
     public IngestNodeCommand mapToIngestNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)

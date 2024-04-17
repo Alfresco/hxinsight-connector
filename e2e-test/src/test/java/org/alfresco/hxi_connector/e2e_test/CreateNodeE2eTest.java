@@ -49,7 +49,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @Slf4j
 @Testcontainers
-public class CreateNodeIntegrationTest
+public class CreateNodeE2eTest
 {
 
     private static final String BUCKET_NAME = "test-hxinsight-bucket";

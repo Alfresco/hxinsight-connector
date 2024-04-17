@@ -18,8 +18,8 @@ env:
   # Both variables are required to be set before the release process starts .
   # As the release is triggered by a commit message with "[release]" keyword on a release branch,
   # setting these variables to new values can be done in the same commit and will indicate the release and the dev versions in it.
-  DEVELOPMENT_VERSION: "0.0.7-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
-  RELEASE_VERSION: "0.0.6" # The version of the release (tag).
+  DEVELOPMENT_VERSION: "1.0.0-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
+  RELEASE_VERSION: "1.0.0-A1" # The version of the release (tag).
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -97,8 +97,9 @@ jobs:
     needs:
       - pre_commit
     if: >
+      !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
-      !contains(github.event.head_commit.message, '[skip build]')
+      !contains(github.event.head_commit.message, '[skip e2es]')
     strategy:
       matrix:
         repoVersion: [ 7.3.0.8, 7.4.1.6, 23.2.1 ]
@@ -113,8 +114,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'common-test,e2e-test' -Drepository.tag=${{ matrix.repoVersion }}
-
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Drepository.tag=${{ matrix.repoVersion }}
 
   push_docker_images:
     name: "Push docker images"

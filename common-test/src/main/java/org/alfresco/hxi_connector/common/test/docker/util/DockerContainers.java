@@ -82,16 +82,16 @@ public class DockerContainers
 
     public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network, boolean enterprise)
     {
-        AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(new AlfrescoRepositoryExtension(
-                "alfresco-hxinsight-connector-prediction-applier-extension",
-                "localhost/alfresco/alfresco-content-repository-prediction-applier-extension",
-                enterprise))
-                        .withStartupTimeout(Duration.ofMinutes(5));
+        AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
+                new AlfrescoRepositoryExtension(
+                        "alfresco-hxinsight-connector-prediction-applier-extension",
+                        "localhost/alfresco/alfresco-content-repository-prediction-applier-extension",
+                        enterprise))
+                                .withStartupTimeout(Duration.ofMinutes(5));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
 
         return repository;
-        // @formatter:on
     }
 
     public static PostgreSQLContainer<?> createPostgresContainer()

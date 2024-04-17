@@ -47,6 +47,7 @@ import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent.ContentInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
@@ -60,6 +61,7 @@ public class IngestEventProcessor
 {
     private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
+    private final MimeTypeMapper mimeTypeMapper;
 
     public void process(@Validated IngestEvent ingestEvent)
     {
@@ -75,7 +77,15 @@ public class IngestEventProcessor
 
         if (ingestEvent.contentInfo() != null)
         {
-            TriggerContentIngestionCommand triggerContentIngestionCommand = new TriggerContentIngestionCommand(ingestEvent.nodeId());
+            String sourceMimeType = ingestEvent.contentInfo().mimetype();
+            String targetMimeType = mimeTypeMapper.mapMimeType(sourceMimeType);
+            if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(targetMimeType))
+            {
+                log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}", ingestEvent.nodeId(), sourceMimeType);
+                return;
+            }
+            TriggerContentIngestionCommand triggerContentIngestionCommand = new TriggerContentIngestionCommand(ingestEvent.nodeId(),
+                    targetMimeType);
 
             ingestContentCommandHandler.handle(triggerContentIngestionCommand);
         }

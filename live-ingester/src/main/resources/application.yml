@@ -36,9 +36,6 @@ alfresco:
     shared-file-store:
       host: http://localhost
       port: 8099
-    mime-type:
-      mapping:
-        '[*]': "application/pdf"
   filter:
     aspect:
       allow:
