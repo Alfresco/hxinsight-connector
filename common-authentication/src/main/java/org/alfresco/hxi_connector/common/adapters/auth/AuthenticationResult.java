@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,11 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.auth;
+package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static java.util.Objects.requireNonNullElse;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.auth.HxAuthenticationClient.EXPECTED_STATUS_CODE;
+import static org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient.EXPECTED_STATUS_CODE;
 
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;

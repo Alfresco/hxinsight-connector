@@ -36,7 +36,7 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationResult;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthUtils

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -38,7 +38,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.auth.HxOAuth2AuthenticationProvider;
 
 @Configuration
