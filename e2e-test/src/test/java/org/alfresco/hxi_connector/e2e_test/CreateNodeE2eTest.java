@@ -25,10 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import static io.restassured.RestAssured.given;
-
-import java.io.File;
-
 import io.restassured.response.Response;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -44,8 +40,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.S3BucketClient;
 
 @Slf4j
 @Testcontainers
@@ -53,6 +53,8 @@ public class CreateNodeE2eTest
 {
 
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
+    private static final int INITIAL_DELAY_MS = 200;
+    private static final String CONTENTS_STRING = "Contents";
     private static final Network NETWORK = Network.newNetwork();
 
     @Container
@@ -89,6 +91,9 @@ public class CreateNodeE2eTest
     @Container
     private static final LocalStackContainer LOCAL_STACK_SERVER = DockerContainers.createLocalStackContainerWithin(NETWORK);
 
+    RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(REPOSITORY.getBaseUrl(), "admin", "admin");
+    S3BucketClient s3BucketClient = new S3BucketClient();
+
     @BeforeAll
     @SneakyThrows
     public static void beforeAll()
@@ -99,29 +104,23 @@ public class CreateNodeE2eTest
     @Test
     void testCreateFile()
     {
-        Response acsResponse = given().auth().basic("admin", "admin")
-                .contentType("multipart/form-data")
-                .multiPart("filedata", new File("src/test/resources/test-files/Alfresco Content Services 7.4.docx"))
-                .when()
-                .post(REPOSITORY.getBaseUrl() + "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
-                .then()
-                .extract().response();
+        // when
+        Node uploadExistingFile = repositoryNodesClient.uploadExistingFile("-my-", "src/test/resources/test-files/Alfresco Content Services 7.4.docx");
 
-        Assertions.assertEquals(201, acsResponse.statusCode());
-        Assertions.assertNotNull(acsResponse.jsonPath().get("entry.id"));
+        // then
+        Node actualNode = repositoryNodesClient.getNode(uploadExistingFile.id());
+        Assertions.assertNotNull(actualNode);
 
-        pauseExecution(5000);
+        // and
+        Boolean result = RetryUtils.retryWithBackoff(() -> {
+            Response s3Response = s3BucketClient.getS3Response(LOCAL_STACK_SERVER.getFirstMappedPort());
 
-        Response s3Response = given()
-                .contentType("application/xml")
-                .when()
-                .get("http://localhost:" + LOCAL_STACK_SERVER.getFirstMappedPort() + "/test-hxinsight-bucket/")
-                .then()
-                .extract().response();
-
-        Assertions.assertEquals(200, s3Response.statusCode());
-        String stringS3response = s3Response.asString();
-        Assertions.assertTrue(stringS3response.contains("Contents"));
+            Assertions.assertEquals(200, s3Response.statusCode());
+            String stringS3response = s3Response.asString();
+            boolean containsContents = stringS3response.contains(CONTENTS_STRING);
+            Assertions.assertTrue(containsContents, "S3 response does not contain any contents");
+            return containsContents;
+        }, INITIAL_DELAY_MS);
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -163,17 +162,4 @@ public class CreateNodeE2eTest
                 .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI",
                         "http://%s:8080/token".formatted(HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()));
     }
-
-    private static void pauseExecution(long millis)
-    {
-        try
-        {
-            Thread.sleep(millis);
-        }
-        catch (InterruptedException e)
-        {
-            e.printStackTrace();
-        }
-    }
-
 }

@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import static java.util.Objects.requireNonNullElseGet;
 
-import java.util.Collections;
 import java.util.Map;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -46,7 +45,7 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
         this.request = request;
         this.response = response;
         this.sharedFileStore = sharedFileStore;
-        this.mimeType = mimeType != null ? mimeType : new MimeType(Collections.emptyMap());
+        this.mimeType = mimeType != null ? mimeType : new MimeType(null);
     }
 
     public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout)

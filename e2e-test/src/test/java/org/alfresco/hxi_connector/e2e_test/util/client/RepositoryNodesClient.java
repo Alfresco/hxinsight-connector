@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.e2e_test.util.client;
 
 import static io.restassured.RestAssured.given;
 
+import java.io.File;
 import java.io.InputStream;
 
 import lombok.RequiredArgsConstructor;
@@ -60,6 +61,17 @@ public class RepositoryNodesClient
         return given().auth().preemptive().basic(username, password)
                 .contentType("application/json")
                 .when().get(uri)
+                .then().extract().response()
+                .as(NodeEntry.class).node();
+    }
+
+    public Node uploadExistingFile(String parentId, String pathName)
+    {
+        String uri = URI_PATTERN.formatted(baseUri, parentId) + "/children";
+        return given().auth().preemptive().basic(username, password)
+                .contentType("multipart/form-data")
+                .multiPart("filedata", new File(pathName))
+                .when().post(uri)
                 .then().extract().response()
                 .as(NodeEntry.class).node();
     }

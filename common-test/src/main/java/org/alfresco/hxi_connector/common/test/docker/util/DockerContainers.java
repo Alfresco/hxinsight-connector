@@ -214,7 +214,7 @@ public class DockerContainers
     {
         return createWireMockContainer()
                 .withNetwork(network)
-                .withEnv("WIREMOCK_OPTIONS", "--global-response-templating --permitted-system-keys=AWS_.* --verbose");
+                .withEnv("WIREMOCK_OPTIONS", "--global-response-templating --verbose");
     }
 
     public static LocalStackContainer createLocalStackContainer()
