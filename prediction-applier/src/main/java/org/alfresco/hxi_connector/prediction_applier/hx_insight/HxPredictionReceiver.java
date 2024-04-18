@@ -36,12 +36,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.component.jackson.ListJacksonDataFormat;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
-import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
 
 @Slf4j
 @Component
@@ -58,6 +58,8 @@ public class HxPredictionReceiver extends RouteBuilder
     public void configure()
     {
         // @formatter:off
+        JacksonDataFormat predictionsBatchDataFormat = new ListJacksonDataFormat(Prediction.class);
+
         from(config.predictionProcessorTriggerEndpoint())
                 .routeId(PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID)
                 .choice()
@@ -71,14 +73,14 @@ public class HxPredictionReceiver extends RouteBuilder
                 .routeId(PREDICTION_PROCESSOR_ROUTE_ID)
                 .process(setIsProcessingPending(true))
                 .loopDoWhile(this::hasNextPage)
+                    .log(DEBUG, log, "Fetching predictions")
                     .to(config.predictionsSourceEndpoint())
                     .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
-                    .unmarshal(new ListJacksonDataFormat(Prediction.class))
-                    .process(this::setHasNextPage)
-                    .process(this::saveBody)
+                    .unmarshal(predictionsBatchDataFormat)
+                    .process(this::savePredictionsBatch)
                     .loopDoWhile(this::predictionsBatchNotEmpty)
                         .process(this::setPredictionToSend)
-                        .marshal(new ListJacksonDataFormat(Prediction.class))
+                        .marshal(predictionsBatchDataFormat)
                         .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
                         .to(config.internalPredictionsBufferEndpoint())
                         .end()
@@ -97,10 +99,7 @@ public class HxPredictionReceiver extends RouteBuilder
 
     private Processor setIsProcessingPending(boolean isProcessingPending)
     {
-        return exchange -> {
-            exchange.getIn().setBody(null);
-            getContext().getRegistry().bind("is-prediction-processing-pending", isProcessingPending);
-        };
+        return exchange -> getContext().getRegistry().bind("is-prediction-processing-pending", isProcessingPending);
     }
 
     private boolean hasNextPage(Exchange exchange)
@@ -108,40 +107,22 @@ public class HxPredictionReceiver extends RouteBuilder
         return Objects.requireNonNullElse(exchange.getProperty("has-next-page", Boolean.class), true);
     }
 
-    private void setHasNextPage(Exchange exchange)
+    private void savePredictionsBatch(Exchange exchange)
     {
-        String hasNextPageProperty = "has-next-page";
+        List<Prediction> predictionsBatch = exchange.getIn().getBody(List.class);
 
-        Object body = exchange.getIn().getBody();
-
-        if (body == null)
-        {
-            exchange.setProperty(hasNextPageProperty, true);
-            return;
-        }
-
-        if (body instanceof List<?> list)
-        {
-            exchange.setProperty(hasNextPageProperty, !list.isEmpty());
-            return;
-        }
-
-        throw new PredictionApplierRuntimeException("Unexpected body type: " + body.getClass().getName());
-    }
-
-    private void saveBody(Exchange exchange)
-    {
-        exchange.setVariable("body", exchange.getIn().getBody());
+        exchange.setProperty("has-next-page", !predictionsBatch.isEmpty());
+        exchange.setVariable("predictionsBatch", predictionsBatch);
     }
 
     private boolean predictionsBatchNotEmpty(Exchange exchange)
     {
-        return !exchange.getVariable("body", List.class).isEmpty();
+        return !exchange.getVariable("predictionsBatch", List.class).isEmpty();
     }
 
     private void setPredictionToSend(Exchange exchange)
     {
-        Prediction predictionToSend = (Prediction) exchange.getVariable("body", List.class).remove(0);
+        Prediction predictionToSend = (Prediction) exchange.getVariable("predictionsBatch", List.class).remove(0);
         exchange.getIn().setBody(predictionToSend);
     }
 }
