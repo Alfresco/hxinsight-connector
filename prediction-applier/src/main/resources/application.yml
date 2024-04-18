@@ -14,7 +14,7 @@ hyland-experience:
       endpoint: direct:test
     prediction-listener:
       pool-period: 300_000 #5 min
-      predictions-source-endpoint: http:localhost:4000/predictions?pageSize=10
+      predictions-source-endpoint: direct:mocked
       internal-predictions-buffer-endpoint: activemq:queue:predictions-buffer
 
 alfresco:
