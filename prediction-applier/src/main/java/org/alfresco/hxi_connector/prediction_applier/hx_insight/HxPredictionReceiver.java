@@ -37,6 +37,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
 
 @Slf4j
 @Component
@@ -105,7 +106,7 @@ public class HxPredictionReceiver extends RouteBuilder
                 return !list.isEmpty();
             }
 
-            throw new RuntimeException("Unexpected body type: " + body.getClass().getName());
+            throw new PredictionApplierRuntimeException("Unexpected body type: " + body.getClass().getName());
         };
     }
 }

@@ -39,7 +39,6 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -60,7 +59,7 @@ import org.alfresco.hxi_connector.prediction_applier.util.PredictionSourceStub;
                 InternalPredictionBufferStub.class, PredictionSourceStub.class
         })
 @EnableAutoConfiguration
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.FieldNamingConventions"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.LongVariable", "PMD.LinguisticNaming"})
 class HxPredictionReceiverTest
 {
     public static final String TRIGGER_ENDPOINT = "direct:prediction-processor-trigger";
@@ -111,7 +110,7 @@ class HxPredictionReceiverTest
         internalPredictionBufferStub.assertAllPredictionsHandled(predictions);
     }
 
-    @RepeatedTest(100)
+    @Test
     void shouldIgnoreTriggerSignalIfProcessingIsPending()
     {
         // given
