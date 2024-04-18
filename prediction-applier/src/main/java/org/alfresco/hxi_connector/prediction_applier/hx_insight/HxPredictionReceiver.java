@@ -34,7 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
@@ -69,11 +68,9 @@ public class HxPredictionReceiver extends RouteBuilder
                 .routeId(PREDICTION_PROCESSOR_ROUTE_ID)
                 .process(setIsProcessingPending(true))
                 .loopDoWhile(hasNextPage())
-                    .to(config.predictionsEndpoint())
-                    .unmarshal(new JacksonDataFormat(List.class))
-                    .process(exchange -> {
-                        log.info("Processing exchange: {}", exchange.getIn().getBody(List.class));
-                    })
+                    .to(config.predictionsSourceEndpoint())
+                    .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
+                    .to(config.internalPredictionsBufferEndpoint())
                 .end()
                 .log(DEBUG, log, "Finished processing predictions")
                 .process(setIsProcessingPending(false));

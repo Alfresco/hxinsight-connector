@@ -11,10 +11,11 @@ camel:
 hyland-experience:
   insight:
     prediction:
-      endpoint: aws2-sqs://arn:aws:sqs:us-east-1:000000000000:hxinsight-prediction-queue
+      endpoint: direct:test
     prediction-listener:
-      predictions-endpoint: http:localhost:8080/predictions?pageSize=10
+      predictions-source-endpoint: http:localhost:8080/predictions?pageSize=10
       prediction-processor-trigger-endpoint: quartz:prediction-processor-trigger?cron=0+*/1+*+?+*+*
+      internal-predictions-buffer-endpoint: activemq:queue:predictions-buffer
 
 alfresco:
   repository:

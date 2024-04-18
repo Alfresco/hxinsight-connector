@@ -33,5 +33,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @ConfigurationProperties(prefix = "hyland-experience.insight.prediction-listener")
 public record PredictionListenerConfig(
         @NotBlank String predictionProcessorTriggerEndpoint,
-        @NotBlank String predictionsEndpoint)
+        @NotBlank String predictionsSourceEndpoint,
+        @NotBlank String internalPredictionsBufferEndpoint)
 {}
