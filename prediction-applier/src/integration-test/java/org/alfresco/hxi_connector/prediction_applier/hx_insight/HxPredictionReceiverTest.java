@@ -83,9 +83,10 @@ class HxPredictionReceiverTest
     void shouldDoNothingIfPredictionProcessingNotTriggered()
     {
         // given
-        List<Prediction> predictions = List.of(new Prediction("1", "1"));
+        List<Prediction> predictions1 = List.of(new Prediction("1", "1"));
+        List<Prediction> predictions2 = List.of(new Prediction("2", "2"));
 
-        predictionSourceStub.shouldReturnPredictions(predictions);
+        predictionSourceStub.shouldReturnPredictions(predictions1, predictions2);
 
         // then
         internalPredictionBufferStub.assertAllPredictionsHandled(Collections.emptyList());

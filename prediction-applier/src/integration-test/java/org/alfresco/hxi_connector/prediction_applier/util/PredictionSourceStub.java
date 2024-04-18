@@ -47,7 +47,7 @@ public class PredictionSourceStub extends RouteBuilder
 {
     private final PredictionListenerConfig predictionListenerConfig;
 
-    private long deliveryDelayInMs = 0;
+    private long deliveryDelayInMs;
     private Queue<List<Prediction>> predictionsBatchesQueue = new LinkedList<>();
 
     @Override
@@ -70,13 +70,6 @@ public class PredictionSourceStub extends RouteBuilder
     public final void shouldReturnPredictions(List<Prediction>... predictionsBatches)
     {
         predictionsBatchesQueue = new LinkedList<>(Arrays.asList(predictionsBatches));
-    }
-
-    @SafeVarargs
-    public final void shouldReturnPredictions(long delayInMs, List<Prediction>... predictionsBatches)
-    {
-        this.deliveryDelayInMs = delayInMs;
-        this.predictionsBatchesQueue = new LinkedList<>(Arrays.asList(predictionsBatches));
     }
 
     public final void shouldReturnPredictions(long delayInMs, List<List<Prediction>> predictionsBatches)
