@@ -112,7 +112,7 @@ public class CreateNodeE2eTest
         Assertions.assertNotNull(actualNode);
 
         // and
-        Boolean result = RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.retryWithBackoff(() -> {
             Response s3Response = s3BucketClient.getS3Response(LOCAL_STACK_SERVER.getFirstMappedPort());
             // check if the response from localstack contains the content of the file
             Assertions.assertEquals(200, s3Response.statusCode());
