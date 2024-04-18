@@ -79,4 +79,10 @@ public class PredictionSourceStub extends RouteBuilder
         this.predictionsBatchesQueue = new LinkedList<>(Arrays.asList(predictionsBatches));
     }
 
+    public final void shouldReturnPredictions(long delayInMs, List<List<Prediction>> predictionsBatches)
+    {
+        this.deliveryDelayInMs = delayInMs;
+        this.predictionsBatchesQueue = new LinkedList<>(predictionsBatches);
+    }
+
 }

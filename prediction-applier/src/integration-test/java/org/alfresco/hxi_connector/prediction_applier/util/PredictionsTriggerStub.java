@@ -26,42 +26,36 @@
 
 package org.alfresco.hxi_connector.prediction_applier.util;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jackson.JacksonDataFormat;
+import lombok.SneakyThrows;
+import org.apache.camel.ProducerTemplate;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
 
 @Component
 @RequiredArgsConstructor
-public class InternalPredictionBufferStub extends RouteBuilder
+public class PredictionsTriggerStub
 {
+
+    private final ProducerTemplate producerTemplate;
+
     private final PredictionListenerConfig predictionListenerConfig;
 
-    private final List<Prediction> handledPredictions;
-
-    @Override
-    public void configure()
+    public void triggerPredictionsProcessing()
     {
-        from(predictionListenerConfig.internalPredictionsBufferEndpoint())
-                .log("Handling predictions ${body}")
-                .unmarshal(new JacksonDataFormat(Prediction.class))
-                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(Prediction.class)));
+        producerTemplate.sendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
     }
 
-    public void assertAllPredictionsHandled(List<Prediction> predictions)
+    @SneakyThrows
+    public void triggerPredictionsProcessingAsync(long delayInMs)
     {
-        assertEquals(predictions, handledPredictions);
+        Thread.sleep(delayInMs);
+        triggerPredictionsProcessingAsync();
     }
 
-    public void reset()
+    public void triggerPredictionsProcessingAsync()
     {
-        handledPredictions.clear();
+        producerTemplate.asyncSendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
     }
 }

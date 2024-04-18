@@ -26,13 +26,14 @@
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.TRACE;
 
 import java.util.List;
 import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Predicate;
+import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.ListJacksonDataFormat;
@@ -60,7 +61,7 @@ public class HxPredictionReceiver extends RouteBuilder
         from(config.predictionProcessorTriggerEndpoint())
                 .routeId(PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID)
                 .choice()
-                .when(isProcessingPending())
+                .when(this::isProcessingPending)
                     .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
                 .otherwise()
                     .log(DEBUG, log, "Triggering prediction processing")
@@ -69,22 +70,27 @@ public class HxPredictionReceiver extends RouteBuilder
         from(PREDICTION_PROCESSOR)
                 .routeId(PREDICTION_PROCESSOR_ROUTE_ID)
                 .process(setIsProcessingPending(true))
-                .loopDoWhile(hasNextPage())
+                .loopDoWhile(this::hasNextPage)
                     .to(config.predictionsSourceEndpoint())
                     .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
                     .unmarshal(new ListJacksonDataFormat(Prediction.class))
-                    .process(setHasNextPage())
-                    .marshal(new ListJacksonDataFormat())
-                    .to(config.internalPredictionsBufferEndpoint())
+                    .process(this::setHasNextPage)
+                    .process(this::saveBody)
+                    .loopDoWhile(this::predictionsBatchNotEmpty)
+                        .process(this::setPredictionToSend)
+                        .marshal(new ListJacksonDataFormat(Prediction.class))
+                        .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
+                        .to(config.internalPredictionsBufferEndpoint())
+                        .end()
                 .end()
                 .log(DEBUG, log, "Finished processing predictions")
                 .process(setIsProcessingPending(false));
         // @formatter:on
     }
 
-    private Predicate isProcessingPending()
+    private boolean isProcessingPending(Exchange exchange)
     {
-        return exchange -> Objects.requireNonNullElse(
+        return Objects.requireNonNullElse(
                 getContext().getRegistry().lookupByNameAndType("is-prediction-processing-pending", Boolean.class),
                 false);
     }
@@ -97,31 +103,45 @@ public class HxPredictionReceiver extends RouteBuilder
         };
     }
 
-    private Predicate hasNextPage()
+    private boolean hasNextPage(Exchange exchange)
     {
-        return exchange -> Objects.requireNonNullElse(exchange.getProperty("has-next-page", Boolean.class), true);
+        return Objects.requireNonNullElse(exchange.getProperty("has-next-page", Boolean.class), true);
     }
 
-    private Processor setHasNextPage()
+    private void setHasNextPage(Exchange exchange)
     {
         String hasNextPageProperty = "has-next-page";
 
-        return exchange -> {
-            Object body = exchange.getIn().getBody();
+        Object body = exchange.getIn().getBody();
 
-            if (body == null)
-            {
-                exchange.setProperty(hasNextPageProperty, true);
-                return;
-            }
+        if (body == null)
+        {
+            exchange.setProperty(hasNextPageProperty, true);
+            return;
+        }
 
-            if (body instanceof List<?> list)
-            {
-                exchange.setProperty(hasNextPageProperty, !list.isEmpty());
-                return;
-            }
+        if (body instanceof List<?> list)
+        {
+            exchange.setProperty(hasNextPageProperty, !list.isEmpty());
+            return;
+        }
 
-            throw new PredictionApplierRuntimeException("Unexpected body type: " + body.getClass().getName());
-        };
+        throw new PredictionApplierRuntimeException("Unexpected body type: " + body.getClass().getName());
+    }
+
+    private void saveBody(Exchange exchange)
+    {
+        exchange.setVariable("body", exchange.getIn().getBody());
+    }
+
+    private boolean predictionsBatchNotEmpty(Exchange exchange)
+    {
+        return !exchange.getVariable("body", List.class).isEmpty();
+    }
+
+    private void setPredictionToSend(Exchange exchange)
+    {
+        Prediction predictionToSend = (Prediction) exchange.getVariable("body", List.class).remove(0);
+        exchange.getIn().setBody(predictionToSend);
     }
 }

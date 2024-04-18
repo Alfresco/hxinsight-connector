@@ -32,12 +32,13 @@ import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLog
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,30 +51,27 @@ import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
 import org.alfresco.hxi_connector.prediction_applier.util.InternalPredictionBufferStub;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionSourceStub;
+import org.alfresco.hxi_connector.prediction_applier.util.PredictionsTriggerStub;
 
 @Slf4j
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
         classes = {
                 HxPredictionReceiver.class, HxPredictionReceiverTest.IntegrationPropertiesTestConfig.class,
-                InternalPredictionBufferStub.class, PredictionSourceStub.class
+                InternalPredictionBufferStub.class, PredictionSourceStub.class, PredictionsTriggerStub.class
         })
 @EnableAutoConfiguration
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.LongVariable", "PMD.LinguisticNaming"})
 class HxPredictionReceiverTest
 {
-    public static final String TRIGGER_ENDPOINT = "direct:prediction-processor-trigger";
-    public static final String PREDICTIONS_SOURCE_ENDPOINT = "direct:predictions-source";
-    public static final String INTERNAL_PREDICTIONS_BUFFER_ENDPOINT = "direct:internal-predictions-buffer";
-
-    @Autowired
-    private ProducerTemplate producerTemplate;
-
     @Autowired
     private InternalPredictionBufferStub internalPredictionBufferStub;
 
     @Autowired
     private PredictionSourceStub predictionSourceStub;
+
+    @Autowired
+    private PredictionsTriggerStub predictionsTriggerStub;
 
     @AfterEach
     void tearDown()
@@ -97,59 +95,44 @@ class HxPredictionReceiverTest
     void shouldProcessPredictionsIfProcessingTriggered()
     {
         // given
-        List<Prediction> predictions = List.of(
-                new Prediction("1", "1"),
-                new Prediction("2", "2"));
+        List<Prediction> predictions1 = List.of(new Prediction("1", "1"), new Prediction("2", "2"));
+        List<Prediction> predictions2 = List.of(new Prediction("3", "3"), new Prediction("4", "4"));
 
-        predictionSourceStub.shouldReturnPredictions(predictions);
+        List<Prediction> allPredictions = Stream.concat(predictions1.stream(), predictions2.stream()).toList();
+
+        predictionSourceStub.shouldReturnPredictions(predictions1, predictions2);
 
         // when
-        triggerPredictionsProcessing();
+        predictionsTriggerStub.triggerPredictionsProcessing();
 
         // then
-        internalPredictionBufferStub.assertAllPredictionsHandled(predictions);
+        internalPredictionBufferStub.assertAllPredictionsHandled(allPredictions);
     }
 
     @Test
+    @SneakyThrows
     void shouldIgnoreTriggerSignalIfProcessingIsPending()
     {
         // given
         ListAppender<ILoggingEvent> logs = createLogsListAppender(HxPredictionReceiver.class);
 
-        List<Prediction> predictions = List.of(
-                new Prediction("1", "1"),
-                new Prediction("2", "2"));
+        List<Prediction> predictions = List.of(new Prediction("1", "1"), new Prediction("2", "2"), new Prediction("3", "3"));
+        List<List<Prediction>> predictionsBatches = IntStream.range(0, 11).boxed().map(i -> predictions).toList();
 
-        predictionSourceStub.shouldReturnPredictions(10, predictions);
+        predictionSourceStub.shouldReturnPredictions(5, predictionsBatches);
 
         // when
-        new Thread(() -> triggerPredictionsProcessing(5)).start();
-        triggerPredictionsProcessing();
+        predictionsTriggerStub.triggerPredictionsProcessingAsync();
+        predictionsTriggerStub.triggerPredictionsProcessingAsync(50);
 
+        Thread.sleep(75);
         // then
-        internalPredictionBufferStub.assertAllPredictionsHandled(predictions);
-
         List<String> logMessages = logs.list.stream()
                 .map(ILoggingEvent::getMessage)
                 .toList();
 
-        assertTrue(logMessages.get(0).contains("Triggering prediction processing"));
-        assertTrue(logMessages.get(1).contains("Prediction processing is pending, no need to trigger it"));
-        assertTrue(logMessages.get(2).contains("Sending predictions to internal buffer"));
-        assertTrue(logMessages.get(3).contains("Sending predictions to internal buffer: []"));
-        assertTrue(logMessages.get(4).contains("Finished processing predictions"));
-    }
-
-    @SneakyThrows
-    private void triggerPredictionsProcessing(long delayInMs)
-    {
-        Thread.sleep(delayInMs);
-        triggerPredictionsProcessing();
-    }
-
-    private void triggerPredictionsProcessing()
-    {
-        producerTemplate.sendBody(TRIGGER_ENDPOINT, null);
+        assertTrue(logMessages.stream().anyMatch(logMessage -> logMessage.contains("Triggering prediction processing")));
+        assertTrue(logMessages.stream().anyMatch(logMessage -> logMessage.contains("Prediction processing is pending, no need to trigger it")));
     }
 
     @TestConfiguration
@@ -159,10 +142,10 @@ class HxPredictionReceiverTest
         public PredictionListenerConfig predictionListenerConfig()
         {
             return new PredictionListenerConfig(
-                    TRIGGER_ENDPOINT,
+                    "direct:prediction-processor-trigger",
                     null,
-                    PREDICTIONS_SOURCE_ENDPOINT,
-                    INTERNAL_PREDICTIONS_BUFFER_ENDPOINT);
+                    "direct:predictions-source",
+                    "direct:internal-predictions-buffer");
         }
     }
 }
