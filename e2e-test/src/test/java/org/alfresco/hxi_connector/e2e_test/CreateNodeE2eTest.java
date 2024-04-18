@@ -114,7 +114,7 @@ public class CreateNodeE2eTest
         // and
         Boolean result = RetryUtils.retryWithBackoff(() -> {
             Response s3Response = s3BucketClient.getS3Response(LOCAL_STACK_SERVER.getFirstMappedPort());
-
+            // check if the response from localstack contains the content of the file
             Assertions.assertEquals(200, s3Response.statusCode());
             String stringS3response = s3Response.asString();
             boolean containsContents = stringS3response.contains(CONTENTS_STRING);
