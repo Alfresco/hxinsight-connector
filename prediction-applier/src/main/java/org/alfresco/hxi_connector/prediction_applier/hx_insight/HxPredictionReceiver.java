@@ -59,6 +59,7 @@ public class HxPredictionReceiver extends RouteBuilder
     {
         // @formatter:off
         JacksonDataFormat predictionsBatchDataFormat = new ListJacksonDataFormat(Prediction.class);
+        JacksonDataFormat predictionDataFormat = new JacksonDataFormat(Prediction.class);
 
         from(config.predictionProcessorTriggerEndpoint())
                 .routeId(PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID)
@@ -80,7 +81,7 @@ public class HxPredictionReceiver extends RouteBuilder
                     .process(this::savePredictionsBatch)
                     .loopDoWhile(this::predictionsBatchNotEmpty)
                         .process(this::setPredictionToSend)
-                        .marshal(predictionsBatchDataFormat)
+                        .marshal(predictionDataFormat)
                         .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
                         .to(config.internalPredictionsBufferEndpoint())
                         .end()
