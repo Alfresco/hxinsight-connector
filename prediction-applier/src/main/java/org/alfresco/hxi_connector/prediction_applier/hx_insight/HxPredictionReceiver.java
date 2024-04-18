@@ -46,7 +46,7 @@ import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerCo
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.UnusedFormalParameter"})
+@SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.UnusedFormalParameter", "PMD.LinguisticNaming"})
 public class HxPredictionReceiver extends RouteBuilder
 {
     private static final String PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID = "prediction-processor-trigger-route";
