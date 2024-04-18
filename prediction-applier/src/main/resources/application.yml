@@ -13,8 +13,8 @@ hyland-experience:
     prediction:
       endpoint: direct:test
     prediction-listener:
-      predictions-source-endpoint: http:localhost:8080/predictions?pageSize=10
       pool-period: 1000000
+      predictions-source-endpoint: http:localhost:4000/predictions?pageSize=10
       internal-predictions-buffer-endpoint: activemq:queue:predictions-buffer
 
 alfresco:
