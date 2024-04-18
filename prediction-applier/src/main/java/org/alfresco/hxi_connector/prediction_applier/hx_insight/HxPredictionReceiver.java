@@ -28,14 +28,17 @@ package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 import static org.apache.camel.LoggingLevel.DEBUG;
 
 import java.util.List;
+import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.jackson.ListJacksonDataFormat;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
 import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
 
@@ -54,8 +57,6 @@ public class HxPredictionReceiver extends RouteBuilder
     public void configure()
     {
         // @formatter:off
-        getContext().getRegistry().bind("is-prediction-processing-pending", false);
-
         from(config.predictionProcessorTriggerEndpoint())
                 .routeId(PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID)
                 .choice()
@@ -71,6 +72,9 @@ public class HxPredictionReceiver extends RouteBuilder
                 .loopDoWhile(hasNextPage())
                     .to(config.predictionsSourceEndpoint())
                     .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
+                    .unmarshal(new ListJacksonDataFormat(Prediction.class))
+                    .process(setHasNextPage())
+                    .marshal(new ListJacksonDataFormat())
                     .to(config.internalPredictionsBufferEndpoint())
                 .end()
                 .log(DEBUG, log, "Finished processing predictions")
@@ -78,12 +82,14 @@ public class HxPredictionReceiver extends RouteBuilder
         // @formatter:on
     }
 
-    Predicate isProcessingPending()
+    private Predicate isProcessingPending()
     {
-        return exchange -> getContext().getRegistry().lookupByNameAndType("is-prediction-processing-pending", Boolean.class);
+        return exchange -> Objects.requireNonNullElse(
+                getContext().getRegistry().lookupByNameAndType("is-prediction-processing-pending", Boolean.class),
+                false);
     }
 
-    Processor setIsProcessingPending(boolean isProcessingPending)
+    private Processor setIsProcessingPending(boolean isProcessingPending)
     {
         return exchange -> {
             exchange.getIn().setBody(null);
@@ -91,19 +97,28 @@ public class HxPredictionReceiver extends RouteBuilder
         };
     }
 
-    Predicate hasNextPage()
+    private Predicate hasNextPage()
     {
+        return exchange -> Objects.requireNonNullElse(exchange.getProperty("has-next-page", Boolean.class), true);
+    }
+
+    private Processor setHasNextPage()
+    {
+        String hasNextPageProperty = "has-next-page";
+
         return exchange -> {
             Object body = exchange.getIn().getBody();
 
             if (body == null)
             {
-                return true;
+                exchange.setProperty(hasNextPageProperty, true);
+                return;
             }
 
             if (body instanceof List<?> list)
             {
-                return !list.isEmpty();
+                exchange.setProperty(hasNextPageProperty, !list.isEmpty());
+                return;
             }
 
             throw new PredictionApplierRuntimeException("Unexpected body type: " + body.getClass().getName());

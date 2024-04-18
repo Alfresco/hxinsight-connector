@@ -14,7 +14,7 @@ hyland-experience:
       endpoint: direct:test
     prediction-listener:
       predictions-source-endpoint: http:localhost:8080/predictions?pageSize=10
-      prediction-processor-trigger-endpoint: quartz:prediction-processor-trigger?cron=0+*/1+*+?+*+*
+      pool-period: 1000000
       internal-predictions-buffer-endpoint: activemq:queue:predictions-buffer
 
 alfresco:
@@ -27,3 +27,6 @@ alfresco:
         attempts: 10
         initial-delay: 500
         delay-multiplier: 2
+logging:
+  level:
+    org.alfresco: DEBUG

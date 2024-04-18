@@ -160,6 +160,7 @@ class HxPredictionReceiverTest
         {
             return new PredictionListenerConfig(
                     TRIGGER_ENDPOINT,
+                    null,
                     PREDICTIONS_SOURCE_ENDPOINT,
                     INTERNAL_PREDICTIONS_BUFFER_ENDPOINT);
         }

@@ -30,9 +30,25 @@ import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
+
 @ConfigurationProperties(prefix = "hyland-experience.insight.prediction-listener")
 public record PredictionListenerConfig(
-        @NotBlank String predictionProcessorTriggerEndpoint,
+        String predictionProcessorTriggerEndpoint,
+        Long poolPeriod,
         @NotBlank String predictionsSourceEndpoint,
         @NotBlank String internalPredictionsBufferEndpoint)
-{}
+{
+    public PredictionListenerConfig
+    {
+        if (poolPeriod == null && predictionProcessorTriggerEndpoint == null)
+        {
+            throw new PredictionApplierRuntimeException("Pool period is required when predictions source endpoint is not provided");
+        }
+
+        if (poolPeriod != null)
+        {
+            predictionProcessorTriggerEndpoint = "quartz:prediction-processor-trigger?autoStartScheduler=true&trigger.repeatInterval=" + poolPeriod;
+        }
+    }
+}
