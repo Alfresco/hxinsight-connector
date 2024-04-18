@@ -70,7 +70,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.util.auth.WithMockOAuth2User;
@@ -267,7 +267,7 @@ class PreSignedUrlRequesterIntegrationTest
     {
         registry.add("hyland-experience.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
         registry.add("hyland-experience.storage.location.retry.attempts", () -> RETRY_ATTEMPTS);
-        registry.add("hyland-experience.storage.location.retry.initialDelay", () -> RETRY_DELAY_MS);
+        registry.add("hyland-experience.storage.location.retry.initial-delay", () -> RETRY_DELAY_MS);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,12 +23,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.auth;
+package org.alfresco.hxi_connector.common.test.docker.util;
 
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
 
-public interface AuthenticationClient
+import org.junit.jupiter.api.Test;
+
+class DockerTagsIntegrationTest
 {
 
-    AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration);
+    @Test
+    void testMavenPropertyResolution()
+    {
+        // when
+        Throwable thrown = catchThrowable(() -> DockerTags.keySet().stream()
+                .map(String::valueOf)
+                .forEach(DockerTags::getProperty));
+
+        // then
+        assertThat(thrown).doesNotThrowAnyException();
+    }
 }

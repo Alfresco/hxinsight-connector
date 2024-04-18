@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.test.util;
+package org.alfresco.hxi_connector.common.test.docker.util;
 
 import java.io.InputStream;
 import java.nio.file.NoSuchFileException;

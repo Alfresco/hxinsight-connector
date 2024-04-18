@@ -11,6 +11,15 @@ alfresco:
     shared-file-store:
       retry:
         initial-delay: 0
+    mime-type:
+      mapping:
+        '[image/png]': "image/png"
+        '[image/bmp]': "image/png"
+        '[image/gif]': "image/png"
+        '[image/raw]': "image/png"
+        '[image/tiff]': "image/png"
+        '[image/*]': "image/jpeg"
+        '[application/*]': "application/pdf"
 hyland-experience:
   authentication:
     retry:

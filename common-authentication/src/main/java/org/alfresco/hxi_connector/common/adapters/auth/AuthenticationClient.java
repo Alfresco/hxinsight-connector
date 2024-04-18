@@ -23,25 +23,12 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.test.util;
+package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
-import org.junit.jupiter.api.Test;
-
-class DockerTagsIntegrationTest
+public interface AuthenticationClient
 {
 
-    @Test
-    void testMavenPropertyResolution()
-    {
-        // when
-        Throwable thrown = catchThrowable(() -> DockerTags.keySet().stream()
-                .map(String::valueOf)
-                .forEach(DockerTags::getProperty));
-
-        // then
-        assertThat(thrown).doesNotThrowAnyException();
-    }
+    AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration);
 }

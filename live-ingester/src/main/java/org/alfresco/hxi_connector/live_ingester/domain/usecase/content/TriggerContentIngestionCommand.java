@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
 import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
 
-public record TriggerContentIngestionCommand(String nodeId)
+public record TriggerContentIngestionCommand(String nodeId, String mimeType)
 {
     public TriggerContentIngestionCommand
     {

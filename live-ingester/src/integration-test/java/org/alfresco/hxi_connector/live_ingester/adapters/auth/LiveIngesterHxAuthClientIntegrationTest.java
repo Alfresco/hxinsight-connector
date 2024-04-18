@@ -59,21 +59,23 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        HxAuthenticationClient.class},
+        LiveIngesterHxAuthClient.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
 @ActiveProfiles("test")
 @Testcontainers
-class HxAuthenticationClientIntegrationTest
+class LiveIngesterHxAuthClientIntegrationTest
 {
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;

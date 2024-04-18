@@ -97,6 +97,7 @@ public class NodesClient extends RouteBuilder
         from(RETRYABLE_ROUTE)
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
+            .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
             .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl(), NODE_ID_HEADER, nodesApiProperties.username(), nodesApiProperties.password()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))

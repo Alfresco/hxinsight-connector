@@ -44,11 +44,12 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.test.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @Slf4j
 @Testcontainers
-public class CreateNodeIntegrationTest
+public class CreateNodeE2eTest
 {
 
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
@@ -71,7 +72,7 @@ public class CreateNodeIntegrationTest
             .dependsOn(TRANSFORM_CORE_AIO)
             .dependsOn(SFS);
     @Container
-    private static final GenericContainer<?> REPOSITORY = createRepositoryContainer()
+    private static final AlfrescoRepositoryContainer REPOSITORY = createRepositoryContainer()
             .dependsOn(POSTGRES)
             .dependsOn(ACTIVEMQ)
             .dependsOn(TRANSFORM_ROUTER)
@@ -98,12 +99,11 @@ public class CreateNodeIntegrationTest
     @Test
     void testCreateFile()
     {
-
         Response acsResponse = given().auth().basic("admin", "admin")
                 .contentType("multipart/form-data")
                 .multiPart("filedata", new File("src/test/resources/test-files/Alfresco Content Services 7.4.docx"))
                 .when()
-                .post("http://" + REPOSITORY.getHost() + ":" + REPOSITORY.getFirstMappedPort() + "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
+                .post(REPOSITORY.getBaseUrl() + "/alfresco/api/-default-/public/alfresco/versions/1/nodes/-my-/children")
                 .then()
                 .extract().response();
 
@@ -118,13 +118,12 @@ public class CreateNodeIntegrationTest
                 .extract().response();
 
         Assertions.assertEquals(200, s3Response.statusCode());
-
     }
 
-    private static GenericContainer<?> createRepositoryContainer()
+    private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         return DockerContainers.createExtendedRepositoryContainerWithin(NETWORK, true)
-                .withEnv("JAVA_OPTS", """
+                .withJavaOpts("""
                         -Ddb.driver=org.postgresql.Driver
                         -Ddb.username=%s
                         -Ddb.password=%s
@@ -155,13 +154,10 @@ public class CreateNodeIntegrationTest
     private static GenericContainer<?> createLiveIngesterContainer()
     {
         return DockerContainers.createLiveIngesterContainerWithin(NETWORK)
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL", "http://%s:8080"
-                        .formatted(
-                                HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()))
-
-                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI", "http://%s:8080/token"
-                        .formatted(
-                                HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()));
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
+                        "http://%s:8080".formatted(HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()))
+                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI",
+                        "http://%s:8080/token".formatted(HX_AUTH_SERVER.getNetworkAliases().stream().findFirst().get()));
     }
 
 }

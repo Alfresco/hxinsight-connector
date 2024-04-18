@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-hxinsight-connector-parent</artifactId>
-        <version>0.0.7-SNAPSHOT</version>
+        <version>1.0.0-SNAPSHOT</version>
     </parent>
 
     <name>Alfresco Connector for Hyland Experience Insight :: Prediction Applier Extension for Alfresco Repository</name>
