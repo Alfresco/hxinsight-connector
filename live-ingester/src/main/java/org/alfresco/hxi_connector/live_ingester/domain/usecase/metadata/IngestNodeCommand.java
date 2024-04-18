@@ -26,8 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNonNull;
-import static org.alfresco.hxi_connector.live_ingester.domain.utils.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureNonNull;
+import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureNotBlank;
 
 import java.util.Set;
 
