@@ -33,7 +33,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
 
 @ConfigurationProperties(prefix = "hyland-experience.insight.prediction-listener")
-@SuppressWarnings("PMD.LongVariable")
+@SuppressWarnings({"PMD.LongVariable", "PMD.UnusedAssignment"})
 public record PredictionListenerConfig(
         String predictionProcessorTriggerEndpoint,
         Long poolPeriod,
