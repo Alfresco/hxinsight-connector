@@ -61,7 +61,7 @@ import org.alfresco.hxi_connector.prediction_applier.util.PredictionsTriggerStub
                 InternalPredictionBufferStub.class, PredictionSourceStub.class, PredictionsTriggerStub.class
         })
 @EnableAutoConfiguration
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.LongVariable", "PMD.LinguisticNaming", "PMD.UnusedPrivateMethod"})
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.LongVariable", "PMD.LinguisticNaming"})
 class HxPredictionReceiverTest
 {
     @Autowired
