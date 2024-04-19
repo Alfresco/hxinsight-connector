@@ -52,6 +52,9 @@ public class HxPredictionReceiver extends RouteBuilder
     private static final String PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID = "prediction-processor-trigger-route";
     private static final String PREDICTION_PROCESSOR_ROUTE_ID = "prediction-processor-route";
     private static final String PREDICTION_PROCESSOR = "direct:prediction-processor";
+    private static final String IS_PREDICTION_PROCESSING_PENDING_KEY = "is-prediction-processing-pending";
+    private static final String HAS_NEXT_PAGE_KEY = "has-next-page";
+    private static final String PREDICTIONS_BATCH_KEY = "predictions-batch";
 
     private final PredictionListenerConfig config;
 
@@ -95,36 +98,36 @@ public class HxPredictionReceiver extends RouteBuilder
     private boolean isProcessingPending(Exchange exchange)
     {
         return Objects.requireNonNullElse(
-                getContext().getRegistry().lookupByNameAndType("is-prediction-processing-pending", Boolean.class),
+                getContext().getRegistry().lookupByNameAndType(IS_PREDICTION_PROCESSING_PENDING_KEY, Boolean.class),
                 false);
     }
 
     private Processor setIsProcessingPending(boolean isProcessingPending)
     {
-        return exchange -> getContext().getRegistry().bind("is-prediction-processing-pending", isProcessingPending);
+        return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
     }
 
     private boolean hasNextPage(Exchange exchange)
     {
-        return Objects.requireNonNullElse(exchange.getProperty("has-next-page", Boolean.class), true);
+        return Objects.requireNonNullElse(exchange.getVariable(HAS_NEXT_PAGE_KEY, Boolean.class), true);
     }
 
     private void savePredictionsBatch(Exchange exchange)
     {
         List<Prediction> predictionsBatch = exchange.getIn().getBody(List.class);
 
-        exchange.setProperty("has-next-page", !predictionsBatch.isEmpty());
-        exchange.setVariable("predictionsBatch", predictionsBatch);
+        exchange.setVariable(HAS_NEXT_PAGE_KEY, !predictionsBatch.isEmpty());
+        exchange.setVariable(PREDICTIONS_BATCH_KEY, predictionsBatch);
     }
 
     private boolean predictionsBatchNotEmpty(Exchange exchange)
     {
-        return !exchange.getVariable("predictionsBatch", List.class).isEmpty();
+        return !exchange.getVariable(PREDICTIONS_BATCH_KEY, List.class).isEmpty();
     }
 
     private void setPredictionToSend(Exchange exchange)
     {
-        Prediction predictionToSend = (Prediction) exchange.getVariable("predictionsBatch", List.class).remove(0);
+        Prediction predictionToSend = (Prediction) exchange.getVariable(PREDICTIONS_BATCH_KEY, List.class).remove(0);
         exchange.getIn().setBody(predictionToSend);
     }
 }
