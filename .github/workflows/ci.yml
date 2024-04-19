@@ -79,6 +79,7 @@ jobs:
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
+      fail-fast: false
       matrix:
         subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
                       "live-ingester", "prediction-applier", "prediction-applier-extension" ]
@@ -126,6 +127,7 @@ jobs:
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
     strategy:
+      fail-fast: false
       matrix:
         repoVersion: [ 7.3.0.8, 7.4.1.6, 23.2.1 ]
     steps:
