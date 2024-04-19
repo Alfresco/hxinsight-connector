@@ -116,7 +116,7 @@ public class HxPredictionReceiver extends RouteBuilder
 
     private void savePredictionsBatch(Exchange exchange)
     {
-        LinkedList<Prediction> predictionsBatch = new LinkedList(exchange.getIn().getBody(List.class));
+        Queue<Prediction> predictionsBatch = new LinkedList(exchange.getIn().getBody(List.class));
 
         exchange.setVariable(HAS_NEXT_PAGE_KEY, !predictionsBatch.isEmpty());
         exchange.setVariable(PREDICTIONS_BATCH_KEY, predictionsBatch);
