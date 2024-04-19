@@ -37,6 +37,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.mod
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ATSTransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.uuid.UUIDProvider;
 
 @Slf4j
 @Component
@@ -48,6 +49,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
+    private final UUIDProvider uuidProvider;
 
     @Override
     public void configure()
@@ -79,6 +81,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
     private ATSTransformRequest toTransformRequest(TransformRequest transformRequest, int attempt)
     {
         return new ATSTransformRequest(
+                uuidProvider.random(),
                 transformRequest.nodeRef(),
                 transformRequest.targetMimeType(),
                 new ClientData(transformRequest.nodeRef(), transformRequest.targetMimeType(), attempt),
