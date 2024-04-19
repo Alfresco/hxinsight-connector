@@ -37,7 +37,7 @@ import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplier
 public record PredictionListenerConfig(
         String predictionProcessorTriggerEndpoint,
         Long pollPeriod,
-        @NotBlank String predictionsSourceEndpoint,
+        @NotBlank String hxiPredictionsEndpoint,
         @NotBlank String internalPredictionsBufferEndpoint)
 {
     public PredictionListenerConfig

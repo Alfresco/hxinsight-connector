@@ -54,7 +54,7 @@ public class PredictionSourceStub extends RouteBuilder
     @Override
     public void configure()
     {
-        from(predictionListenerConfig.predictionsSourceEndpoint())
+        from(predictionListenerConfig.hxiPredictionsEndpoint())
                 .setBody(exchange -> getPredictionsBatch())
                 .marshal(new JacksonDataFormat());
     }

@@ -60,6 +60,15 @@ public class HxPredictionReceiver extends RouteBuilder
 
     private final PredictionListenerConfig config;
 
+    /**
+     * Polls all available prediction batches and sends them (one by one) to the internal buffer for further processing.
+     * <p>
+     * You can imagine that you have the following predictions waiting in hxi: 1. [prediction1, prediction2] 2. [prediction3, prediction4]
+     * <p>
+     * Processor PREDICTION_PROCESSOR after being triggered will: 1. Fetch the first batch (prediction1, prediction2) 1.1. Send prediction1 to the internal buffer 1.2. Send prediction2 to the internal buffer 2. Fetch the second batch (prediction3, prediction4) 2.1. Send prediction3 to the internal buffer 2.2. Send prediction4 to the internal buffer 3. Exit and wait for the next trigger
+     * <p>
+     * By default, the processor is triggered by the quartz scheduler every 5 minutes.
+     */
     @Override
     public void configure()
     {
@@ -81,7 +90,7 @@ public class HxPredictionReceiver extends RouteBuilder
                 .process(setIsProcessingPending(true))
                 .loopDoWhile(this::hasNextPage)
                     .log(DEBUG, log, "Fetching predictions")
-                    .to(config.predictionsSourceEndpoint())
+                    .to(config.hxiPredictionsEndpoint())
                     .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
                     .unmarshal(predictionsBatchDataFormat)
                     .process(this::savePredictionsBatch)
