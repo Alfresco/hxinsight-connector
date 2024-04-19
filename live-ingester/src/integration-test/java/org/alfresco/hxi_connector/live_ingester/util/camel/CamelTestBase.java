@@ -54,13 +54,13 @@ import org.alfresco.hxi_connector.live_ingester.util.IntegrationTest;
 })
 public class CamelTestBase
 {
+    public static final String TEST_UUID = "1bde77d8-39c0-4c5d-81c5-7593b3c8e087";
+
     @MockBean
     private UUIDProvider uuidProvider;
 
     @Autowired
     public CamelTest camelTest;
-
-    public final String TEST_UUID = "1bde77d8-39c0-4c5d-81c5-7593b3c8e087";
 
     @BeforeEach
     void setUp()
