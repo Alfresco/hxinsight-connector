@@ -11,7 +11,7 @@ camel:
 hyland-experience:
   insight:
     prediction:
-      endpoint: direct:test
+      endpoint: aws2-sqs://arn:aws:sqs:us-east-1:000000000000:hxinsight-prediction-queue
     prediction-listener:
       poll-period: 300_000 #5 min
       predictions-source-endpoint: direct:mocked
