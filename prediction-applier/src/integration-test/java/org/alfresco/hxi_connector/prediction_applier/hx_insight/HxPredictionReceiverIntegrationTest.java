@@ -57,12 +57,12 @@ import org.alfresco.hxi_connector.prediction_applier.util.PredictionsTriggerStub
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
         classes = {
-                HxPredictionReceiver.class, HxPredictionReceiverTest.IntegrationPropertiesTestConfig.class,
+                HxPredictionReceiver.class, HxPredictionReceiverIntegrationTest.IntegrationPropertiesTestConfig.class,
                 InternalPredictionBufferStub.class, PredictionSourceStub.class, PredictionsTriggerStub.class
         })
 @EnableAutoConfiguration
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.LongVariable"})
-class HxPredictionReceiverTest
+class HxPredictionReceiverIntegrationTest
 {
     @Autowired
     private InternalPredictionBufferStub internalPredictionBufferStub;
