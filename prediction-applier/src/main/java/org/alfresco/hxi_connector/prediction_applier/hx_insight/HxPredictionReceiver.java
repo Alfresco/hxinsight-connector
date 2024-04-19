@@ -85,7 +85,7 @@ public class HxPredictionReceiver extends RouteBuilder
                         .marshal(predictionDataFormat)
                         .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
                         .to(config.internalPredictionsBufferEndpoint())
-                        .end()
+                    .end()
                 .end()
                 .log(DEBUG, log, "Finished processing predictions")
                 .process(setIsProcessingPending(false));
