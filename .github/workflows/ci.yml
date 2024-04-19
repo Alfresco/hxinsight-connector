@@ -80,7 +80,7 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
       matrix:
-        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
+        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test", "distribution",
                       "live-ingester", "prediction-applier", "prediction-applier-extension" ]
     steps:
       - uses: actions/checkout@v3
@@ -93,7 +93,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Test application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}'
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am
 
   run_e2e_test:
     name: "Run e2e tests"
