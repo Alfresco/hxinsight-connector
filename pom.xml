@@ -453,6 +453,8 @@
                     <excludes>
                         <exclude>**/*IT.java</exclude>
                         <exclude>**/*IntegrationTest.java</exclude>
+                        <exclude>**/*E2eTest.java</exclude>
+                        <exclude>**/*E2ETest.java</exclude>
                         <exclude>**/*ManualTest.java</exclude>
                     </excludes>
                     <skipTests>${skipUnitTests}</skipTests>
