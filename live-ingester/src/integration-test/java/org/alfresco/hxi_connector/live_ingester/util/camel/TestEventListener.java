@@ -40,6 +40,7 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 
 @Builder(builderMethodName = "internalBuilder")
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.UnusedAssignment"})
 public class TestEventListener
 {
     private final ObjectMapper objectMapper = new ObjectMapper();

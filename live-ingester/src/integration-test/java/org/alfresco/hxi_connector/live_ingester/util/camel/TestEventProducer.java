@@ -31,6 +31,7 @@ import lombok.SneakyThrows;
 import org.apache.camel.ProducerTemplate;
 
 @RequiredArgsConstructor
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class TestEventProducer
 {
     private final ProducerTemplate producerTemplate;
