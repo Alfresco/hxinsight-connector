@@ -36,20 +36,20 @@ import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplier
 @SuppressWarnings({"PMD.LongVariable", "PMD.UnusedAssignment"})
 public record PredictionListenerConfig(
         String predictionProcessorTriggerEndpoint,
-        Long poolPeriod,
+        Long pollPeriod,
         @NotBlank String predictionsSourceEndpoint,
         @NotBlank String internalPredictionsBufferEndpoint)
 {
     public PredictionListenerConfig
     {
-        if (poolPeriod == null && predictionProcessorTriggerEndpoint == null)
+        if (pollPeriod == null && predictionProcessorTriggerEndpoint == null)
         {
-            throw new PredictionApplierRuntimeException("Pool period is required when predictions source endpoint is not provided");
+            throw new PredictionApplierRuntimeException("Poll period is required when predictions source endpoint is not provided");
         }
 
-        if (poolPeriod != null)
+        if (pollPeriod != null)
         {
-            predictionProcessorTriggerEndpoint = "quartz:prediction-processor-trigger?autoStartScheduler=true&trigger.repeatInterval=" + poolPeriod;
+            predictionProcessorTriggerEndpoint = "quartz:prediction-processor-trigger?autoStartScheduler=true&trigger.repeatInterval=" + pollPeriod;
         }
     }
 }
