@@ -7,7 +7,14 @@ spring:
             token-uri:
 
 alfresco:
+  bulk-ingester:
+    endpoint: direct:test-bulk-ingester-endpoint
   transform:
+    request:
+      endpoint: direct:test-transform-request-endpoint
+    response:
+      queue-name: test-transform-reply-endpoint
+      endpoint: direct:${alfresco.transform.response.queue-name}
     shared-file-store:
       retry:
         initial-delay: 0
@@ -20,6 +27,7 @@ alfresco:
         '[image/tiff]': "image/png"
         '[image/*]': "image/jpeg"
         '[application/*]': "application/pdf"
+        '[text/*]': "application/pdf"
 hyland-experience:
   authentication:
     retry:
@@ -34,3 +42,4 @@ hyland-experience:
   ingester:
     retry:
       initial-delay: 0
+    endpoint: direct:hxi-ingester-endpoint

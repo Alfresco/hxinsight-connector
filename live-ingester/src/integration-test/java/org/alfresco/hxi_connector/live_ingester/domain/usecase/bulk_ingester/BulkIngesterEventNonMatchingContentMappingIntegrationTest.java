@@ -23,37 +23,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.bulk_ingester;
-
-import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQUEST_ID_PLACEHOLDER;
+package org.alfresco.hxi_connector.live_ingester.domain.usecase.bulk_ingester;
 
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import org.springframework.test.context.TestPropertySource;
 
-import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
+import org.alfresco.hxi_connector.live_ingester.util.camel.CamelTestBase;
 
-@SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[text/*]=application/pdf",
-        "logging.level.org.alfresco=DEBUG"})
+@TestPropertySource(properties = {"alfresco.transform.mime-type.mapping.[text/*]="})
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ETestBase
+public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends CamelTestBase
 {
-
     @ParameterizedTest
-    @CsvSource({
-            "image/gif,image/png", "image/bmp,image/png", "image/png,image/png", "image/raw,image/png",
-            "image/jpeg,image/jpeg", "image/heic,image/jpeg", "image/webp,image/jpeg",
-            "application/msword,application/pdf", "application/pdf,application/pdf",
-            "text/plain,application/pdf", "text/html,application/pdf"
-    })
-    void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
-            String sourceMimeType, String expectedTargetMimeType)
+    @ValueSource(strings = {"text/plain", "text/html", "text/richtext"})
+    void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithNotMatchingTypeIngested_thenProcessWithoutTransformRequest(
+            String sourceMimeType)
     {
         // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        // when
-        String repoEvent = """
+        String bulkIngesterEvent = """
                 {
                   "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
                   "contentInfo": {
@@ -75,10 +63,12 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     ]
                   }
                 }""".formatted(sourceMimeType);
-        containerSupport.raiseBulkIngesterEvent(repoEvent);
+
+        // when
+        camelTest.BULK_INGESTER_LISTENER.receivesMessage(bulkIngesterEvent);
 
         // then
-        String expectedBody = """
+        String expectedIngestEvent = """
                 [
                   {
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
@@ -104,18 +94,8 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     }
                   }
                 ]""".formatted(sourceMimeType);
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
-                    "targetMediaType": "%s",
-                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
-
+        camelTest.INGESTER_LISTENER.expectExactlyOneMessageReceived(expectedIngestEvent);
+        camelTest.ATS_REQUEST_LISTENER.expectNoMessagesReceived();
     }
 }
