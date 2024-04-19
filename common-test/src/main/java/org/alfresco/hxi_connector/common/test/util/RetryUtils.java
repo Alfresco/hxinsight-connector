@@ -52,8 +52,14 @@ public class RetryUtils
     @SneakyThrows
     public static <T> T retryWithBackoff(Supplier<T> supplier)
     {
+        return retryWithBackoff(supplier, INITIAL_DELAY_MS);
+    }
+
+    @SneakyThrows
+    public static <T> T retryWithBackoff(Supplier<T> supplier, int delayMs)
+    {
         int attempt = 0;
-        int delay = INITIAL_DELAY_MS;
+        int delay = delayMs;
         while (true)
         {
             try

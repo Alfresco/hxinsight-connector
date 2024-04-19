@@ -213,7 +213,8 @@ public class DockerContainers
     public static WireMockContainer createWireMockContainerWithin(Network network)
     {
         return createWireMockContainer()
-                .withNetwork(network);
+                .withNetwork(network)
+                .withEnv("WIREMOCK_OPTIONS", "--global-response-templating --verbose");
     }
 
     public static LocalStackContainer createLocalStackContainer()
