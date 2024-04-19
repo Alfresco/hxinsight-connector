@@ -28,8 +28,10 @@ package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Queue;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -114,7 +116,7 @@ public class HxPredictionReceiver extends RouteBuilder
 
     private void savePredictionsBatch(Exchange exchange)
     {
-        List<Prediction> predictionsBatch = exchange.getIn().getBody(List.class);
+        LinkedList<Prediction> predictionsBatch = new LinkedList(exchange.getIn().getBody(List.class));
 
         exchange.setVariable(HAS_NEXT_PAGE_KEY, !predictionsBatch.isEmpty());
         exchange.setVariable(PREDICTIONS_BATCH_KEY, predictionsBatch);
@@ -122,12 +124,12 @@ public class HxPredictionReceiver extends RouteBuilder
 
     private boolean predictionsBatchNotEmpty(Exchange exchange)
     {
-        return !exchange.getVariable(PREDICTIONS_BATCH_KEY, List.class).isEmpty();
+        return !exchange.getVariable(PREDICTIONS_BATCH_KEY, Queue.class).isEmpty();
     }
 
     private void setPredictionToSend(Exchange exchange)
     {
-        Prediction predictionToSend = (Prediction) exchange.getVariable(PREDICTIONS_BATCH_KEY, List.class).remove(0);
+        Prediction predictionToSend = (Prediction) exchange.getVariable(PREDICTIONS_BATCH_KEY, Queue.class).poll();
         exchange.getIn().setBody(predictionToSend);
     }
 }
