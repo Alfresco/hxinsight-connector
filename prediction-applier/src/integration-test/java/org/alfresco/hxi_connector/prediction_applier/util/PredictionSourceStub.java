@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.prediction_applier.util;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -63,7 +64,7 @@ public class PredictionSourceStub extends RouteBuilder
     {
         Thread.sleep(deliveryDelayInMs);
 
-        return Objects.requireNonNullElseGet(predictionsBatchesQueue.poll(), List::of);
+        return Objects.requireNonNullElseGet(predictionsBatchesQueue.poll(), Collections::emptyList);
     }
 
     @SafeVarargs
