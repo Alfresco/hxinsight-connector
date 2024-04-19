@@ -12,6 +12,11 @@ hyland-experience:
   insight:
     prediction:
       endpoint: aws2-sqs://arn:aws:sqs:us-east-1:000000000000:hxinsight-prediction-queue
+    prediction-listener:
+      poll-period: 300_000 #5 min
+      internal-predictions-buffer-endpoint: activemq:queue:predictions-buffer
+      hxi-predictions-endpoint: direct:mocked
+
 alfresco:
   repository:
     nodes:
