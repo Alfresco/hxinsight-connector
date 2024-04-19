@@ -36,7 +36,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
 @Component
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.FieldNamingConventions"})
 public class CamelTest
 {
     public final TestEventListener INGESTER_LISTENER;
