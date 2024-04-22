@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.common.test.docker.util;
 
+import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.pullRepositoryImage;
+
 import java.time.Duration;
 import java.util.Optional;
 
@@ -82,6 +84,7 @@ public class DockerContainers
 
     public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network, boolean enterprise)
     {
+        pullRepositoryImage(enterprise);
         AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
                 new AlfrescoRepositoryExtension(
                         "alfresco-hxinsight-connector-prediction-applier-extension",
