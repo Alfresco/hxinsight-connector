@@ -28,6 +28,15 @@ alfresco:
     request:
       endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
       timeout: 20000
+      options:
+        "[image/png]":
+          resizeWidth: 3840
+          resizeHeight: 3840
+          allowEnlargement: false
+        "[image/jpeg]":
+          resizeWidth: 3840
+          resizeHeight: 3840
+          allowEnlargement: false
     response:
       queue-name: org.alfresco.hxinsight-connector.transform.response
       endpoint: activemq:queue:${alfresco.transform.response.queue-name}
