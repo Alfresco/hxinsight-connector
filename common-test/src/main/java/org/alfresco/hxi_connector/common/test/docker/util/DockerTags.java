@@ -42,7 +42,7 @@ import lombok.SneakyThrows;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerTags
 {
-    private static final String REPOSITORY_TAG_DEFAULT = "23.1.0";
+    private static final String REPOSITORY_TAG_DEFAULT = "23.2.1";
     private static final String POSTGRES_TAG_DEFAULT = "14.4";
     private static final String ACTIVEMQ_TAG_DEFAULT = "5.18.3-jre17-rockylinux8";
     private static final String WIREMOCK_TAG_DEFAULT = "3.4.2";
