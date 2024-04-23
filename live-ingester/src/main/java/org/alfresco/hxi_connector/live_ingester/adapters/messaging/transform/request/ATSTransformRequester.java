@@ -26,6 +26,9 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
@@ -33,6 +36,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ATSTransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
@@ -45,6 +49,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
 {
     private static final String LOCAL_ENDPOINT = "direct:" + ATSTransformRequester.class.getSimpleName();
     private static final String ROUTE_ID = "transform-request-publisher";
+    protected static final String TIMEOUT_KEY = "timeout";
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
@@ -76,14 +81,23 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
     }
 
-    private ATSTransformRequest toTransformRequest(TransformRequest transformRequest, int attempt)
+    protected ATSTransformRequest toTransformRequest(TransformRequest transformRequest, int attempt)
     {
+        Transform transformProperties = integrationProperties.alfresco().transform();
+        String targetMimeType = transformRequest.targetMimeType();
+        Map<String, String> transformOptions = new HashMap<>();
+        transformOptions.put(TIMEOUT_KEY, String.valueOf(transformProperties.request().timeout()));
+        Map<String, Map<String, String>> configuredOptions = transformProperties.request().options();
+        if (configuredOptions != null && configuredOptions.containsKey(targetMimeType))
+        {
+            transformOptions.putAll(configuredOptions.get(targetMimeType));
+        }
         return new ATSTransformRequest(
                 transformRequest.nodeRef(),
-                transformRequest.targetMimeType(),
-                new ClientData(transformRequest.nodeRef(), transformRequest.targetMimeType(), attempt),
-                integrationProperties.alfresco().transform().request().timeout(),
-                integrationProperties.alfresco().transform().response().queueName());
+                targetMimeType,
+                new ClientData(transformRequest.nodeRef(), targetMimeType, attempt),
+                transformOptions,
+                transformProperties.response().queueName());
     }
 
 }
