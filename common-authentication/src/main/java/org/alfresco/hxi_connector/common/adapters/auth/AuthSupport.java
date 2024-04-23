@@ -51,9 +51,9 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class AuthSupport
 {
-    private static final String APP_NAME_ATTRIBUTE_KEY = "applicationName";
-    private static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";
-    private static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
+    static final String APP_NAME_ATTRIBUTE_KEY = "applicationName";
+    static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";
+    static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
     public static final String CLIENT_REGISTRATION_ID = "hyland-experience-auth";
     public static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
 
