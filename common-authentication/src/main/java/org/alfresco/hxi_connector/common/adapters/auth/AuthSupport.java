@@ -30,7 +30,8 @@ import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.RequiredArgsConstructor;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.commons.lang3.StringUtils;
@@ -47,9 +48,9 @@ import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.stereotype.Service;
 
 @Service
-@RequiredArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
-public class AuthSupport
+public final class AuthSupport
 {
     static final String APP_NAME_ATTRIBUTE_KEY = "applicationName";
     static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";

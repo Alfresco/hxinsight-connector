@@ -86,6 +86,7 @@ class AuthSupportTest
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void givenTokenPresentInContext_whenSetAuthToken_thenSetAuthInExchange()
     {
         // given
@@ -123,6 +124,7 @@ class AuthSupportTest
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void givenTokenNotPresentInContext_whenSetAuthToken_thenNotSetInExchange()
     {
         // given
