@@ -38,15 +38,12 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ETestBase
 {
-
     @ParameterizedTest
     @CsvSource({
             "image/gif,image/png", "image/bmp,image/png", "image/png,image/png", "image/raw,image/png",
-            "image/jpeg,image/jpeg", "image/heic,image/jpeg", "image/webp,image/jpeg",
-            "application/msword,application/pdf", "application/pdf,application/pdf",
-            "text/plain,application/pdf", "text/html,application/pdf"
+            "image/jpeg,image/jpeg", "image/heic,image/jpeg", "image/webp,image/jpeg"
     })
-    void givenExactAndWildcardMimeTypeMappingForContentConfigured_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
+    void givenMappingForImage_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
             String sourceMimeType, String expectedTargetMimeType)
     {
         // given
@@ -112,10 +109,93 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
                     "targetMediaType": "%s",
                     "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
-                    "transformOptions": { "timeout":"20000" },
+                    "transformOptions": {
+                        "timeout": "20000",
+                        "resizeWidth": "3840",
+                        "resizeHeight": "3840",
+                        "allowEnlargement": "false"
+                    },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
+    }
 
+    @ParameterizedTest
+    @CsvSource({
+            "application/msword,application/pdf", "application/pdf,application/pdf",
+            "text/plain,application/pdf", "text/html,application/pdf"
+    })
+    void givenMappingForNonImage_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
+            String sourceMimeType, String expectedTargetMimeType)
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        // when
+        String repoEvent = """
+                {
+                  "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
+                  "contentInfo": {
+                    "contentSize": 330,
+                    "encoding": "ISO-8859-1",
+                    "mimetype": "%s"
+                  },
+                  "properties": {
+                    "cm:name": "dashboard.xml",
+                    "cm:isContentIndexed": true,
+                    "cm:isIndexed": false,
+                    "createdAt": 1308061016,
+                    "type": "cm:content",
+                    "createdBy": "admin",
+                    "modifiedBy": "hr_user",
+                    "aspectsNames": [
+                      "cm:indexControl",
+                      "cm:auditable"
+                    ]
+                  }
+                }""".formatted(sourceMimeType);
+        containerSupport.raiseBulkIngesterEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                [
+                  {
+                    "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
+                    "eventType" : "create",
+                    "properties" : {
+                      "type": {"value": "cm:content"},
+                      "createdBy": {"value": "admin"},
+                      "modifiedBy": {"value": "hr_user"},
+                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
+                      "createdAt": {"value": 1308061016},
+                      "cm:name": {"value": "dashboard.xml"},
+                      "cm:isContentIndexed": {"value": true},
+                      "cm:isIndexed": {"value": false},
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "name": "dashboard.xml",
+                            "size": 330,
+                            "content-type": "%s"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]""".formatted(sourceMimeType);
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+
+        String expectedATSRequest = """
+                {
+                    "requestId": "%s",
+                    "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
+                    "targetMediaType": "%s",
+                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
+                    "transformOptions": {
+                        "timeout": "20000"
+                    },
+                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
+                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
+        containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
 }
