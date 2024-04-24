@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.util.auth;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationService.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
 
 import java.time.Instant;
 import java.util.Map;

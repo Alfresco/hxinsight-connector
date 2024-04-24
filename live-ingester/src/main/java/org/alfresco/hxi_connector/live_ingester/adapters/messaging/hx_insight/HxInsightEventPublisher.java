@@ -27,8 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.setAuthorizationToken;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
-import static org.alfresco.hxi_connector.live_ingester.adapters.auth.AuthenticationService.setAuthorizationToken;
 
 import java.util.Set;
 
