@@ -39,7 +39,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.auth.HxOAuth2AuthenticationProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.HxOAuth2AuthenticationProvider;
 
 @Configuration
 @EnableMethodSecurity
