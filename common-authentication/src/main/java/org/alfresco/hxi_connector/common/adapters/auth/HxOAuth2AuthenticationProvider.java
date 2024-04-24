@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.auth;
+package org.alfresco.hxi_connector.common.adapters.auth;
 
 import java.time.Instant;
 import java.util.Set;
@@ -42,9 +42,6 @@ import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationExch
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationResponse;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 
 @RequiredArgsConstructor
 public class HxOAuth2AuthenticationProvider implements AuthenticationProvider
