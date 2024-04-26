@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.repository;
 
+import static java.util.Collections.emptySet;
+
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.builder.AdviceWith.adviceWith;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -49,6 +51,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.model.repository.Node;
@@ -148,7 +151,7 @@ class NodesClientTest
 
     private NodesApiProperties createNodesApiProperties()
     {
-        return new NodesApiProperties(null, null, null, new NodesApiProperties.Retry(RETRY_ATTEMPTS, 0, 1));
+        return new NodesApiProperties(null, null, null, new Retry(RETRY_ATTEMPTS, 0, 1, emptySet()));
     }
 
     private void mockEndpointWillRespondWith(int statusCode)

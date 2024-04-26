@@ -37,6 +37,7 @@ import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATU
 
 import java.net.URI;
 import java.util.Map;
+import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -49,12 +50,14 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
+import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
 @Slf4j
-public abstract class HxAuthenticationClient extends RouteBuilder implements AuthenticationClient
+public class HxAuthenticationClient extends RouteBuilder implements AuthenticationClient
 {
     private static final String LOCAL_ENDPOINT = "direct:" + HxAuthenticationClient.class.getSimpleName();
     private static final String ROUTE_ID = "authentication-requester";
@@ -63,6 +66,7 @@ public abstract class HxAuthenticationClient extends RouteBuilder implements Aut
     public static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
+    private final Retry retryProperties;
 
     @Override
     public void configure()
@@ -113,6 +117,14 @@ public abstract class HxAuthenticationClient extends RouteBuilder implements Aut
                 .request(AuthenticationResult.class);
     }
 
+    private void wrapErrorIfNecessary(Exchange exchange)
+    {
+        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+        Set<Class<? extends Throwable>> retryReasons = retryProperties.reasons();
+
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, HxInsightConnectorRuntimeException.class);
+    }
+
     private String createEncodedBody(ClientRegistration clientRegistration)
     {
         return BODY_PATTERN.formatted(
@@ -133,6 +145,4 @@ public abstract class HxAuthenticationClient extends RouteBuilder implements Aut
 
         ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
     }
-
-    protected abstract void wrapErrorIfNecessary(Exchange exchange);
 }

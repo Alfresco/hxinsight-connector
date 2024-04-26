@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -35,8 +35,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Authentication;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Authorization;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authentication;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;

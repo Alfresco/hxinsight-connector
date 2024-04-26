@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.auth;
+package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.CLIENT_REGISTRATION_ID;
 
@@ -33,30 +33,26 @@ import java.util.function.Supplier;
 import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.scheduling.DelegatingSecurityContextTaskScheduler;
-import org.springframework.stereotype.Service;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authentication;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
+import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 
-@Service
 @RequiredArgsConstructor
-@Slf4j
 public class AuthenticationService
 {
     private static final int WAIT_FOR_PAUSE_TIME_MILLIS = 100;
 
     private final OAuth2ClientProperties oAuth2ClientProperties;
-    private final IntegrationProperties integrationProperties;
+    private final Authorization authorizationProperties;
+    private final Authentication authenticationProperties;
     private final AuthenticationManager authenticationManager;
     private final TaskScheduler taskScheduler;
     private final CamelContext camelContext;
@@ -71,14 +67,11 @@ public class AuthenticationService
             Runnable authenticationTask = () -> {
                 waitFor(camelContext::isStarted);
                 String clientName = oAuth2ClientProperties.getRegistration().get(CLIENT_REGISTRATION_ID).getClientName();
-                String serviceUser = integrationProperties.hylandExperience().authorization().serviceUser();
-                String environmentKey = integrationProperties.hylandExperience().authorization().environmentKey();
-                OAuth2AuthenticationToken authenticationToken = AuthSupport.createOAuth2AuthenticationToken(clientName, serviceUser, environmentKey);
-                AuthSupport.authenticate(authenticationToken, authenticationManager);
+                AuthSupport.authenticate(clientName, authorizationProperties, authenticationManager);
             };
             delegatingTaskScheduler.scheduleWithFixedDelay(
                     authenticationTask,
-                    Duration.ofMinutes(integrationProperties.hylandExperience().authentication().refreshDelayMinutes()));
+                    Duration.ofMinutes(authenticationProperties.refreshDelayMinutes()));
         }
     }
 
@@ -92,7 +85,7 @@ public class AuthenticationService
             }
             catch (InterruptedException e)
             {
-                throw new LiveIngesterRuntimeException(e);
+                throw new HxInsightConnectorRuntimeException(e);
             }
         }
     }

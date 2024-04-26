@@ -29,6 +29,7 @@ import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -59,12 +60,12 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
+
 @ExtendWith(MockitoExtension.class)
 class AuthSupportTest
 {
 
-    @Mock
-    private OAuth2AuthenticationToken mockOAuth2Token;
     @Mock
     private AuthenticationManager mockAuthManager;
     @Mock
@@ -74,13 +75,17 @@ class AuthSupportTest
     void givenTokenNotPresentInContext_whenAuthenticateCalled_thenSecurityContextSet()
     {
         // given
-        given(mockAuthManager.authenticate(mockOAuth2Token)).willReturn(mockAuthentication);
+        String dummyServiceUser = "dummy-service-user";
+        String dummyEnvironmentKey = "dummy-env-key";
+        Authorization authorizationProperties = new Authorization("dummy-app-name", dummyServiceUser, dummyEnvironmentKey);
+        String dummyClientName = "dummy-client-name";
+        given(mockAuthManager.authenticate(any())).willReturn(mockAuthentication);
 
         // when
-        AuthSupport.authenticate(mockOAuth2Token, mockAuthManager);
+        AuthSupport.authenticate(dummyClientName, authorizationProperties, mockAuthManager);
 
         // then
-        then(mockAuthManager).should().authenticate(mockOAuth2Token);
+        then(mockAuthManager).should().authenticate(any());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         assertEquals(mockAuthentication, authentication);
     }

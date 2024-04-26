@@ -61,6 +61,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
+import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
@@ -69,7 +70,7 @@ import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        LiveIngesterHxAuthClient.class},
+        HxAuthenticationClient.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
