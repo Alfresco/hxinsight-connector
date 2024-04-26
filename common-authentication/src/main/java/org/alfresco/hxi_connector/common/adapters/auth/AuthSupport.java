@@ -47,6 +47,8 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
 import org.springframework.stereotype.Service;
 
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
+
 @Service
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
@@ -58,10 +60,12 @@ public final class AuthSupport
     public static final String CLIENT_REGISTRATION_ID = "hyland-experience-auth";
     public static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
 
-    public static void authenticate(OAuth2AuthenticationToken authenticationToken, AuthenticationManager authenticationManager)
+    public static void authenticate(String clientName, Authorization authorizationProperties, AuthenticationManager authenticationManager)
     {
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String serviceUser = authorizationProperties.serviceUser();
+        String environmentKey = authorizationProperties.environmentKey();
+        OAuth2AuthenticationToken authenticationToken = createOAuth2AuthenticationToken(clientName, serviceUser, environmentKey);
+        setAuthenticationInContext(authenticationToken, authenticationManager);
     }
 
     public static void setAuthorizationToken(Exchange exchange)
@@ -84,7 +88,19 @@ public final class AuthSupport
         }
     }
 
-    public static OAuth2AuthenticationToken createOAuth2AuthenticationToken(String clientName, String serviceUser, String environmentKey)
+    public static boolean isTokenUriNotBlank(OAuth2ClientProperties oAuth2ClientProperties)
+    {
+        return oAuth2ClientProperties.getProvider().containsKey(CLIENT_REGISTRATION_ID)
+                && StringUtils.isNotBlank(oAuth2ClientProperties.getProvider().get(CLIENT_REGISTRATION_ID).getTokenUri());
+    }
+
+    private static void setAuthenticationInContext(OAuth2AuthenticationToken authenticationToken, AuthenticationManager authenticationManager)
+    {
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    static OAuth2AuthenticationToken createOAuth2AuthenticationToken(String clientName, String serviceUser, String environmentKey)
     {
         Map<String, Object> userAttributes = Map.of(
                 APP_NAME_ATTRIBUTE_KEY, clientName,
@@ -93,11 +109,5 @@ public final class AuthSupport
         OAuth2UserAuthority oAuth2UserAuthority = new OAuth2UserAuthority(userAttributes);
         OAuth2User oAuth2User = new DefaultOAuth2User(Set.of(oAuth2UserAuthority), userAttributes, APP_NAME_ATTRIBUTE_KEY);
         return new OAuth2AuthenticationToken(oAuth2User, Set.of(oAuth2UserAuthority), CLIENT_REGISTRATION_ID);
-    }
-
-    public static boolean isTokenUriNotBlank(OAuth2ClientProperties oAuth2ClientProperties)
-    {
-        return oAuth2ClientProperties.getProvider().containsKey(CLIENT_REGISTRATION_ID)
-                && StringUtils.isNotBlank(oAuth2ClientProperties.getProvider().get(CLIENT_REGISTRATION_ID).getTokenUri());
     }
 }

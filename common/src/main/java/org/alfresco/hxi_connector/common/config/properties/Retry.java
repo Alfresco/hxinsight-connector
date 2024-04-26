@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
+package org.alfresco.hxi_connector.common.config.properties;
 
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;

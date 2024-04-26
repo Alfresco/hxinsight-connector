@@ -36,6 +36,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
+import org.alfresco.hxi_connector.common.config.properties.Retry;
+
 public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore, MimeType mimeType)
 {
 

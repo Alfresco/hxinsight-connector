@@ -27,10 +27,8 @@ package org.alfresco.hxi_connector.prediction_applier.config;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
+import org.alfresco.hxi_connector.common.config.properties.Retry;
+
 @ConfigurationProperties("alfresco.repository.nodes")
 public record NodesApiProperties(String baseUrl, String username, String password, Retry retry)
-{
-
-    public record Retry(int attempts, int initialDelay, int delayMultiplier)
-    {}
-}
+{}

@@ -65,11 +65,12 @@ import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.SecurityConfig;
 import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        LiveIngesterHxAuthClient.class},
+        SecurityConfig.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
