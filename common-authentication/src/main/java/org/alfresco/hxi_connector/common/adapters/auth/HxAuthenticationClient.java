@@ -117,6 +117,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
                 .request(AuthenticationResult.class);
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void wrapErrorIfNecessary(Exchange exchange)
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
