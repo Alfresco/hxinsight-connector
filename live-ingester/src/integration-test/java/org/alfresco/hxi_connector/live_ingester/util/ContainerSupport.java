@@ -69,8 +69,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
+import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
-import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
 
 @Slf4j
 @SuppressWarnings("PMD.NonThreadSafeSingleton")

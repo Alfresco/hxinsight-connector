@@ -23,26 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.auth;
+package org.alfresco.hxi_connector.common.adapters.auth.util;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.test.context.ActiveProfiles;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
-import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClientTest;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.SecurityConfig;
+import org.springframework.security.test.context.support.WithSecurityContext;
 
-@SpringBootTest(classes = {
-        IntegrationProperties.class,
-        SecurityConfig.class},
-        properties = "logging.level.org.alfresco=DEBUG")
-@EnableAutoConfiguration
-@EnableRetry
-@ActiveProfiles("test")
-@Testcontainers
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
-class LiveIngesterHxAuthClientIntegrationTest extends HxAuthenticationClientTest
+@Retention(RetentionPolicy.RUNTIME)
+@WithSecurityContext(factory = WithMockOAuth2UserSecurityContextFactory.class)
+public @interface WithMockOAuth2User
 {}

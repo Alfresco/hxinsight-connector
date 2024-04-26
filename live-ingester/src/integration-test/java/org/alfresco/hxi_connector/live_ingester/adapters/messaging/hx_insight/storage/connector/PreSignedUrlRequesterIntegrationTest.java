@@ -39,8 +39,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils.AUTH_HEADER;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -68,13 +68,13 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.adapters.auth.util.WithMockOAuth2User;
+import org.alfresco.hxi_connector.common.adapters.auth.util.WithoutAnyUser;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
-import org.alfresco.hxi_connector.live_ingester.util.auth.WithMockOAuth2User;
-import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,

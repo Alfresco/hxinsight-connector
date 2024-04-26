@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config;
+package org.alfresco.hxi_connector.prediction_applier.config;
 
 import java.util.List;
 
@@ -33,7 +33,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -45,21 +44,20 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationService;
 import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.HxOAuth2AuthenticationProvider;
-import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterHxAuthClient;
+import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierHxAuthClient;
 
 @Configuration
 @EnableMethodSecurity
-@EnableRetry
 @EnableScheduling
 @EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class SecurityConfig
 {
 
     @Bean
-    @DependsOn("liveIngesterHxAuthClient")
-    public AuthenticationProvider hxAuthenticationProvider(OAuth2ClientProperties oAuth2ClientProperties, AuthenticationClient liveIngesterHxAuthClient)
+    @DependsOn("predictionApplierHxAuthClient")
+    public AuthenticationProvider hxAuthenticationProvider(OAuth2ClientProperties oAuth2ClientProperties, AuthenticationClient predictionApplierHxAuthClient)
     {
-        return new HxOAuth2AuthenticationProvider(oAuth2ClientProperties, liveIngesterHxAuthClient);
+        return new HxOAuth2AuthenticationProvider(oAuth2ClientProperties, predictionApplierHxAuthClient);
     }
 
     @Bean
@@ -70,16 +68,16 @@ public class SecurityConfig
 
     @Bean
     @DependsOn("authenticationManager")
-    public AuthenticationService authenticationService(OAuth2ClientProperties oAuth2ClientProperties, IntegrationProperties integrationProperties,
+    public AuthenticationService authenticationService(OAuth2ClientProperties oAuth2ClientProperties, HxInsightProperties hxInsightProperties,
             AuthenticationManager authenticationManager, TaskScheduler taskScheduler, CamelContext camelContext)
     {
-        return new AuthenticationService(oAuth2ClientProperties, integrationProperties.hylandExperience().authorization(), integrationProperties.hylandExperience()
-                .authentication(), authenticationManager, taskScheduler, camelContext);
+        return new AuthenticationService(oAuth2ClientProperties, hxInsightProperties.hylandExperience().authorization(), hxInsightProperties.hylandExperience().authentication(),
+                authenticationManager, taskScheduler, camelContext);
     }
 
     @Bean
-    public HxAuthenticationClient liveIngesterHxAuthClient(CamelContext camelContext, IntegrationProperties integrationProperties)
+    public HxAuthenticationClient predictionApplierHxAuthClient(CamelContext camelContext, HxInsightProperties hxInsightProperties)
     {
-        return new LiveIngesterHxAuthClient(camelContext, integrationProperties);
+        return new PredictionApplierHxAuthClient(camelContext, hxInsightProperties);
     }
 }
