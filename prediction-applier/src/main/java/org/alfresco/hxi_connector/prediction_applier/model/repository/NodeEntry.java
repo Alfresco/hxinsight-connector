@@ -23,10 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.model.prediction;
+package org.alfresco.hxi_connector.prediction_applier.model.repository;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record Prediction(String id, String objectId)
+public record NodeEntry(@JsonProperty("entry") Node node)
 {}
