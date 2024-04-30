@@ -45,8 +45,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
-import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 
 @Slf4j
 @Component
