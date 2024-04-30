@@ -35,8 +35,8 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 
 @Component
 @RequiredArgsConstructor

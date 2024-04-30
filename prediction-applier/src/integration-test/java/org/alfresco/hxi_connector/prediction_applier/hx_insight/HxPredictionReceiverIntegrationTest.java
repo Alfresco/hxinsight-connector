@@ -47,8 +47,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
-import org.alfresco.hxi_connector.common.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.util.InternalPredictionBufferStub;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionSourceStub;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionsTriggerStub;

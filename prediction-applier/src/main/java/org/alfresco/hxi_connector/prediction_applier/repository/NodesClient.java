@@ -43,9 +43,9 @@ import org.apache.hc.core5.http.NoHttpResponseException;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.model.repository.NodeEntry;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.NodeEntry;
 
 @Component
 @RequiredArgsConstructor

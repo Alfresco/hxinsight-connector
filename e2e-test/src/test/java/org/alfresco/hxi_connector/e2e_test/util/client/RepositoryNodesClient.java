@@ -32,8 +32,8 @@ import java.io.InputStream;
 
 import lombok.RequiredArgsConstructor;
 
-import org.alfresco.hxi_connector.common.model.repository.Node;
-import org.alfresco.hxi_connector.common.model.repository.NodeEntry;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.NodeEntry;
 
 @RequiredArgsConstructor
 public class RepositoryNodesClient

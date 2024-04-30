@@ -54,9 +54,9 @@ import org.junit.jupiter.api.TestInstance;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.model.repository.Node;
-import org.alfresco.hxi_connector.common.model.repository.NodeEntry;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.NodeEntry;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NodesClientTest
