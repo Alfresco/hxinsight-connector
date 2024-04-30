@@ -23,17 +23,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.util.auth;
+package org.alfresco.hxi_connector.prediction_applier.adapters.auth;
 
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithSecurityContextFactory;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.retry.annotation.EnableRetry;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
-public class WithoutAnyUserSecurityContextFactory implements WithSecurityContextFactory<WithoutAnyUser>
-{
-    @Override
-    public SecurityContext createSecurityContext(WithoutAnyUser annotation)
-    {
-        return SecurityContextHolder.createEmptyContext();
-    }
-}
+import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClientTest;
+import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.SecurityConfig;
+
+@SpringBootTest(
+        classes = {HxInsightProperties.class, SecurityConfig.class},
+        properties = "logging.level.org.alfresco=DEBUG")
+@EnableAutoConfiguration
+@EnableConfigurationProperties
+@EnableRetry
+@Testcontainers
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
+class PredictionApplierHxAuthClientIntegrationTest extends HxAuthenticationClientTest
+{}

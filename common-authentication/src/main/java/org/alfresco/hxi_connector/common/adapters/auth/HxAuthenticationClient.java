@@ -52,7 +52,6 @@ import org.springframework.security.oauth2.client.registration.ClientRegistratio
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
@@ -117,15 +116,6 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
                 .request(AuthenticationResult.class);
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = retryProperties.reasons();
-
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, HxInsightConnectorRuntimeException.class);
-    }
-
     private String createEncodedBody(ClientRegistration clientRegistration)
     {
         return BODY_PATTERN.formatted(
@@ -133,6 +123,15 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
                 encode(clientRegistration.getClientId(), UTF_8),
                 encode(clientRegistration.getClientSecret(), UTF_8),
                 encode(String.join(",", clientRegistration.getScopes()), UTF_8));
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private void wrapErrorIfNecessary(Exchange exchange)
+    {
+        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
+        Set<Class<? extends Throwable>> retryReasons = retryProperties.reasons();
+
+        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

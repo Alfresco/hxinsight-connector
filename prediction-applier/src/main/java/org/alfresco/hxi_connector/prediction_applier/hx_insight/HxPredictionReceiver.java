@@ -40,8 +40,11 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.component.jackson.ListJacksonDataFormat;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
 import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 
@@ -85,9 +88,14 @@ public class HxPredictionReceiver extends RouteBuilder
                     .log(DEBUG, log, "Triggering prediction processing")
                     .to(PREDICTION_PROCESSOR);
 
+        SecurityContext securityContext = SecurityContextHolder.getContext();
         from(PREDICTION_PROCESSOR)
                 .routeId(PREDICTION_PROCESSOR_ROUTE_ID)
                 .process(setIsProcessingPending(true))
+                .process(exchange -> {
+                    SecurityContextHolder.setContext(securityContext);
+                    AuthSupport.setAuthorizationToken(exchange);
+                })
                 .loopDoWhile(this::hasNextPage)
                     .log(DEBUG, log, "Fetching predictions")
                     .to(config.hxiPredictionsEndpoint())

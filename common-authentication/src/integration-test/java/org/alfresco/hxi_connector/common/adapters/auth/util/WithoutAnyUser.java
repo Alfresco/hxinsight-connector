@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.util.auth;
+package org.alfresco.hxi_connector.common.adapters.auth.util;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -31,6 +31,6 @@ import java.lang.annotation.RetentionPolicy;
 import org.springframework.security.test.context.support.WithSecurityContext;
 
 @Retention(RetentionPolicy.RUNTIME)
-@WithSecurityContext(factory = WithMockOAuth2UserSecurityContextFactory.class)
-public @interface WithMockOAuth2User
+@WithSecurityContext(factory = WithoutAnyUserSecurityContextFactory.class)
+public @interface WithoutAnyUser
 {}

@@ -23,14 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.util.auth;
+package org.alfresco.hxi_connector.common.adapters.auth.util;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.test.context.support.WithSecurityContextFactory;
 
-import org.springframework.security.test.context.support.WithSecurityContext;
-
-@Retention(RetentionPolicy.RUNTIME)
-@WithSecurityContext(factory = WithoutAnyUserSecurityContextFactory.class)
-public @interface WithoutAnyUser
-{}
+public class WithoutAnyUserSecurityContextFactory implements WithSecurityContextFactory<WithoutAnyUser>
+{
+    @Override
+    public SecurityContext createSecurityContext(WithoutAnyUser annotation)
+    {
+        return SecurityContextHolder.createEmptyContext();
+    }
+}

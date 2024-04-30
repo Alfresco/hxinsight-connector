@@ -182,12 +182,12 @@
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
-                <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
+                <artifactId>alfresco-hxinsight-connector-common-test</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
-                <artifactId>alfresco-hxinsight-connector-common-test</artifactId>
+                <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
