@@ -45,11 +45,9 @@ import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
-import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
 
-@Service
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public final class AuthSupport
@@ -84,7 +82,7 @@ public final class AuthSupport
         }
         else
         {
-            log.warn("Spring security context does not contain authentication principal of type " + OAuth2LoginAuthenticationToken.class.getSimpleName());
+            log.warn("Spring security context does not contain authentication principal of type: {}", OAuth2LoginAuthenticationToken.class.getSimpleName());
         }
     }
 

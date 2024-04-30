@@ -62,7 +62,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class HxAuthenticationClientTest
+public abstract class HxAuthenticationClientTest
 {
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
@@ -71,7 +71,7 @@ public class HxAuthenticationClientTest
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    protected static final WireMockContainer wireMockServer = DockerContainers.createWireMockContainer();
+    static final WireMockContainer hxAuthMock = DockerContainers.createWireMockContainer();
 
     @SpyBean
     protected AuthenticationClient authenticationClient;
@@ -79,8 +79,8 @@ public class HxAuthenticationClientTest
     @BeforeAll
     protected static void beforeAll()
     {
-        WireMock.configureFor(wireMockServer.getHost(), wireMockServer.getPort());
-        tokenUri = wireMockServer.getBaseUrl() + AuthUtils.TOKEN_PATH;
+        WireMock.configureFor(hxAuthMock.getHost(), hxAuthMock.getPort());
+        tokenUri = hxAuthMock.getBaseUrl() + AuthUtils.TOKEN_PATH;
         clientRegistration = AuthUtils.creatClientRegistration(tokenUri);
     }
 
@@ -100,7 +100,7 @@ public class HxAuthenticationClientTest
         then(authenticationClient).should().authenticate(tokenUri, clientRegistration);
         String authRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
-                .withHeader(HOST, new EqualToPattern(wireMockServer.getHost() + ":" + wireMockServer.getPort()))
+                .withHeader(HOST, new EqualToPattern(hxAuthMock.getHost() + ":" + hxAuthMock.getPort()))
                 .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
                 .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))
                 .withRequestBody(new EqualToPattern(authRequestBody)));
@@ -141,7 +141,7 @@ public class HxAuthenticationClientTest
     @DynamicPropertySource
     protected static void overrideProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, wireMockServer.getBaseUrl());
+        AuthUtils.overrideAuthProperties(registry, hxAuthMock.getBaseUrl());
         registry.add("hyland-experience.authentication.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.authentication.retry.initialDelay", () -> RETRY_DELAY_MS);
     }

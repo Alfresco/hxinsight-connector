@@ -33,6 +33,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -48,6 +49,7 @@ import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierHxAut
 
 @Configuration
 @EnableMethodSecurity
+@EnableRetry
 @EnableScheduling
 @EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class SecurityConfig
