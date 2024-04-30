@@ -15,10 +15,96 @@
         <namespace uri="http://www.alfresco.org/model/hxi/1.0" prefix="hxi"/>
     </namespaces>
 
+    <constraints>
+        <constraint name="hxi:updateTypeList" type="LIST">
+            <parameter name="allowedValues">
+                <list>
+                    <value>AUTOFILL</value>
+                    <value>AUTOCORRECT</value>
+                </list>
+            </parameter>
+            <parameter name="caseSensitive">
+                <value>false</value>
+            </parameter>
+        </constraint>
+    </constraints>
+
+    <types>
+        <type name="hxi:prediction">
+            <title>Prediction</title>
+            <parent>cm:cmobject</parent>
+
+            <properties>
+                <property name="hxi:predictionDateTime">
+                    <title>Prediction Date Time</title>
+                    <description>Time that the prediction was generated</description>
+                    <type>d:datetime</type>
+                    <mandatory>true</mandatory>
+                </property>
+                <property name="hxi:confidenceLevel">
+                    <title>Confidence Level</title>
+                    <description>Prediction confidence from Hx Insight</description>
+                    <type>d:float</type>
+                    <mandatory>true</mandatory>
+                </property>
+                <property name="hxi:modelId">
+                    <title>Prediction Model Id</title>
+                    <description>Identified for the model used by Hx Insight</description>
+                    <type>d:text</type>
+                    <mandatory>true</mandatory>
+                </property>
+                <property name="hxi:predictionValue">
+                    <title>Prediction Value</title>
+                    <description>Value predicted by Hx Insight</description>
+                    <type>d:any</type>
+                    <mandatory>true</mandatory>
+                </property>
+                <property name="hxi:previousValue">
+                    <title>Previous Value</title>
+                    <description>Value before predictions were applied</description>
+                    <type>d:any</type>
+                    <mandatory>true</mandatory>
+                </property>
+                <property name="hxi:updateType">
+                    <title>Update Type</title>
+                    <description>Whether the prediction exceeded the threshold for autofill or autocorrect</description>
+                    <type>d:text</type>
+                    <mandatory>true</mandatory>
+                    <constraints>
+                        <constraint ref="hxi:updateTypeList" />
+                    </constraints>
+                </property>
+            </properties>
+        </type>
+    </types>
+
     <aspects>
         <aspect name="hxi:predictionApplied">
             <title>Prediction Applied</title>
-            <description>Indicates whether prediction was applied</description>
+            <description>Indicates that a prediction has been applied</description>
+
+            <properties>
+                <property name="hxi:latestPredictionDateTime">
+                    <type>d:datetime</type>
+                </property>
+            </properties>
+
+            <associations>
+                <child-association name="hxi:predictedBy">
+                    <title>Predicted By</title>
+                    <description>Link to predictions applying to this node</description>
+                    <source>
+                        <mandatory>true</mandatory>
+                        <many>false</many>
+                    </source>
+                    <target>
+                        <class>hxi:prediction</class>
+                        <mandatory>true</mandatory>
+                        <many>true</many>
+                    </target>
+                    <duplicate>false</duplicate>
+                </child-association>
+            </associations>
         </aspect>
     </aspects>
 
