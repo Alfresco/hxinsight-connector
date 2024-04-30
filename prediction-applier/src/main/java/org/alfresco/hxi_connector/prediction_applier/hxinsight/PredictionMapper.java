@@ -29,8 +29,8 @@ import java.util.Set;
 
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.model.prediction.Prediction;
-import org.alfresco.hxi_connector.common.model.repository.Node;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
 
 @Component
 public class PredictionMapper

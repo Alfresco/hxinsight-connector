@@ -192,6 +192,11 @@
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
+                <artifactId>alfresco-hxinsight-connector-prediction-applier</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.alfresco</groupId>
                 <artifactId>alfresco-elasticsearch-database-connector</artifactId>
                 <version>${alfresco-db-connector.version}</version>
             </dependency>

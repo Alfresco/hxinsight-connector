@@ -23,19 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.model.repository;
+package org.alfresco.hxi_connector.prediction_applier.model.prediction;
 
-import java.util.Set;
-import jakarta.validation.constraints.NotBlank;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record Node(@NotBlank String id, @JsonProperty("aspectNames") Set<String> aspects)
-{
-    public Node(String id)
-    {
-        this(id, null);
-    }
-}
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+public record Prediction(String id, String objectId)
+{}
