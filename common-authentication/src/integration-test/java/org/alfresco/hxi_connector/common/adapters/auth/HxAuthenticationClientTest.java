@@ -62,6 +62,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class HxAuthenticationClientTest
 {
     private static final int RETRY_ATTEMPTS = 3;
