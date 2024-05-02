@@ -49,12 +49,12 @@ import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataF
 @Slf4j
 @Component
 @RequiredArgsConstructor
-@SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.LongVariable"})
+@SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.UnusedFormalParameter", "PMD.LinguisticNaming", "PMD.LongVariable"})
 public class PredictionCollector extends RouteBuilder
 {
+    private static final String DIRECT_ENDPOINT = "direct:" + PredictionCollector.class.getSimpleName();
     private static final String TIMER_ROUTE_ID = "predictions-collector-timer";
-    private static final String ROUTE_ID = "prediction-collector";
-    private static final String DIRECT_ENDPOINT = "direct:prediction-collector";
+    private static final String COLLECTOR_ROUTE_ID = "prediction-collector";
     private static final String IS_PREDICTION_PROCESSING_PENDING_KEY = "is-prediction-processing-pending";
 
     private final InsightPredictionsProperties insightPredictionsProperties;
@@ -95,8 +95,8 @@ public class PredictionCollector extends RouteBuilder
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(DIRECT_ENDPOINT)
-            .routeId(ROUTE_ID)
-            .process(setIsProcessingPending(true))
+            .routeId(COLLECTOR_ROUTE_ID)
+            .process(setProcessingPending(true))
             .process(exchange -> AuthSupport.setAuthorizationToken(securityContext, exchange))
             .loopDoWhile(bodyAs(Collection.class).method("isEmpty").isEqualTo(false))
                 .log(DEBUG, log, "Fetching predictions")
@@ -110,7 +110,7 @@ public class PredictionCollector extends RouteBuilder
                 .end()
             .end()
             .log(DEBUG, log, "Finished processing predictions")
-            .process(setIsProcessingPending(false))
+            .process(setProcessingPending(false))
             .end();
     }
     // @formatter:on
@@ -122,7 +122,7 @@ public class PredictionCollector extends RouteBuilder
                 false);
     }
 
-    private Processor setIsProcessingPending(boolean isProcessingPending)
+    private Processor setProcessingPending(boolean isProcessingPending)
     {
         return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
     }

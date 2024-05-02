@@ -43,7 +43,7 @@ public class PredictionTriggerStub
 
     public void triggerPredictionsCollecting()
     {
-        producerTemplate.requestBody(insightPredictionsProperties.collectorTimerEndpoint(), (Object) null);
+        producerTemplate.sendBody(insightPredictionsProperties.collectorTimerEndpoint(), null);
     }
 
     @SneakyThrows
