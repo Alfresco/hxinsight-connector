@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.hxinsight;
+package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
 import java.util.Set;
 

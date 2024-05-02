@@ -26,42 +26,35 @@
 
 package org.alfresco.hxi_connector.prediction_applier.util;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
 import lombok.RequiredArgsConstructor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jackson.JacksonDataFormat;
+import lombok.SneakyThrows;
+import org.apache.camel.ProducerTemplate;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 
 @Component
 @RequiredArgsConstructor
-public class InternalPredictionBufferStub extends RouteBuilder
+public class PredictionTriggerStub
 {
-    private final PredictionListenerConfig predictionListenerConfig;
 
-    private final List<Prediction> handledPredictions;
+    private final ProducerTemplate producerTemplate;
+    private final InsightPredictionsProperties insightPredictionsProperties;
 
-    @Override
-    public void configure()
+    public void triggerPredictionsCollecting()
     {
-        from(predictionListenerConfig.internalPredictionsBufferEndpoint())
-                .log("Handling predictions ${body}")
-                .unmarshal(new JacksonDataFormat(Prediction.class))
-                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(Prediction.class)));
+        producerTemplate.sendBody(insightPredictionsProperties.collectorTimerEndpoint(), null);
     }
 
-    public void assertAllPredictionsHandled(List<Prediction> predictions)
+    @SneakyThrows
+    public void triggerPredictionsCollectingAsync(long delayInMs)
     {
-        assertEquals(predictions, handledPredictions);
+        Thread.sleep(delayInMs);
+        triggerPredictionsCollectingAsync();
     }
 
-    public void reset()
+    public void triggerPredictionsCollectingAsync()
     {
-        handledPredictions.clear();
+        producerTemplate.asyncSendBody(insightPredictionsProperties.collectorTimerEndpoint(), null);
     }
 }

@@ -26,15 +26,12 @@
 
 package org.alfresco.hxi_connector.prediction_applier.util;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.LinkedList;
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.Queue;
 
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
@@ -44,38 +41,28 @@ import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction
 
 @Component
 @RequiredArgsConstructor
-public class PredictionSourceStub extends RouteBuilder
+public class PredictionBufferStub extends RouteBuilder
 {
     private final InsightPredictionsProperties insightPredictionsProperties;
-    private long deliveryDelayInMs;
-    private Queue<List<Prediction>> predictionsBatchesQueue = new LinkedList<>();
+    private final List<Prediction> handledPredictions = new ArrayList<>();
 
     @Override
     public void configure()
     {
-        from(insightPredictionsProperties.sourceEndpoint())
-                .routeId("predictions-source-stub")
-                .setBody(exchange -> getPredictionsBatch())
-                .marshal(new JacksonDataFormat());
+        from(insightPredictionsProperties.bufferEndpoint())
+                .routeId("predictions-buffer-stub")
+                .log("Handling predictions ${body}")
+                .unmarshal(new JacksonDataFormat(Prediction.class))
+                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(Prediction.class)));
     }
 
-    @SneakyThrows
-    private List<Prediction> getPredictionsBatch()
+    public void assertAllPredictionsHandled(List<Prediction> predictions)
     {
-        Thread.sleep(deliveryDelayInMs);
-
-        return Objects.requireNonNullElseGet(predictionsBatchesQueue.poll(), Collections::emptyList);
+        assertEquals(predictions, handledPredictions);
     }
 
-    @SafeVarargs
-    public final void shouldReturnPredictions(List<Prediction>... predictionsBatches)
+    public void reset()
     {
-        predictionsBatchesQueue = new LinkedList<>(Arrays.asList(predictionsBatches));
-    }
-
-    public final void shouldReturnPredictions(long delayInMs, List<List<Prediction>> predictionsBatches)
-    {
-        this.deliveryDelayInMs = delayInMs;
-        this.predictionsBatchesQueue = new LinkedList<>(predictionsBatches);
+        handledPredictions.clear();
     }
 }

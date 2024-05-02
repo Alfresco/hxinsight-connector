@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.hxinsight;
+package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
 import static org.apache.camel.builder.AdviceWith.adviceWith;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,7 +33,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.prediction_applier.hxinsight.PredictionListener.ROUTE_ID;
+import static org.alfresco.hxi_connector.prediction_applier.hx_insight.PredictionListener.ROUTE_ID;
 
 import java.util.stream.Stream;
 
@@ -51,6 +51,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
 
@@ -72,7 +73,8 @@ class PredictionListenerTest
     {
         camelContext = new DefaultCamelContext();
         predictionMapperMock = mock(PredictionMapper.class);
-        PredictionListener predictionListener = new PredictionListener(predictionMapperMock, TEST_ENDPOINT);
+        InsightPredictionsProperties properties = new InsightPredictionsProperties(null, 0L, null, TEST_ENDPOINT);
+        PredictionListener predictionListener = new PredictionListener(predictionMapperMock, properties);
         camelContext.addRoutes(predictionListener);
         camelContext.start();
 
@@ -99,7 +101,7 @@ class PredictionListenerTest
         // given
         Prediction prediction = new Prediction("prediction-id", "node-id");
         String predictionJson = new ObjectMapper().writeValueAsString(prediction);
-        Node node = new Node("nodeId", null);
+        Node node = new Node("node-id", null);
         given(predictionMapperMock.map(any())).willReturn(node);
         mockEndpointWillExpectInRequestBody(node);
 
@@ -116,6 +118,6 @@ class PredictionListenerTest
 
     private void mockEndpointWillExpectInRequestBody(Node... expectedNodes)
     {
-        Stream.of(expectedNodes).forEach(node -> mockEndpoint.message(0).body(Node.class).contains(node));
+        Stream.of(expectedNodes).forEach(node -> mockEndpoint.message(0).body().contains(node));
     }
 }

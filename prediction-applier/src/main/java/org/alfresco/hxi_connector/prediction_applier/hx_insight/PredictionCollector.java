@@ -28,10 +28,8 @@ package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
-import java.util.Queue;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,29 +37,27 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
-import org.apache.camel.component.jackson.ListJacksonDataFormat;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
 
 @Slf4j
 @Component
 @RequiredArgsConstructor
 @SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.UnusedFormalParameter", "PMD.LinguisticNaming", "PMD.LongVariable"})
-public class HxPredictionReceiver extends RouteBuilder
+public class PredictionCollector extends RouteBuilder
 {
-    private static final String PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID = "prediction-processor-trigger-route";
-    private static final String PREDICTION_PROCESSOR_ROUTE_ID = "prediction-processor-route";
-    private static final String PREDICTION_PROCESSOR = "direct:prediction-processor";
+    private static final String DIRECT_ENDPOINT = "direct:" + PredictionCollector.class.getSimpleName();
+    private static final String TIMER_ROUTE_ID = "predictions-collector-timer";
+    private static final String COLLECTOR_ROUTE_ID = "prediction-collector";
     private static final String IS_PREDICTION_PROCESSING_PENDING_KEY = "is-prediction-processing-pending";
-    private static final String HAS_NEXT_PAGE_KEY = "has-next-page";
-    private static final String PREDICTIONS_BATCH_KEY = "predictions-batch";
 
-    private final PredictionListenerConfig config;
+    private final InsightPredictionsProperties insightPredictionsProperties;
 
     // @formatter:off
     /**
@@ -83,41 +79,39 @@ public class HxPredictionReceiver extends RouteBuilder
     @Override
     public void configure()
     {
-        JacksonDataFormat predictionsBatchDataFormat = new ListJacksonDataFormat(Prediction.class);
+        JacksonDataFormat predictionsBatchDataFormat = new LinkedListJacksonDataFormat(Prediction.class);
         JacksonDataFormat predictionDataFormat = new JacksonDataFormat(Prediction.class);
 
-        from(config.predictionProcessorTriggerEndpoint())
-                .routeId(PREDICTION_PROCESSOR_TRIGGER_ROUTE_ID)
-                .choice()
-                .when(this::isProcessingPending)
-                    .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
-                .otherwise()
-                    .log(DEBUG, log, "Triggering prediction processing")
-                    .to(PREDICTION_PROCESSOR);
+        from(insightPredictionsProperties.collectorTimerEndpoint())
+            .routeId(TIMER_ROUTE_ID)
+            .choice()
+            .when(this::isProcessingPending)
+                .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
+            .otherwise()
+                .log(DEBUG, log, "Triggering prediction processing")
+                .to(DIRECT_ENDPOINT)
+            .end()
+            .end();
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        from(PREDICTION_PROCESSOR)
-                .routeId(PREDICTION_PROCESSOR_ROUTE_ID)
-                .process(setIsProcessingPending(true))
-                .process(exchange -> {
-                    SecurityContextHolder.setContext(securityContext);
-                    AuthSupport.setAuthorizationToken(exchange);
-                })
-                .loopDoWhile(this::hasNextPage)
-                    .log(DEBUG, log, "Fetching predictions")
-                    .to(config.hxiPredictionsEndpoint())
-                    .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
-                    .unmarshal(predictionsBatchDataFormat)
-                    .process(this::savePredictionsBatch)
-                    .loopDoWhile(this::predictionsBatchNotEmpty)
-                        .process(this::setPredictionToSend)
-                        .marshal(predictionDataFormat)
-                        .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
-                        .to(config.internalPredictionsBufferEndpoint())
-                    .end()
+        from(DIRECT_ENDPOINT)
+            .routeId(COLLECTOR_ROUTE_ID)
+            .process(setProcessingPending(true))
+            .process(exchange -> AuthSupport.setAuthorizationToken(securityContext, exchange))
+            .loopDoWhile(bodyAs(Collection.class).method("isEmpty").isEqualTo(false))
+                .log(DEBUG, log, "Fetching predictions")
+                .to(insightPredictionsProperties.sourceEndpoint())
+                .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
+                .unmarshal(predictionsBatchDataFormat)
+                .split(body())
+                    .marshal(predictionDataFormat)
+                    .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
+                    .to(insightPredictionsProperties.bufferEndpoint())
                 .end()
-                .log(DEBUG, log, "Finished processing predictions")
-                .process(setIsProcessingPending(false));
+            .end()
+            .log(DEBUG, log, "Finished processing predictions")
+            .process(setProcessingPending(false))
+            .end();
     }
     // @formatter:on
 
@@ -128,32 +122,8 @@ public class HxPredictionReceiver extends RouteBuilder
                 false);
     }
 
-    private Processor setIsProcessingPending(boolean isProcessingPending)
+    private Processor setProcessingPending(boolean isProcessingPending)
     {
         return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
-    }
-
-    private boolean hasNextPage(Exchange exchange)
-    {
-        return Objects.requireNonNullElse(exchange.getVariable(HAS_NEXT_PAGE_KEY, Boolean.class), true);
-    }
-
-    private void savePredictionsBatch(Exchange exchange)
-    {
-        Queue<Prediction> predictionsBatch = new LinkedList(exchange.getIn().getBody(List.class));
-
-        exchange.setVariable(HAS_NEXT_PAGE_KEY, !predictionsBatch.isEmpty());
-        exchange.setVariable(PREDICTIONS_BATCH_KEY, predictionsBatch);
-    }
-
-    private boolean predictionsBatchNotEmpty(Exchange exchange)
-    {
-        return !exchange.getVariable(PREDICTIONS_BATCH_KEY, Queue.class).isEmpty();
-    }
-
-    private void setPredictionToSend(Exchange exchange)
-    {
-        Prediction predictionToSend = (Prediction) exchange.getVariable(PREDICTIONS_BATCH_KEY, Queue.class).poll();
-        exchange.getIn().setBody(predictionToSend);
     }
 }

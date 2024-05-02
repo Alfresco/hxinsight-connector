@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,39 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.prediction_applier.util;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.apache.camel.ProducerTemplate;
-import org.springframework.stereotype.Component;
+import java.util.LinkedList;
 
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.apache.camel.component.jackson.ListJacksonDataFormat;
 
-@Component
-@RequiredArgsConstructor
-public class PredictionsTriggerStub
+public class LinkedListJacksonDataFormat extends ListJacksonDataFormat
 {
-
-    private final ProducerTemplate producerTemplate;
-
-    private final PredictionListenerConfig predictionListenerConfig;
-
-    public void triggerPredictionsProcessing()
+    public LinkedListJacksonDataFormat(Class<?> unmarshalType)
     {
-        producerTemplate.sendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
+        super(unmarshalType);
     }
 
-    @SneakyThrows
-    public void triggerPredictionsProcessingAsync(long delayInMs)
+    @Override
+    public void useList()
     {
-        Thread.sleep(delayInMs);
-        triggerPredictionsProcessingAsync();
-    }
-
-    public void triggerPredictionsProcessingAsync()
-    {
-        producerTemplate.asyncSendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
+        this.setCollectionType(LinkedList.class);
     }
 }
