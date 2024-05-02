@@ -27,5 +27,5 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
 public enum UpdateType
 {
-    AUTO_COMPLETE, AUTO_CORRECT
+    AUTOFILL, AUTOCORRECT
 }

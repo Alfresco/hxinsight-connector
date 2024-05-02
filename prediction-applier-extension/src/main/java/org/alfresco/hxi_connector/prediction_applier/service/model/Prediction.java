@@ -23,10 +23,26 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
+package org.alfresco.hxi_connector.prediction_applier.service.model;
 
+import java.io.Serializable;
 import java.util.Date;
-import java.util.List;
 
-public record NodeWithPrediction(String id, Date latestPredictionDateTime, List<String> predictedProperties)
-{}
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
+
+@Data
+@AllArgsConstructor
+public class Prediction
+{
+    private String id;
+    private String property;
+    private Date predictionDateTime;
+    private float confidenceLevel;
+    private String modelId;
+    private Serializable predictionValue;
+    private Serializable previousValue;
+    private UpdateType updateType;
+}

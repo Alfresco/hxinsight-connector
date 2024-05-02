@@ -27,77 +27,57 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
 import static java.util.stream.Collectors.toList;
 
-import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionModel.PROP_CONFIDENCE_LEVEL;
-import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionModel.PROP_MODEL_ID;
-import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionModel.PROP_PREDICTION_DATE_TIME;
-import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionModel.PROP_PREDICTION_VALUE;
-import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionModel.PROP_UPDATE_TYPE;
-import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionModel.TYPE_PREDICTION;
-import static org.alfresco.model.ContentModel.PROP_NAME;
-
-import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.Prediction;
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
+import lombok.Setter;
+
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
+import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
+import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
+import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.rest.api.impl.NodesImpl;
 import org.alfresco.rest.framework.resource.RelationshipResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.RelationshipResourceAction;
 import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
 import org.alfresco.rest.framework.resource.parameters.Paging;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
-import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.alfresco.service.cmr.repository.NodeService;
-import org.alfresco.service.namespace.QName;
+import org.alfresco.service.transaction.TransactionService;
 
+@Setter
 @RelationshipResource(name = "predictions", entityResource = NodeEntityResource.class, title = "Predictions for a node")
-public class PredictionChildrenRelation implements RelationshipResourceAction.Read<Prediction>
+public class PredictionChildrenRelation implements RelationshipResourceAction.Read<PredictionModel>,
+        RelationshipResourceAction.Create<PredictionModel>
 {
-    private NodeService nodeService;
     private NodesImpl nodes;
+    private TransactionService transactionService;
+    private PredictionService predictionService;
 
     @Override
-    public CollectionWithPagingInfo<Prediction> readAll(String nodeId, Parameters params)
+    public CollectionWithPagingInfo<PredictionModel> readAll(String nodeId, Parameters params)
     {
         NodeRef nodeRef = nodes.validateOrLookupNode(nodeId);
 
-        List<ChildAssociationRef> childAssocs = nodeService.getChildAssocs(nodeRef, Set.of(TYPE_PREDICTION));
-        List<Prediction> predictions = childAssocs.stream().map(this::childAssocToPrediction).collect(toList());
+        List<Prediction> predictions = predictionService.getPredictions(nodeRef);
+        List<PredictionModel> predictionModels = predictions.stream().map(PredictionModel::fromServiceModel).collect(toList());
 
         Paging paging = params.getPaging();
         return CollectionWithPagingInfo.asPaged(
                 paging,
-                predictions,
-                predictions.size() > paging.getSkipCount() + paging.getMaxItems(),
-                predictions.size());
+                predictionModels,
+                predictionModels.size() > paging.getSkipCount() + paging.getMaxItems(),
+                predictionModels.size());
     }
 
-    private Prediction childAssocToPrediction(ChildAssociationRef childAssociationRef)
+    @Override
+    public List<PredictionModel> create(String nodeId, List<PredictionModel> predictionModels, Parameters parameters)
     {
-        NodeRef predictionNodeRef = childAssociationRef.getChildRef();
-        Map<QName, Serializable> properties = nodeService.getProperties(predictionNodeRef);
+        NodeRef nodeRef = nodes.validateOrLookupNode(nodeId);
+        List<Prediction> predictions = predictionModels.stream().map(PredictionModel::toServiceModel).collect(toList());
 
-        String property = ((String) properties.get(PROP_NAME)).replaceFirst("_", ":");
-        Date predictionDateTime = (Date) properties.get(PROP_PREDICTION_DATE_TIME);
-        Float confidenceLevel = (Float) properties.get(PROP_CONFIDENCE_LEVEL);
-        String modelId = (String) properties.get(PROP_MODEL_ID);
-        Serializable predictionValue = properties.get(PROP_PREDICTION_VALUE);
-        UpdateType updateType = UpdateType.valueOf((String) properties.get(PROP_UPDATE_TYPE));
+        RetryingTransactionCallback<List<Prediction>> callback = () -> predictionService.applyPredictions(nodeRef, predictions);
+        List<Prediction> outputPredictions = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false, true);
 
-        return new Prediction(property, predictionDateTime, confidenceLevel, modelId, predictionValue, updateType);
-    }
-
-    public void setNodeService(NodeService nodeService)
-    {
-        this.nodeService = nodeService;
-    }
-
-    public void setNodes(NodesImpl nodes)
-    {
-        this.nodes = nodes;
+        return outputPredictions.stream().map(PredictionModel::fromServiceModel).collect(toList());
     }
 }

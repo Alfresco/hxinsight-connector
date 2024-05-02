@@ -27,9 +27,9 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api.data_model;
 
 import org.alfresco.service.namespace.QName;
 
-public class PredictionModel
+public class PredictionDataModel
 {
-    private static final String HXI_URI = "http://www.alfresco.org/model/hxinsightconnector/1.0";
+    private static final String HXI_URI = "http://www.alfresco.org/model/hxi/1.0";
     private static final String HXI_PREFIX = "hxi";
 
     public static final QName TYPE_PREDICTION = QName.createQName(HXI_URI, "prediction");

@@ -25,12 +25,15 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
-import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionModel.PROP_LATEST_PREDICTION_DATE_TIME;
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_LATEST_PREDICTION_DATE_TIME;
 
-import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
+
+import lombok.Setter;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.NodeWithPrediction;
+import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
 import org.alfresco.rest.api.impl.NodesImpl;
 import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
 import org.alfresco.rest.framework.resource.EntityResource;
@@ -39,29 +42,22 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 
+@Setter
 @EntityResource(name = "nodes", title = "Nodes With Predictions")
 public class NodeEntityResource implements EntityResourceAction.ReadById<NodeWithPrediction>
 {
     private NodeService nodeService;
     private NodesImpl nodes;
+    private PredictionService predictionService;
 
     @Override
     public NodeWithPrediction readById(String id, Parameters parameters) throws EntityNotFoundException
     {
         NodeRef nodeRef = nodes.validateOrLookupNode(id);
 
-        Serializable date = nodeService.getProperty(nodeRef, PROP_LATEST_PREDICTION_DATE_TIME);
+        Date date = (Date) nodeService.getProperty(nodeRef, PROP_LATEST_PREDICTION_DATE_TIME);
+        List<String> predictedProperties = predictionService.getPredictedProperties(nodeRef);
 
-        return new NodeWithPrediction(id, (Date) date);
-    }
-
-    public void setNodeService(NodeService nodeService)
-    {
-        this.nodeService = nodeService;
-    }
-
-    public void setNodes(NodesImpl nodes)
-    {
-        this.nodes = nodes;
+        return new NodeWithPrediction(id, date, predictedProperties);
     }
 }
