@@ -308,6 +308,9 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       CAMEL_COMPONENT_AWS2-SQS_URI-ENDPOINT-OVERRIDE: http://aws-mock:4566
+      HYLAND-EXPERIENCE_INSIGHT_PREDICTION-LISTENER_HXI-PREDICTIONS-ENDPOINT: http://hxinsight-mock:8080/prediction-batches?httpMethod=GET
+      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
+      SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI: http://hxinsight-mock:8080/token
     ports:
       - "5009:5009"
 
