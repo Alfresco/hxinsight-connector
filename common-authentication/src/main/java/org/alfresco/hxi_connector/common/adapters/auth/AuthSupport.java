@@ -38,6 +38,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
@@ -64,6 +65,12 @@ public final class AuthSupport
         String environmentKey = authorizationProperties.environmentKey();
         OAuth2AuthenticationToken authenticationToken = createOAuth2AuthenticationToken(clientName, serviceUser, environmentKey);
         setAuthenticationInContext(authenticationToken, authenticationManager);
+    }
+
+    public static void setAuthorizationToken(SecurityContext securityContext, Exchange exchange)
+    {
+        SecurityContextHolder.setContext(securityContext);
+        setAuthorizationToken(exchange);
     }
 
     public static void setAuthorizationToken(Exchange exchange)

@@ -23,21 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.hxinsight;
+package org.alfresco.hxi_connector.prediction_applier.util;
 
-import java.util.Set;
+import java.util.LinkedList;
 
-import org.springframework.stereotype.Component;
+import org.apache.camel.component.jackson.ListJacksonDataFormat;
 
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
-
-@Component
-public class PredictionMapper
+public class LinkedListJacksonDataFormat extends ListJacksonDataFormat
 {
-
-    public Node map(Prediction prediction)
+    public LinkedListJacksonDataFormat(Class<?> unmarshalType)
     {
-        return new Node(prediction.objectId(), Set.of("cm:versionable", "cm:auditable", "hxi:predictionApplied"));
+        super(unmarshalType);
+    }
+
+    @Override
+    public void useList()
+    {
+        this.setCollectionType(LinkedList.class);
     }
 }

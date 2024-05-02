@@ -31,31 +31,30 @@ import lombok.SneakyThrows;
 import org.apache.camel.ProducerTemplate;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 
 @Component
 @RequiredArgsConstructor
-public class PredictionsTriggerStub
+public class PredictionTriggerStub
 {
 
     private final ProducerTemplate producerTemplate;
+    private final InsightPredictionsProperties insightPredictionsProperties;
 
-    private final PredictionListenerConfig predictionListenerConfig;
-
-    public void triggerPredictionsProcessing()
+    public void triggerPredictionsCollecting()
     {
-        producerTemplate.sendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
+        producerTemplate.requestBody(insightPredictionsProperties.collectorTimerEndpoint(), (Object) null);
     }
 
     @SneakyThrows
-    public void triggerPredictionsProcessingAsync(long delayInMs)
+    public void triggerPredictionsCollectingAsync(long delayInMs)
     {
         Thread.sleep(delayInMs);
-        triggerPredictionsProcessingAsync();
+        triggerPredictionsCollectingAsync();
     }
 
-    public void triggerPredictionsProcessingAsync()
+    public void triggerPredictionsCollectingAsync()
     {
-        producerTemplate.asyncSendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
+        producerTemplate.asyncSendBody(insightPredictionsProperties.collectorTimerEndpoint(), null);
     }
 }

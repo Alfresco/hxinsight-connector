@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,45 +23,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
-package org.alfresco.hxi_connector.prediction_applier.util;
+import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
 
 @Component
-@RequiredArgsConstructor
-public class InternalPredictionBufferStub extends RouteBuilder
+public class PredictionMapper
 {
-    private final PredictionListenerConfig predictionListenerConfig;
 
-    private final List<Prediction> handledPredictions;
-
-    @Override
-    public void configure()
+    public Node map(Prediction prediction)
     {
-        from(predictionListenerConfig.internalPredictionsBufferEndpoint())
-                .log("Handling predictions ${body}")
-                .unmarshal(new JacksonDataFormat(Prediction.class))
-                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(Prediction.class)));
-    }
-
-    public void assertAllPredictionsHandled(List<Prediction> predictions)
-    {
-        assertEquals(predictions, handledPredictions);
-    }
-
-    public void reset()
-    {
-        handledPredictions.clear();
+        return new Node(prediction.objectId(), Set.of("cm:versionable", "cm:auditable", "hxi:predictionApplied"));
     }
 }

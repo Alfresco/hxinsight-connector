@@ -32,24 +32,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
 
-@ConfigurationProperties(prefix = "hyland-experience.insight.prediction-listener")
+@ConfigurationProperties(prefix = "hyland-experience.insight.predictions")
 @SuppressWarnings({"PMD.LongVariable", "PMD.UnusedAssignment"})
-public record PredictionListenerConfig(
-        String predictionProcessorTriggerEndpoint,
-        Long pollPeriod,
-        @NotBlank String hxiPredictionsEndpoint,
-        @NotBlank String internalPredictionsBufferEndpoint)
+public record InsightPredictionsProperties(
+        String collectorTimerEndpoint,
+        Long pollPeriodMillis,
+        @NotBlank String sourceEndpoint,
+        @NotBlank String bufferEndpoint)
 {
-    public PredictionListenerConfig
+    public InsightPredictionsProperties
     {
-        if (pollPeriod == null && predictionProcessorTriggerEndpoint == null)
+        if (pollPeriodMillis == null && collectorTimerEndpoint == null)
         {
             throw new PredictionApplierRuntimeException("Poll period is required when predictions source endpoint is not provided");
         }
 
-        if (pollPeriod != null)
+        if (pollPeriodMillis != null)
         {
-            predictionProcessorTriggerEndpoint = "quartz:prediction-processor-trigger?autoStartScheduler=true&trigger.repeatInterval=" + pollPeriod;
+            collectorTimerEndpoint = "quartz:predictions-collector-timer?autoStartScheduler=true&trigger.repeatInterval=" + pollPeriodMillis;
         }
     }
 }
