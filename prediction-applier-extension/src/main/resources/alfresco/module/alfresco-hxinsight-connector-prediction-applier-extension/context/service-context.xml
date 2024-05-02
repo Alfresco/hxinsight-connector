@@ -21,6 +21,12 @@
           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.NodeEntityResource">
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodes" ref="nodes" />
+    </bean>
 
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.PredictionChildrenRelation">
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodes" ref="nodes" />
     </bean>
 </beans>
