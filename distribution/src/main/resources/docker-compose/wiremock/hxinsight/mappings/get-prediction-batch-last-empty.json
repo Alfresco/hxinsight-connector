@@ -1,0 +1,12 @@
+{
+  "scenarioName": "Collect prediction batches",
+  "requiredScenarioState": "Empty",
+  "request": {
+    "method": "GET",
+    "urlPath": "/prediction-batches"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": []
+  }
+}
