@@ -41,6 +41,7 @@ import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
 {
     private String _id;

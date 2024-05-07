@@ -27,10 +27,12 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api.data_model;
 
 import org.alfresco.service.namespace.QName;
 
+/**
+ * Constants for the prediction data model (with namespace abbreviation "hxi").
+ */
 public class PredictionDataModel
 {
     private static final String HXI_URI = "http://www.alfresco.org/model/hxi/1.0";
-    private static final String HXI_PREFIX = "hxi";
 
     public static final QName TYPE_PREDICTION = QName.createQName(HXI_URI, "prediction");
     public static final QName PROP_PREDICTION_DATE_TIME = QName.createQName(HXI_URI, "predictionDateTime");
@@ -40,7 +42,6 @@ public class PredictionDataModel
     public static final QName PROP_PREVIOUS_VALUE = QName.createQName(HXI_URI, "previousValue");
     public static final QName PROP_UPDATE_TYPE = QName.createQName(HXI_URI, "updateType");
 
-    public static final QName ASPECT_PREDICTION_APPLIED = QName.createQName(HXI_URI, "predictionApplied");
     public static final QName PROP_LATEST_PREDICTION_DATE_TIME = QName.createQName(HXI_URI, "latestPredictionDateTime");
     public static final QName ASSOC_PREDICTED_BY = QName.createQName(HXI_URI, "predictedBy");
 }
