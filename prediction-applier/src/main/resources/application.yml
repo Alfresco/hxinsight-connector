@@ -18,27 +18,19 @@ spring:
 camel:
   springboot:
     main-run-controller: true
-  component:
-    aws2-sqs:
-      override-endpoint: true
-      uri-endpoint-override: http://localhost:4566
-      access-key: dummy_access_key
-      secret-key: dummy_secret_key
 
 hyland-experience:
-  insight:
-    prediction:
-      endpoint: aws2-sqs://arn:aws:sqs:us-east-1:000000000000:hxinsight-prediction-queue
-    prediction-listener:
-      poll-period: 300_000 #5 min
-      internal-predictions-buffer-endpoint: activemq:queue:predictions-buffer
-      hxi-predictions-endpoint: direct:mocked
   authentication:
     refresh-delay-minutes: 55
   authorization:
     application-name: acs-insight-connector
     service-user: insight-acs
     environment-key: hxai-env-key
+  insight:
+    predictions:
+      source-endpoint: direct:mocked
+      buffer-endpoint: activemq:queue:predictions-buffer
+      poll-period-millis: 300_000 # 5 minutes
 
 alfresco:
   repository:

@@ -24,24 +24,12 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.exception;
+package org.alfresco.hxi_connector.common.exception;
 
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
-
-public class LiveIngesterRuntimeException extends HxInsightConnectorRuntimeException
+public class ValidationException extends HxInsightConnectorRuntimeException
 {
-    public LiveIngesterRuntimeException(String message)
+    public ValidationException(String message)
     {
         super(message);
-    }
-
-    public LiveIngesterRuntimeException(Throwable cause)
-    {
-        super(cause);
-    }
-
-    public LiveIngesterRuntimeException(String message, Throwable cause)
-    {
-        super(message, cause);
     }
 }

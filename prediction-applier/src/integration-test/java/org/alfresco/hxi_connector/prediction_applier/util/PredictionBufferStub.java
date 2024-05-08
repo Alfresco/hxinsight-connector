@@ -26,36 +26,43 @@
 
 package org.alfresco.hxi_connector.prediction_applier.util;
 
+import static org.junit.Assert.assertEquals;
+
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.apache.camel.ProducerTemplate;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 
 @Component
 @RequiredArgsConstructor
-public class PredictionsTriggerStub
+public class PredictionBufferStub extends RouteBuilder
 {
+    private final InsightPredictionsProperties insightPredictionsProperties;
+    private final List<Prediction> handledPredictions = new ArrayList<>();
 
-    private final ProducerTemplate producerTemplate;
-
-    private final PredictionListenerConfig predictionListenerConfig;
-
-    public void triggerPredictionsProcessing()
+    @Override
+    public void configure()
     {
-        producerTemplate.sendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
+        from(insightPredictionsProperties.bufferEndpoint())
+                .routeId("predictions-buffer-stub")
+                .log("Handling predictions ${body}")
+                .unmarshal(new JacksonDataFormat(Prediction.class))
+                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(Prediction.class)));
     }
 
-    @SneakyThrows
-    public void triggerPredictionsProcessingAsync(long delayInMs)
+    public void assertAllPredictionsHandled(List<Prediction> predictions)
     {
-        Thread.sleep(delayInMs);
-        triggerPredictionsProcessingAsync();
+        assertEquals(predictions, handledPredictions);
     }
 
-    public void triggerPredictionsProcessingAsync()
+    public void reset()
     {
-        producerTemplate.asyncSendBody(predictionListenerConfig.predictionProcessorTriggerEndpoint(), null);
+        handledPredictions.clear();
     }
 }

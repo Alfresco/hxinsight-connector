@@ -24,18 +24,18 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.util;
+package org.alfresco.hxi_connector.common.util;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureNonNull;
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureNotBlank;
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
+import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
+import org.alfresco.hxi_connector.common.exception.ValidationException;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class EnsureUtilsTest
@@ -98,7 +98,7 @@ class EnsureUtilsTest
         ensureThat(1 == 1, () -> new CustomTestException("some message"));
     }
 
-    static class CustomTestException extends LiveIngesterRuntimeException
+    static class CustomTestException extends HxInsightConnectorRuntimeException
     {
 
         public CustomTestException(String message)

@@ -47,67 +47,67 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
-import org.alfresco.hxi_connector.prediction_applier.util.InternalPredictionBufferStub;
+import org.alfresco.hxi_connector.prediction_applier.util.PredictionBufferStub;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionSourceStub;
-import org.alfresco.hxi_connector.prediction_applier.util.PredictionsTriggerStub;
+import org.alfresco.hxi_connector.prediction_applier.util.PredictionTriggerStub;
 
 @Slf4j
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
         classes = {
-                HxPredictionReceiver.class, HxPredictionReceiverIntegrationTest.IntegrationPropertiesTestConfig.class,
-                InternalPredictionBufferStub.class, PredictionSourceStub.class, PredictionsTriggerStub.class
+                PredictionCollector.class, PredictionCollectorIntegrationTest.IntegrationPropertiesTestConfig.class,
+                PredictionSourceStub.class, PredictionTriggerStub.class, PredictionBufferStub.class
         })
 @EnableAutoConfiguration
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.LongVariable"})
-class HxPredictionReceiverIntegrationTest
+class PredictionCollectorIntegrationTest
 {
-    @Autowired
-    private InternalPredictionBufferStub internalPredictionBufferStub;
 
     @Autowired
     private PredictionSourceStub predictionSourceStub;
-
     @Autowired
-    private PredictionsTriggerStub predictionsTriggerStub;
+    private PredictionTriggerStub predictionTriggerStub;
+    @Autowired
+    private PredictionBufferStub predictionBufferStub;
 
     @AfterEach
     void tearDown()
     {
-        internalPredictionBufferStub.reset();
+        predictionBufferStub.reset();
     }
 
     @Test
-    void shouldDoNothingIfPredictionProcessingNotTriggered()
+    void shouldDoNothingIfPredictionsCollectingNotTriggered()
     {
         // given
-        List<Prediction> predictions1 = List.of(new Prediction("1", "1"));
-        List<Prediction> predictions2 = List.of(new Prediction("2", "2"));
+        List<Prediction> predictionsBatch1 = List.of(new Prediction("1", "1"));
+        List<Prediction> predictionsBatch2 = List.of(new Prediction("2", "2"));
 
-        predictionSourceStub.shouldReturnPredictions(predictions1, predictions2);
-
-        // then
-        internalPredictionBufferStub.assertAllPredictionsHandled(Collections.emptyList());
-    }
-
-    @Test
-    void shouldProcessPredictionsIfProcessingTriggered()
-    {
-        // given
-        List<Prediction> predictions1 = List.of(new Prediction("1", "1"), new Prediction("2", "2"));
-        List<Prediction> predictions2 = List.of(new Prediction("3", "3"), new Prediction("4", "4"));
-
-        List<Prediction> allPredictions = Stream.concat(predictions1.stream(), predictions2.stream()).toList();
-
-        predictionSourceStub.shouldReturnPredictions(predictions1, predictions2);
+        predictionSourceStub.shouldReturnPredictions(predictionsBatch1, predictionsBatch2);
 
         // when
-        predictionsTriggerStub.triggerPredictionsProcessing();
 
         // then
-        internalPredictionBufferStub.assertAllPredictionsHandled(allPredictions);
+        predictionBufferStub.assertAllPredictionsHandled(Collections.emptyList());
+    }
+
+    @Test
+    void shouldProcessPredictionsIfCollectingTriggered()
+    {
+        // given
+        List<Prediction> predictionsBatch1 = List.of(new Prediction("1", "1"), new Prediction("2", "2"));
+        List<Prediction> predictionsBatch2 = List.of(new Prediction("3", "3"), new Prediction("4", "4"));
+
+        predictionSourceStub.shouldReturnPredictions(predictionsBatch1, predictionsBatch2);
+
+        // when
+        predictionTriggerStub.triggerPredictionsCollecting();
+
+        // then
+        List<Prediction> expectedPredictions = Stream.concat(predictionsBatch1.stream(), predictionsBatch2.stream()).toList();
+        predictionBufferStub.assertAllPredictionsHandled(expectedPredictions);
     }
 
     @Test
@@ -115,7 +115,7 @@ class HxPredictionReceiverIntegrationTest
     void shouldIgnoreTriggerSignalIfProcessingIsPending()
     {
         // given
-        ListAppender<ILoggingEvent> logs = createLogsListAppender(HxPredictionReceiver.class);
+        ListAppender<ILoggingEvent> logs = createLogsListAppender(PredictionCollector.class);
 
         List<Prediction> predictions = List.of(new Prediction("1", "1"), new Prediction("2", "2"), new Prediction("3", "3"));
         List<List<Prediction>> predictionsBatches = IntStream.range(0, 11).boxed().map(i -> predictions).toList();
@@ -123,8 +123,8 @@ class HxPredictionReceiverIntegrationTest
         predictionSourceStub.shouldReturnPredictions(5, predictionsBatches);
 
         // when
-        predictionsTriggerStub.triggerPredictionsProcessingAsync();
-        predictionsTriggerStub.triggerPredictionsProcessingAsync(50);
+        predictionTriggerStub.triggerPredictionsCollectingAsync();
+        predictionTriggerStub.triggerPredictionsCollectingAsync(50);
 
         Thread.sleep(75);
         // then
@@ -140,13 +140,13 @@ class HxPredictionReceiverIntegrationTest
     public static class IntegrationPropertiesTestConfig
     {
         @Bean
-        public PredictionListenerConfig predictionListenerConfig()
+        public InsightPredictionsProperties insightPredictionsProperties()
         {
-            return new PredictionListenerConfig(
-                    "direct:prediction-processor-trigger",
+            return new InsightPredictionsProperties(
+                    "direct:predictions-collector-timer",
                     null,
                     "direct:predictions-source",
-                    "direct:internal-predictions-buffer");
+                    "direct:predictions-buffer");
         }
     }
 }

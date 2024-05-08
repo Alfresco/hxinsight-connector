@@ -1,0 +1,13 @@
+{
+  "scenarioName": "Collect prediction batches",
+  "requiredScenarioState": "Started",
+  "newScenarioState": "Empty",
+  "request": {
+    "method": "GET",
+    "urlPath": "/prediction-batches"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "prediction-batch-first.json"
+  }
+}

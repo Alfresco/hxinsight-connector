@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,13 +23,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
-package org.alfresco.hxi_connector.live_ingester.domain.exception;
+import java.util.Set;
 
-public class ValidationException extends LiveIngesterRuntimeException
+import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
+
+@Component
+public class PredictionMapper
 {
-    public ValidationException(String message)
+
+    public Node map(Prediction prediction)
     {
-        super(message);
+        return new Node(prediction.objectId(), Set.of("cm:versionable", "cm:auditable", "hxi:predictionApplied"));
     }
 }

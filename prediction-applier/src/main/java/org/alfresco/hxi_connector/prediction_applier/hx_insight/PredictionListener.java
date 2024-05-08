@@ -23,33 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.hxinsight;
+package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.repository.NodesClient;
 
 @Component
+@RequiredArgsConstructor
 @Slf4j
 public class PredictionListener extends RouteBuilder
 {
     static final String ROUTE_ID = "prediction-listener";
 
     private final PredictionMapper predictionMapper;
-    private final String endpoint;
-
-    public PredictionListener(PredictionMapper predictionMapper, @Value("${hyland-experience.insight.prediction.endpoint}") String endpoint)
-    {
-        super();
-        this.predictionMapper = predictionMapper;
-        this.endpoint = endpoint;
-    }
+    private final InsightPredictionsProperties insightPredictionsProperties;
 
     @Override
     public void configure()
@@ -58,7 +53,7 @@ public class PredictionListener extends RouteBuilder
                 .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
                 .stop();
 
-        from(endpoint)
+        from(insightPredictionsProperties.bufferEndpoint())
                 .routeId(ROUTE_ID)
                 .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")
                 .unmarshal()

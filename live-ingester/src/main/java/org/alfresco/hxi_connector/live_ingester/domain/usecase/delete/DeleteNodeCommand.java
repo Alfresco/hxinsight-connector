@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.delete;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
 
 public record DeleteNodeCommand(String nodeId)
 {

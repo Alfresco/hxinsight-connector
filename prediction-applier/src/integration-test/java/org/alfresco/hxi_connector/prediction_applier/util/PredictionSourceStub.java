@@ -39,22 +39,22 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.prediction_applier.config.PredictionListenerConfig;
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 
 @Component
 @RequiredArgsConstructor
 public class PredictionSourceStub extends RouteBuilder
 {
-    private final PredictionListenerConfig predictionListenerConfig;
-
+    private final InsightPredictionsProperties insightPredictionsProperties;
     private long deliveryDelayInMs;
     private Queue<List<Prediction>> predictionsBatchesQueue = new LinkedList<>();
 
     @Override
     public void configure()
     {
-        from(predictionListenerConfig.hxiPredictionsEndpoint())
+        from(insightPredictionsProperties.sourceEndpoint())
+                .routeId("predictions-source-stub")
                 .setBody(exchange -> getPredictionsBatch())
                 .marshal(new JacksonDataFormat());
     }
@@ -78,5 +78,4 @@ public class PredictionSourceStub extends RouteBuilder
         this.deliveryDelayInMs = delayInMs;
         this.predictionsBatchesQueue = new LinkedList<>(predictionsBatches);
     }
-
 }
