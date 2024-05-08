@@ -31,14 +31,12 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 
 @Accessors(prefix = {"_", ""})
 @Getter
-@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @SuppressWarnings("PMD.FieldNamingConventions")
