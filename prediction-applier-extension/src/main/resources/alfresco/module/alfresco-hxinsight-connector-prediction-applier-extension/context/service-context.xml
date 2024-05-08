@@ -21,8 +21,8 @@
           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
     <bean id="predictionService" class="org.alfresco.hxi_connector.prediction_applier.service.PredictionServiceImpl">
-        <property name="nodeService" ref="NodeService"/>
-        <property name="namespaceService" ref="NamespaceService"/>
+        <constructor-arg name="nodeService" ref="NodeService"/>
+        <constructor-arg name="namespaceService" ref="NamespaceService"/>
     </bean>
 
 

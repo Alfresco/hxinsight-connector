@@ -46,7 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
@@ -56,11 +56,11 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 
-@Setter
+@RequiredArgsConstructor
 public class PredictionServiceImpl implements PredictionService
 {
-    private NodeService nodeService;
-    private NamespaceService namespaceService;
+    private final NodeService nodeService;
+    private final NamespaceService namespaceService;
 
     @Override
     public List<Prediction> applyPredictions(NodeRef nodeRef, List<Prediction> predictions)

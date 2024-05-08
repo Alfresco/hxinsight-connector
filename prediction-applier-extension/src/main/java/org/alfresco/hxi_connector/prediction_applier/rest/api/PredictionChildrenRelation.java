@@ -39,6 +39,7 @@ import org.alfresco.rest.api.impl.NodesImpl;
 import org.alfresco.rest.framework.resource.RelationshipResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.RelationshipResourceAction;
 import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
+import org.alfresco.rest.framework.resource.parameters.ListPage;
 import org.alfresco.rest.framework.resource.parameters.Paging;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -62,11 +63,7 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
         List<PredictionModel> predictionModels = predictions.stream().map(PredictionModel::fromServiceModel).collect(toList());
 
         Paging paging = params.getPaging();
-        return CollectionWithPagingInfo.asPaged(
-                paging,
-                predictionModels,
-                predictionModels.size() > paging.getSkipCount() + paging.getMaxItems(),
-                predictionModels.size());
+        return ListPage.of(predictionModels, paging);
     }
 
     @Override

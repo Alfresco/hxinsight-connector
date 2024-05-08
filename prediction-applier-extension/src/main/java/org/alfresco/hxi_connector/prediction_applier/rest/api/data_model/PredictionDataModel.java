@@ -25,12 +25,17 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api.data_model;
 
+import static lombok.AccessLevel.PRIVATE;
+
+import lombok.NoArgsConstructor;
+
 import org.alfresco.service.namespace.QName;
 
 /**
  * Constants for the prediction data model (with namespace abbreviation "hxi").
  */
-public class PredictionDataModel
+@NoArgsConstructor(access = PRIVATE)
+public final class PredictionDataModel
 {
     private static final String HXI_URI = "http://www.alfresco.org/model/hxi/1.0";
 
