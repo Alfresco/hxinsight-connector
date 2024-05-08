@@ -27,9 +27,9 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureThat;
 
 import java.util.Set;
 

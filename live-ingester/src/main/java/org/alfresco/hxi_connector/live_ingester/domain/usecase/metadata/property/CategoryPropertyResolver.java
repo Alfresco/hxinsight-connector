@@ -26,7 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.util.List;
 import java.util.Map;

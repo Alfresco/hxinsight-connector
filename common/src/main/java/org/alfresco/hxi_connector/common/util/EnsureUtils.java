@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.util;
+package org.alfresco.hxi_connector.common.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
@@ -33,8 +33,8 @@ import java.util.function.Supplier;
 
 import lombok.NoArgsConstructor;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
+import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
+import org.alfresco.hxi_connector.common.exception.ValidationException;
 
 @NoArgsConstructor(access = PRIVATE)
 public class EnsureUtils
@@ -54,7 +54,7 @@ public class EnsureUtils
         ensureThat(isOk, () -> new ValidationException(String.format(errorMessage, formatArgs)));
     }
 
-    public static void ensureThat(boolean isOk, Supplier<? extends LiveIngesterRuntimeException> exceptionSupplier)
+    public static void ensureThat(boolean isOk, Supplier<? extends HxInsightConnectorRuntimeException> exceptionSupplier)
     {
         if (!isOk)
         {
