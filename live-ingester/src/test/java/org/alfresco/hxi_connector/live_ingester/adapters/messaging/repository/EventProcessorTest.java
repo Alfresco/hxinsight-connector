@@ -31,9 +31,9 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.EventProcessor.PREDICTION_APPLIED_ASPECT;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.EventProcessor.PREDICTION_NODE_TYPE;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.EventProcessor.PREDICTION_TIME_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_APPLIED_ASPECT;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_NODE_TYPE;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_TIME_PROPERTY;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -269,8 +269,6 @@ class EventProcessorTest
     {
         given(mockRepoEventFilterHandler.handleAndGetAllowed(mockExchange, mockFilter)).willReturn(false);
         given(mockEvent.getId()).willReturn("event-id");
-        given(mockEvent.getData()).willReturn(mock());
-        given(mockEvent.getData().getResource()).willReturn(mock());
 
         // when
         eventProcessor.process(mockExchange);

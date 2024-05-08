@@ -31,6 +31,8 @@ import static java.util.Optional.ofNullable;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeDeleted;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeUpdated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isNotPredictionApplyEvent;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isNotPredictionNodeEvent;
 
 import java.util.Optional;
 
@@ -59,9 +61,6 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class EventProcessor
 {
-    static final String PREDICTION_NODE_TYPE = "hxi:prediction";
-    static final String PREDICTION_APPLIED_ASPECT = "hxi:predictionApplied";
-    static final String PREDICTION_TIME_PROPERTY = "hxi:latestPredictionDateTime";
 
     private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
@@ -91,28 +90,6 @@ public class EventProcessor
         {
             log.atDebug().log("Repository event of id: {} is denied for further processing", event.getId());
         }
-    }
-
-    private boolean isNotPredictionNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        return !PREDICTION_NODE_TYPE.equals(event.getData().getResource().getNodeType());
-    }
-
-    private boolean isNotPredictionApplyEvent(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        if (event.getData().getResource().getAspectNames().contains(PREDICTION_APPLIED_ASPECT))
-        {
-            String actualPredictionTime = (String) event.getData().getResource().getProperties().get(PREDICTION_TIME_PROPERTY);
-            String beforePredictionTime = (String) Optional.ofNullable(event.getData().getResourceBefore())
-                    .map(NodeResource::getProperties)
-                    .map(properties -> properties.get(PREDICTION_TIME_PROPERTY))
-                    .orElse(null);
-
-            return actualPredictionTime != null && actualPredictionTime.equals(beforePredictionTime)
-                    || actualPredictionTime == null && beforePredictionTime == null;
-        }
-
-        return true;
     }
 
     private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)
