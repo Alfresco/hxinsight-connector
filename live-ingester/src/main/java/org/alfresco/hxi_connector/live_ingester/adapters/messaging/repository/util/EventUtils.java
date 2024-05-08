@@ -35,7 +35,9 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import java.util.Collections;
 import java.util.Optional;
+import java.util.Set;
 
 import lombok.NoArgsConstructor;
 
@@ -91,7 +93,8 @@ public final class EventUtils
 
     public static boolean isNotPredictionApplyEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (event.getData().getResource().getAspectNames().contains(PREDICTION_APPLIED_ASPECT))
+        Set<String> aspects = Optional.ofNullable(event.getData().getResource().getAspectNames()).orElse(Collections.emptySet());
+        if (aspects.contains(PREDICTION_APPLIED_ASPECT))
         {
             String actualPredictionTime = (String) event.getData().getResource().getProperties().get(PREDICTION_TIME_PROPERTY);
             String beforePredictionTime = (String) Optional.ofNullable(event.getData().getResourceBefore())
