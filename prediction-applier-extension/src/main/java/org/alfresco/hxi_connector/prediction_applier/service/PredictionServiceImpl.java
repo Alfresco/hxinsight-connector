@@ -48,6 +48,7 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -65,6 +66,8 @@ public class PredictionServiceImpl implements PredictionService
     @Override
     public List<Prediction> applyPredictions(NodeRef nodeRef, List<Prediction> predictions)
     {
+        EnsureUtils.ensureNotNullOrEmpty(predictions, "Predictions list cannot be null or empty");
+
         Map<QName, Serializable> nodeProperties = new HashMap<>(nodeService.getProperties(nodeRef));
 
         Map<QName, ChildAssociationRef> existingPredictedProperties = nodeService.getChildAssocs(nodeRef, Set.of(TYPE_PREDICTION))
@@ -85,9 +88,11 @@ public class PredictionServiceImpl implements PredictionService
                 {
                     continue;
                 }
-                Map<QName, Serializable> predictionProperties = propertiesFromPrediction(prediction, previousPredictedValue);
+                Serializable previousValue = existingPredictionMetadata.get(PROP_PREVIOUS_VALUE);
+                Map<QName, Serializable> predictionProperties = propertiesFromPrediction(prediction, previousValue);
                 nodeService.setProperties(predictionNodeRef, predictionProperties);
                 prediction.setId(predictionNodeRef.getId());
+                prediction.setPreviousValue(previousValue);
             }
             else
             {
@@ -102,8 +107,11 @@ public class PredictionServiceImpl implements PredictionService
             nodeProperties.put(propertyQName, prediction.getPredictionValue());
         }
 
-        nodeProperties.put(PROP_LATEST_PREDICTION_DATE_TIME, new Date());
-        nodeService.setProperties(nodeRef, nodeProperties);
+        if (!returnList.isEmpty())
+        {
+            nodeProperties.put(PROP_LATEST_PREDICTION_DATE_TIME, new Date());
+            nodeService.setProperties(nodeRef, nodeProperties);
+        }
 
         return returnList;
     }

@@ -36,6 +36,10 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-hxinsight-connector-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-test</artifactId>
             <scope>test</scope>
             <exclusions>

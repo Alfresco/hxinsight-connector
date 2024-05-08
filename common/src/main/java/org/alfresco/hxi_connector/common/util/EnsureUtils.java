@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.common.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import java.util.Collection;
 import java.util.Objects;
 import java.util.function.Supplier;
 
@@ -47,6 +48,11 @@ public class EnsureUtils
     public static void ensureNonNull(Object o, String errorMessage, Object... formatArgs)
     {
         ensureThat(Objects.nonNull(o), errorMessage, formatArgs);
+    }
+
+    public static void ensureNotNullOrEmpty(Collection<?> collection, String errorMessage, Object... formatArgs)
+    {
+        ensureThat(Objects.nonNull(collection) && !collection.isEmpty(), errorMessage, formatArgs);
     }
 
     public static void ensureThat(boolean isOk, String errorMessage, Object... formatArgs)
