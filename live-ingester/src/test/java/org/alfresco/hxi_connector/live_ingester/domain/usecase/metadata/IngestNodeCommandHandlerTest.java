@@ -53,7 +53,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.ValidationException;
+import org.alfresco.hxi_connector.common.exception.ValidationException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;

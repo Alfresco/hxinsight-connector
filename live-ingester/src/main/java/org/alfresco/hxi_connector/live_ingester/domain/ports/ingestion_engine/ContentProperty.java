@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
 
 public record ContentProperty(String propertyName, String id, String mimeType, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName)
 {
