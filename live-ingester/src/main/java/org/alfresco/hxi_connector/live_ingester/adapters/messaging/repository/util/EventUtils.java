@@ -35,7 +35,10 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import java.io.Serializable;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
@@ -97,13 +100,16 @@ public final class EventUtils
         if (aspects.contains(PREDICTION_APPLIED_ASPECT))
         {
             String actualPredictionTime = (String) event.getData().getResource().getProperties().get(PREDICTION_TIME_PROPERTY);
-            String beforePredictionTime = (String) Optional.ofNullable(event.getData().getResourceBefore())
+
+            Map<String, Serializable> beforeProperties = Optional.ofNullable(event.getData().getResourceBefore())
                     .map(NodeResource::getProperties)
-                    .map(properties -> properties.get(PREDICTION_TIME_PROPERTY))
                     .orElse(null);
 
-            return actualPredictionTime != null && actualPredictionTime.equals(beforePredictionTime)
-                    || actualPredictionTime == null && beforePredictionTime == null;
+            if (beforeProperties != null && beforeProperties.containsKey(PREDICTION_TIME_PROPERTY))
+            {
+                String beforePredictionTime = (String) beforeProperties.get(PREDICTION_TIME_PROPERTY);
+                return Objects.equals(actualPredictionTime, beforePredictionTime);
+            }
         }
 
         return true;

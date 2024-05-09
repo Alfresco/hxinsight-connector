@@ -140,8 +140,75 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                         "cm:title": "Purchase Order",
                         "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
+                        "hxi:latestPredictionDateTime": null
                       },
                       "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ]
+                    }
+                  }
+                }""";
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        containerSupport.expectNoHxIngestMessagesReceived();
+    }
+
+    @Test
+    void testNewerPredictionApplyRequest()
+    {
+        // given
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "ae5dac3c-25d0-438d-b148-2084d1ab05a6",
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2021-01-26T10:29:42.99524Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "b5b1ebfe-45fc-4f86-b71b-421996482881",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "23452345-2345-2345-2345-234523452345",
+                      "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "abeecher",
+                        "displayName": "Alice Beecher"
+                      },
+                      "modifiedAt": "2021-01-26T10:29:42.529Z",
+                      "content": {
+                        "mimeType": "application/pdf",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "cm:title": "Purchase Order",
+                        "cm:versionType": "MAJOR",
+                        "cm:versionLabel": "1.0",
+                        "hxi:latestPredictionDateTime": "2024-05-09T19:00:00.000Z"
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled", "hxi:predictionApplied" ],
+                      "isFolder": false,
+                      "isFile": true
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "modifiedAt": "2021-01-21T11:14:25.223Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "properties": {
+                        "hxi:latestPredictionDateTime": "2024-05-02T08:00:00.000Z"
+                      }
                     }
                   }
                 }""";
@@ -210,9 +277,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                       "properties": {
                         "cm:title": null,
                         "cm:versionType": "MAJOR",
-                        "cm:versionLabel": "1.0",
-                        "cm:description": "Old Description",
-                        "hxi:latestPredictionDateTime": "2024-05-08T17:00:42.529Z"
+                        "cm:description": "Old Description"
                       },
                       "aspectNames": [ "cm:versionable", "cm:thumbnailModification", "cm:author", "hxi:predictionApplied" ]
                     }
