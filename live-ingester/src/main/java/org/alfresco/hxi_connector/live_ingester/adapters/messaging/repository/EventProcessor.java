@@ -31,6 +31,8 @@ import static java.util.Optional.ofNullable;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeDeleted;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeUpdated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isNotPredictionApplyEvent;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isNotPredictionNodeEvent;
 
 import java.util.Optional;
 
@@ -59,6 +61,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class EventProcessor
 {
+
     private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final DeleteNodeCommandHandler deleteNodeCommandHandler;
@@ -72,9 +75,16 @@ public class EventProcessor
         final RepoEvent<DataAttributes<NodeResource>> event = exchange.getIn().getBody(RepoEvent.class);
         if (allowEvent)
         {
-            handleMetadataPropertiesChange(event);
-            handleContentChange(event);
-            handleNodeDeleteEvent(event);
+            if (isNotPredictionNodeEvent(event) && isNotPredictionApplyEvent(event))
+            {
+                handleMetadataPropertiesChange(event);
+                handleContentChange(event);
+                handleNodeDeleteEvent(event);
+            }
+            else
+            {
+                log.atDebug().log("Detected prediction event. Further processing of event with id: {} was skipped.", event.getId());
+            }
         }
         else
         {

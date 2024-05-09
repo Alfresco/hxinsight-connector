@@ -31,9 +31,15 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_APPLIED_ASPECT;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_NODE_TYPE;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_TIME_PROPERTY;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+
+import java.util.Map;
+import java.util.Set;
 
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -136,6 +142,7 @@ class EventProcessorTest
         given(mockMessage.getBody(RepoEvent.class)).willReturn(mockEvent);
         given(mockEvent.getType()).willReturn(NODE_UPDATED.getType());
         given(mockEvent.getData()).willReturn(mock());
+        given(mockEvent.getData().getResource()).willReturn(mock());
 
         // when
         eventProcessor.process(mockExchange);
@@ -245,6 +252,7 @@ class EventProcessorTest
         given(mockMessage.getBody(RepoEvent.class)).willReturn(mockEvent);
         given(mockEvent.getType()).willReturn(NODE_DELETED.getType());
         given(mockEvent.getData()).willReturn(mock());
+        given(mockEvent.getData().getResource()).willReturn(mock());
         DeleteNodeCommand deleteNodeCommand = mock();
         given(repoEventMapper.mapToDeleteNodeCommand(mockEvent)).willReturn(deleteNodeCommand);
 
@@ -261,6 +269,42 @@ class EventProcessorTest
     {
         given(mockRepoEventFilterHandler.handleAndGetAllowed(mockExchange, mockFilter)).willReturn(false);
         given(mockEvent.getId()).willReturn("event-id");
+
+        // when
+        eventProcessor.process(mockExchange);
+
+        // then
+        then(repoEventMapper).shouldHaveNoInteractions();
+        then(ingestNodeCommandHandler).shouldHaveNoInteractions();
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+        then(deleteNodeCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldNotProcessWhenPredictionNodeEvent()
+    {
+        given(mockEvent.getId()).willReturn("event-id");
+        given(mockEvent.getData()).willReturn(mock());
+        given(mockEvent.getData().getResource()).willReturn(mock());
+        given(mockEvent.getData().getResource().getNodeType()).willReturn(PREDICTION_NODE_TYPE);
+
+        // when
+        eventProcessor.process(mockExchange);
+
+        // then
+        then(repoEventMapper).shouldHaveNoInteractions();
+        then(ingestNodeCommandHandler).shouldHaveNoInteractions();
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+        then(deleteNodeCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldNotProcessWhenPredictionApplyEvent()
+    {
+        given(mockEvent.getData()).willReturn(mock());
+        given(mockEvent.getData().getResource()).willReturn(mock());
+        given(mockEvent.getData().getResource().getAspectNames()).willReturn(Set.of(PREDICTION_APPLIED_ASPECT));
+        given(mockEvent.getData().getResource().getProperties()).willReturn(Map.of(PREDICTION_TIME_PROPERTY, "time"));
 
         // when
         eventProcessor.process(mockExchange);
