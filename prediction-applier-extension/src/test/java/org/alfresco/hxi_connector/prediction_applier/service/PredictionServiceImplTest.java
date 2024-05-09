@@ -92,7 +92,7 @@ public class PredictionServiceImplTest
         List<String> predictedProperties = predictionService.getPredictedProperties(NODE_REF);
 
         // then
-        assertEquals(predictedProperties, emptyList());
+        assertEquals(emptyList(), predictedProperties);
     }
 
     @Test
