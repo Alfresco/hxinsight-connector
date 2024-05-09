@@ -124,7 +124,7 @@ public class PredictionServiceImplTest
     {
         // given
         Map<QName, Serializable> properties = Map.of(
-                PROP_PREDICTION_DATE_TIME, new Date(1234567890L),
+                PROP_PREDICTION_DATE_TIME, new Date(1_234_567_890L),
                 PROP_CONFIDENCE_LEVEL, 0.5f,
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
@@ -138,7 +138,7 @@ public class PredictionServiceImplTest
         List<Prediction> predictions = predictionService.getPredictions(NODE_REF);
 
         // then
-        Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1234567890L),
+        Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1_234_567_890L),
                 0.5f, "hx-model-id", "blue", "red", AUTOCORRECT);
         assertEquals(List.of(expectedPrediction), predictions);
     }
@@ -151,7 +151,7 @@ public class PredictionServiceImplTest
         given(nodeService.getProperties(NODE_REF)).willReturn(Map.of(PROPERTY_QNAME, "red"));
         given(namespaceService.getNamespaceURI(NAMESPACE_PREFIX)).willReturn(NAMESPACE);
         Map<QName, Serializable> expectedProperties = Map.of(
-                PROP_PREDICTION_DATE_TIME, new Date(1234567890L),
+                PROP_PREDICTION_DATE_TIME, new Date(1_234_567_890L),
                 PROP_CONFIDENCE_LEVEL, 0.5f,
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
@@ -160,12 +160,12 @@ public class PredictionServiceImplTest
         given(nodeService.createNode(NODE_REF, ASSOC_PREDICTED_BY, PROPERTY_QNAME, TYPE_PREDICTION, expectedProperties)).willReturn(CHILD_ASSOC_REF);
 
         // when
-        Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1234567890L),
+        Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1_234_567_890L),
                 0.5f, "hx-model-id", "blue", null, AUTOCORRECT);
         List<Prediction> returnedPredictions = predictionService.applyPredictions(NODE_REF, List.of(prediction));
 
         // then
-        Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1234567890L),
+        Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1_234_567_890L),
                 0.5f, "hx-model-id", "blue", "red", AUTOCORRECT);
         assertEquals(List.of(expectedPrediction), returnedPredictions);
         assertPropertySet(NODE_REF, PROPERTY_QNAME, "blue");
@@ -182,12 +182,12 @@ public class PredictionServiceImplTest
         given(namespaceService.getNamespaceURI(NAMESPACE_PREFIX)).willReturn(NAMESPACE);
 
         // when
-        Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1234567890L),
+        Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1_234_567_890L),
                 0.5f, "hx-model-id", "blue", null, AUTOCORRECT);
         List<Prediction> returnedPredictions = predictionService.applyPredictions(NODE_REF, List.of(prediction));
 
         // then
-        Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1234567890L),
+        Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1_234_567_890L),
                 0.5f, "hx-model-id", "blue", "red", AUTOCORRECT);
         assertEquals(List.of(expectedPrediction), returnedPredictions);
         assertPropertySet(NODE_REF, PROPERTY_QNAME, "blue");
@@ -212,7 +212,7 @@ public class PredictionServiceImplTest
         given(namespaceService.getNamespaceURI(NAMESPACE_PREFIX)).willReturn(NAMESPACE);
 
         // when
-        Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1234567890L),
+        Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1_234_567_890L),
                 0.5f, "hx-model-id", "blue", null, AUTOCORRECT);
         List<Prediction> returnedPredictions = predictionService.applyPredictions(NODE_REF, List.of(prediction));
 
