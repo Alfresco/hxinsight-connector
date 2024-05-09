@@ -301,7 +301,6 @@ class EventProcessorTest
     @Test
     void shouldNotProcessWhenPredictionApplyEvent()
     {
-        given(mockEvent.getId()).willReturn("event-id");
         given(mockEvent.getData()).willReturn(mock());
         given(mockEvent.getData().getResource()).willReturn(mock());
         given(mockEvent.getData().getResource().getAspectNames()).willReturn(Set.of(PREDICTION_APPLIED_ASPECT));
