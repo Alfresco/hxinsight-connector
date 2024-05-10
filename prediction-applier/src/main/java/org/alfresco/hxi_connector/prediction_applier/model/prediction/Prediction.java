@@ -25,8 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.model.prediction;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record Prediction(String id, String objectId)
+public record Prediction(
+        String field,
+        Double confidence,
+        Object value)
 {}

@@ -48,7 +48,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionBufferStub;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionSourceStub;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionTriggerStub;
@@ -82,8 +82,8 @@ class PredictionCollectorIntegrationTest
     void shouldDoNothingIfPredictionsCollectingNotTriggered()
     {
         // given
-        List<Prediction> predictionsBatch1 = List.of(new Prediction("1", "1"));
-        List<Prediction> predictionsBatch2 = List.of(new Prediction("2", "2"));
+        List<PredictionEntry> predictionsBatch1 = List.of(new PredictionEntry("1", "1", null, null));
+        List<PredictionEntry> predictionsBatch2 = List.of(new PredictionEntry("2", "2", null, null));
 
         predictionSourceStub.shouldReturnPredictions(predictionsBatch1, predictionsBatch2);
 
@@ -97,8 +97,8 @@ class PredictionCollectorIntegrationTest
     void shouldProcessPredictionsIfCollectingTriggered()
     {
         // given
-        List<Prediction> predictionsBatch1 = List.of(new Prediction("1", "1"), new Prediction("2", "2"));
-        List<Prediction> predictionsBatch2 = List.of(new Prediction("3", "3"), new Prediction("4", "4"));
+        List<PredictionEntry> predictionsBatch1 = List.of(new PredictionEntry("1", "1", null, null), new PredictionEntry("2", "2", null, null));
+        List<PredictionEntry> predictionsBatch2 = List.of(new PredictionEntry("3", "3", null, null), new PredictionEntry("4", "4", null, null));
 
         predictionSourceStub.shouldReturnPredictions(predictionsBatch1, predictionsBatch2);
 
@@ -106,7 +106,7 @@ class PredictionCollectorIntegrationTest
         predictionTriggerStub.triggerPredictionsCollecting();
 
         // then
-        List<Prediction> expectedPredictions = Stream.concat(predictionsBatch1.stream(), predictionsBatch2.stream()).toList();
+        List<PredictionEntry> expectedPredictions = Stream.concat(predictionsBatch1.stream(), predictionsBatch2.stream()).toList();
         predictionBufferStub.assertAllPredictionsHandled(expectedPredictions);
     }
 
@@ -117,8 +117,8 @@ class PredictionCollectorIntegrationTest
         // given
         ListAppender<ILoggingEvent> logs = createLogsListAppender(PredictionCollector.class);
 
-        List<Prediction> predictions = List.of(new Prediction("1", "1"), new Prediction("2", "2"), new Prediction("3", "3"));
-        List<List<Prediction>> predictionsBatches = IntStream.range(0, 11).boxed().map(i -> predictions).toList();
+        List<PredictionEntry> predictions = List.of(new PredictionEntry("1", "1", null, null), new PredictionEntry("2", "2", null, null), new PredictionEntry("3", "3", null, null));
+        List<List<PredictionEntry>> predictionsBatches = IntStream.range(0, 11).boxed().map(i -> predictions).toList();
 
         predictionSourceStub.shouldReturnPredictions(5, predictionsBatches);
 

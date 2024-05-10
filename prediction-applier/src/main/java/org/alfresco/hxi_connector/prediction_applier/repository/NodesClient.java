@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.prediction_applier.repository;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 
 import java.net.UnknownHostException;
 import java.util.Set;
@@ -98,6 +99,7 @@ public class NodesClient extends RouteBuilder
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
             .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
+            .removeHeader(AUTHORIZATION) // remove Bearer token to avoid 401 from Alfresco
             .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl(), NODE_ID_HEADER, nodesApiProperties.username(), nodesApiProperties.password()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))

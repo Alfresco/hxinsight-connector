@@ -23,21 +23,15 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.hx_insight;
+package org.alfresco.hxi_connector.prediction_applier.model.prediction;
 
-import java.util.Set;
+import java.util.List;
 
-import org.springframework.stereotype.Component;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
-
-@Component
-public class PredictionMapper
-{
-
-    public Node map(PredictionEntry prediction)
-    {
-        return new Node(prediction.objectId(), Set.of("cm:versionable", "cm:auditable", "hxi:predictionApplied"));
-    }
-}
+public record PredictionEntry(
+        String objectId,
+        String modelId,
+        String enrichmentType,
+        @JsonProperty("prediction") List<Prediction> predictions)
+{}
