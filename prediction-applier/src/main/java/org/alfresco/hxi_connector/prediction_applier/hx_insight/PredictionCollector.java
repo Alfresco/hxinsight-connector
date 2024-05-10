@@ -137,12 +137,12 @@ public class PredictionCollector extends RouteBuilder
                                     .to(insightPredictionsProperties.bufferEndpoint())
                                 .end()
                             .end()
-                            .setHeader("predictionsPage").spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
+                            .setHeader(PREDICTIONS_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
                         .end()
                         // notify HxI -> finished batch processing
                     .end()
                 .end()
-                .setHeader("batchesPage").spel("#{request.headers['%s'] + 1}".formatted(BATCHES_PAGE_NO_HEADER))
+                .setHeader(BATCHES_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(BATCHES_PAGE_NO_HEADER))
             .end()
             .log(DEBUG, log, "Finished processing predictions")
         .end();
