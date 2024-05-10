@@ -82,6 +82,7 @@
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-shade-plugin.version>3.5.3</maven-shade-plugin.version>
         <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <spotless-plugin.version>2.43.0</spotless-plugin.version>
@@ -302,6 +303,11 @@
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>${maven-jar-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-shade-plugin</artifactId>
+                    <version>${maven-shade-plugin.version}</version>
                 </plugin>
 
                 <plugin>
