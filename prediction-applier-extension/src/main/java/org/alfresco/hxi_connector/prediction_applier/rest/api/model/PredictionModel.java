@@ -51,6 +51,16 @@ public class PredictionModel
     private Serializable _previousValue;
     private UpdateType updateType;
 
+    public PredictionModel(String property, Date predictionDateTime, float confidenceLevel, String modelId, Serializable predictionValue, UpdateType updateType)
+    {
+        this.property = property;
+        this.predictionDateTime = predictionDateTime;
+        this.confidenceLevel = confidenceLevel;
+        this.modelId = modelId;
+        this.predictionValue = predictionValue;
+        this.updateType = updateType;
+    }
+
     public Prediction toServiceModel()
     {
         return new Prediction(_id, property, predictionDateTime, confidenceLevel, modelId, predictionValue, _previousValue, updateType);

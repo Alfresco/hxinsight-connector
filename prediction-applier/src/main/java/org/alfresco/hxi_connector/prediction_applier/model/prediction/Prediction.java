@@ -25,8 +25,14 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.model.prediction;
 
+import java.io.Serializable;
+import java.util.Date;
+
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
+
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record Prediction(String id, String objectId)
+public record Prediction(String id, String nodeId, String modelId, Date predictionDateTime, float confidenceLevel,
+        String property, Serializable predictionValue, UpdateType updateType)
 {}

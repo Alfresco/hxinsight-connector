@@ -25,19 +25,22 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 
 @Component
 public class PredictionMapper
 {
 
-    public Node map(Prediction prediction)
+    public PredictionModel map(Prediction prediction)
     {
-        return new Node(prediction.objectId(), Set.of("cm:versionable", "cm:auditable", "hxi:predictionApplied"));
+        return new PredictionModel(prediction.property(),
+                prediction.predictionDateTime(),
+                prediction.confidenceLevel(),
+                prediction.modelId(),
+                prediction.predictionValue(),
+                prediction.updateType());
     }
 }

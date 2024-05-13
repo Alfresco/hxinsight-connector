@@ -53,7 +53,7 @@ import org.junit.jupiter.api.TestInstance;
 
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PredictionListenerTest
@@ -99,11 +99,11 @@ class PredictionListenerTest
     void testApplyPrediction() throws InterruptedException, JsonProcessingException
     {
         // given
-        Prediction prediction = new Prediction("prediction-id", "node-id");
+        Prediction prediction = new Prediction("prediction-id", "node-id", "model-id", null, 0, null, null, null);
         String predictionJson = new ObjectMapper().writeValueAsString(prediction);
-        Node node = new Node("node-id", null);
-        given(predictionMapperMock.map(any())).willReturn(node);
-        mockEndpointWillExpectInRequestBody(node);
+        PredictionModel predictionModel = new PredictionModel("node-id", null, 0, null, null, null);
+        given(predictionMapperMock.map(any())).willReturn(predictionModel);
+        mockEndpointWillExpectInRequestBody(predictionModel);
 
         // when
         Throwable thrown = catchThrowable(() -> producerTemplate.to(TEST_ENDPOINT)
@@ -116,8 +116,8 @@ class PredictionListenerTest
         assertThat(thrown).doesNotThrowAnyException();
     }
 
-    private void mockEndpointWillExpectInRequestBody(Node... expectedNodes)
+    private void mockEndpointWillExpectInRequestBody(PredictionModel... expectedPredictions)
     {
-        Stream.of(expectedNodes).forEach(node -> mockEndpoint.message(0).body().contains(node));
+        Stream.of(expectedPredictions).forEach(node -> mockEndpoint.message(0).body().contains(node));
     }
 }
