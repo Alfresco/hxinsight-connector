@@ -37,14 +37,14 @@ import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 
 @Component
 @RequiredArgsConstructor
 public class PredictionBufferStub extends RouteBuilder
 {
     private final InsightPredictionsProperties insightPredictionsProperties;
-    private final List<Prediction> handledPredictions = new ArrayList<>();
+    private final List<PredictionEntry> handledPredictions = new ArrayList<>();
 
     @Override
     public void configure()
@@ -52,13 +52,13 @@ public class PredictionBufferStub extends RouteBuilder
         from(insightPredictionsProperties.bufferEndpoint())
                 .routeId("predictions-buffer-stub")
                 .log("Handling predictions ${body}")
-                .unmarshal(new JacksonDataFormat(Prediction.class))
-                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(Prediction.class)));
+                .unmarshal(new JacksonDataFormat(PredictionEntry.class))
+                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(PredictionEntry.class)));
     }
 
-    public void assertAllPredictionsHandled(List<Prediction> predictions)
+    public void assertAllPredictionsHandled(List<PredictionEntry> predictionEntries)
     {
-        assertEquals(predictions, handledPredictions);
+        assertEquals(predictionEntries, handledPredictions);
     }
 
     public void reset()

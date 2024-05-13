@@ -34,6 +34,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 import org.alfresco.hxi_connector.prediction_applier.repository.NodesClient;
 
 @Component
@@ -58,7 +59,7 @@ public class PredictionListener extends RouteBuilder
                 .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, Prediction.class)
-                .setBody(exchange -> predictionMapper.map(exchange.getIn().getBody(Prediction.class)))
+                .setBody(exchange -> predictionMapper.map(exchange.getIn().getBody(PredictionEntry.class)))
                 .to(NodesClient.NODES_DIRECT_ENDPOINT)
                 .end();
     }
