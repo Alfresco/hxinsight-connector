@@ -304,6 +304,9 @@ services:
       resources:
         limits:
           memory: 256m
+    depends_on:
+      alfresco:
+        condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG

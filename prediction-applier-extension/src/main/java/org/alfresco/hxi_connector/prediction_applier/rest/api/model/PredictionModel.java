@@ -25,9 +25,12 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,6 +42,7 @@ import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(NON_NULL)
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
 {

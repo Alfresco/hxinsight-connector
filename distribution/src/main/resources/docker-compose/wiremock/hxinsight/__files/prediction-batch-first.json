@@ -1,10 +1,26 @@
 [
   {
-    "id": "12341234-1234-1234-1234-123412341234",
-    "objectId": "11111111-1111-1111-1111-111111111111"
+    "prediction": [
+      {
+        "field": "cm:description",
+        "confidence": 0.97,
+        "value": "budget"
+      }
+    ],
+    "objectId": "5fa74ad3-9b5b-461b-9df5-de407f1f4fe7",
+    "modelId": "56785678-5678-5678-5678-567856785678",
+    "enrichmentType": "AUTOCORRECT"
   },
   {
-    "id": "98769876-9876-9876-9876-987698769876",
-    "objectId": "99999999-9999-9999-9999-999999999999"
+    "prediction": [
+      {
+        "field": "cm:description",
+        "confidence": 0.9999999403953552,
+        "value": "coins"
+      }
+    ],
+    "objectId": "7bb9c846-fcc5-43b5-a893-39e46ebe94d4",
+    "modelId": "56785678-5678-5678-5678-567856785678",
+    "enrichmentType": "AUTOCORRECT"
   }
 ]
