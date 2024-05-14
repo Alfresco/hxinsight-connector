@@ -31,6 +31,7 @@ import java.util.Date;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 
 @Data
@@ -45,4 +46,5 @@ public class Prediction
     private Serializable predictionValue;
     private Serializable previousValue;
     private UpdateType updateType;
+    private ReviewStatus reviewStatus;
 }

@@ -35,8 +35,11 @@ import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_PREDICTION_DATE_TIME;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_PREDICTION_VALUE;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_PREVIOUS_VALUE;
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_REVIEW_STATUS;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_UPDATE_TYPE;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.TYPE_PREDICTION;
+import static org.alfresco.model.ContentModel.PROP_MODIFIER;
+import static org.alfresco.model.ContentModel.PROP_MODIFIED;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -49,6 +52,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -147,8 +151,9 @@ public class PredictionServiceImpl implements PredictionService
         Serializable predictionValue = properties.get(PROP_PREDICTION_VALUE);
         Serializable previousValue = properties.get(PROP_PREVIOUS_VALUE);
         UpdateType updateType = UpdateType.valueOf((String) properties.get(PROP_UPDATE_TYPE));
+        ReviewStatus reviewStatus = ReviewStatus.valueOf((String) properties.get(PROP_REVIEW_STATUS));
 
-        return new Prediction(predictionNodeRef.getId(), property, predictionDateTime, confidenceLevel, modelId, predictionValue, previousValue, updateType);
+        return new Prediction(predictionNodeRef.getId(), property, predictionDateTime, confidenceLevel, modelId, predictionValue, previousValue, updateType, reviewStatus);
     }
 
     @Override
@@ -159,5 +164,30 @@ public class PredictionServiceImpl implements PredictionService
                 .map(ChildAssociationRef::getQName)
                 .map(qName -> qName.toPrefixString(namespaceService))
                 .collect(toList());
+    }
+
+    @Override
+    public void handlePredictions(NodeRef nodeRef, List<Prediction> predictions, ReviewStatus reviewStatus)
+    {
+        EnsureUtils.ensureNotNullOrEmpty(predictions, "Predictions list cannot be null or empty");
+
+        Map<QName, Serializable> existingProperties = nodeService.getProperties(nodeRef);
+
+        for (Prediction prediction : predictions)
+        {
+            QName propertyQName = QName.createQName(prediction.getProperty(), namespaceService);
+            if (existingProperties.containsKey(propertyQName)) {
+                if (reviewStatus.equals(ReviewStatus.CONFIRMED))
+                {
+                    existingProperties.put(PROP_MODIFIED, new Date());
+                    existingProperties.put(PROP_MODIFIER, prediction.getPreviousValue());
+                    prediction.setReviewStatus(ReviewStatus.CONFIRMED);
+                } else if (reviewStatus.equals(ReviewStatus.REJECTED))
+                {
+                    existingProperties.put(propertyQName, prediction.getPreviousValue());
+                    prediction.setReviewStatus(ReviewStatus.REJECTED);
+                }
+            }
+        }
     }
 }
