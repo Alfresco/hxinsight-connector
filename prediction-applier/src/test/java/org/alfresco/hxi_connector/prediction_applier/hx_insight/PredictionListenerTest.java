@@ -48,7 +48,6 @@ import org.apache.camel.model.ToDefinition;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
@@ -97,7 +96,6 @@ class PredictionListenerTest
     }
 
     @Test
-    @Disabled
     void testApplyPrediction() throws InterruptedException, JsonProcessingException
     {
         // given
