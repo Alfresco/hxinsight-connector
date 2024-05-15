@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.NodeEntry;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
 
 @Component
 @RequiredArgsConstructor
@@ -104,7 +104,7 @@ public class NodesClient extends RouteBuilder
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
                 .unmarshal()
-                .json(JsonLibrary.Jackson, NodeEntry.class)
+                .json(JsonLibrary.Jackson, PredictionModelResponse.class)
             .endChoice()
             .end();
         // @formatter:on

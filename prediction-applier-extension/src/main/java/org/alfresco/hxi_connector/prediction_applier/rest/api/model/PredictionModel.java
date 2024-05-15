@@ -32,6 +32,7 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -43,6 +44,7 @@ import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(NON_NULL)
+@EqualsAndHashCode
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
 {

@@ -25,17 +25,18 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.model.repository;
 
-import java.util.Set;
-import jakarta.validation.constraints.NotBlank;
+import java.io.Serializable;
+import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-public record Node(@NotBlank String id, @JsonProperty("aspectNames") Set<String> aspects)
-{
-    public Node(String id)
-    {
-        this(id, null);
-    }
-}
+public record PredictionModelResponse(
+        String id,
+        String property,
+        Date predictionDateTime,
+        float confidenceLevel,
+        String modelId,
+        Serializable predictionValue,
+        Serializable previousValue,
+        UpdateType updateType)
+{}
