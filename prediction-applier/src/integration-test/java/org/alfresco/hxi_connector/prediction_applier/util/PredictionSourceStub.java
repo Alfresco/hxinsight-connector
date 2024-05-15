@@ -53,7 +53,7 @@ public class PredictionSourceStub extends RouteBuilder
     @Override
     public void configure()
     {
-        from(insightPredictionsProperties.sourceEndpoint())
+        from(insightPredictionsProperties.sourceBaseUrl())
                 .routeId("predictions-source-stub")
                 .setBody(exchange -> getPredictionsBatch())
                 .marshal(new JacksonDataFormat());

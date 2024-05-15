@@ -28,7 +28,7 @@ hyland-experience:
     environment-key: hxai-env-key
   insight:
     predictions:
-      source-endpoint: direct:mocked
+      source-base-url: http://localhost:8001
       buffer-endpoint: activemq:queue:predictions-buffer
       poll-period-millis: 300_000 # 5 minutes
 
