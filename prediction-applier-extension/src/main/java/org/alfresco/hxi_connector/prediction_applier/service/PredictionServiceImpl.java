@@ -38,7 +38,6 @@ import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_REVIEW_STATUS;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_UPDATE_TYPE;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.TYPE_PREDICTION;
-import static org.alfresco.model.ContentModel.PROP_MODIFIER;
 import static org.alfresco.model.ContentModel.PROP_MODIFIED;
 
 import java.io.Serializable;
@@ -167,26 +166,27 @@ public class PredictionServiceImpl implements PredictionService
     }
 
     @Override
-    public void handlePredictions(NodeRef nodeRef, List<Prediction> predictions, ReviewStatus reviewStatus)
+    public void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus)
     {
-        EnsureUtils.ensureNotNullOrEmpty(predictions, "Predictions list cannot be null or empty");
-
-        Map<QName, Serializable> existingProperties = nodeService.getProperties(nodeRef);
-
-        for (Prediction prediction : predictions)
+        //get prediction node parent (there should be only one)
+        for (ChildAssociationRef parent : nodeService.getParentAssocs(predictionNodeRef))
         {
-            QName propertyQName = QName.createQName(prediction.getProperty(), namespaceService);
-            if (existingProperties.containsKey(propertyQName)) {
-                if (reviewStatus.equals(ReviewStatus.CONFIRMED))
-                {
+            NodeRef parentNode = parent.getParentRef();
+            Map<QName, Serializable> existingProperties = nodeService.getProperties(parentNode);
+            Map<QName, Serializable> predictionNodeProperties = nodeService.getProperties(predictionNodeRef);
+            Prediction prediction = getPredictions(parentNode).stream().filter(pred -> pred.getId().equals(predictionNodeRef.getId())).findFirst().orElse(null);
+            if (prediction != null)
+            {
+                QName propertyQName = QName.createQName(prediction.getProperty(), namespaceService);
+                if (reviewStatus.equals(ReviewStatus.CONFIRMED)) {
                     existingProperties.put(PROP_MODIFIED, new Date());
-                    existingProperties.put(PROP_MODIFIER, prediction.getPreviousValue());
-                    prediction.setReviewStatus(ReviewStatus.CONFIRMED);
-                } else if (reviewStatus.equals(ReviewStatus.REJECTED))
-                {
+                    predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED.toString());
+                } else if (reviewStatus.equals(ReviewStatus.REJECTED)) {
                     existingProperties.put(propertyQName, prediction.getPreviousValue());
-                    prediction.setReviewStatus(ReviewStatus.REJECTED);
+                    predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.REJECTED.toString());
                 }
+                nodeService.setProperties(parentNode, existingProperties);
+                nodeService.setProperties(predictionNodeRef, predictionNodeProperties);
             }
         }
     }

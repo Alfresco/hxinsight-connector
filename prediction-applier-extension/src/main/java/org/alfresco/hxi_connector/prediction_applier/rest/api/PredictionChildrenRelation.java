@@ -32,22 +32,16 @@ import java.util.List;
 import lombok.Setter;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
 import org.alfresco.rest.api.impl.NodesImpl;
-import org.alfresco.rest.framework.Operation;
-import org.alfresco.rest.framework.WebApiDescription;
-import org.alfresco.rest.framework.WebApiParam;
-import org.alfresco.rest.framework.core.ResourceParameter;
 import org.alfresco.rest.framework.resource.RelationshipResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.RelationshipResourceAction;
 import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
 import org.alfresco.rest.framework.resource.parameters.ListPage;
 import org.alfresco.rest.framework.resource.parameters.Paging;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
-import org.alfresco.rest.framework.webscripts.WithResponse;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.transaction.TransactionService;
 
@@ -56,7 +50,6 @@ import org.alfresco.service.transaction.TransactionService;
 public class PredictionChildrenRelation implements RelationshipResourceAction.Read<PredictionModel>,
         RelationshipResourceAction.Create<PredictionModel>
 {
-    private final String PARAM_REVIEW_STATUS = "reviewStatus";
     private NodesImpl nodes;
     private TransactionService transactionService;
     private PredictionService predictionService;
@@ -83,16 +76,5 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
         List<Prediction> outputPredictions = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false, true);
 
         return outputPredictions.stream().map(PredictionModel::fromServiceModel).collect(toList());
-    }
-
-    @Operation("prediction-review")
-    @WebApiDescription(title = "Confirm or reject predictions on the node properties")
-    @WebApiParam(name = "predictions", title="predictions", description = "List of predictions to confirm/reject", kind= ResourceParameter.KIND.HTTP_BODY_OBJECT)
-    public void handlePredictions(String nodeId, List<Prediction> predictions, Parameters parameters, WithResponse withResponse)
-    {
-        NodeRef nodeRef = nodes.validateOrLookupNode(nodeId);
-        //TODO add IllegalArgumentException handling
-        ReviewStatus reviewStatus = ReviewStatus.valueOf(parameters.getParameter(PARAM_REVIEW_STATUS));
-        predictionService.handlePredictions(nodeRef, predictions, reviewStatus);
     }
 }

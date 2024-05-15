@@ -39,5 +39,5 @@ public interface PredictionService
 
     List<String> getPredictedProperties(NodeRef nodeRef);
 
-    void handlePredictions(NodeRef nodeRef, List<Prediction> predictions, ReviewStatus reviewStatus);
+    void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus);
 }

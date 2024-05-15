@@ -67,4 +67,9 @@
         <property name="transactionService" ref="TransactionService"/>
         <property name="predictionService" ref="PredictionService"/>
     </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.PredictionsEntityResource">
+        <property name="nodes" ref="nodes"/>
+        <property name="predictionService" ref="PredictionService"/>
+    </bean>
 </beans>
