@@ -25,5 +25,18 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.model.repository;
 
-public record PredictionModelResponse(PredictionModelResponseEntry entry)
+import java.io.Serializable;
+import java.util.Date;
+
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
+
+public record PredictionModelResponseEntry(
+        String id,
+        String property,
+        Date predictionDateTime,
+        float confidenceLevel,
+        String modelId,
+        Serializable predictionValue,
+        Serializable previousValue,
+        UpdateType updateType)
 {}

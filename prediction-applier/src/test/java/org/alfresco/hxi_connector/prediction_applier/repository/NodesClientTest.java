@@ -58,6 +58,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponseEntry;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -101,7 +102,8 @@ class NodesClientTest
     void testUpdateNode() throws Exception
     {
         // given
-        PredictionModelResponse predictionResponse = new PredictionModelResponse("prediction-id", "property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", "old-value", AUTOFILL);
+        PredictionModelResponseEntry predictionResponseEntry = new PredictionModelResponseEntry("prediction-id", "property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", "old-value", AUTOFILL);
+        PredictionModelResponse predictionResponse = new PredictionModelResponse(predictionResponseEntry);
         mockEndpointWillRespondWith(SC_CREATED, new ObjectMapper().writeValueAsString(predictionResponse));
         mockEndpoint.expectedMessageCount(1);
 
