@@ -38,7 +38,6 @@ import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_REVIEW_STATUS;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_UPDATE_TYPE;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.TYPE_PREDICTION;
-import static org.alfresco.model.ContentModel.PROP_MODIFIED;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -51,9 +50,11 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
+import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -150,7 +151,8 @@ public class PredictionServiceImpl implements PredictionService
         Serializable predictionValue = properties.get(PROP_PREDICTION_VALUE);
         Serializable previousValue = properties.get(PROP_PREVIOUS_VALUE);
         UpdateType updateType = UpdateType.valueOf((String) properties.get(PROP_UPDATE_TYPE));
-        ReviewStatus reviewStatus = ReviewStatus.valueOf((String) properties.get(PROP_REVIEW_STATUS));
+        ReviewStatus reviewStatus = (ReviewStatus) properties.get(PROP_REVIEW_STATUS);
+        reviewStatus = reviewStatus != null ? reviewStatus : ReviewStatus.UNREVIEWED;
 
         return new Prediction(predictionNodeRef.getId(), property, predictionDateTime, confidenceLevel, modelId, predictionValue, previousValue, updateType, reviewStatus);
     }
@@ -166,27 +168,54 @@ public class PredictionServiceImpl implements PredictionService
     }
 
     @Override
-    public void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus)
+    public void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus) throws EntityNotFoundException, PredictionStateChangedException
     {
-        //get prediction node parent (there should be only one)
+        // get prediction node parent (there should be only one)
         for (ChildAssociationRef parent : nodeService.getParentAssocs(predictionNodeRef))
         {
             NodeRef parentNode = parent.getParentRef();
-            Map<QName, Serializable> existingProperties = nodeService.getProperties(parentNode);
-            Map<QName, Serializable> predictionNodeProperties = nodeService.getProperties(predictionNodeRef);
-            Prediction prediction = getPredictions(parentNode).stream().filter(pred -> pred.getId().equals(predictionNodeRef.getId())).findFirst().orElse(null);
+            Map<QName, Serializable> existingProperties = new HashMap<>(nodeService.getProperties(parentNode));
+            Map<QName, Serializable> predictionNodeProperties = new HashMap<>(nodeService.getProperties(predictionNodeRef));
+            Prediction prediction = getPredictions(parentNode)
+                    .stream()
+                    .filter(pred -> pred.getId().equals(predictionNodeRef.getId()))
+                    .findFirst()
+                    .orElse(null);
             if (prediction != null)
             {
                 QName propertyQName = QName.createQName(prediction.getProperty(), namespaceService);
-                if (reviewStatus.equals(ReviewStatus.CONFIRMED)) {
-                    existingProperties.put(PROP_MODIFIED, new Date());
-                    predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED.toString());
-                } else if (reviewStatus.equals(ReviewStatus.REJECTED)) {
-                    existingProperties.put(propertyQName, prediction.getPreviousValue());
-                    predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.REJECTED.toString());
+                if (existingProperties.get(propertyQName).equals(prediction.getPredictionValue()))
+                {
+                    if (predictionNodeProperties.get(PROP_REVIEW_STATUS).equals(ReviewStatus.UNREVIEWED))
+                    {
+                        if (reviewStatus.equals(ReviewStatus.CONFIRMED))
+                        {
+                            predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
+                        }
+                        else if (reviewStatus.equals(ReviewStatus.REJECTED))
+                        {
+                            existingProperties.put(propertyQName, prediction.getPreviousValue());
+                            nodeService.setProperties(parentNode, existingProperties);
+                            predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
+                        }
+                        nodeService.setProperties(predictionNodeRef, predictionNodeProperties);
+                    }
+                    else
+                    {
+                        if (!reviewStatus.equals(prediction.getReviewStatus()))
+                        {
+                            throw new PredictionStateChangedException("Prediction for " + prediction.getProperty() + " property has already been reviewed.");
+                        }
+                    }
                 }
-                nodeService.setProperties(parentNode, existingProperties);
-                nodeService.setProperties(predictionNodeRef, predictionNodeProperties);
+                else
+                {
+                    throw new PredictionStateChangedException(prediction.getProperty() + " property value has changed, prediction is no longer valid!");
+                }
+            }
+            else
+            {
+                throw new EntityNotFoundException(predictionNodeRef.getId());
             }
         }
     }

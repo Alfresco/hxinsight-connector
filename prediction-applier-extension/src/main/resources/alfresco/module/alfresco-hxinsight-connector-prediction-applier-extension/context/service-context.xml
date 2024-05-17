@@ -72,4 +72,16 @@
         <property name="nodes" ref="nodes"/>
         <property name="predictionService" ref="PredictionService"/>
     </bean>
+
+    <bean id="hxi.simpleMappingExceptionResolver" abstract="true" parent="simpleMappingExceptionResolverParent">
+        <property name="exceptionMappings">
+            <map merge="true">
+                <entry key="org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException" value="#{T(org.springframework.extensions.webscripts.Status).STATUS_CONFLICT}" />
+            </map>
+        </property>
+    </bean>
+    <bean class="org.alfresco.util.BeanExtender">
+        <property name="beanName" value="simpleMappingExceptionResolverParent"/>
+        <property name="extendingBeanName" value="hxi.simpleMappingExceptionResolver"/>
+    </bean>
 </beans>
