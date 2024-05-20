@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,12 +23,25 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.config;
+package org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e;
 
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.common.config.properties.Retry;
+import org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e.util.PredictionApplierE2ETestBase;
 
-@ConfigurationProperties("alfresco.repository.nodes")
-public record NodesApiProperties(String baseUrl, String username, String password, Retry retry)
-{}
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETestBase
+{
+    private static final String NODE_ID = "nodeId";
+    private static final String PREDICTED_VALUE = "New value";
+
+    @Test
+    public void testPredictionApplication() throws InterruptedException
+    {
+        containerSupport.prepareHxInsightToReturnPredictionBatch(NODE_ID, PREDICTED_VALUE);
+
+        containerSupport.expectRepositoryRequestReceived(NODE_ID, PREDICTED_VALUE);
+
+        Thread.sleep(10000);
+    }
+}

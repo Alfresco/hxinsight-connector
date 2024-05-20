@@ -46,7 +46,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
-import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
 
 @Component
@@ -69,7 +69,7 @@ public class NodesClient extends RouteBuilder
             NoHttpResponseException.class,
             MalformedChunkCodingException.class);
 
-    private final NodesApiProperties nodesApiProperties;
+    private final RepositoryApiProperties nodesApiProperties;
 
     @Override
     @SuppressWarnings("unchecked")
