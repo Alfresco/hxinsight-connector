@@ -40,7 +40,7 @@ import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 
 @Component
 @RequiredArgsConstructor
@@ -48,7 +48,7 @@ public class PredictionSourceStub extends RouteBuilder
 {
     private final InsightPredictionsProperties insightPredictionsProperties;
     private long deliveryDelayInMs;
-    private Queue<List<Prediction>> predictionsBatchesQueue = new LinkedList<>();
+    private Queue<List<PredictionEntry>> predictionsBatchesQueue = new LinkedList<>();
 
     @Override
     public void configure()
@@ -60,7 +60,7 @@ public class PredictionSourceStub extends RouteBuilder
     }
 
     @SneakyThrows
-    private List<Prediction> getPredictionsBatch()
+    private List<PredictionEntry> getPredictionsBatch()
     {
         Thread.sleep(deliveryDelayInMs);
 
@@ -68,12 +68,12 @@ public class PredictionSourceStub extends RouteBuilder
     }
 
     @SafeVarargs
-    public final void shouldReturnPredictions(List<Prediction>... predictionsBatches)
+    public final void shouldReturnPredictions(List<PredictionEntry>... predictionsBatches)
     {
         predictionsBatchesQueue = new LinkedList<>(Arrays.asList(predictionsBatches));
     }
 
-    public final void shouldReturnPredictions(long delayInMs, List<List<Prediction>> predictionsBatches)
+    public final void shouldReturnPredictions(long delayInMs, List<List<PredictionEntry>> predictionsBatches)
     {
         this.deliveryDelayInMs = delayInMs;
         this.predictionsBatchesQueue = new LinkedList<>(predictionsBatches);

@@ -29,13 +29,15 @@ import static java.util.Collections.emptySet;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.builder.AdviceWith.adviceWith;
+import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType.AUTOFILL;
 
-import java.util.Set;
+import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -55,14 +57,16 @@ import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.NodeEntry;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponseEntry;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class NodesClientTest
 {
     private static final String MOCK_ENDPOINT = "mock:repo-nodes-endpoint";
     private static final int RETRY_ATTEMPTS = 3;
+    private static final Date PREDICTION_DATE_TIME = new Date();
 
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
@@ -95,24 +99,23 @@ class NodesClientTest
     }
 
     @Test
-    void testUpdateNode() throws InterruptedException
+    void testUpdateNode() throws Exception
     {
         // given
-        String nodeId = "node-id";
-        String aspect = "aspect-name";
-        Node node = new Node(nodeId, Set.of(aspect));
-        mockEndpointWillRespondWith(200, createResponseBodyWith(nodeId, aspect));
+        PredictionModelResponseEntry predictionResponseEntry = new PredictionModelResponseEntry("prediction-id", "property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", "old-value", AUTOFILL);
+        PredictionModelResponse predictionResponse = new PredictionModelResponse(predictionResponseEntry);
+        mockEndpointWillRespondWith(SC_CREATED, new ObjectMapper().writeValueAsString(predictionResponse));
         mockEndpoint.expectedMessageCount(1);
 
         // when
-        Node actualNode = producerTemplate.to(NODES_DIRECT_ENDPOINT)
-                .withBody(node)
-                .request(NodeEntry.class)
-                .node();
+        PredictionModel predictionModel = new PredictionModel("property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", AUTOFILL);
+        PredictionModelResponse actualResponse = producerTemplate.to(NODES_DIRECT_ENDPOINT)
+                .withBody(predictionModel)
+                .request(PredictionModelResponse.class);
 
         // then
         mockEndpoint.assertIsSatisfied();
-        assertThat(actualNode).isEqualTo(new Node(nodeId, Set.of(aspect)));
+        assertThat(actualResponse).isEqualTo(predictionResponse);
     }
 
     @Test
@@ -165,11 +168,5 @@ class NodesClientTest
             exchange.getMessage().setHeader(HTTP_RESPONSE_CODE, statusCode);
             exchange.getMessage().setBody(responseBody);
         });
-    }
-
-    @SneakyThrows
-    private static String createResponseBodyWith(String nodeId, String... aspects)
-    {
-        return new ObjectMapper().writeValueAsString(new NodeEntry(new Node(nodeId, Set.of(aspects))));
     }
 }

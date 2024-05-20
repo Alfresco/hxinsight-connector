@@ -25,19 +25,30 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
-import java.util.Set;
-
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.Node;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 
 @Component
 public class PredictionMapper
 {
-
-    public Node map(Prediction prediction)
+    public PredictionModel map(PredictionEntry predictionEntry)
     {
-        return new Node(prediction.objectId(), Set.of("cm:versionable", "cm:auditable", "hxi:predictionApplied"));
+        if (predictionEntry.predictions().size() != 1)
+        {
+            throw new HxInsightConnectorRuntimeException("Currently only one prediction per entry is supported.");
+        }
+
+        Prediction prediction = predictionEntry.predictions().get(0);
+
+        return new PredictionModel(prediction.field(),
+                null,
+                prediction.confidence(),
+                predictionEntry.modelId(),
+                prediction.value(),
+                predictionEntry.enrichmentType());
     }
 }

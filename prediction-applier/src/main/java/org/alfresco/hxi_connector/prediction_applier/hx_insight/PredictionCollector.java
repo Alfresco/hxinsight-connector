@@ -43,7 +43,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
 
 @Slf4j
@@ -79,8 +79,8 @@ public class PredictionCollector extends RouteBuilder
     @Override
     public void configure()
     {
-        JacksonDataFormat predictionsBatchDataFormat = new LinkedListJacksonDataFormat(Prediction.class);
-        JacksonDataFormat predictionDataFormat = new JacksonDataFormat(Prediction.class);
+        JacksonDataFormat predictionsBatchDataFormat = new LinkedListJacksonDataFormat(PredictionEntry.class);
+        JacksonDataFormat predictionDataFormat = new JacksonDataFormat(PredictionEntry.class);
 
         from(insightPredictionsProperties.collectorTimerEndpoint())
             .routeId(TIMER_ROUTE_ID)

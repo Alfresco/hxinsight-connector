@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.prediction_applier.repository;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 
 import java.net.UnknownHostException;
 import java.util.Set;
@@ -45,7 +46,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.NodeEntry;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
 
 @Component
 @RequiredArgsConstructor
@@ -54,9 +55,9 @@ public class NodesClient extends RouteBuilder
     public static final String NODES_DIRECT_ENDPOINT = "direct:" + NodesClient.class.getSimpleName();
     private static final String RETRYABLE_ROUTE = "direct:retryable-" + NodesClient.class.getSimpleName();
     static final String ROUTE_ID = "repository-nodes";
-    private static final String NODE_ID_HEADER = "nodeId";
-    private static final String URI_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/${headers.%s}?httpMethod=PUT&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
-    private static final int EXPECTED_STATUS_CODE = 200;
+    public static final String NODE_ID_HEADER = "nodeId";
+    private static final String URI_PATTERN = "%s/alfresco/api/-default-/private/hxi/versions/1/nodes/${headers.nodeId}/predictions?httpMethod=POST&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
+    private static final int EXPECTED_STATUS_CODE = SC_CREATED;
     public static final String UNEXPECTED_STATUS_CODE_MESSAGE = "Unexpected response status code - expecting: %d, received: %d";
     private static final Set<Class<? extends Throwable>> RETRY_REASONS = Set.of(
             EndpointServerErrorException.class,
@@ -88,7 +89,6 @@ public class NodesClient extends RouteBuilder
             .stop();
 
         from(NODES_DIRECT_ENDPOINT)
-            .setHeader(NODE_ID_HEADER, simple("${body.id}"))
             .marshal()
             .json(JsonLibrary.Jackson)
             .to(RETRYABLE_ROUTE)
@@ -98,13 +98,13 @@ public class NodesClient extends RouteBuilder
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
             .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
-            .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl(), NODE_ID_HEADER, nodesApiProperties.username(), nodesApiProperties.password()))
+            .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl(), nodesApiProperties.username(), nodesApiProperties.password()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
                 .unmarshal()
-                .json(JsonLibrary.Jackson, NodeEntry.class)
+                .json(JsonLibrary.Jackson, PredictionModelResponse.class)
             .endChoice()
             .end();
         // @formatter:on

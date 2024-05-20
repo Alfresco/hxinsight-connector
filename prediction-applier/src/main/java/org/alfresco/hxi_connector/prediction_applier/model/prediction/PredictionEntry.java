@@ -23,9 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+package org.alfresco.hxi_connector.prediction_applier.model.prediction;
+
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public record NodeEntry(@JsonProperty("entry") Node node)
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
+
+public record PredictionEntry(
+        String objectId,
+        String modelId,
+        UpdateType enrichmentType,
+        @JsonProperty("prediction") List<Prediction> predictions)
 {}

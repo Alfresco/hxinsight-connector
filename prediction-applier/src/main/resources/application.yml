@@ -35,9 +35,9 @@ hyland-experience:
 alfresco:
   repository:
     nodes:
-      base-url: http://localhost:8080
-      username:
-      password:
+      base-url: http://alfresco:8080
+      username: admin
+      password: admin
       retry:
         attempts: 10
         initial-delay: 500
