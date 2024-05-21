@@ -95,20 +95,9 @@ public class EventProcessor
             return;
         }
 
-        if (isEventTypeCreated(event) || isEventTypeUpdated(event))
-        {
-            handleMetadataPropertiesChange(event);
-        }
-
-        if (wasContentChanged(event))
-        {
-            handleContentChange(event);
-        }
-
-        if (isEventTypeDeleted(event))
-        {
-            handleNodeDeleteEvent(event);
-        }
+        handleMetadataPropertiesChange(event);
+        handleContentChange(event);
+        handleNodeDeleteEvent(event);
     }
 
     private void handlePredictionNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
@@ -124,33 +113,37 @@ public class EventProcessor
 
     private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(isEventTypeCreated(event) || isEventTypeUpdated(event), "Metadata properties are changed just for create or update events");
+        if (isEventTypeCreated(event) || isEventTypeUpdated(event))
+        {
+            IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
 
-        IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
-        ingestNodeCommandHandler.handle(ingestNodeCommand);
+            ingestNodeCommandHandler.handle(ingestNodeCommand);
+        }
     }
 
     private void handleContentChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(wasContentChanged(event), "Content not changed");
-
-        TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
-        if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(command.mimeType()))
+        if (wasContentChanged(event))
         {
-            NodeResource resource = event.getData().getResource();
-            String sourceMimeType = resource.getContent().getMimeType();
-            log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}.", resource.getId(), sourceMimeType);
-            return;
-        }
+            TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
+            if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(command.mimeType()))
+            {
+                NodeResource resource = event.getData().getResource();
+                String sourceMimeType = resource.getContent().getMimeType();
+                log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}.", resource.getId(), sourceMimeType);
+                return;
+            }
 
-        ingestContentCommandHandler.handle(command);
+            ingestContentCommandHandler.handle(command);
+        }
     }
 
     private void handleNodeDeleteEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(isEventTypeDeleted(event), "Event type is not delete");
-
-        DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
-        deleteNodeCommandHandler.handle(deleteNodeCommand);
+        if (isEventTypeDeleted(event))
+        {
+            DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
+            deleteNodeCommandHandler.handle(deleteNodeCommand);
+        }
     }
 }
