@@ -129,6 +129,7 @@ public class PredictionServiceImpl implements PredictionService
         properties.put(PROP_PREDICTION_VALUE, prediction.getPredictionValue());
         properties.put(PROP_UPDATE_TYPE, prediction.getUpdateType());
         properties.put(PROP_PREVIOUS_VALUE, previousValue);
+        properties.put(PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED);
         return properties;
     }
 
@@ -152,7 +153,6 @@ public class PredictionServiceImpl implements PredictionService
         Serializable previousValue = properties.get(PROP_PREVIOUS_VALUE);
         UpdateType updateType = UpdateType.valueOf((String) properties.get(PROP_UPDATE_TYPE));
         ReviewStatus reviewStatus = (ReviewStatus) properties.get(PROP_REVIEW_STATUS);
-        reviewStatus = reviewStatus != null ? reviewStatus : ReviewStatus.UNREVIEWED;
 
         return new Prediction(predictionNodeRef.getId(), property, predictionDateTime, confidenceLevel, modelId, predictionValue, previousValue, updateType, reviewStatus);
     }
@@ -170,53 +170,39 @@ public class PredictionServiceImpl implements PredictionService
     @Override
     public void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus) throws EntityNotFoundException, PredictionStateChangedException
     {
-        // get prediction node parent (there should be only one)
-        for (ChildAssociationRef parent : nodeService.getParentAssocs(predictionNodeRef))
+        ChildAssociationRef parentAssocRef = nodeService.getPrimaryParent(predictionNodeRef);
+        NodeRef parentNode = parentAssocRef.getParentRef();
+        Map<QName, Serializable> existingProperties = new HashMap<>(nodeService.getProperties(parentNode));
+        Map<QName, Serializable> predictionNodeProperties = new HashMap<>(nodeService.getProperties(predictionNodeRef));
+        Prediction prediction = childAssocToPrediction(parentAssocRef);
+        QName propertyQName = QName.createQName(prediction.getProperty(), namespaceService);
+        if (existingProperties.get(propertyQName).equals(prediction.getPredictionValue()))
         {
-            NodeRef parentNode = parent.getParentRef();
-            Map<QName, Serializable> existingProperties = new HashMap<>(nodeService.getProperties(parentNode));
-            Map<QName, Serializable> predictionNodeProperties = new HashMap<>(nodeService.getProperties(predictionNodeRef));
-            Prediction prediction = getPredictions(parentNode)
-                    .stream()
-                    .filter(pred -> pred.getId().equals(predictionNodeRef.getId()))
-                    .findFirst()
-                    .orElse(null);
-            if (prediction != null)
+            if (predictionNodeProperties.get(PROP_REVIEW_STATUS).equals(ReviewStatus.UNREVIEWED))
             {
-                QName propertyQName = QName.createQName(prediction.getProperty(), namespaceService);
-                if (existingProperties.get(propertyQName).equals(prediction.getPredictionValue()))
+                if (reviewStatus.equals(ReviewStatus.CONFIRMED))
                 {
-                    if (predictionNodeProperties.get(PROP_REVIEW_STATUS).equals(ReviewStatus.UNREVIEWED))
-                    {
-                        if (reviewStatus.equals(ReviewStatus.CONFIRMED))
-                        {
-                            predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
-                        }
-                        else if (reviewStatus.equals(ReviewStatus.REJECTED))
-                        {
-                            existingProperties.put(propertyQName, prediction.getPreviousValue());
-                            nodeService.setProperties(parentNode, existingProperties);
-                            predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
-                        }
-                        nodeService.setProperties(predictionNodeRef, predictionNodeProperties);
-                    }
-                    else
-                    {
-                        if (!reviewStatus.equals(prediction.getReviewStatus()))
-                        {
-                            throw new PredictionStateChangedException("Prediction for " + prediction.getProperty() + " property has already been reviewed.");
-                        }
-                    }
+                    predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
                 }
-                else
+                else if (reviewStatus.equals(ReviewStatus.REJECTED))
                 {
-                    throw new PredictionStateChangedException(prediction.getProperty() + " property value has changed, prediction is no longer valid!");
+                    existingProperties.put(propertyQName, prediction.getPreviousValue());
+                    nodeService.setProperties(parentNode, existingProperties);
+                    predictionNodeProperties.put(PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
                 }
+                nodeService.setProperties(predictionNodeRef, predictionNodeProperties);
             }
             else
             {
-                throw new EntityNotFoundException(predictionNodeRef.getId());
+                if (!reviewStatus.equals(prediction.getReviewStatus()))
+                {
+                    throw new PredictionStateChangedException("Prediction for " + prediction.getProperty() + " property has already been reviewed.");
+                }
             }
+        }
+        else
+        {
+            throw new PredictionStateChangedException(prediction.getProperty() + " property value has changed, prediction is no longer valid!");
         }
     }
 }

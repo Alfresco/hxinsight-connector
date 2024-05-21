@@ -61,7 +61,6 @@ import org.alfresco.hxi_connector.common.exception.ValidationException;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
-import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -133,7 +132,8 @@ public class PredictionServiceImplTest
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
-                PROP_UPDATE_TYPE, AUTOCORRECT.name());
+                PROP_UPDATE_TYPE, AUTOCORRECT.name(),
+                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED);
         given(nodeService.getProperties(PREDICTION_NODE_REF)).willReturn(properties);
         given(nodeService.getChildAssocs(NODE_REF, Set.of(TYPE_PREDICTION))).willReturn(List.of(CHILD_ASSOC_REF));
         given(namespaceService.getPrefixes(NAMESPACE)).willReturn(Set.of(NAMESPACE_PREFIX));
@@ -160,7 +160,8 @@ public class PredictionServiceImplTest
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
-                PROP_UPDATE_TYPE, AUTOCORRECT);
+                PROP_UPDATE_TYPE, AUTOCORRECT,
+                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED);
         given(nodeService.createNode(NODE_REF, ASSOC_PREDICTED_BY, PROPERTY_QNAME, TYPE_PREDICTION, expectedProperties)).willReturn(CHILD_ASSOC_REF);
 
         // when
@@ -240,17 +241,6 @@ public class PredictionServiceImplTest
     }
 
     @Test
-    public void testReviewPrediction_missingPrediction()
-    {
-        // given
-        NodeRef mismatchedPredictionNodeRef = new NodeRef("node://test/");
-        given(nodeService.getParentAssocs(mismatchedPredictionNodeRef)).willReturn(List.of(CHILD_ASSOC_REF));
-
-        // when
-        assertThrows(EntityNotFoundException.class, () -> predictionService.reviewPrediction(mismatchedPredictionNodeRef, ReviewStatus.CONFIRMED));
-    }
-
-    @Test
     public void testReviewPrediction_propertyValueChangedBeforePredictionReview()
     {
         // given
@@ -316,7 +306,6 @@ public class PredictionServiceImplTest
         given(nodeService.getProperties(PREDICTION_NODE_REF)).willReturn(properties);
         given(namespaceService.getNamespaceURI(NAMESPACE_PREFIX)).willReturn(NAMESPACE);
         given(namespaceService.getPrefixes(NAMESPACE)).willReturn(Set.of(NAMESPACE_PREFIX));
-        given(nodeService.getChildAssocs(NODE_REF, Set.of(TYPE_PREDICTION))).willReturn(List.of(CHILD_ASSOC_REF));
-        given(nodeService.getParentAssocs(PREDICTION_NODE_REF)).willReturn(List.of(CHILD_ASSOC_REF));
+        given(nodeService.getPrimaryParent(PREDICTION_NODE_REF)).willReturn(CHILD_ASSOC_REF);
     }
 }
