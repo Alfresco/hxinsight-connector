@@ -41,7 +41,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 @EntityResource(name = "predictions", title = "Predictions")
 public class PredictionsEntityResource
 {
-    private final String PARAM_REVIEW_STATUS = "reviewStatus";
+    private static final String PARAM_REVIEW_STATUS = "reviewStatus";
     private NodesImpl nodes;
     private PredictionService predictionService;
 
