@@ -55,6 +55,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @NoArgsConstructor(access = PRIVATE)
+@SuppressWarnings({"PMD.PrematureDeclaration", "PMD.SimplifyBooleanReturns"})
 public final class EventUtils
 {
     public static final String PREDICTION_NODE_TYPE = "hxi:prediction";
