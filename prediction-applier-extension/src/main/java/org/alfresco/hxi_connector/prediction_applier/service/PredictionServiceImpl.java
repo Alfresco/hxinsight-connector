@@ -54,7 +54,6 @@ import org.alfresco.hxi_connector.prediction_applier.rest.api.exception.Predicti
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
-import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
@@ -168,7 +167,7 @@ public class PredictionServiceImpl implements PredictionService
     }
 
     @Override
-    public void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus) throws EntityNotFoundException, PredictionStateChangedException
+    public void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus) throws PredictionStateChangedException
     {
         ChildAssociationRef parentAssocRef = nodeService.getPrimaryParent(predictionNodeRef);
         NodeRef parentNode = parentAssocRef.getParentRef();
