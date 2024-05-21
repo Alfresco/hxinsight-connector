@@ -177,12 +177,12 @@ public final class EventUtils
         Object oldValue = oldProperties.get(propertyName);
         Object newValue = newProperties.get(propertyName);
 
-        if (!newValue.equals(value))
+        if (Objects.equals(oldValue, newValue))
         {
             return false;
         }
 
-        return !oldValue.equals(newValue);
+        return Objects.equals(newValue, value);
     }
 
     public static String getNodeParent(RepoEvent<DataAttributes<NodeResource>> event)
