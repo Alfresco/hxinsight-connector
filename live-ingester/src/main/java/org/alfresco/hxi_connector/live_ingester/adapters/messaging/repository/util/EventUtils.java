@@ -104,12 +104,12 @@ public final class EventUtils
 
     public static boolean isPredictionApplyEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        Set<String> aspects = Optional.ofNullable(event.getData().getResource().getAspectNames()).orElse(Collections.emptySet());
+        Set<String> aspects = ofNullable(event.getData().getResource().getAspectNames()).orElse(Collections.emptySet());
         if (aspects.contains(PREDICTION_APPLIED_ASPECT))
         {
             String actualPredictionTime = (String) event.getData().getResource().getProperties().get(PREDICTION_TIME_PROPERTY);
 
-            Map<String, Serializable> beforeProperties = Optional.ofNullable(event.getData().getResourceBefore())
+            Map<String, Serializable> beforeProperties = ofNullable(event.getData().getResourceBefore())
                     .map(NodeResource::getProperties)
                     .orElse(null);
 
