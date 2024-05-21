@@ -1,23 +1,43 @@
+spring:
+  main:
+    web-application-type: none
+  security:
+    oauth2:
+      client:
+        registration:
+          hyland-experience-auth:
+            authorization-grant-type: urn:hyland:params:oauth:grant-type:api-credentials
+            client-id: dummy-client-id
+            client-secret: dummy-client-pass
+            client-name: ${hyland-experience.authorization.application-name}
+            scope: hxp.integrations
+        provider:
+          hyland-experience-auth:
+            token-uri: http://localhost:8001/token
+
 camel:
   springboot:
     main-run-controller: true
-  component:
-    aws2-sqs:
-      override-endpoint: true
-      uri-endpoint-override: http://localhost:4566
-      access-key: dummy_access_key
-      secret-key: dummy_secret_key
 
 hyland-experience:
+  authentication:
+    refresh-delay-minutes: 55
+  authorization:
+    application-name: acs-insight-connector
+    service-user: insight-acs
+    environment-key: hxai-env-key
   insight:
-    prediction:
-      endpoint: aws2-sqs://arn:aws:sqs:us-east-1:000000000000:hxinsight-prediction-queue
+    predictions:
+      source-endpoint: direct:mocked
+      buffer-endpoint: activemq:queue:predictions-buffer
+      poll-period-millis: 300_000 # 5 minutes
+
 alfresco:
   repository:
     nodes:
-      base-url: http://localhost:8080
-      username:
-      password:
+      base-url: http://alfresco:8080
+      username: admin
+      password: admin
       retry:
         attempts: 10
         initial-delay: 500

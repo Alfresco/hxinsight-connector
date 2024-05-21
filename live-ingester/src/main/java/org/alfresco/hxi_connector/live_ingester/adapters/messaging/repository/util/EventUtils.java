@@ -35,6 +35,13 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
+
 import lombok.NoArgsConstructor;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
@@ -46,6 +53,9 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @NoArgsConstructor(access = PRIVATE)
 public final class EventUtils
 {
+    public static final String PREDICTION_NODE_TYPE = "hxi:prediction";
+    public static final String PREDICTION_APPLIED_ASPECT = "hxi:predictionApplied";
+    public static final String PREDICTION_TIME_PROPERTY = "hxi:latestPredictionDateTime";
 
     public static boolean isEventTypeCreated(RepoEvent<DataAttributes<NodeResource>> event)
     {
@@ -77,5 +87,31 @@ public final class EventUtils
             return DELETE;
         }
         throw new LiveIngesterRuntimeException("Unsupported Repo event type " + event.getType());
+    }
+
+    public static boolean isNotPredictionNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return !PREDICTION_NODE_TYPE.equals(event.getData().getResource().getNodeType());
+    }
+
+    public static boolean isNotPredictionApplyEvent(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        Set<String> aspects = Optional.ofNullable(event.getData().getResource().getAspectNames()).orElse(Collections.emptySet());
+        if (aspects.contains(PREDICTION_APPLIED_ASPECT))
+        {
+            String actualPredictionTime = (String) event.getData().getResource().getProperties().get(PREDICTION_TIME_PROPERTY);
+
+            Map<String, Serializable> beforeProperties = Optional.ofNullable(event.getData().getResourceBefore())
+                    .map(NodeResource::getProperties)
+                    .orElse(null);
+
+            if (beforeProperties != null && beforeProperties.containsKey(PREDICTION_TIME_PROPERTY))
+            {
+                String beforePredictionTime = (String) beforeProperties.get(PREDICTION_TIME_PROPERTY);
+                return Objects.equals(actualPredictionTime, beforePredictionTime);
+            }
+        }
+
+        return true;
     }
 }

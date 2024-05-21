@@ -49,16 +49,15 @@ public record ATSTransformRequest(String requestId,
 {
 
     private static final String WORKSPACE_SPACES_STORE = "workspace://SpacesStore/";
-    private static final String TIMEOUT_KEY = "timeout";
 
-    public ATSTransformRequest(String nodeRef, String targetMediaType, ClientData clientData, int timeout, String replyQueue)
+    public ATSTransformRequest(String nodeRef, String targetMediaType, ClientData clientData, Map<String, String> transformOptions, String replyQueue)
     {
         this(
                 UUID.randomUUID().toString(),
                 WORKSPACE_SPACES_STORE + nodeRef,
                 targetMediaType,
                 clientData,
-                Map.of(TIMEOUT_KEY, String.valueOf(timeout)),
+                transformOptions,
                 replyQueue);
     }
 }

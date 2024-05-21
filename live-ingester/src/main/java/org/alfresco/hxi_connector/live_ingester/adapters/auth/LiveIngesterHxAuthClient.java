@@ -25,35 +25,31 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 
-import java.util.Set;
-
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.springframework.stereotype.Component;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
-import org.alfresco.hxi_connector.common.util.ErrorUtils;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-@Component
 public class LiveIngesterHxAuthClient extends HxAuthenticationClient
 {
-    private final IntegrationProperties integrationProperties;
 
     public LiveIngesterHxAuthClient(CamelContext camelContext, IntegrationProperties integrationProperties)
     {
-        super(camelContext);
-        this.integrationProperties = integrationProperties;
+        super(camelContext, integrationProperties.hylandExperience().authentication().retry());
     }
 
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.authentication.retry.attempts}",
+            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.authentication.retry.initialDelay}",
+                    multiplierExpression = "#{@integrationProperties.hylandExperience.authentication.retry.delayMultiplier}"))
     @Override
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    protected void wrapErrorIfNecessary(Exchange exchange)
+    public AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration)
     {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
-
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
+        return super.authenticate(tokenUri, clientRegistration);
     }
 }

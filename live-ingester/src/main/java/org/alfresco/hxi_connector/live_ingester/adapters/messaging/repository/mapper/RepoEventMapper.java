@@ -26,13 +26,13 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getEventType;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeDeleted;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.util.EnsureUtils.ensureThat;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;

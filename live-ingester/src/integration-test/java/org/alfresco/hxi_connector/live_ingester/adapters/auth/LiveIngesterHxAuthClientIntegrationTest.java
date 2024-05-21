@@ -25,137 +25,24 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
-import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED;
-import static org.apache.http.HttpHeaders.HOST;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.times;
-import static software.amazon.awssdk.http.HttpStatusCode.OK;
-
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import org.apache.camel.Exchange;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
-import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClientTest;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.SecurityConfig;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        LiveIngesterHxAuthClient.class},
+        SecurityConfig.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
 @ActiveProfiles("test")
 @Testcontainers
-class LiveIngesterHxAuthClientIntegrationTest
-{
-    private static final int RETRY_ATTEMPTS = 3;
-    private static final int RETRY_DELAY_MS = 0;
-    private static String tokenUri;
-    private static ClientRegistration clientRegistration;
-
-    @Container
-    @SuppressWarnings("PMD.FieldNamingConventions")
-    static final WireMockContainer wireMockServer = DockerContainers.createWireMockContainer();
-
-    @SpyBean
-    AuthenticationClient authenticationClient;
-
-    @BeforeAll
-    static void beforeAll()
-    {
-        WireMock.configureFor(wireMockServer.getHost(), wireMockServer.getPort());
-        tokenUri = wireMockServer.getBaseUrl() + AuthUtils.TOKEN_PATH;
-        clientRegistration = AuthUtils.creatClientRegistration(tokenUri);
-    }
-
-    @Test
-    void testAuthorize()
-    {
-        // given
-        givenThat(post(AuthUtils.TOKEN_PATH)
-                .willReturn(aResponse()
-                        .withStatus(OK)
-                        .withBody(AuthUtils.createAuthResponseBody())));
-
-        // when
-        AuthenticationResult authenticationResult = authenticationClient.authenticate(tokenUri, clientRegistration);
-
-        // then
-        then(authenticationClient).should().authenticate(tokenUri, clientRegistration);
-        String authRequestBody = AuthUtils.createAuthRequestBody();
-        WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
-                .withHeader(HOST, new EqualToPattern(wireMockServer.getHost() + ":" + wireMockServer.getPort()))
-                .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
-                .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))
-                .withRequestBody(new EqualToPattern(authRequestBody)));
-        AuthenticationResult expectedAuthenticationResult = AuthUtils.createExpectedAuthResult();
-        assertThat(authenticationResult).isEqualTo(expectedAuthenticationResult);
-    }
-
-    @Test
-    void testAuthorize_serverError_doRetry()
-    {
-        // given
-        givenThat(post(AuthUtils.TOKEN_PATH)
-                .willReturn(serverError()));
-
-        // when
-        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(tokenUri, clientRegistration));
-
-        // then
-        then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(tokenUri, clientRegistration);
-        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
-    }
-
-    @Test
-    void testAuthorize_clientError_dontRetry()
-    {
-        // given
-        givenThat(post(AuthUtils.TOKEN_PATH)
-                .willReturn(badRequest()));
-
-        // when
-        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(tokenUri, clientRegistration));
-
-        // then
-        then(authenticationClient).should(times(1)).authenticate(tokenUri, clientRegistration);
-        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
-    }
-
-    @DynamicPropertySource
-    static void overrideProperties(DynamicPropertyRegistry registry)
-    {
-        AuthUtils.overrideAuthProperties(registry, wireMockServer.getBaseUrl());
-        registry.add("hyland-experience.authentication.retry.attempts", () -> RETRY_ATTEMPTS);
-        registry.add("hyland-experience.authentication.retry.initialDelay", () -> RETRY_DELAY_MS);
-    }
-}
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
+class LiveIngesterHxAuthClientIntegrationTest extends HxAuthenticationClientTest
+{}

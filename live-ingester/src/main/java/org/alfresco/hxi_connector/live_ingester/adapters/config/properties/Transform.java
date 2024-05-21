@@ -36,6 +36,8 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
+import org.alfresco.hxi_connector.common.config.properties.Retry;
+
 public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore, MimeType mimeType)
 {
 
@@ -48,7 +50,7 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
         this.mimeType = mimeType != null ? mimeType : new MimeType(null);
     }
 
-    public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout)
+    public record Request(@NotBlank String endpoint, @Positive @DefaultValue("20000") int timeout, @NotNull Map<String, Map<String, String>> options)
     {}
 
     @SuppressWarnings("PMD.UnusedAssignment")

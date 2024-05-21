@@ -39,7 +39,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
-import static org.alfresco.hxi_connector.live_ingester.util.auth.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
@@ -61,6 +61,8 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.adapters.auth.util.WithMockOAuth2User;
+import org.alfresco.hxi_connector.common.adapters.auth.util.WithoutAnyUser;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
@@ -69,8 +71,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.In
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
-import org.alfresco.hxi_connector.live_ingester.util.auth.WithMockOAuth2User;
-import org.alfresco.hxi_connector.live_ingester.util.auth.WithoutAnyUser;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,

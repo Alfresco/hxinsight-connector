@@ -25,7 +25,11 @@
  */
 package org.alfresco.hxi_connector.common.test.docker.repository;
 
+import com.github.dockerjava.api.DockerClient;
+import com.github.dockerjava.api.command.PullImageResultCallback;
+import com.github.dockerjava.api.model.PullResponseItem;
 import lombok.NonNull;
+import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.utility.DockerImageName;
 
@@ -43,6 +47,20 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
     public AlfrescoRepositoryContainer()
     {
         this(false);
+    }
+
+    public static void pullRepositoryImage(boolean enterprise)
+    {
+        DockerClient dockerClient = DockerClientFactory.instance().client();
+        PullImageResultCallback callback = new PullImageResultCallback() {
+            @Override
+            public void onNext(PullResponseItem item)
+            {
+                super.onNext(item);
+            }
+        };
+        dockerClient.pullImageCmd(String.valueOf(DockerImageName.parse(!enterprise ? REPOSITORY_IMAGE_DEFAULT : REPOSITORY_ENTERPRISE_IMAGE_DEFAULT).withTag(REPOSITORY_TAG)))
+                .exec(callback);
     }
 
     public AlfrescoRepositoryContainer(boolean enterprise)
