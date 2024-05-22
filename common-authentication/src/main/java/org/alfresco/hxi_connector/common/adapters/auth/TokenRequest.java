@@ -49,8 +49,7 @@ public class TokenRequest
     public String getTokenRequestBody()
     {
         StringBuilder body = new StringBuilder();
-        body.append("grant_type=").append(encode(this.grantType, UTF_8));
-        body.append("&client_id=").append(encode(clientId, UTF_8));
+        body.append("grant_type=").append(encode(this.grantType, UTF_8)).append("&client_id=").append(encode(clientId, UTF_8));
         if (Strings.isNotBlank(this.clientSecret))
         {
             body.append("&client_secret=").append(encode(this.clientSecret, UTF_8));

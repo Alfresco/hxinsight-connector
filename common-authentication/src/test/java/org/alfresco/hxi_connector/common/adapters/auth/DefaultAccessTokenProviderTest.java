@@ -66,7 +66,7 @@ class DefaultAccessTokenProviderTest
     }
 
     @Test
-    void getAccessToken_whenTokenNotPresent_shouldRefreshToken()
+    void givenTokenNotPresent_whenGetAccessToken_thenRefreshToken()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
         given(mockResult.accessToken()).willReturn(TEST_TOKEN);
@@ -83,7 +83,7 @@ class DefaultAccessTokenProviderTest
     }
 
     @Test
-    void getAccessToken_whenTokenExpired_shouldRefreshToken()
+    void givenTokenExpired_whenGetAccessToken_thenRefreshToken()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
         given(mockResult.accessToken()).willReturn(TEST_TOKEN);
@@ -104,7 +104,7 @@ class DefaultAccessTokenProviderTest
     }
 
     @Test
-    void getAccessToken_whenTokenValid_shouldNotRefreshToken()
+    void givenTokenValid_whenGetAccessToken_thenReturnTokenWithoutRefresh()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
         given(mockResult.accessToken()).willReturn(TEST_TOKEN);
@@ -121,7 +121,7 @@ class DefaultAccessTokenProviderTest
     }
 
     @Test
-    void getAccessToken_whenAuthenticationError_shouldThrowException()
+    void givenAuthenticationError_whenGetAccessToken_thenThrowException()
     {
         given(mockAuthenticationClient.authenticate(CLIENT_REGISTRATION_ID)).willThrow(RuntimeException.class);
 

@@ -80,7 +80,7 @@ public class NodesClient extends RouteBuilder
 
     @Override
     @SuppressWarnings("unchecked")
-    public void configure() throws Exception
+    public void configure()
     {
         // @formatter:off
         onException(RETRY_REASONS.toArray(Class[]::new))
@@ -120,6 +120,7 @@ public class NodesClient extends RouteBuilder
         // @formatter:on
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void setAuthorizationHeader(Exchange exchange)
     {
         if (oAuth2ClientProperties.getProvider().containsKey("alfresco"))
