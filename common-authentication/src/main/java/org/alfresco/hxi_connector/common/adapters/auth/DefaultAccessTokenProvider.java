@@ -44,8 +44,9 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     private final CamelContext camelContext;
     private final AuthenticationClient authenticationClient;
 
-    private Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> accessTokens = new HashMap<>();
+    private final Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> accessTokens = new HashMap<>();
 
+    @Override
     public String getAccessToken(String clientRegistrationId)
     {
         waitFor(camelContext::isStarted);
