@@ -45,6 +45,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -56,8 +58,13 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClientTest;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierHxAuthClient;
+import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.SecurityConfig;
 
-@SpringBootTest(properties = "logging.level.org.alfresco=DEBUG")
+@SpringBootTest(properties = "logging.level.org.alfresco=DEBUG",
+        classes = {HxInsightProperties.class, SecurityConfig.class, PredictionApplierHxAuthClient.class, PredictionApplierHxAuthClientIntegrationTest.PredictionApplierHxAuthClientTestConfig.class})
 @EnableAutoConfiguration
 @EnableConfigurationProperties
 @EnableRetry
@@ -98,5 +105,15 @@ class PredictionApplierHxAuthClientIntegrationTest extends HxAuthenticationClien
     protected static void overrideProperties(DynamicPropertyRegistry registry)
     {
         AuthUtils.overrideAuthProperties(registry, ACS_MOCK.getBaseUrl(), "alfresco");
+    }
+
+    @TestConfiguration
+    public static class PredictionApplierHxAuthClientTestConfig
+    {
+        @Bean
+        public NodesApiProperties nodesApiProperties()
+        {
+            return new NodesApiProperties("http://localhost:8002", "dummy-user", "dummy-password", null);
+        }
     }
 }
