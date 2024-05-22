@@ -84,6 +84,7 @@ public class PredictionCollector extends RouteBuilder
 
         from(insightPredictionsProperties.collectorTimerEndpoint())
             .routeId(TIMER_ROUTE_ID)
+            .delay(5000)
             .choice()
             .when(this::isProcessingPending)
                 .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")

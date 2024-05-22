@@ -41,11 +41,11 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationService;
-import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
 import org.alfresco.hxi_connector.common.adapters.auth.HxOAuth2AuthenticationProvider;
-import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierHxAuthClient;
 
 @Configuration
 @EnableMethodSecurity
@@ -78,8 +78,8 @@ public class SecurityConfig
     }
 
     @Bean
-    public HxAuthenticationClient predictionApplierHxAuthClient(CamelContext camelContext, HxInsightProperties hxInsightProperties)
+    public AccessTokenProvider defaultAccessTokenProvider(CamelContext camelContext, AuthenticationClient predictionApplierHxAuthClient)
     {
-        return new PredictionApplierHxAuthClient(camelContext, hxInsightProperties);
+        return new DefaultAccessTokenProvider(camelContext, predictionApplierHxAuthClient);
     }
 }
