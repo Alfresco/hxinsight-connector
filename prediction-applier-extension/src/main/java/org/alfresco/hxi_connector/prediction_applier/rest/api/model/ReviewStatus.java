@@ -38,7 +38,7 @@ public enum ReviewStatus
 
     public static ReviewStatus fromString(String status)
     {
-        for (ReviewStatus reviewStatus : ReviewStatus.values())
+        for (ReviewStatus reviewStatus : values())
         {
             if (reviewStatus.value.equalsIgnoreCase(status))
             {
