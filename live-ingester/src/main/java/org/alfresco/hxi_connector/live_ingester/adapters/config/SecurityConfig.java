@@ -78,8 +78,8 @@ public class SecurityConfig
     }
 
     @Bean
-    public HxAuthenticationClient liveIngesterHxAuthClient(CamelContext camelContext, IntegrationProperties integrationProperties)
+    public HxAuthenticationClient liveIngesterHxAuthClient(CamelContext camelContext, IntegrationProperties integrationProperties, OAuth2ClientProperties oAuth2ClientProperties)
     {
-        return new LiveIngesterHxAuthClient(camelContext, integrationProperties);
+        return new LiveIngesterHxAuthClient(camelContext, integrationProperties, oAuth2ClientProperties);
     }
 }
