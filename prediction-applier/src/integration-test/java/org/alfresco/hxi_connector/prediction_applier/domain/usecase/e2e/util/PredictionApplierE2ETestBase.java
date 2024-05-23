@@ -110,7 +110,8 @@ public class PredictionApplierE2ETestBase
     @SneakyThrows
     public void setUp()
     {
-        containerSupport = ContainerSupport.getInstance(hxInsightMock, brokerUrl, repositoryMock);
+        String repositoryBaseUrl = repositoryServer.getBaseUrl();
+        containerSupport = ContainerSupport.getInstance(hxInsightMock, brokerUrl, repositoryMock, repositoryBaseUrl);
     }
 
     @AfterEach
@@ -129,15 +130,5 @@ public class PredictionApplierE2ETestBase
     {
         WireMock.configureFor(hxAuthMock);
         ContainerSupport.removeInstance();
-    }
-
-    public static WireMock getHxInsightMock()
-    {
-        return hxInsightMock;
-    }
-
-    public static WireMock getRepositoryMock()
-    {
-        return repositoryMock;
     }
 }

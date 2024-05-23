@@ -27,12 +27,10 @@ package org.alfresco.hxi_connector.prediction_applier.util;
 
 import static java.net.HttpURLConnection.HTTP_CREATED;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.apache.camel.Exchange.CONTENT_TYPE;
+
+import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 
 import java.util.UUID;
 import jakarta.jms.Connection;
@@ -44,6 +42,10 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Getter
@@ -52,21 +54,23 @@ public class ContainerSupport
 {
     private static final int HTTP_OK_STATUS = 200;
     private static final int HTTP_ACCEPTED_STATUS = 202;
-    public static final String HX_INSIGHT_PREDICTION_BATCHES_ENDPOINT = "/prediction-batches";
-    public static final String REPOSITORY_PREDICTION_ENDPOINT_TEMPLATE = "/alfresco/api/-default-/private/hxi/versions/1/nodes/%s/predictions";
+    public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/prediction-batches";
+    public static final String REPOSITORY_PREDICTION_ENDPOINT = "/alfresco/api/-default-/private/hxi/versions/1/nodes/%s/predictions";
     private static ContainerSupport instance;
     private final Session session;
     private final WireMock hxInsightMock;
     private final WireMock repositoryMock;
+    private final String repositoryBaseUrl;
 
     @SneakyThrows
     @SuppressWarnings("PMD.CloseResource")
-    private ContainerSupport(WireMock hxInsightMock, String brokerUrl, WireMock repositoryMock)
+    private ContainerSupport(WireMock hxInsightMock, String brokerUrl, WireMock repositoryMock, String repositoryBaseUrl)
     {
         configureFor(hxInsightMock);
         this.hxInsightMock = hxInsightMock;
         configureFor(repositoryMock);
         this.repositoryMock = repositoryMock;
+        this.repositoryBaseUrl = repositoryBaseUrl;
 
         ConnectionFactory connectionFactory = new ActiveMQConnectionFactory(brokerUrl);
         Connection connection = connectionFactory.createConnection();
@@ -75,11 +79,11 @@ public class ContainerSupport
         session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
     }
 
-    public static ContainerSupport getInstance(WireMock hxInsightMock, String brokerUrl, WireMock repositoryMock)
+    public static ContainerSupport getInstance(WireMock hxInsightMock, String brokerUrl, WireMock repositoryMock, String repositoryBaseUrl)
     {
         if (instance == null)
         {
-            instance = new ContainerSupport(hxInsightMock, brokerUrl, repositoryMock);
+            instance = new ContainerSupport(hxInsightMock, brokerUrl, repositoryMock, repositoryBaseUrl);
         }
         return instance;
     }
@@ -94,7 +98,7 @@ public class ContainerSupport
         String batchId = UUID.randomUUID().toString();
 
         configureFor(hxInsightMock);
-        givenThat(get(urlPathEqualTo(HX_INSIGHT_PREDICTION_BATCHES_ENDPOINT))
+        givenThat(get(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT))
                 .willReturn(aResponse()
                         .withStatus(HTTP_OK_STATUS)
                         .withBody("""
@@ -117,7 +121,7 @@ public class ContainerSupport
                                     }
                                 ]
                                 """.formatted(batchId))));
-        givenThat(get(urlPathEqualTo(HX_INSIGHT_PREDICTION_BATCHES_ENDPOINT + "/" + batchId))
+        givenThat(get(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT + "/" + batchId))
                 .willReturn(aResponse()
                         .withStatus(HTTP_OK_STATUS)
                         .withBody("""
@@ -140,16 +144,6 @@ public class ContainerSupport
 
     public void expectRepositoryRequestReceived(String nodeId, String predictedValue)
     {
-        String expectedBody = """
-                {
-                    "property": "cm:description",
-                    "predictionDateTime": "2024-04-12T10:31:12.477+0000",
-                    "confidenceLevel": 0.98,
-                    "modelId": "97f33039-2d09-4206-94ab-8b50f2cd2569",
-                    "predictionValue": "%s",
-                    "updateType": "AUTOCORRECT"
-                }
-                """.formatted(predictedValue);
         String responseBody = """
                 {
                     "entry": {
@@ -164,25 +158,40 @@ public class ContainerSupport
                     }
                 }
                 """.formatted(predictedValue);
-        ;
+
+        String expectedBody = """
+                {
+                    "property": "cm:description",
+                    "predictionDateTime": "2024-04-12T10:31:12.477+0000",
+                    "confidenceLevel": 0.98,
+                    "modelId": "97f33039-2d09-4206-94ab-8b50f2cd2569",
+                    "predictionValue": "%s",
+                    "updateType": "AUTOCORRECT"
+                }
+                """.formatted(predictedValue);
 
         configureFor(repositoryMock);
-        String repositoryUrl = REPOSITORY_PREDICTION_ENDPOINT_TEMPLATE.formatted(nodeId);
+        String repositoryUrl = REPOSITORY_PREDICTION_ENDPOINT.formatted(nodeId);
         givenThat(post(urlPathEqualTo(repositoryUrl))
                 .willReturn(aResponse()
                         .withStatus(HTTP_CREATED)
                         .withBody(responseBody)));
 
-        // retryWithBackoff(() -> getRepositoryMock().verifyThat(postRequestedFor(urlPathEqualTo(repositoryUrl))
-        // .withHeader(CONTENT_TYPE, equalTo("application/json"))
-        // .withRequestBody(equalToJson(expectedBody))));
+        sendPostRequest(repositoryUrl, expectedBody);
+
+        retryWithBackoff(() -> getRepositoryMock().verifyThat(postRequestedFor(urlPathEqualTo(repositoryUrl))
+                .withHeader(CONTENT_TYPE, equalTo("application/json"))
+                .withRequestBody(equalToJson(expectedBody))));
     }
 
-    private void resetWireMock()
+    public void sendPostRequest(String repositoryPath, String requestBody)
     {
-        WireMock.reset();
-        WireMock.resetAllRequests();
-        hxInsightMock.resetRequests();
-        hxInsightMock.resetMappings();
+        String repositoryUrl = repositoryBaseUrl + repositoryPath;
+        RestTemplate restTemplate = new RestTemplate();
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
+
+        restTemplate.postForObject(repositoryUrl, entity, String.class);
     }
 }
