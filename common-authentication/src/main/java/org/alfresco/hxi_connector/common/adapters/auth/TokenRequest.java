@@ -31,12 +31,14 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.ToString;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
 @AllArgsConstructor
 @ToString
+@Builder
 public class TokenRequest
 {
     private String grantType;
@@ -48,7 +50,7 @@ public class TokenRequest
 
     public String getTokenRequestBody()
     {
-        StringBuilder body = new StringBuilder();
+        final StringBuilder body = new StringBuilder();
         body.append("grant_type=").append(encode(this.grantType, UTF_8)).append("&client_id=").append(encode(clientId, UTF_8));
         if (Strings.isNotBlank(this.clientSecret))
         {
@@ -68,76 +70,5 @@ public class TokenRequest
         }
 
         return body.toString();
-    }
-
-    public static TokenRequestBuilder builder()
-    {
-        return new TokenRequestBuilder();
-    }
-
-    public static class TokenRequestBuilder
-    {
-        private String grantType;
-        private String clientId;
-        private String clientSecret;
-        private Set<String> scope;
-        private String username;
-        private String password;
-
-        TokenRequestBuilder()
-        {}
-
-        public TokenRequestBuilder grantType(String grantType)
-        {
-            this.grantType = grantType;
-            return this;
-        }
-
-        public TokenRequestBuilder clientId(String clientId)
-        {
-            this.clientId = clientId;
-            return this;
-        }
-
-        public TokenRequestBuilder clientSecret(String clientSecret)
-        {
-            if (Strings.isNotBlank(clientSecret))
-            {
-                this.clientSecret = clientSecret;
-            }
-            return this;
-        }
-
-        public TokenRequestBuilder scope(Set<String> scope)
-        {
-            if (!CollectionUtils.isEmpty(scope))
-            {
-                this.scope = scope;
-            }
-            return this;
-        }
-
-        public TokenRequestBuilder username(String username)
-        {
-            if (Strings.isNotBlank(username))
-            {
-                this.username = username;
-            }
-            return this;
-        }
-
-        public TokenRequestBuilder password(String password)
-        {
-            if (Strings.isNotBlank(password))
-            {
-                this.password = password;
-            }
-            return this;
-        }
-
-        public TokenRequest build()
-        {
-            return new TokenRequest(this.grantType, this.clientId, this.clientSecret, this.scope, this.username, this.password);
-        }
     }
 }
