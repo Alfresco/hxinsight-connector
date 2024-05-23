@@ -40,8 +40,6 @@ import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.http.HttpHeaders;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
@@ -99,7 +97,6 @@ public class PredictionCollector extends RouteBuilder
             .end()
             .end();
 
-        SecurityContext securityContext = SecurityContextHolder.getContext();
         from(DIRECT_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
