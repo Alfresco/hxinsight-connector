@@ -142,7 +142,7 @@ public abstract class HxAuthenticationClientTest
     @DynamicPropertySource
     protected static void overrideProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, hxAuthMock.getBaseUrl());
+        AuthUtils.overrideAuthProperties(registry, hxAuthMock.getBaseUrl(), "hyland-experience-auth");
         registry.add("hyland-experience.authentication.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.authentication.retry.initialDelay", () -> RETRY_DELAY_MS);
     }

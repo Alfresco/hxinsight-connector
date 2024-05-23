@@ -97,13 +97,13 @@ public class AuthUtils
         return TOKEN_TYPE + " " + ACCESS_TOKEN;
     }
 
-    public static void overrideAuthProperties(DynamicPropertyRegistry registry, String mockServerBaseUrl)
+    public static void overrideAuthProperties(DynamicPropertyRegistry registry, String mockServerBaseUrl, String clientRegistrationId)
     {
-        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-id", () -> CLIENT_ID);
-        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-secret", () -> CLIENT_SECRET);
-        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-name", () -> CLIENT_NAME);
-        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.authorization-grant-type", () -> AUTH_GRAND_TYPE);
-        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.scope", () -> SCOPE);
-        registry.add("spring.security.oauth2.client.provider.hyland-experience-auth.token-uri", () -> mockServerBaseUrl + TOKEN_PATH);
+        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".client-id", () -> CLIENT_ID);
+        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".client-secret", () -> CLIENT_SECRET);
+        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".client-name", () -> CLIENT_NAME);
+        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".authorization-grant-type", () -> AUTH_GRAND_TYPE);
+        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".scope", () -> SCOPE);
+        registry.add("spring.security.oauth2.client.provider." + clientRegistrationId + ".token-uri", () -> mockServerBaseUrl + TOKEN_PATH);
     }
 }

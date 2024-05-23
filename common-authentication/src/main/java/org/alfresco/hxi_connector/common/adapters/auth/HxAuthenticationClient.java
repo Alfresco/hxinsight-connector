@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
@@ -46,22 +45,18 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
 @Slf4j
 public class HxAuthenticationClient extends RouteBuilder implements AuthenticationClient
 {
-    private static final String LOCAL_ENDPOINT = "direct:" + HxAuthenticationClient.class.getSimpleName();
+    public static final String LOCAL_AUTH_ENDPOINT = "direct:" + HxAuthenticationClient.class.getSimpleName();
     private static final String ROUTE_ID = "authentication-requester";
-    private static final String AUTH_URL_HEADER = "hxAuthUri";
-    private static final String BODY_PATTERN = "grant_type=%s&client_id=%s&client_secret=%s&scope=%s";
+    private static final String AUTH_URL_HEADER = "authUri";
     public static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
@@ -76,7 +71,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
             .process(this::wrapErrorIfNecessary)
             .stop();
 
-        from(LOCAL_ENDPOINT)
+        from(LOCAL_AUTH_ENDPOINT)
             .id(ROUTE_ID)
             .toD("${headers." + AUTH_URL_HEADER + "}?throwExceptionOnFailure=false")
             .choice()
@@ -92,10 +87,6 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
         // @formatter:on
     }
 
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.authentication.retry.attempts}",
-            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.authentication.retry.initialDelay}",
-                    multiplierExpression = "#{@integrationProperties.hylandExperience.authentication.retry.delayMultiplier}"))
     @Override
     public AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration)
     {
@@ -103,7 +94,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
         int contentLength = body.getBytes(UTF_8).length;
 
         return camelContext.createFluentProducerTemplate()
-                .to(LOCAL_ENDPOINT)
+                .to(LOCAL_AUTH_ENDPOINT)
                 .withProcessor(exchange -> {
                     exchange.getIn().setHeaders(Map.of(
                             AUTH_URL_HEADER, tokenUri,
@@ -116,13 +107,15 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
                 .request(AuthenticationResult.class);
     }
 
-    private String createEncodedBody(ClientRegistration clientRegistration)
+    protected String createEncodedBody(ClientRegistration clientRegistration)
     {
-        return BODY_PATTERN.formatted(
-                encode(clientRegistration.getAuthorizationGrantType().getValue(), UTF_8),
-                encode(clientRegistration.getClientId(), UTF_8),
-                encode(clientRegistration.getClientSecret(), UTF_8),
-                encode(String.join(",", clientRegistration.getScopes()), UTF_8));
+        return TokenRequest.builder()
+                .clientId(clientRegistration.getClientId())
+                .grantType(clientRegistration.getAuthorizationGrantType().getValue())
+                .clientSecret(clientRegistration.getClientSecret())
+                .scope(clientRegistration.getScopes())
+                .build()
+                .getTokenRequestBody();
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

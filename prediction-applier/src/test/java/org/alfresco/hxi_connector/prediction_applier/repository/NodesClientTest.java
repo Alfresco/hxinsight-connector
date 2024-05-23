@@ -52,7 +52,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -77,7 +82,11 @@ class NodesClientTest
     void beforeAll()
     {
         camelContext = new DefaultCamelContext();
-        NodesClient nodesClient = new NodesClient(createNodesApiProperties());
+        OAuth2ClientProperties dummyOauth2Properties = createDummyOauth2Properties();
+        Retry dummyRetryProperties = new Retry(RETRY_ATTEMPTS, 0, 1, emptySet());
+        AuthenticationClient dummyAuthClient = new HxAuthenticationClient(camelContext, dummyRetryProperties);
+        AccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(camelContext, dummyAuthClient);
+        NodesClient nodesClient = new NodesClient(createNodesApiProperties(), dummyAccessTokenProvider, dummyOauth2Properties);
         camelContext.addRoutes(nodesClient);
         camelContext.start();
 
@@ -168,5 +177,13 @@ class NodesClientTest
             exchange.getMessage().setHeader(HTTP_RESPONSE_CODE, statusCode);
             exchange.getMessage().setBody(responseBody);
         });
+    }
+
+    private static OAuth2ClientProperties createDummyOauth2Properties()
+    {
+        OAuth2ClientProperties oAuth2ClientProperties = new OAuth2ClientProperties();
+        oAuth2ClientProperties.getProvider().put("dummy", new OAuth2ClientProperties.Provider());
+        oAuth2ClientProperties.getRegistration().put("dummy", new OAuth2ClientProperties.Registration());
+        return oAuth2ClientProperties;
     }
 }
