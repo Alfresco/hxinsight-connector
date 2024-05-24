@@ -30,6 +30,7 @@ import static java.util.Optional.ofNullable;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
@@ -164,8 +165,10 @@ public final class EventUtils
         return false;
     }
 
-    public static boolean wasNodePropertyChangedTo(RepoEvent<DataAttributes<NodeResource>> event, String propertyName, Object value)
+    public static boolean wasPredictionConfirmed(RepoEvent<DataAttributes<NodeResource>> event)
     {
+        ensureThat(isPredictionNodeEvent(event), "Event is not a prediction node event");
+
         Map<String, Serializable> oldProperties = event.getData().getResourceBefore().getProperties();
         Map<String, Serializable> newProperties = event.getData().getResource().getProperties();
 
@@ -174,15 +177,8 @@ public final class EventUtils
             return false;
         }
 
-        Object oldValue = oldProperties.get(propertyName);
-        Object newValue = newProperties.get(propertyName);
-
-        if (Objects.equals(oldValue, newValue))
-        {
-            return false;
-        }
-
-        return Objects.equals(newValue, value);
+        return !Objects.equals(oldProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY), newProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY)) &&
+                Objects.equals(newProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY), PREDICTION_CONFIRMED);
     }
 
     public static String getNodeParent(RepoEvent<DataAttributes<NodeResource>> event)

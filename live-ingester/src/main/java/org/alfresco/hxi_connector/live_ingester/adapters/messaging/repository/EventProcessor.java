@@ -26,9 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_CONFIRMED;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_REVIEW_STATUS_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getNodeParent;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getPredictionNodeProperties;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
@@ -37,7 +34,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isPredictionApplyEvent;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isPredictionNodeEvent;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasContentChanged;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasNodePropertyChangedTo;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasPredictionConfirmed;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 
 import lombok.RequiredArgsConstructor;
@@ -102,9 +99,7 @@ public class EventProcessor
 
     private void handlePredictionNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(isPredictionNodeEvent(event), "Event is not a prediction node event");
-
-        if (wasNodePropertyChangedTo(event, PREDICTION_REVIEW_STATUS_PROPERTY, PREDICTION_CONFIRMED))
+        if (wasPredictionConfirmed(event))
         {
             IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), UPDATE, getPredictionNodeProperties(event));
             ingestNodeCommandHandler.handle(command);
