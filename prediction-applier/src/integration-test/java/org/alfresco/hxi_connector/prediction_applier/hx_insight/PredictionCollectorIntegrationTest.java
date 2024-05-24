@@ -26,6 +26,9 @@
 
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLogsListAppender;
@@ -37,18 +40,33 @@ import java.util.stream.Stream;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
+import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.core5.http.HttpStatus;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierHxAuthClient;
+import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionBufferStub;
 import org.alfresco.hxi_connector.prediction_applier.util.PredictionSourceStub;
@@ -59,9 +77,11 @@ import org.alfresco.hxi_connector.prediction_applier.util.PredictionTriggerStub;
         properties = {"logging.level.org.alfresco=DEBUG"},
         classes = {
                 PredictionCollector.class, PredictionCollectorIntegrationTest.IntegrationPropertiesTestConfig.class,
-                PredictionSourceStub.class, PredictionTriggerStub.class, PredictionBufferStub.class
+                PredictionSourceStub.class, PredictionTriggerStub.class, PredictionBufferStub.class, DefaultAccessTokenProvider.class,
+                PredictionApplierHxAuthClient.class, HxInsightProperties.class, OAuth2ClientProperties.class
         })
 @EnableAutoConfiguration
+@Testcontainers
 @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.LongVariable"})
 class PredictionCollectorIntegrationTest
 {
@@ -72,6 +92,19 @@ class PredictionCollectorIntegrationTest
     private PredictionTriggerStub predictionTriggerStub;
     @Autowired
     private PredictionBufferStub predictionBufferStub;
+
+    @Container
+    private static final WireMockContainer HX_MOCK = DockerContainers.createWireMockContainer();
+
+    @BeforeEach
+    void setUp()
+    {
+        WireMock.configureFor(HX_MOCK.getHost(), HX_MOCK.getPort());
+        givenThat(post(AuthUtils.TOKEN_PATH)
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withBody(AuthUtils.createAuthResponseBody())));
+    }
 
     @AfterEach
     void tearDown()
@@ -127,7 +160,7 @@ class PredictionCollectorIntegrationTest
         predictionTriggerStub.triggerPredictionsCollectingAsync();
         predictionTriggerStub.triggerPredictionsCollectingAsync(50);
 
-        Thread.sleep(75);
+        Thread.sleep(750);
         // then
         List<String> logMessages = logs.list.stream()
                 .map(ILoggingEvent::getMessage)
@@ -142,6 +175,12 @@ class PredictionCollectorIntegrationTest
         return new PredictionEntry(id, id, null, null);
     }
 
+    @DynamicPropertySource
+    protected static void overrideProperties(DynamicPropertyRegistry registry)
+    {
+        AuthUtils.overrideAuthProperties(registry, HX_MOCK.getBaseUrl(), "hyland-experience-auth");
+    }
+
     @TestConfiguration
     public static class IntegrationPropertiesTestConfig
     {
@@ -154,6 +193,12 @@ class PredictionCollectorIntegrationTest
                     null,
                     "direct:predictions-source",
                     "direct:predictions-buffer");
+        }
+
+        @Bean
+        public NodesApiProperties nodesApiProperties()
+        {
+            return new NodesApiProperties("http://localhost:8002", "dummy-user", "dummy-password", null);
         }
     }
 }
