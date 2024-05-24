@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.auth;
 
-import java.util.Objects;
-
 import org.apache.camel.CamelContext;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.retry.annotation.Backoff;
@@ -39,6 +37,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.TokenRequest;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
 
@@ -80,7 +79,7 @@ public class PredictionApplierHxAuthClient extends HxAuthenticationClient
     protected String createEncodedBody(String clientRegistrationId)
     {
         OAuth2ClientProperties.Registration registration = oAuth2ClientProperties.getRegistration().get(clientRegistrationId);
-        Objects.requireNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
+        EnsureUtils.ensureNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
         if (AuthorizationGrantType.PASSWORD.getValue().equals(registration.getAuthorizationGrantType()))
         {
             return TokenRequest.builder()

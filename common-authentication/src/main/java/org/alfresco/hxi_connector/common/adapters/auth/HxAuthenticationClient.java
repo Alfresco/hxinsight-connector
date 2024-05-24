@@ -36,7 +36,6 @@ import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATU
 
 import java.net.URI;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
@@ -50,6 +49,7 @@ import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2Clien
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
@@ -103,7 +103,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
     {
         String body = createEncodedBody(clientRegistrationId);
         OAuth2ClientProperties.Provider provider = oAuth2ClientProperties.getProvider().get(clientRegistrationId);
-        Objects.requireNonNull(provider, "Auth Provider not found for client registration id: " + clientRegistrationId);
+        EnsureUtils.ensureNonNull(provider, "Auth Provider not found for client registration id: " + clientRegistrationId);
         String tokenUri = provider.getTokenUri();
         log.atDebug().log("Authentication :: sending token request for {} client registration", clientRegistrationId);
 
@@ -141,7 +141,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
     protected String createEncodedBody(String clientRegistrationId)
     {
         OAuth2ClientProperties.Registration registration = oAuth2ClientProperties.getRegistration().get(clientRegistrationId);
-        Objects.requireNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
+        EnsureUtils.ensureNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
         return TokenRequest.builder()
                 .clientId(registration.getClientId())
                 .grantType(registration.getAuthorizationGrantType())
