@@ -25,7 +25,9 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api.exception;
 
-public class PredictionStateChangedException extends RuntimeException
+import org.alfresco.error.AlfrescoRuntimeException;
+
+public class PredictionStateChangedException extends AlfrescoRuntimeException
 {
     public PredictionStateChangedException(String message)
     {

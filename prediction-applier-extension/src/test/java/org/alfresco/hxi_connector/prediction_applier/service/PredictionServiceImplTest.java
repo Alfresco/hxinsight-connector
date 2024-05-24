@@ -205,11 +205,11 @@ public class PredictionServiceImplTest
         assertEquals(expectedValue, propertyCaptor.getValue().get(propertyQName));
     }
 
-    private void assertPropertySet(NodeRef nodeRef, QName propertyQName, ReviewStatus expectedValue)
+    private void assertSinglePropertySet(NodeRef nodeRef, QName propertyQName, Serializable expectedValue)
     {
-        ArgumentCaptor<Map<QName, Serializable>> propertyCaptor = ArgumentCaptor.forClass(Map.class);
-        then(nodeService).should().setProperties(eq(nodeRef), propertyCaptor.capture());
-        assertEquals(expectedValue, propertyCaptor.getValue().get(propertyQName));
+        ArgumentCaptor<Serializable> propertyCaptor = ArgumentCaptor.forClass(Serializable.class);
+        then(nodeService).should().setProperty(eq(nodeRef), eq(propertyQName), propertyCaptor.capture());
+        assertEquals(expectedValue, propertyCaptor.getValue());
     }
 
     @Test
@@ -246,7 +246,7 @@ public class PredictionServiceImplTest
         // given
         reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
         // value has changed after prediction has been applied
-        given(nodeService.getProperties(NODE_REF)).willReturn(Map.of(PROPERTY_QNAME, "yellow"));
+        given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("yellow");
 
         // when
         assertThrows(PredictionStateChangedException.class, () -> predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.CONFIRMED));
@@ -257,7 +257,8 @@ public class PredictionServiceImplTest
     {
         // given
         reviewPredictionTestSetup(ReviewStatus.REJECTED);
-        given(nodeService.getProperties(NODE_REF)).willReturn(Map.of(PROPERTY_QNAME, "blue"));
+        given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.REJECTED);
 
         // when
         assertThrows(PredictionStateChangedException.class, () -> predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.CONFIRMED));
@@ -268,13 +269,14 @@ public class PredictionServiceImplTest
     {
         // given
         reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
-        given(nodeService.getProperties(NODE_REF)).willReturn(Map.of(PROPERTY_QNAME, "blue"));
+        given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED);
 
         // when
         predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.CONFIRMED);
 
         // then
-        assertPropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
+        assertSinglePropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
 
     }
 
@@ -283,14 +285,15 @@ public class PredictionServiceImplTest
     {
         // given
         reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
-        given(nodeService.getProperties(NODE_REF)).willReturn(Map.of(PROPERTY_QNAME, "blue"));
+        given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED);
 
         // when
         predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.REJECTED);
 
         // then
-        assertPropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
-        assertPropertySet(NODE_REF, PROPERTY_QNAME, "red");
+        assertSinglePropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
+        assertSinglePropertySet(NODE_REF, PROPERTY_QNAME, "red");
     }
 
     private void reviewPredictionTestSetup(ReviewStatus initialReviewStatus)
