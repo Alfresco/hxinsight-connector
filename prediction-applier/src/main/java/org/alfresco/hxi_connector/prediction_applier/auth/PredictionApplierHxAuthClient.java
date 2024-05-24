@@ -31,6 +31,7 @@ import org.apache.camel.CamelContext;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.stereotype.Component;
 
@@ -53,6 +54,16 @@ public class PredictionApplierHxAuthClient extends HxAuthenticationClient
         super(camelContext, hxInsightProperties.hylandExperience().authentication().retry(), oAuth2ClientProperties);
         this.oAuth2ClientProperties = oAuth2ClientProperties;
         this.nodesApiProperties = nodesApiProperties;
+    }
+
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "#{@hxInsightProperties.hylandExperience.authentication.retry.attempts}",
+            backoff = @Backoff(delayExpression = "#{@hxInsightProperties.hylandExperience.authentication.retry.initialDelay}",
+                    multiplierExpression = "#{@hxInsightProperties.hylandExperience.authentication.retry.delayMultiplier}"))
+    @Override
+    public AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration)
+    {
+        return super.authenticate(tokenUri, clientRegistration);
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
