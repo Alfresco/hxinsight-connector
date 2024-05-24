@@ -39,6 +39,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -82,8 +83,8 @@ class PredictionCollectorIntegrationTest
     void shouldDoNothingIfPredictionsCollectingNotTriggered()
     {
         // given
-        List<PredictionEntry> predictionsBatch1 = List.of(new PredictionEntry("1", "1", null, null));
-        List<PredictionEntry> predictionsBatch2 = List.of(new PredictionEntry("2", "2", null, null));
+        List<PredictionEntry> predictionsBatch1 = List.of(makePrediction("1"));
+        List<PredictionEntry> predictionsBatch2 = List.of(makePrediction("2"));
 
         predictionSourceStub.shouldReturnPredictions(predictionsBatch1, predictionsBatch2);
 
@@ -97,8 +98,8 @@ class PredictionCollectorIntegrationTest
     void shouldProcessPredictionsIfCollectingTriggered()
     {
         // given
-        List<PredictionEntry> predictionsBatch1 = List.of(new PredictionEntry("1", "1", null, null), new PredictionEntry("2", "2", null, null));
-        List<PredictionEntry> predictionsBatch2 = List.of(new PredictionEntry("3", "3", null, null), new PredictionEntry("4", "4", null, null));
+        List<PredictionEntry> predictionsBatch1 = List.of(makePrediction("1"), makePrediction("2"));
+        List<PredictionEntry> predictionsBatch2 = List.of(makePrediction("3"), makePrediction("4"));
 
         predictionSourceStub.shouldReturnPredictions(predictionsBatch1, predictionsBatch2);
 
@@ -117,7 +118,7 @@ class PredictionCollectorIntegrationTest
         // given
         ListAppender<ILoggingEvent> logs = createLogsListAppender(PredictionCollector.class);
 
-        List<PredictionEntry> predictions = List.of(new PredictionEntry("1", "1", null, null), new PredictionEntry("2", "2", null, null), new PredictionEntry("3", "3", null, null));
+        List<PredictionEntry> predictions = List.of(makePrediction("1"), makePrediction("2"), makePrediction("3"));
         List<List<PredictionEntry>> predictionsBatches = IntStream.range(0, 11).boxed().map(i -> predictions).toList();
 
         predictionSourceStub.shouldReturnPredictions(5, predictionsBatches);
@@ -136,9 +137,15 @@ class PredictionCollectorIntegrationTest
         assertTrue(logMessages.stream().anyMatch(logMessage -> logMessage.contains("Prediction processing is pending, no need to trigger it")));
     }
 
+    @NotNull private static PredictionEntry makePrediction(String id)
+    {
+        return new PredictionEntry(id, id, null, null);
+    }
+
     @TestConfiguration
     public static class IntegrationPropertiesTestConfig
     {
+
         @Bean
         public InsightPredictionsProperties insightPredictionsProperties()
         {

@@ -25,10 +25,14 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
 import java.io.Serializable;
 import java.util.Date;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
@@ -39,6 +43,8 @@ import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(NON_NULL)
+@EqualsAndHashCode
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
 {
@@ -50,6 +56,16 @@ public class PredictionModel
     private Serializable predictionValue;
     private Serializable _previousValue;
     private UpdateType updateType;
+
+    public PredictionModel(String property, Date predictionDateTime, float confidenceLevel, String modelId, Serializable predictionValue, UpdateType updateType)
+    {
+        this.property = property;
+        this.predictionDateTime = predictionDateTime;
+        this.confidenceLevel = confidenceLevel;
+        this.modelId = modelId;
+        this.predictionValue = predictionValue;
+        this.updateType = updateType;
+    }
 
     public Prediction toServiceModel()
     {

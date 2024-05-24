@@ -23,15 +23,20 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.prediction;
+package org.alfresco.hxi_connector.prediction_applier.model.repository;
 
 import java.io.Serializable;
+import java.util.Date;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public record Prediction(
-        String field,
-        float confidence,
-        Serializable value)
+public record PredictionModelResponseEntry(
+        String id,
+        String property,
+        Date predictionDateTime,
+        float confidenceLevel,
+        String modelId,
+        Serializable predictionValue,
+        Serializable previousValue,
+        UpdateType updateType)
 {}

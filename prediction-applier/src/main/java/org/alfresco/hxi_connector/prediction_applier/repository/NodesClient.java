@@ -25,10 +25,14 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.repository;
 
+import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
-import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.camel.component.http.HttpMethods.PUT;
+import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import java.net.UnknownHostException;
+import java.util.Base64;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
@@ -41,12 +45,14 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.repository.NodeEntry;
+import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
 
 @Component
 @RequiredArgsConstructor
@@ -55,9 +61,9 @@ public class NodesClient extends RouteBuilder
     public static final String NODES_DIRECT_ENDPOINT = "direct:" + NodesClient.class.getSimpleName();
     private static final String RETRYABLE_ROUTE = "direct:retryable-" + NodesClient.class.getSimpleName();
     static final String ROUTE_ID = "repository-nodes";
-    private static final String NODE_ID_HEADER = "nodeId";
-    private static final String URI_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/${headers.%s}?httpMethod=PUT&authMethod=Basic&authUsername=%s&authPassword=%s&authenticationPreemptive=true&throwExceptionOnFailure=false";
-    private static final int EXPECTED_STATUS_CODE = 200;
+    public static final String NODE_ID_HEADER = "nodeId";
+    private static final String URI_PATTERN = "%s/alfresco/api/-default-/private/hxi/versions/1/nodes/${headers.nodeId}/predictions?throwExceptionOnFailure=false";
+    private static final int EXPECTED_STATUS_CODE = SC_CREATED;
     public static final String UNEXPECTED_STATUS_CODE_MESSAGE = "Unexpected response status code - expecting: %d, received: %d";
     private static final Set<Class<? extends Throwable>> RETRY_REASONS = Set.of(
             EndpointServerErrorException.class,
@@ -69,10 +75,12 @@ public class NodesClient extends RouteBuilder
             MalformedChunkCodingException.class);
 
     private final NodesApiProperties nodesApiProperties;
+    private final AccessTokenProvider accessTokenProvider;
+    private final OAuth2ClientProperties oAuth2ClientProperties;
 
     @Override
     @SuppressWarnings("unchecked")
-    public void configure() throws Exception
+    public void configure()
     {
         // @formatter:off
         onException(RETRY_REASONS.toArray(Class[]::new))
@@ -89,7 +97,6 @@ public class NodesClient extends RouteBuilder
             .stop();
 
         from(NODES_DIRECT_ENDPOINT)
-            .setHeader(NODE_ID_HEADER, simple("${body.id}"))
             .marshal()
             .json(JsonLibrary.Jackson)
             .to(RETRYABLE_ROUTE)
@@ -99,17 +106,37 @@ public class NodesClient extends RouteBuilder
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
             .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
-            .removeHeader(AUTHORIZATION) // remove Bearer token to avoid 401 from Alfresco
-            .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl(), NODE_ID_HEADER, nodesApiProperties.username(), nodesApiProperties.password()))
+            .setHeader(HTTP_METHOD, constant(PUT))
+            .process(this::setAuthorizationHeader)
+            .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
                 .unmarshal()
-                .json(JsonLibrary.Jackson, NodeEntry.class)
+                .json(JsonLibrary.Jackson, PredictionModelResponse.class)
             .endChoice()
             .end();
         // @formatter:on
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private void setAuthorizationHeader(Exchange exchange)
+    {
+        if (oAuth2ClientProperties.getProvider().containsKey("alfresco"))
+        {
+            exchange.getIn().setHeader(AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("alfresco"));
+        }
+        else
+        {
+            exchange.getIn().setHeader(AUTHORIZATION, getBasicAuthenticationHeader());
+        }
+    }
+
+    private String getBasicAuthenticationHeader()
+    {
+        String valueToEncode = nodesApiProperties.username() + ":" + nodesApiProperties.password();
+        return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

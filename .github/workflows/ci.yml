@@ -19,7 +19,7 @@ env:
   # As the release is triggered by a commit message with "[release]" keyword on a release branch,
   # setting these variables to new values can be done in the same commit and will indicate the release and the dev versions in it.
   DEVELOPMENT_VERSION: "1.0.0-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
-  RELEASE_VERSION: "1.0.0-A1" # The version of the release (tag).
+  RELEASE_VERSION: "1.0.0-A3" # The version of the release (tag).
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -78,6 +78,11 @@ jobs:
     if: >
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
+    strategy:
+      fail-fast: false
+      matrix:
+        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
+                      "live-ingester", "prediction-applier", "prediction-applier-extension" ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.25.0
@@ -89,7 +94,28 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.25.0
       - name: "Test application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '!e2e-test'
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am -DfailIfNoTests=false
+
+  test_distirbution:
+    name: "Build application with distribution profile"
+    runs-on: ubuntu-latest
+    needs:
+      - pre_commit
+    if: >
+      !contains(github.event.head_commit.message, '[skip tests]') &&
+      !contains(github.event.head_commit.message, '[skip build]')
+    steps:
+      - uses: actions/checkout@v3
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v1.35.2
+      - name: "Login to Quay.io"
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
+      - name: "Build application with distribution profile"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -Pdistribution -DskipTests
 
   run_e2e_test:
     name: "Run e2e tests"
@@ -101,6 +127,7 @@ jobs:
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
     strategy:
+      fail-fast: false
       matrix:
         repoVersion: [ 7.3.0.8, 7.4.1.6, 23.2.1 ]
     steps:

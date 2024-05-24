@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
+import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODE_ID_HEADER;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.LoggingLevel;
@@ -58,6 +60,7 @@ public class PredictionListener extends RouteBuilder
                 .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, PredictionEntry.class)
+                .setHeader(NODE_ID_HEADER, simple("${body.objectId}"))
                 .setBody(exchange -> predictionMapper.map(exchange.getIn().getBody(PredictionEntry.class)))
                 .to(NodesClient.NODES_DIRECT_ENDPOINT)
                 .end();

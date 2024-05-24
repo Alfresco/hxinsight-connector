@@ -23,9 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+package org.alfresco.hxi_connector.common.adapters.auth;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public record NodeEntry(@JsonProperty("entry") Node node)
-{}
+public interface AccessTokenProvider
+{
+    String getAccessToken(String clientRegistrationId);
+}

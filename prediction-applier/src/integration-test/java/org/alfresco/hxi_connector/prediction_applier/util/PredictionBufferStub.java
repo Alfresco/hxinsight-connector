@@ -56,9 +56,9 @@ public class PredictionBufferStub extends RouteBuilder
                 .process(exchange -> handledPredictions.add(exchange.getIn().getBody(PredictionEntry.class)));
     }
 
-    public void assertAllPredictionsHandled(List<PredictionEntry> predictions)
+    public void assertAllPredictionsHandled(List<PredictionEntry> predictionEntries)
     {
-        assertEquals(predictions, handledPredictions);
+        assertEquals(predictionEntries, handledPredictions);
     }
 
     public void reset()

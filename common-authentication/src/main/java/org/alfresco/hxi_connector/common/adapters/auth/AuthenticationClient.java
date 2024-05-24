@@ -31,4 +31,9 @@ public interface AuthenticationClient
 {
 
     AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration);
+
+    default AuthenticationResult authenticate(String clientRegistrationId)
+    {
+        throw new UnsupportedOperationException("This method is not supported by this client");
+    }
 }
