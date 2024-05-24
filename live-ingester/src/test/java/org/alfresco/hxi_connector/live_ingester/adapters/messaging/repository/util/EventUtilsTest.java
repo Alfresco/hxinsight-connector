@@ -33,6 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_REVIEW_STATUS_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
@@ -40,6 +41,8 @@ import static org.alfresco.repo.event.v1.model.EventType.CHILD_ASSOC_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+
+import java.util.Map;
 
 import org.junit.jupiter.api.Test;
 
@@ -176,4 +179,54 @@ class EventUtilsTest
         // then
         assertThrows(LiveIngesterRuntimeException.class, () -> EventUtils.getEventType(event));
     }
+
+    @Test
+    void shouldCheckIfPredictionWasConfirmed()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getData()).willReturn(mock());
+        given(event.getData().getResourceBefore()).willReturn(mock());
+        given(event.getData().getResourceBefore().getProperties()).willReturn(Map.of(
+                PREDICTION_REVIEW_STATUS_PROPERTY, "UNREVIEWED"));
+        given(event.getData().getResource()).willReturn(mock());
+        given(event.getData().getResource().getProperties()).willReturn(Map.of(
+                PREDICTION_REVIEW_STATUS_PROPERTY, "CONFIRMED"));
+
+        // then
+        assertTrue(EventUtils.wasPredictionConfirmed(event));
+    }
+
+    @Test
+    void ifReviewStatusIsUnchanged_shouldReturnFalse()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getData()).willReturn(mock());
+        given(event.getData().getResourceBefore()).willReturn(mock());
+        given(event.getData().getResourceBefore().getProperties()).willReturn(Map.of(
+                "some_other_prop", "some value"));
+        given(event.getData().getResource()).willReturn(mock());
+        given(event.getData().getResource().getProperties()).willReturn(Map.of(
+                PREDICTION_REVIEW_STATUS_PROPERTY, "CONFIRMED"));
+
+        // then
+        assertFalse(EventUtils.wasPredictionConfirmed(event));
+    }
+
+    @Test
+    void ifPropertiesAreNotChanged_shouldReturnFalse()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getData()).willReturn(mock());
+        given(event.getData().getResourceBefore()).willReturn(mock());
+        given(event.getData().getResource()).willReturn(mock());
+        given(event.getData().getResource().getProperties()).willReturn(Map.of(
+                PREDICTION_REVIEW_STATUS_PROPERTY, "CONFIRMED"));
+
+        // then
+        assertFalse(EventUtils.wasPredictionConfirmed(event));
+    }
+
 }

@@ -30,7 +30,6 @@ import static java.util.Optional.ofNullable;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
@@ -64,6 +63,7 @@ public final class EventUtils
     public static final String PREDICTION_TIME_PROPERTY = "hxi:latestPredictionDateTime";
     public static final String PREDICTION_VALUE_PROPERTY = "hxi:predictionValue";
     public static final String PREDICTION_REVIEW_STATUS_PROPERTY = "hxi:reviewStatus";
+    public static final String PREDICTION_UNREVIEWED = "UNREVIEWED";
     public static final String PREDICTION_CONFIRMED = "CONFIRMED";
 
     public static boolean isEventTypeCreated(RepoEvent<DataAttributes<NodeResource>> event)
@@ -167,8 +167,6 @@ public final class EventUtils
 
     public static boolean wasPredictionConfirmed(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        ensureThat(isPredictionNodeEvent(event), "Event is not a prediction node event");
-
         Map<String, Serializable> oldProperties = event.getData().getResourceBefore().getProperties();
         Map<String, Serializable> newProperties = event.getData().getResource().getProperties();
 
@@ -177,8 +175,11 @@ public final class EventUtils
             return false;
         }
 
-        return !Objects.equals(oldProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY), newProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY)) &&
-                Objects.equals(newProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY), PREDICTION_CONFIRMED);
+        Serializable previousStatus = oldProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY);
+        Serializable actualStatus = newProperties.get(PREDICTION_REVIEW_STATUS_PROPERTY);
+
+        return Objects.equals(previousStatus, PREDICTION_UNREVIEWED) &&
+                Objects.equals(actualStatus, PREDICTION_CONFIRMED);
     }
 
     public static String getNodeParent(RepoEvent<DataAttributes<NodeResource>> event)
