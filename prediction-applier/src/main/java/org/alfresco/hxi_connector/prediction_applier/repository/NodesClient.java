@@ -123,9 +123,15 @@ public class NodesClient extends RouteBuilder
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void setAuthorizationHeader(Exchange exchange)
     {
-        final String token = oAuth2ClientProperties.getProvider().containsKey("alfresco") ? "Bearer " + accessTokenProvider.getAccessToken("alfresco") : getBasicAuthenticationHeader();
+        boolean isAlfrescoBasicAuth = oAuth2ClientProperties.getProvider().containsKey("alfresco");
+        String authHeader = isAlfrescoBasicAuth ? getBasicAuthenticationHeader() : getAlfrescoAccessTokenHeader();
 
-        exchange.getIn().setHeader(AUTHORIZATION, token);
+        exchange.getIn().setHeader(AUTHORIZATION, authHeader);
+    }
+
+    private String getAlfrescoAccessTokenHeader()
+    {
+        return "Bearer " + accessTokenProvider.getAccessToken("alfresco");
     }
 
     private String getBasicAuthenticationHeader()
