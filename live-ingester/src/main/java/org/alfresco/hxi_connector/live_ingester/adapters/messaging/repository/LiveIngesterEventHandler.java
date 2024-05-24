@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 import static org.apache.camel.LoggingLevel.DEBUG;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +38,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class LiveIngesterEventHandler extends RouteBuilder
 {
@@ -53,7 +55,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
         from(integrationProperties.alfresco().repository().endpoint())
                 .transacted()
                 .routeId(ROUTE_ID)
-                .log(DEBUG, "Received repo event : ${header.JMSMessageID}")
+                .log(DEBUG, log, "Received repo event : ${header.JMSMessageID}")
                 .setBody(camelEventMapper::repoEventFrom)
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)

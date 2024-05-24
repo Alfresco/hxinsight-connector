@@ -34,10 +34,12 @@ import static org.mockito.Mockito.mock;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_APPLIED_ASPECT;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_NODE_TYPE;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_TIME_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -59,7 +61,9 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
@@ -283,10 +287,10 @@ class EventProcessorTest
     @Test
     void shouldNotProcessWhenPredictionNodeEvent()
     {
-        given(mockEvent.getId()).willReturn("event-id");
         given(mockEvent.getData()).willReturn(mock());
         given(mockEvent.getData().getResource()).willReturn(mock());
         given(mockEvent.getData().getResource().getNodeType()).willReturn(PREDICTION_NODE_TYPE);
+        given(mockEvent.getData().getResourceBefore()).willReturn(mock());
 
         // when
         eventProcessor.process(mockExchange);
@@ -296,6 +300,42 @@ class EventProcessorTest
         then(ingestNodeCommandHandler).shouldHaveNoInteractions();
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
         then(deleteNodeCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldProcessWhenPredictionIsConfirmed()
+    {
+        String parentId = "parent_id";
+        String descriptionProperty = "cm:description";
+        String predictedDescription = "predicted description";
+
+        given(mockEvent.getData()).willReturn(mock());
+        given(mockEvent.getData().getResource()).willReturn(mock());
+        given(mockEvent.getData().getResource().getNodeType()).willReturn(PREDICTION_NODE_TYPE);
+
+        given(mockEvent.getData().getResourceBefore()).willReturn(mock());
+        given(mockEvent.getData().getResourceBefore().getProperties()).willReturn(Map.of(
+                "hxi:reviewStatus", "UNREVIEWED"));
+
+        given(mockEvent.getData().getResource().getPrimaryHierarchy()).willReturn(
+                List.of(
+                        parentId,
+                        "grandfather_id"));
+        given(mockEvent.getData().getResource().getPrimaryAssocQName()).willReturn("cm:description");
+        given(mockEvent.getData().getResource().getProperties()).willReturn(Map.of(
+                "hxi:reviewStatus", "CONFIRMED",
+                "hxi:predictionValue", predictedDescription));
+
+        IngestNodeCommand expectedCommand = new IngestNodeCommand(
+                parentId,
+                UPDATE,
+                Set.of(PropertyDelta.updated(descriptionProperty, predictedDescription)));
+
+        // when
+        eventProcessor.process(mockExchange);
+
+        // then
+        then(ingestNodeCommandHandler).should().handle(expectedCommand);
     }
 
     @Test
