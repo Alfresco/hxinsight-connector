@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,17 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.adapters.auth;
+package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-
-public interface AuthenticationClient
+public enum ReviewStatus
 {
+    UNREVIEWED("unreviewed"), CONFIRMED("confirmed"), REJECTED("rejected");
 
-    AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration);
+    private final String value;
 
-    default AuthenticationResult authenticate(String clientRegistrationId)
+    ReviewStatus(String status)
     {
-        throw new UnsupportedOperationException("This method is not supported by this client");
+        value = status;
+    }
+
+    public static ReviewStatus fromString(String status)
+    {
+        for (ReviewStatus reviewStatus : values())
+        {
+            if (reviewStatus.value.equalsIgnoreCase(status))
+            {
+                return reviewStatus;
+            }
+        }
+        return null;
     }
 }

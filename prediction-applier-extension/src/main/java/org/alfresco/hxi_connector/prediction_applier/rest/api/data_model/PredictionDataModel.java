@@ -46,6 +46,7 @@ public final class PredictionDataModel
     public static final QName PROP_PREDICTION_VALUE = QName.createQName(HXI_URI, "predictionValue");
     public static final QName PROP_PREVIOUS_VALUE = QName.createQName(HXI_URI, "previousValue");
     public static final QName PROP_UPDATE_TYPE = QName.createQName(HXI_URI, "updateType");
+    public static final QName PROP_REVIEW_STATUS = QName.createQName(HXI_URI, "reviewStatus");
 
     public static final QName PROP_LATEST_PREDICTION_DATE_TIME = QName.createQName(HXI_URI, "latestPredictionDateTime");
     public static final QName ASSOC_PREDICTED_BY = QName.createQName(HXI_URI, "predictedBy");

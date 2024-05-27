@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -25,15 +25,7 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-
-public interface AuthenticationClient
+public interface AccessTokenProvider
 {
-
-    AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration);
-
-    default AuthenticationResult authenticate(String clientRegistrationId)
-    {
-        throw new UnsupportedOperationException("This method is not supported by this client");
-    }
+    String getAccessToken(String clientRegistrationId);
 }

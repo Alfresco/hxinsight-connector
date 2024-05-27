@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,17 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.adapters.auth;
+package org.alfresco.hxi_connector.prediction_applier.rest.api.exception;
 
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.alfresco.error.AlfrescoRuntimeException;
 
-public interface AuthenticationClient
+public class PredictionStateChangedException extends AlfrescoRuntimeException
 {
-
-    AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration);
-
-    default AuthenticationResult authenticate(String clientRegistrationId)
+    public PredictionStateChangedException(String message)
     {
-        throw new UnsupportedOperationException("This method is not supported by this client");
+        super(message);
     }
 }
