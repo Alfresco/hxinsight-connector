@@ -60,7 +60,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierHxAuthClient;
 import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
-import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.SecurityConfig;
 
 @SpringBootTest(properties = "logging.level.org.alfresco=DEBUG",
@@ -111,9 +111,9 @@ class PredictionApplierHxAuthClientIntegrationTest extends HxAuthenticationClien
     public static class PredictionApplierHxAuthClientTestConfig
     {
         @Bean
-        public NodesApiProperties nodesApiProperties()
+        public RepositoryApiProperties nodesApiProperties()
         {
-            return new NodesApiProperties("http://localhost:8002", "dummy-user", "dummy-password", null);
+            return new RepositoryApiProperties("http://localhost:8002", "dummy-user", "dummy-password", null);
         }
     }
 }

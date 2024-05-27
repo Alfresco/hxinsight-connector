@@ -80,7 +80,7 @@ public class PredictionApplierE2ETestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl());
+        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl(), hxAuthServer.getPort().toString());
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);

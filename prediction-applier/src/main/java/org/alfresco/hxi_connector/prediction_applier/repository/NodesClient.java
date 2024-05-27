@@ -74,7 +74,7 @@ public class NodesClient extends RouteBuilder
             NoHttpResponseException.class,
             MalformedChunkCodingException.class);
 
-    private final NodesApiProperties nodesApiProperties;
+    private final RepositoryApiProperties nodesApiProperties;
     private final AccessTokenProvider accessTokenProvider;
     private final OAuth2ClientProperties oAuth2ClientProperties;
 
