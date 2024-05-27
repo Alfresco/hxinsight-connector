@@ -25,27 +25,18 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.config;
 
-import java.util.List;
-
 import org.apache.camel.CamelContext;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationService;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.HxOAuth2AuthenticationProvider;
 
 @Configuration
 @EnableMethodSecurity
@@ -54,29 +45,6 @@ import org.alfresco.hxi_connector.common.adapters.auth.HxOAuth2AuthenticationPro
 @EnableConfigurationProperties(OAuth2ClientProperties.class)
 public class SecurityConfig
 {
-
-    @Bean
-    @DependsOn("predictionApplierHxAuthClient")
-    public AuthenticationProvider hxAuthenticationProvider(OAuth2ClientProperties oAuth2ClientProperties, AuthenticationClient predictionApplierHxAuthClient)
-    {
-        return new HxOAuth2AuthenticationProvider(oAuth2ClientProperties, predictionApplierHxAuthClient);
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(List<AuthenticationProvider> authenticationProviders)
-    {
-        return new ProviderManager(authenticationProviders);
-    }
-
-    @Bean
-    @DependsOn("authenticationManager")
-    public AuthenticationService authenticationService(OAuth2ClientProperties oAuth2ClientProperties, HxInsightProperties hxInsightProperties,
-            AuthenticationManager authenticationManager, TaskScheduler taskScheduler, CamelContext camelContext)
-    {
-        return new AuthenticationService(oAuth2ClientProperties, hxInsightProperties.hylandExperience().authorization(), hxInsightProperties.hylandExperience().authentication(),
-                authenticationManager, taskScheduler, camelContext);
-    }
-
     @Bean
     public AccessTokenProvider defaultAccessTokenProvider(CamelContext camelContext, AuthenticationClient predictionApplierHxAuthClient)
     {

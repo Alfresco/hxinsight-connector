@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
@@ -36,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.camel.CamelContext;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 
 @RequiredArgsConstructor
 public class DefaultAccessTokenProvider implements AccessTokenProvider
@@ -56,7 +56,7 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
             refreshAuthenticationResult(clientRegistrationId);
             authenticationResultEntry = accessTokens.get(clientRegistrationId);
         }
-        Objects.requireNonNull(authenticationResultEntry, "Authentication result is null");
+        EnsureUtils.ensureNonNull(authenticationResultEntry, "Authentication result is null");
         AuthenticationResult authenticationResult = authenticationResultEntry.getKey();
         return authenticationResult.accessToken();
     }

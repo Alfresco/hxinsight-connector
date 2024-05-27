@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
+
 import java.util.Collection;
 import java.util.Objects;
 
@@ -37,11 +39,11 @@ import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
@@ -58,6 +60,8 @@ public class PredictionCollector extends RouteBuilder
     private static final String IS_PREDICTION_PROCESSING_PENDING_KEY = "is-prediction-processing-pending";
 
     private final InsightPredictionsProperties insightPredictionsProperties;
+    private final AccessTokenProvider accessTokenProvider;
+    private final HxInsightProperties hxInsightProperties;
 
     // @formatter:off
     /**
@@ -93,11 +97,10 @@ public class PredictionCollector extends RouteBuilder
             .end()
             .end();
 
-        SecurityContext securityContext = SecurityContextHolder.getContext();
         from(DIRECT_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
-            .process(exchange -> AuthSupport.setAuthorizationToken(securityContext, exchange))
+            .process(this::setAuthorizationHeaders)
             .loopDoWhile(bodyAs(Collection.class).method("isEmpty").isEqualTo(false))
                 .log(DEBUG, log, "Fetching predictions")
                 .to(insightPredictionsProperties.sourceEndpoint())
@@ -125,5 +128,13 @@ public class PredictionCollector extends RouteBuilder
     private Processor setProcessingPending(boolean isProcessingPending)
     {
         return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
+    }
+
+    private void setAuthorizationHeaders(Exchange exchange)
+    {
+        final String token = "Bearer " + accessTokenProvider.getAccessToken("hyland-experience-auth");
+        String environmentKey = hxInsightProperties.hylandExperience().authorization().environmentKey();
+        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, token);
+        exchange.getIn().setHeader(ENVIRONMENT_KEY_ATTRIBUTE_KEY, environmentKey);
     }
 }

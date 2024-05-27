@@ -45,9 +45,11 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
@@ -61,6 +63,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
 
     private final CamelContext camelContext;
     private final Retry retryProperties;
+    private final OAuth2ClientProperties oAuth2ClientProperties;
 
     @Override
     public void configure()
@@ -91,8 +94,25 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
     public AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration)
     {
         String body = createEncodedBody(clientRegistration);
-        int contentLength = body.getBytes(UTF_8).length;
+        log.atDebug().log("Authentication :: sending token request for {} client registration", clientRegistration.getRegistrationId());
+        return sendRequest(tokenUri, body);
+    }
 
+    @Override
+    public AuthenticationResult authenticate(String clientRegistrationId)
+    {
+        String body = createEncodedBody(clientRegistrationId);
+        OAuth2ClientProperties.Provider provider = oAuth2ClientProperties.getProvider().get(clientRegistrationId);
+        EnsureUtils.ensureNonNull(provider, "Auth Provider not found for client registration id: " + clientRegistrationId);
+        String tokenUri = provider.getTokenUri();
+        log.atDebug().log("Authentication :: sending token request for {} client registration", clientRegistrationId);
+
+        return sendRequest(tokenUri, body);
+    }
+
+    private AuthenticationResult sendRequest(String tokenUri, String body)
+    {
+        int contentLength = body.getBytes(UTF_8).length;
         return camelContext.createFluentProducerTemplate()
                 .to(LOCAL_AUTH_ENDPOINT)
                 .withProcessor(exchange -> {
@@ -107,13 +127,26 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
                 .request(AuthenticationResult.class);
     }
 
-    protected String createEncodedBody(ClientRegistration clientRegistration)
+    private String createEncodedBody(ClientRegistration clientRegistration)
     {
         return TokenRequest.builder()
                 .clientId(clientRegistration.getClientId())
                 .grantType(clientRegistration.getAuthorizationGrantType().getValue())
                 .clientSecret(clientRegistration.getClientSecret())
                 .scope(clientRegistration.getScopes())
+                .build()
+                .getTokenRequestBody();
+    }
+
+    protected String createEncodedBody(String clientRegistrationId)
+    {
+        OAuth2ClientProperties.Registration registration = oAuth2ClientProperties.getRegistration().get(clientRegistrationId);
+        EnsureUtils.ensureNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
+        return TokenRequest.builder()
+                .clientId(registration.getClientId())
+                .grantType(registration.getAuthorizationGrantType())
+                .clientSecret(registration.getClientSecret())
+                .scope(registration.getScope())
                 .build()
                 .getTokenRequestBody();
     }
