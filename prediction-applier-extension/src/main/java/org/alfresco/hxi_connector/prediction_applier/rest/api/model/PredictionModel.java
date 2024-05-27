@@ -56,6 +56,7 @@ public class PredictionModel
     private Serializable predictionValue;
     private Serializable _previousValue;
     private UpdateType updateType;
+    private ReviewStatus reviewStatus;
 
     public PredictionModel(String property, Date predictionDateTime, float confidenceLevel, String modelId, Serializable predictionValue, UpdateType updateType)
     {
@@ -69,7 +70,7 @@ public class PredictionModel
 
     public Prediction toServiceModel()
     {
-        return new Prediction(_id, property, predictionDateTime, confidenceLevel, modelId, predictionValue, _previousValue, updateType);
+        return new Prediction(_id, property, predictionDateTime, confidenceLevel, modelId, predictionValue, _previousValue, updateType, reviewStatus);
     }
 
     public static PredictionModel fromServiceModel(Prediction prediction)
@@ -82,6 +83,7 @@ public class PredictionModel
                 prediction.getModelId(),
                 prediction.getPredictionValue(),
                 prediction.getPreviousValue(),
-                prediction.getUpdateType());
+                prediction.getUpdateType(),
+                prediction.getReviewStatus());
     }
 }

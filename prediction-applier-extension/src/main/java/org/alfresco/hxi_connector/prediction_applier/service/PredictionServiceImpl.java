@@ -35,6 +35,7 @@ import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_PREDICTION_DATE_TIME;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_PREDICTION_VALUE;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_PREVIOUS_VALUE;
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_REVIEW_STATUS;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_UPDATE_TYPE;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.TYPE_PREDICTION;
 
@@ -49,6 +50,8 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
@@ -125,6 +128,7 @@ public class PredictionServiceImpl implements PredictionService
         properties.put(PROP_PREDICTION_VALUE, prediction.getPredictionValue());
         properties.put(PROP_UPDATE_TYPE, prediction.getUpdateType());
         properties.put(PROP_PREVIOUS_VALUE, previousValue);
+        properties.put(PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED);
         return properties;
     }
 
@@ -147,8 +151,9 @@ public class PredictionServiceImpl implements PredictionService
         Serializable predictionValue = properties.get(PROP_PREDICTION_VALUE);
         Serializable previousValue = properties.get(PROP_PREVIOUS_VALUE);
         UpdateType updateType = UpdateType.valueOf((String) properties.get(PROP_UPDATE_TYPE));
+        ReviewStatus reviewStatus = (ReviewStatus) properties.get(PROP_REVIEW_STATUS);
 
-        return new Prediction(predictionNodeRef.getId(), property, predictionDateTime, confidenceLevel, modelId, predictionValue, previousValue, updateType);
+        return new Prediction(predictionNodeRef.getId(), property, predictionDateTime, confidenceLevel, modelId, predictionValue, previousValue, updateType, reviewStatus);
     }
 
     @Override
@@ -159,5 +164,31 @@ public class PredictionServiceImpl implements PredictionService
                 .map(ChildAssociationRef::getQName)
                 .map(qName -> qName.toPrefixString(namespaceService))
                 .collect(toList());
+    }
+
+    @Override
+    public void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus) throws PredictionStateChangedException
+    {
+        ChildAssociationRef parentAssocRef = nodeService.getPrimaryParent(predictionNodeRef);
+        NodeRef parentNode = parentAssocRef.getParentRef();
+        Prediction prediction = childAssocToPrediction(parentAssocRef);
+        QName propertyQName = QName.createQName(prediction.getProperty(), namespaceService);
+        if (!nodeService.getProperty(parentNode, propertyQName).equals(prediction.getPredictionValue()))
+        {
+            throw new PredictionStateChangedException(prediction.getProperty() + " property value has changed, prediction is no longer valid!");
+        }
+        if (!nodeService.getProperty(predictionNodeRef, PROP_REVIEW_STATUS).equals(ReviewStatus.UNREVIEWED) && !reviewStatus.equals(prediction.getReviewStatus()))
+        {
+            throw new PredictionStateChangedException("Prediction for " + prediction.getProperty() + " property has already been reviewed.");
+        }
+        if (reviewStatus.equals(ReviewStatus.CONFIRMED))
+        {
+            nodeService.setProperty(predictionNodeRef, PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
+        }
+        else if (reviewStatus.equals(ReviewStatus.REJECTED))
+        {
+            nodeService.setProperty(parentNode, propertyQName, prediction.getPreviousValue());
+            nodeService.setProperty(predictionNodeRef, PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
+        }
     }
 }
