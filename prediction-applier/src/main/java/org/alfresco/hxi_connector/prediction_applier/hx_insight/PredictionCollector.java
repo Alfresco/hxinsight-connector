@@ -29,11 +29,15 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.support.builder.PredicateBuilder.and;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
+
 import java.util.Collection;
 import java.util.Objects;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
 import org.apache.camel.Exchange;
 import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
@@ -68,6 +72,8 @@ public class PredictionCollector extends RouteBuilder
     private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=PUT";
 
     private final InsightPredictionsProperties insightPredictionsProperties;
+    private final AccessTokenProvider accessTokenProvider;
+    private final HxInsightProperties hxInsightProperties;
 
     // @formatter:off
     /**
@@ -104,7 +110,7 @@ public class PredictionCollector extends RouteBuilder
             .onCompletion()
                 .process(setProcessingPending(false))
             .end()
-            .process(exchange -> AuthSupport.setAuthorizationToken(securityContext, exchange))
+            .process(this::setAuthorizationHeaders)
             .setHeader(BATCHES_PAGE_NO_HEADER, constant(1))
                 .toD(batchesUrl)
                 .log(DEBUG, log, "Processing prediction batches: ${body}")
@@ -155,5 +161,13 @@ public class PredictionCollector extends RouteBuilder
     private Processor setProcessingPending(boolean isProcessingPending)
     {
         return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
+    }
+
+    private void setAuthorizationHeaders(Exchange exchange)
+    {
+        final String token = "Bearer " + accessTokenProvider.getAccessToken("hyland-experience-auth");
+        String environmentKey = hxInsightProperties.hylandExperience().authorization().environmentKey();
+        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, token);
+        exchange.getIn().setHeader(ENVIRONMENT_KEY_ATTRIBUTE_KEY, environmentKey);
     }
 }

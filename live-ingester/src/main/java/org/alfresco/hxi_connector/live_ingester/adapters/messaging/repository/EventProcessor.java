@@ -26,15 +26,16 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
-import static java.util.Optional.ofNullable;
-
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getNodeParent;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getPredictionNodeProperties;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeDeleted;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeUpdated;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isNotPredictionApplyEvent;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isNotPredictionNodeEvent;
-
-import java.util.Optional;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isPredictionApplyEvent;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isPredictionNodeEvent;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasContentChanged;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasPredictionConfirmed;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,7 +52,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNode
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
-import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -73,22 +73,36 @@ public class EventProcessor
     {
         boolean allowEvent = repoEventFilterHandler.handleAndGetAllowed(exchange, integrationProperties.alfresco().filter());
         final RepoEvent<DataAttributes<NodeResource>> event = exchange.getIn().getBody(RepoEvent.class);
-        if (allowEvent)
-        {
-            if (isNotPredictionNodeEvent(event) && isNotPredictionApplyEvent(event))
-            {
-                handleMetadataPropertiesChange(event);
-                handleContentChange(event);
-                handleNodeDeleteEvent(event);
-            }
-            else
-            {
-                log.atDebug().log("Detected prediction event. Further processing of event with id: {} was skipped.", event.getId());
-            }
-        }
-        else
+
+        if (!allowEvent)
         {
             log.atDebug().log("Repository event of id: {} is denied for further processing", event.getId());
+            return;
+        }
+
+        if (isPredictionApplyEvent(event))
+        {
+            log.atDebug().log("Detected prediction apply event. Further processing of event with id: {} was skipped.", event.getId());
+            return;
+        }
+
+        if (isPredictionNodeEvent(event))
+        {
+            handlePredictionNodeEvent(event);
+            return;
+        }
+
+        handleMetadataPropertiesChange(event);
+        handleContentChange(event);
+        handleNodeDeleteEvent(event);
+    }
+
+    private void handlePredictionNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (wasPredictionConfirmed(event))
+        {
+            IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), UPDATE, getPredictionNodeProperties(event));
+            ingestNodeCommandHandler.handle(command);
         }
     }
 
@@ -104,7 +118,7 @@ public class EventProcessor
 
     private void handleContentChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (containsNewContent(event))
+        if (wasContentChanged(event))
         {
             TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
             if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(command.mimeType()))
@@ -117,47 +131,6 @@ public class EventProcessor
 
             ingestContentCommandHandler.handle(command);
         }
-    }
-
-    /**
-     * We can determine if there is new content that needs processing by looking at the resourceBefore.content and resource.content fields.
-     * <p>
-     * For newly created nodes we have:
-     * <ul>
-     * <li>null -> zero bytes: No content
-     * <li>null -> non-zero bytes: New content
-     * </ul>
-     * For updated nodes we have:
-     * <ul>
-     * <li>null -> zero bytes: No content
-     * <li>null -> non-zero bytes: No change to content
-     * <li>non-zero bytes -> zero bytes: Content deleted
-     * <li>non-zero bytes -> non-zero bytes : Content updated
-     * <li>zero bytes -> non-zero bytes : Content added (no content on node before)
-     * </ul>
-     */
-    private boolean containsNewContent(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        Optional<ContentInfo> latestContentInfo = ofNullable(event.getData().getResource()).map(NodeResource::getContent);
-        // If there's no content info in the current resource then the node cannot contain content.
-        if (latestContentInfo.isEmpty())
-        {
-            return false;
-        }
-        boolean latestContentPresent = !latestContentInfo.get().getSizeInBytes().equals(0L);
-        // If there is content on a new node then we should process it.
-        if (isEventTypeCreated(event))
-        {
-            return latestContentPresent;
-        }
-        else if (isEventTypeUpdated(event))
-        {
-            Optional<ContentInfo> oldContentInfo = ofNullable(event.getData().getResourceBefore()).map(NodeResource::getContent);
-            // We only need to process the content if it was mentioned in the resourceBefore _and_ is non-zero now.
-            return oldContentInfo.isPresent() && latestContentPresent;
-        }
-        // For events other than create or update then we do not need to process the content.
-        return false;
     }
 
     private void handleNodeDeleteEvent(RepoEvent<DataAttributes<NodeResource>> event)

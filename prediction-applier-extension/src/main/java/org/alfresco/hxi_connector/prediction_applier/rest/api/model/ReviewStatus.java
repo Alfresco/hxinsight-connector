@@ -23,28 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.service.model;
+package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
-
-@Data
-@AllArgsConstructor
-public class Prediction
+public enum ReviewStatus
 {
-    private String id;
-    private String property;
-    private Date predictionDateTime;
-    private float confidenceLevel;
-    private String modelId;
-    private Serializable predictionValue;
-    private Serializable previousValue;
-    private UpdateType updateType;
-    private ReviewStatus reviewStatus;
+    UNREVIEWED("unreviewed"), CONFIRMED("confirmed"), REJECTED("rejected");
+
+    private final String value;
+
+    ReviewStatus(String status)
+    {
+        value = status;
+    }
+
+    public static ReviewStatus fromString(String status)
+    {
+        for (ReviewStatus reviewStatus : values())
+        {
+            if (reviewStatus.value.equalsIgnoreCase(status))
+            {
+                return reviewStatus;
+            }
+        }
+        return null;
+    }
 }

@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.prediction_applier.service;
 
 import java.util.List;
 
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Prediction;
 import org.alfresco.service.cmr.repository.NodeRef;
 
@@ -37,4 +38,6 @@ public interface PredictionService
     List<Prediction> getPredictions(NodeRef nodeRef);
 
     List<String> getPredictedProperties(NodeRef nodeRef);
+
+    void reviewPrediction(NodeRef predictionNodeRef, ReviewStatus reviewStatus);
 }
