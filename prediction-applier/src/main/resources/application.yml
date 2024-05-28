@@ -11,9 +11,16 @@ spring:
             client-secret: dummy-client-pass
             client-name: ${hyland-experience.authorization.application-name}
             scope: hxp.integrations
+          alfresco:
+            client-id: dummy-client-id
+            client-secret: dummy-client-secret
+            authorization-grant-type: client_credentials
         provider:
           hyland-experience-auth:
             token-uri: http://localhost:8001/token
+          alfresco:
+            token-uri: http://localhost:8002/token
+
 
 camel:
   springboot:

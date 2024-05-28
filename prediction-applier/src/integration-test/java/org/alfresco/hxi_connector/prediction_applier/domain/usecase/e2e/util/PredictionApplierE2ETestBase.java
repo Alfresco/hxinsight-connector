@@ -30,6 +30,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static lombok.AccessLevel.PROTECTED;
 import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.CLIENT_REGISTRATION_ID;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TOKEN_PATH;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.createAuthResponseBody;
 
@@ -80,7 +81,7 @@ public class PredictionApplierE2ETestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl());
+        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl(), CLIENT_REGISTRATION_ID);
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
