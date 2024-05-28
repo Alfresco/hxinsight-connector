@@ -36,12 +36,10 @@ public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETe
     private static final String PREDICTED_VALUE = "New value";
 
     @Test
-    public void testPredictionApplication() throws InterruptedException
+    public void testPredictionApplication()
     {
         containerSupport.prepareHxInsightToReturnPredictionBatch(NODE_ID, PREDICTED_VALUE);
 
         containerSupport.expectRepositoryRequestReceived(NODE_ID, PREDICTED_VALUE);
-
-        Thread.sleep(10000);
     }
 }

@@ -30,8 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"hyland-experience.insight.predictions.source-base-url=direct:mocked",
-        "spring.security.oauth2.client.provider.hyland-experience-auth.token-uri="})
+@SpringBootTest
 class PredictionApplierApplicationIntegrationTest
 {
 
