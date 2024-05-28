@@ -25,34 +25,26 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
-import static org.apache.camel.LoggingLevel.DEBUG;
-import static org.apache.camel.LoggingLevel.TRACE;
-import static org.apache.camel.support.builder.PredicateBuilder.and;
-
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
-
-import java.util.Collection;
-import java.util.Objects;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
-import org.apache.camel.Exchange;
-import org.apache.camel.Predicate;
-import org.apache.camel.Processor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.builder.ValueBuilder;
-import org.apache.camel.component.jackson.JacksonDataFormat;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Component;
-
-import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
+import org.apache.camel.Exchange;
+import org.apache.camel.Processor;
+import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.builder.ValueBuilder;
+import org.apache.camel.component.jackson.JacksonDataFormat;
+import org.springframework.stereotype.Component;
+
+import java.util.Objects;
+
+import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.TRACE;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
 @Component
@@ -67,9 +59,10 @@ public class PredictionCollector extends RouteBuilder
     private static final String BATCH_ID_HEADER = "batchId";
     private static final String BATCHES_PAGE_NO_HEADER = "batchesPageNo";
     private static final String PREDICTIONS_PAGE_NO_HEADER = "predictionsPageNo";
-    private static final String BATCHES_URL_PATTERN = "%s/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
-    private static final String PREDICTIONS_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
-    private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=PUT";
+    private static final String BATCHES_URL_PATTERN = "%s/v1/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
+    private static final String PREDICTIONS_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
+    private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=PUT";
+    private static final String ENVIRONMENT_HEADER = "hxai-environment";
 
     private final InsightPredictionsProperties insightPredictionsProperties;
     private final AccessTokenProvider accessTokenProvider;
@@ -89,20 +82,17 @@ public class PredictionCollector extends RouteBuilder
 
         from(insightPredictionsProperties.collectorTimerEndpoint())
             .routeId(TIMER_ROUTE_ID)
-            .delay(5000) // workaround to slow down first call and wait for the authentication to pass. More info in: InsightPredictionsProperties
-                .choice().when(this::isProcessingPending)
-                    .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
-                .otherwise()
-                    .log(DEBUG, log, "Triggering prediction processing")
-                    .to(DIRECT_ENDPOINT)
-                .end()
+            .choice().when(this::isProcessingPending)
+                .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
+            .otherwise()
+                .log(DEBUG, log, "Triggering prediction processing")
+                .to(DIRECT_ENDPOINT)
             .end()
         .end();
 
         String batchesUrl = BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCHES_PAGE_NO_HEADER);
         String predictionsUrl = PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
         String predictionsConfirmationUrl = PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
 
         from(DIRECT_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
@@ -167,7 +157,7 @@ public class PredictionCollector extends RouteBuilder
     {
         final String token = "Bearer " + accessTokenProvider.getAccessToken("hyland-experience-auth");
         String environmentKey = hxInsightProperties.hylandExperience().authorization().environmentKey();
-        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, token);
-        exchange.getIn().setHeader(ENVIRONMENT_KEY_ATTRIBUTE_KEY, environmentKey);
+        exchange.getIn().setHeader(AUTHORIZATION, token);
+        exchange.getIn().setHeader(ENVIRONMENT_HEADER, environmentKey);
     }
 }
