@@ -30,7 +30,5 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PredictionBatch(
-        @JsonProperty("_id") String id
-
-)
+        @JsonProperty("_id") String id)
 {}
