@@ -25,14 +25,15 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
+import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.TRACE;
+import static org.apache.camel.language.spel.SpelExpression.spel;
+import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+
+import java.util.Objects;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
-import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
-import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
 import org.apache.camel.Exchange;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
@@ -40,12 +41,12 @@ import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-import java.util.Objects;
-
-import static org.apache.camel.LoggingLevel.DEBUG;
-import static org.apache.camel.LoggingLevel.TRACE;
-import static org.apache.camel.language.spel.SpelExpression.spel;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
+import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
 
 @Slf4j
 @Component
@@ -95,6 +96,7 @@ public class PredictionCollector extends RouteBuilder
         String predictionsUrl = PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
         String predictionsConfirmationUrl = PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER);
 
+
         from(PREDICTIONS_PROCESSOR_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
@@ -118,30 +120,31 @@ public class PredictionCollector extends RouteBuilder
             .log(DEBUG, log, "Finished processing predictions");
 
         from(BATCH_PROCESSOR_ENDPOINT)
-                .routeId(BATCH_PROCESSOR_ROUTE_ID)
-                .log(DEBUG, log, "Processing prediction batch ${body.id} started")
-                .setHeader(BATCH_ID_HEADER, simple("${body.id}"))
-                .setHeader(PREDICTIONS_PAGE_NO_HEADER, constant(1))
-                .loopDoWhile(statusCodeNot204())
-                    .toD(predictionsUrl)
-                    .choice().when(statusCodeNot204())
-                        .log(TRACE, log, "Processing page ${headers.%s} of predictions in batch ${headers.%s}, ${body}, ${header.CamelHttpResponseCode}".formatted(PREDICTIONS_PAGE_NO_HEADER, BATCH_ID_HEADER))
-                        .unmarshal(predictionsDataFormat)
-                        .split(body())
-                            .marshal(predictionDataFormat)
-                            .to(insightPredictionsProperties.bufferEndpoint())
-                        .end()
-                        .setBody(simple("{\"status\": \"COMPLETE\", \"currentPage\": ${headers.%s}}".formatted(PREDICTIONS_PAGE_NO_HEADER)))
-                        .toD(predictionsConfirmationUrl)
-                        .log(TRACE, log, "Processing prediction batch ${headers.%s} page ${headers.%s} completed".formatted(BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER))
-                        .setHeader(PREDICTIONS_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
+            .routeId(BATCH_PROCESSOR_ROUTE_ID)
+            .log(DEBUG, log, "Processing prediction batch ${body.id} started")
+            .setHeader(BATCH_ID_HEADER, simple("${body.id}"))
+            .setHeader(PREDICTIONS_PAGE_NO_HEADER, constant(1))
+            .loopDoWhile(statusCodeNot204())
+                .toD(predictionsUrl)
+                .choice().when(statusCodeNot204())
+                    .log(TRACE, log, "Processing page ${headers.%s} of predictions in batch ${headers.%s}, ${body}, ${header.CamelHttpResponseCode}".formatted(PREDICTIONS_PAGE_NO_HEADER, BATCH_ID_HEADER))
+                    .unmarshal(predictionsDataFormat)
+                    .split(body())
+                        .marshal(predictionDataFormat)
+                        .to(insightPredictionsProperties.bufferEndpoint())
                     .end()
+                    .setBody(simple("{\"status\": \"COMPLETE\", \"currentPage\": ${headers.%s}}".formatted(PREDICTIONS_PAGE_NO_HEADER)))
+                    .toD(predictionsConfirmationUrl)
+                    .log(TRACE, log, "Processing prediction batch ${headers.%s} page ${headers.%s} completed".formatted(BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER))
+                    .setHeader(PREDICTIONS_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
                 .end()
-                .log(DEBUG, log, "Processing prediction batch ${headers.%s} finished".formatted(BATCH_ID_HEADER));
+            .end()
+            .log(DEBUG, log, "Processing prediction batch ${headers.%s} finished".formatted(BATCH_ID_HEADER));
     }
     // @formatter:on
 
-    private ValueBuilder statusCodeNot204() {
+    private ValueBuilder statusCodeNot204()
+    {
         return simple("${header.CamelHttpResponseCode} != 204");
     }
 
