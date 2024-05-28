@@ -23,28 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.service.model;
+package org.alfresco.hxi_connector.prediction_applier.rest.api.exception;
 
-import java.io.Serializable;
-import java.util.Date;
+import org.alfresco.error.AlfrescoRuntimeException;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
-
-@Data
-@AllArgsConstructor
-public class Prediction
+public class PredictionStateChangedException extends AlfrescoRuntimeException
 {
-    private String id;
-    private String property;
-    private Date predictionDateTime;
-    private float confidenceLevel;
-    private String modelId;
-    private Serializable predictionValue;
-    private Serializable previousValue;
-    private UpdateType updateType;
-    private ReviewStatus reviewStatus;
+    public PredictionStateChangedException(String message)
+    {
+        super(message);
+    }
 }
