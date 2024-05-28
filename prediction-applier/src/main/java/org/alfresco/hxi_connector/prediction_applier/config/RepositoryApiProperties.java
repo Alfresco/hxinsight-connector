@@ -29,6 +29,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 
-@ConfigurationProperties("alfresco.repository.nodes")
-public record NodesApiProperties(String baseUrl, String username, String password, Retry retry)
+@ConfigurationProperties("alfresco.repository")
+public record RepositoryApiProperties(String baseUrl, String username, String password, Retry retry)
 {}

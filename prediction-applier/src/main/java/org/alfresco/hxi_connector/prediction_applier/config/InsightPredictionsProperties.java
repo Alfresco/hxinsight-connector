@@ -49,10 +49,7 @@ public record InsightPredictionsProperties(
 
         if (pollPeriodMillis != null)
         {
-            /* I was trying to declare initial delay in endpoint URI using: - trigger.startDelay=%s - trigger.startTime=%s = now().plusSeconds(5) - requires to declare Spring's converter (String to java.util.Date) in Spring context both without luck */
-            collectorTimerEndpoint = "quartz:predictions-collector-timer?autoStartScheduler=true&trigger.repeatInterval=%s&trigger.startDelay=%s"
-                    .formatted(pollPeriodMillis, 5000);
-
+            collectorTimerEndpoint = "quartz:predictions-collector-timer?autoStartScheduler=true&trigger.repeatInterval=" + pollPeriodMillis;
         }
     }
 }

@@ -28,8 +28,8 @@ package org.alfresco.hxi_connector.prediction_applier.repository;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.component.http.HttpMethods.PUT;
+import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import java.net.UnknownHostException;
 import java.util.Base64;
@@ -51,7 +51,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
-import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
 
 @Component
@@ -74,7 +74,7 @@ public class NodesClient extends RouteBuilder
             NoHttpResponseException.class,
             MalformedChunkCodingException.class);
 
-    private final NodesApiProperties nodesApiProperties;
+    private final RepositoryApiProperties repositoryApiProperties;
     private final AccessTokenProvider accessTokenProvider;
     private final OAuth2ClientProperties oAuth2ClientProperties;
 
@@ -87,9 +87,9 @@ public class NodesClient extends RouteBuilder
             .retryAttemptedLogLevel(LoggingLevel.WARN)
             .logExhaustedMessageBody(true)
             .log(LoggingLevel.ERROR, log, "Unexpected response. Headers: ${headers}, Body: ${body}")
-            .maximumRedeliveries(nodesApiProperties.retry().attempts())
-            .redeliveryDelay(nodesApiProperties.retry().initialDelay())
-            .backOffMultiplier(nodesApiProperties.retry().delayMultiplier())
+            .maximumRedeliveries(repositoryApiProperties.retry().attempts())
+            .redeliveryDelay(repositoryApiProperties.retry().initialDelay())
+            .backOffMultiplier(repositoryApiProperties.retry().delayMultiplier())
             .stop();
 
         onException(Exception.class)
@@ -105,10 +105,11 @@ public class NodesClient extends RouteBuilder
         from(RETRYABLE_ROUTE)
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
+            .removeHeader(AUTHORIZATION) // Remove Hx Insight Bearer token to avoid 401 from Alfresco.
             .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
             .setHeader(HTTP_METHOD, constant(PUT))
             .process(this::setAuthorizationHeader)
-            .toD(URI_PATTERN.formatted(nodesApiProperties.baseUrl()))
+            .toD(URI_PATTERN.formatted(repositoryApiProperties.baseUrl()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
@@ -136,7 +137,7 @@ public class NodesClient extends RouteBuilder
 
     private String getBasicAuthenticationHeader()
     {
-        String valueToEncode = nodesApiProperties.username() + ":" + nodesApiProperties.password();
+        String valueToEncode = repositoryApiProperties.username() + ":" + repositoryApiProperties.password();
         return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
     }
 

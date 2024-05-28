@@ -23,38 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e;
 
-package org.alfresco.hxi_connector.prediction_applier.util;
+import org.junit.jupiter.api.Test;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import org.apache.camel.ProducerTemplate;
-import org.springframework.stereotype.Component;
+import org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e.util.PredictionApplierE2ETestBase;
 
-import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
-
-@Component
-@RequiredArgsConstructor
-public class PredictionTriggerStub
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETestBase
 {
+    private static final String NODE_ID = "nodeId";
+    private static final String PREDICTED_VALUE = "New value";
 
-    private final ProducerTemplate producerTemplate;
-    private final InsightPredictionsProperties insightPredictionsProperties;
-
-    public void triggerPredictionsCollecting()
+    @Test
+    public void testPredictionApplication()
     {
-        producerTemplate.sendBody(insightPredictionsProperties.collectorTimerEndpoint(), null);
-    }
+        containerSupport.prepareHxInsightToReturnPredictionBatch(NODE_ID, PREDICTED_VALUE);
 
-    @SneakyThrows
-    public void triggerPredictionsCollectingAsync(long delayInMs)
-    {
-        Thread.sleep(delayInMs);
-        triggerPredictionsCollectingAsync();
-    }
-
-    public void triggerPredictionsCollectingAsync()
-    {
-        producerTemplate.asyncSendBody(insightPredictionsProperties.collectorTimerEndpoint(), null);
+        containerSupport.expectRepositoryRequestReceived(NODE_ID, PREDICTED_VALUE);
     }
 }
