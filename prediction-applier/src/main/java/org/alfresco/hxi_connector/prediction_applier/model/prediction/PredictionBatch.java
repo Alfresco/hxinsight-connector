@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,20 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier;
+package org.alfresco.hxi_connector.prediction_applier.model.prediction;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.util.Map;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@SpringBootTest
-class PredictionApplierApplicationIntegrationTest
-{
-
-    @Test
-    void contextLoads()
-    {
-        assertEquals(1, 1);
-    }
-}
+public record PredictionBatch(
+        @JsonProperty("_id") String id,
+        String modelId,
+        String fieldConfigurationId,
+        String field,
+        String enrichmentType,
+        Double threshold,
+        @JsonProperty("dateCreated") String creationDate,
+        String status,
+        Integer currentPage,
+        @JsonProperty("isSuperseded") Boolean superseded,
+        Map<String, Object> primaryGrouping)
+{}

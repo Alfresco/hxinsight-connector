@@ -62,7 +62,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponseEntry;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
@@ -162,9 +162,9 @@ class NodesClientTest
                 .hasMessageContaining("received:", 500);
     }
 
-    private NodesApiProperties createNodesApiProperties()
+    private RepositoryApiProperties createNodesApiProperties()
     {
-        return new NodesApiProperties(null, null, null, new Retry(RETRY_ATTEMPTS, 0, 1, emptySet()));
+        return new RepositoryApiProperties(null, null, null, new Retry(RETRY_ATTEMPTS, 0, 1, emptySet()));
     }
 
     private void mockEndpointWillRespondWith(int statusCode)

@@ -39,20 +39,20 @@ import org.alfresco.hxi_connector.common.adapters.auth.TokenRequest;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
-import org.alfresco.hxi_connector.prediction_applier.config.NodesApiProperties;
+import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 
 @Component
 public class PredictionApplierHxAuthClient extends HxAuthenticationClient
 {
     private final OAuth2ClientProperties oAuth2ClientProperties;
-    private final NodesApiProperties nodesApiProperties;
+    private final RepositoryApiProperties repositoryApiProperties;
 
     public PredictionApplierHxAuthClient(CamelContext camelContext, HxInsightProperties hxInsightProperties,
-            OAuth2ClientProperties oAuth2ClientProperties, NodesApiProperties nodesApiProperties)
+            OAuth2ClientProperties oAuth2ClientProperties, RepositoryApiProperties repositoryApiProperties)
     {
         super(camelContext, hxInsightProperties.hylandExperience().authentication().retry(), oAuth2ClientProperties);
         this.oAuth2ClientProperties = oAuth2ClientProperties;
-        this.nodesApiProperties = nodesApiProperties;
+        this.repositoryApiProperties = repositoryApiProperties;
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
@@ -86,8 +86,8 @@ public class PredictionApplierHxAuthClient extends HxAuthenticationClient
                     .clientId(registration.getClientId())
                     .grantType(registration.getAuthorizationGrantType())
                     .scope(registration.getScope())
-                    .username(nodesApiProperties.username())
-                    .password(nodesApiProperties.password())
+                    .username(repositoryApiProperties.username())
+                    .password(repositoryApiProperties.password())
                     .build()
                     .getTokenRequestBody();
 

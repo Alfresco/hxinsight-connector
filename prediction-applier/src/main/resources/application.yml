@@ -35,17 +35,16 @@ hyland-experience:
     environment-key: hxai-env-key
   insight:
     predictions:
-      source-endpoint: direct:mocked
+      source-base-url: http://localhost:8001
       buffer-endpoint: activemq:queue:predictions-buffer
       poll-period-millis: 300_000 # 5 minutes
 
 alfresco:
   repository:
-    nodes:
-      base-url: http://alfresco:8080
-      username: admin
-      password: admin
-      retry:
-        attempts: 10
-        initial-delay: 500
-        delay-multiplier: 2
+    base-url: http://alfresco:8080
+    username: admin
+    password: admin
+    retry:
+      attempts: 10
+      initial-delay: 500
+      delay-multiplier: 2

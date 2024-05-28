@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
+import static org.apache.camel.support.builder.PredicateBuilder.and;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
 
@@ -36,6 +37,7 @@ import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
+import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
@@ -45,6 +47,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
+import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
 
@@ -58,6 +61,11 @@ public class PredictionCollector extends RouteBuilder
     private static final String TIMER_ROUTE_ID = "predictions-collector-timer";
     private static final String COLLECTOR_ROUTE_ID = "prediction-collector";
     private static final String IS_PREDICTION_PROCESSING_PENDING_KEY = "is-prediction-processing-pending";
+    private static final String BATCH_ID_HEADER = "batchId";
+    private static final String BATCHES_PAGE_NO_HEADER = "batchesPageNo";
+    private static final String PREDICTIONS_PAGE_NO_HEADER = "predictionsPageNo";
+    private static final String BATCHES_URL_PATTERN = "%s/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
+    private static final String PREDICTIONS_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
 
     private final InsightPredictionsProperties insightPredictionsProperties;
     private final AccessTokenProvider accessTokenProvider;
@@ -83,40 +91,71 @@ public class PredictionCollector extends RouteBuilder
     @Override
     public void configure()
     {
-        JacksonDataFormat predictionsBatchDataFormat = new LinkedListJacksonDataFormat(PredictionEntry.class);
+        JacksonDataFormat predictionsBatchDataFormat = new LinkedListJacksonDataFormat(PredictionBatch.class);
+        JacksonDataFormat predictionsDataFormat = new LinkedListJacksonDataFormat(PredictionEntry.class);
         JacksonDataFormat predictionDataFormat = new JacksonDataFormat(PredictionEntry.class);
 
         from(insightPredictionsProperties.collectorTimerEndpoint())
             .routeId(TIMER_ROUTE_ID)
-            .choice()
-            .when(this::isProcessingPending)
-                .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
-            .otherwise()
-                .log(DEBUG, log, "Triggering prediction processing")
-                .to(DIRECT_ENDPOINT)
+            .delay(5000) // workaround to slow down first call and wait for the authentication to pass. More info in: InsightPredictionsProperties
+                .choice().when(this::isProcessingPending)
+                    .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
+                .otherwise()
+                    .log(DEBUG, log, "Triggering prediction processing")
+                    .to(DIRECT_ENDPOINT)
+                .end()
             .end()
-            .end();
+        .end();
 
+        String batchesUrl = BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCHES_PAGE_NO_HEADER);
+        String predictionsUrl = PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
         from(DIRECT_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
+            .onCompletion()
+                .process(setProcessingPending(false))
+            .end()
             .process(this::setAuthorizationHeaders)
-            .loopDoWhile(bodyAs(Collection.class).method("isEmpty").isEqualTo(false))
-                .log(DEBUG, log, "Fetching predictions")
-                .to(insightPredictionsProperties.sourceEndpoint())
-                .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
-                .unmarshal(predictionsBatchDataFormat)
-                .split(body())
-                    .marshal(predictionDataFormat)
-                    .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
-                    .to(insightPredictionsProperties.bufferEndpoint())
+            .setBody(constant("temp-val-for-init"))
+            .setHeader(BATCHES_PAGE_NO_HEADER, constant(1))
+            .loopDoWhile(bodyNotEmpty())
+                .log(DEBUG, log, "Calling URL: " + batchesUrl)
+                .toD(batchesUrl)
+                .log(DEBUG, log, "Processing prediction batches: ${body}")
+                .choice().when(bodyNotEmpty())
+                    .unmarshal(predictionsBatchDataFormat)
+                    .split(body())
+                        .setHeader(BATCH_ID_HEADER, simple("${body.id}"))
+                        // notify HxI -> started batch processing
+                        .setHeader(PREDICTIONS_PAGE_NO_HEADER, constant(1))
+                        .loopDoWhile(bodyNotEmpty())
+                            .log(DEBUG, log, "Calling URL: " + predictionsUrl)
+                            .toD(predictionsUrl)
+                            .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
+                            .choice().when(bodyNotEmpty())
+                                .unmarshal(predictionsDataFormat)
+                                .split(body())
+                                    .marshal(predictionDataFormat)
+                                    .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
+                                    .to(insightPredictionsProperties.bufferEndpoint())
+                                .end()
+                            .end()
+                            .setHeader(PREDICTIONS_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
+                        .end()
+                        // notify HxI -> finished batch processing
+                    .end()
                 .end()
+                .setHeader(BATCHES_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(BATCHES_PAGE_NO_HEADER))
             .end()
             .log(DEBUG, log, "Finished processing predictions")
-            .process(setProcessingPending(false))
-            .end();
+        .end();
     }
     // @formatter:on
+
+    private Predicate bodyNotEmpty()
+    {
+        return and(body().isNotNull(), bodyAs(Collection.class).method("isEmpty").isEqualTo(false));
+    }
 
     private boolean isProcessingPending(Exchange exchange)
     {

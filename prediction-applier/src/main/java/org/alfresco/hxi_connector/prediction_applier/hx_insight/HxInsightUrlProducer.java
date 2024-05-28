@@ -23,46 +23,31 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.alfresco.hxi_connector.prediction_applier.util;
-
-import static org.junit.Assert.assertEquals;
-
-import java.util.ArrayList;
-import java.util.List;
+package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
-import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 
 @Component
 @RequiredArgsConstructor
-public class PredictionBufferStub extends RouteBuilder
+public class HxInsightUrlProducer
 {
+    private static final String BATCHES_URL_PATTERN = "%s/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
+    private static final String PREDICTIONS_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
+    public static final String BATCHES_PAGE_NO_HEADER = "batchesPageNo";
+    public static final String BATCH_ID_HEADER = "batchId";
+    public static final String PREDICTIONS_PAGE_NO_HEADER = "predictionsPageNo";
     private final InsightPredictionsProperties insightPredictionsProperties;
-    private final List<PredictionEntry> handledPredictions = new ArrayList<>();
 
-    @Override
-    public void configure()
+    public String getBatchesUrl()
     {
-        from(insightPredictionsProperties.bufferEndpoint())
-                .routeId("predictions-buffer-stub")
-                .log("Handling predictions ${body}")
-                .unmarshal(new JacksonDataFormat(PredictionEntry.class))
-                .process(exchange -> handledPredictions.add(exchange.getIn().getBody(PredictionEntry.class)));
+        return BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCHES_PAGE_NO_HEADER);
     }
 
-    public void assertAllPredictionsHandled(List<PredictionEntry> predictionEntries)
+    public String getPredictionsUrl()
     {
-        assertEquals(predictionEntries, handledPredictions);
-    }
-
-    public void reset()
-    {
-        handledPredictions.clear();
+        return PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
     }
 }

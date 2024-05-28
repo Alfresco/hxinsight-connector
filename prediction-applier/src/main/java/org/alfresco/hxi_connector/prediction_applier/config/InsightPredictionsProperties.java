@@ -37,7 +37,7 @@ import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplier
 public record InsightPredictionsProperties(
         String collectorTimerEndpoint,
         Long pollPeriodMillis,
-        @NotBlank String sourceEndpoint,
+        @NotBlank String sourceBaseUrl,
         @NotBlank String bufferEndpoint)
 {
     public InsightPredictionsProperties
