@@ -96,7 +96,6 @@ public class PredictionCollector extends RouteBuilder
         String predictionsUrl = PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
         String predictionsConfirmationUrl = PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER);
 
-
         from(PREDICTIONS_PROCESSOR_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
