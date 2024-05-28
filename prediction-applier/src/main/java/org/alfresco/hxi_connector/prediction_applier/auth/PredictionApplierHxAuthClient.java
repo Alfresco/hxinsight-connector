@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.auth;
 
-import java.util.Objects;
-
 import org.apache.camel.CamelContext;
 import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.retry.annotation.Backoff;
@@ -39,6 +37,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.TokenRequest;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 
@@ -51,7 +50,7 @@ public class PredictionApplierHxAuthClient extends HxAuthenticationClient
     public PredictionApplierHxAuthClient(CamelContext camelContext, HxInsightProperties hxInsightProperties,
             OAuth2ClientProperties oAuth2ClientProperties, RepositoryApiProperties repositoryApiProperties)
     {
-        super(camelContext, hxInsightProperties.hylandExperience().authentication().retry());
+        super(camelContext, hxInsightProperties.hylandExperience().authentication().retry(), oAuth2ClientProperties);
         this.oAuth2ClientProperties = oAuth2ClientProperties;
         this.repositoryApiProperties = repositoryApiProperties;
     }
@@ -73,36 +72,27 @@ public class PredictionApplierHxAuthClient extends HxAuthenticationClient
     @Override
     public AuthenticationResult authenticate(String clientRegistrationId)
     {
-        OAuth2ClientProperties.Provider provider = oAuth2ClientProperties.getProvider().get(clientRegistrationId);
-        Objects.requireNonNull(provider, "Auth Provider not found for client registration id: " + clientRegistrationId);
-        OAuth2ClientProperties.Registration registration = oAuth2ClientProperties.getRegistration().get(clientRegistrationId);
-        Objects.requireNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
-        String tokenUri = provider.getTokenUri();
-        ClientRegistration clientRegistration = ClientRegistration.withRegistrationId(clientRegistrationId)
-                .tokenUri(tokenUri)
-                .authorizationGrantType(new AuthorizationGrantType(registration.getAuthorizationGrantType()))
-                .clientId(registration.getClientId())
-                .clientSecret(registration.getClientSecret())
-                .scope(registration.getScope())
-                .build();
-        return super.authenticate(tokenUri, clientRegistration);
+        return super.authenticate(clientRegistrationId);
     }
 
     @Override
-    protected String createEncodedBody(ClientRegistration clientRegistration)
+    protected String createEncodedBody(String clientRegistrationId)
     {
-        if (AuthorizationGrantType.PASSWORD.getValue().equals(clientRegistration.getAuthorizationGrantType().getValue()))
+        OAuth2ClientProperties.Registration registration = oAuth2ClientProperties.getRegistration().get(clientRegistrationId);
+        EnsureUtils.ensureNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
+        if (AuthorizationGrantType.PASSWORD.getValue().equals(registration.getAuthorizationGrantType()))
         {
             return TokenRequest.builder()
-                    .grantType(clientRegistration.getAuthorizationGrantType().getValue())
-                    .clientId(clientRegistration.getClientId())
-                    .scope(clientRegistration.getScopes())
+                    .clientId(registration.getClientId())
+                    .grantType(registration.getAuthorizationGrantType())
+                    .scope(registration.getScope())
                     .username(repositoryApiProperties.username())
                     .password(repositoryApiProperties.password())
                     .build()
                     .getTokenRequestBody();
 
         }
-        return super.createEncodedBody(clientRegistration);
+        return super.createEncodedBody(clientRegistrationId);
+
     }
 }

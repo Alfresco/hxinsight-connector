@@ -29,6 +29,8 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.support.builder.PredicateBuilder.and;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
+
 import java.util.Collection;
 import java.util.Objects;
 
@@ -39,11 +41,11 @@ import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
@@ -66,6 +68,8 @@ public class PredictionCollector extends RouteBuilder
     private static final String PREDICTIONS_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
 
     private final InsightPredictionsProperties insightPredictionsProperties;
+    private final AccessTokenProvider accessTokenProvider;
+    private final HxInsightProperties hxInsightProperties;
 
     // @formatter:off
     /**
@@ -105,14 +109,13 @@ public class PredictionCollector extends RouteBuilder
 
         String batchesUrl = BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCHES_PAGE_NO_HEADER);
         String predictionsUrl = PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
-        SecurityContext securityContext = SecurityContextHolder.getContext();
         from(DIRECT_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
             .onCompletion()
                 .process(setProcessingPending(false))
             .end()
-            .process(exchange -> AuthSupport.setAuthorizationToken(securityContext, exchange))
+            .process(this::setAuthorizationHeaders)
             .setBody(constant("temp-val-for-init"))
             .setHeader(BATCHES_PAGE_NO_HEADER, constant(1))
             .loopDoWhile(bodyNotEmpty())
@@ -164,5 +167,13 @@ public class PredictionCollector extends RouteBuilder
     private Processor setProcessingPending(boolean isProcessingPending)
     {
         return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
+    }
+
+    private void setAuthorizationHeaders(Exchange exchange)
+    {
+        final String token = "Bearer " + accessTokenProvider.getAccessToken("hyland-experience-auth");
+        String environmentKey = hxInsightProperties.hylandExperience().authorization().environmentKey();
+        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, token);
+        exchange.getIn().setHeader(ENVIRONMENT_KEY_ATTRIBUTE_KEY, environmentKey);
     }
 }

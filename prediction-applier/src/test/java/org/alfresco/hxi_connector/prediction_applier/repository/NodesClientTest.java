@@ -32,6 +32,7 @@ import static org.apache.camel.builder.AdviceWith.adviceWith;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
@@ -84,7 +85,7 @@ class NodesClientTest
         camelContext = new DefaultCamelContext();
         OAuth2ClientProperties dummyOauth2Properties = createDummyOauth2Properties();
         Retry dummyRetryProperties = new Retry(RETRY_ATTEMPTS, 0, 1, emptySet());
-        AuthenticationClient dummyAuthClient = new HxAuthenticationClient(camelContext, dummyRetryProperties);
+        AuthenticationClient dummyAuthClient = new HxAuthenticationClient(camelContext, dummyRetryProperties, mock());
         AccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(camelContext, dummyAuthClient);
         NodesClient nodesClient = new NodesClient(createNodesApiProperties(), dummyAccessTokenProvider, dummyOauth2Properties);
         camelContext.addRoutes(nodesClient);

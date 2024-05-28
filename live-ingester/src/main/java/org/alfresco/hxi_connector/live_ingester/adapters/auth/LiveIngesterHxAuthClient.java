@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 
 import org.apache.camel.CamelContext;
+import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -38,9 +39,9 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 public class LiveIngesterHxAuthClient extends HxAuthenticationClient
 {
 
-    public LiveIngesterHxAuthClient(CamelContext camelContext, IntegrationProperties integrationProperties)
+    public LiveIngesterHxAuthClient(CamelContext camelContext, IntegrationProperties integrationProperties, OAuth2ClientProperties oAuth2ClientProperties)
     {
-        super(camelContext, integrationProperties.hylandExperience().authentication().retry());
+        super(camelContext, integrationProperties.hylandExperience().authentication().retry(), oAuth2ClientProperties);
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
