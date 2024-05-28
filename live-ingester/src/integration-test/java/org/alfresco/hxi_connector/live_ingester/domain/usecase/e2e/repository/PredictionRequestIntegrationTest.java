@@ -70,7 +70,8 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                         "hxi:predictionValue": "predicted value"
                       },
                       "isFolder": false,
-                      "isFile": false
+                      "isFile": false,
+                      "primaryAssocQName": "cm:description"
                     },
                     "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
                     "resourceDeniedAuthorities": []
@@ -120,7 +121,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                         "encoding": "UTF-8"
                       },
                       "properties": {
-                        "cm:title": "Purchase Order",
+                        "cm:title": "Purchase Order New",
                         "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
                         "hxi:latestPredictionDateTime": "2024-05-08T17:00:42.529Z"
@@ -137,9 +138,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                         "displayName": "Administrator"
                       },
                       "properties": {
-                        "cm:title": "Purchase Order",
-                        "cm:versionType": "MAJOR",
-                        "cm:versionLabel": "1.0",
+                        "cm:title": "Purchase Order Old",
                         "hxi:latestPredictionDateTime": null
                       },
                       "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ]
@@ -190,7 +189,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                         "encoding": "UTF-8"
                       },
                       "properties": {
-                        "cm:title": "Purchase Order",
+                        "cm:title": "Purchase Order New",
                         "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
                         "hxi:latestPredictionDateTime": "2024-05-09T19:00:00.000Z"
@@ -207,6 +206,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                         "displayName": "Administrator"
                       },
                       "properties": {
+                        "cm:title": "Purchase Order Old",
                         "hxi:latestPredictionDateTime": "2024-05-02T08:00:00.000Z"
                       }
                     }
@@ -299,6 +299,82 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                       "modifiedBy": {"value": "abeecher"}
                     },
                     "removedProperties": ["cm:versionType", "cm:description"]
+                  }
+                ]""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
+
+    @Test
+    void testPredictionNodeConfirmedByUserRaisesHxIEventAgainstParent()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "368818d9-dddd-4b8b-8eab-e050253d7f61",
+                  "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
+                  "time": "2022-02-22T22:22:22.22222Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "4004ca99-9d2a-400d-9d80-8f840e223581",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "12341234-1234-1234-1234-123412341234",
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
+                      "name": "prediction1",
+                      "nodeType": "hxi:prediction",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "modifiedAt": "2022-02-22T22:22:22.222Z",
+                      "properties": {
+                        "hxi:predictionDateTime": "2021-01-21T11:11:11.111Z",
+                        "hxi:confidenceLevel": 0.9,
+                        "hxi:predictionValue": "predicted value",
+                        "hxi:previousValue": "previous value",
+                        "hxi:reviewStatus": "CONFIRMED"
+                      },
+                      "isFolder": false,
+                      "isFile": false,
+                      "primaryAssocQName": "cm:description"
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "modifiedAt": "2021-01-11T11:11:11.111Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "properties": {
+                        "hxi:reviewStatus": "UNREVIEWED"
+                      }
+                    },
+                    "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
+                    "resourceDeniedAuthorities": []
+                  }
+                }""";
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                [
+                  {
+                    "objectId": "5f355d16-f824-4173-bf4b-b1ec37ef5549",
+                    "eventType": "update",
+                    "properties": {
+                      "cm:description": {"value": "predicted value"}
+                    }
                   }
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
