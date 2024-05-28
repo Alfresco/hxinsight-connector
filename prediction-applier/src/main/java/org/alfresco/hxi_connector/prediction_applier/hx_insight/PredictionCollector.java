@@ -44,6 +44,7 @@ import java.util.Objects;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
+import static org.apache.camel.language.spel.SpelExpression.spel;
 import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 @Slf4j
@@ -52,9 +53,11 @@ import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 @SuppressWarnings({"PMD.UnusedPrivateMethod", "PMD.UnusedFormalParameter", "PMD.LinguisticNaming", "PMD.LongVariable"})
 public class PredictionCollector extends RouteBuilder
 {
-    private static final String DIRECT_ENDPOINT = "direct:" + PredictionCollector.class.getSimpleName();
     private static final String TIMER_ROUTE_ID = "predictions-collector-timer";
     private static final String COLLECTOR_ROUTE_ID = "prediction-collector";
+    private static final String BATCH_PROCESSOR_ROUTE_ID = "prediction-batch-processor";
+    private static final String PREDICTIONS_PROCESSOR_ENDPOINT = "direct:" + COLLECTOR_ROUTE_ID + "-" + PredictionCollector.class.getSimpleName();
+    private static final String BATCH_PROCESSOR_ENDPOINT = "direct:" + BATCH_PROCESSOR_ROUTE_ID + "-" + PredictionCollector.class.getSimpleName();
     private static final String IS_PREDICTION_PROCESSING_PENDING_KEY = "is-prediction-processing-pending";
     private static final String BATCH_ID_HEADER = "batchId";
     private static final String BATCHES_PAGE_NO_HEADER = "batchesPageNo";
@@ -86,15 +89,13 @@ public class PredictionCollector extends RouteBuilder
                 .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
             .otherwise()
                 .log(DEBUG, log, "Triggering prediction processing")
-                .to(DIRECT_ENDPOINT)
-            .end()
-        .end();
+                .to(PREDICTIONS_PROCESSOR_ENDPOINT);
 
         String batchesUrl = BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCHES_PAGE_NO_HEADER);
         String predictionsUrl = PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
         String predictionsConfirmationUrl = PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER);
 
-        from(DIRECT_ENDPOINT)
+        from(PREDICTIONS_PROCESSOR_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
             .onCompletion()
@@ -102,38 +103,41 @@ public class PredictionCollector extends RouteBuilder
             .end()
             .process(this::setAuthorizationHeaders)
             .setHeader(BATCHES_PAGE_NO_HEADER, constant(1))
+            .loopDoWhile(statusCodeNot204())
                 .toD(batchesUrl)
-                .log(DEBUG, log, "Processing prediction batches: ${body}")
                 .choice().when(statusCodeNot204())
+                    .log(DEBUG, log, "Processing prediction batches page ${headers.%s} started".formatted(BATCHES_PAGE_NO_HEADER))
                     .unmarshal(predictionsBatchDataFormat)
                     .split(body())
-                        .log(TRACE, log, "Processing prediction batch ${body.id} started")
-                        .setHeader(BATCH_ID_HEADER, simple("${body.id}"))
-                        .setHeader(PREDICTIONS_PAGE_NO_HEADER, constant(1))
-                        .loopDoWhile(statusCodeNot204())
-                            .log(TRACE, log, "Looking for predictions in batch: " + predictionsUrl)
-                            .toD(predictionsUrl)
-                            .log(DEBUG, log, "Sending predictions to internal buffer: ${body}")
-                            .choice().when(statusCodeNot204())
-                                .unmarshal(predictionsDataFormat)
-                                .split(body())
-                                    .marshal(predictionDataFormat)
-                                    .log(TRACE, log, "Sending prediction to internal buffer: ${body}")
-                                    .to(insightPredictionsProperties.bufferEndpoint())
-                                .end()
-                                .setBody(simple("{\"status\": \"COMPLETE\", \"currentPage\": ${headers.%s}}".formatted(PREDICTIONS_PAGE_NO_HEADER)))
-                                .toD(predictionsConfirmationUrl)
-                                .log(TRACE, log, "Processing prediction batch ${headers.%s} page ${headers.%s} completed".formatted(BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER))
-                                .end()
-                            .setHeader(PREDICTIONS_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
+                        .to(BATCH_PROCESSOR_ENDPOINT)
+                    .end()
+                    .setHeader(BATCHES_PAGE_NO_HEADER, spel("#{request.headers['%s'] + 1}".formatted(BATCHES_PAGE_NO_HEADER)))
+                    .toD(batchesUrl)
+                .end()
+            .end()
+            .log(DEBUG, log, "Finished processing predictions");
+
+        from(BATCH_PROCESSOR_ENDPOINT)
+                .routeId(BATCH_PROCESSOR_ROUTE_ID)
+                .log(DEBUG, log, "Processing prediction batch ${body.id} started")
+                .setHeader(BATCH_ID_HEADER, simple("${body.id}"))
+                .setHeader(PREDICTIONS_PAGE_NO_HEADER, constant(1))
+                .loopDoWhile(statusCodeNot204())
+                    .toD(predictionsUrl)
+                    .choice().when(statusCodeNot204())
+                        .log(TRACE, log, "Processing page ${headers.%s} of predictions in batch ${headers.%s}, ${body}, ${header.CamelHttpResponseCode}".formatted(PREDICTIONS_PAGE_NO_HEADER, BATCH_ID_HEADER))
+                        .unmarshal(predictionsDataFormat)
+                        .split(body())
+                            .marshal(predictionDataFormat)
+                            .to(insightPredictionsProperties.bufferEndpoint())
                         .end()
-                        .log(TRACE, log, "Processing prediction batch ${headers.%s} finished".formatted(BATCH_ID_HEADER))
+                        .setBody(simple("{\"status\": \"COMPLETE\", \"currentPage\": ${headers.%s}}".formatted(PREDICTIONS_PAGE_NO_HEADER)))
+                        .toD(predictionsConfirmationUrl)
+                        .log(TRACE, log, "Processing prediction batch ${headers.%s} page ${headers.%s} completed".formatted(BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER))
+                        .setHeader(PREDICTIONS_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
                     .end()
                 .end()
-                .setHeader(BATCHES_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(BATCHES_PAGE_NO_HEADER))
-            .end()
-            .log(DEBUG, log, "Finished processing predictions")
-        .end();
+                .log(DEBUG, log, "Processing prediction batch ${headers.%s} finished".formatted(BATCH_ID_HEADER));
     }
     // @formatter:on
 
