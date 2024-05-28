@@ -30,10 +30,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record PredictionBatch(
-        @JsonProperty("_id") String id,
-        Integer currentPage,
-        @JsonProperty("isSuperseded") Boolean superseded
-        // somewhere in docs it says that suspended batch will also have SUSPENDED status but I cannot find it to confirm
-        // if that`s true we can get rid of this field because we query just for batches with "APPROVED" status
+        @JsonProperty("_id") String id
 )
 {}
