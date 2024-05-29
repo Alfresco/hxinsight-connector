@@ -67,6 +67,9 @@ public class PredictionCollector extends RouteBuilder
     private static final String PREDICTIONS_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
     private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=PUT";
     private static final String ENVIRONMENT_HEADER = "hxai-environment";
+    private static final String SET_BATCH_STATUS_BODY_TEMPLATE = "{\"status\": \"%s\", \"currentPage\": ${headers.%s}}";
+    private static final String IN_PROGRESS_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("IN_PROGRESS", PREDICTIONS_PAGE_NO_HEADER);
+    private static final String COMPLETE_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("COMPLETE", PREDICTIONS_PAGE_NO_HEADER);
 
     private final InsightPredictionsProperties insightPredictionsProperties;
     private final AccessTokenProvider accessTokenProvider;
@@ -132,12 +135,14 @@ public class PredictionCollector extends RouteBuilder
                         .marshal(predictionDataFormat)
                         .to(insightPredictionsProperties.bufferEndpoint())
                     .end()
-                    .setBody(simple("{\"status\": \"COMPLETE\", \"currentPage\": ${headers.%s}}".formatted(PREDICTIONS_PAGE_NO_HEADER)))
+                    .setBody(simple(IN_PROGRESS_BATCH_STATUS_BODY))
                     .toD(predictionsConfirmationUrl)
                     .log(TRACE, log, "Processing prediction batch ${headers.%s} page ${headers.%s} completed".formatted(BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER))
                     .setHeader(PREDICTIONS_PAGE_NO_HEADER).spel("#{request.headers['%s'] + 1}".formatted(PREDICTIONS_PAGE_NO_HEADER))
                 .end()
             .end()
+            .setBody(simple(COMPLETE_BATCH_STATUS_BODY))
+            .toD(predictionsConfirmationUrl)
             .log(DEBUG, log, "Processing prediction batch ${headers.%s} finished".formatted(BATCH_ID_HEADER));
     }
     // @formatter:on
