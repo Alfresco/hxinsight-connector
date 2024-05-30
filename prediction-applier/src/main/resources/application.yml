@@ -7,13 +7,13 @@ spring:
         registration:
           hyland-experience-auth:
             authorization-grant-type: urn:hyland:params:oauth:grant-type:api-credentials
-            client-id: dummy-client-id
-            client-secret: dummy-client-pass
+            client-id:
+            client-secret:
             client-name: ${hyland-experience.authorization.application-name}
             scope: hxp.integrations
           alfresco:
-            client-id: dummy-client-id
-            client-secret: dummy-client-secret
+            client-id:
+            client-secret:
             authorization-grant-type: client_credentials
         provider:
           hyland-experience-auth:
@@ -32,7 +32,7 @@ hyland-experience:
   authorization:
     application-name: acs-insight-connector
     service-user: insight-acs
-    environment-key: hxai-env-key
+    environment-key:
   insight:
     predictions:
       source-base-url: http://localhost:8001
@@ -42,8 +42,8 @@ hyland-experience:
 alfresco:
   repository:
     base-url: http://alfresco:8080
-    username: admin
-    password: admin
+    username:
+    password:
     retry:
       attempts: 10
       initial-delay: 500

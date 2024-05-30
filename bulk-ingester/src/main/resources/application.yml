@@ -2,8 +2,8 @@
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/alfresco
-    username: alfresco
-    password: alfresco
+    username:
+    password:
     hikari:
       maximumPoolSize: 20
 

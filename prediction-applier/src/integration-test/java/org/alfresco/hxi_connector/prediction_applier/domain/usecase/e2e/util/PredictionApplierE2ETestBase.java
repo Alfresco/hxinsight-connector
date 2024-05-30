@@ -55,7 +55,9 @@ import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 
-@SpringBootTest(properties = "logging.level.org.alfresco=DEBUG")
+@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG",
+        "spring.security.oauth2.client.registration.hyland-experience-auth.client-id=hx-client-id",
+        "spring.security.oauth2.client.registration.alfresco.client-id=alfresco-client-id"})
 @ActiveProfiles("test")
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
