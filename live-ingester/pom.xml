@@ -122,19 +122,19 @@
 
     <profiles>
         <profile>
-        <id>test</id>
-        <activation>
-            <activeByDefault>true</activeByDefault>
-        </activation>
-        <dependencies>
-            <dependency>
-                <groupId>org.alfresco</groupId>
-                <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
-                <version>${project.parent.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
-        </dependencies>
+            <id>test</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <dependencies>
+                <dependency>
+                    <groupId>org.alfresco</groupId>
+                    <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
+                    <version>${project.parent.version}</version>
+                    <type>test-jar</type>
+                    <scope>test</scope>
+                </dependency>
+            </dependencies>
         </profile>
     </profiles>
 </project>
