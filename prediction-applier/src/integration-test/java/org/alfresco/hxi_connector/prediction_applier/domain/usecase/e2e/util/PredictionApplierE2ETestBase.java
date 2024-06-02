@@ -37,10 +37,12 @@ import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.cre
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -55,7 +57,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 
-@SpringBootTest(properties = "logging.level.org.alfresco=DEBUG")
+@SpringBootTest(properties = "logging.level.org.alfresco=TRACE")
 @ActiveProfiles("test")
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
@@ -63,16 +65,20 @@ import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionApplierE2ETestBase
 {
+    private static final String PREDICTION_COLLECTOR_TRIGGER_ENDPOINT = "direct:prediction-collector-trigger";
     private static String brokerUrl;
-    private static WireMock hxAuthMock;
+    private static WireMock oAuthMock;
     private static WireMock hxInsightMock;
     private static WireMock repositoryMock;
     protected ContainerSupport containerSupport;
 
+    @Autowired
+    private ProducerTemplate producerTemplate;
+
     @Container
     static final GenericContainer<?> activemqBroker = DockerContainers.createActiveMqContainer();
     @Container
-    static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainer();
+    static final WireMockContainer oAuthServer = DockerContainers.createWireMockContainer();
     @Container
     static final WireMockContainer hxInsightServer = DockerContainers.createWireMockContainer();
     @Container
@@ -81,26 +87,30 @@ public class PredictionApplierE2ETestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl(), CLIENT_REGISTRATION_ID);
+        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), CLIENT_REGISTRATION_ID);
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
-        registry.add("spring.security.oauth2.client.provider.hyland-experience-auth.token-uri", () -> hxAuthServer.getBaseUrl() + TOKEN_PATH);
+        registry.add("spring.security.oauth2.client.provider.hyland-experience-auth.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
+
+        registry.add("spring.security.oauth2.client.provider.alfresco.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
 
         registry.add("hyland-experience.insight.predictions.source-base-url", hxInsightServer::getBaseUrl);
 
-        registry.add("alfresco.repository.endpoint", repositoryServer::getBaseUrl);
+        registry.add("alfresco.repository.base-url", repositoryServer::getBaseUrl);
+
+        registry.add("hyland-experience.insight.predictions.collectorTimerEndpoint", () -> PREDICTION_COLLECTOR_TRIGGER_ENDPOINT);
     }
 
     @BeforeAll
     @SneakyThrows
     public static void beforeAll()
     {
-        hxAuthMock = new WireMock(hxAuthServer.getHost(), hxAuthServer.getPort());
+        oAuthMock = new WireMock(oAuthServer.getHost(), oAuthServer.getPort());
         hxInsightMock = new WireMock(hxInsightServer.getHost(), hxInsightServer.getPort());
         repositoryMock = new WireMock(repositoryServer.getHost(), repositoryServer.getPort());
-        WireMock.configureFor(hxAuthMock);
+        WireMock.configureFor(oAuthMock);
         WireMock.givenThat(post(TOKEN_PATH)
                 .willReturn(aResponse()
                         .withStatus(SC_OK)
@@ -129,7 +139,12 @@ public class PredictionApplierE2ETestBase
     @AfterAll
     public static void tearDown()
     {
-        WireMock.configureFor(hxAuthMock);
+        WireMock.configureFor(oAuthMock);
         ContainerSupport.removeInstance();
+    }
+
+    protected void triggerPredictionsCollection()
+    {
+        producerTemplate.send(PREDICTION_COLLECTOR_TRIGGER_ENDPOINT, exchange -> exchange.getIn().setBody("Trigger predictions collection"));
     }
 }
