@@ -37,6 +37,7 @@ import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 import static software.amazon.awssdk.http.HttpStatusCode.OK;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_QUEUE;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.ATS_RESPONSE_QUEUE;
 import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.BULK_INGESTER_QUEUE;
@@ -102,7 +103,7 @@ public class E2ETestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl(), "hyland-experience-auth");
+        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl(), HXI_AUTH_PROVIDER);
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);

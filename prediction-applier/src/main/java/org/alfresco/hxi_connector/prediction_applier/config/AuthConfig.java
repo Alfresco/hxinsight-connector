@@ -26,28 +26,32 @@
 package org.alfresco.hxi_connector.prediction_applier.config;
 
 import org.apache.camel.CamelContext;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
 @Configuration
-@EnableMethodSecurity
 @EnableRetry
-@EnableScheduling
-@EnableConfigurationProperties(OAuth2ClientProperties.class)
-public class SecurityConfig
+@EnableConfigurationProperties
+public class AuthConfig
 {
     @Bean
     public AccessTokenProvider defaultAccessTokenProvider(CamelContext camelContext, AuthenticationClient predictionApplierHxAuthClient)
     {
         return new DefaultAccessTokenProvider(camelContext, predictionApplierHxAuthClient);
+    }
+
+    @Bean
+    @ConfigurationProperties(prefix = "auth")
+    public AuthProperties authorizationProperties()
+    {
+        return new AuthProperties();
     }
 }

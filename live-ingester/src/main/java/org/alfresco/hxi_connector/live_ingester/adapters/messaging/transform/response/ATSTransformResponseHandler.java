@@ -34,8 +34,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.exception.ResourceNotFoundException;
@@ -69,13 +67,11 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 .redeliveryDelay(integrationProperties.alfresco().transform().response().retryIngestion().initialDelay())
                 .backOffMultiplier(integrationProperties.alfresco().transform().response().retryIngestion().delayMultiplier());
 
-        SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().transform().response().endpoint())
                 .routeId(ROUTE_ID)
                 .log(DEBUG, log, "Received transform completed event : ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)
-                .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(this::ingestContent)
                 .end();
     }

@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.s
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.setAuthorizationToken;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.net.MalformedURLException;
@@ -45,9 +44,11 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -69,6 +70,8 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
+    private final AuthProperties authProperties;
+    private final AccessTokenProvider accessTokenProvider;
 
     @Override
     public void configure()
@@ -95,7 +98,6 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         // @formatter:on
     }
 
-    @PreAuthorize("hasAuthority('OAUTH2_USER')")
     @Retryable(retryFor = EndpointServerErrorException.class,
             maxAttemptsExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.attempts}",
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.initialDelay}",
@@ -110,7 +112,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
                 .to(LOCAL_ENDPOINT)
                 .withProcessor(exchange -> {
                     exchange.getIn().setBody(request);
-                    setAuthorizationToken(exchange);
+                    setAuthorizationHeaders(exchange);
                 })
                 .request(PreSignedUrlResponse.class);
     }
@@ -169,5 +171,10 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
 
         ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
+    }
+
+    private void setAuthorizationHeaders(Exchange exchange)
+    {
+        AuthSupport.setHxIAuthorizationHeaders(exchange, accessTokenProvider, authProperties);
     }
 }

@@ -37,6 +37,12 @@ import static org.apache.hc.core5.http.HttpHeaders.HOST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ALFRESCO_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.HXI_AUTH_PROVIDER;
+
+import java.util.Collections;
+import java.util.Map;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import org.apache.camel.Exchange;
@@ -48,29 +54,25 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
-import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClientTest;
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClientTest;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierHxAuthClient;
-import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
-import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
-import org.alfresco.hxi_connector.prediction_applier.config.SecurityConfig;
+import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierAuthClient;
 
 @SpringBootTest(properties = "logging.level.org.alfresco=DEBUG",
-        classes = {HxInsightProperties.class, SecurityConfig.class, PredictionApplierHxAuthClient.class, PredictionApplierHxAuthClientIntegrationTest.PredictionApplierHxAuthClientTestConfig.class})
+        classes = {PredictionApplierAuthClient.class, PredictionApplierAuthClientIntegrationTest.PredictionApplierAuthClientTestConfig.class})
 @EnableAutoConfiguration
 @EnableConfigurationProperties
 @EnableRetry
 @Testcontainers
 @SuppressWarnings("PMD.TestClassWithoutTestCases")
-class PredictionApplierHxAuthClientIntegrationTest extends HxAuthenticationClientTest
+class PredictionApplierAuthClientIntegrationTest extends DefaultAuthenticationClientTest
 {
     @Container
     private static final WireMockContainer ACS_MOCK = DockerContainers.createWireMockContainer();
@@ -86,11 +88,10 @@ class PredictionApplierHxAuthClientIntegrationTest extends HxAuthenticationClien
                         .withBody(AuthUtils.createAuthResponseBody())));
 
         // when
-        String clientRegistrationId = "alfresco";
-        AuthenticationResult authenticationResult = authenticationClient.authenticate(clientRegistrationId);
+        AuthenticationResult authenticationResult = authenticationClient.authenticate(ALFRESCO_AUTH_PROVIDER);
 
         // then
-        then(authenticationClient).should().authenticate(clientRegistrationId);
+        then(authenticationClient).should().authenticate(ALFRESCO_AUTH_PROVIDER);
         String authRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(ACS_MOCK.getHost() + ":" + ACS_MOCK.getPort()))
@@ -101,19 +102,20 @@ class PredictionApplierHxAuthClientIntegrationTest extends HxAuthenticationClien
         assertThat(authenticationResult).isEqualTo(expectedAuthenticationResult);
     }
 
-    @DynamicPropertySource
-    protected static void overrideProperties(DynamicPropertyRegistry registry)
-    {
-        AuthUtils.overrideAuthProperties(registry, ACS_MOCK.getBaseUrl(), "alfresco");
-    }
-
     @TestConfiguration
-    public static class PredictionApplierHxAuthClientTestConfig
+    public static class PredictionApplierAuthClientTestConfig
     {
         @Bean
-        public RepositoryApiProperties nodesApiProperties()
+        public AuthProperties authorizationProperties()
         {
-            return new RepositoryApiProperties("http://localhost:8002", "dummy-user", "dummy-password", null);
+            AuthProperties authProperties = new AuthProperties();
+            AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider(hxAuthMock.getBaseUrl() + AuthUtils.TOKEN_PATH);
+            AuthProperties.AuthProvider alfrescoAuthProvider = AuthUtils.createAuthProvider(ACS_MOCK.getBaseUrl() + AuthUtils.TOKEN_PATH);
+            authProperties.setProviders(Map.of(HXI_AUTH_PROVIDER, hXauthProvider, ALFRESCO_AUTH_PROVIDER, alfrescoAuthProvider));
+            authProperties.setRetry(
+                    new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
+                            Collections.emptySet()));
+            return authProperties;
         }
     }
 }

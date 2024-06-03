@@ -25,94 +25,68 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
-
-import java.util.Map;
-import java.util.Set;
+import java.util.Base64;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
+import org.springframework.http.HttpHeaders;
 
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
 public final class AuthSupport
 {
-    static final String APP_NAME_ATTRIBUTE_KEY = "applicationName";
-    static final String SERVICE_USER_ATTRIBUTE_KEY = "serviceUser";
     static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
-    public static final String CLIENT_REGISTRATION_ID = "hyland-experience-auth";
-    public static final String ENVIRONMENT_KEY_ATTRIBUTE_KEY = "hxAiEnvironmentKey";
+    public static final String HXI_AUTH_PROVIDER = "hyland-experience";
+    public static final String ALFRESCO_AUTH_PROVIDER = "alfresco";
+    static final String BASIC = "Basic ";
+    static final String BEARER = "Bearer ";
 
-    public static void authenticate(String clientName, Authorization authorizationProperties, AuthenticationManager authenticationManager)
+    public static void setAlfrescoAuthorizationHeaders(Exchange exchange, AccessTokenProvider accessTokenProvider, AuthProperties authProperties)
     {
-        String serviceUser = authorizationProperties.serviceUser();
-        String environmentKey = authorizationProperties.environmentKey();
-        OAuth2AuthenticationToken authenticationToken = createOAuth2AuthenticationToken(clientName, serviceUser, environmentKey);
-        setAuthenticationInContext(authenticationToken, authenticationManager);
+        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
+        String authType = authProvider.getType();
+        String authHeaderValue = getAlfrescoAuthHeaderValue(accessTokenProvider, authProvider);
+        clearAuthHeaders(exchange);
+        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, authHeaderValue);
+        log.debug("Authorization :: {} {} authorization header added", ALFRESCO_AUTH_PROVIDER, authType);
     }
 
-    public static void setAuthorizationToken(SecurityContext securityContext, Exchange exchange)
+    public static void setHxIAuthorizationHeaders(Exchange exchange, AccessTokenProvider accessTokenProvider, AuthProperties authProperties)
     {
-        SecurityContextHolder.setContext(securityContext);
-        setAuthorizationToken(exchange);
+        final String token = accessTokenProvider.getAccessToken(HXI_AUTH_PROVIDER);
+        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(HXI_AUTH_PROVIDER);
+        String authHeaderValue = BEARER + token;
+        clearAuthHeaders(exchange);
+        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, authHeaderValue);
+        exchange.getIn().setHeader(ENVIRONMENT_KEY_HEADER, authProvider.getEnvironmentKey());
+        log.debug("Authorization :: {} authorization header added", HXI_AUTH_PROVIDER);
     }
 
-    public static void setAuthorizationToken(Exchange exchange)
+    private static String getAlfrescoAuthHeaderValue(AccessTokenProvider accessTokenProvider, AuthProperties.AuthProvider authProvider)
     {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication instanceof OAuth2LoginAuthenticationToken authenticationToken)
+        if (BASIC.trim().equalsIgnoreCase(authProvider.getType()))
         {
-            OAuth2AccessToken accessToken = authenticationToken.getAccessToken();
-            Map<String, Object> principalAttributes = authenticationToken.getPrincipal().getAttributes();
-
-            String authorization = accessToken.getTokenType().getValue() + " " + accessToken.getTokenValue();
-            exchange.getIn().setHeaders(Map.of(
-                    AUTHORIZATION, authorization,
-                    ENVIRONMENT_KEY_HEADER, principalAttributes.get(ENVIRONMENT_KEY_ATTRIBUTE_KEY)));
-            log.debug("Authorization :: auth header added");
+            return BASIC + getBasicAuthenticationHeader(authProvider);
         }
         else
         {
-            log.warn("Spring security context does not contain authentication principal of type: {}", OAuth2LoginAuthenticationToken.class.getSimpleName());
+            return BEARER + accessTokenProvider.getAccessToken(ALFRESCO_AUTH_PROVIDER);
         }
     }
 
-    public static boolean isTokenUriNotBlank(OAuth2ClientProperties oAuth2ClientProperties)
+    private static String getBasicAuthenticationHeader(AuthProperties.AuthProvider authProvider)
     {
-        return oAuth2ClientProperties.getProvider().containsKey(CLIENT_REGISTRATION_ID)
-                && StringUtils.isNotBlank(oAuth2ClientProperties.getProvider().get(CLIENT_REGISTRATION_ID).getTokenUri());
+        String valueToEncode = authProvider.getUsername() + ":" + authProvider.getPassword();
+        return Base64.getEncoder().encodeToString(valueToEncode.getBytes());
     }
 
-    private static void setAuthenticationInContext(OAuth2AuthenticationToken authenticationToken, AuthenticationManager authenticationManager)
+    private static void clearAuthHeaders(Exchange exchange)
     {
-        Authentication authentication = authenticationManager.authenticate(authenticationToken);
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-    }
-
-    static OAuth2AuthenticationToken createOAuth2AuthenticationToken(String clientName, String serviceUser, String environmentKey)
-    {
-        Map<String, Object> userAttributes = Map.of(
-                APP_NAME_ATTRIBUTE_KEY, clientName,
-                SERVICE_USER_ATTRIBUTE_KEY, serviceUser,
-                ENVIRONMENT_KEY_ATTRIBUTE_KEY, environmentKey);
-        OAuth2UserAuthority oAuth2UserAuthority = new OAuth2UserAuthority(userAttributes);
-        OAuth2User oAuth2User = new DefaultOAuth2User(Set.of(oAuth2UserAuthority), userAttributes, APP_NAME_ATTRIBUTE_KEY);
-        return new OAuth2AuthenticationToken(oAuth2User, Set.of(oAuth2UserAuthority), CLIENT_REGISTRATION_ID);
+        exchange.getIn().removeHeader(HttpHeaders.AUTHORIZATION);
+        exchange.getIn().removeHeader(ENVIRONMENT_KEY_HEADER);
     }
 }

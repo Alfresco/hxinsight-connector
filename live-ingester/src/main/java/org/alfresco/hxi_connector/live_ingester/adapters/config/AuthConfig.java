@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,34 +23,36 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.config;
+package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
-import jakarta.validation.constraints.NotNull;
-
-import lombok.Data;
-import lombok.experimental.Accessors;
+import org.apache.camel.CamelContext;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.stereotype.Component;
-import org.springframework.validation.annotation.Validated;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.retry.annotation.EnableRetry;
 
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authentication;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
-@Component
-@EnableConfigurationProperties({HxInsightProperties.HylandExperience.class})
-@Validated
-@Data
-@Accessors(fluent = true)
-public class HxInsightProperties
+@Configuration
+@EnableRetry
+@EnableConfigurationProperties
+public class AuthConfig
 {
+    @Bean
+    public AccessTokenProvider defaultAccessTokenProvider(CamelContext camelContext, AuthenticationClient liveIngesterAuthClient)
+    {
+        return new DefaultAccessTokenProvider(camelContext, liveIngesterAuthClient);
+    }
 
-    @NotNull private final HxInsightProperties.HylandExperience hylandExperience;
+    @Bean
+    @ConfigurationProperties(prefix = "auth")
+    public AuthProperties authorizationProperties()
+    {
+        return new AuthProperties();
+    }
 
-    @ConfigurationProperties(prefix = "hyland-experience")
-    public record HylandExperience(
-            @NotNull @NestedConfigurationProperty Authentication authentication,
-            @NotNull @NestedConfigurationProperty Authorization authorization)
-    {}
 }

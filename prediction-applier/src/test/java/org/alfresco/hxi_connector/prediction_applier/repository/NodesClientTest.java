@@ -32,13 +32,17 @@ import static org.apache.camel.builder.AdviceWith.adviceWith;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
+import static org.mockito.MockitoAnnotations.initMocks;
 
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType.AUTOFILL;
 
 import java.util.Date;
+import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -53,12 +57,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
+import org.mockito.Mock;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -74,6 +76,11 @@ class NodesClientTest
     private static final int RETRY_ATTEMPTS = 3;
     private static final Date PREDICTION_DATE_TIME = new Date();
 
+    @Mock
+    private AuthProperties mockAuthProperties;
+    @Mock
+    private AccessTokenProvider mockAccessTokenProvider;
+
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
     FluentProducerTemplate producerTemplate;
@@ -82,12 +89,15 @@ class NodesClientTest
     @SneakyThrows
     void beforeAll()
     {
+        initMocks(this);
+        given(mockAccessTokenProvider.getAccessToken(any())).willReturn("access-token");
+        Map<String, AuthProperties.AuthProvider> mockProviderMap = mock();
+        given(mockAuthProperties.getProviders()).willReturn(mockProviderMap);
+        AuthProperties.AuthProvider mockProvider = mock();
+        given(mockProviderMap.get(any(String.class))).willReturn(mockProvider);
+
         camelContext = new DefaultCamelContext();
-        OAuth2ClientProperties dummyOauth2Properties = createDummyOauth2Properties();
-        Retry dummyRetryProperties = new Retry(RETRY_ATTEMPTS, 0, 1, emptySet());
-        AuthenticationClient dummyAuthClient = new HxAuthenticationClient(camelContext, dummyRetryProperties, mock());
-        AccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(camelContext, dummyAuthClient);
-        NodesClient nodesClient = new NodesClient(createNodesApiProperties(), dummyAccessTokenProvider, dummyOauth2Properties);
+        NodesClient nodesClient = new NodesClient(createNodesApiProperties(), mockAccessTokenProvider, mockAuthProperties);
         camelContext.addRoutes(nodesClient);
         camelContext.start();
 
@@ -178,13 +188,5 @@ class NodesClientTest
             exchange.getMessage().setHeader(HTTP_RESPONSE_CODE, statusCode);
             exchange.getMessage().setBody(responseBody);
         });
-    }
-
-    private static OAuth2ClientProperties createDummyOauth2Properties()
-    {
-        OAuth2ClientProperties oAuth2ClientProperties = new OAuth2ClientProperties();
-        oAuth2ClientProperties.getProvider().put("dummy", new OAuth2ClientProperties.Provider());
-        oAuth2ClientProperties.getRegistration().put("dummy", new OAuth2ClientProperties.Registration());
-        return oAuth2ClientProperties;
     }
 }

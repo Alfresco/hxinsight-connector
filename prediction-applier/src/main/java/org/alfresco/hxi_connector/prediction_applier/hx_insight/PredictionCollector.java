@@ -29,8 +29,6 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.support.builder.PredicateBuilder.and;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
-
 import java.util.Collection;
 import java.util.Objects;
 
@@ -41,11 +39,11 @@ import org.apache.camel.Predicate;
 import org.apache.camel.Processor;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
@@ -69,7 +67,7 @@ public class PredictionCollector extends RouteBuilder
 
     private final InsightPredictionsProperties insightPredictionsProperties;
     private final AccessTokenProvider accessTokenProvider;
-    private final HxInsightProperties hxInsightProperties;
+    private final AuthProperties authProperties;
 
     // @formatter:off
     /**
@@ -171,9 +169,6 @@ public class PredictionCollector extends RouteBuilder
 
     private void setAuthorizationHeaders(Exchange exchange)
     {
-        final String token = "Bearer " + accessTokenProvider.getAccessToken("hyland-experience-auth");
-        String environmentKey = hxInsightProperties.hylandExperience().authorization().environmentKey();
-        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, token);
-        exchange.getIn().setHeader(ENVIRONMENT_KEY_ATTRIBUTE_KEY, environmentKey);
+        AuthSupport.setHxIAuthorizationHeaders(exchange, accessTokenProvider, authProperties);
     }
 }

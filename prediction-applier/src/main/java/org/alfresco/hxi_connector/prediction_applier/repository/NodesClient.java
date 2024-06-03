@@ -28,11 +28,9 @@ package org.alfresco.hxi_connector.prediction_applier.repository;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.component.http.HttpMethods.PUT;
-import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 
 import java.net.UnknownHostException;
-import java.util.Base64;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
@@ -45,10 +43,11 @@ import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
@@ -76,7 +75,7 @@ public class NodesClient extends RouteBuilder
 
     private final RepositoryApiProperties repositoryApiProperties;
     private final AccessTokenProvider accessTokenProvider;
-    private final OAuth2ClientProperties oAuth2ClientProperties;
+    private final AuthProperties authProperties;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -105,10 +104,9 @@ public class NodesClient extends RouteBuilder
         from(RETRYABLE_ROUTE)
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
-            .removeHeader(AUTHORIZATION) // Remove Hx Insight Bearer token to avoid 401 from Alfresco.
-            .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
             .setHeader(HTTP_METHOD, constant(PUT))
             .process(this::setAuthorizationHeader)
+            .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
             .toD(URI_PATTERN.formatted(repositoryApiProperties.baseUrl()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
@@ -124,21 +122,7 @@ public class NodesClient extends RouteBuilder
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void setAuthorizationHeader(Exchange exchange)
     {
-        boolean isAlfrescoBasicAuth = !oAuth2ClientProperties.getProvider().containsKey("alfresco");
-        String authHeader = isAlfrescoBasicAuth ? getBasicAuthenticationHeader() : getAlfrescoAccessTokenHeader();
-
-        exchange.getIn().setHeader(AUTHORIZATION, authHeader);
-    }
-
-    private String getAlfrescoAccessTokenHeader()
-    {
-        return "Bearer " + accessTokenProvider.getAccessToken("alfresco");
-    }
-
-    private String getBasicAuthenticationHeader()
-    {
-        String valueToEncode = repositoryApiProperties.username() + ":" + repositoryApiProperties.password();
-        return "Basic " + Base64.getEncoder().encodeToString(valueToEncode.getBytes());
+        AuthSupport.setAlfrescoAuthorizationHeaders(exchange, accessTokenProvider, authProperties);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

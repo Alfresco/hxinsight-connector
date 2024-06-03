@@ -41,6 +41,8 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.HXI_AUTH_PROVIDER;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import lombok.AccessLevel;
@@ -50,9 +52,6 @@ import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
 import org.testcontainers.junit.jupiter.Container;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
@@ -63,16 +62,14 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
-public abstract class HxAuthenticationClientTest
+public abstract class DefaultAuthenticationClientTest
 {
-    private static final int RETRY_ATTEMPTS = 3;
-    private static final int RETRY_DELAY_MS = 0;
-    private static String tokenUri;
-    private static ClientRegistration clientRegistration;
+    protected static final int RETRY_ATTEMPTS = 3;
+    protected static final int RETRY_DELAY_MS = 0;
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
-    static final WireMockContainer hxAuthMock = DockerContainers.createWireMockContainer();
+    protected static final WireMockContainer hxAuthMock = DockerContainers.createWireMockContainer();
 
     @SpyBean
     protected AuthenticationClient authenticationClient;
@@ -81,8 +78,6 @@ public abstract class HxAuthenticationClientTest
     protected static void beforeAll()
     {
         WireMock.configureFor(hxAuthMock.getHost(), hxAuthMock.getPort());
-        tokenUri = hxAuthMock.getBaseUrl() + AuthUtils.TOKEN_PATH;
-        clientRegistration = AuthUtils.creatClientRegistration(tokenUri);
     }
 
     @Test
@@ -95,10 +90,10 @@ public abstract class HxAuthenticationClientTest
                         .withBody(AuthUtils.createAuthResponseBody())));
 
         // when
-        AuthenticationResult authenticationResult = authenticationClient.authenticate(tokenUri, clientRegistration);
+        AuthenticationResult authenticationResult = authenticationClient.authenticate(HXI_AUTH_PROVIDER);
 
         // then
-        then(authenticationClient).should().authenticate(tokenUri, clientRegistration);
+        then(authenticationClient).should().authenticate(HXI_AUTH_PROVIDER);
         String authRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthMock.getHost() + ":" + hxAuthMock.getPort()))
@@ -117,10 +112,10 @@ public abstract class HxAuthenticationClientTest
                 .willReturn(serverError()));
 
         // when
-        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(tokenUri, clientRegistration));
+        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXI_AUTH_PROVIDER));
 
         // then
-        then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(tokenUri, clientRegistration);
+        then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(HXI_AUTH_PROVIDER);
         assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
     }
 
@@ -132,18 +127,10 @@ public abstract class HxAuthenticationClientTest
                 .willReturn(badRequest()));
 
         // when
-        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(tokenUri, clientRegistration));
+        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXI_AUTH_PROVIDER));
 
         // then
-        then(authenticationClient).should(times(1)).authenticate(tokenUri, clientRegistration);
+        then(authenticationClient).should(times(1)).authenticate(HXI_AUTH_PROVIDER);
         assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
-    }
-
-    @DynamicPropertySource
-    protected static void overrideProperties(DynamicPropertyRegistry registry)
-    {
-        AuthUtils.overrideAuthProperties(registry, hxAuthMock.getBaseUrl(), "hyland-experience-auth");
-        registry.add("hyland-experience.authentication.retry.attempts", () -> RETRY_ATTEMPTS);
-        registry.add("hyland-experience.authentication.retry.initialDelay", () -> RETRY_DELAY_MS);
     }
 }

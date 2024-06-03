@@ -25,184 +25,110 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.APP_NAME_ATTRIBUTE_KEY;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.CLIENT_REGISTRATION_ID;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_ATTRIBUTE_KEY;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_HEADER;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.SERVICE_USER_ATTRIBUTE_KEY;
 
-import java.util.Collection;
+import java.util.Base64;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
-import org.apache.camel.Message;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.client.authentication.OAuth2LoginAuthenticationToken;
-import org.springframework.security.oauth2.core.OAuth2AccessToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.core.user.OAuth2UserAuthority;
+import org.springframework.http.HttpHeaders;
 
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
 @ExtendWith(MockitoExtension.class)
 class AuthSupportTest
 {
 
+    public static final String VALID_TOKEN = "valid-token";
     @Mock
-    private AuthenticationManager mockAuthManager;
+    private AccessTokenProvider mockAccessTokenProvider;
+
     @Mock
-    private OAuth2LoginAuthenticationToken mockAuthentication;
+    private AuthProperties mockAuthProperties;
+
+    @Mock
+    private AuthProperties.AuthProvider mockAuthProvider;
+
+    @Mock
+    private Exchange mockExchange;
+
+    @BeforeEach
+    void setUp() {
+        when(mockExchange.getIn()).thenReturn(mock());
+    }
 
     @Test
-    void givenTokenNotPresentInContext_whenAuthenticateCalled_thenSecurityContextSet()
+    void givenValidBearerToken_whenSetAlfrescoAuthorizationHeaders_thenBearerHeaderIsSet()
     {
         // given
-        String dummyServiceUser = "dummy-service-user";
-        String dummyEnvironmentKey = "dummy-env-key";
-        Authorization authorizationProperties = new Authorization("dummy-app-name", dummyServiceUser, dummyEnvironmentKey);
-        String dummyClientName = "dummy-client-name";
-        given(mockAuthManager.authenticate(any())).willReturn(mockAuthentication);
+        given(mockAccessTokenProvider.getAccessToken(AuthSupport.ALFRESCO_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
+        given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthSupport.ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
+        given(mockAuthProvider.getType()).willReturn(AuthSupport.BEARER.trim().toLowerCase());
 
         // when
-        AuthSupport.authenticate(dummyClientName, authorizationProperties, mockAuthManager);
+        AuthSupport.setAlfrescoAuthorizationHeaders(mockExchange, mockAccessTokenProvider, mockAuthProperties);
 
         // then
-        then(mockAuthManager).should().authenticate(any());
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        assertEquals(mockAuthentication, authentication);
+        thenExpectedAuthHeadersCleared();
+        then(mockExchange.getIn()).should().setHeader(HttpHeaders.AUTHORIZATION, AuthSupport.BEARER + VALID_TOKEN);
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void givenTokenPresentInContext_whenSetAuthToken_thenSetAuthInExchange()
+    void givenBasicAlfrescoAuthProvided_whenSetAlfrescoAuthorizationHeaders_thenBasicHeaderIsSet()
     {
         // given
-        SecurityContextHolder.getContext().setAuthentication(mockAuthentication);
-        OAuth2AccessToken mockAccessToken = mock(OAuth2AccessToken.class);
-        given(mockAuthentication.getAccessToken()).willReturn(mockAccessToken);
-
-        String dummyToken = "dummy-token";
-        given(mockAccessToken.getTokenValue()).willReturn(dummyToken);
-
-        OAuth2AccessToken.TokenType mockTokenType = mock(OAuth2AccessToken.TokenType.class);
-        given(mockAccessToken.getTokenType()).willReturn(mockTokenType);
-
-        String dummyTypeValue = "dummy-type-value";
-        given(mockTokenType.getValue()).willReturn(dummyTypeValue);
-        OAuth2User mockPrincipal = mock(OAuth2User.class);
-        given(mockAuthentication.getPrincipal()).willReturn(mockPrincipal);
-
-        String dummyAttribute = "dummy-attribute";
-        Map<String, Object> dummyAttributes = Map.of(ENVIRONMENT_KEY_ATTRIBUTE_KEY, dummyAttribute);
-        given(mockPrincipal.getAttributes()).willReturn(dummyAttributes);
-
-        Exchange mockExchange = mock(Exchange.class);
-        Message mockMessage = mock(Message.class);
-        given(mockExchange.getIn()).willReturn(mockMessage);
+        given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthSupport.ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
+        given(mockAuthProvider.getType()).willReturn(AuthSupport.BASIC.trim().toLowerCase());
+        String username = "username";
+        given(mockAuthProvider.getUsername()).willReturn(username);
+        String password = "password";
+        given(mockAuthProvider.getPassword()).willReturn(password);
 
         // when
-        AuthSupport.setAuthorizationToken(mockExchange);
+        AuthSupport.setAlfrescoAuthorizationHeaders(mockExchange, mockAccessTokenProvider, mockAuthProperties);
 
         // then
-        String expectedAuthorization = dummyTypeValue + " " + dummyToken;
-        Map<String, Object> authHeaders = Map.of(AUTHORIZATION, expectedAuthorization,
-                ENVIRONMENT_KEY_HEADER, dummyAttribute);
-        then(mockMessage).should().setHeaders(authHeaders);
+        thenExpectedAuthHeadersCleared();
+        then(mockExchange.getIn()).should().setHeader(HttpHeaders.AUTHORIZATION, AuthSupport.BASIC + getEncodedCredentials(username, password));
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void givenTokenNotPresentInContext_whenSetAuthToken_thenNotSetInExchange()
+    void givenValidBearerToken_whenSetHxIAuthorizationHeaders_thenHeadersAreSet()
     {
         // given
-        Exchange mockExchange = mock(Exchange.class);
+        given(mockAccessTokenProvider.getAccessToken(AuthSupport.HXI_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
+        given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthSupport.HXI_AUTH_PROVIDER, mockAuthProvider));
+        String dummyEnvKey = "dummy-environment";
+        given(mockAuthProvider.getEnvironmentKey()).willReturn(dummyEnvKey);
 
         // when
-        AuthSupport.setAuthorizationToken(mockExchange);
-
-        then(mockExchange).shouldHaveNoInteractions();
-    }
-
-    @Test
-    void givenAllNecessaryDataProvided_whenCreateOAuth2TokenCalled_thenReturnProperToken()
-    {
-        // given
-        String dummyClientName = "dummy-client-name";
-        String dummyServiceUser = "dummy-service-user";
-        String dummyEnvironmentKey = "dummy-env-key";
-
-        // when
-        OAuth2AuthenticationToken oAuth2AuthenticationToken = AuthSupport.createOAuth2AuthenticationToken(dummyClientName, dummyServiceUser, dummyEnvironmentKey);
+        AuthSupport.setHxIAuthorizationHeaders(mockExchange, mockAccessTokenProvider, mockAuthProperties);
 
         // then
-        Collection<GrantedAuthority> authorities = oAuth2AuthenticationToken.getAuthorities();
-        OAuth2UserAuthority firstAuthority = (OAuth2UserAuthority) authorities.iterator().next();
-        Map<String, Object> userAttributes = Map.of(
-                APP_NAME_ATTRIBUTE_KEY, dummyClientName,
-                SERVICE_USER_ATTRIBUTE_KEY, dummyServiceUser,
-                ENVIRONMENT_KEY_ATTRIBUTE_KEY, dummyEnvironmentKey);
-        assertEquals(userAttributes, firstAuthority.getAttributes());
+        thenExpectedAuthHeadersCleared();
+        then(mockExchange.getIn()).should().setHeader(HttpHeaders.AUTHORIZATION, AuthSupport.BEARER + VALID_TOKEN);
+        then(mockExchange.getIn()).should().setHeader(ENVIRONMENT_KEY_HEADER, dummyEnvKey);
     }
 
-    @Test
-    void givenNoClientRegistrationKey_whenIsTokenUriNotBlankCalled_thenReturnFalse()
+    private static String getEncodedCredentials(String username, String password)
     {
-        // given
-        OAuth2ClientProperties mockOAuth2ClientProperties = mock(OAuth2ClientProperties.class);
-        OAuth2ClientProperties.Provider mockProvider = mock();
-        given(mockOAuth2ClientProperties.getProvider()).willReturn(Map.of("dummy", mockProvider));
-
-        // when
-        boolean result = AuthSupport.isTokenUriNotBlank(mockOAuth2ClientProperties);
-
-        assertFalse(result);
+        String valueToEncode = username + ":" + password;
+        return Base64.getEncoder().encodeToString(valueToEncode.getBytes());
     }
 
-    @Test
-    void givenEmptyClientRegistrationKey_whenIsTokenUriNotBlankCalled_thenReturnFalse()
+    private void thenExpectedAuthHeadersCleared()
     {
-        // given
-        OAuth2ClientProperties mockOAuth2ClientProperties = mock(OAuth2ClientProperties.class);
-        OAuth2ClientProperties.Provider mockProvider = mock();
-        given(mockOAuth2ClientProperties.getProvider()).willReturn(Map.of(CLIENT_REGISTRATION_ID, mockProvider));
-
-        // when
-        boolean result = AuthSupport.isTokenUriNotBlank(mockOAuth2ClientProperties);
-
-        assertFalse(result);
+        then(mockExchange.getIn()).should().removeHeader(HttpHeaders.AUTHORIZATION);
+        then(mockExchange.getIn()).should().removeHeader(ENVIRONMENT_KEY_HEADER);
     }
-
-    @Test
-    void givenClientRegistrationKeyWithTokenUri_whenIsTokenUriNotBlankCalled_thenReturnTrue()
-    {
-        // given
-        OAuth2ClientProperties mockOAuth2ClientProperties = mock(OAuth2ClientProperties.class);
-        OAuth2ClientProperties.Provider mockProvider = mock(OAuth2ClientProperties.Provider.class);
-        given(mockOAuth2ClientProperties.getProvider()).willReturn(Map.of(CLIENT_REGISTRATION_ID, mockProvider));
-        given(mockProvider.getTokenUri()).willReturn("dummy-token-uri");
-
-        // when
-        boolean result = AuthSupport.isTokenUriNotBlank(mockOAuth2ClientProperties);
-
-        assertTrue(result);
-    }
-
 }
