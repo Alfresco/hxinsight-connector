@@ -93,8 +93,12 @@ public class PredictionApplierE2ETestBase
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
         registry.add("spring.security.oauth2.client.provider.hyland-experience-auth.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
+        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-id", () -> "dummy-client-id");
+        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-secret", () -> "dummy-client-secret");
 
         registry.add("spring.security.oauth2.client.provider.alfresco.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
+        registry.add("spring.security.oauth2.client.registration.alfresco.client-id", () -> "dummy-client-id");
+        registry.add("spring.security.oauth2.client.registration.alfresco.client-secret", () -> "dummy-client-secret");
 
         registry.add("hyland-experience.insight.predictions.source-base-url", hxInsightServer::getBaseUrl);
 
