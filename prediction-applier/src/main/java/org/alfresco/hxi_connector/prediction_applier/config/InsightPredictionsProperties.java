@@ -38,10 +38,15 @@ public record InsightPredictionsProperties(
         String collectorTimerEndpoint,
         Long pollPeriodMillis,
         @NotBlank String sourceBaseUrl,
-        @NotBlank String bufferEndpoint)
+        String bufferEndpoint)
 {
     public InsightPredictionsProperties
     {
+        if (bufferEndpoint == null)
+        {
+            bufferEndpoint = "activemq:queue:predictions-buffer";
+        }
+
         if (pollPeriodMillis == null && collectorTimerEndpoint == null)
         {
             throw new PredictionApplierRuntimeException("Poll period is required when predictions source endpoint is not provided");
