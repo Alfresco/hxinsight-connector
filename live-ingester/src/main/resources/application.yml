@@ -7,8 +7,8 @@ spring:
         registration:
           hyland-experience-auth:
             authorization-grant-type: urn:hyland:params:oauth:grant-type:api-credentials
-            client-id: dummy-client-id
-            client-secret: dummy-client-pass
+            client-id:
+            client-secret:
             client-name: ${hyland-experience.authorization.application-name}
             scope: hxp.integrations
         provider:
@@ -63,7 +63,7 @@ hyland-experience:
   authorization:
     application-name: acs-insight-connector
     service-user: insight-acs
-    environment-key: hxai-env-key
+    environment-key:
   storage:
     location:
       endpoint: ${hyland-experience.insight.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
