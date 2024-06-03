@@ -10,7 +10,6 @@ hyland-experience:
   insight:
     predictions:
       source-base-url: http://localhost:8001
-      buffer-endpoint: activemq:queue:predictions-buffer
       poll-period-millis: 300_000 # 5 minutes
 
 alfresco:
