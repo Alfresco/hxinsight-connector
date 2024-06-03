@@ -62,7 +62,7 @@ import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
 @NoArgsConstructor(access = PROTECTED)
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.LongVariable"})
 public class PredictionApplierE2ETestBase
 {
     private static final String PREDICTION_COLLECTOR_TRIGGER_ENDPOINT = "direct:prediction-collector-trigger";
