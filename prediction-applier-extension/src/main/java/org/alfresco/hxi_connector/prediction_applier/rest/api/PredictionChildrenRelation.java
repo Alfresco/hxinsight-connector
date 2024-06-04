@@ -27,6 +27,8 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
 import static java.util.stream.Collectors.toList;
 
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesUtils.validateOrLookupNode;
+
 import java.util.List;
 
 import lombok.Setter;

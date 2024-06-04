@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesUtils.validateOrLookupNode;
+
 import lombok.Setter;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;

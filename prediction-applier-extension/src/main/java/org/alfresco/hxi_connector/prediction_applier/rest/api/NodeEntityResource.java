@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_LATEST_PREDICTION_DATE_TIME;
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesUtils.validateOrLookupNode;
 
 import java.util.Date;
 import java.util.List;
