@@ -272,9 +272,11 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
+      HYLAND-EXPERIENCE_AUTHORIZATION_ENVIRONMENT-KEY: hxai-env-key
       HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST: http://shared-file-store
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT: 8099
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_HYLAND-EXPERIENCE-AUTH_CLIENT-ID: dummy-client-id
       SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI: http://hxinsight-mock:8080/token
     ports:
       - "5007:5007"
@@ -290,6 +292,8 @@ services:
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
+      SPRING_DATASOURCE_USERNAME: alfresco
+      SPRING_DATASOURCE_PASSWORD: alfresco
     depends_on:
       live-indexing:
         condition: service_started
@@ -311,6 +315,13 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_HYLAND-EXPERIENCE-AUTH_CLIENT-ID: dummy-client-id
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_HYLAND-EXPERIENCE-AUTH_CLIENT-SECRET: dummy-client-pass
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_ALFRESCO_CLIENT-ID: dummy-client-id
+      SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_ALFRESCO_CLIENT-SECRET: dummy-client-secret
+      HYLAND-EXPERIENCE_AUTHORIZATION_ENVIRONMENT-KEY: hxai-env-key
+      ALFRESCO_REPOSITORY_USERNAME: admin
+      ALFRESCO_REPOSITORY_PASSWORD: admin
     ports:
       - "5009:5009"
 

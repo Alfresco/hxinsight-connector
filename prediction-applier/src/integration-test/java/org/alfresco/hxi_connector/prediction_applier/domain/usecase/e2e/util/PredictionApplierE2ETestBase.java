@@ -62,7 +62,7 @@ import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
 @NoArgsConstructor(access = PROTECTED)
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.LongVariable"})
 public class PredictionApplierE2ETestBase
 {
     private static final String PREDICTION_COLLECTOR_TRIGGER_ENDPOINT = "direct:prediction-collector-trigger";
@@ -93,8 +93,12 @@ public class PredictionApplierE2ETestBase
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
         registry.add("spring.security.oauth2.client.provider.hyland-experience-auth.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
+        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-id", () -> "dummy-client-id");
+        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-secret", () -> "dummy-client-secret");
 
         registry.add("spring.security.oauth2.client.provider.alfresco.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
+        registry.add("spring.security.oauth2.client.registration.alfresco.client-id", () -> "dummy-client-id");
+        registry.add("spring.security.oauth2.client.registration.alfresco.client-secret", () -> "dummy-client-secret");
 
         registry.add("hyland-experience.insight.predictions.source-base-url", hxInsightServer::getBaseUrl);
 
