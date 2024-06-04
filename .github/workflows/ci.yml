@@ -104,6 +104,10 @@ jobs:
     if: >
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
+    strategy:
+      fail-fast: false
+      matrix:
+        repoVersion: [ 7.3.2, 7.4.2, 23.2.1 ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v1.35.2
@@ -115,7 +119,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Build application with distribution profile"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -Pdistribution -DskipTests
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -Pdistribution -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   run_e2e_test:
     name: "Run e2e tests"
@@ -129,7 +133,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repoVersion: [ 7.3.0.8, 7.4.1.6, 23.2.1 ]
+        repoVersion: [ 7.3.2, 7.4.2, 23.2.1 ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.25.0
@@ -141,7 +145,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.25.0
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Drepository.tag=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   push_docker_images:
     name: "Push docker images"
