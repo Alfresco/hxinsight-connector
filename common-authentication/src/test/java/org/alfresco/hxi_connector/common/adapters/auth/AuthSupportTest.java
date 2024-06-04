@@ -33,6 +33,7 @@ import static org.mockito.Mockito.when;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ENVIRONMENT_KEY_HEADER;
 
 import java.util.Base64;
+import java.util.Locale;
 import java.util.Map;
 
 import org.apache.camel.Exchange;
@@ -74,7 +75,7 @@ class AuthSupportTest
         // given
         given(mockAccessTokenProvider.getAccessToken(AuthSupport.ALFRESCO_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
         given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthSupport.ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
-        given(mockAuthProvider.getType()).willReturn(AuthSupport.BEARER.trim().toLowerCase());
+        given(mockAuthProvider.getType()).willReturn(AuthSupport.BEARER.trim().toLowerCase(Locale.getDefault()));
 
         // when
         AuthSupport.setAlfrescoAuthorizationHeaders(mockExchange, mockAccessTokenProvider, mockAuthProperties);
@@ -89,7 +90,7 @@ class AuthSupportTest
     {
         // given
         given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthSupport.ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
-        given(mockAuthProvider.getType()).willReturn(AuthSupport.BASIC.trim().toLowerCase());
+        given(mockAuthProvider.getType()).willReturn(AuthSupport.BASIC.trim().toLowerCase(Locale.getDefault()));
         String username = "username";
         given(mockAuthProvider.getUsername()).willReturn(username);
         String password = "password";
