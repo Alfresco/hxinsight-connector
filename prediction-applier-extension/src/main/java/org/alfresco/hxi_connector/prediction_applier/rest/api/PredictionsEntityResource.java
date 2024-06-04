@@ -49,7 +49,7 @@ public class PredictionsEntityResource
     @WebApiDescription(title = "Review prediction")
     public void reviewPrediction(String predictionNodeId, Void body, Parameters parameters, WithResponse withResponse)
     {
-        NodeRef predictionNodeRef = nodes.validateOrLookupNode(predictionNodeId);
+        NodeRef predictionNodeRef = validateOrLookupNode(nodes, predictionNodeId);
         ReviewStatus reviewStatus = ReviewStatus.fromString(parameters.getParameter(PARAM_REVIEW_STATUS));
         predictionService.reviewPrediction(predictionNodeRef, reviewStatus);
     }

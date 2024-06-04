@@ -53,7 +53,7 @@ public class NodeEntityResource implements EntityResourceAction.ReadById<NodeWit
     @Override
     public NodeWithPrediction readById(String id, Parameters parameters) throws EntityNotFoundException
     {
-        NodeRef nodeRef = nodes.validateOrLookupNode(id);
+        NodeRef nodeRef = validateOrLookupNode(nodes, id);
 
         Date date = (Date) nodeService.getProperty(nodeRef, PROP_LATEST_PREDICTION_DATE_TIME);
         List<String> predictedProperties = predictionService.getPredictedProperties(nodeRef);

@@ -57,7 +57,7 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
     @Override
     public CollectionWithPagingInfo<PredictionModel> readAll(String nodeId, Parameters params)
     {
-        NodeRef nodeRef = nodes.validateOrLookupNode(nodeId);
+        NodeRef nodeRef = validateOrLookupNode(nodes, nodeId);
 
         List<Prediction> predictions = predictionService.getPredictions(nodeRef);
         List<PredictionModel> predictionModels = predictions.stream().map(PredictionModel::fromServiceModel).collect(toList());
@@ -69,7 +69,7 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
     @Override
     public List<PredictionModel> create(String nodeId, List<PredictionModel> predictionModels, Parameters parameters)
     {
-        NodeRef nodeRef = nodes.validateOrLookupNode(nodeId);
+        NodeRef nodeRef = validateOrLookupNode(nodes, nodeId);
         List<Prediction> predictions = predictionModels.stream().map(PredictionModel::toServiceModel).collect(toList());
 
         RetryingTransactionCallback<List<Prediction>> callback = () -> predictionService.applyPredictions(nodeRef, predictions);
