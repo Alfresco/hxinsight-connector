@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.prediction_applier.repository;
 
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.component.http.HttpMethods.PUT;
 import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
@@ -62,7 +63,7 @@ public class NodesClient extends RouteBuilder
     private static final String RETRYABLE_ROUTE = "direct:retryable-" + NodesClient.class.getSimpleName();
     static final String ROUTE_ID = "repository-nodes";
     public static final String NODE_ID_HEADER = "nodeId";
-    private static final String URI_PATTERN = "%s/alfresco/api/-default-/private/hxi/versions/1/nodes/${headers.nodeId}/predictions?throwExceptionOnFailure=false";
+    private static final String URI_PATTERN = "%s/alfresco/api/-default-/private/hxi/versions/1/nodes/${headers.nodeId}/predictions?httpMethod=POST&throwExceptionOnFailure=false";
     private static final int EXPECTED_STATUS_CODE = SC_CREATED;
     public static final String UNEXPECTED_STATUS_CODE_MESSAGE = "Unexpected response status code - expecting: %d, received: %d";
     private static final Set<Class<? extends Throwable>> RETRY_REASONS = Set.of(
@@ -116,6 +117,7 @@ public class NodesClient extends RouteBuilder
             .otherwise()
                 .unmarshal()
                 .json(JsonLibrary.Jackson, PredictionModelResponse.class)
+                .log(TRACE, log, "Node updated successfully")
             .endChoice()
             .end();
         // @formatter:on

@@ -26,6 +26,8 @@
 package org.alfresco.hxi_connector.prediction_applier.util;
 
 import static java.net.HttpURLConnection.HTTP_CREATED;
+import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
+import static java.net.HttpURLConnection.HTTP_OK;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
@@ -42,19 +44,13 @@ import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Getter
 @SuppressWarnings("PMD.NonThreadSafeSingleton")
 public class ContainerSupport
 {
-    private static final int HTTP_OK_STATUS = 200;
-    private static final int HTTP_ACCEPTED_STATUS = 202;
-    public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/prediction-batches";
+    public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/v1/prediction-batches";
     public static final String REPOSITORY_PREDICTION_ENDPOINT = "/alfresco/api/-default-/private/hxi/versions/1/nodes/%s/predictions";
     private static ContainerSupport instance;
     private final Session session;
@@ -98,9 +94,15 @@ public class ContainerSupport
         String batchId = UUID.randomUUID().toString();
 
         configureFor(hxInsightMock);
+
         givenThat(get(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT))
                 .willReturn(aResponse()
-                        .withStatus(HTTP_OK_STATUS)
+                        .withStatus(HTTP_NO_CONTENT)));
+
+        givenThat(get(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT))
+                .withQueryParam("page", equalTo("1"))
+                .willReturn(aResponse()
+                        .withStatus(HTTP_OK)
                         .withBody("""
                                 [
                                     {
@@ -121,29 +123,38 @@ public class ContainerSupport
                                     }
                                 ]
                                 """.formatted(batchId))));
+
         givenThat(get(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT + "/" + batchId))
                 .willReturn(aResponse()
-                        .withStatus(HTTP_OK_STATUS)
+                        .withStatus(HTTP_NO_CONTENT)));
+
+        givenThat(get(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT + "/" + batchId))
+                .withQueryParam("page", equalTo("1"))
+                .willReturn(aResponse()
+                        .withStatus(HTTP_OK)
                         .withBody("""
                                 [
-                                   {
-                                     "objectId": "%s",
-                                     "modelId": "97f33039-2d09-4206-94ab-8b50f2cd2569",
-                                     "prediction": [
-                                       {
-                                         "field": "cm:description",
-                                         "confidence": 0.98,
-                                         "value": "%s",
-                                       }
-                                     ],
-                                     "enrichmentType": "AUTOCORRECT"
-                                   }
+                                    {
+                                        "objectId": "%s",
+                                        "modelId": "97f33039-2d09-4206-94ab-8b50f2cd2569",
+                                        "prediction": [
+                                        {
+                                            "field": "cm:description",
+                                            "confidence": 0.98,
+                                            "value": "%s"
+                                        }
+                                        ],
+                                        "enrichmentType": "AUTOCORRECT"
+                                    }
                                 ]
                                 """.formatted(nodeId, predictedValue))));
-    }
 
-    public void expectRepositoryRequestReceived(String nodeId, String predictedValue)
-    {
+        givenThat(put(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT + "/" + batchId))
+                .willReturn(aResponse()
+                        .withStatus(HTTP_OK)));
+
+        configureFor(repositoryMock);
+
         String responseBody = """
                 {
                     "entry": {
@@ -159,10 +170,17 @@ public class ContainerSupport
                 }
                 """.formatted(predictedValue);
 
+        givenThat(post(urlPathEqualTo(REPOSITORY_PREDICTION_ENDPOINT.formatted(nodeId)))
+                .willReturn(aResponse()
+                        .withStatus(HTTP_CREATED)
+                        .withBody(responseBody)));
+    }
+
+    public void expectRepositoryRequestReceived(String nodeId, String predictedValue)
+    {
         String expectedBody = """
                 {
                     "property": "cm:description",
-                    "predictionDateTime": "2024-04-12T10:31:12.477+0000",
                     "confidenceLevel": 0.98,
                     "modelId": "97f33039-2d09-4206-94ab-8b50f2cd2569",
                     "predictionValue": "%s",
@@ -170,28 +188,10 @@ public class ContainerSupport
                 }
                 """.formatted(predictedValue);
 
-        configureFor(repositoryMock);
         String repositoryUrl = REPOSITORY_PREDICTION_ENDPOINT.formatted(nodeId);
-        givenThat(post(urlPathEqualTo(repositoryUrl))
-                .willReturn(aResponse()
-                        .withStatus(HTTP_CREATED)
-                        .withBody(responseBody)));
-
-        sendPostRequest(repositoryUrl, expectedBody);
 
         retryWithBackoff(() -> getRepositoryMock().verifyThat(postRequestedFor(urlPathEqualTo(repositoryUrl))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withRequestBody(equalToJson(expectedBody))));
-    }
-
-    public void sendPostRequest(String repositoryPath, String requestBody)
-    {
-        String repositoryUrl = repositoryBaseUrl + repositoryPath;
-        RestTemplate restTemplate = new RestTemplate();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        HttpEntity<String> entity = new HttpEntity<>(requestBody, headers);
-
-        restTemplate.postForObject(repositoryUrl, entity, String.class);
     }
 }
