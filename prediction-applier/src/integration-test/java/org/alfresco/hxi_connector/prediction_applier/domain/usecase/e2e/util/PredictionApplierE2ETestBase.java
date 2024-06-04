@@ -38,10 +38,12 @@ import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.cre
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
+import org.apache.camel.ProducerTemplate;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -61,19 +63,23 @@ import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
 @NoArgsConstructor(access = PROTECTED)
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.LongVariable"})
 public class PredictionApplierE2ETestBase
 {
+    private static final String PREDICTION_COLLECTOR_TRIGGER_ENDPOINT = "direct:prediction-collector-trigger";
     private static String brokerUrl;
-    private static WireMock hxAuthMock;
+    private static WireMock oAuthMock;
     private static WireMock hxInsightMock;
     private static WireMock repositoryMock;
     protected ContainerSupport containerSupport;
 
+    @Autowired
+    private ProducerTemplate producerTemplate;
+
     @Container
     static final GenericContainer<?> activemqBroker = DockerContainers.createActiveMqContainer();
     @Container
-    static final WireMockContainer hxAuthServer = DockerContainers.createWireMockContainer();
+    static final WireMockContainer oAuthServer = DockerContainers.createWireMockContainer();
     @Container
     static final WireMockContainer hxInsightServer = DockerContainers.createWireMockContainer();
     @Container
@@ -82,25 +88,27 @@ public class PredictionApplierE2ETestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl(), HXI_AUTH_PROVIDER);
-        AuthUtils.overrideAuthProperties(registry, hxAuthServer.getBaseUrl(), ALFRESCO_AUTH_PROVIDER);
+        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), HXI_AUTH_PROVIDER);
+        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), ALFRESCO_AUTH_PROVIDER);
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
         registry.add("hyland-experience.insight.predictions.source-base-url", hxInsightServer::getBaseUrl);
 
-        registry.add("alfresco.repository.endpoint", repositoryServer::getBaseUrl);
+        registry.add("alfresco.repository.base-url", repositoryServer::getBaseUrl);
+
+        registry.add("hyland-experience.insight.predictions.collectorTimerEndpoint", () -> PREDICTION_COLLECTOR_TRIGGER_ENDPOINT);
     }
 
     @BeforeAll
     @SneakyThrows
     public static void beforeAll()
     {
-        hxAuthMock = new WireMock(hxAuthServer.getHost(), hxAuthServer.getPort());
+        oAuthMock = new WireMock(oAuthServer.getHost(), oAuthServer.getPort());
         hxInsightMock = new WireMock(hxInsightServer.getHost(), hxInsightServer.getPort());
         repositoryMock = new WireMock(repositoryServer.getHost(), repositoryServer.getPort());
-        WireMock.configureFor(hxAuthMock);
+        WireMock.configureFor(oAuthMock);
         WireMock.givenThat(post(TOKEN_PATH)
                 .willReturn(aResponse()
                         .withStatus(SC_OK)
@@ -129,7 +137,12 @@ public class PredictionApplierE2ETestBase
     @AfterAll
     public static void tearDown()
     {
-        WireMock.configureFor(hxAuthMock);
+        WireMock.configureFor(oAuthMock);
         ContainerSupport.removeInstance();
+    }
+
+    protected void triggerPredictionsCollection()
+    {
+        producerTemplate.send(PREDICTION_COLLECTOR_TRIGGER_ENDPOINT, exchange -> exchange.getIn().setBody("Trigger predictions collection"));
     }
 }

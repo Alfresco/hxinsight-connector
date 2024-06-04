@@ -52,7 +52,7 @@ public record InsightPredictionsProperties(
             throw new PredictionApplierRuntimeException("Poll period is required when predictions source endpoint is not provided");
         }
 
-        if (pollPeriodMillis != null)
+        if (pollPeriodMillis != null && collectorTimerEndpoint == null)
         {
             collectorTimerEndpoint = "quartz:predictions-collector-timer?autoStartScheduler=true&trigger.repeatInterval=" + pollPeriodMillis;
         }
