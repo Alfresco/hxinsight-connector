@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesUtils.validateOrLookupNode;
+
 import lombok.Setter;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
@@ -49,7 +51,7 @@ public class PredictionsEntityResource
     @WebApiDescription(title = "Review prediction")
     public void reviewPrediction(String predictionNodeId, Void body, Parameters parameters, WithResponse withResponse)
     {
-        NodeRef predictionNodeRef = nodes.validateOrLookupNode(predictionNodeId);
+        NodeRef predictionNodeRef = validateOrLookupNode(nodes, predictionNodeId);
         ReviewStatus reviewStatus = ReviewStatus.fromString(parameters.getParameter(PARAM_REVIEW_STATUS));
         predictionService.reviewPrediction(predictionNodeRef, reviewStatus);
     }
