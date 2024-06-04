@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.data_model.PredictionDataModel.PROP_LATEST_PREDICTION_DATE_TIME;
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesUtils.validateOrLookupNode;
 
 import java.util.Date;
 import java.util.List;
@@ -53,7 +54,7 @@ public class NodeEntityResource implements EntityResourceAction.ReadById<NodeWit
     @Override
     public NodeWithPrediction readById(String id, Parameters parameters) throws EntityNotFoundException
     {
-        NodeRef nodeRef = nodes.validateOrLookupNode(id);
+        NodeRef nodeRef = validateOrLookupNode(nodes, id);
 
         Date date = (Date) nodeService.getProperty(nodeRef, PROP_LATEST_PREDICTION_DATE_TIME);
         List<String> predictedProperties = predictionService.getPredictedProperties(nodeRef);
