@@ -26,9 +26,14 @@
 
 package org.alfresco.hxi_connector.prediction_applier.rest.api.util;
 
+import static lombok.AccessLevel.PRIVATE;
+
+import lombok.NoArgsConstructor;
+
 import org.alfresco.rest.api.Nodes;
 import org.alfresco.service.cmr.repository.NodeRef;
 
+@NoArgsConstructor(access = PRIVATE)
 public class NodesUtils
 {
     // To keep compatibility with 7.3.x ACS versions we cannot use validateOrLookupNode(id)
