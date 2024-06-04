@@ -45,6 +45,7 @@ import org.springframework.http.HttpHeaders;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 class AuthSupportTest
 {

@@ -194,13 +194,13 @@ class HxInsightEventPublisherIntegrationTest
         {
             CamelContext camelContext = new DefaultCamelContext();
             camelContext.start();
-            AuthenticationClient dummyPredictionApplierHxAuthClient = new DefaultAuthenticationClient(camelContext, authorizationProperties());
-            DefaultAccessTokenProvider defaultAccessTokenProvider = new DefaultAccessTokenProvider(camelContext, dummyPredictionApplierHxAuthClient);
+            AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(camelContext, authorizationProperties());
+            DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(camelContext, dummyAuthClient);
             Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
             AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
             tokens.put(HXI_AUTH_PROVIDER, Map.entry(dummyAuthResult, OffsetDateTime.now().plusSeconds(3600)));
-            ReflectionTestUtils.setField(defaultAccessTokenProvider, "accessTokens", tokens);
-            return defaultAccessTokenProvider;
+            ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
+            return dummyAccessTokenProvider;
         }
     }
 }
