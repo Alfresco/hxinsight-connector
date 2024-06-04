@@ -31,7 +31,7 @@ import org.alfresco.service.cmr.repository.NodeRef;
 
 public class NodesUtils
 {
-    // To keep compatibility with 7.3.x repo versions we cannot use validateOrLookupNode(id)
+    // To keep compatibility with 7.3.x ACS versions we cannot use validateOrLookupNode(id)
     public static NodeRef validateOrLookupNode(Nodes nodes, String id)
     {
         return nodes.validateOrLookupNode(id, null);
