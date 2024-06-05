@@ -21,7 +21,6 @@ spring:
           alfresco:
             token-uri: http://localhost:8002/token
 
-
 camel:
   springboot:
     main-run-controller: true
@@ -40,7 +39,7 @@ hyland-experience:
 
 alfresco:
   repository:
-    base-url: http://alfresco:8080
+    base-url: http://localhost:8002
     username:
     password:
     retry:

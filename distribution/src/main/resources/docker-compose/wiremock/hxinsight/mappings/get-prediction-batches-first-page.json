@@ -4,10 +4,10 @@
   "newScenarioState": "Empty",
   "request": {
     "method": "GET",
-    "urlPath": "/prediction-batches"
+    "urlPath": "/v1/prediction-batches"
   },
   "response": {
     "status": 200,
-    "bodyFileName": "prediction-batch-first.json"
+    "bodyFileName": "prediction-batches.json"
   }
 }

@@ -43,6 +43,7 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
@@ -126,7 +127,7 @@ public class NodesClient extends RouteBuilder
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void setAuthorizationHeader(Exchange exchange)
     {
-        boolean isAlfrescoBasicAuth = !oAuth2ClientProperties.getProvider().containsKey("alfresco");
+        boolean isAlfrescoBasicAuth = !oAuth2ClientProperties.getProvider().containsKey("alfresco") || StringUtils.isEmpty(oAuth2ClientProperties.getProvider().get("alfresco").getTokenUri());
         String authHeader = isAlfrescoBasicAuth ? getBasicAuthenticationHeader() : getAlfrescoAccessTokenHeader();
 
         exchange.getIn().setHeader(AUTHORIZATION, authHeader);
