@@ -33,18 +33,22 @@ import org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e.util.Pre
 public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETestBase
 {
     private static final String NODE_ID = "nodeId";
+    private static final String BATCH_ID = "batchId";
     private static final String PREDICTED_VALUE = "New value";
 
     @Test
     public void testPredictionApplication()
     {
         // given
-        containerSupport.prepareHxInsightToReturnPredictionBatch(NODE_ID, PREDICTED_VALUE);
+        containerSupport.prepareHxInsightToReturnPredictionBatch(BATCH_ID, NODE_ID, PREDICTED_VALUE);
 
         // when
         triggerPredictionsCollection();
 
         // then
+        containerSupport.expectBatchStatusWasUpdated(BATCH_ID, "IN_PROGRESS", 1);
+        containerSupport.expectBatchStatusWasUpdated(BATCH_ID, "COMPLETE", 2);
+
         containerSupport.expectRepositoryRequestReceived(NODE_ID, PREDICTED_VALUE);
     }
 }

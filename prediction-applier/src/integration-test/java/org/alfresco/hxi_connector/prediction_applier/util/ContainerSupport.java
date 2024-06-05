@@ -34,7 +34,6 @@ import static org.apache.camel.Exchange.CONTENT_TYPE;
 
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 
-import java.util.UUID;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Session;
@@ -89,10 +88,8 @@ public class ContainerSupport
         instance = null;
     }
 
-    public void prepareHxInsightToReturnPredictionBatch(String nodeId, String predictedValue)
+    public void prepareHxInsightToReturnPredictionBatch(String batchId, String nodeId, String predictedValue)
     {
-        String batchId = UUID.randomUUID().toString();
-
         configureFor(hxInsightMock);
 
         givenThat(get(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT))
@@ -192,6 +189,19 @@ public class ContainerSupport
 
         retryWithBackoff(() -> getRepositoryMock().verifyThat(postRequestedFor(urlPathEqualTo(repositoryUrl))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
+                .withRequestBody(equalToJson(expectedBody))));
+    }
+
+    public void expectBatchStatusWasUpdated(String batchId, String status, int page)
+    {
+        String expectedBody = """
+                {
+                    "status": "%s",
+                    "currentPage": %d
+                }
+                """.formatted(status, page);
+
+        retryWithBackoff(() -> getHxInsightMock().verifyThat(putRequestedFor(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT + "/" + batchId))
                 .withRequestBody(equalToJson(expectedBody))));
     }
 }
