@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 
 import java.util.Collections;
 import java.util.Map;

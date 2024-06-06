@@ -39,7 +39,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
@@ -75,6 +75,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
@@ -292,6 +293,12 @@ class PreSignedUrlRequesterIntegrationTest
             tokens.put(HXI_AUTH_PROVIDER, Map.entry(dummyAuthResult, OffsetDateTime.now().plusSeconds(3600)));
             ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
             return dummyAccessTokenProvider;
+        }
+
+        @Bean
+        public AuthService authService()
+        {
+            return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
         }
     }
 }

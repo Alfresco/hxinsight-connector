@@ -33,6 +33,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
@@ -54,4 +55,11 @@ public class AuthConfig
     {
         return new AuthProperties();
     }
+
+    @Bean
+    public AuthService authService(AuthProperties authProperties, AccessTokenProvider defaultAccessTokenProvider)
+    {
+        return new AuthService(authProperties, defaultAccessTokenProvider);
+    }
+
 }

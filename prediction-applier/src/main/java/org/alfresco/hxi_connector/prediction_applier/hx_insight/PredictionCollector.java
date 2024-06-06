@@ -40,9 +40,7 @@ import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
@@ -72,8 +70,7 @@ public class PredictionCollector extends RouteBuilder
     private static final String COMPLETE_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("COMPLETE", PREDICTIONS_PAGE_NO_HEADER);
 
     private final InsightPredictionsProperties insightPredictionsProperties;
-    private final AccessTokenProvider accessTokenProvider;
-    private final AuthProperties authProperties;
+    private final AuthService authService;
 
     // @formatter:off
     /**
@@ -105,7 +102,7 @@ public class PredictionCollector extends RouteBuilder
             .onCompletion()
                 .process(setProcessingPending(false))
             .end()
-            .process(this::setAuthorizationHeaders)
+            .process(authService::setHxIAuthorizationHeaders)
             .setHeader(BATCHES_PAGE_NO_HEADER, constant(1))
             .loopDoWhile(statusCodeNot204())
                 .toD(batchesUrl)
@@ -162,10 +159,5 @@ public class PredictionCollector extends RouteBuilder
     private Processor setProcessingPending(boolean isProcessingPending)
     {
         return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
-    }
-
-    private void setAuthorizationHeaders(Exchange exchange)
-    {
-        AuthSupport.setHxIAuthorizationHeaders(exchange, accessTokenProvider, authProperties);
     }
 }

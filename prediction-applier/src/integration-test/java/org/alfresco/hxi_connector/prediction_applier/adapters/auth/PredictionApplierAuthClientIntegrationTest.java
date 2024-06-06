@@ -37,8 +37,8 @@ import static org.apache.hc.core5.http.HttpHeaders.HOST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.then;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ALFRESCO_AUTH_PROVIDER;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 
 import java.util.Collections;
 import java.util.Map;

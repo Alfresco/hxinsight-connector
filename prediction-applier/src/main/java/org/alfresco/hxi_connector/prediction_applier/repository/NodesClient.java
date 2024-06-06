@@ -46,9 +46,7 @@ import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
@@ -75,8 +73,7 @@ public class NodesClient extends RouteBuilder
             MalformedChunkCodingException.class);
 
     private final RepositoryApiProperties repositoryApiProperties;
-    private final AccessTokenProvider accessTokenProvider;
-    private final AuthProperties authProperties;
+    private final AuthService authService;
 
     @Override
     @SuppressWarnings("unchecked")
@@ -106,7 +103,7 @@ public class NodesClient extends RouteBuilder
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
             .setHeader(HTTP_METHOD, constant(PUT))
-            .process(this::setAuthorizationHeader)
+            .process(authService::setAlfrescoAuthorizationHeaders)
             .log(LoggingLevel.INFO, log, "Updating node: Headers: ${headers}, Body: ${body}")
             .toD(URI_PATTERN.formatted(repositoryApiProperties.baseUrl()))
             .choice()
@@ -119,12 +116,6 @@ public class NodesClient extends RouteBuilder
             .endChoice()
             .end();
         // @formatter:on
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void setAuthorizationHeader(Exchange exchange)
-    {
-        AuthSupport.setAlfrescoAuthorizationHeaders(exchange, accessTokenProvider, authProperties);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

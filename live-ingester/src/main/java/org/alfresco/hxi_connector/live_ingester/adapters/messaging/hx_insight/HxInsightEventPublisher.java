@@ -41,9 +41,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthSupport;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -62,8 +60,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
-    private final AuthProperties authProperties;
-    private final AccessTokenProvider accessTokenProvider;
+    private final AuthService authService;
 
     @Override
     public void configure()
@@ -99,7 +96,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
                 .to(LOCAL_ENDPOINT)
                 .withProcessor(exchange -> {
                     exchange.getIn().setBody(event);
-                    setAuthorizationHeaders(exchange);
+                    authService.setHxIAuthorizationHeaders(exchange);
                 })
                 .request();
     }
@@ -125,8 +122,4 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 
-    private void setAuthorizationHeaders(Exchange exchange)
-    {
-        AuthSupport.setHxIAuthorizationHeaders(exchange, accessTokenProvider, authProperties);
-    }
 }

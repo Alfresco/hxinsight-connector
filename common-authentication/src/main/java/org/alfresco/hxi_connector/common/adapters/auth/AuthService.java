@@ -27,25 +27,26 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 
 import java.util.Base64;
 
-import lombok.AccessLevel;
-import lombok.NoArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.springframework.http.HttpHeaders;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
-@NoArgsConstructor(access = AccessLevel.PRIVATE)
 @Slf4j
-public final class AuthSupport
+@RequiredArgsConstructor
+public class AuthService
 {
     static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
     public static final String HXI_AUTH_PROVIDER = "hyland-experience";
     public static final String ALFRESCO_AUTH_PROVIDER = "alfresco";
     static final String BASIC = "Basic ";
     static final String BEARER = "Bearer ";
+    private final AuthProperties authProperties;
+    private final AccessTokenProvider accessTokenProvider;
 
-    public static void setAlfrescoAuthorizationHeaders(Exchange exchange, AccessTokenProvider accessTokenProvider, AuthProperties authProperties)
+    public void setAlfrescoAuthorizationHeaders(Exchange exchange)
     {
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
         String authType = authProvider.getType();
@@ -55,7 +56,7 @@ public final class AuthSupport
         log.debug("Authorization :: {} {} authorization header added", ALFRESCO_AUTH_PROVIDER, authType);
     }
 
-    public static void setHxIAuthorizationHeaders(Exchange exchange, AccessTokenProvider accessTokenProvider, AuthProperties authProperties)
+    public void setHxIAuthorizationHeaders(Exchange exchange)
     {
         final String token = accessTokenProvider.getAccessToken(HXI_AUTH_PROVIDER);
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(HXI_AUTH_PROVIDER);
@@ -66,7 +67,7 @@ public final class AuthSupport
         log.debug("Authorization :: {} authorization header added", HXI_AUTH_PROVIDER);
     }
 
-    private static String getAlfrescoAuthHeaderValue(AccessTokenProvider accessTokenProvider, AuthProperties.AuthProvider authProvider)
+    private String getAlfrescoAuthHeaderValue(AccessTokenProvider accessTokenProvider, AuthProperties.AuthProvider authProvider)
     {
         if (BASIC.trim().equalsIgnoreCase(authProvider.getType()))
         {

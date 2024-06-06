@@ -45,12 +45,6 @@ alfresco:
 hyland-experience:
   insight:
     base-url: http://localhost:8001
-  authentication:
-    refresh-delay-minutes: 55
-  authorization:
-    application-name: acs-insight-connector
-    service-user: insight-acs
-    environment-key:
   storage:
     location:
       endpoint: ${hyland-experience.insight.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
@@ -65,7 +59,10 @@ auth:
       client-secret:
       token-uri: http://localhost:8001/token
       grant-type: urn:hyland:params:oauth:grant-type:api-credentials
-      scope: hxp.integrations
+      scope:
+        - hxp.integrations
+      environment-key: hxi-env-key
+      client-name: acs-insight-connector
     alfresco:
       type: basic
       username:

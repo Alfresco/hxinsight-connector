@@ -33,8 +33,7 @@ import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
@@ -42,7 +41,6 @@ import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClie
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType.AUTOFILL;
 
 import java.util.Date;
-import java.util.Map;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -59,8 +57,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -77,9 +74,7 @@ class NodesClientTest
     private static final Date PREDICTION_DATE_TIME = new Date();
 
     @Mock
-    private AuthProperties mockAuthProperties;
-    @Mock
-    private AccessTokenProvider mockAccessTokenProvider;
+    private AuthService mockAuthService;
 
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
@@ -90,14 +85,8 @@ class NodesClientTest
     void beforeAll()
     {
         initMocks(this);
-        given(mockAccessTokenProvider.getAccessToken(any())).willReturn("access-token");
-        Map<String, AuthProperties.AuthProvider> mockProviderMap = mock();
-        given(mockAuthProperties.getProviders()).willReturn(mockProviderMap);
-        AuthProperties.AuthProvider mockProvider = mock();
-        given(mockProviderMap.get(any(String.class))).willReturn(mockProvider);
-
         camelContext = new DefaultCamelContext();
-        NodesClient nodesClient = new NodesClient(createNodesApiProperties(), mockAccessTokenProvider, mockAuthProperties);
+        NodesClient nodesClient = new NodesClient(createNodesApiProperties(), mockAuthService);
         camelContext.addRoutes(nodesClient);
         camelContext.start();
 
@@ -110,6 +99,7 @@ class NodesClientTest
     void tearDown()
     {
         mockEndpoint.reset();
+        initMocks(this);
     }
 
     @AfterAll
@@ -136,6 +126,7 @@ class NodesClientTest
         // then
         mockEndpoint.assertIsSatisfied();
         assertThat(actualResponse).isEqualTo(predictionResponse);
+        then(mockAuthService).should().setAlfrescoAuthorizationHeaders(any());
     }
 
     @Test
@@ -153,6 +144,7 @@ class NodesClientTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointClientErrorException.class)
                 .hasMessageContaining("received:", 400);
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -170,6 +162,7 @@ class NodesClientTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("received:", 500);
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     private RepositoryApiProperties createNodesApiProperties()

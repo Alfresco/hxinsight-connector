@@ -28,7 +28,10 @@ auth:
       client-secret:
       token-uri: http://localhost:8001/token
       grant-type: urn:hyland:params:oauth:grant-type:api-credentials
-      scope: hxp.integrations
+      scope:
+       - hxp.integrations
+      environment-key: hxi-env-key
+      client-name: acs-insight-connector
     alfresco:
       type: basic
       client-id:

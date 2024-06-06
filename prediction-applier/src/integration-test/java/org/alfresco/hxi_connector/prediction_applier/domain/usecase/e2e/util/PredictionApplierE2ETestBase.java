@@ -30,8 +30,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static lombok.AccessLevel.PROTECTED;
 import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.ALFRESCO_AUTH_PROVIDER;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TOKEN_PATH;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.createAuthResponseBody;
 

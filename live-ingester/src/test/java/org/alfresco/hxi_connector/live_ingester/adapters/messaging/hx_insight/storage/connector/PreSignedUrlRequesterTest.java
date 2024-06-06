@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 import static org.mockito.MockitoAnnotations.initMocks;
 
@@ -40,7 +41,6 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.Map;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
@@ -51,13 +51,13 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.language.ConstantExpression;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -77,9 +77,7 @@ class PreSignedUrlRequesterTest
     private static final String RESPONSE_BODY = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, STORAGE_LOCATION);
 
     @Mock
-    private AuthProperties mockAuthProperties;
-    @Mock
-    private AccessTokenProvider mockAccessTokenProvider;
+    private AuthService mockAuthService;
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
 
@@ -90,18 +88,19 @@ class PreSignedUrlRequesterTest
     void beforeAll()
     {
         initMocks(this);
-        given(mockAccessTokenProvider.getAccessToken(any())).willReturn("access-token");
-        Map<String, AuthProperties.AuthProvider> mockProviderMap = mock();
-        given(mockAuthProperties.getProviders()).willReturn(mockProviderMap);
-        AuthProperties.AuthProvider mockProvider = mock();
-        given(mockProviderMap.get(any(String.class))).willReturn(mockProvider);
         camelContext = new DefaultCamelContext();
         IntegrationProperties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT);
-        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties, mockAuthProperties, mockAccessTokenProvider);
+        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties, mockAuthService);
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
 
         mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
+    }
+
+    @AfterEach
+    void afterEach()
+    {
+        initMocks(this);
     }
 
     @AfterAll
@@ -125,6 +124,7 @@ class PreSignedUrlRequesterTest
         mockEndpoint.assertIsSatisfied();
         PreSignedUrlResponse expected = new PreSignedUrlResponse(new URL(STORAGE_LOCATION), CONTENT_ID);
         assertThat(preSignedUrlResponse).isEqualTo(expected);
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -141,6 +141,7 @@ class PreSignedUrlRequesterTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("received:", 500);
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -157,6 +158,7 @@ class PreSignedUrlRequesterTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointClientErrorException.class)
                 .hasMessageContaining("received:", 400);
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -174,6 +176,7 @@ class PreSignedUrlRequesterTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("Missing", STORAGE_LOCATION_PROPERTY);
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -192,6 +195,7 @@ class PreSignedUrlRequesterTest
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(JsonEOFException.class)
                 .message().isNotEmpty();
+        then(mockAuthService).should().setHxIAuthorizationHeaders(any());
     }
 
     @Test
@@ -210,6 +214,7 @@ class PreSignedUrlRequesterTest
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MismatchedInputException.class)
                 .message().isNotEmpty();
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -229,6 +234,7 @@ class PreSignedUrlRequesterTest
                 .hasMessageContaining("Parsing URL from response property failed!")
                 .rootCause().isInstanceOf(MalformedURLException.class)
                 .message().isNotEmpty();
+        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     private IntegrationProperties integrationPropertiesOf(String endpoint)
