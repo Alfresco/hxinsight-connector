@@ -23,32 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e;
 
-import org.junit.jupiter.api.Test;
+package org.alfresco.hxi_connector.prediction_applier.rest.api.util;
 
-import org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e.util.PredictionApplierE2ETestBase;
+import static lombok.AccessLevel.PRIVATE;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETestBase
+import lombok.NoArgsConstructor;
+
+import org.alfresco.rest.api.Nodes;
+import org.alfresco.service.cmr.repository.NodeRef;
+
+@NoArgsConstructor(access = PRIVATE)
+public class NodesUtils
 {
-    private static final String NODE_ID = "nodeId";
-    private static final String BATCH_ID = "batchId";
-    private static final String PREDICTED_VALUE = "New value";
-
-    @Test
-    public void testPredictionApplication()
+    // To keep compatibility with 7.3.x ACS versions we cannot use validateOrLookupNode(id)
+    public static NodeRef validateOrLookupNode(Nodes nodes, String id)
     {
-        // given
-        containerSupport.prepareHxInsightToReturnPredictionBatch(BATCH_ID, NODE_ID, PREDICTED_VALUE);
-
-        // when
-        triggerPredictionsCollection();
-
-        // then
-        containerSupport.expectBatchStatusWasUpdated(BATCH_ID, "IN_PROGRESS", 1);
-        containerSupport.expectBatchStatusWasUpdated(BATCH_ID, "COMPLETE", 2);
-
-        containerSupport.expectRepositoryRequestReceived(NODE_ID, PREDICTED_VALUE);
+        return nodes.validateOrLookupNode(id, null);
     }
 }
