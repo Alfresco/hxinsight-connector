@@ -144,8 +144,10 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.25.0
+      - name: "Build application"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   push_docker_images:
     name: "Push docker images"
