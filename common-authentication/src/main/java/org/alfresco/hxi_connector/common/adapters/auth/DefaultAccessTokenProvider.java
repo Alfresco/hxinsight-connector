@@ -41,31 +41,41 @@ import org.alfresco.hxi_connector.common.util.EnsureUtils;
 public class DefaultAccessTokenProvider implements AccessTokenProvider
 {
 
+    static final int REFRESH_OFFSET_SECS = 60;
     private final CamelContext camelContext;
     private final AuthenticationClient authenticationClient;
 
     private final Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> accessTokens = new HashMap<>();
 
     @Override
-    public String getAccessToken(String clientRegistrationId)
+    public String getAccessToken(String providerId)
     {
         waitFor(camelContext::isStarted);
-        Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry = accessTokens.get(clientRegistrationId);
-        if (authenticationResultEntry == null || authenticationResultEntry.getValue().isBefore(OffsetDateTime.now()))
+        Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry = accessTokens.get(providerId);
+        synchronized (this)
         {
-            refreshAuthenticationResult(clientRegistrationId);
-            authenticationResultEntry = accessTokens.get(clientRegistrationId);
+            if (shouldRefreshToken(authenticationResultEntry))
+            {
+                refreshAuthenticationResult(providerId);
+                authenticationResultEntry = accessTokens.get(providerId);
+            }
         }
         EnsureUtils.ensureNonNull(authenticationResultEntry, "Authentication result is null");
         AuthenticationResult authenticationResult = authenticationResultEntry.getKey();
         return authenticationResult.accessToken();
     }
 
-    private void refreshAuthenticationResult(String clientRegistrationId)
+    private void refreshAuthenticationResult(String providerId)
     {
-        AuthenticationResult authenticationResult = authenticationClient.authenticate(clientRegistrationId);
-        accessTokens.put(clientRegistrationId, Map.entry(authenticationResult,
+        AuthenticationResult authenticationResult = authenticationClient.authenticate(providerId);
+        accessTokens.put(providerId, Map.entry(authenticationResult,
                 OffsetDateTime.now().plus(authenticationResult.expiresIn(), authenticationResult.temporalUnit())));
+    }
+
+    private static boolean shouldRefreshToken(Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry)
+    {
+        return authenticationResultEntry == null || authenticationResultEntry.getValue().isBefore(OffsetDateTime.now().minusSeconds(
+                REFRESH_OFFSET_SECS));
     }
 
     private static void waitFor(Supplier<Boolean> supplier)

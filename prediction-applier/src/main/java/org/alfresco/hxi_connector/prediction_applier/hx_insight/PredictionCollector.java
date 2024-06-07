@@ -64,7 +64,6 @@ public class PredictionCollector extends RouteBuilder
     private static final String BATCHES_URL_PATTERN = "%s/v1/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
     private static final String PREDICTIONS_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
     private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=PUT";
-    private static final String ENVIRONMENT_HEADER = "hxai-environment";
     private static final String SET_BATCH_STATUS_BODY_TEMPLATE = "{\"status\": \"%s\", \"currentPage\": ${headers.%s}}";
     private static final String IN_PROGRESS_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("IN_PROGRESS", PREDICTIONS_PAGE_NO_HEADER);
     private static final String COMPLETE_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("COMPLETE", PREDICTIONS_PAGE_NO_HEADER);
@@ -102,9 +101,9 @@ public class PredictionCollector extends RouteBuilder
             .onCompletion()
                 .process(setProcessingPending(false))
             .end()
-            .process(authService::setHxIAuthorizationHeaders)
             .setHeader(BATCHES_PAGE_NO_HEADER, constant(1))
             .loopDoWhile(statusCodeNot204())
+                .process(authService::setHxIAuthorizationHeaders)
                 .toD(batchesUrl)
                 .choice().when(statusCodeNot204())
                     .log(DEBUG, log, "Processing prediction batches page ${headers.%s} started".formatted(BATCHES_PAGE_NO_HEADER))
@@ -124,6 +123,7 @@ public class PredictionCollector extends RouteBuilder
             .setHeader(BATCH_ID_HEADER, simple("${body.id}"))
             .setHeader(PREDICTIONS_PAGE_NO_HEADER, constant(1))
             .loopDoWhile(statusCodeNot204())
+                .process(authService::setHxIAuthorizationHeaders)
                 .toD(predictionsUrl)
                 .choice().when(statusCodeNot204())
                     .log(TRACE, log, "Processing page ${headers.%s} of predictions in batch ${headers.%s}, ${body}, ${header.CamelHttpResponseCode}".formatted(PREDICTIONS_PAGE_NO_HEADER, BATCH_ID_HEADER))

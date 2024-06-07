@@ -27,5 +27,5 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 
 public interface AccessTokenProvider
 {
-    String getAccessToken(String clientRegistrationId);
+    String getAccessToken(String providerId);
 }
