@@ -1,11 +1,3 @@
-spring:
-  security:
-    oauth2:
-      client:
-        provider:
-          hyland-experience-auth:
-            token-uri:
-
 alfresco:
   transform:
     shared-file-store:

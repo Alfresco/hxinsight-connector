@@ -35,8 +35,6 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authentication;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.Authorization;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
@@ -66,8 +64,6 @@ public class IntegrationProperties
 
     @ConfigurationProperties("hyland-experience")
     public record HylandExperience(
-            @NotNull @NestedConfigurationProperty Authentication authentication,
-            @NotNull @NestedConfigurationProperty Authorization authorization,
             @NotNull @NestedConfigurationProperty Storage storage,
             @NotNull @NestedConfigurationProperty Ingester ingester)
     {}

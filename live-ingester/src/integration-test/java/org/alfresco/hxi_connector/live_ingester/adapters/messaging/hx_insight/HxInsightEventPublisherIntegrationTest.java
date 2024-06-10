@@ -39,33 +39,48 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
+
+import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
+import org.apache.camel.CamelContext;
+import org.apache.camel.impl.DefaultCamelContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.security.test.context.support.WithAnonymousUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.adapters.auth.util.WithMockOAuth2User;
-import org.alfresco.hxi_connector.common.adapters.auth.util.WithoutAnyUser;
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
@@ -74,14 +89,15 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
-        HxInsightEventPublisher.class},
+        HxInsightEventPublisher.class,
+        HxInsightEventPublisherIntegrationTest.HxInsightEventPublisherTestConfig.class,
+        LiveIngesterAuthClient.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableMethodSecurity
 @EnableRetry
 @ActiveProfiles("test")
 @Testcontainers
-@WithMockOAuth2User
 class HxInsightEventPublisherIntegrationTest
 {
     private static final String INGEST_PATH = "/ingestion-events";
@@ -150,35 +166,48 @@ class HxInsightEventPublisherIntegrationTest
         assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
     }
 
-    @Test
-    @WithoutAnyUser
-    void testPublishMessage_withoutAuth_dontRetry()
-    {
-        // when
-        Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
-
-        // then
-        then(ingestionEngineEventPublisher).shouldHaveNoInteractions();
-        assertThat(thrown).isInstanceOf(AuthenticationCredentialsNotFoundException.class);
-    }
-
-    @Test
-    @WithAnonymousUser
-    void testPublishMessage_authError_dontRetry()
-    {
-        // when
-        Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
-
-        // then
-        then(ingestionEngineEventPublisher).shouldHaveNoInteractions();
-        assertThat(thrown).isInstanceOf(AccessDeniedException.class);
-    }
-
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
         registry.add("hyland-experience.insight.base-url", wireMockServer::getBaseUrl);
         registry.add("hyland-experience.ingester.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.ingester.retry.initialDelay", () -> RETRY_DELAY_MS);
+    }
+
+    @TestConfiguration
+    public static class HxInsightEventPublisherTestConfig
+    {
+
+        @Bean
+        public AuthProperties authorizationProperties()
+        {
+            AuthProperties authProperties = new AuthProperties();
+            AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider(wireMockServer.getBaseUrl());
+            authProperties.setProviders(Map.of(HXI_AUTH_PROVIDER, hXauthProvider));
+            authProperties.setRetry(
+                    new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
+                            Collections.emptySet()));
+            return authProperties;
+        }
+
+        @Bean
+        public AccessTokenProvider defaultAccessTokenProvider()
+        {
+            CamelContext camelContext = new DefaultCamelContext();
+            camelContext.start();
+            AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(camelContext, authorizationProperties());
+            DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(camelContext, dummyAuthClient);
+            Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
+            AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
+            tokens.put(HXI_AUTH_PROVIDER, Map.entry(dummyAuthResult, OffsetDateTime.now().plusSeconds(3600)));
+            ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
+            return dummyAccessTokenProvider;
+        }
+
+        @Bean
+        public AuthService authService()
+        {
+            return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
+        }
     }
 }

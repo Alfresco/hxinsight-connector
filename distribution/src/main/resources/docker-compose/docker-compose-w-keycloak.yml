@@ -1,3 +1,19 @@
+# In order this docker-compose file to work on your local machine, you need to have HOST_IP environment variable set to the IP address of your local machine.
+# It has been added to .env file in this directory but by default it is empty.
+# In the live-ingester service, you need to set the following environment variables:
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE-AUTH_CLIENT-ID
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI
+# In the prediction-applier service, you need to set the following environment variables:
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE-AUTH_CLIENT-ID
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI
+#      AUTH_PROVIDERS_ALFRESCO_USERNAME
+#      AUTH_PROVIDERS_ALFRESCO_PASSWORD
+
+
 version: "3.8"
 
 services:
@@ -45,7 +61,13 @@ services:
         -Dtika.url=http://transform-core-aio:8090/
         -Dtransform.misc.url=http://transform-core-aio:8090/
         -Dcsrf.filter.enabled=false
-        -Dalfresco.restApi.basicAuthScheme=true
+        -Dauthentication.chain=identity-service1:identity-service,alfrescoNtlm1:alfrescoNtlm
+        -Didentity-service.authentication.validation.failure.silent=false
+        -Didentity-service.enable-basic-auth=true
+        -Didentity-service.authentication.enabled=true
+        -Didentity-service.auth-server-url=http://${HOST_IP}:8999/auth
+        -Didentity-service.realm=alfresco
+        -Didentity-service.resource=alfresco
         -Xms1500m -Xmx1500m
         "
     ports:
@@ -139,7 +161,7 @@ services:
       REPO_HOST: "alfresco"
       REPO_PORT: "8080"
       JAVA_OPTS: "
-        -Dalfresco.host=localhost
+        -Dalfresco.host=${HOST_IP}
         -Dalfresco.port=8080
         -Dalfresco.context=alfresco
         -Dalfresco.protocol=http
@@ -153,10 +175,19 @@ services:
         limits:
           memory: 128m
     environment:
-      APP_CONFIG_PROVIDER: "ECM"
-      APP_CONFIG_AUTH_TYPE: "BASIC"
       BASE_PATH: ./
-      APP_BASE_SHARE_URL: "http://localhost:8080/workspace/#/preview/s"
+      APP_CONFIG_PROVIDER: "ECM"
+      APP_BASE_SHARE_URL: "http://${HOST_IP}:8080/workspace/#//preview/s"
+      API_URL: "http://${HOST_IP}:8080"
+      APP_CONFIG_AUTH_TYPE: "OAUTH"
+      APP_CONFIG_OAUTH2_HOST: "http://${HOST_IP}:8999/auth/realms/alfresco"
+      APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
+      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
+      APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://${HOST_IP}:8080/workspace/assets/silent-refresh.html"
+      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
 
   control-center:
     image: quay.io/alfresco/alfresco-control-center:${CONTROL_CENTER_TAG}
@@ -165,9 +196,54 @@ services:
         limits:
           memory: 128m
     environment:
-      APP_CONFIG_PROVIDER: "ECM"
-      APP_CONFIG_AUTH_TYPE: "BASIC"
       BASE_PATH: ./
+      APP_CONFIG_PROVIDER: "ECM"
+      APP_CONFIG_AUTH_TYPE: "OAUTH"
+      APP_CONFIG_OAUTH2_HOST: "http://${HOST_IP}:8999/auth/realms/alfresco"
+      APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
+      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
+      APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://${HOST_IP}:8080/workspace/assets/silent-refresh.html"
+      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
+
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0.7
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_LOG_LEVEL: info
+      KC_METRICS_ENABLED: true
+      KC_HEALTH_ENABLED: true
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://keycloakdb:5433/keycloak
+      KC_DB_USER: keycloak
+      KC_DB_PASSWORD: keycloak
+    command: ["start-dev", "--import-realm", "--http-relative-path=/auth", "--hostname=localhost", "--http-enabled=true"]
+    volumes:
+      - ./realms:/opt/keycloak/data/import
+    depends_on:
+      - keycloakdb
+    ports:
+      - "8999:8080"
+
+  keycloakdb:
+    image: postgres:${POSTGRES_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    environment:
+      - POSTGRES_PASSWORD=keycloak
+      - POSTGRES_USER=keycloak
+      - POSTGRES_DB=keycloak
+      - PGPORT=5433
+    command: postgres -c max_connections=300 -c log_min_messages=LOG
+    ports:
+      - 5433:5433
+
 
   # HTTP proxy to provide HTTP Default port access to services
   proxy:
@@ -208,8 +284,6 @@ services:
         hard: 65536
     cap_add:
       - IPC_LOCK
-    #    volumes:
-    #      - elasticsearch-data:/usr/share/elasticsearch/data
     ports:
       - "9200:9200"
       - "9300:9300"
@@ -320,9 +394,12 @@ services:
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-pass
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://localhost:8002/token
-      AUTH_PROVIDERS_ALFRESCO_CLIENT-ID: dummy-client-id
-      AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
-      AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
+      AUTH_PROVIDERS_ALFRESCO_CLIENT-ID: alfresco
+      AUTH_PROVIDERS_ALFRESCO_TYPE: oauth2
+      AUTH_PROVIDERS_ALFRESCO_GRANT-TYPE: password
+      AUTH_PROVIDERS_ALFRESCO_TOKEN-URI: http://${HOST_IP}:8999/auth/realms/alfresco/protocol/openid-connect/token
+      AUTH_PROVIDERS_ALFRESCO_USERNAME:
+      AUTH_PROVIDERS_ALFRESCO_PASSWORD:
     ports:
       - "5009:5009"
 

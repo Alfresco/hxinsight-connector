@@ -23,34 +23,34 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.auth;
+package org.alfresco.hxi_connector.prediction_applier.auth;
 
 import org.apache.camel.CamelContext;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
-import org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
-public class LiveIngesterHxAuthClient extends HxAuthenticationClient
+@Component
+public class PredictionApplierAuthClient extends DefaultAuthenticationClient
 {
 
-    public LiveIngesterHxAuthClient(CamelContext camelContext, IntegrationProperties integrationProperties, OAuth2ClientProperties oAuth2ClientProperties)
+    public PredictionApplierAuthClient(CamelContext camelContext, AuthProperties authProperties)
     {
-        super(camelContext, integrationProperties.hylandExperience().authentication().retry(), oAuth2ClientProperties);
+        super(camelContext, authProperties);
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.authentication.retry.attempts}",
-            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.authentication.retry.initialDelay}",
-                    multiplierExpression = "#{@integrationProperties.hylandExperience.authentication.retry.delayMultiplier}"))
+            maxAttemptsExpression = "#{@authorizationProperties.retry.attempts}",
+            backoff = @Backoff(delayExpression = "#{@authorizationProperties.retry.initialDelay}",
+                    multiplierExpression = "#{@authorizationProperties.retry.delayMultiplier}"))
     @Override
-    public AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration)
+    public AuthenticationResult authenticate(String providerId)
     {
-        return super.authenticate(tokenUri, clientRegistration);
+        return super.authenticate(providerId);
     }
 }

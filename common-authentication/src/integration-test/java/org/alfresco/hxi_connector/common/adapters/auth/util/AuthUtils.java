@@ -29,14 +29,14 @@ import static java.net.URLEncoder.encode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.time.temporal.ChronoUnit;
+import java.util.Set;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.test.context.DynamicPropertyRegistry;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class AuthUtils
@@ -75,18 +75,6 @@ public class AuthUtils
                 encode(String.join(",", SCOPE), UTF_8));
     }
 
-    public static ClientRegistration creatClientRegistration(String tokenUri)
-    {
-        return ClientRegistration.withRegistrationId("hx-auth-mock")
-                .tokenUri(tokenUri)
-                .clientId(CLIENT_ID)
-                .clientSecret(CLIENT_SECRET)
-                .clientName(CLIENT_NAME)
-                .authorizationGrantType(new AuthorizationGrantType(AUTH_GRAND_TYPE))
-                .scope(SCOPE)
-                .build();
-    }
-
     public static AuthenticationResult createExpectedAuthResult()
     {
         return new AuthenticationResult(ACCESS_TOKEN, EXPIRES_IN, ChronoUnit.SECONDS, TOKEN_TYPE, SCOPE, 200);
@@ -97,13 +85,27 @@ public class AuthUtils
         return TOKEN_TYPE + " " + ACCESS_TOKEN;
     }
 
-    public static void overrideAuthProperties(DynamicPropertyRegistry registry, String mockServerBaseUrl, String clientRegistrationId)
+    public static void overrideAuthProperties(DynamicPropertyRegistry registry, String mockServerBaseUrl, String providerId)
     {
-        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".client-id", () -> CLIENT_ID);
-        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".client-secret", () -> CLIENT_SECRET);
-        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".client-name", () -> CLIENT_NAME);
-        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".authorization-grant-type", () -> AUTH_GRAND_TYPE);
-        registry.add("spring.security.oauth2.client.registration." + clientRegistrationId + ".scope", () -> SCOPE);
-        registry.add("spring.security.oauth2.client.provider." + clientRegistrationId + ".token-uri", () -> mockServerBaseUrl + TOKEN_PATH);
+        registry.add("auth.providers." + providerId + ".client-id", () -> CLIENT_ID);
+        registry.add("auth.providers." + providerId + ".client-secret", () -> CLIENT_SECRET);
+        registry.add("auth.providers." + providerId + ".client-name", () -> CLIENT_NAME);
+        registry.add("auth.providers." + providerId + ".grant-type", () -> AUTH_GRAND_TYPE);
+        registry.add("auth.providers." + providerId + ".scope", () -> SCOPE);
+        registry.add("auth.providers." + providerId + ".token-uri", () -> mockServerBaseUrl + TOKEN_PATH);
+
+    }
+
+    public static AuthProperties.AuthProvider createAuthProvider(String tokenUri)
+    {
+        AuthProperties.AuthProvider authProvider = new AuthProperties.AuthProvider();
+        authProvider.setClientId(CLIENT_ID);
+        authProvider.setType("dummy-type");
+        authProvider.setClientSecret(CLIENT_SECRET);
+        authProvider.setTokenUri(tokenUri);
+        authProvider.setGrantType(AUTH_GRAND_TYPE);
+        authProvider.setScope(Set.of(SCOPE));
+        authProvider.setEnvironmentKey("test-environment-key");
+        return authProvider;
     }
 }
