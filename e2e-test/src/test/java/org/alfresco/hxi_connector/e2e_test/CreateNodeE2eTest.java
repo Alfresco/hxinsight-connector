@@ -63,6 +63,7 @@ public class CreateNodeE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int INITIAL_DELAY_MS = 200;
+    private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
     private static final Network network = Network.newNetwork();
@@ -106,7 +107,7 @@ public class CreateNodeE2eTest
         assertThat(awsS3Client.listS3Content()).isEmpty();
 
         // when
-        Node createdNode = repositoryNodesClient.createNodeWithContent("-my-", "dummy.txt", fileContent, "text/plaint");
+        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plaint");
 
         // then
         RetryUtils.retryWithBackoff(() -> {
