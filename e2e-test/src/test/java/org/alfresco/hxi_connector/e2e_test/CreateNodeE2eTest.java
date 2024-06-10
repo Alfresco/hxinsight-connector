@@ -103,7 +103,8 @@ public class CreateNodeE2eTest
     void testCreateFile()
     {
         // given
-        @Cleanup InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
+        @Cleanup
+        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         assertThat(awsS3Client.listS3Content()).isEmpty();
 
         // when
@@ -114,39 +115,39 @@ public class CreateNodeE2eTest
             assertThat(awsS3Client.listS3Content()).hasSize(1);
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id())));
+                    .withRequestBody(containing(createdNode.id())));
         }, INITIAL_DELAY_MS);
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         return DockerContainers.createExtendedRepositoryContainerWithin(network, true)
-            .withJavaOpts("""
-                -Ddb.driver=org.postgresql.Driver
-                -Ddb.username=%s
-                -Ddb.password=%s
-                -Ddb.url=jdbc:postgresql://%s:5432/%s
-                -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
-                -Ddeployment.method=DOCKER_COMPOSE
-                -Dtransform.service.enabled=true
-                -Dtransform.service.url=http://transform-router:8095
-                -Dsfs.url=http://shared-file-store:8099/
-                -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
-                -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
-                -Djodconverter.url=http://transform-core-aio:8090/
-                -Dimg.url=http://transform-core-aio:8090/
-                -Dtika.url=http://transform-core-aio:8090/
-                -Dtransform.misc.url=http://transform-core-aio:8090/
-                -Dcsrf.filter.enabled=false
-                -Dalfresco.restApi.basicAuthScheme=true
-                -Xms1500m -Xmx1500m
-                """.formatted(
-                    postgres.getUsername(),
-                    postgres.getPassword(),
-                    postgres.getNetworkAliases().stream().findFirst().get(),
-                    postgres.getDatabaseName(),
-                    activemq.getNetworkAliases().stream().findFirst().get())
-                .replace("\n", " "));
+                .withJavaOpts("""
+                        -Ddb.driver=org.postgresql.Driver
+                        -Ddb.username=%s
+                        -Ddb.password=%s
+                        -Ddb.url=jdbc:postgresql://%s:5432/%s
+                        -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
+                        -Ddeployment.method=DOCKER_COMPOSE
+                        -Dtransform.service.enabled=true
+                        -Dtransform.service.url=http://transform-router:8095
+                        -Dsfs.url=http://shared-file-store:8099/
+                        -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
+                        -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
+                        -Djodconverter.url=http://transform-core-aio:8090/
+                        -Dimg.url=http://transform-core-aio:8090/
+                        -Dtika.url=http://transform-core-aio:8090/
+                        -Dtransform.misc.url=http://transform-core-aio:8090/
+                        -Dcsrf.filter.enabled=false
+                        -Dalfresco.restApi.basicAuthScheme=true
+                        -Xms1500m -Xmx1500m
+                        """.formatted(
+                        postgres.getUsername(),
+                        postgres.getPassword(),
+                        postgres.getNetworkAliases().stream().findFirst().get(),
+                        postgres.getDatabaseName(),
+                        activemq.getNetworkAliases().stream().findFirst().get())
+                        .replace("\n", " "));
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
