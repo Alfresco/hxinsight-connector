@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.setAuthorizationToken;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.util.Set;
@@ -40,9 +39,9 @@ import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -61,6 +60,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
+    private final AuthService authService;
 
     @Override
     public void configure()
@@ -85,7 +85,6 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         // @formatter:on
     }
 
-    @PreAuthorize("hasAuthority('OAUTH2_USER')")
     @Retryable(retryFor = EndpointServerErrorException.class,
             maxAttemptsExpression = "#{@integrationProperties.hylandExperience.ingester.retry.attempts}",
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.ingester.retry.initialDelay}",
@@ -97,7 +96,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
                 .to(LOCAL_ENDPOINT)
                 .withProcessor(exchange -> {
                     exchange.getIn().setBody(event);
-                    setAuthorizationToken(exchange);
+                    authService.setHxIAuthorizationHeaders(exchange);
                 })
                 .request();
     }
@@ -122,4 +121,5 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
 
         ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
+
 }
