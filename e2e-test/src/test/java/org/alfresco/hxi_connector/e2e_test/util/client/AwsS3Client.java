@@ -27,17 +27,36 @@ package org.alfresco.hxi_connector.e2e_test.util.client;
 
 import static io.restassured.RestAssured.given;
 
-import io.restassured.response.Response;
+import java.util.List;
 
-public class S3BucketClient
+import com.fasterxml.jackson.dataformat.xml.XmlMapper;
+import lombok.SneakyThrows;
+
+import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Bucket;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
+
+public class AwsS3Client
 {
-    public Response getS3Response(int port)
+    private final XmlMapper xmlMapper;
+    private final String baseUrl;
+
+    public AwsS3Client(String host, Integer port)
     {
-        return given()
+        this.xmlMapper = new XmlMapper();
+        this.baseUrl = "http://%s:%s".formatted(host, port);
+    }
+
+    @SneakyThrows
+    public List<S3Object> listS3Content()
+    {
+        S3Bucket s3Bucket = xmlMapper.readValue(given()
                 .contentType("application/xml")
                 .when()
-                .get("http://localhost:" + port + "/test-hxinsight-bucket/")
+                .get("%s/test-hxinsight-bucket/".formatted(baseUrl))
                 .then()
-                .extract().response();
+                .extract().response()
+                .asString(), S3Bucket.class);
+
+        return s3Bucket.content();
     }
 }

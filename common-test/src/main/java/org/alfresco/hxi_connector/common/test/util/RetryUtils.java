@@ -49,6 +49,14 @@ public class RetryUtils
         });
     }
 
+    public static void retryWithBackoff(Runnable runnable, int delayMs)
+    {
+        retryWithBackoff(() -> {
+            runnable.run();
+            return null;
+        }, delayMs);
+    }
+
     @SneakyThrows
     public static <T> T retryWithBackoff(Supplier<T> supplier)
     {

@@ -13,15 +13,26 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.NodeEntry;
 @RequiredArgsConstructor
 public class RepositoryNodesClient
 {
-    private static final String URI_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/%s";
+    private static final String URL_PATTERN = "%s/alfresco/api/-default-/public/alfresco/versions/1/nodes/%s";
 
-    private final String baseUri;
+    private final String baseUrl;
     private final String username;
     private final String password;
 
-    public Node createFileNode(String parentNodeId, String filename, InputStream fileContent, String mimeType)
+    public Node createNodeWithContent(String parentId, File content)
     {
-        String uri = URI_PATTERN.formatted(baseUri, parentNodeId) + "/children";
+        String uri = URL_PATTERN.formatted(baseUrl, parentId) + "/children";
+        return given().auth().preemptive().basic(username, password)
+            .contentType("multipart/form-data")
+            .multiPart("filedata", content)
+            .when().post(uri)
+            .then().extract().response()
+            .as(NodeEntry.class).node();
+    }
+
+    public Node createNodeWithContent(String parentNodeId, String filename, InputStream fileContent, String mimeType)
+    {
+        String uri = URL_PATTERN.formatted(baseUrl, parentNodeId) + "/children";
         return given().auth().preemptive().basic(username, password)
             .contentType("multipart/form-data")
             .multiPart("filedata", filename, fileContent, mimeType)
@@ -32,21 +43,10 @@ public class RepositoryNodesClient
 
     public Node getNode(String nodeId)
     {
-        String uri = URI_PATTERN.formatted(baseUri, nodeId);
+        String uri = URL_PATTERN.formatted(baseUrl, nodeId);
         return given().auth().preemptive().basic(username, password)
             .contentType("application/json")
             .when().get(uri)
-            .then().extract().response()
-            .as(NodeEntry.class).node();
-    }
-
-    public Node uploadExistingFile(String parentId, String pathName)
-    {
-        String uri = URI_PATTERN.formatted(baseUri, parentId) + "/children";
-        return given().auth().preemptive().basic(username, password)
-            .contentType("multipart/form-data")
-            .multiPart("filedata", new File(pathName))
-            .when().post(uri)
             .then().extract().response()
             .as(NodeEntry.class).node();
     }
