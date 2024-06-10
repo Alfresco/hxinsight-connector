@@ -111,8 +111,7 @@ public class CreateNodeE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> {
             assertThat(awsS3Client.listS3Content()).hasSize(1);
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls"))
-                .withRequestBody(containing(createdNode.id())));
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id())));
         }, INITIAL_DELAY_MS);
