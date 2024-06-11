@@ -167,7 +167,7 @@ public final class EventUtils
 
     public static boolean wasPredictionConfirmed(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        Map<String, Serializable> oldProperties = Optional.ofNullable(event.getData().getResourceBefore())
+        Map<String, Serializable> oldProperties = ofNullable(event.getData().getResourceBefore())
                 .map(NodeResource::getProperties)
                 .orElse(null);
         Map<String, Serializable> newProperties = event.getData().getResource().getProperties();
