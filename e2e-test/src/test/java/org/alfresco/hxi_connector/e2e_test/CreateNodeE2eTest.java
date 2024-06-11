@@ -59,6 +59,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Slf4j
 @Testcontainers
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class CreateNodeE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
@@ -105,14 +106,14 @@ public class CreateNodeE2eTest
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        assertThat(awsS3Client.listS3Content()).isEmpty();
+        assertThat(awsS3Client.listS3Content(BUCKET_NAME)).isEmpty();
 
         // when
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plaint");
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            assertThat(awsS3Client.listS3Content()).hasSize(1);
+            assertThat(awsS3Client.listS3Content(BUCKET_NAME)).hasSize(1);
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id())));
@@ -121,33 +122,35 @@ public class CreateNodeE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
+        // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network, true)
-                .withJavaOpts("""
-                        -Ddb.driver=org.postgresql.Driver
-                        -Ddb.username=%s
-                        -Ddb.password=%s
-                        -Ddb.url=jdbc:postgresql://%s:5432/%s
-                        -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
-                        -Ddeployment.method=DOCKER_COMPOSE
-                        -Dtransform.service.enabled=true
-                        -Dtransform.service.url=http://transform-router:8095
-                        -Dsfs.url=http://shared-file-store:8099/
-                        -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
-                        -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
-                        -Djodconverter.url=http://transform-core-aio:8090/
-                        -Dimg.url=http://transform-core-aio:8090/
-                        -Dtika.url=http://transform-core-aio:8090/
-                        -Dtransform.misc.url=http://transform-core-aio:8090/
-                        -Dcsrf.filter.enabled=false
-                        -Dalfresco.restApi.basicAuthScheme=true
-                        -Xms1500m -Xmx1500m
-                        """.formatted(
-                        postgres.getUsername(),
-                        postgres.getPassword(),
-                        postgres.getNetworkAliases().stream().findFirst().get(),
-                        postgres.getDatabaseName(),
-                        activemq.getNetworkAliases().stream().findFirst().get())
-                        .replace("\n", " "));
+            .withJavaOpts("""
+                -Ddb.driver=org.postgresql.Driver
+                -Ddb.username=%s
+                -Ddb.password=%s
+                -Ddb.url=jdbc:postgresql://%s:5432/%s
+                -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
+                -Ddeployment.method=DOCKER_COMPOSE
+                -Dtransform.service.enabled=true
+                -Dtransform.service.url=http://transform-router:8095
+                -Dsfs.url=http://shared-file-store:8099/
+                -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
+                -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
+                -Djodconverter.url=http://transform-core-aio:8090/
+                -Dimg.url=http://transform-core-aio:8090/
+                -Dtika.url=http://transform-core-aio:8090/
+                -Dtransform.misc.url=http://transform-core-aio:8090/
+                -Dcsrf.filter.enabled=false
+                -Dalfresco.restApi.basicAuthScheme=true
+                -Xms1500m -Xmx1500m
+                """.formatted(
+                    postgres.getUsername(),
+                    postgres.getPassword(),
+                    postgres.getNetworkAliases().stream().findFirst().get(),
+                    postgres.getDatabaseName(),
+                    activemq.getNetworkAliases().stream().findFirst().get())
+                .replace("\n", " "));
+        // @formatter:on
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
@@ -155,8 +158,8 @@ public class CreateNodeE2eTest
         return DockerContainers.createLiveIngesterContainerWithin(network)
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
                         "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_PROVIDER_HYLAND-EXPERIENCE-AUTH_TOKEN-URI",
+                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("SPRING_SECURITY_OAUTH2_CLIENT_REGISTRATION_HYLAND-EXPERIENCE-AUTH_CLIENT-ID", "dummy-client-id");
+                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-id");
     }
 }

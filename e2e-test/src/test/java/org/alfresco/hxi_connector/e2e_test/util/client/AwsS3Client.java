@@ -37,22 +37,21 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
 public class AwsS3Client
 {
-    private final XmlMapper xmlMapper;
+    private final XmlMapper xmlMapper = new XmlMapper();
     private final String baseUrl;
 
     public AwsS3Client(String host, Integer port)
     {
-        this.xmlMapper = new XmlMapper();
         this.baseUrl = "http://%s:%s".formatted(host, port);
     }
 
     @SneakyThrows
-    public List<S3Object> listS3Content()
+    public List<S3Object> listS3Content(String bucketName)
     {
         S3Bucket s3Bucket = xmlMapper.readValue(given()
                 .contentType("application/xml")
                 .when()
-                .get("%s/test-hxinsight-bucket/".formatted(baseUrl))
+                .get("%s/%s/".formatted(baseUrl, bucketName))
                 .then()
                 .extract().response()
                 .asString(), S3Bucket.class);
