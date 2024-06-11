@@ -30,6 +30,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public record S3Object(
-        @JsonProperty("Key") String id,
+        @JsonProperty("Key") String key,
         @JsonProperty("Size") Long size)
 {}

@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.e2e_test.util.client;
 
 import static io.restassured.RestAssured.given;
 
+import java.io.InputStream;
 import java.util.List;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -39,14 +40,16 @@ public class AwsS3Client
 {
     private final XmlMapper xmlMapper = new XmlMapper();
     private final String baseUrl;
+    private final String bucketName;
 
-    public AwsS3Client(String host, Integer port)
+    public AwsS3Client(String host, Integer port, String bucketName)
     {
         this.baseUrl = "http://%s:%s".formatted(host, port);
+        this.bucketName = bucketName;
     }
 
     @SneakyThrows
-    public List<S3Object> listS3Content(String bucketName)
+    public List<S3Object> listS3Content()
     {
         S3Bucket s3Bucket = xmlMapper.readValue(given()
                 .contentType("application/xml")
@@ -57,5 +60,15 @@ public class AwsS3Client
                 .asString(), S3Bucket.class);
 
         return s3Bucket.content();
+    }
+
+    public InputStream getS3ObjectContent(String objectKey)
+    {
+        return given()
+                .when()
+                .get("%s/%s/%s".formatted(baseUrl, bucketName, objectKey))
+                .then()
+                .extract().response()
+                .asInputStream();
     }
 }

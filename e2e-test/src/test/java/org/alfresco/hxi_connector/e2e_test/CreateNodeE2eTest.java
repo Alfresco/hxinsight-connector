@@ -33,12 +33,18 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.Loader;
+import org.apache.pdfbox.io.RandomAccessReadBuffer;
+import org.apache.pdfbox.pdmodel.PDDocument;
+import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -56,6 +62,7 @@ import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
 @Slf4j
 @Testcontainers
@@ -89,7 +96,7 @@ public class CreateNodeE2eTest
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer();
 
     RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
-    AwsS3Client awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort());
+    AwsS3Client awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
 
     @BeforeAll
     @SneakyThrows
@@ -101,23 +108,39 @@ public class CreateNodeE2eTest
 
     @Test
     @SneakyThrows
-    void testCreateFile()
+    void testCreateFile() throws IOException
     {
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        assertThat(awsS3Client.listS3Content(BUCKET_NAME)).isEmpty();
+        assertThat(awsS3Client.listS3Content()).isEmpty();
 
         // when
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plaint");
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            assertThat(awsS3Client.listS3Content(BUCKET_NAME)).hasSize(1);
+            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
+            assertThat(actualBucketContent).hasSize(1);
+
+            String actualPdfContent = getPdfContent(actualBucketContent.get(0).key());
+            assertThat(actualPdfContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
+
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id())));
         }, INITIAL_DELAY_MS);
+    }
+
+    @SneakyThrows
+    private String getPdfContent(String objectKey)
+    {
+        @Cleanup
+        InputStream pdfContent = awsS3Client.getS3ObjectContent(objectKey);
+        @Cleanup
+        PDDocument document = Loader.loadPDF(new RandomAccessReadBuffer(pdfContent));
+        PDFTextStripper pdfStripper = new PDFTextStripper();
+        return pdfStripper.getText(document);
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -160,6 +183,6 @@ public class CreateNodeE2eTest
                         "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-id");
+                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key");
     }
 }
