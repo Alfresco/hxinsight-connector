@@ -30,7 +30,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static lombok.AccessLevel.PROTECTED;
 import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthSupport.CLIENT_REGISTRATION_ID;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TOKEN_PATH;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.createAuthResponseBody;
 
@@ -57,7 +58,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 
-@SpringBootTest(properties = "logging.level.org.alfresco=TRACE")
+@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
 @ActiveProfiles("test")
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
@@ -87,18 +88,11 @@ public class PredictionApplierE2ETestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), CLIENT_REGISTRATION_ID);
+        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), HXI_AUTH_PROVIDER);
+        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), ALFRESCO_AUTH_PROVIDER);
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
-
-        registry.add("spring.security.oauth2.client.provider.hyland-experience-auth.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
-        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-id", () -> "dummy-client-id");
-        registry.add("spring.security.oauth2.client.registration.hyland-experience-auth.client-secret", () -> "dummy-client-secret");
-
-        registry.add("spring.security.oauth2.client.provider.alfresco.token-uri", () -> oAuthServer.getBaseUrl() + TOKEN_PATH);
-        registry.add("spring.security.oauth2.client.registration.alfresco.client-id", () -> "dummy-client-id");
-        registry.add("spring.security.oauth2.client.registration.alfresco.client-secret", () -> "dummy-client-secret");
 
         registry.add("hyland-experience.insight.predictions.source-base-url", hxInsightServer::getBaseUrl);
 

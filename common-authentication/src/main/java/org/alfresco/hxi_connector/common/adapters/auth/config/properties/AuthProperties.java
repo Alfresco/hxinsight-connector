@@ -23,14 +23,37 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.adapters.auth.util;
+package org.alfresco.hxi_connector.common.adapters.auth.config.properties;
 
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import java.util.Map;
+import java.util.Set;
+import jakarta.validation.constraints.NotNull;
 
-import org.springframework.security.test.context.support.WithSecurityContext;
+import lombok.Data;
+import org.springframework.validation.annotation.Validated;
 
-@Retention(RetentionPolicy.RUNTIME)
-@WithSecurityContext(factory = WithoutAnyUserSecurityContextFactory.class)
-public @interface WithoutAnyUser
-{}
+import org.alfresco.hxi_connector.common.config.properties.Retry;
+
+@Data
+public class AuthProperties
+{
+
+    private Map<String, AuthProvider> providers;
+    private Retry retry;
+
+    @Data
+    @Validated
+    public static class AuthProvider
+    {
+        private @NotNull String type;
+        private @NotNull String clientId;
+        private String clientSecret;
+        private String tokenUri;
+        private String grantType;
+        private Set<String> scope;
+        private String clientName;
+        private String username;
+        private String password;
+        private String environmentKey;
+    }
+}

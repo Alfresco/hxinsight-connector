@@ -45,25 +45,22 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
-import org.springframework.boot.autoconfigure.security.oauth2.client.OAuth2ClientProperties;
-import org.springframework.security.oauth2.client.registration.ClientRegistration;
 
-import org.alfresco.hxi_connector.common.config.properties.Retry;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
 @Slf4j
-public class HxAuthenticationClient extends RouteBuilder implements AuthenticationClient
+public class DefaultAuthenticationClient extends RouteBuilder implements AuthenticationClient
 {
-    public static final String LOCAL_AUTH_ENDPOINT = "direct:" + HxAuthenticationClient.class.getSimpleName();
+    public static final String LOCAL_AUTH_ENDPOINT = "direct:" + DefaultAuthenticationClient.class.getSimpleName();
     private static final String ROUTE_ID = "authentication-requester";
     private static final String AUTH_URL_HEADER = "authUri";
     public static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
-    private final Retry retryProperties;
-    private final OAuth2ClientProperties oAuth2ClientProperties;
+    private final AuthProperties authProperties;
 
     @Override
     public void configure()
@@ -91,21 +88,13 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
     }
 
     @Override
-    public AuthenticationResult authenticate(String tokenUri, ClientRegistration clientRegistration)
+    public AuthenticationResult authenticate(String providerId)
     {
-        String body = createEncodedBody(clientRegistration);
-        log.atDebug().log("Authentication :: sending token request for {} client registration", clientRegistration.getRegistrationId());
-        return sendRequest(tokenUri, body);
-    }
-
-    @Override
-    public AuthenticationResult authenticate(String clientRegistrationId)
-    {
-        String body = createEncodedBody(clientRegistrationId);
-        OAuth2ClientProperties.Provider provider = oAuth2ClientProperties.getProvider().get(clientRegistrationId);
-        EnsureUtils.ensureNonNull(provider, "Auth Provider not found for client registration id: " + clientRegistrationId);
-        String tokenUri = provider.getTokenUri();
-        log.atDebug().log("Authentication :: sending token request for {} client registration", clientRegistrationId);
+        String body = createEncodedBody(providerId);
+        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(providerId);
+        EnsureUtils.ensureNonNull(authProvider, "Auth Provider not found for authorization provider id: " + providerId);
+        String tokenUri = authProvider.getTokenUri();
+        log.atDebug().log("Authentication :: sending token request for {} authorization provider", providerId);
 
         return sendRequest(tokenUri, body);
     }
@@ -127,26 +116,18 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
                 .request(AuthenticationResult.class);
     }
 
-    private String createEncodedBody(ClientRegistration clientRegistration)
+    private String createEncodedBody(String providerId)
     {
-        return TokenRequest.builder()
-                .clientId(clientRegistration.getClientId())
-                .grantType(clientRegistration.getAuthorizationGrantType().getValue())
-                .clientSecret(clientRegistration.getClientSecret())
-                .scope(clientRegistration.getScopes())
-                .build()
-                .getTokenRequestBody();
-    }
+        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(providerId);
 
-    protected String createEncodedBody(String clientRegistrationId)
-    {
-        OAuth2ClientProperties.Registration registration = oAuth2ClientProperties.getRegistration().get(clientRegistrationId);
-        EnsureUtils.ensureNonNull(registration, "Auth Registration not found for client registration id: " + clientRegistrationId);
+        EnsureUtils.ensureNonNull(providerId, "Auth Registration not found for authorization provider id: " + providerId);
         return TokenRequest.builder()
-                .clientId(registration.getClientId())
-                .grantType(registration.getAuthorizationGrantType())
-                .clientSecret(registration.getClientSecret())
-                .scope(registration.getScope())
+                .clientId(authProvider.getClientId())
+                .grantType(authProvider.getGrantType())
+                .clientSecret(authProvider.getClientSecret())
+                .scope(authProvider.getScope())
+                .username(authProvider.getUsername())
+                .password(authProvider.getPassword())
                 .build()
                 .getTokenRequestBody();
     }
@@ -155,7 +136,7 @@ public class HxAuthenticationClient extends RouteBuilder implements Authenticati
     private void wrapErrorIfNecessary(Exchange exchange)
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = retryProperties.reasons();
+        Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
 
         ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
     }

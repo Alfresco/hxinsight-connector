@@ -27,7 +27,7 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static java.util.Objects.requireNonNullElse;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.HxAuthenticationClient.EXPECTED_STATUS_CODE;
+import static org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient.EXPECTED_STATUS_CODE;
 
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
