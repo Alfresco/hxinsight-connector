@@ -23,21 +23,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.util.client;
+package org.alfresco.hxi_connector.e2e_test.util.client.model;
 
-import static io.restassured.RestAssured.given;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import io.restassured.response.Response;
-
-public class S3BucketClient
-{
-    public Response getS3Response(int port)
-    {
-        return given()
-                .contentType("application/xml")
-                .when()
-                .get("http://localhost:" + port + "/test-hxinsight-bucket/")
-                .then()
-                .extract().response();
-    }
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record S3Object(
+        @JsonProperty("Key") String key,
+        @JsonProperty("Size") Long size)
+{}
