@@ -3,10 +3,9 @@
   "requiredScenarioState": "Empty",
   "request": {
     "method": "GET",
-    "urlPath": "/prediction-batches"
+    "urlPath": "/v1/prediction-batches"
   },
   "response": {
-    "status": 200,
-    "jsonBody": []
+    "status": 204
   }
 }
