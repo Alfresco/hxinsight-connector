@@ -41,7 +41,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploadRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
@@ -68,10 +67,9 @@ class HttpHxInsightStorageClientTest
     void testUploadDataFromInputStream()
     {
         // given
-        StorageLocationRequest storageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
         URL urlMock = mock(URL.class);
         PreSignedUrlResponse preSignedUrlResponse = new PreSignedUrlResponse(urlMock, CONTENT_ID);
-        given(storageLocationRequesterMock.requestStorageLocation(storageLocationRequest)).willReturn(preSignedUrlResponse);
+        given(storageLocationRequesterMock.requestStorageLocation()).willReturn(preSignedUrlResponse);
         InputStream inputStreamMock = mock(InputStream.class);
         File testData = new File(inputStreamMock);
 
@@ -80,8 +78,7 @@ class HttpHxInsightStorageClientTest
 
         // then
         assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(CONTENT_ID, FILE_CONTENT_TYPE));
-        StorageLocationRequest expectedStorageLocationRequest = new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE);
-        then(storageLocationRequesterMock).should().requestStorageLocation(expectedStorageLocationRequest);
+        then(storageLocationRequesterMock).should().requestStorageLocation();
         FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(new File(inputStreamMock), FILE_CONTENT_TYPE, urlMock);
         then(fileUploaderMock).should().upload(expectedFileUploadRequest, NODE_ID);
     }

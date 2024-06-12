@@ -26,7 +26,9 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -35,7 +37,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
@@ -54,7 +55,6 @@ import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
-import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import org.apache.camel.CamelContext;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.hc.core5.http.NoHttpResponseException;
@@ -136,11 +136,12 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody(hxInsightResponse)));
 
         // when
-        PreSignedUrlResponse preSignedUrlResponse = locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE));
+        PreSignedUrlResponse preSignedUrlResponse = locationRequester.requestStorageLocation();
 
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
-                .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER)));
+                .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
+                .withRequestBody(absent()));
         PreSignedUrlResponse expected = new PreSignedUrlResponse(new URL(preSignedUrl), CONTENT_ID);
         assertThat(preSignedUrlResponse).isEqualTo(expected);
     }
@@ -153,10 +154,10 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(serverError()));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
     }
 
@@ -168,10 +169,10 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(badRequest()));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
 
         // then
-        then(locationRequester).should(times(1)).requestStorageLocation(any());
+        then(locationRequester).should(times(1)).requestStorageLocation();
         assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
     }
 
@@ -185,10 +186,10 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody("")));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MismatchedInputException.class);
@@ -204,10 +205,10 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody("[")));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(JsonEOFException.class);
@@ -225,10 +226,10 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody(hxInsightResponse)));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MalformedURLException.class);
@@ -242,10 +243,10 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation(new StorageLocationRequest(NODE_ID, FILE_CONTENT_TYPE)));
+        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
 
         // then
-        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation(any());
+        then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(NoHttpResponseException.class);

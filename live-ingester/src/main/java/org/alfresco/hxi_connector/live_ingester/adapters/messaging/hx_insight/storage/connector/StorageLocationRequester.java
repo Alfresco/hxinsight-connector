@@ -29,5 +29,5 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
 
 public interface StorageLocationRequester
 {
-    PreSignedUrlResponse requestStorageLocation(StorageLocationRequest storageLocationRequest);
+    PreSignedUrlResponse requestStorageLocation();
 }
