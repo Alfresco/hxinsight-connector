@@ -48,6 +48,7 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -107,6 +108,12 @@ public class CreateNodeE2eTest
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
+    }
+
+    @AfterEach
+    void tearDown()
+    {
+        WireMock.reset();
     }
 
     @Test
