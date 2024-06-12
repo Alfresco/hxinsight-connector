@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -68,7 +69,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
 @Slf4j
 @Testcontainers
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.FieldNamingConventions"})
 public class CreateNodeE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
@@ -109,8 +110,31 @@ public class CreateNodeE2eTest
     }
 
     @Test
+    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    void testCreateNodeContainingImageFile() throws IOException
+    {
+        // given
+        File imageFile = new File("src/test/resources/images/quick.jpg");
+        List<S3Object> initialBucketContent = awsS3Client.listS3Content();
+
+        // when
+        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, imageFile);
+
+        // then
+        RetryUtils.retryWithBackoff(() -> {
+            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
+            assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size() + 1);
+
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
+            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
+                    .withRequestBody(containing(createdNode.id())));
+        }, INITIAL_DELAY_MS);
+    }
+
+    @Test
     @SneakyThrows
-    void testCreateNodeWithTextFile() throws IOException
+    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    void testCreateNodeContainingTextFile() throws IOException
     {
         // given
         @Cleanup
