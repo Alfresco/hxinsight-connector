@@ -31,6 +31,7 @@ import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.Question;
 import org.alfresco.rest.framework.WebApiDescription;
@@ -40,14 +41,14 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @Slf4j
 @EntityResource(name = "questions", title = "Questions about documents")
-public class QuestionEntityResource implements EntityResourceAction.Create<Question>
+public class QuestionsEntityResource implements EntityResourceAction.Create<Question>
 {
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
     public List<Question> create(List<Question> questions, Parameters parameters)
     {
-        ensureThat(questions.size() == 1, "You can only ask one question at a time.");
+        ensureThat(questions.size() == 1, () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask one question at a time."));
 
         Question question = questions.get(0);
 
