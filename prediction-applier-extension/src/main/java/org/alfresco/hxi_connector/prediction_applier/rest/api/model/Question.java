@@ -26,24 +26,15 @@
 
 package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
-import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 @ToString
-@Setter(AccessLevel.PRIVATE)
+@Getter
 public class Question
 {
+    @Setter
     private String questionId;
-    @Getter
     private String question;
-
-    public static Question createResponse(String questionId)
-    {
-        Question question = new Question();
-        question.setQuestionId(questionId);
-
-        return question;
-    }
 }

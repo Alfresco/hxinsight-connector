@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+
 import java.util.List;
 
 import lombok.extern.slf4j.Slf4j;
@@ -38,15 +40,21 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @Slf4j
 @EntityResource(name = "questions", title = "Questions about documents")
-public class QuestionApi implements EntityResourceAction.Create<Question>
+public class QuestionEntityResource implements EntityResourceAction.Create<Question>
 {
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
     public List<Question> create(List<Question> questions, Parameters parameters)
     {
-        log.info("Received questions: {}", questions);
+        ensureThat(questions.size() == 1, "You can only ask one question at a time.");
 
-        return List.of(Question.createResponse("questionId"));
+        Question question = questions.get(0);
+
+        log.info("Received question: {}", question);
+
+        question.setQuestionId("questionId");
+
+        return List.of(question);
     }
 }
