@@ -35,12 +35,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
@@ -123,7 +125,8 @@ public class CreateNodeE2eTest
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size() + 1);
 
-            String actualPdfContent = getPdfContent(actualBucketContent.get(0).key());
+            S3Object s3Object = new ArrayList<>(CollectionUtils.disjunction(initialBucketContent, actualBucketContent)).get(0);
+            String actualPdfContent = getPdfContent(s3Object.key());
             assertThat(actualPdfContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
 
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
