@@ -108,12 +108,12 @@ public class CreateNodeE2eTest
 
     @Test
     @SneakyThrows
-    void testCreateFile() throws IOException
+    void testCreateNodeWithTextFile() throws IOException
     {
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        int bucketInitialSize = awsS3Client.listS3Content().size();
+        List<S3Object> initialBucketContent = awsS3Client.listS3Content();
 
         // when
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plaint");
@@ -121,7 +121,7 @@ public class CreateNodeE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> {
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isEqualTo(bucketInitialSize + 1);
+            assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size() + 1);
 
             String actualPdfContent = getPdfContent(actualBucketContent.get(0).key());
             assertThat(actualPdfContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
