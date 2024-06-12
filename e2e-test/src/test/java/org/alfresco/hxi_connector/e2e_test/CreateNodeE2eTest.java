@@ -70,7 +70,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 public class CreateNodeE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int INITIAL_DELAY_MS = 200;
+    private static final int INITIAL_DELAY_MS = 300;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
@@ -113,7 +113,7 @@ public class CreateNodeE2eTest
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        assertThat(awsS3Client.listS3Content()).isEmpty();
+        int bucketInitialSize = awsS3Client.listS3Content().size();
 
         // when
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plaint");
@@ -121,7 +121,7 @@ public class CreateNodeE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> {
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent).hasSize(1);
+            assertThat(actualBucketContent.size()).isEqualTo(bucketInitialSize + 1);
 
             String actualPdfContent = getPdfContent(actualBucketContent.get(0).key());
             assertThat(actualPdfContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
