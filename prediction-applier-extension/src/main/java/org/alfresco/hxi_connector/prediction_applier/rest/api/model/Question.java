@@ -37,4 +37,5 @@ public class Question
     @Setter
     private String questionId;
     private String question;
+    private String restrictionQuery;
 }
