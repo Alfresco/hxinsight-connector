@@ -76,6 +76,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
             .marshal()
             .json()
             .log("Sending event ${body}")
+            .process(authService::setHxIAuthorizationHeaders)
             .to(integrationProperties.hylandExperience().ingester().endpoint())
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
@@ -94,10 +95,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     {
         camelContext.createFluentProducerTemplate()
                 .to(LOCAL_ENDPOINT)
-                .withProcessor(exchange -> {
-                    exchange.getIn().setBody(event);
-                    authService.setHxIAuthorizationHeaders(exchange);
-                })
+                .withBody(event)
                 .request();
     }
 
