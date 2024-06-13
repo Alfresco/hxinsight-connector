@@ -55,7 +55,7 @@ jobs:
         continue-on-error: true
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
-          srcclr-install-options: "-Dmaven.test.skip -P !test -pl '!common-test,!e2e-test'"
+          srcclr-install-options: -Dmaven.test.skip -P !test -pl "!common-test,!e2e-test"
 
   pmd_scan:
     name: "PMD Scan"
