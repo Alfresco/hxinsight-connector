@@ -38,5 +38,6 @@ hs_err_pid*
 
 # This file is generated from distribution/src/main/resources/docker-compose-origin/.env
 distribution/src/main/resources/docker-compose/.env
+distribution/src/main/resources/docker-compose/volume
 # This is produced by the maven-shade-plugin
 dependency-reduced-pom.xml
