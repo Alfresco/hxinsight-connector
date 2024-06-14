@@ -25,39 +25,62 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
+import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.UUID;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.model.prediction.Prediction;
-import org.alfresco.hxi_connector.common.model.repository.Node;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class UpdateNodeE2eTest
 {
-    private static final String QUEUE_NAME = "hxinsight-prediction-queue";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String PREDICTION_APPLIED_ASPECT = "hxi:predictionApplied";
+    private static final String PROPERTY_TO_UPDATE = "cm:description";
+    private static final String PREDICTION = "New description";
+    private static final String LIST_PREDICTION_BATCHES_SCENARIO = "List-prediction-batches";
+    private static final String LIST_PREDICTIONS_SCENARIO = "List-predictions";
+    private static final String PREDICTIONS_AVAILABLE_STATE = "Available";
+    private static final String PREDICTIONS_LIST = """
+            [
+              {
+                "prediction": [
+                  {
+                    "field": "%s",
+                    "confidence": 0.9999999403953552,
+                    "value": "%s"
+                  }
+                ],
+                "objectId": "%s",
+                "modelId": "56785678-5678-5678-5678-567856785678",
+                "enrichmentType": "AUTOCORRECT"
+              }
+            ]
+            """;
 
     static final Network network = Network.newNetwork();
     @Container
@@ -67,49 +90,54 @@ public class UpdateNodeE2eTest
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
     @Container
-    private static final LocalStackContainer awsMock = DockerContainers.createLocalStackContainerWithin(network);
+    private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
+            .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer();
 
     RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
 
     @BeforeAll
-    public static void beforeAll() throws IOException, InterruptedException
+    public static void beforeAll()
     {
-        awsMock.execInContainer("awslocal", "sqs", "create-queue", "--queue-name", QUEUE_NAME);
+        WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
     }
 
     @Test
     @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void testUpdateFile() throws IOException
+    void testApplyPredictionToNode() throws IOException
     {
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createFileNode("-my-", "dummy.txt", fileContent, "text/plaint");
+        Node createdNode = repositoryNodesClient.createNodeWithContent("-my-", "dummy.txt", fileContent, "text/plaint");
+        prepareWireMockToReturnPredictionFor(createdNode.id());
 
         // when
-        publishPrediction(mockPredictionFor(createdNode.id()));
+        WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+        WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
 
         // then
+        assertThat(createdNode.aspects()).doesNotContain(PREDICTION_APPLIED_ASPECT);
+        assertThat(createdNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
         RetryUtils.retryWithBackoff(() -> {
             Node actualNode = repositoryNodesClient.getNode(createdNode.id());
-            assertThat(actualNode.aspects())
-                    .contains(PREDICTION_APPLIED_ASPECT);
+            assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
+            assertThat(actualNode.properties())
+                    .containsKey(PROPERTY_TO_UPDATE)
+                    .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTION);
         });
     }
 
-    private Prediction mockPredictionFor(String nodeId)
+    private void prepareWireMockToReturnPredictionFor(String nodeId)
     {
-        return new Prediction(UUID.randomUUID().toString(), nodeId);
-    }
-
-    @SneakyThrows
-    private void publishPrediction(Prediction prediction)
-    {
-        awsMock.execInContainer("awslocal", "sqs", "send-message",
-                "--queue-url", "http://sqs.us-east-1.localhost.localstack.cloud:4566/000000000000/%s".formatted(QUEUE_NAME),
-                "--message-body", new ObjectMapper().writeValueAsString(prediction));
+        givenThat(get(urlPathTemplate("/v1/prediction-batches/{batchId}"))
+                .inScenario(LIST_PREDICTIONS_SCENARIO)
+                .whenScenarioStateIs(PREDICTIONS_AVAILABLE_STATE)
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withBody(PREDICTIONS_LIST.formatted(PROPERTY_TO_UPDATE, PREDICTION, nodeId)))
+                .willSetStateTo(STARTED));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -141,13 +169,19 @@ public class UpdateNodeE2eTest
     private static GenericContainer<?> createPredictionApplierContainer()
     {
         return DockerContainers.createPredictionApplierContainerWithin(network)
-                .withEnv("CAMEL_COMPONENT_AWS2-SQS_URI-ENDPOINT-OVERRIDE", "http://%s:4566".formatted(awsMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("CAMEL_COMPONENT_AWS2-SQS_ACCESS-KEY", awsMock.getAccessKey())
-                .withEnv("CAMEL_COMPONENT_AWS2-SQS_SECRET-KEY", awsMock.getSecretKey())
-                .withEnv("ALFRESCO_REPOSITORY_NODES_BASE-URL", "http://%s:8080".formatted(repository.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("ALFRESCO_REPOSITORY_NODES_USERNAME", "admin")
-                .withEnv("ALFRESCO_REPOSITORY_NODES_PASSWORD", "admin")
-                .withEnv("ALFRESCO_REPOSITORY_NODES_RETRY_ATTEMPTS", "1")
-                .withEnv("ALFRESCO_REPOSITORY_NODES_RETRY_INITIAL-DELAY", "0");
+                .withEnv("SPRING_ACTIVEMQ_BROKERURL",
+                        "nio://%s:61616".formatted(activemq.getNetworkAliases().stream().findFirst().get()))
+                .withEnv("ALFRESCO_REPOSITORY_BASE-URL",
+                        "http://%s:8080".formatted(repository.getNetworkAliases().stream().findFirst().get()))
+                .withEnv("ALFRESCO_REPOSITORY_RETRY_ATTEMPTS", "1")
+                .withEnv("ALFRESCO_REPOSITORY_RETRY_INITIAL-DELAY", "0")
+                .withEnv("AUTH_PROVIDERS_ALFRESCO_CLIENT-ID", "dummy-client-id")
+                .withEnv("AUTH_PROVIDERS_ALFRESCO_USERNAME", "admin")
+                .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin")
+                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
+                        "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL",
+                        "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
     }
 }
