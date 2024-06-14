@@ -29,10 +29,12 @@ import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.util.List;
 
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.Question;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.EntityResource;
@@ -40,9 +42,11 @@ import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAct
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @Slf4j
+@Setter
 @EntityResource(name = "questions", title = "Questions about documents")
 public class QuestionsEntityResource implements EntityResourceAction.Create<Question>
 {
+    private AccessTokenProvider accessTokenProvider;
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
@@ -52,7 +56,7 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
 
         Question question = questions.get(0);
 
-        log.info("Received question: {}", question);
+        log.info("Received question: {}", accessTokenProvider.getAccessToken("hyland-experience"));
 
         question.setQuestionId("questionId");
 

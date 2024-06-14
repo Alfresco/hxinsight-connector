@@ -86,4 +86,44 @@
         <property name="beanName" value="simpleMappingExceptionResolverParent"/>
         <property name="extendingBeanName" value="hxi.simpleMappingExceptionResolver"/>
     </bean>
+
+    <bean class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties"
+          id="hxiAuthProperties">
+        <property name="providers">
+            <map>
+                <entry key="hyland-experience">
+                    <bean class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties.AuthProvider">
+                        <property name="type" value="dummy"/>
+                        <property name="grantType" value="dummy"/>
+                        <property name="clientName" value="dummy"/>
+                        <property name="clientId" value="dummy"/>
+                        <property name="clientSecret" value="dummy"/>
+                        <property name="scope">
+                            <set>
+                                <value>dummy</value>
+                            </set>
+                        </property>
+                        <property name="tokenUri" value="dummy"/>
+                        <property name="environmentKey" value="dummy"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient"
+          id="hxiAuthenticationClient">
+        <constructor-arg index="0" ref="alfrescoCamelContext"/>
+        <constructor-arg index="1" ref="hxiAuthProperties"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider"
+          id="hxiAccessTokenProvider">
+        <constructor-arg index="0" ref="alfrescoCamelContext"/>
+        <constructor-arg index="1" ref="hxiAuthenticationClient"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource">
+        <property name="accessTokenProvider" ref="hxiAccessTokenProvider"/>
+    </bean>
 </beans>
