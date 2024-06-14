@@ -34,7 +34,6 @@ import java.util.function.Supplier;
 
 import lombok.NoArgsConstructor;
 
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.common.exception.ValidationException;
 
 @NoArgsConstructor(access = PRIVATE)
@@ -60,7 +59,7 @@ public class EnsureUtils
         ensureThat(isOk, () -> new ValidationException(String.format(errorMessage, formatArgs)));
     }
 
-    public static void ensureThat(boolean isOk, Supplier<? extends HxInsightConnectorRuntimeException> exceptionSupplier)
+    public static void ensureThat(boolean isOk, Supplier<? extends RuntimeException> exceptionSupplier)
     {
         if (!isOk)
         {
