@@ -54,8 +54,6 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
 
         log.info("Received question: {}", question);
 
-        Question returnedQuestion = new Question("questionId", question.getQuestion());
-
-        return List.of(returnedQuestion);
+        return List.of(question.withId("questionId"));
     }
 }

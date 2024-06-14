@@ -46,4 +46,10 @@ public class Question
 {
     private String _questionId;
     private String question;
+
+    public Question withId(String questionId)
+    {
+        this._questionId = questionId;
+        return this;
+    }
 }
