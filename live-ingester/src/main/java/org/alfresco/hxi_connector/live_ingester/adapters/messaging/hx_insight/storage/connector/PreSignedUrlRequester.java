@@ -62,8 +62,6 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     static final String ROUTE_ID = "presigned-url-requester";
     static final String STORAGE_LOCATION_PROPERTY = "url";
     static final String CONTENT_ID_PROPERTY = "id";
-    static final String NODE_ID_PROPERTY = "objectId";
-    static final String CONTENT_TYPE_PROPERTY = "contentType";
     private static final int EXPECTED_STATUS_CODE = 200;
 
     private final CamelContext camelContext;
@@ -81,7 +79,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
-            .setBody(simple(null))
+            .process(authService::setHxIAuthorizationHeaders)
             .to(integrationProperties.hylandExperience().storage().location().endpoint())
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
@@ -100,17 +98,10 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.initialDelay}",
                     multiplierExpression = "#{@integrationProperties.hylandExperience.storage.location.retry.delayMultiplier}"))
     @Override
-    public PreSignedUrlResponse requestStorageLocation(StorageLocationRequest storageLocationRequest)
+    public PreSignedUrlResponse requestStorageLocation()
     {
-        Map<String, String> request = Map.of(NODE_ID_PROPERTY, storageLocationRequest.nodeId(),
-                CONTENT_TYPE_PROPERTY, storageLocationRequest.contentType());
-
         return camelContext.createFluentProducerTemplate()
                 .to(LOCAL_ENDPOINT)
-                .withProcessor(exchange -> {
-                    exchange.getIn().setBody(request);
-                    authService.setHxIAuthorizationHeaders(exchange);
-                })
                 .request(PreSignedUrlResponse.class);
     }
 

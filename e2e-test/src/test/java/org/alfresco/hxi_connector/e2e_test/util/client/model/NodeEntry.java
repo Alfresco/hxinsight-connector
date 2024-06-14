@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,38 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.e2e_test.util.client.model;
 
-package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-import jakarta.validation.constraints.NotBlank;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.Accessors;
-
-@Accessors(prefix = {"_", ""})
-@ToString
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@JsonInclude(NON_NULL)
-@SuppressWarnings("PMD.FieldNamingConventions")
-public class Question
-{
-    private String _questionId;
-    @NotBlank
-    private String question;
-    @NotBlank
-    private String restrictionQuery;
-
-    public Question withId(String questionId)
-    {
-        this._questionId = questionId;
-        return this;
-    }
-}
+public record NodeEntry(@JsonProperty("entry") Node node)
+{}

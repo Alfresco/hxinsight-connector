@@ -35,7 +35,6 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploadRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequest;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
@@ -55,7 +54,7 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
     @Override
     public IngestContentResponse upload(File file, String contentType, String nodeId)
     {
-        PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation(new StorageLocationRequest(nodeId, contentType));
+        PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation();
         log.atDebug().log("Storage :: Received target location with transfer ID: {} for node: {}", preSignedUrlResponse.id(), nodeId);
         URL preSignedUrl = preSignedUrlResponse.url();
         try (InputStream fileData = file.data())

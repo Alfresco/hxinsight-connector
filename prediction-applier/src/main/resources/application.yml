@@ -14,7 +14,7 @@ hyland-experience:
 
 alfresco:
   repository:
-    base-url: http://alfresco:8080
+    base-url: http://localhost:8002
     retry:
       attempts: 10
       initial-delay: 500

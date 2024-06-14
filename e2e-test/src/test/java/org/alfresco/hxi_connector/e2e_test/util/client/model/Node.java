@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,38 +23,27 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.e2e_test.util.client.model;
 
-package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
+import java.util.Map;
+import java.util.Set;
 import jakarta.validation.constraints.NotBlank;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.Accessors;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-@Accessors(prefix = {"_", ""})
-@ToString
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@JsonInclude(NON_NULL)
-@SuppressWarnings("PMD.FieldNamingConventions")
-public class Question
-{
-    private String _questionId;
-    @NotBlank
-    private String question;
-    @NotBlank
-    private String restrictionQuery;
-
-    public Question withId(String questionId)
-    {
-        this._questionId = questionId;
-        return this;
-    }
-}
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record Node(
+        @NotBlank String id,
+        String name,
+        String nodeType,
+        boolean isFolder,
+        boolean isFile,
+        String parentId,
+        Map<String, Object> properties,
+        @JsonProperty("aspectNames") Set<String> aspects,
+        String createdAt,
+        Map<String, String> createdByUser,
+        String modifiedAt,
+        Map<String, String> modifiedByUser)
+{}
