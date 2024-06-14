@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import jakarta.validation.constraints.NotBlank;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -45,6 +47,7 @@ import lombok.experimental.Accessors;
 public class Question
 {
     private String _questionId;
+    @NotBlank
     private String question;
 
     public Question withId(String questionId)
