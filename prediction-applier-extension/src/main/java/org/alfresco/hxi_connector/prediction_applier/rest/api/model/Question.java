@@ -26,15 +26,24 @@
 
 package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@Accessors(prefix = {"_", ""})
 @ToString
 @Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class Question
 {
-    @Setter
-    private String questionId;
+    private String _questionId;
     private String question;
 }
