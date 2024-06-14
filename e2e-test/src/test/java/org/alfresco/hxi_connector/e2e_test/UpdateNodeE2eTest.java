@@ -27,9 +27,12 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
@@ -117,6 +120,8 @@ public class UpdateNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryNodesClient.createNodeWithContent("-my-", "dummy.txt", fileContent, "text/plaint");
+        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing(createdNode.id()))));
         WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id());
 
