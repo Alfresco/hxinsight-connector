@@ -73,7 +73,8 @@
         <commons-lang.version>3.14.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.16.1</commons-io.version>
-        <aws-sdk-s3.version>2.25.64</aws-sdk-s3.version>
+        <pdfbox.version>3.0.2</pdfbox.version>
+        <aws-sdk-s3.version>2.25.69</aws-sdk-s3.version>
         <wiremock.version>3.6.0</wiremock.version>
 
         <testcontainers.version>1.19.8</testcontainers.version>
@@ -236,6 +237,11 @@
                 <groupId>commons-io</groupId>
                 <artifactId>commons-io</artifactId>
                 <version>${commons-io.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.pdfbox</groupId>
+                <artifactId>pdfbox</artifactId>
+                <version>${pdfbox.version}</version>
             </dependency>
             <dependency>
                 <groupId>software.amazon.awssdk</groupId>

@@ -28,17 +28,16 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.s
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.reset;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.CONTENT_ID_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.CONTENT_TYPE_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.NODE_ID_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
@@ -48,10 +47,13 @@ import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.camel.model.language.ConstantExpression;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mock;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -64,12 +66,12 @@ class PreSignedUrlRequesterTest
 {
     private static final String MOCK_ENDPOINT = "mock:hxi-endpoint";
     private static final int STATUS_CODE_200 = 200;
-    private static final String NODE_REF = "node-ref";
-    private static final String CONTENT_TYPE = "content/type";
     private static final String STORAGE_LOCATION = "http://dummy-url";
     private static final String CONTENT_ID = "CONTENT ID";
     private static final String RESPONSE_BODY = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, STORAGE_LOCATION);
 
+    @Mock
+    private AuthService mockAuthService;
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
 
@@ -79,13 +81,20 @@ class PreSignedUrlRequesterTest
     @SneakyThrows
     void beforeAll()
     {
+        openMocks(this);
         camelContext = new DefaultCamelContext();
         IntegrationProperties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT);
-        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties);
+        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties, mockAuthService);
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
 
         mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
+    }
+
+    @AfterEach
+    void afterEach()
+    {
+        reset(mockAuthService);
     }
 
     @AfterAll
@@ -98,28 +107,27 @@ class PreSignedUrlRequesterTest
     void testRequestStorageLocation() throws Exception
     {
         // given
-        StorageLocationRequest request = createStorageLocationRequestMock();
         mockEndpointWillRespondWith(STATUS_CODE_200, RESPONSE_BODY);
-        mockEndpointWillExpectInRequestBody(NODE_ID_PROPERTY, NODE_REF, CONTENT_TYPE_PROPERTY, CONTENT_TYPE);
 
         // when
-        PreSignedUrlResponse preSignedUrlResponse = preSignedUrlRequester.requestStorageLocation(request);
+        PreSignedUrlResponse preSignedUrlResponse = preSignedUrlRequester.requestStorageLocation();
 
         // then
         mockEndpoint.assertIsSatisfied();
         PreSignedUrlResponse expected = new PreSignedUrlResponse(new URL(STORAGE_LOCATION), CONTENT_ID);
         assertThat(preSignedUrlResponse).isEqualTo(expected);
+        then(mockAuthService).should().setHxIAuthorizationHeaders(any());
+        then(mockAuthService).shouldHaveNoMoreInteractions();
     }
 
     @Test
     void testRequestStorageLocation_invalidResponseStatusCode5xx()
     {
         // given
-        StorageLocationRequest request = createStorageLocationRequestMock();
         mockEndpointWillRespondWith(500);
 
         // when
-        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
         assertThat(thrown)
@@ -131,11 +139,10 @@ class PreSignedUrlRequesterTest
     void testRequestStorageLocation_invalidResponseStatusCode4xx()
     {
         // given
-        StorageLocationRequest request = createStorageLocationRequestMock();
         mockEndpointWillRespondWith(400);
 
         // when
-        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
         assertThat(thrown)
@@ -147,12 +154,11 @@ class PreSignedUrlRequesterTest
     void testRequestStorageLocation_missingStorageLocationPropertyInResponse()
     {
         // given
-        StorageLocationRequest request = createStorageLocationRequestMock();
         String responseBodyWithoutUrl = createResponseBodyWith("unexpectedProperty", STORAGE_LOCATION);
         mockEndpointWillRespondWith(STATUS_CODE_200, responseBodyWithoutUrl);
 
         // when
-        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
         assertThat(thrown)
@@ -164,12 +170,11 @@ class PreSignedUrlRequesterTest
     void testRequestStorageLocation_invalidJsonResponse()
     {
         // given
-        StorageLocationRequest request = createStorageLocationRequestMock();
         String invalidJsonBody = removeLastCharacter(RESPONSE_BODY);
         mockEndpointWillRespondWith(STATUS_CODE_200, invalidJsonBody);
 
         // when
-        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
         assertThat(thrown)
@@ -182,12 +187,11 @@ class PreSignedUrlRequesterTest
     void testRequestStorageLocation_emptyBodyInResponse()
     {
         // given
-        StorageLocationRequest request = createStorageLocationRequestMock();
         String emptyBody = "";
         mockEndpointWillRespondWith(STATUS_CODE_200, emptyBody);
 
         // when
-        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
         assertThat(thrown)
@@ -200,12 +204,11 @@ class PreSignedUrlRequesterTest
     void testRequestStorageLocation_invalidUrlInResponse()
     {
         // given
-        StorageLocationRequest request = createStorageLocationRequestMock();
         String responseBodyWithInvalidUrl = createResponseBodyWith(STORAGE_LOCATION_PROPERTY, "invalidUrl");
         mockEndpointWillRespondWith(STATUS_CODE_200, responseBodyWithInvalidUrl);
 
         // when
-        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation(request));
+        Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
         assertThat(thrown)
@@ -218,17 +221,8 @@ class PreSignedUrlRequesterTest
     private IntegrationProperties integrationPropertiesOf(String endpoint)
     {
         Storage storageProperties = new Storage(new Storage.Location(endpoint, new Retry()), new Storage.Upload(new Retry()));
-        IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(null, null, storageProperties, null);
+        IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
         return new IntegrationProperties(null, hylandExperienceProperties);
-    }
-
-    private StorageLocationRequest createStorageLocationRequestMock()
-    {
-        StorageLocationRequest request = mock(StorageLocationRequest.class);
-        given(request.nodeId()).willReturn(NODE_REF);
-        given(request.contentType()).willReturn(CONTENT_TYPE);
-
-        return request;
     }
 
     private void mockEndpointWillRespondWith(int statusCode)
@@ -242,11 +236,6 @@ class PreSignedUrlRequesterTest
             exchange.getMessage().setHeader(HTTP_RESPONSE_CODE, statusCode);
             exchange.getMessage().setBody(responseBody);
         });
-    }
-
-    private void mockEndpointWillExpectInRequestBody(String... expectedProperties)
-    {
-        Stream.of(expectedProperties).forEach(property -> mockEndpoint.message(0).body(String.class).contains(property));
     }
 
     private static String createResponseBodyWith(String storageLocationProperty, String storageLocation)

@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.language.spel.SpelExpression.spel;
-import static org.springframework.http.HttpHeaders.AUTHORIZATION;
 
 import java.util.Objects;
 
@@ -41,8 +40,7 @@ import org.apache.camel.builder.ValueBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.prediction_applier.config.HxInsightProperties;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
@@ -66,14 +64,12 @@ public class PredictionCollector extends RouteBuilder
     private static final String BATCHES_URL_PATTERN = "%s/v1/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
     private static final String PREDICTIONS_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
     private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=PUT";
-    private static final String ENVIRONMENT_HEADER = "hxai-environment";
     private static final String SET_BATCH_STATUS_BODY_TEMPLATE = "{\"status\": \"%s\", \"currentPage\": ${headers.%s}}";
     private static final String IN_PROGRESS_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("IN_PROGRESS", PREDICTIONS_PAGE_NO_HEADER);
     private static final String COMPLETE_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("COMPLETE", PREDICTIONS_PAGE_NO_HEADER);
 
     private final InsightPredictionsProperties insightPredictionsProperties;
-    private final AccessTokenProvider accessTokenProvider;
-    private final HxInsightProperties hxInsightProperties;
+    private final AuthService authService;
 
     // @formatter:off
     /**
@@ -105,9 +101,9 @@ public class PredictionCollector extends RouteBuilder
             .onCompletion()
                 .process(setProcessingPending(false))
             .end()
-            .process(this::setAuthorizationHeaders)
             .setHeader(BATCHES_PAGE_NO_HEADER, constant(1))
             .loopDoWhile(statusCodeNot204())
+                .process(authService::setHxIAuthorizationHeaders)
                 .toD(batchesUrl)
                 .choice().when(statusCodeNot204())
                     .log(DEBUG, log, "Processing prediction batches page ${headers.%s} started".formatted(BATCHES_PAGE_NO_HEADER))
@@ -127,6 +123,7 @@ public class PredictionCollector extends RouteBuilder
             .setHeader(BATCH_ID_HEADER, simple("${body.id}"))
             .setHeader(PREDICTIONS_PAGE_NO_HEADER, constant(1))
             .loopDoWhile(statusCodeNot204())
+                .process(authService::setHxIAuthorizationHeaders)
                 .toD(predictionsUrl)
                 .choice().when(statusCodeNot204())
                     .log(TRACE, log, "Processing page ${headers.%s} of predictions in batch ${headers.%s}, ${body}, ${header.CamelHttpResponseCode}".formatted(PREDICTIONS_PAGE_NO_HEADER, BATCH_ID_HEADER))
@@ -162,13 +159,5 @@ public class PredictionCollector extends RouteBuilder
     private Processor setProcessingPending(boolean isProcessingPending)
     {
         return exchange -> getContext().getRegistry().bind(IS_PREDICTION_PROCESSING_PENDING_KEY, isProcessingPending);
-    }
-
-    private void setAuthorizationHeaders(Exchange exchange)
-    {
-        final String token = "Bearer " + accessTokenProvider.getAccessToken("hyland-experience-auth");
-        String environmentKey = hxInsightProperties.hylandExperience().authorization().environmentKey();
-        exchange.getIn().setHeader(AUTHORIZATION, token);
-        exchange.getIn().setHeader(ENVIRONMENT_HEADER, environmentKey);
     }
 }

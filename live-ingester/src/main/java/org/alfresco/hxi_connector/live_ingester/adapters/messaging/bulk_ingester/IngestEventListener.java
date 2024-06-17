@@ -33,8 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
@@ -54,12 +52,10 @@ public class IngestEventListener extends RouteBuilder
     @Override
     public void configure()
     {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
         from(integrationProperties.alfresco().bulkIngester().endpoint())
                 .transacted()
                 .routeId(ROUTE_ID)
                 .log(DEBUG, "Received bulk ingester event : ${header.JMSMessageID}")
-                .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(exchange -> eventProcessor.process(mapToIngestEvent(exchange)))
                 .end();
     }

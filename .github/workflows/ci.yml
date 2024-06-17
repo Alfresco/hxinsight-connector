@@ -55,7 +55,7 @@ jobs:
         continue-on-error: true
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
-          srcclr-install-options: "-Dmaven.test.skip -P !test -pl '!common-test,!e2e-test'"
+          srcclr-install-options: -Dmaven.test.skip -P !test -pl "!common-test,!e2e-test"
 
   pmd_scan:
     name: "PMD Scan"
@@ -96,7 +96,7 @@ jobs:
       - name: "Test application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am -DfailIfNoTests=false
 
-  test_distirbution:
+  test_distribution:
     name: "Build application with distribution profile"
     runs-on: ubuntu-latest
     needs:
@@ -144,8 +144,12 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.25.0
+      - name: "Build application"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Build docker images"
+        run: bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   push_docker_images:
     name: "Push docker images"
@@ -242,8 +246,8 @@ jobs:
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
-  deploy_release_version_to_quay_and_dockerhub:
-    name: "Deploy release version to quay.io and Docker Hub"
+  deploy_release_version_to_quay:
+    name: "Deploy release version to quay.io"
     runs-on: ubuntu-latest
     needs:
       - test_application
@@ -262,16 +266,11 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - name: "Login to Docker Hub"
-        uses: docker/login-action@v3.1.0
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.25.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.25.0
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }}
-      - name: "Deploy release version to quay.io and Docker Hub"
+      - name: "Deploy release version to quay.io"
         run: bash ./scripts/ci/releaseDockerImage.sh -v ${{ env.RELEASE_VERSION }}
         env:
           COMMIT_MESSAGE: ${{ github.sha }}
@@ -282,7 +281,7 @@ jobs:
     name: "Copy to S3 Downloads Bucket"
     runs-on: ubuntu-latest
     needs:
-      - deploy_release_version_to_quay_and_dockerhub
+      - deploy_release_version_to_quay
       - release_and_deploy_to_nexus_and_s3
       - publish_snapshot_artifacts
       - push_docker_images
