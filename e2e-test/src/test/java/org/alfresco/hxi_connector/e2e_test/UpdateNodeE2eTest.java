@@ -58,6 +58,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class UpdateNodeE2eTest
 {
+    private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String PREDICTION_APPLIED_ASPECT = "hxi:predictionApplied";
     private static final String PROPERTY_TO_UPDATE = "cm:description";
@@ -110,7 +111,7 @@ public class UpdateNodeE2eTest
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createNodeWithContent("-my-", "dummy.txt", fileContent, "text/plaint");
+        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         prepareWireMockToReturnPredictionFor(createdNode.id());
 
         // when

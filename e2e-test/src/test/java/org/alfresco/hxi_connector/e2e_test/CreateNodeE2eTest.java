@@ -149,7 +149,7 @@ public class CreateNodeE2eTest
         List<S3Object> initialBucketContent = awsS3Client.listS3Content();
 
         // when
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plaint");
+        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
 
         // then
         RetryUtils.retryWithBackoff(() -> {
