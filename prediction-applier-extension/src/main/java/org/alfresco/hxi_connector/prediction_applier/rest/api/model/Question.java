@@ -49,6 +49,8 @@ public class Question
     private String _questionId;
     @NotBlank
     private String question;
+    @NotBlank
+    private String restrictionQuery;
 
     public Question withId(String questionId)
     {

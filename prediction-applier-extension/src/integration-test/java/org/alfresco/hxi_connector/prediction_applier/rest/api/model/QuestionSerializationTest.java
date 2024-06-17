@@ -45,7 +45,8 @@ class QuestionSerializationTest
         String questionSerialized = """
                 {
                     "_questionId": "86553f9b-e382-4a1b-b07d-52adae3e96e8",
-                    "question": "What is the capital of France?"
+                    "question": "What is the capital of France?",
+                    "restrictionQuery": "format tbd"
                 }
                 """;
 
@@ -60,7 +61,8 @@ class QuestionSerializationTest
         String questionSerialized = """
                 {
                     "questionId": "86553f9b-e382-4a1b-b07d-52adae3e96e8",
-                    "question": "What is the capital of France?"
+                    "question": "What is the capital of France?",
+                    "restrictionQuery": "format tbd"
                 }
                 """;
 
@@ -75,7 +77,8 @@ class QuestionSerializationTest
         // given
         String questionSerialized = """
                 {
-                    "question": "What is the capital of France?"
+                    "question": "What is the capital of France?",
+                    "restrictionQuery": "format tbd"
                 }
                 """;
 
@@ -84,5 +87,6 @@ class QuestionSerializationTest
 
         // then
         assertEquals("What is the capital of France?", question.getQuestion());
+        assertEquals("format tbd", question.getRestrictionQuery());
     }
 }
