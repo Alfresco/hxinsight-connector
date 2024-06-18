@@ -133,6 +133,9 @@
                                 <includes>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common</include>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common-authentication</include>
+                                    <include>org.apache.camel:camel-http-base</include>
+                                    <include>org.apache.camel:camel-http-common</include>
+                                    <include>org.apache.camel:camel-http</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
