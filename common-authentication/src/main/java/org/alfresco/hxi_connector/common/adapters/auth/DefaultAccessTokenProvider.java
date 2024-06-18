@@ -28,13 +28,9 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.function.Supplier;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.camel.CamelContext;
 
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 
 @RequiredArgsConstructor
@@ -42,7 +38,6 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
 {
 
     static final int REFRESH_OFFSET_SECS = 60;
-    private final CamelContext camelContext;
     private final AuthenticationClient authenticationClient;
 
     private final Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> accessTokens = new HashMap<>();
@@ -50,7 +45,6 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     @Override
     public String getAccessToken(String providerId)
     {
-        waitFor(camelContext::isStarted);
         Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry = accessTokens.get(providerId);
         synchronized (this)
         {
@@ -76,20 +70,5 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     {
         return authenticationResultEntry == null || authenticationResultEntry.getValue().isBefore(OffsetDateTime.now().minusSeconds(
                 REFRESH_OFFSET_SECS));
-    }
-
-    private static void waitFor(Supplier<Boolean> supplier)
-    {
-        while (!supplier.get())
-        {
-            try
-            {
-                TimeUnit.MILLISECONDS.sleep(100);
-            }
-            catch (InterruptedException e)
-            {
-                throw new HxInsightConnectorRuntimeException(e);
-            }
-        }
     }
 }
