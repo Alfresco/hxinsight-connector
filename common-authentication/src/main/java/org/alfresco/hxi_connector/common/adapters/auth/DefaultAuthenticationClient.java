@@ -31,7 +31,6 @@ import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.CamelContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -49,7 +48,6 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 {
     public static final int EXPECTED_STATUS_CODE = 200;
 
-    private final CamelContext camelContext;
     private final AuthProperties authProperties;
     private final RestTemplate restTemplate = new RestTemplate();
 

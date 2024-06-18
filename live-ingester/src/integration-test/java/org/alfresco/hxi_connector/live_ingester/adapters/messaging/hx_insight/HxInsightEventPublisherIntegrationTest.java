@@ -50,8 +50,6 @@ import java.util.Map;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import org.apache.camel.CamelContext;
-import org.apache.camel.impl.DefaultCamelContext;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -193,9 +191,7 @@ class HxInsightEventPublisherIntegrationTest
         @Bean
         public AccessTokenProvider defaultAccessTokenProvider()
         {
-            CamelContext camelContext = new DefaultCamelContext();
-            camelContext.start();
-            AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(camelContext, authorizationProperties());
+            AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(authorizationProperties());
             DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(dummyAuthClient);
             Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
             AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
