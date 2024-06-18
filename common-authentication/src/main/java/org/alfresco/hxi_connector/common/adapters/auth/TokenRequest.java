@@ -25,9 +25,6 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static java.net.URLEncoder.encode;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -35,6 +32,8 @@ import lombok.Builder;
 import lombok.ToString;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 
 @AllArgsConstructor
 @ToString
@@ -48,27 +47,30 @@ public class TokenRequest
     private String username;
     private String password;
 
-    public String getTokenRequestBody()
+    public MultiValueMap<String, String> getTokenRequestBody()
     {
-        final StringBuilder body = new StringBuilder();
-        body.append("grant_type=").append(encode(this.grantType, UTF_8)).append("&client_id=").append(encode(clientId, UTF_8));
+        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+
+        form.add("grant_type", this.grantType);
+        form.add("client_id", this.grantType);
+
         if (Strings.isNotBlank(this.clientSecret))
         {
-            body.append("&client_secret=").append(encode(this.clientSecret, UTF_8));
+            form.add("client_secret", this.clientSecret);
         }
         if (!CollectionUtils.isEmpty(this.scope))
         {
-            body.append("&scope=").append(encode(String.join(",", this.scope), UTF_8));
+            form.add("scope", String.join(",", this.scope));
         }
         if (Strings.isNotBlank(this.username))
         {
-            body.append("&username=").append(encode(this.username, UTF_8));
+            form.add("username", this.username);
         }
         if (Strings.isNotBlank(this.password))
         {
-            body.append("&password=").append(encode(this.password, UTF_8));
+            form.add("password", this.password);
         }
 
-        return body.toString();
+        return form;
     }
 }

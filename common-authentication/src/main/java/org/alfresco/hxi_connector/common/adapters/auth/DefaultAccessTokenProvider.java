@@ -36,7 +36,6 @@ import org.alfresco.hxi_connector.common.util.EnsureUtils;
 @RequiredArgsConstructor
 public class DefaultAccessTokenProvider implements AccessTokenProvider
 {
-
     static final int REFRESH_OFFSET_SECS = 60;
     private final AuthenticationClient authenticationClient;
 
