@@ -37,8 +37,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.camel.CamelContext;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -54,18 +52,10 @@ class DefaultAccessTokenProviderTest
     private static final String CLIENT_REGISTRATION_ID = "testClient";
     private static final String TEST_TOKEN = "testToken";
     @Mock
-    private CamelContext mockCamelContext;
-    @Mock
     private AuthenticationClient mockAuthenticationClient;
 
     @InjectMocks
     private DefaultAccessTokenProvider objectUnderTest;
-
-    @BeforeEach
-    void setUp()
-    {
-        given(mockCamelContext.isStarted()).willReturn(true);
-    }
 
     @Test
     void givenTokenNotPresent_whenGetAccessToken_thenRefreshToken()
