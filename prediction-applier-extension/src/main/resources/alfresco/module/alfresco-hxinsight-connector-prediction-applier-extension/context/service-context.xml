@@ -118,7 +118,5 @@
         <constructor-arg index="1" ref="hxInsightAuthClient"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource">
-        <constructor-arg index="0" ref="hxiAccessTokenProvider"/>
-    </bean>
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource"/>
 </beans>
