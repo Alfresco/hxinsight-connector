@@ -13,6 +13,10 @@
     <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <camel.version>4.0.0</camel.version>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -38,10 +42,17 @@
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
         </dependency>
+        <dependency> <!-- Camel version in extension has to be the same as in ACS -->
+            <groupId>org.apache.camel.springboot</groupId>
+            <artifactId>camel-http-starter</artifactId>
+            <version>${camel.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-test</artifactId>
