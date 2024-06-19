@@ -44,6 +44,16 @@ public class RepositoryNodesClient
     private final String username;
     private final String password;
 
+    public Node getNode(String nodeId)
+    {
+        String uri = URL_PATTERN.formatted(baseUrl, nodeId);
+        return given().auth().preemptive().basic(username, password)
+                .contentType("application/json")
+                .when().get(uri)
+                .then().extract().response()
+                .as(NodeEntry.class).node();
+    }
+
     public Node createNodeWithContent(String parentNodeId, String filename, InputStream fileContent, String mimeType)
     {
         String uri = URL_PATTERN.formatted(baseUrl, parentNodeId) + "/children";

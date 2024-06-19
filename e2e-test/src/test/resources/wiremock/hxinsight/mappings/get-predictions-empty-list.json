@@ -1,0 +1,11 @@
+{
+  "scenarioName": "List-predictions",
+  "requiredScenarioState": "Started",
+  "request": {
+    "method": "GET",
+    "urlPathTemplate": "/v1/prediction-batches/{batchId}"
+  },
+  "response": {
+    "status": 204
+  }
+}

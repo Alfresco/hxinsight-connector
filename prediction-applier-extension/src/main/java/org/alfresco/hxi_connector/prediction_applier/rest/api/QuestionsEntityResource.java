@@ -29,24 +29,20 @@ import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.util.List;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.Question;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 
-@EntityResource(name = "questions", title = "Questions about documents")
-@RequiredArgsConstructor
 @Slf4j
+@EntityResource(name = "questions", title = "Questions about documents")
 public class QuestionsEntityResource implements EntityResourceAction.Create<Question>
 {
-    private final AccessTokenProvider accessTokenProvider;
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
@@ -56,10 +52,8 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
 
         Question question = questions.get(0);
 
-        log.info("Received question: {}", accessTokenProvider.getAccessToken("hyland-experience"));
+        log.info("Received question: {}", question);
 
-        question.setQuestionId("questionId");
-
-        return List.of(question);
+        return List.of(question.withId("questionId"));
     }
 }
