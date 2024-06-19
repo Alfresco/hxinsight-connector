@@ -29,7 +29,7 @@ import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.util.List;
 
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -41,12 +41,12 @@ import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 
-@Slf4j
-@Setter
 @EntityResource(name = "questions", title = "Questions about documents")
+@RequiredArgsConstructor
+@Slf4j
 public class QuestionsEntityResource implements EntityResourceAction.Create<Question>
 {
-    private AccessTokenProvider accessTokenProvider;
+    private final AccessTokenProvider accessTokenProvider;
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
