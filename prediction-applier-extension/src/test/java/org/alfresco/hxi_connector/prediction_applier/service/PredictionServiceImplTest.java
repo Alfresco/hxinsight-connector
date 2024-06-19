@@ -133,7 +133,7 @@ public class PredictionServiceImplTest
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
                 PROP_UPDATE_TYPE, AUTOCORRECT.name(),
-                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED);
+                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED.toString());
         given(nodeService.getProperties(PREDICTION_NODE_REF)).willReturn(properties);
         given(nodeService.getChildAssocs(NODE_REF, Set.of(TYPE_PREDICTION))).willReturn(List.of(CHILD_ASSOC_REF));
         given(namespaceService.getPrefixes(NAMESPACE)).willReturn(Set.of(NAMESPACE_PREFIX));
@@ -161,7 +161,7 @@ public class PredictionServiceImplTest
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
                 PROP_UPDATE_TYPE, AUTOCORRECT,
-                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED);
+                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED.toString());
         given(nodeService.createNode(NODE_REF, ASSOC_PREDICTED_BY, PROPERTY_QNAME, TYPE_PREDICTION, expectedProperties)).willReturn(CHILD_ASSOC_REF);
 
         // when
@@ -258,7 +258,7 @@ public class PredictionServiceImplTest
         // given
         reviewPredictionTestSetup(ReviewStatus.REJECTED);
         given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
-        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.REJECTED);
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.REJECTED.toString());
 
         // when
         assertThrows(PredictionStateChangedException.class, () -> predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.CONFIRMED));
@@ -270,13 +270,13 @@ public class PredictionServiceImplTest
         // given
         reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
         given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
-        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED);
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED.toString());
 
         // when
         predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.CONFIRMED);
 
         // then
-        assertSinglePropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
+        assertSinglePropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED.toString());
 
     }
 
@@ -286,13 +286,13 @@ public class PredictionServiceImplTest
         // given
         reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
         given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
-        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED);
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED.toString());
 
         // when
         predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.REJECTED);
 
         // then
-        assertSinglePropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
+        assertSinglePropertySet(PREDICTION_NODE_REF, PROP_REVIEW_STATUS, ReviewStatus.REJECTED.toString());
         assertSinglePropertySet(NODE_REF, PROPERTY_QNAME, "red");
     }
 
@@ -304,8 +304,8 @@ public class PredictionServiceImplTest
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
-                PROP_UPDATE_TYPE, AUTOCORRECT.name(),
-                PROP_REVIEW_STATUS, initialReviewStatus);
+                PROP_UPDATE_TYPE, AUTOCORRECT.toString(),
+                PROP_REVIEW_STATUS, initialReviewStatus.toString());
         given(nodeService.getProperties(PREDICTION_NODE_REF)).willReturn(properties);
         given(namespaceService.getNamespaceURI(NAMESPACE_PREFIX)).willReturn(NAMESPACE);
         given(namespaceService.getPrefixes(NAMESPACE)).willReturn(Set.of(NAMESPACE_PREFIX));
