@@ -25,8 +25,13 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
+import static jakarta.xml.bind.DatatypeConverter.parseDateTime;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus.UNREVIEWED;
+import static org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType.AUTOFILL;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -101,6 +106,15 @@ public class PredictionModelDeserializationTest
         PredictionModel predictionModel = objectMapper.readValue(predictionModelSerialized, PredictionModel.class);
 
         // then
-        assertEquals("property", predictionModel.getProperty());
+        PredictionModel expected = new PredictionModel(null, // No id specified.
+                "property",
+                parseDateTime("2023-01-01T00:00:00Z").getTime(),
+                0.8f,
+                "modelId",
+                "predictionValue",
+                null, // No previous value specified.
+                AUTOFILL,
+                UNREVIEWED);
+        assertEquals(expected, predictionModel);
     }
 }
