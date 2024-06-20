@@ -27,9 +27,6 @@ package org.alfresco.hxi_connector.prediction_applier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.core.config.Configurator;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -58,12 +55,6 @@ public class PredictionApplierExtensionIntegrationTest
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
 
     AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
-
-    @BeforeAll
-    static void beforeAll()
-    {
-        Configurator.setAllLevels("", Level.INFO);
-    }
 
     @Test
     void testHxIModelInstallation()
