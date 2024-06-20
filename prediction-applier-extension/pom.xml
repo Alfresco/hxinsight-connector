@@ -45,11 +45,17 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.camel.springboot</groupId>
+                    <artifactId>camel-http-starter</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
 
         <dependency> <!-- Camel version in extension has to be the same as in ACS -->
-            <groupId>org.apache.camel.springboot</groupId>
-            <artifactId>camel-http-starter</artifactId>
+            <groupId>org.apache.camel</groupId>
+            <artifactId>camel-http</artifactId>
             <version>${camel.version}</version>
         </dependency>
 
@@ -58,6 +64,10 @@
             <artifactId>alfresco-hxinsight-connector-common-test</artifactId>
             <scope>test</scope>
             <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
