@@ -39,10 +39,8 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.springframework.web.client.RestTemplate;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
@@ -52,7 +50,6 @@ public class DefaultAuthenticationClient implements AuthenticationClient
     public static final int EXPECTED_STATUS_CODE = 200;
 
     private final AuthProperties authProperties;
-    private final RestTemplate restTemplate = new RestTemplate();
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -81,8 +78,7 @@ public class DefaultAuthenticationClient implements AuthenticationClient
         {
             Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
 
-            ErrorUtils.wrapErrorIfNecessary(e, retryReasons);
-            throw new EndpointServerErrorException(e);
+            throw ErrorUtils.wrapErrorIfNecessary(e, retryReasons);
         }
     }
 
