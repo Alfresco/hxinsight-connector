@@ -117,7 +117,7 @@ public abstract class DefaultAuthenticationClientTest
 
         // then
         then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(HXI_AUTH_PROVIDER);
-        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointServerErrorException.class);
     }
 
     @Test
