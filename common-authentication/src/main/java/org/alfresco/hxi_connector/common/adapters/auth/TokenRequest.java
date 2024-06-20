@@ -32,9 +32,9 @@ import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.ToString;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.message.BasicNameValuePair;
-import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
 
 @AllArgsConstructor
@@ -56,7 +56,7 @@ public class TokenRequest
         form.add(new BasicNameValuePair("grant_type", this.grantType));
         form.add(new BasicNameValuePair("client_id", this.clientId));
 
-        if (Strings.isNotBlank(this.clientSecret))
+        if (StringUtils.isNotBlank(this.clientSecret))
         {
             form.add(new BasicNameValuePair("client_secret", this.clientSecret));
         }
@@ -64,11 +64,11 @@ public class TokenRequest
         {
             form.add(new BasicNameValuePair("scope", String.join(",", this.scope)));
         }
-        if (Strings.isNotBlank(this.username))
+        if (StringUtils.isNotBlank(this.username))
         {
             form.add(new BasicNameValuePair("username", this.username));
         }
-        if (Strings.isNotBlank(this.password))
+        if (StringUtils.isNotBlank(this.password))
         {
             form.add(new BasicNameValuePair("password", this.password));
         }

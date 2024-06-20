@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
+import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -43,7 +44,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpHeaders;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
@@ -86,7 +86,7 @@ class AuthServiceTest
 
         // then
         thenExpectedAuthHeadersCleared();
-        then(mockExchange.getIn()).should().setHeader(HttpHeaders.AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
+        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
     }
 
     @Test
@@ -105,7 +105,7 @@ class AuthServiceTest
 
         // then
         thenExpectedAuthHeadersCleared();
-        then(mockExchange.getIn()).should().setHeader(HttpHeaders.AUTHORIZATION, AuthService.BASIC + getEncodedCredentials(username, password));
+        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BASIC + getEncodedCredentials(username, password));
     }
 
     @Test
@@ -122,7 +122,7 @@ class AuthServiceTest
 
         // then
         thenExpectedAuthHeadersCleared();
-        then(mockExchange.getIn()).should().setHeader(HttpHeaders.AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
+        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
         then(mockExchange.getIn()).should().setHeader(ENVIRONMENT_KEY_HEADER, dummyEnvKey);
     }
 
@@ -134,7 +134,7 @@ class AuthServiceTest
 
     private void thenExpectedAuthHeadersCleared()
     {
-        then(mockExchange.getIn()).should().removeHeader(HttpHeaders.AUTHORIZATION);
+        then(mockExchange.getIn()).should().removeHeader(AUTHORIZATION);
         then(mockExchange.getIn()).should().removeHeader(ENVIRONMENT_KEY_HEADER);
     }
 }
