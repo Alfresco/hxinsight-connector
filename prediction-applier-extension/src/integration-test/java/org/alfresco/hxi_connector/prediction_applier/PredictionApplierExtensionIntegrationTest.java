@@ -48,13 +48,13 @@ public class PredictionApplierExtensionIntegrationTest
 
     static final Network network = Network.newNetwork();
     @Container
-    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network).withReuse(true);
+    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
     @Container
-    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network).withReuse(true);
+    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
 
-    static AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
+    AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
 
     @Test
     void testHxIModelInstallation()
