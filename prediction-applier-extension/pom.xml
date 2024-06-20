@@ -157,6 +157,7 @@
                                     <include>org.apache.camel:camel-http-base</include>
                                     <include>org.apache.camel:camel-http-common</include>
                                     <include>org.apache.camel:camel-http</include>
+                                    <include>org.apache.httpcomponents.client5:httpclient5</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
