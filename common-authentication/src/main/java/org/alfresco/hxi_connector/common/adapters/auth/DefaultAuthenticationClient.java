@@ -25,21 +25,24 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED;
-
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
+import java.util.List;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
-import org.springframework.util.MultiValueMap;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.web.client.RestTemplate;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
@@ -50,6 +53,7 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
     private final AuthProperties authProperties;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public AuthenticationResult authenticate(String providerId)
@@ -59,25 +63,35 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
         log.atDebug().log("Authentication :: sending token request for {} authorization provider", providerId);
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(APPLICATION_FORM_URLENCODED);
+        // return response.getBody();
 
-        HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(
-                createEncodedBody(authProvider),
-                headers);
+        String url = authProvider.getTokenUri();
 
-        ResponseEntity<AuthenticationResult> response = restTemplate.exchange(
-                authProvider.getTokenUri(),
-                HttpMethod.POST,
-                requestEntity,
-                new ParameterizedTypeReference<AuthenticationResult>() {});
+        // Create the HttpClient
+        try (CloseableHttpClient httpClient = HttpClients.createDefault())
+        {
+            HttpPost httpPost = new HttpPost(url);
 
-        ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.getStatusCode().value(), EXPECTED_STATUS_CODE);
+            // Set headers
+            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-        return response.getBody();
+            // Set the request body
+            StringEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider));
+            httpPost.setEntity(entity);
+
+            return httpClient.execute(httpPost, response -> {
+                ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.getCode(), EXPECTED_STATUS_CODE);
+
+                return objectMapper.readValue(EntityUtils.toString(response.getEntity()), AuthenticationResult.class);
+            });
+        }
+        catch (Exception e)
+        {
+            throw new EndpointServerErrorException("Error while sending token request to authorization provider", e);
+        }
     }
 
-    private MultiValueMap<String, String> createEncodedBody(AuthProperties.AuthProvider authProvider)
+    private List<NameValuePair> createEncodedBody(AuthProperties.AuthProvider authProvider)
     {
         return TokenRequest.builder()
                 .clientId(authProvider.getClientId())

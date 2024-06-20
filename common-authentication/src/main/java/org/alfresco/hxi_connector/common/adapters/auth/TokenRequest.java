@@ -25,15 +25,17 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.ToString;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.message.BasicNameValuePair;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 @AllArgsConstructor
 @ToString
@@ -47,28 +49,28 @@ public class TokenRequest
     private String username;
     private String password;
 
-    public MultiValueMap<String, String> getTokenRequestBody()
+    public List<NameValuePair> getTokenRequestBody()
     {
-        MultiValueMap<String, String> form = new LinkedMultiValueMap<>();
+        List<NameValuePair> form = new LinkedList<>();
 
-        form.add("grant_type", this.grantType);
-        form.add("client_id", this.grantType);
+        form.add(new BasicNameValuePair("grant_type", this.grantType));
+        form.add(new BasicNameValuePair("client_id", this.clientId));
 
         if (Strings.isNotBlank(this.clientSecret))
         {
-            form.add("client_secret", this.clientSecret);
+            form.add(new BasicNameValuePair("client_secret", this.clientSecret));
         }
         if (!CollectionUtils.isEmpty(this.scope))
         {
-            form.add("scope", String.join(",", this.scope));
+            form.add(new BasicNameValuePair("scope", String.join(",", this.scope)));
         }
         if (Strings.isNotBlank(this.username))
         {
-            form.add("username", this.username);
+            form.add(new BasicNameValuePair("username", this.username));
         }
         if (Strings.isNotBlank(this.password))
         {
-            form.add("password", this.password);
+            form.add(new BasicNameValuePair("password", this.password));
         }
 
         return form;
