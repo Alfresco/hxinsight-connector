@@ -25,13 +25,16 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
-import static jakarta.xml.bind.DatatypeConverter.parseDateTime;
+import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus.UNREVIEWED;
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType.AUTOFILL;
+
+import java.time.Instant;
+import java.util.Date;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
@@ -108,7 +111,7 @@ public class PredictionModelDeserializationTest
         // then
         PredictionModel expected = new PredictionModel(null, // No id specified.
                 "property",
-                parseDateTime("2023-01-01T00:00:00Z").getTime(),
+                parseDateTime("2023-01-01T00:00:00Z"),
                 0.8f,
                 "modelId",
                 "predictionValue",
@@ -116,5 +119,10 @@ public class PredictionModelDeserializationTest
                 AUTOFILL,
                 UNREVIEWED);
         assertEquals(expected, predictionModel);
+    }
+
+    private Date parseDateTime(String isoDate)
+    {
+        return Date.from(Instant.from(ISO_INSTANT.parse(isoDate)));
     }
 }
