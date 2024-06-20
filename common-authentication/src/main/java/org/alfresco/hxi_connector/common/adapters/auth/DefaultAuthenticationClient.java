@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
 import java.util.List;
+import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -80,7 +81,10 @@ public class DefaultAuthenticationClient implements AuthenticationClient
         }
         catch (Exception e)
         {
-            throw new EndpointServerErrorException("Error while sending token request to authorization provider", e);
+            Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
+
+            ErrorUtils.wrapErrorIfNecessary(e, retryReasons);
+            throw new EndpointServerErrorException(e);
         }
     }
 
