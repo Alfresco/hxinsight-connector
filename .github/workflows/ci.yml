@@ -94,10 +94,11 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.25.0
       - name: "Test application"
+        id: tests
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am -DfailIfNoTests=false
       - name: "Dump all Docker containers logs"
         uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@v1.41.0
-        if: failure() && (steps.tests.outcome == 'failure' || steps.env.outcome == 'failure')
+        if: failure() && steps.tests.outcome == 'failure'
 
   test_distribution:
     name: "Build application with distribution profile"
@@ -122,10 +123,11 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v1.35.2
       - name: "Build application with distribution profile"
+        id: tests
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -Pdistribution -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Dump all Docker containers logs"
         uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@v1.41.0
-        if: failure() && (steps.tests.outcome == 'failure' || steps.env.outcome == 'failure')
+        if: failure() && steps.tests.outcome == 'failure'
 
   run_e2e_test:
     name: "Run e2e tests"
@@ -155,10 +157,11 @@ jobs:
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
+        id: tests
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Dump all Docker containers logs"
         uses: Alfresco/alfresco-build-tools/.github/actions/docker-dump-containers-logs@v1.41.0
-        if: failure() && (steps.tests.outcome == 'failure' || steps.env.outcome == 'failure')
+        if: failure() && steps.tests.outcome == 'failure'
 
   push_docker_images:
     name: "Push docker images"
