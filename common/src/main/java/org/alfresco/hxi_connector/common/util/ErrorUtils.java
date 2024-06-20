@@ -63,12 +63,12 @@ public class ErrorUtils
         return wrapError(cause, retryReasons, HxInsightConnectorRuntimeException.class);
     }
 
-    @SuppressWarnings("PMD.PreserveStackTrace")
     public static void wrapErrorAndThrowIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
     {
         throw wrapError(cause, retryReasons, runtimeExceptionType);
     }
 
+    @SuppressWarnings("PMD.ExceptionAsFlowControl")
     private static RuntimeException wrapError(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
     {
         if (cause instanceof EndpointServerErrorException)
