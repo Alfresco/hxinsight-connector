@@ -31,7 +31,8 @@ import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesU
 
 import java.util.List;
 
-import lombok.Setter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
@@ -47,14 +48,22 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.transaction.TransactionService;
 
-@Setter
+@Component
 @RelationshipResource(name = "predictions", entityResource = NodeEntityResource.class, title = "Predictions for a node")
 public class PredictionChildrenRelation implements RelationshipResourceAction.Read<PredictionModel>,
         RelationshipResourceAction.Create<PredictionModel>
 {
-    private NodesImpl nodes;
-    private TransactionService transactionService;
-    private PredictionService predictionService;
+    private final NodesImpl nodes;
+    private final TransactionService transactionService;
+    private final PredictionService predictionService;
+
+    public PredictionChildrenRelation(NodesImpl nodes, @Qualifier("TransactionService") TransactionService transactionService,
+            PredictionService predictionService)
+    {
+        this.nodes = nodes;
+        this.transactionService = transactionService;
+        this.predictionService = predictionService;
+    }
 
     @Override
     public CollectionWithPagingInfo<PredictionModel> readAll(String nodeId, Parameters params)

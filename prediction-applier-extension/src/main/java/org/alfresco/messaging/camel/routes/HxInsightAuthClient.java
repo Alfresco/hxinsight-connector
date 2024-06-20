@@ -34,8 +34,8 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @Component
 public class HxInsightAuthClient extends DefaultAuthenticationClient
 {
-    public HxInsightAuthClient(CamelContext camelContext, AuthProperties authProperties)
+    public HxInsightAuthClient(CamelContext alfrescoCamelContext, AuthProperties hxInsightAuthProperties)
     {
-        super(camelContext, authProperties);
+        super(alfrescoCamelContext, hxInsightAuthProperties);
     }
 }

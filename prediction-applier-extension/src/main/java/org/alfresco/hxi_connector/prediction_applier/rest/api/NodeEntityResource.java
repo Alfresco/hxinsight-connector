@@ -31,7 +31,8 @@ import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesU
 import java.util.Date;
 import java.util.List;
 
-import lombok.Setter;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.NodeWithPrediction;
 import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
@@ -43,13 +44,21 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 import org.alfresco.service.cmr.repository.NodeRef;
 import org.alfresco.service.cmr.repository.NodeService;
 
-@Setter
+@Component
 @EntityResource(name = "nodes", title = "Nodes With Predictions")
 public class NodeEntityResource implements EntityResourceAction.ReadById<NodeWithPrediction>
 {
-    private NodeService nodeService;
-    private NodesImpl nodes;
-    private PredictionService predictionService;
+    private final NodeService nodeService;
+    private final NodesImpl nodes;
+    private final PredictionService predictionService;
+
+    public NodeEntityResource(@Qualifier("NodeService") NodeService nodeService, NodesImpl nodes,
+            PredictionService predictionService)
+    {
+        this.nodeService = nodeService;
+        this.nodes = nodes;
+        this.predictionService = predictionService;
+    }
 
     @Override
     public NodeWithPrediction readById(String id, Parameters parameters) throws EntityNotFoundException

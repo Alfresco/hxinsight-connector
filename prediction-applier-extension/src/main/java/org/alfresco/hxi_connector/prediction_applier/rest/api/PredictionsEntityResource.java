@@ -27,7 +27,7 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
 import static org.alfresco.hxi_connector.prediction_applier.rest.api.util.NodesUtils.validateOrLookupNode;
 
-import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
@@ -39,13 +39,21 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 import org.alfresco.rest.framework.webscripts.WithResponse;
 import org.alfresco.service.cmr.repository.NodeRef;
 
-@Setter
+@Component
 @EntityResource(name = "predictions", title = "Predictions")
 public class PredictionsEntityResource
 {
     private static final String PARAM_REVIEW_STATUS = "reviewStatus";
-    private NodesImpl nodes;
-    private PredictionService predictionService;
+
+    private final NodesImpl nodes;
+
+    public PredictionsEntityResource(NodesImpl nodes, PredictionService predictionService)
+    {
+        this.nodes = nodes;
+        this.predictionService = predictionService;
+    }
+
+    private final PredictionService predictionService;
 
     @Operation("review")
     @WebApiDescription(title = "Review prediction")

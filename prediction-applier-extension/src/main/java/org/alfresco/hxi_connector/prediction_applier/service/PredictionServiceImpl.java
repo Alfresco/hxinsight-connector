@@ -47,7 +47,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException;
@@ -60,11 +61,17 @@ import org.alfresco.service.cmr.repository.NodeService;
 import org.alfresco.service.namespace.NamespaceService;
 import org.alfresco.service.namespace.QName;
 
-@RequiredArgsConstructor
+@Service
 public class PredictionServiceImpl implements PredictionService
 {
     private final NodeService nodeService;
     private final NamespaceService namespaceService;
+
+    public PredictionServiceImpl(@Qualifier("NodeService") NodeService nodeService, @Qualifier("NamespaceService") NamespaceService namespaceService)
+    {
+        this.nodeService = nodeService;
+        this.namespaceService = namespaceService;
+    }
 
     @Override
     public List<Prediction> applyPredictions(NodeRef nodeRef, List<Prediction> predictions)
