@@ -85,7 +85,8 @@ public class PredictionApplierExtensionIntegrationTest
                 postgres.getNetworkAliases().stream().findFirst().get(),
                 postgres.getDatabaseName(),
                 activemq.getNetworkAliases().stream().findFirst().get())
-            .replace("\n", " "));
+            .replace("\n", " "))
+            .withReuse(true);
         // @formatter:on
     }
 }
