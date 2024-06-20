@@ -128,6 +128,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common</include>
+                                    <include>org.alfresco:alfresco-hxinsight-connector-common-authentication</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
