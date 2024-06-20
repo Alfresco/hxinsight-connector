@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.prediction_applier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -45,15 +46,21 @@ public class PredictionApplierExtensionIntegrationTest
 {
     private static final int TIMEOUT_SECONDS = 300;
 
+    static AspectsClient aspectsClient;
+
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
     @Container
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
-    @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
 
-    AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
+    @BeforeAll
+    static void beforeAll()
+    {
+        repository.start();
+        aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
+    }
 
     @Test
     void testHxIModelInstallation()
