@@ -93,6 +93,7 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
         return files.filter(matchExtension(extension))
                 .filter(nameContains(nameSnippet))
                 .filter(not(nameContains("-tests")))
+                .filter(not(nameContains("original")))
                 .findFirst()
                 .orElseThrow(() -> new IllegalStateException("%s file with name containing: '%s' not found in directory: '%s/'"
                         .formatted(extension.toUpperCase(Locale.ENGLISH), nameSnippet, path)));
