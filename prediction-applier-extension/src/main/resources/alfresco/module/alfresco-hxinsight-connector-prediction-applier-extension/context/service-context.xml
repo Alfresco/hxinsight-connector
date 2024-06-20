@@ -106,7 +106,7 @@
         <property name="retry">
             <bean class="org.alfresco.hxi_connector.common.config.properties.Retry">
                 <property name="reasons">
-                    <list>
+                    <list merge="false">
                         <value>org.alfresco.hxi_connector.common.exception.EndpointServerErrorException</value>
                         <value>java.net.UnknownHostException</value>
                         <value>java.net.MalformedURLException</value>
