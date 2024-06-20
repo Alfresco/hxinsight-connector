@@ -63,19 +63,12 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
         log.atDebug().log("Authentication :: sending token request for {} authorization provider", providerId);
 
-        // return response.getBody();
-
-        String url = authProvider.getTokenUri();
-
-        // Create the HttpClient
         try (CloseableHttpClient httpClient = HttpClients.createDefault())
         {
-            HttpPost httpPost = new HttpPost(url);
+            HttpPost httpPost = new HttpPost(authProvider.getTokenUri());
 
-            // Set headers
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
 
-            // Set the request body
             StringEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider));
             httpPost.setEntity(entity);
 
