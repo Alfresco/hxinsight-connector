@@ -39,7 +39,6 @@ import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.NameValuePair;
 import org.apache.hc.core5.http.io.entity.EntityUtils;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 import org.springframework.web.client.RestTemplate;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
@@ -64,13 +63,12 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
         log.atDebug().log("Authentication :: sending token request for {} authorization provider", providerId);
 
-        try (CloseableHttpClient httpClient = HttpClients.createDefault())
+        try (
+                CloseableHttpClient httpClient = HttpClients.createDefault();
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider)))
         {
             HttpPost httpPost = new HttpPost(authProvider.getTokenUri());
-
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-
-            StringEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider));
             httpPost.setEntity(entity);
 
             return httpClient.execute(httpPost, response -> {
