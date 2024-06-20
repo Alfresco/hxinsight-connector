@@ -38,7 +38,7 @@ import lombok.extern.slf4j.Slf4j;
 public class RetryUtils
 {
     private static final int MAX_ATTEMPTS = 5;
-    private static final int INITIAL_DELAY_MS = 200;
+    private static final int INITIAL_DELAY_MS = 100;
     private static final int BACKOFF_MULTIPLIER = 2;
 
     public static void retryWithBackoff(Runnable runnable)
