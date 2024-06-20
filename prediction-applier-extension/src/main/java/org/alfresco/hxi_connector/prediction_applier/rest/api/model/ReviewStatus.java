@@ -27,24 +27,5 @@ package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
 public enum ReviewStatus
 {
-    UNREVIEWED("unreviewed"), CONFIRMED("confirmed"), REJECTED("rejected");
-
-    private final String value;
-
-    ReviewStatus(String status)
-    {
-        value = status;
-    }
-
-    public static ReviewStatus fromString(String status)
-    {
-        for (ReviewStatus reviewStatus : values())
-        {
-            if (reviewStatus.value.equalsIgnoreCase(status))
-            {
-                return reviewStatus;
-            }
-        }
-        return null;
-    }
+    UNREVIEWED, CONFIRMED, REJECTED
 }

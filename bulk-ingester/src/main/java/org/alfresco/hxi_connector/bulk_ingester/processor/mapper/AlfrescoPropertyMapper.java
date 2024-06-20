@@ -188,7 +188,7 @@ public class AlfrescoPropertyMapper
         }
         catch (ClassNotFoundException | IOException e)
         {
-            log.error("Cannot deserialize property {} value {}. Node: {}", propertyName, propertyValue, alfrescoNode.getId(), e);
+            log.error("Cannot deserialize property {} value {}. Node: {} with reference: {}", propertyName, propertyValue, alfrescoNode.getId(), alfrescoNode.getNodeRef(), e);
 
             return empty();
         }

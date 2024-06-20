@@ -59,6 +59,7 @@
     "http://www.alfresco.org/model/custommodelmanagement/1.0": "cmm",
     "http://www.alfresco.org/model/calendar": "ia",
     "http://www.alfresco.com/model/activiti-bpm-suite/1.0": "abs",
-    "http://www.alfresco.org/model/publishing/flickr/1.0": "flickr"
+    "http://www.alfresco.org/model/publishing/flickr/1.0": "flickr",
+    "http://www.alfresco.org/model/hxi/1.0": "hxi"
   }
 }
