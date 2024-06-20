@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.prediction_applier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -45,28 +44,25 @@ import org.alfresco.rest.api.model.Aspect;
 public class PredictionApplierExtensionIntegrationTest
 {
     private static final int TIMEOUT_SECONDS = 300;
-
-    static AspectsClient aspectsClient;
+    private static final String EXPECTED_HXI_ASPECT = "hxi:predictionApplied";
 
     static final Network network = Network.newNetwork();
     @Container
-    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
+    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network).withReuse(true);
     @Container
-    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
+    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network).withReuse(true);
+    @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
 
-    @BeforeAll
-    static void beforeAll()
-    {
-        repository.start();
-        aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
-    }
+    static AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
 
     @Test
     void testHxIModelInstallation()
     {
-        Aspect actualAspect = aspectsClient.getAspectById("hxi:predictionApplied");
+        // when
+        Aspect actualAspect = aspectsClient.getAspectById(EXPECTED_HXI_ASPECT);
 
+        // then
         assertThat(actualAspect).isNotNull();
     }
 
@@ -92,8 +88,7 @@ public class PredictionApplierExtensionIntegrationTest
                 postgres.getNetworkAliases().stream().findFirst().get(),
                 postgres.getDatabaseName(),
                 activemq.getNetworkAliases().stream().findFirst().get())
-            .replace("\n", " "))
-            .withReuse(true);
+            .replace("\n", " "));
         // @formatter:on
     }
 }
