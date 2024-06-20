@@ -125,6 +125,6 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
                         -Dmetadata-keystore.metadata.password=oKIWzVdEdA
                         -Dmetadata-keystore.metadata.algorithm=DESede
                         """.replace("\n", " "))
-                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class)));
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
     }
 }

@@ -27,6 +27,10 @@ package org.alfresco.hxi_connector.prediction_applier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import lombok.extern.slf4j.Slf4j;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.core.config.Configurator;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -40,6 +44,7 @@ import org.alfresco.hxi_connector.prediction_applier.util.client.AspectsClient;
 import org.alfresco.rest.api.model.Aspect;
 
 @Testcontainers
+@Slf4j
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionApplierExtensionIntegrationTest
 {
@@ -56,14 +61,22 @@ public class PredictionApplierExtensionIntegrationTest
 
     AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
 
+    @BeforeAll
+    static void beforeAll()
+    {
+        Configurator.setAllLevels("", Level.ALL);
+    }
+
     @Test
     void testHxIModelInstallation()
     {
+        log.info("before test - testHxIModelInstallation");
         // when
         Aspect actualAspect = aspectsClient.getAspectById(EXPECTED_HXI_ASPECT);
 
         // then
         assertThat(actualAspect).isNotNull();
+        log.info("after test - testHxIModelInstallation");
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
