@@ -35,7 +35,9 @@ import static org.apache.hc.core5.http.HttpHeaders.HOST;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.net.URI;
+import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
@@ -47,6 +49,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
@@ -136,7 +139,7 @@ public class DefaultAuthenticationClient extends RouteBuilder implements Authent
     private void wrapErrorIfNecessary(Exchange exchange)
     {
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
+        Set<Class<? extends Throwable>> retryReasons = Optional.ofNullable(authProperties.getRetry()).map(Retry::reasons).orElse(Collections.emptySet());
 
         ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
     }

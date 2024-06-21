@@ -103,21 +103,6 @@
                 </entry>
             </map>
         </property>
-        <property name="retry">
-            <bean class="org.alfresco.hxi_connector.common.config.properties.Retry">
-                <property name="reasons">
-                    <set merge="false">
-                        <value>org.alfresco.hxi_connector.common.exception.EndpointServerErrorException</value>
-                        <value>java.net.UnknownHostException</value>
-                        <value>java.net.MalformedURLException</value>
-                        <value>com.fasterxml.jackson.core.io.JsonEOFException</value>
-                        <value>com.fasterxml.jackson.databind.exc.MismatchedInputException</value>
-                        <value>org.apache.hc.core5.http.NoHttpResponseException</value>
-                        <value>org.apache.hc.core5.http.MalformedChunkCodingException</value>
-                    </set>
-                </property>
-            </bean>
-        </property>
     </bean>
 
     <bean id="hxInsightAuthClient" class="org.alfresco.messaging.camel.routes.HxInsightAuthClient">
