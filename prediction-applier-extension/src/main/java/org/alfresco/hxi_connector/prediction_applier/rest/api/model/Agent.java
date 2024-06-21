@@ -42,6 +42,7 @@ import lombok.experimental.Accessors;
 @NoArgsConstructor
 @JsonInclude(NON_NULL)
 @EqualsAndHashCode
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class Agent
 {
     private String _id;
