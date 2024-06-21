@@ -32,10 +32,12 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
@@ -46,6 +48,8 @@ import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoReposito
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
+    private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-prediction-applier-extension");
+    private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-prediction-applier-extension";
     private static final String POSTGRES_IMAGE = "postgres";
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
@@ -86,11 +90,9 @@ public class DockerContainers
     {
         pullRepositoryImage(enterprise);
         AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
-                new AlfrescoRepositoryExtension(
-                        "alfresco-hxinsight-connector-prediction-applier-extension",
-                        "localhost/alfresco/alfresco-content-repository-prediction-applier-extension",
-                        enterprise))
-                                .withStartupTimeout(Duration.ofMinutes(5));
+                new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, enterprise))
+                        .withStartupTimeout(Duration.ofMinutes(5))
+                        .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
 
@@ -154,7 +156,8 @@ public class DockerContainers
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
                 .withExposedPorts(8090)
                 .waitingFor(Wait.forListeningPort())
-                .withStartupTimeout(Duration.ofMinutes(2));
+                .withStartupTimeout(Duration.ofMinutes(2))
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformCoreContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> transformCoreAio.withNetwork(n).withNetworkAliases(TRANSFORM_CORE_AIO_ALIAS));
 
@@ -186,7 +189,8 @@ public class DockerContainers
                 .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT", "8099")
                 .withExposedPorts(5007)
                 .waitingFor(Wait.forListeningPort())
-                .withStartupTimeout(Duration.ofMinutes(2));
+                .withStartupTimeout(Duration.ofMinutes(2))
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("LiveIngesterContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> liveIngester.withNetwork(n).withNetworkAliases(LIVE_INGESTER_ALIAS));
 
@@ -200,7 +204,8 @@ public class DockerContainers
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withExposedPorts(5009)
                 .waitingFor(Wait.forListeningPort())
-                .withStartupTimeout(Duration.ofMinutes(2));
+                .withStartupTimeout(Duration.ofMinutes(2))
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("PredictionApplierContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> predictionApplier.withNetwork(n).withNetworkAliases(PREDICTION_APPLIER_ALIAS));
 
