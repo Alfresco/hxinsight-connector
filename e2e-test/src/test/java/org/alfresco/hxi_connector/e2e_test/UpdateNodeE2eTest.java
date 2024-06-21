@@ -171,12 +171,12 @@ public class UpdateNodeE2eTest
             -Ddeployment.method=DOCKER_COMPOSE
             -Xms1500m -Xmx1500m
             """.formatted(
-                    postgres.getUsername(),
-                    postgres.getPassword(),
-                    postgres.getNetworkAliases().stream().findFirst().get(),
-                    postgres.getDatabaseName(),
-                    activemq.getNetworkAliases().stream().findFirst().get())
-                .replace("\n", " "));
+                postgres.getUsername(),
+                postgres.getPassword(),
+                postgres.getNetworkAliases().stream().findFirst().get(),
+                postgres.getDatabaseName(),
+                activemq.getNetworkAliases().stream().findFirst().get())
+            .replace("\n", " "));
         // @formatter:on
     }
 
