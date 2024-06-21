@@ -58,29 +58,34 @@ public class ErrorUtils
         }
     }
 
-    public static void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons)
+    public static RuntimeException wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons)
     {
-        wrapErrorIfNecessary(cause, retryReasons, HxInsightConnectorRuntimeException.class);
+        return wrapError(cause, retryReasons, HxInsightConnectorRuntimeException.class);
     }
 
-    @SuppressWarnings("PMD.PreserveStackTrace")
-    public static void wrapErrorIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
+    public static void wrapErrorAndThrowIfNecessary(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
+    {
+        throw wrapError(cause, retryReasons, runtimeExceptionType);
+    }
+
+    @SuppressWarnings("PMD.ExceptionAsFlowControl")
+    private static RuntimeException wrapError(Exception cause, Set<Class<? extends Throwable>> retryReasons, Class<? extends RuntimeException> runtimeExceptionType)
     {
         if (cause instanceof EndpointServerErrorException)
         {
-            throw (EndpointServerErrorException) cause;
+            return (EndpointServerErrorException) cause;
         }
         else if (retryReasons.contains(cause.getClass()))
         {
-            throw new EndpointServerErrorException(cause);
+            return new EndpointServerErrorException(cause);
         }
         else if (cause instanceof EndpointClientErrorException)
         {
-            throw (EndpointClientErrorException) cause;
+            return (EndpointClientErrorException) cause;
         }
         else if (runtimeExceptionType.isAssignableFrom(cause.getClass()))
         {
-            throw runtimeExceptionType.cast(cause);
+            return runtimeExceptionType.cast(cause);
         }
         else
         {
@@ -90,8 +95,12 @@ public class ErrorUtils
             }
             catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e)
             {
-                throw new HxInsightConnectorRuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
+                return new HxInsightConnectorRuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
                         .formatted(runtimeExceptionType.getSimpleName(), e.getMessage()), cause);
+            }
+            catch (RuntimeException e)
+            {
+                return e;
             }
         }
     }
