@@ -25,12 +25,13 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
+import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
+
 import java.util.Base64;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
-import org.springframework.http.HttpHeaders;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
@@ -52,7 +53,7 @@ public class AuthService
         String authType = authProvider.getType();
         String authHeaderValue = getAlfrescoAuthHeaderValue(accessTokenProvider, authProvider);
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, authHeaderValue);
+        exchange.getIn().setHeader(AUTHORIZATION, authHeaderValue);
         log.debug("Authorization :: {} {} authorization header added", ALFRESCO_AUTH_PROVIDER, authType);
     }
 
@@ -62,7 +63,7 @@ public class AuthService
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(HXI_AUTH_PROVIDER);
         String authHeaderValue = BEARER + token;
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(HttpHeaders.AUTHORIZATION, authHeaderValue);
+        exchange.getIn().setHeader(AUTHORIZATION, authHeaderValue);
         exchange.getIn().setHeader(ENVIRONMENT_KEY_HEADER, authProvider.getEnvironmentKey());
         log.debug("Authorization :: {} authorization header added", HXI_AUTH_PROVIDER);
     }
@@ -87,7 +88,7 @@ public class AuthService
 
     private static void clearAuthHeaders(Exchange exchange)
     {
-        exchange.getIn().removeHeader(HttpHeaders.AUTHORIZATION);
+        exchange.getIn().removeHeader(AUTHORIZATION);
         exchange.getIn().removeHeader(ENVIRONMENT_KEY_HEADER);
     }
 }

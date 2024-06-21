@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.config;
 
-import org.apache.camel.CamelContext;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -44,9 +43,9 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 public class AuthConfig
 {
     @Bean
-    public AccessTokenProvider defaultAccessTokenProvider(CamelContext camelContext, AuthenticationClient predictionApplierHxAuthClient)
+    public AccessTokenProvider defaultAccessTokenProvider(AuthenticationClient predictionApplierHxAuthClient)
     {
-        return new DefaultAccessTokenProvider(camelContext, predictionApplierHxAuthClient);
+        return new DefaultAccessTokenProvider(predictionApplierHxAuthClient);
     }
 
     @Bean

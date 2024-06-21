@@ -117,7 +117,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().ingester().retry().reasons();
 
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
+        ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 
 }

@@ -124,6 +124,6 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
         Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.alfresco().transform().sharedFileStore().retry().reasons();
 
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
+        ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 }
