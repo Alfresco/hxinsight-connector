@@ -159,21 +159,21 @@ public class UpdateNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
-        Node updateNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
+        Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(updateNode.id()))));
+                .withRequestBody(containing(updatedNode.id()))));
         WireMock.reset();
-        prepareHxInsightMockToReturnPredictionFor(updateNode.id());
+        prepareHxInsightMockToReturnPredictionFor(updatedNode.id());
 
         // when
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
         WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
 
         // then
-        assertThat(updateNode.aspects()).doesNotContain(PREDICTION_APPLIED_ASPECT);
-        assertThat(updateNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
+        assertThat(updatedNode.aspects()).doesNotContain(PREDICTION_APPLIED_ASPECT);
+        assertThat(updatedNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode = repositoryNodesClient.getNode(updateNode.id());
+            Node actualNode = repositoryNodesClient.getNode(updatedNode.id());
             assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
