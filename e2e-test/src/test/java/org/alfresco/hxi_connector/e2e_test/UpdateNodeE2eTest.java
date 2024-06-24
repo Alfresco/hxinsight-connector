@@ -89,6 +89,14 @@ public class UpdateNodeE2eTest
               }
             ]
             """;
+    private static final String UPDATE_NODE_PROPERTIES = """
+            {
+                "properties": {
+                    "cm:versionLabel": "1.1",
+                    "cm:title": "User title"
+                    }
+            }
+            """;
 
     static final Network network = Network.newNetwork();
     @Container
@@ -135,6 +143,37 @@ public class UpdateNodeE2eTest
         assertThat(createdNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
         RetryUtils.retryWithBackoff(() -> {
             Node actualNode = repositoryNodesClient.getNode(createdNode.id());
+            assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
+            assertThat(actualNode.properties())
+                    .containsKey(PROPERTY_TO_UPDATE)
+                    .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
+        });
+        verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
+    }
+
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void testApplyPredictionToUpdatedNode() throws IOException
+    {
+        // given
+        @Cleanup
+        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
+        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
+        Node updateNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
+        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing(updateNode.id()))));
+        WireMock.reset();
+        prepareHxInsightMockToReturnPredictionFor(updateNode.id());
+
+        // when
+        WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+        WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+
+        // then
+        assertThat(updateNode.aspects()).doesNotContain(PREDICTION_APPLIED_ASPECT);
+        assertThat(updateNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
+        RetryUtils.retryWithBackoff(() -> {
+            Node actualNode = repositoryNodesClient.getNode(updateNode.id());
             assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
