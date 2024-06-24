@@ -13,11 +13,6 @@
     <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-        <!-- Camel version in extension has to be the same as in ACS -->
-        <spring-camel.version>4.0.0</spring-camel.version>
-    </properties>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -46,18 +41,6 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.camel.springboot</groupId>
-                    <artifactId>camel-http-starter</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <dependency>
-            <groupId>org.apache.camel</groupId>
-            <artifactId>camel-http</artifactId>
-            <version>${spring-camel.version}</version>
         </dependency>
 
         <dependency>
@@ -155,13 +138,6 @@
                                 <includes>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common</include>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common-authentication</include>
-                                    <include>jakarta.servlet:jakarta.servlet-api</include>
-                                    <include>org.apache.camel:camel-http-base</include>
-                                    <include>org.apache.camel:camel-http-common</include>
-                                    <include>org.apache.camel:camel-http</include>
-                                    <include>org.apache.httpcomponents.core5:httpcore5</include>
-                                    <include>org.apache.httpcomponents.core5:httpcore5-h2</include>
-                                    <include>org.apache.httpcomponents.client5:httpclient5</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
