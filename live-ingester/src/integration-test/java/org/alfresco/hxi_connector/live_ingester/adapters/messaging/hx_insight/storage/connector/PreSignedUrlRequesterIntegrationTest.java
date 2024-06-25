@@ -55,8 +55,6 @@ import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.http.Fault;
-import org.apache.camel.CamelContext;
-import org.apache.camel.impl.DefaultCamelContext;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -285,10 +283,8 @@ class PreSignedUrlRequesterIntegrationTest
         @Bean
         public AccessTokenProvider defaultAccessTokenProvider()
         {
-            CamelContext camelContext = new DefaultCamelContext();
-            camelContext.start();
-            AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(camelContext, authorizationProperties());
-            DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(camelContext, dummyAuthClient);
+            AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(authorizationProperties());
+            DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(dummyAuthClient);
             Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
             AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
             tokens.put(HXI_AUTH_PROVIDER, Map.entry(dummyAuthResult, OffsetDateTime.now().plusSeconds(3600)));

@@ -35,7 +35,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED;
-import static org.apache.http.HttpHeaders.HOST;
+import static org.apache.hc.core5.http.HttpHeaders.CONTENT_LENGTH;
+import static org.apache.hc.core5.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.hc.core5.http.HttpHeaders.HOST;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
@@ -47,8 +49,7 @@ import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.apache.camel.Exchange;
-import org.apache.http.HttpStatus;
+import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -97,8 +98,8 @@ public abstract class DefaultAuthenticationClientTest
         String authRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthMock.getHost() + ":" + hxAuthMock.getPort()))
-                .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
-                .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))
+                .withHeader(CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
+                .withHeader(CONTENT_LENGTH, new EqualToPattern(String.valueOf(authRequestBody.getBytes(UTF_8).length)))
                 .withRequestBody(new EqualToPattern(authRequestBody)));
         AuthenticationResult expectedAuthenticationResult = AuthUtils.createExpectedAuthResult();
         assertThat(authenticationResult).isEqualTo(expectedAuthenticationResult);
@@ -116,7 +117,7 @@ public abstract class DefaultAuthenticationClientTest
 
         // then
         then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(HXI_AUTH_PROVIDER);
-        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointServerErrorException.class);
     }
 
     @Test
@@ -131,6 +132,6 @@ public abstract class DefaultAuthenticationClientTest
 
         // then
         then(authenticationClient).should(times(1)).authenticate(HXI_AUTH_PROVIDER);
-        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointClientErrorException.class);
     }
 }

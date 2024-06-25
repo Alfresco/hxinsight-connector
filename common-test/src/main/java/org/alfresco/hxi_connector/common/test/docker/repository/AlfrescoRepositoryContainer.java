@@ -29,8 +29,10 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.PullResponseItem;
 import lombok.NonNull;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.utility.DockerImageName;
 
 import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
@@ -122,6 +124,7 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
                         -Dmetadata-keystore.aliases=metadata
                         -Dmetadata-keystore.metadata.password=oKIWzVdEdA
                         -Dmetadata-keystore.metadata.algorithm=DESede
-                        """.replace("\n", " "));
+                        """.replace("\n", " "))
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
     }
 }
