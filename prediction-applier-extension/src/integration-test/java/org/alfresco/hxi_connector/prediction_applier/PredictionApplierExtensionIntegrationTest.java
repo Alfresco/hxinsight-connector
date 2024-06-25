@@ -44,6 +44,7 @@ import org.alfresco.rest.api.model.Aspect;
 public class PredictionApplierExtensionIntegrationTest
 {
     private static final int TIMEOUT_SECONDS = 300;
+    private static final String EXPECTED_HXI_ASPECT = "hxi:predictionApplied";
 
     static final Network network = Network.newNetwork();
     @Container
@@ -58,8 +59,10 @@ public class PredictionApplierExtensionIntegrationTest
     @Test
     void testHxIModelInstallation()
     {
-        Aspect actualAspect = aspectsClient.getAspectById("hxi:predictionApplied");
+        // when
+        Aspect actualAspect = aspectsClient.getAspectById(EXPECTED_HXI_ASPECT);
 
+        // then
         assertThat(actualAspect).isNotNull();
     }
 

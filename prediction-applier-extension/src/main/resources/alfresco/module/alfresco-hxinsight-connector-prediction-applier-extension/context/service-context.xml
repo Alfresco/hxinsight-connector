@@ -25,7 +25,6 @@
         <constructor-arg name="namespaceService" ref="NamespaceService"/>
     </bean>
 
-
     <bean id="PredictionService" class="org.springframework.aop.framework.ProxyFactoryBean">
         <property name="proxyInterfaces">
             <value>org.alfresco.hxi_connector.prediction_applier.service.PredictionService</value>
@@ -86,4 +85,33 @@
         <property name="beanName" value="simpleMappingExceptionResolverParent"/>
         <property name="extendingBeanName" value="hxi.simpleMappingExceptionResolver"/>
     </bean>
+
+    <bean id="hxiAuthProperties" class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties">
+        <property name="providers">
+            <map>
+                <entry key="hyland-experience">
+                    <bean class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties.AuthProvider">
+                        <property name="type" value="${hxi.auth.providers.hyland-experience.type}"/>
+                        <property name="grantType" value="${hxi.auth.providers.hyland-experience.grant-type}"/>
+                        <property name="clientName" value="${hxi.auth.providers.hyland-experience.client-name}"/>
+                        <property name="clientId" value="${hxi.auth.providers.hyland-experience.client-id}"/>
+                        <property name="clientSecret" value="${hxi.auth.providers.hyland-experience.client-secret}"/>
+                        <property name="scope" value="${hxi.auth.providers.hyland-experience.scope}"/>
+                        <property name="tokenUri" value="${hxi.auth.providers.hyland-experience.token-uri}"/>
+                        <property name="environmentKey" value="${hxi.auth.providers.hyland-experience.environment-key}"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+    </bean>
+
+    <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient">
+        <constructor-arg name="authProperties" ref="hxiAuthProperties"/>
+    </bean>
+
+    <bean id="hxiAccessTokenProvider" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider">
+        <constructor-arg name="authenticationClient" ref="hxInsightAuthClient"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource"/>
 </beans>
