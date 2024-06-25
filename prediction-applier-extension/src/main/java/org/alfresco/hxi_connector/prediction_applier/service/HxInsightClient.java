@@ -37,6 +37,7 @@ import jakarta.annotation.PreDestroy;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -64,19 +65,20 @@ public class HxInsightClient
     @SneakyThrows
     public String askQuestion(Question question)
     {
-        try (HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON))
-        {
-            HttpPost httpPost = new HttpPost(QUESTION_URL);
-            httpPost.setEntity(body);
+        @Cleanup
+        HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
 
-            authService.setAuthHeader(httpPost);
+        HttpPost httpPost = new HttpPost(QUESTION_URL);
+        httpPost.setEntity(body);
 
-            return client.execute(httpPost, (response) -> {
-                throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
+        authService.setAuthHeader(httpPost);
 
-                return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
-            });
-        }
+        return client.execute(httpPost, (response) -> {
+            throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
+
+            return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
+        });
+
     }
 
     @PreDestroy
