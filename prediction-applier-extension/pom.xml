@@ -143,10 +143,7 @@
                                 <includes>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common</include>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common-authentication</include>
-                                    <include>jakarta.servlet:jakarta.servlet-api</include>
                                     <include>org.apache.httpcomponents.core5:httpcore5</include>
-                                    <include>org.apache.httpcomponents.core5:httpcore5-h2</include>
-                                    <include>org.apache.httpcomponents.client5:httpclient5</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
