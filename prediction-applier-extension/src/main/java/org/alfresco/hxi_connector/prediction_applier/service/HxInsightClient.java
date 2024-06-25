@@ -60,7 +60,6 @@ public class HxInsightClient
     private final AuthService authService;
     private final ObjectMapper objectMapper;
     private final CloseableHttpClient client = HttpClients.createDefault();
-    private final String QUESTION_URL = config.baseUrl() + "/v1/questions";
 
     @SneakyThrows
     public String askQuestion(Question question)
@@ -68,7 +67,7 @@ public class HxInsightClient
         @Cleanup
         HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
 
-        HttpPost httpPost = new HttpPost(QUESTION_URL);
+        HttpPost httpPost = new HttpPost(config.questionUrl());
         httpPost.setEntity(body);
 
         authService.setAuthHeader(httpPost);
@@ -78,7 +77,6 @@ public class HxInsightClient
 
             return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
         });
-
     }
 
     @PreDestroy
@@ -86,7 +84,7 @@ public class HxInsightClient
     {
         try
         {
-            log.info("Closing the HTTP client");
+            log.trace("Closing the HTTP client");
             client.close();
         }
         catch (IOException e)
