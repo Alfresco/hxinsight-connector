@@ -48,12 +48,14 @@ import org.apache.hc.core5.http.io.entity.StringEntity;
 
 import org.alfresco.hxi_connector.prediction_applier.service.config.QuestionServiceConfig;
 import org.alfresco.hxi_connector.prediction_applier.service.model.Question;
+import org.alfresco.hxi_connector.prediction_applier.service.util.AuthService;
 
 @Slf4j
 @RequiredArgsConstructor
 public class HxInsightClient
 {
     private final QuestionServiceConfig config;
+    private final AuthService authService;
     private final ObjectMapper objectMapper;
     private final CloseableHttpClient client = HttpClients.createDefault();
     private final String QUESTION_URL = config.baseUrl() + "/v1/questions";
@@ -66,6 +68,8 @@ public class HxInsightClient
         {
             HttpPost httpPost = new HttpPost(QUESTION_URL);
             httpPost.setEntity(body);
+
+            authService.setAuthHeader(httpPost);
 
             return client.execute(httpPost, (response) -> {
                 throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
