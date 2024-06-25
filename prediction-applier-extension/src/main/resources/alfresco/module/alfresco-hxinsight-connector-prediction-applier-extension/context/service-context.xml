@@ -68,11 +68,22 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource"/>
-
     <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.PredictionsEntityResource">
         <property name="nodes" ref="nodes"/>
         <property name="predictionService" ref="PredictionService"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.service.config.QuestionServiceConfig" id="questionServiceConfig">
+        <constructor-arg name="askQuestionUrl" value="${hxi.client.askQuestionUrl}"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.service.QuestionService" id="questionService">
+        <constructor-arg name="config" ref="questionServiceConfig"/>
+        <constructor-arg name="objectMapper" ref="alfrescoEventObjectMapper"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource">
+        <constructor-arg name="questionService" ref="questionService"/>
     </bean>
 
     <bean id="hxi.simpleMappingExceptionResolver" abstract="true" parent="simpleMappingExceptionResolverParent">

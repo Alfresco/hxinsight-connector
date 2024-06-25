@@ -29,31 +29,37 @@ import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.util.List;
 
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.Question;
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.QuestionModel;
+import org.alfresco.hxi_connector.prediction_applier.service.QuestionService;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @Slf4j
+@RequiredArgsConstructor
 @EntityResource(name = "questions", title = "Questions about documents")
-public class QuestionsEntityResource implements EntityResourceAction.Create<Question>
+public class QuestionsEntityResource implements EntityResourceAction.Create<QuestionModel>
 {
+    private final QuestionService questionService;
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
-    public List<Question> create(List<Question> questions, Parameters parameters)
+    public List<QuestionModel> create(List<QuestionModel> questions, Parameters parameters)
     {
         ensureThat(questions.size() == 1, () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask one question at a time."));
 
-        Question question = questions.get(0);
+        QuestionModel question = questions.get(0);
 
         log.info("Received question: {}", question);
 
-        return List.of(question.withId("questionId"));
+        String questionId = questionService.askQuestion(question.getQuestion());
+
+        return List.of(question.withId(questionId));
     }
 }
