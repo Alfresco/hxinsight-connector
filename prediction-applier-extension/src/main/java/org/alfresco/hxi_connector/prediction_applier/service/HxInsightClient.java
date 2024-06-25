@@ -54,12 +54,12 @@ import org.alfresco.hxi_connector.prediction_applier.service.util.AuthService;
 @RequiredArgsConstructor
 public class HxInsightClient
 {
+    private final static String QUESTION_ID_ENTRY = "questionId";
     private final QuestionServiceConfig config;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
     private final CloseableHttpClient client = HttpClients.createDefault();
     private final String QUESTION_URL = config.baseUrl() + "/v1/questions";
-    private final String QUESTION_ID_ENTRY = "questionId";
 
     @SneakyThrows
     public String askQuestion(Question question)
