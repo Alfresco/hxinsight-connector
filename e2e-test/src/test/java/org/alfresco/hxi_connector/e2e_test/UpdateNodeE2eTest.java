@@ -94,7 +94,7 @@ public class UpdateNodeE2eTest
                 "properties": {
                     "cm:versionLabel": "1.1",
                     "cm:title": "User title"
-                    }
+                }
             }
             """;
 
@@ -160,7 +160,7 @@ public class UpdateNodeE2eTest
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
         Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> verify(exactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))));
         WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(updatedNode.id());
