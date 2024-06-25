@@ -95,9 +95,8 @@ public class DeleteNodeE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> verify(exactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
-
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(matching(".*\"objectId\":\"" + createdNode.id() + "\",\"eventType\":\"delete\".*"))));
+        verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(matching(".*\"objectId\":\"" + createdNode.id() + "\",\"eventType\":\"delete\".*")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
