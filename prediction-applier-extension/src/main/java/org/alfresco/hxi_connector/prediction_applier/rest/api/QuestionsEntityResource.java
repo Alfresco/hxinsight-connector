@@ -35,7 +35,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.prediction_applier.rest.api.model.QuestionModel;
-import org.alfresco.hxi_connector.prediction_applier.service.QuestionService;
+import org.alfresco.hxi_connector.prediction_applier.service.HxInsightClient;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
@@ -46,7 +46,7 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 @EntityResource(name = "questions", title = "Questions about documents")
 public class QuestionsEntityResource implements EntityResourceAction.Create<QuestionModel>
 {
-    private final QuestionService questionService;
+    private final HxInsightClient hxInsightClient;
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
@@ -58,7 +58,7 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
 
         log.info("Received question: {}", question);
 
-        String questionId = questionService.askQuestion(question.toQuestion());
+        String questionId = hxInsightClient.askQuestion(question.toQuestion());
 
         return List.of(question.withId(questionId));
     }

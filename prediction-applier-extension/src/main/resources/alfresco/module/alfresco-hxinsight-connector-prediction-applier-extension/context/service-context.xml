@@ -73,10 +73,10 @@
     </bean>
 
     <bean class="org.alfresco.hxi_connector.prediction_applier.service.config.QuestionServiceConfig" id="questionServiceConfig">
-        <constructor-arg name="askQuestionUrl" value="${hxi.client.askQuestionUrl}"/>
+        <constructor-arg name="baseUrl" value="${hxi.client.baseUrl}"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.prediction_applier.service.QuestionService" id="questionService">
+    <bean class="org.alfresco.hxi_connector.prediction_applier.service.HxInsightClient" id="questionService">
         <constructor-arg name="config" ref="questionServiceConfig"/>
         <constructor-arg name="objectMapper" ref="alfrescoEventObjectMapper"/>
     </bean>

@@ -29,5 +29,5 @@ package org.alfresco.hxi_connector.prediction_applier.service.config;
 import jakarta.validation.constraints.NotBlank;
 
 public record QuestionServiceConfig(
-        @NotBlank String askQuestionUrl)
+        @NotBlank String baseUrl)
 {}
