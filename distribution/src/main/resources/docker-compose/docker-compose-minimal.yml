@@ -1,0 +1,188 @@
+version: "3.8"
+
+services:
+  alfresco:
+    image: quay.io/alfresco/alfresco-content-repository-prediction-applier-extension:${HXINSIGHT_CONNECTOR_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 1700m
+    environment:
+      CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n"
+      JAVA_TOOL_OPTIONS: "
+        -Dencryption.keystore.type=JCEKS
+        -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
+        -Dencryption.keyAlgorithm=DESede
+        -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
+        -Dmetadata-keystore.password=mp6yc0UD9e
+        -Dmetadata-keystore.aliases=metadata
+        -Dmetadata-keystore.metadata.password=oKIWzVdEdA
+        -Dmetadata-keystore.metadata.algorithm=DESede
+        "
+      JAVA_OPTS: "
+        -Ddb.driver=org.postgresql.Driver
+        -Ddb.username=alfresco
+        -Ddb.password=alfresco
+        -Ddb.url=jdbc:postgresql://postgres:5432/alfresco
+        -Dalfresco.host=localhost
+        -Dalfresco.port=8080
+        -Daos.baseUrlOverwrite=http://localhost:8080/alfresco/aos
+        -Dmessaging.broker.url=\"failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true\"
+        -Ddeployment.method=DOCKER_COMPOSE
+        -Dtransform.service.enabled=true
+        -Dtransform.service.url=http://transform-router:8095
+        -Dsfs.url=http://shared-file-store:8099/
+        -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
+        -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
+        -Djodconverter.url=http://transform-core-aio:8090/
+        -Dimg.url=http://transform-core-aio:8090/
+        -Dtika.url=http://transform-core-aio:8090/
+        -Dtransform.misc.url=http://transform-core-aio:8090/
+        -Dcsrf.filter.enabled=false
+        -Dalfresco.restApi.basicAuthScheme=true
+        -Xms1500m -Xmx1500m
+        "
+    ports:
+      - "8000:8000"
+      - "8080:8080"
+    healthcheck:
+      test: curl --fail http://localhost:8080/alfresco || exit 1
+      start_period: 90s
+      interval: 10s
+      timeout: 3s
+      retries: 20
+
+  postgres:
+    image: postgres:${POSTGRES_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    environment:
+      POSTGRES_PASSWORD: alfresco
+      POSTGRES_USER: alfresco
+      POSTGRES_DB: alfresco
+    command: postgres -c max_connections=300 -c log_min_messages=LOG
+    ports:
+      - "5432:5432"
+
+  activemq:
+    image: quay.io/alfresco/alfresco-activemq:${ACTIVE_MQ_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 1g
+    ports:
+      - "8161:8161" # Web Console
+      - "5672:5672" # AMQP
+      - "61616:61616" # OpenWire
+      - "61613:61613" # STOMP
+
+  transform-router:
+    image: quay.io/alfresco/alfresco-transform-router:${TRANSFORM_ROUTER_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    environment:
+      JAVA_OPTS: " -Xms256m -Xmx512m"
+      ACTIVEMQ_URL: "nio://activemq:61616"
+      CORE_AIO_URL: "http://transform-core-aio:8090"
+      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+    ports:
+      - "8095:8095"
+    links:
+      - activemq
+
+  transform-core-aio:
+    image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_CORE_AIO_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 3000m
+    environment:
+      JAVA_OPTS: " -Xms256m -Xmx3000m"
+      ACTIVEMQ_URL: "nio://activemq:61616"
+      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+    ports:
+      - "8090:8090"
+    links:
+      - activemq
+
+  shared-file-store:
+    image: quay.io/alfresco/alfresco-shared-file-store:${SHARED_FILE_STORE_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    environment:
+      JAVA_OPTS: " -Xms256m -Xmx512m"
+      scheduler.content.age.millis: 86400000
+      scheduler.cleanup.interval: 86400000
+    ports:
+      - "8099:8099"
+    volumes:
+      - shared-file-store-volume:/tmp/Alfresco/sfs
+
+  live-ingester:
+    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:${HXINSIGHT_CONNECTOR_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    depends_on:
+      activemq:
+        condition: service_started
+      alfresco:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
+      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
+      HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080
+      ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST: http://shared-file-store
+      ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT: 8099
+      AUTH_PROVIDERS_HYLAND-EXPERIENCE-AUTH_CLIENT-ID: dummy-client-id
+      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-secret
+      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
+      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://hxinsight-mock:8080/token
+    ports:
+      - "5007:5007"
+
+  hxinsight-mock:
+    image: wiremock/wiremock:${WIREMOCK_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    command: "--global-response-templating --permitted-system-keys=AWS_.* --verbose"
+    environment:
+      AWS_HOST: aws-mock
+      AWS_PORT: 4566
+      AWS_S3_BUCKET_NAME: test-hxinsight-bucket
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./wiremock/hxinsight:/home/wiremock
+
+  aws-mock:
+    image: localstack/localstack:${LOCALSTACK_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 256m
+    environment:
+      SERVICES: s3
+      BUCKET_NAME: test-hxinsight-bucket
+    ports:
+      - "4566:4566"
+    volumes:
+      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
+      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
+      - "/var/run/docker.sock:/var/run/docker.sock"
+
+volumes:
+  shared-file-store-volume:
+    driver_opts:
+      type: tmpfs
+      device: tmpfs

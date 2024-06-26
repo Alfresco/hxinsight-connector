@@ -146,8 +146,14 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
+      - name: "Start docker-compose"
+        run: ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+      - name: "Run e2e plain docker-compose tests"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'prediction-applier-extension,e2e-test' -am -Dtest=CreateNodeE2eTest -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Stop docker-compose"
+        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'prediction-applier-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'prediction-applier-extension,e2e-test' -am Dtest=\!CreateNodeE2eTest -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
 #  push_docker_images:
 #    name: "Push docker images"
