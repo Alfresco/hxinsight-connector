@@ -52,7 +52,7 @@ public class NodeEntityResource implements EntityResourceAction.ReadById<NodeWit
     private final NodesImpl nodes;
     private final PredictionService predictionService;
 
-    public NodeEntityResource(@Qualifier("NodeService") NodeService nodeService, NodesImpl nodes,
+    public NodeEntityResource(@Qualifier("NodeService") NodeService nodeService, @Qualifier("nodes") NodesImpl nodes,
             PredictionService predictionService)
     {
         this.nodeService = nodeService;

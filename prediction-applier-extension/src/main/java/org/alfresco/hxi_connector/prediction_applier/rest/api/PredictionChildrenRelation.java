@@ -57,7 +57,7 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
     private final TransactionService transactionService;
     private final PredictionService predictionService;
 
-    public PredictionChildrenRelation(NodesImpl nodes, @Qualifier("TransactionService") TransactionService transactionService,
+    public PredictionChildrenRelation(@Qualifier("nodes") NodesImpl nodes, @Qualifier("TransactionService") TransactionService transactionService,
             PredictionService predictionService)
     {
         this.nodes = nodes;
