@@ -49,7 +49,7 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 {
     public static final int EXPECTED_STATUS_CODE = 200;
 
-    private final AuthProperties authProperties;
+    protected final AuthProperties authProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override

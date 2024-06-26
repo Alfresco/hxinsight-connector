@@ -103,16 +103,21 @@
                 </entry>
             </map>
         </property>
+        <property name="retry">
+            <bean class="org.alfresco.hxi_connector.common.config.properties.Retry">
+                <property name="attempts" value="${hxi.auth.retry.attempts}"/>
+                <property name="initialDelay" value="${hxi.auth.retry.initial-delay}"/>
+                <property name="delayMultiplier" value="${hxi.auth.retry.delay-multiplier}"/>
+            </bean>
+        </property>
     </bean>
 
-    <bean id="hxInsightAuthClient" class="org.alfresco.messaging.camel.routes.HxInsightAuthClient">
-        <constructor-arg index="0" ref="alfrescoCamelContext"/>
-        <constructor-arg index="1" ref="hxiAuthProperties"/>
+    <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.prediction_applier.client.HxInsightAuthClient">
+        <constructor-arg index="0" ref="hxiAuthProperties"/>
     </bean>
 
     <bean id="hxiAccessTokenProvider" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider">
-        <constructor-arg index="0" ref="alfrescoCamelContext"/>
-        <constructor-arg index="1" ref="hxInsightAuthClient"/>
+        <constructor-arg index="0" ref="hxInsightAuthClient"/>
     </bean>
 
     <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource"/>
