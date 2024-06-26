@@ -27,30 +27,33 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
+import org.springframework.beans.factory.DisposableBean;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
 @Slf4j
-public class DefaultAuthenticationClient implements AuthenticationClient
+public class DefaultAuthenticationClient implements AuthenticationClient, DisposableBean
 {
     public static final int EXPECTED_STATUS_CODE = 200;
 
     private final AuthProperties authProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final CloseableHttpClient httpClient = HttpClients.createDefault();
 
     @Override
     public AuthenticationResult authenticate(String providerId)
@@ -60,16 +63,15 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
         log.atDebug().log("Authentication :: sending token request for {} authorization provider", providerId);
 
-        try (
-                CloseableHttpClient httpClient = HttpClients.createDefault();
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider)))
+        try
         {
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider));
             HttpPost httpPost = new HttpPost(authProvider.getTokenUri());
             httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
             httpPost.setEntity(entity);
 
             return httpClient.execute(httpPost, response -> {
-                ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.getCode(), EXPECTED_STATUS_CODE);
+                ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.getStatusLine().getStatusCode(), EXPECTED_STATUS_CODE);
 
                 return objectMapper.readValue(EntityUtils.toString(response.getEntity()), AuthenticationResult.class);
             });
@@ -93,5 +95,19 @@ public class DefaultAuthenticationClient implements AuthenticationClient
                 .password(authProvider.getPassword())
                 .build()
                 .getTokenRequestBody();
+    }
+
+    @Override
+    public void destroy()
+    {
+        try
+        {
+            log.trace("Closing the HTTP client");
+            httpClient.close();
+        }
+        catch (IOException e)
+        {
+            log.error("Failed to close the HTTP client", e);
+        }
     }
 }

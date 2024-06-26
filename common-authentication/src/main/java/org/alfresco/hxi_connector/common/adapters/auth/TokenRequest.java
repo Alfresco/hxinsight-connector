@@ -33,8 +33,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.ToString;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.message.BasicNameValuePair;
+import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.springframework.util.CollectionUtils;
 
 @AllArgsConstructor
