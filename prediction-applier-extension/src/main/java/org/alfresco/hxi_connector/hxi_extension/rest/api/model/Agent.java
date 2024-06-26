@@ -23,20 +23,29 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-import java.io.Serializable;
-import java.util.Date;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
-public record PredictionModelResponseEntry(
-        String id,
-        String property,
-        Date predictionDateTime,
-        float confidenceLevel,
-        String modelId,
-        Serializable predictionValue,
-        Serializable previousValue,
-        UpdateType updateType)
-{}
+@Accessors(prefix = {"_", ""})
+@ToString
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@EqualsAndHashCode
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class Agent
+{
+    private String _id;
+    private String name;
+    private String description;
+}

@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,20 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
 
-import java.io.Serializable;
-import java.util.Date;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.util;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
+import static lombok.AccessLevel.PRIVATE;
 
-public record PredictionModelResponseEntry(
-        String id,
-        String property,
-        Date predictionDateTime,
-        float confidenceLevel,
-        String modelId,
-        Serializable predictionValue,
-        Serializable previousValue,
-        UpdateType updateType)
-{}
+import lombok.NoArgsConstructor;
+
+import org.alfresco.rest.api.Nodes;
+import org.alfresco.service.cmr.repository.NodeRef;
+
+@NoArgsConstructor(access = PRIVATE)
+public class NodesUtils
+{
+    // To keep compatibility with 7.3.x ACS versions we cannot use validateOrLookupNode(id)
+    public static NodeRef validateOrLookupNode(Nodes nodes, String id)
+    {
+        return nodes.validateOrLookupNode(id, null);
+    }
+}

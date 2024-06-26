@@ -29,7 +29,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
 
 public record PredictionEntry(
         String objectId,
