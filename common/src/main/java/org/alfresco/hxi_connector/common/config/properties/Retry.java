@@ -36,10 +36,8 @@ import jakarta.validation.constraints.PositiveOrZero;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
 import org.apache.hc.core5.http.NoHttpResponseException;
@@ -47,8 +45,6 @@ import org.apache.hc.core5.http.NoHttpResponseException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Getter(AccessLevel.NONE)
 public class Retry
 {
@@ -70,7 +66,28 @@ public class Retry
     @PositiveOrZero
     private int initialDelay = RETRY_INITIAL_DELAY_DEFAULT;
     @Positive private double delayMultiplier = RETRY_DELAY_MULTIPLIER_DEFAULT;
-    @NotNull private Set<Class<? extends Throwable>> reasons = RETRY_REASONS;
+    @NotNull private Set<Class<? extends Throwable>> reasons;
+
+    public Retry()
+    {
+        this.reasons = RETRY_REASONS;
+    }
+
+    public Retry(int attempts, int initialDelay, double delayMultiplier)
+    {
+        this();
+        this.attempts = attempts;
+        this.initialDelay = initialDelay;
+        this.delayMultiplier = delayMultiplier;
+    }
+
+    public Retry(int attempts, int initialDelay, double delayMultiplier, Set<Class<? extends Throwable>> reasons)
+    {
+        this.attempts = attempts;
+        this.initialDelay = initialDelay;
+        this.delayMultiplier = delayMultiplier;
+        this.reasons = reasons;
+    }
 
     public int attempts()
     {
