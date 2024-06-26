@@ -39,8 +39,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
-import org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException;
-import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.exception.PredictionStateChangedException;
+import org.alfresco.hxi_connector.hxi_extension.service.PredictionService;
 import org.alfresco.repo.security.permissions.impl.AlwaysProceedMethodInterceptor;
 import org.alfresco.rest.framework.core.exceptions.SimpleMappingExceptionResolver;
 import org.alfresco.util.BeanExtender;
