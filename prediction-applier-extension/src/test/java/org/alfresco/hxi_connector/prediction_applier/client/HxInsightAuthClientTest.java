@@ -54,15 +54,16 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 @ExtendWith(MockitoExtension.class)
 class HxInsightAuthClientTest
 {
-
-    ListAppender testAppender;
-    LoggerConfig rootLoggerConfig;
+    private static final String PROVIDER_ID = "some-provider";
 
     @Mock
     AuthProperties authPropertiesMock;
 
     @InjectMocks
     HxInsightAuthClient hxInsightAuthClient;
+
+    ListAppender testAppender;
+    LoggerConfig rootLoggerConfig;
 
     @BeforeAll
     void beforeAll()
@@ -92,10 +93,10 @@ class HxInsightAuthClientTest
         when(authPropertiesMock.getRetry().delayMultiplier()).thenReturn(2.0);
         when(authPropertiesMock.getRetry().reasons()).thenReturn(Set.of(EndpointServerErrorException.class));
         when(authPropertiesMock.getProviders()).thenReturn(mock());
-        when(authPropertiesMock.getProviders().get("some-provider")).thenThrow(new EndpointServerErrorException("some error"));
+        when(authPropertiesMock.getProviders().get(PROVIDER_ID)).thenThrow(new EndpointServerErrorException("some error"));
 
         // when
-        Throwable actualException = catchThrowable(() -> hxInsightAuthClient.authenticate("some-provider"));
+        Throwable actualException = catchThrowable(() -> hxInsightAuthClient.authenticate(PROVIDER_ID));
 
         // then
         assertThat(actualException).isInstanceOf(EndpointServerErrorException.class);
