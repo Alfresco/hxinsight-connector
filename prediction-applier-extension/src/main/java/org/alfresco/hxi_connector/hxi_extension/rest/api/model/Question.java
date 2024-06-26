@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,20 +23,38 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
 
-import java.io.Serializable;
-import java.util.Date;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-public record PredictionModelResponseEntry(
-        String id,
-        String property,
-        Date predictionDateTime,
-        float confidenceLevel,
-        String modelId,
-        Serializable predictionValue,
-        Serializable previousValue,
-        UpdateType updateType)
-{}
+import jakarta.validation.constraints.NotBlank;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
+
+@Accessors(prefix = {"_", ""})
+@ToString
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class Question
+{
+    private String _questionId;
+    @NotBlank
+    private String question;
+    @NotBlank
+    private String restrictionQuery;
+
+    public Question withId(String questionId)
+    {
+        this._questionId = questionId;
+        return this;
+    }
+}

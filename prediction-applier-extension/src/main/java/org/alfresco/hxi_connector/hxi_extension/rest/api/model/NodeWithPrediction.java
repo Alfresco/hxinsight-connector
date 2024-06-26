@@ -23,20 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
-
-public record PredictionModelResponseEntry(
-        String id,
-        String property,
-        Date predictionDateTime,
-        float confidenceLevel,
-        String modelId,
-        Serializable predictionValue,
-        Serializable previousValue,
-        UpdateType updateType)
+public record NodeWithPrediction(String id, Date latestPredictionDateTime, List<String> predictedProperties)
 {}
