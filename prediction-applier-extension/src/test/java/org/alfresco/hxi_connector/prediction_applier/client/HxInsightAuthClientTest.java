@@ -61,7 +61,6 @@ class HxInsightAuthClientTest
 
     @Mock
     AuthProperties authPropertiesMock;
-
     @InjectMocks
     HxInsightAuthClient hxInsightAuthClient;
 
@@ -72,10 +71,9 @@ class HxInsightAuthClientTest
     void beforeAll()
     {
         LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
-        Configuration configuration = loggerContext.getConfiguration();
-
+        Configuration loggerConfig = loggerContext.getConfiguration();
         testAppender = ListAppender.newBuilder().setName("test-appender").build();
-        rootLoggerConfig = configuration.getLoggerConfig(StringUtils.EMPTY);
+        rootLoggerConfig = loggerConfig.getLoggerConfig(StringUtils.EMPTY);
         rootLoggerConfig.setLevel(Level.INFO);
         rootLoggerConfig.addAppender(testAppender, Level.ALL, null);
     }
