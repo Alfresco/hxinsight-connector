@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.common.config.properties;
 import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -51,15 +53,12 @@ public class Retry
     private static final int RETRY_ATTEMPTS_DEFAULT = 10;
     private static final int RETRY_INITIAL_DELAY_DEFAULT = 500;
     private static final double RETRY_DELAY_MULTIPLIER_DEFAULT = 2;
-    private static final Set<Class<? extends Throwable>> RETRY_REASONS = Set.of(
+    private static final Set<Class<? extends Throwable>> RETRY_REASONS_BASIC = Set.of(
             EndpointServerErrorException.class,
             UnknownHostException.class,
             MalformedURLException.class,
             JsonEOFException.class,
-            MismatchedInputException.class,
-            HttpHostConnectException.class,
-            NoHttpResponseException.class,
-            MalformedChunkCodingException.class);
+            MismatchedInputException.class);
 
     @Min(-1)
     private int attempts = RETRY_ATTEMPTS_DEFAULT;
@@ -70,7 +69,8 @@ public class Retry
 
     public Retry()
     {
-        this.reasons = RETRY_REASONS;
+        this.reasons = Stream.concat(RETRY_REASONS_BASIC.stream(), Stream.of(HttpHostConnectException.class, NoHttpResponseException.class, MalformedChunkCodingException.class))
+                .collect(Collectors.toSet());
     }
 
     public Retry(int attempts, int initialDelay, double delayMultiplier)
