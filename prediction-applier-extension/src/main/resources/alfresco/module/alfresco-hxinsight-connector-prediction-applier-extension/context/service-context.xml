@@ -105,9 +105,18 @@
         </property>
         <property name="retry">
             <bean class="org.alfresco.hxi_connector.common.config.properties.Retry">
-                <property name="attempts" value="${hxi.auth.retry.attempts}"/>
-                <property name="initialDelay" value="${hxi.auth.retry.initial-delay}"/>
-                <property name="delayMultiplier" value="${hxi.auth.retry.delay-multiplier}"/>
+                <constructor-arg name="attempts" value="${hxi.auth.retry.attempts}"/>
+                <constructor-arg name="initialDelay" value="${hxi.auth.retry.initial-delay}"/>
+                <constructor-arg name="delayMultiplier" value="${hxi.auth.retry.delay-multiplier}"/>
+                <constructor-arg name="reasons">
+                    <set>
+                        <value>org.alfresco.hxi_connector.common.exception.EndpointServerErrorException</value>
+                        <value>java.net.UnknownHostException</value>
+                        <value>java.net.MalformedURLException</value>
+                        <value>com.fasterxml.jackson.core.io.JsonEOFException</value>
+                        <value>com.fasterxml.jackson.databind.exc.MismatchedInputException</value>
+                    </set>
+                </constructor-arg>
             </bean>
         </property>
     </bean>
