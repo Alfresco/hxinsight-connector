@@ -27,28 +27,18 @@ package org.alfresco.hxi_connector.prediction_applier.config;
 
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 
-import org.apache.camel.CamelContext;
 import org.springframework.aop.framework.ProxyFactoryBean;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.context.annotation.PropertySource;
-import org.springframework.core.env.Environment;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.transaction.TransactionManager;
 import org.springframework.transaction.interceptor.TransactionInterceptor;
 
-import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
-import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException;
 import org.alfresco.hxi_connector.prediction_applier.service.PredictionService;
 import org.alfresco.repo.security.permissions.impl.AlwaysProceedMethodInterceptor;
@@ -56,8 +46,6 @@ import org.alfresco.rest.framework.core.exceptions.SimpleMappingExceptionResolve
 import org.alfresco.util.BeanExtender;
 
 @Configuration
-@EnableConfigurationProperties
-@PropertySource("classpath:alfresco/module/alfresco-hxinsight-connector-prediction-applier-extension/alfresco-global.properties")
 public class ExtensionConfiguration
 {
 
@@ -109,40 +97,5 @@ public class ExtensionConfiguration
         beanExtender.setExtendingBeanName("hxInsightSimpleMappingExceptionResolver");
 
         return beanExtender;
-    }
-
-    @Bean
-    public AuthProperties hxInsightAuthProperties(Environment environment)
-    {
-        AuthProperties authProperties = new AuthProperties();
-        AuthProperties.AuthProvider authProvider = new AuthProperties.AuthProvider();
-        authProvider.setType(environment.getProperty("hxi.auth.providers.hyland-experience.type"));
-        authProvider.setGrantType(environment.getProperty("hxi.auth.providers.hyland-experience.grant-type"));
-        authProvider.setClientName(environment.getProperty("hxi.auth.providers.hyland-experience.client-name"));
-        authProvider.setClientId(environment.getProperty("hxi.auth.providers.hyland-experience.client-id"));
-        authProvider.setClientSecret(environment.getProperty("hxi.auth.providers.hyland-experience.client-secret"));
-        authProvider.setScope(Set.of(environment.getProperty("hxi.auth.providers.hyland-experience.scope")));
-        authProvider.setTokenUri(environment.getProperty("hxi.auth.providers.hyland-experience.token-uri"));
-        authProvider.setEnvironmentKey(environment.getProperty("hxi.auth.providers.hyland-experience.environment-key"));
-        authProperties.setProviders(Map.of("hyland-experience", authProvider));
-        authProperties.setRetry(new Retry());
-
-        return authProperties;
-    }
-
-    @Bean
-    public DefaultAuthenticationClient hxInsightAuthClient(ApplicationContext applicationContext,
-            @Value("${messaging.camel.context.id:alfrescoCamelContext}") String camelContextId, AuthProperties hxInsightAuthProperties)
-    {
-        CamelContext alfrescoCamelContext = applicationContext.getBean(camelContextId, CamelContext.class);
-        return new DefaultAuthenticationClient(alfrescoCamelContext, hxInsightAuthProperties);
-    }
-
-    @Bean
-    public DefaultAccessTokenProvider hxInsightAccessTokenProvider(ApplicationContext applicationContext,
-            @Value("${messaging.camel.context.id:alfrescoCamelContext}") String camelContextId, DefaultAuthenticationClient hxInsightAuthClient)
-    {
-        CamelContext alfrescoCamelContext = applicationContext.getBean(camelContextId, CamelContext.class);
-        return new DefaultAccessTokenProvider(alfrescoCamelContext, hxInsightAuthClient);
     }
 }

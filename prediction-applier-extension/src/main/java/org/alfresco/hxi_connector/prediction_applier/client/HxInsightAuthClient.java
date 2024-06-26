@@ -30,12 +30,14 @@ import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 
+@Component
 @Slf4j
 public class HxInsightAuthClient extends DefaultAuthenticationClient
 {
