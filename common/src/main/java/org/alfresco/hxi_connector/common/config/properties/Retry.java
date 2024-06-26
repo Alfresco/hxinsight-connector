@@ -50,10 +50,10 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 @Getter(AccessLevel.NONE)
 public class Retry
 {
-    private static final int RETRY_ATTEMPTS_DEFAULT = 10;
-    private static final int RETRY_INITIAL_DELAY_DEFAULT = 500;
-    private static final double RETRY_DELAY_MULTIPLIER_DEFAULT = 2;
-    private static final Set<Class<? extends Throwable>> RETRY_REASONS_BASIC = Set.of(
+    public static final int RETRY_ATTEMPTS_DEFAULT = 10;
+    public static final int RETRY_INITIAL_DELAY_DEFAULT = 500;
+    public static final double RETRY_DELAY_MULTIPLIER_DEFAULT = 2;
+    public static final Set<Class<? extends Throwable>> RETRY_REASONS_BASIC = Set.of(
             EndpointServerErrorException.class,
             UnknownHostException.class,
             MalformedURLException.class,

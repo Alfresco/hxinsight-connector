@@ -27,6 +27,11 @@ package org.alfresco.hxi_connector.prediction_applier.config;
 
 import static java.util.Optional.ofNullable;
 
+import static org.alfresco.hxi_connector.common.config.properties.Retry.RETRY_ATTEMPTS_DEFAULT;
+import static org.alfresco.hxi_connector.common.config.properties.Retry.RETRY_DELAY_MULTIPLIER_DEFAULT;
+import static org.alfresco.hxi_connector.common.config.properties.Retry.RETRY_INITIAL_DELAY_DEFAULT;
+import static org.alfresco.hxi_connector.common.config.properties.Retry.RETRY_REASONS_BASIC;
+
 import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
@@ -61,13 +66,11 @@ public class AuthConfiguration
         authProvider.setEnvironmentKey(environment.getProperty("hxi.auth.providers.hyland-experience.environment-key"));
         authProperties.setProviders(Map.of("hyland-experience", authProvider));
 
-        Retry retryProperties = new Retry();
-        ofNullable(environment.getProperty("hxi.auth.retry.attempts", Integer.class))
-                .ifPresent(retryProperties::setAttempts);
-        ofNullable(environment.getProperty("hxi.auth.retry.initial-delay", Integer.class))
-                .ifPresent(retryProperties::setInitialDelay);
-        ofNullable(environment.getProperty("hxi.auth.retry.delay-multiplier", Double.class))
-                .ifPresent(retryProperties::setDelayMultiplier);
+        Retry retryProperties = new Retry(
+                environment.getProperty("hxi.auth.retry.attempts", Integer.class, RETRY_ATTEMPTS_DEFAULT),
+                environment.getProperty("hxi.auth.retry.initial-delay", Integer.class, RETRY_INITIAL_DELAY_DEFAULT),
+                environment.getProperty("hxi.auth.retry.delay-multiplier", Double.class, RETRY_DELAY_MULTIPLIER_DEFAULT),
+                RETRY_REASONS_BASIC);
         authProperties.setRetry(retryProperties);
 
         return authProperties;
