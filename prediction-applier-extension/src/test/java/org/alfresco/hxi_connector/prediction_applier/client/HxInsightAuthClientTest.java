@@ -84,7 +84,7 @@ class HxInsightAuthClientTest
     }
 
     @Test
-    void authenticate()
+    void givenAuthException_whenAuthenticate_thenFailAfterRetry()
     {
         // given
         when(authPropertiesMock.getRetry()).thenReturn(mock());
