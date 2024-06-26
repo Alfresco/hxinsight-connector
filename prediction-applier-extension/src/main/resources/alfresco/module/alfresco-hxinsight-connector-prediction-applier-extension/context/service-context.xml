@@ -113,11 +113,11 @@
     </bean>
 
     <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.prediction_applier.client.HxInsightAuthClient">
-        <constructor-arg index="0" ref="hxiAuthProperties"/>
+        <constructor-arg name="authProperties" ref="hxiAuthProperties"/>
     </bean>
 
     <bean id="hxiAccessTokenProvider" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider">
-        <constructor-arg index="0" ref="hxInsightAuthClient"/>
+        <constructor-arg name="authenticationClient" ref="hxInsightAuthClient"/>
     </bean>
 
     <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource"/>

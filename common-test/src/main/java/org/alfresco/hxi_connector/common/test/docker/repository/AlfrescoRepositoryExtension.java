@@ -76,7 +76,7 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
                 .withDockerfileFromBuilder(builder -> builder
                         .from(dockerImageName.toString())
                         .user("root")
-                        .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
+                        .copy(jarFile.toString().replace("\\", "/"), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
                         .run("chown -R -h alfresco /usr/local/tomcat")
                         .user("alfresco")
                         .build());
