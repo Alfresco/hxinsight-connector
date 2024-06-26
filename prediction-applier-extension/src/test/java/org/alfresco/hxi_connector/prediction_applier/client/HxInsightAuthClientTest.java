@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 
 import java.util.Set;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -72,7 +73,7 @@ class HxInsightAuthClientTest
         Configuration configuration = loggerContext.getConfiguration();
 
         testAppender = ListAppender.newBuilder().setName("test-appender").build();
-        rootLoggerConfig = configuration.getLoggerConfig("");
+        rootLoggerConfig = configuration.getLoggerConfig(StringUtils.EMPTY);
         rootLoggerConfig.setLevel(Level.INFO);
         rootLoggerConfig.addAppender(testAppender, Level.ALL, null);
     }
