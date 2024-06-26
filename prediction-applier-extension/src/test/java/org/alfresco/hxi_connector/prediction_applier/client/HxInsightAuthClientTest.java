@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -85,15 +87,16 @@ class HxInsightAuthClientTest
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     void givenAuthException_whenAuthenticate_thenFailAfterRetry()
     {
         // given
-        when(authPropertiesMock.getRetry()).thenReturn(mock());
+        when(authPropertiesMock.getRetry()).thenReturn(mock(Retry.class));
         when(authPropertiesMock.getRetry().attempts()).thenReturn(3);
         when(authPropertiesMock.getRetry().initialDelay()).thenReturn(500);
         when(authPropertiesMock.getRetry().delayMultiplier()).thenReturn(2.0);
         when(authPropertiesMock.getRetry().reasons()).thenReturn(Set.of(EndpointServerErrorException.class));
-        when(authPropertiesMock.getProviders()).thenReturn(mock());
+        when(authPropertiesMock.getProviders()).thenReturn(mock(Map.class));
         when(authPropertiesMock.getProviders().get(PROVIDER_ID)).thenThrow(new EndpointServerErrorException("some error"));
 
         // when
