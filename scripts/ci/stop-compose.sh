@@ -10,7 +10,7 @@ fi
 
 echo "Killing ACS stack in ${DOCKER_COMPOSE_PATH}"
 
-cd ${DOCKER_COMPOSE_PATH}
+cd "$(dirname "${DOCKER_COMPOSE_PATH}")"
 
 docker-compose ps
 # logs for debug
