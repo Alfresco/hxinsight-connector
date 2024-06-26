@@ -60,7 +60,7 @@ public class PredictionsEntityResource
     public void reviewPrediction(String predictionNodeId, Void body, Parameters parameters, WithResponse withResponse)
     {
         NodeRef predictionNodeRef = validateOrLookupNode(nodes, predictionNodeId);
-        ReviewStatus reviewStatus = ReviewStatus.fromString(parameters.getParameter(PARAM_REVIEW_STATUS));
+        ReviewStatus reviewStatus = ReviewStatus.valueOf(parameters.getParameter(PARAM_REVIEW_STATUS).toUpperCase());
         predictionService.reviewPrediction(predictionNodeRef, reviewStatus);
     }
 }

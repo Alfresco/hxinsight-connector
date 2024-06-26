@@ -23,19 +23,29 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.messaging.camel.routes;
+package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
 
-import org.apache.camel.CamelContext;
-import org.springframework.stereotype.Component;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
-@Component
-public class HxInsightAuthClient extends DefaultAuthenticationClient
+@Accessors(prefix = {"_", ""})
+@ToString
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@EqualsAndHashCode
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class Agent
 {
-    public HxInsightAuthClient(CamelContext alfrescoCamelContext, AuthProperties hxInsightAuthProperties)
-    {
-        super(alfrescoCamelContext, hxInsightAuthProperties);
-    }
+    private String _id;
+    private String name;
+    private String description;
 }

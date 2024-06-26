@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.common.test.docker.repository;
 
-import static java.util.function.Predicate.not;
-
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_ENTERPRISE_IMAGE_DEFAULT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_IMAGE_DEFAULT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_TAG;
@@ -43,6 +41,8 @@ import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.utility.DockerImageName;
+
+import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 
 public class AlfrescoRepositoryExtension extends ImageFromDockerfile
 {
@@ -76,41 +76,31 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
                 .withDockerfileFromBuilder(builder -> builder
                         .from(dockerImageName.toString())
                         .user("root")
-                        .copy(jarFile.toString(), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
+                        .copy(jarFile.toString().replace("\\", "/"), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
                         .run("chown -R -h alfresco /usr/local/tomcat")
                         .user("alfresco")
                         .build());
     }
 
     @SneakyThrows
-    private static Path findTargetJar(String nameSnippet)
+    private static Path findTargetJar(String name)
     {
         String path = "target";
         String extension = "jar";
         @Cleanup
         Stream<Path> files = Files.list(Paths.get(path));
 
-        return files.filter(matchExtension(extension))
-                .filter(nameContains(nameSnippet))
-                .filter(not(nameContains("-tests")))
+        String extensionFileName = "%s-%s.%s".formatted(name, DockerTags.getHxiConnectorTag(), extension);
+        return files.filter(nameEquals(extensionFileName))
                 .findFirst()
-                .orElseThrow(() -> new IllegalStateException("%s file with name containing: '%s' not found in directory: '%s/'"
-                        .formatted(extension.toUpperCase(Locale.ENGLISH), nameSnippet, path)));
+                .orElseThrow(() -> new IllegalStateException("%s file with name: '%s' not found in directory: '%s/'"
+                        .formatted(extension.toUpperCase(Locale.ENGLISH), extensionFileName, path)));
     }
 
-    private static Predicate<Path> matchExtension(final String extension)
+    private static Predicate<Path> nameEquals(final String name)
     {
         return path -> path != null && path.getFileName()
                 .toString()
-                .toLowerCase(Locale.ENGLISH)
-                .endsWith(extension.startsWith(".") ? extension.toLowerCase(Locale.ENGLISH) : "." + extension.toLowerCase(Locale.ENGLISH));
-    }
-
-    private static Predicate<Path> nameContains(final String snippet)
-    {
-        return path -> path != null && path.getFileName()
-                .toString()
-                .toLowerCase(Locale.ENGLISH)
-                .contains(snippet);
+                .equalsIgnoreCase(name);
     }
 }

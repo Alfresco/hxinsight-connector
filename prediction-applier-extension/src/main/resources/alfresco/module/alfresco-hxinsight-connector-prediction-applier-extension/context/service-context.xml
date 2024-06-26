@@ -17,11 +17,108 @@
 -->
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
-          http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+          http://www.springframework.org/schema/beans/spring-beans-3.0.xsd">
 
-    <context:component-scan base-package="org.alfresco.hxi_connector"/>
+    <bean id="predictionService" class="org.alfresco.hxi_connector.prediction_applier.service.PredictionServiceImpl">
+        <constructor-arg name="nodeService" ref="NodeService"/>
+        <constructor-arg name="namespaceService" ref="NamespaceService"/>
+    </bean>
 
+    <bean id="PredictionService" class="org.springframework.aop.framework.ProxyFactoryBean">
+        <property name="proxyInterfaces">
+            <value>org.alfresco.hxi_connector.prediction_applier.service.PredictionService</value>
+        </property>
+        <property name="target">
+            <ref bean="predictionService"/>
+        </property>
+        <property name="interceptorNames">
+            <list>
+                <idref bean="PredictionService_transaction"/>
+                <idref bean="AuditMethodInterceptor"/>
+                <idref bean="exceptionTranslator"/>
+                <idref bean="PredictionService_security"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="PredictionService_transaction" class="org.springframework.transaction.interceptor.TransactionInterceptor">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="transactionAttributes">
+            <props>
+                <prop key="*">${server.transaction.mode.default}</prop>
+            </props>
+        </property>
+    </bean>
+
+    <bean id="PredictionService_security" class="org.alfresco.repo.security.permissions.impl.AlwaysProceedMethodInterceptor"/>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.NodeEntityResource">
+        <property name="nodeService" ref="NodeService" />
+        <property name="nodes" ref="nodes" />
+        <property name="predictionService" ref="PredictionService"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.PredictionChildrenRelation">
+        <property name="nodes" ref="nodes"/>
+        <property name="transactionService" ref="TransactionService"/>
+        <property name="predictionService" ref="PredictionService"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource"/>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.PredictionsEntityResource">
+        <property name="nodes" ref="nodes"/>
+        <property name="predictionService" ref="PredictionService"/>
+    </bean>
+
+    <bean id="hxi.simpleMappingExceptionResolver" abstract="true" parent="simpleMappingExceptionResolverParent">
+        <property name="exceptionMappings">
+            <map merge="true">
+                <entry key="org.alfresco.hxi_connector.prediction_applier.rest.api.exception.PredictionStateChangedException" value="#{T(org.springframework.extensions.webscripts.Status).STATUS_CONFLICT}" />
+            </map>
+        </property>
+    </bean>
+    <bean class="org.alfresco.util.BeanExtender">
+        <property name="beanName" value="simpleMappingExceptionResolverParent"/>
+        <property name="extendingBeanName" value="hxi.simpleMappingExceptionResolver"/>
+    </bean>
+
+    <bean id="hxiAuthProperties" class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties">
+        <property name="providers">
+            <map>
+                <entry key="hyland-experience">
+                    <bean class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties.AuthProvider">
+                        <property name="type" value="${hxi.auth.providers.hyland-experience.type}"/>
+                        <property name="grantType" value="${hxi.auth.providers.hyland-experience.grant-type}"/>
+                        <property name="clientName" value="${hxi.auth.providers.hyland-experience.client-name}"/>
+                        <property name="clientId" value="${hxi.auth.providers.hyland-experience.client-id}"/>
+                        <property name="clientSecret" value="${hxi.auth.providers.hyland-experience.client-secret}"/>
+                        <property name="scope" value="${hxi.auth.providers.hyland-experience.scope}"/>
+                        <property name="tokenUri" value="${hxi.auth.providers.hyland-experience.token-uri}"/>
+                        <property name="environmentKey" value="${hxi.auth.providers.hyland-experience.environment-key}"/>
+                    </bean>
+                </entry>
+            </map>
+        </property>
+        <property name="retry">
+            <bean class="org.alfresco.hxi_connector.common.config.properties.Retry">
+                <property name="attempts" value="${hxi.auth.retry.attempts}"/>
+                <property name="initialDelay" value="${hxi.auth.retry.initial-delay}"/>
+                <property name="delayMultiplier" value="${hxi.auth.retry.delay-multiplier}"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.prediction_applier.client.HxInsightAuthClient">
+        <constructor-arg name="authProperties" ref="hxiAuthProperties"/>
+    </bean>
+
+    <bean id="hxiAccessTokenProvider" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider">
+        <constructor-arg name="authenticationClient" ref="hxInsightAuthClient"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource"/>
 </beans>

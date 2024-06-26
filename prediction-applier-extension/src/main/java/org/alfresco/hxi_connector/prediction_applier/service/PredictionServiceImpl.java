@@ -135,7 +135,7 @@ public class PredictionServiceImpl implements PredictionService
         properties.put(PROP_PREDICTION_VALUE, prediction.getPredictionValue());
         properties.put(PROP_UPDATE_TYPE, prediction.getUpdateType());
         properties.put(PROP_PREVIOUS_VALUE, previousValue);
-        properties.put(PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED);
+        properties.put(PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED.toString());
         return properties;
     }
 
@@ -158,7 +158,7 @@ public class PredictionServiceImpl implements PredictionService
         Serializable predictionValue = properties.get(PROP_PREDICTION_VALUE);
         Serializable previousValue = properties.get(PROP_PREVIOUS_VALUE);
         UpdateType updateType = UpdateType.valueOf((String) properties.get(PROP_UPDATE_TYPE));
-        ReviewStatus reviewStatus = (ReviewStatus) properties.get(PROP_REVIEW_STATUS);
+        ReviewStatus reviewStatus = ReviewStatus.valueOf((String) properties.get(PROP_REVIEW_STATUS));
 
         return new Prediction(predictionNodeRef.getId(), property, predictionDateTime, confidenceLevel, modelId, predictionValue, previousValue, updateType, reviewStatus);
     }
@@ -184,18 +184,18 @@ public class PredictionServiceImpl implements PredictionService
         {
             throw new PredictionStateChangedException(prediction.getProperty() + " property value has changed, prediction is no longer valid!");
         }
-        if (!nodeService.getProperty(predictionNodeRef, PROP_REVIEW_STATUS).equals(ReviewStatus.UNREVIEWED) && !reviewStatus.equals(prediction.getReviewStatus()))
+        if (!ReviewStatus.UNREVIEWED.equals(ReviewStatus.valueOf((String) nodeService.getProperty(predictionNodeRef, PROP_REVIEW_STATUS))) && !reviewStatus.equals(prediction.getReviewStatus()))
         {
             throw new PredictionStateChangedException("Prediction for " + prediction.getProperty() + " property has already been reviewed.");
         }
-        if (reviewStatus.equals(ReviewStatus.CONFIRMED))
+        if (ReviewStatus.CONFIRMED.equals(reviewStatus))
         {
-            nodeService.setProperty(predictionNodeRef, PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED);
+            nodeService.setProperty(predictionNodeRef, PROP_REVIEW_STATUS, ReviewStatus.CONFIRMED.toString());
         }
-        else if (reviewStatus.equals(ReviewStatus.REJECTED))
+        else if (ReviewStatus.REJECTED.equals(reviewStatus))
         {
             nodeService.setProperty(parentNode, propertyQName, prediction.getPreviousValue());
-            nodeService.setProperty(predictionNodeRef, PROP_REVIEW_STATUS, ReviewStatus.REJECTED);
+            nodeService.setProperty(predictionNodeRef, PROP_REVIEW_STATUS, ReviewStatus.REJECTED.toString());
         }
     }
 }

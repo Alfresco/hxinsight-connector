@@ -23,9 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.rest.api.model;
+package org.alfresco.hxi_connector.prediction_applier.rest.api;
 
-public enum ReviewStatus
+import lombok.extern.slf4j.Slf4j;
+
+import org.alfresco.hxi_connector.prediction_applier.rest.api.model.Agent;
+import org.alfresco.rest.framework.resource.EntityResource;
+import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
+import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
+import org.alfresco.rest.framework.resource.parameters.Parameters;
+
+@Slf4j
+@EntityResource(name = "agents", title = "AI Agents")
+public class AgentsEntityResource implements EntityResourceAction.Read<Agent>
 {
-    UNREVIEWED, CONFIRMED, REJECTED
+    @Override
+    public CollectionWithPagingInfo<Agent> readAll(Parameters params)
+    {
+        return CollectionWithPagingInfo.asPagedCollection();
+    }
 }

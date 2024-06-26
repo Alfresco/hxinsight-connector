@@ -25,102 +25,65 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
-import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
-import static org.apache.camel.http.common.HttpMethods.POST;
-import static org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED;
-import static org.apache.hc.core5.http.HttpHeaders.HOST;
-
-import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
-
-import java.net.URI;
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
-import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.model.dataformat.JsonLibrary;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
+import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
+import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
+import org.apache.hc.client5.http.impl.classic.HttpClients;
+import org.apache.hc.core5.http.NameValuePair;
+import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
-import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
 @Slf4j
-public class DefaultAuthenticationClient extends RouteBuilder implements AuthenticationClient
+public class DefaultAuthenticationClient implements AuthenticationClient
 {
-    public static final String LOCAL_AUTH_ENDPOINT = "direct:" + DefaultAuthenticationClient.class.getSimpleName();
-    private static final String ROUTE_ID = "authentication-requester";
-    private static final String AUTH_URL_HEADER = "authUri";
     public static final int EXPECTED_STATUS_CODE = 200;
 
-    private final CamelContext camelContext;
-    private final AuthProperties authProperties;
-
-    @Override
-    public void configure()
-    {
-        // @formatter:off
-        onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
-            .process(this::wrapErrorIfNecessary)
-            .stop();
-
-        from(LOCAL_AUTH_ENDPOINT)
-            .id(ROUTE_ID)
-            .toD("${headers." + AUTH_URL_HEADER + "}?throwExceptionOnFailure=false")
-            .choice()
-            .when(header(Exchange.HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
-                .unmarshal()
-                .json(JsonLibrary.Jackson, AuthenticationResult.class)
-                .log(LoggingLevel.DEBUG, log, "Authentication :: success")
-            .otherwise()
-                .log(LoggingLevel.ERROR, log, "Authentication :: failure")
-                .process(this::throwExceptionOnUnexpectedStatusCode)
-            .endChoice()
-            .end();
-        // @formatter:on
-    }
+    protected final AuthProperties authProperties;
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
     public AuthenticationResult authenticate(String providerId)
     {
-        String body = createEncodedBody(providerId);
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(providerId);
-        EnsureUtils.ensureNonNull(authProvider, "Auth Provider not found for authorization provider id: " + providerId);
-        String tokenUri = authProvider.getTokenUri();
+        ensureNonNull(authProvider, "Auth Provider not found for authorization provider id: " + providerId);
+
         log.atDebug().log("Authentication :: sending token request for {} authorization provider", providerId);
 
-        return sendRequest(tokenUri, body);
+        try (
+                CloseableHttpClient httpClient = HttpClients.createDefault();
+                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider)))
+        {
+            HttpPost httpPost = new HttpPost(authProvider.getTokenUri());
+            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
+            httpPost.setEntity(entity);
+
+            return httpClient.execute(httpPost, response -> {
+                ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.getCode(), EXPECTED_STATUS_CODE);
+
+                return objectMapper.readValue(EntityUtils.toString(response.getEntity()), AuthenticationResult.class);
+            });
+        }
+        catch (Exception e)
+        {
+            Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
+
+            throw ErrorUtils.wrapErrorIfNecessary(e, retryReasons);
+        }
     }
 
-    private AuthenticationResult sendRequest(String tokenUri, String body)
+    private List<NameValuePair> createEncodedBody(AuthProperties.AuthProvider authProvider)
     {
-        int contentLength = body.getBytes(UTF_8).length;
-        return camelContext.createFluentProducerTemplate()
-                .to(LOCAL_AUTH_ENDPOINT)
-                .withProcessor(exchange -> {
-                    exchange.getIn().setHeaders(Map.of(
-                            AUTH_URL_HEADER, tokenUri,
-                            Exchange.HTTP_METHOD, POST.name(),
-                            HOST, new URI(tokenUri).getHost(),
-                            Exchange.CONTENT_TYPE, APPLICATION_FORM_URLENCODED.getMimeType(),
-                            Exchange.CONTENT_LENGTH, contentLength));
-                    exchange.getIn().setBody(body);
-                })
-                .request(AuthenticationResult.class);
-    }
-
-    private String createEncodedBody(String providerId)
-    {
-        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(providerId);
-
-        EnsureUtils.ensureNonNull(providerId, "Auth Registration not found for authorization provider id: " + providerId);
         return TokenRequest.builder()
                 .clientId(authProvider.getClientId())
                 .grantType(authProvider.getGrantType())
@@ -130,26 +93,5 @@ public class DefaultAuthenticationClient extends RouteBuilder implements Authent
                 .password(authProvider.getPassword())
                 .build()
                 .getTokenRequestBody();
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
-
-        ErrorUtils.wrapErrorIfNecessary(cause, retryReasons);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void throwExceptionOnUnexpectedStatusCode(Exchange exchange)
-    {
-        int actualStatusCode = exchange.getMessage().getHeader(HTTP_RESPONSE_CODE, Integer.class);
-        if (actualStatusCode != EXPECTED_STATUS_CODE)
-        {
-            log.warn(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(EXPECTED_STATUS_CODE, actualStatusCode));
-        }
-
-        ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
     }
 }

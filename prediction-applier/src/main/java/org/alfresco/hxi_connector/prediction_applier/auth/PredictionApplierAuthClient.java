@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.auth;
 
-import org.apache.camel.CamelContext;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -39,9 +38,9 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 public class PredictionApplierAuthClient extends DefaultAuthenticationClient
 {
 
-    public PredictionApplierAuthClient(CamelContext camelContext, AuthProperties authProperties)
+    public PredictionApplierAuthClient(AuthProperties authProperties)
     {
-        super(camelContext, authProperties);
+        super(authProperties);
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
