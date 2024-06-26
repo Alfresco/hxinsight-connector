@@ -85,6 +85,7 @@ public class RepositoryNodesClient
                 .when().put(uri)
                 .then().extract().response()
                 .as(NodeEntry.class).node();
+    }
 
     public void deleteNode(String nodeId)
     {
