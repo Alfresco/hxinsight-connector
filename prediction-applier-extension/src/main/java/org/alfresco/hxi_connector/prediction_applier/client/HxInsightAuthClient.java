@@ -45,6 +45,7 @@ public class HxInsightAuthClient extends DefaultAuthenticationClient
         super(authProperties);
     }
 
+    @Override
     public AuthenticationResult authenticate(String providerId)
     {
         return retryWithBackoff(() -> super.authenticate(providerId), authProperties.getRetry());
