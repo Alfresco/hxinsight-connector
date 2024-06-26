@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.config;
+package org.alfresco.hxi_connector.hxi_extension.config;
 
 import java.util.Map;
 import java.util.Properties;
