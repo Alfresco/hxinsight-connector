@@ -132,7 +132,7 @@ public class DockerContainers
                 .withNetworkAliases(ACTIVE_MQ_ALIAS);
     }
 
-    public static GenericContainer<?> createTransformRouterContainerWithin(Network network)
+    public static GenericContainer<?> createTransformRouterContainerWithin(Network network, GenericContainer<?>... dependencies)
     {
         GenericContainer<?> transformRouter = new GenericContainer<>(DockerImageName.parse(TRANSFORM_ROUTER_IMAGE).withTag(TRANSFORM_ROUTER_TAG))
                 .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
@@ -141,6 +141,7 @@ public class DockerContainers
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
                 .withExposedPorts(8095)
                 .waitingFor(Wait.forListeningPort())
+                .dependsOn(dependencies)
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformRouterContainer")));
 
@@ -149,7 +150,7 @@ public class DockerContainers
         return transformRouter;
     }
 
-    public static GenericContainer<?> createTransformCoreAioContainerWithin(Network network)
+    public static GenericContainer<?> createTransformCoreAioContainerWithin(Network network, GenericContainer<?>... dependencies)
     {
         GenericContainer<?> transformCoreAio = new GenericContainer<>(DockerImageName.parse(TRANSFORM_CORE_AIO_IMAGE).withTag(TRANSFORM_CORE_AIO_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1024m")
@@ -157,6 +158,7 @@ public class DockerContainers
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
                 .withExposedPorts(8090)
                 .waitingFor(Wait.forListeningPort())
+                .dependsOn(dependencies)
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformCoreContainer")));
 
