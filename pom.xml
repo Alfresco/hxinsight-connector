@@ -251,6 +251,17 @@
             </dependency>
 
             <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <exclusions>
+                    <exclusion>
+                        <groupId>org.junit.vintage</groupId>
+                        <artifactId>junit-vintage-engine</artifactId>
+                    </exclusion>
+                </exclusions>
+                <version>${spring-boot.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wiremock.integrations.testcontainers</groupId>
                 <artifactId>wiremock-testcontainers-module</artifactId>
                 <version>${wiremock-testcontainers-module.version}</version>
