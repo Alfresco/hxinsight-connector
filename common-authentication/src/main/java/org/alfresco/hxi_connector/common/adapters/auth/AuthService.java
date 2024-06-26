@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.AUTHORIZATION;
 
 import java.util.Base64;
 
