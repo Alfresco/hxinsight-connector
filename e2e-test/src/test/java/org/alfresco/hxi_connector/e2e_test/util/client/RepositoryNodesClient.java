@@ -30,6 +30,8 @@ import static io.restassured.RestAssured.given;
 import java.io.File;
 import java.io.InputStream;
 
+import io.restassured.RestAssured;
+import io.restassured.parsing.Parser;
 import lombok.RequiredArgsConstructor;
 
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
@@ -43,6 +45,11 @@ public class RepositoryNodesClient
     private final String baseUrl;
     private final String username;
     private final String password;
+
+    static
+    {
+        RestAssured.defaultParser = Parser.JSON;
+    }
 
     public Node getNode(String nodeId)
     {
