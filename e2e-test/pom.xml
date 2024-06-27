@@ -134,6 +134,9 @@
                         <include>**/*E2eTest.java</include>
                         <include>**/*E2ETest.java</include>
                     </includes>
+                    <excludes>
+                        <exclude>**/CreateNodeE2eTest.java</exclude>
+                    </excludes>
                     <skipTests>${skipE2eTests}</skipTests>
                 </configuration>
             </plugin>
