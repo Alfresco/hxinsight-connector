@@ -31,8 +31,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
-import io.restassured.RestAssured;
-import io.restassured.parsing.Parser;
 import lombok.SneakyThrows;
 
 import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Bucket;
@@ -48,11 +46,6 @@ public class AwsS3Client
     {
         this.baseUrl = "http://%s:%s".formatted(host, port);
         this.bucketName = bucketName;
-    }
-
-    static
-    {
-        RestAssured.defaultParser = Parser.JSON;
     }
 
     @SneakyThrows

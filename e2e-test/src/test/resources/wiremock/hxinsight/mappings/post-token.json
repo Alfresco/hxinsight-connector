@@ -5,9 +5,6 @@
   },
   "response": {
     "status": 200,
-    "bodyFileName": "access-token.json",
-    "headers": {
-      "Content-Type": "application/json"
-    }
+    "bodyFileName": "access-token.json"
   }
 }

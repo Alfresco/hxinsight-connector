@@ -5,9 +5,6 @@
   },
   "response": {
     "status": 200,
-    "bodyFileName": "presigned-urls.json",
-    "headers": {
-      "Content-Type": "application/json"
-    }
+    "bodyFileName": "presigned-urls.json"
   }
 }
