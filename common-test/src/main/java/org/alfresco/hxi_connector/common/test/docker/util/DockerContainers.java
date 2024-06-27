@@ -229,7 +229,8 @@ public class DockerContainers
     public static LocalStackContainer createLocalStackContainer()
     {
         return new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG))
-                .withExposedPorts(4566);
+                .withExposedPorts(4566)
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("LocalStackContainer")));
     }
 
     public static LocalStackContainer createLocalStackContainerWithin(Network network)
