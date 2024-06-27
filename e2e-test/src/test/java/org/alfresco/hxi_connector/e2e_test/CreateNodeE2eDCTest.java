@@ -60,7 +60,10 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions"})
-public class CreateNodeE2eTest
+/**
+ * End-to-end test for creating a node with content. As of now this single test class needs command line docker-compose executed (../distribution/src/main/resources/docker-compose/docker-compose-minimal.yml) before it is run.
+ */
+public class CreateNodeE2eDCTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int INITIAL_DELAY_MS = 300;
