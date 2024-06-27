@@ -64,7 +64,7 @@ public class HxInsightAuthClient extends DefaultAuthenticationClient
             }
             catch (Exception e)
             {
-                if (CollectionUtils.isNotEmpty(retryProperties.reasons()) && retryProperties.reasons().contains(e.getClass()))
+                if (retryProperties.reasons() != null && retryProperties.reasons().contains(e.getClass()))
                 {
                     attempt++;
                     if (attempt >= maxAttempts)
