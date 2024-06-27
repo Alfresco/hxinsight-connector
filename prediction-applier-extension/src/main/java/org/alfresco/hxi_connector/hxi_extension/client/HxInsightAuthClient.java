@@ -29,7 +29,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
@@ -57,7 +56,7 @@ public class HxInsightAuthClient extends DefaultAuthenticationClient
     {
         int attempt = 0;
         int maxAttempts = retryProperties.attempts();
-        long delay = retryProperties.initialDelay();
+        double delay = retryProperties.initialDelay();
         while (true)
         {
             try
@@ -66,24 +65,24 @@ public class HxInsightAuthClient extends DefaultAuthenticationClient
             }
             catch (Exception e)
             {
-                if (CollectionUtils.isNotEmpty(retryProperties.reasons()) && retryProperties.reasons().contains(e.getClass()))
+                if (retryProperties.reasons() != null && retryProperties.reasons().contains(e.getClass()))
                 {
                     attempt++;
                     if (attempt >= maxAttempts)
                     {
-                        log.info("Attempt {} of {} failed", attempt, maxAttempts);
+                        log.atInfo().log("Attempt {} of {} failed", attempt, maxAttempts);
                         throw e;
                     }
-                    log.info("Attempt {} of {} failed, retrying after {}ms", attempt, maxAttempts, delay);
+                    log.atInfo().log("Attempt {} of {} failed, retrying after {}ms", attempt, maxAttempts, delay);
                     try
                     {
-                        TimeUnit.MILLISECONDS.sleep(delay);
+                        TimeUnit.MILLISECONDS.sleep(Math.round(delay));
                     }
                     catch (InterruptedException ex)
                     {
-                        log.warn("Cannot pause retryable operation due to InterruptedException: %s".formatted(ex.getMessage()), e);
+                        log.atWarn().log("Cannot pause retryable operation due to InterruptedException: %s".formatted(ex.getMessage()), e);
                     }
-                    delay = Math.round(delay * retryProperties.delayMultiplier());
+                    delay *= retryProperties.delayMultiplier();
                 }
                 else
                 {

@@ -61,24 +61,24 @@ public class Retry
             MismatchedInputException.class);
 
     @Min(-1)
-    private int attempts = RETRY_ATTEMPTS_DEFAULT;
+    private int attempts;
     @PositiveOrZero
-    private int initialDelay = RETRY_INITIAL_DELAY_DEFAULT;
-    @Positive private double delayMultiplier = RETRY_DELAY_MULTIPLIER_DEFAULT;
+    private int initialDelay;
+    @Positive private double delayMultiplier;
     @NotNull private Set<Class<? extends Throwable>> reasons;
 
     public Retry()
     {
-        this.reasons = Stream.concat(RETRY_REASONS_BASIC.stream(), Stream.of(HttpHostConnectException.class, NoHttpResponseException.class, MalformedChunkCodingException.class))
-                .collect(Collectors.toSet());
+        this(RETRY_ATTEMPTS_DEFAULT, RETRY_INITIAL_DELAY_DEFAULT, RETRY_DELAY_MULTIPLIER_DEFAULT);
     }
 
     public Retry(int attempts, int initialDelay, double delayMultiplier)
     {
-        this();
-        this.attempts = attempts;
-        this.initialDelay = initialDelay;
-        this.delayMultiplier = delayMultiplier;
+        this(attempts, initialDelay, delayMultiplier,
+                Stream.concat(RETRY_REASONS_BASIC.stream(), Stream.of(
+                        HttpHostConnectException.class,
+                        NoHttpResponseException.class,
+                        MalformedChunkCodingException.class)).collect(Collectors.toSet()));
     }
 
     public Retry(int attempts, int initialDelay, double delayMultiplier, Set<Class<? extends Throwable>> reasons)
