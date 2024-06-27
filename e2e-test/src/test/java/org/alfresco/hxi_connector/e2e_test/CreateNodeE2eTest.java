@@ -74,7 +74,8 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 public class CreateNodeE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int INITIAL_DELAY_MS = 300;
+    private static final int MAX_ATTEMPTS = 10;
+    private static final int INITIAL_DELAY_MS = 500;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
@@ -84,20 +85,25 @@ public class CreateNodeE2eTest
     @Container
     private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    private static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
+    private static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network)
+            .dependsOn(activemq);
     @Container
-    private static final GenericContainer<?> transformCore = DockerContainers.createTransformCoreAioContainerWithin(network);
+    private static final GenericContainer<?> transformCore = DockerContainers.createTransformCoreAioContainerWithin(network)
+            .dependsOn(activemq);
     @Container
-    private static final GenericContainer<?> transformRouter = DockerContainers.createTransformRouterContainerWithin(network);
-    @Container
-    private static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
+    private static final GenericContainer<?> transformRouter = DockerContainers.createTransformRouterContainerWithin(network)
+            .dependsOn(activemq);
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final LocalStackContainer awsMock = DockerContainers.createLocalStackContainerWithin(network);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer();
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
+            .dependsOn(activemq, hxInsightMock, awsMock);
+    @Container
+    private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
+            .dependsOn(activemq, postgres, transformCore, transformRouter, sfs, liveIngester);
 
     RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
     AwsS3Client awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
@@ -135,7 +141,7 @@ public class CreateNodeE2eTest
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id())));
-        }, INITIAL_DELAY_MS);
+        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 
     @Test
@@ -163,7 +169,7 @@ public class CreateNodeE2eTest
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id())));
-        }, INITIAL_DELAY_MS);
+        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 
     @SneakyThrows

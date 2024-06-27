@@ -91,6 +91,7 @@ public class DockerContainers
         pullRepositoryImage(enterprise);
         AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
                 new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, enterprise))
+                        .waitingFor(Wait.forLogMessage(".*Server startup in \\[\\d+\\] milliseconds.*\\n", 1))
                         .withStartupTimeout(Duration.ofMinutes(5))
                         .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
 
@@ -229,7 +230,8 @@ public class DockerContainers
     public static LocalStackContainer createLocalStackContainer()
     {
         return new LocalStackContainer(DockerImageName.parse(LOCALSTACK_IMAGE).withTag(LOCALSTACK_TAG))
-                .withExposedPorts(4566);
+                .withExposedPorts(4566)
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("LocalStackContainer")));
     }
 
     public static LocalStackContainer createLocalStackContainerWithin(Network network)
