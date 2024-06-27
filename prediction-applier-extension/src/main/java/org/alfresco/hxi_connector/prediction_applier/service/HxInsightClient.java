@@ -70,7 +70,7 @@ public class HxInsightClient
         HttpPost httpPost = new HttpPost(config.questionUrl());
         httpPost.setEntity(body);
 
-        authService.setAuthHeader(httpPost);
+        authService.aaa(httpPost);
 
         return client.execute(httpPost, (response) -> {
             throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);

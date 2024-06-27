@@ -37,7 +37,7 @@ public class AuthService
 {
     private final AccessTokenProvider accessTokenProvider;
 
-    public void setAuthHeader(HttpUriRequestBase requestBase)
+    public void aaa(HttpUriRequestBase requestBase)
     {
         requestBase.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience"));
     }
