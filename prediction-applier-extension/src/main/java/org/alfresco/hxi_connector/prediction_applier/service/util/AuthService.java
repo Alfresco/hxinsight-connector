@@ -27,7 +27,7 @@
 package org.alfresco.hxi_connector.prediction_applier.service.util;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
+import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.core5.http.HttpHeaders;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
@@ -37,8 +37,8 @@ public class AuthService
 {
     private final AccessTokenProvider accessTokenProvider;
 
-    public void aaa(HttpUriRequestBase requestBase)
+    public void setAuthHeader(HttpPost request)
     {
-        requestBase.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience"));
+        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience"));
     }
 }
