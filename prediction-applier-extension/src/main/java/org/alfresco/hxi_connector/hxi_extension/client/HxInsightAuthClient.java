@@ -73,7 +73,7 @@ public class HxInsightAuthClient extends DefaultAuthenticationClient
                         log.atInfo().log("Attempt {} of {} failed", attempt, maxAttempts);
                         throw e;
                     }
-                    log.atInfo().log("Attempt {} of {} failed, retrying after {}ms", attempt, maxAttempts, delay);
+                    log.atInfo().log("Attempt {} of {} failed, retrying after {}ms", attempt, maxAttempts, Math.round(delay));
                     try
                     {
                         TimeUnit.MILLISECONDS.sleep(Math.round(delay));
