@@ -63,12 +63,14 @@ public class DeleteNodeE2eTest
     @Container
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
-    @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer();
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
+            .dependsOn(activemq, hxInsightMock);
+    @Container
+    static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
+            .dependsOn(postgres, activemq, liveIngester);
 
     RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
 

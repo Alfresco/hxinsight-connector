@@ -85,14 +85,13 @@ public class CreateNodeE2eTest
     @Container
     private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    private static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network)
-            .dependsOn(activemq);
+    private static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
     @Container
     private static final GenericContainer<?> transformCore = DockerContainers.createTransformCoreAioContainerWithin(network)
             .dependsOn(activemq);
     @Container
     private static final GenericContainer<?> transformRouter = DockerContainers.createTransformRouterContainerWithin(network)
-            .dependsOn(activemq);
+            .dependsOn(activemq, transformCore);
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
@@ -103,7 +102,7 @@ public class CreateNodeE2eTest
             .dependsOn(activemq, hxInsightMock, awsMock);
     @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(activemq, postgres, transformCore, transformRouter, sfs, liveIngester);
+            .dependsOn(postgres, activemq, transformCore, transformRouter, sfs, liveIngester);
 
     RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
     AwsS3Client awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
