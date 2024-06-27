@@ -112,11 +112,11 @@ public class UpdateNodeE2eTest
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
             .dependsOn(activemq, hxInsightMock);
     @Container
+    static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
+            .dependsOn(postgres, activemq, liveIngester);
+    @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock);
-    @Container
-    static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, liveIngester, predictionApplier);
 
     RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
 
@@ -127,7 +127,6 @@ public class UpdateNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testApplyPredictionToNode() throws IOException
     {
         // given
