@@ -42,6 +42,8 @@ import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.Predi
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.PROP_REVIEW_STATUS;
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.PROP_UPDATE_TYPE;
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.TYPE_PREDICTION;
+import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.ReviewStatus.UNREVIEWED;
+import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType.AUTOCORRECT;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -59,7 +61,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.common.exception.ValidationException;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.exception.PredictionStateChangedException;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.ReviewStatus;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
@@ -132,8 +133,8 @@ public class PredictionServiceImplTest
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
-                PROP_UPDATE_TYPE, UpdateType.AUTOCORRECT.name(),
-                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED.toString());
+                PROP_UPDATE_TYPE, AUTOCORRECT.toString(),
+                PROP_REVIEW_STATUS, UNREVIEWED.toString());
         given(nodeService.getProperties(PREDICTION_NODE_REF)).willReturn(properties);
         given(nodeService.getChildAssocs(NODE_REF, Set.of(TYPE_PREDICTION))).willReturn(List.of(CHILD_ASSOC_REF));
         given(namespaceService.getPrefixes(NAMESPACE)).willReturn(Set.of(NAMESPACE_PREFIX));
@@ -143,7 +144,7 @@ public class PredictionServiceImplTest
 
         // then
         Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1_234_567_890L),
-                0.5f, "hx-model-id", "blue", "red", UpdateType.AUTOCORRECT, ReviewStatus.UNREVIEWED);
+                0.5f, "hx-model-id", "blue", "red", AUTOCORRECT, UNREVIEWED);
         assertEquals(List.of(expectedPrediction), predictions);
     }
 
@@ -160,18 +161,18 @@ public class PredictionServiceImplTest
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
-                PROP_UPDATE_TYPE, UpdateType.AUTOCORRECT,
-                PROP_REVIEW_STATUS, ReviewStatus.UNREVIEWED.toString());
+                PROP_UPDATE_TYPE, AUTOCORRECT,
+                PROP_REVIEW_STATUS, UNREVIEWED.toString());
         given(nodeService.createNode(NODE_REF, ASSOC_PREDICTED_BY, PROPERTY_QNAME, TYPE_PREDICTION, expectedProperties)).willReturn(CHILD_ASSOC_REF);
 
         // when
         Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1_234_567_890L),
-                0.5f, "hx-model-id", "blue", null, UpdateType.AUTOCORRECT, ReviewStatus.UNREVIEWED);
+                0.5f, "hx-model-id", "blue", null, AUTOCORRECT, UNREVIEWED);
         List<Prediction> returnedPredictions = predictionService.applyPredictions(NODE_REF, List.of(prediction));
 
         // then
         Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1_234_567_890L),
-                0.5f, "hx-model-id", "blue", "red", UpdateType.AUTOCORRECT, ReviewStatus.UNREVIEWED);
+                0.5f, "hx-model-id", "blue", "red", AUTOCORRECT, UNREVIEWED);
         assertEquals(List.of(expectedPrediction), returnedPredictions);
         assertPropertySet(NODE_REF, PROPERTY_QNAME, "blue");
     }
@@ -188,12 +189,12 @@ public class PredictionServiceImplTest
 
         // when
         Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1_234_567_890L),
-                0.5f, "hx-model-id", "blue", null, UpdateType.AUTOCORRECT, ReviewStatus.UNREVIEWED);
+                0.5f, "hx-model-id", "blue", null, AUTOCORRECT, UNREVIEWED);
         List<Prediction> returnedPredictions = predictionService.applyPredictions(NODE_REF, List.of(prediction));
 
         // then
         Prediction expectedPrediction = new Prediction(PREDICTION_NODE_REF.getId(), "ns:propertyName", new Date(1_234_567_890L),
-                0.5f, "hx-model-id", "blue", "red", UpdateType.AUTOCORRECT, ReviewStatus.UNREVIEWED);
+                0.5f, "hx-model-id", "blue", "red", AUTOCORRECT, UNREVIEWED);
         assertEquals(List.of(expectedPrediction), returnedPredictions);
         assertPropertySet(NODE_REF, PROPERTY_QNAME, "blue");
     }
@@ -225,7 +226,7 @@ public class PredictionServiceImplTest
 
         // when
         Prediction prediction = new Prediction(null, "ns:propertyName", new Date(1_234_567_890L),
-                0.5f, "hx-model-id", "blue", null, UpdateType.AUTOCORRECT, ReviewStatus.UNREVIEWED);
+                0.5f, "hx-model-id", "blue", null, AUTOCORRECT, UNREVIEWED);
         List<Prediction> returnedPredictions = predictionService.applyPredictions(NODE_REF, List.of(prediction));
 
         // then
@@ -244,7 +245,7 @@ public class PredictionServiceImplTest
     public void testReviewPrediction_propertyValueChangedBeforePredictionReview()
     {
         // given
-        reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
+        reviewPredictionTestSetup(UNREVIEWED);
         // value has changed after prediction has been applied
         given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("yellow");
 
@@ -268,9 +269,9 @@ public class PredictionServiceImplTest
     public void testReviewPrediction_predictionConfirmed()
     {
         // given
-        reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
+        reviewPredictionTestSetup(UNREVIEWED);
         given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
-        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED.toString());
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(UNREVIEWED.toString());
 
         // when
         predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.CONFIRMED);
@@ -284,9 +285,9 @@ public class PredictionServiceImplTest
     public void testReviewPrediction_predictionRejected()
     {
         // given
-        reviewPredictionTestSetup(ReviewStatus.UNREVIEWED);
+        reviewPredictionTestSetup(UNREVIEWED);
         given(nodeService.getProperty(NODE_REF, PROPERTY_QNAME)).willReturn("blue");
-        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(ReviewStatus.UNREVIEWED.toString());
+        given(nodeService.getProperty(PREDICTION_NODE_REF, PROP_REVIEW_STATUS)).willReturn(UNREVIEWED.toString());
 
         // when
         predictionService.reviewPrediction(PREDICTION_NODE_REF, ReviewStatus.REJECTED);
@@ -304,7 +305,7 @@ public class PredictionServiceImplTest
                 PROP_MODEL_ID, "hx-model-id",
                 PROP_PREDICTION_VALUE, "blue",
                 PROP_PREVIOUS_VALUE, "red",
-                PROP_UPDATE_TYPE, UpdateType.AUTOCORRECT.toString(),
+                PROP_UPDATE_TYPE, AUTOCORRECT.toString(),
                 PROP_REVIEW_STATUS, initialReviewStatus.toString());
         given(nodeService.getProperties(PREDICTION_NODE_REF)).willReturn(properties);
         given(namespaceService.getNamespaceURI(NAMESPACE_PREFIX)).willReturn(NAMESPACE);
