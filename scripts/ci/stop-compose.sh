@@ -15,5 +15,6 @@ cd "$(dirname "${DOCKER_COMPOSE_PATH}")"
 docker-compose ps
 # logs for debug
 docker-compose logs --no-color -t alfresco live-ingester transform-router transform-core-aio
-docker-compose -f "$(basename "${DOCKER_COMPOSE_PATH}")" kill
-docker-compose rm -fv
+docker-compose -f "$(basename "${DOCKER_COMPOSE_PATH}")" down
+docker system prune
+docker volume prune
