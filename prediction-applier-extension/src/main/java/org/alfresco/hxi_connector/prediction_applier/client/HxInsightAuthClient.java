@@ -79,7 +79,7 @@ public class HxInsightAuthClient extends DefaultAuthenticationClient
                     }
                     catch (InterruptedException ex)
                     {
-                        log.warn("Cannot pause retryable operation due to InterruptedException: %s".formatted(ex.getMessage()), e);
+                        log.atWarn().log("Cannot pause retryable operation due to InterruptedException: {}", ex.getMessage(), e);
                     }
                     delay = Math.round(delay * retryProperties.delayMultiplier());
                 }
