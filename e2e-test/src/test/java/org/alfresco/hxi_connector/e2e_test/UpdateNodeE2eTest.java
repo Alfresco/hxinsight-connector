@@ -70,6 +70,8 @@ public class UpdateNodeE2eTest
     private static final String PREDICTION_APPLIED_ASPECT = "hxi:predictionApplied";
     private static final String PROPERTY_TO_UPDATE = "cm:description";
     private static final String PREDICTED_VALUE = "New description";
+    private static final String USER_VALUE = "User updates description";
+    private static final String PREDICTED_VALUE_2 = "Second prediction";
     private static final String LIST_PREDICTION_BATCHES_SCENARIO = "List-prediction-batches";
     private static final String LIST_PREDICTIONS_SCENARIO = "List-predictions";
     private static final String PREDICTIONS_AVAILABLE_STATE = "Available";
@@ -88,6 +90,14 @@ public class UpdateNodeE2eTest
                 "enrichmentType": "AUTOCORRECT"
               }
             ]
+            """;
+    private static final String UPDATE_NODE_PROPERTIES = """
+            {
+                "properties": {
+                    "cm:versionLabel": "1.1",
+                    "cm:description": "User updates description"
+                }
+            }
             """;
 
     static final Network network = Network.newNetwork();
@@ -124,7 +134,7 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
         WireMock.reset();
-        prepareHxInsightMockToReturnPredictionFor(createdNode.id());
+        prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
 
         // when
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
@@ -143,14 +153,56 @@ public class UpdateNodeE2eTest
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
-    private void prepareHxInsightMockToReturnPredictionFor(String nodeId)
+    @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    void testApplyPredictionToUpdatedNode() throws IOException
+    {
+        // given
+        @Cleanup
+        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
+        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
+        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing(createdNode.id()))));
+        WireMock.reset();
+        prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
+
+        WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+        WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+
+        RetryUtils.retryWithBackoff(() -> {
+            Node actualNode = repositoryNodesClient.getNode(createdNode.id());
+            assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
+        });
+
+        // when
+        Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing(updatedNode.id()))));
+        WireMock.reset();
+        prepareHxInsightMockToReturnPredictionFor(updatedNode.id(), PREDICTED_VALUE_2);
+
+        WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+        WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+
+        // then
+        RetryUtils.retryWithBackoff(() -> {
+            Node actualNode2 = repositoryNodesClient.getNode(updatedNode.id());
+            assertThat(actualNode2.aspects()).contains(PREDICTION_APPLIED_ASPECT);
+            assertThat(actualNode2.properties())
+                    .containsKey(PROPERTY_TO_UPDATE)
+                    .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
+        });
+        verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
+    }
+
+    private void prepareHxInsightMockToReturnPredictionFor(String nodeId, String predictedValue)
     {
         givenThat(get(urlPathTemplate("/v1/prediction-batches/{batchId}"))
                 .inScenario(LIST_PREDICTIONS_SCENARIO)
                 .whenScenarioStateIs(PREDICTIONS_AVAILABLE_STATE)
                 .willReturn(aResponse()
                         .withStatus(200)
-                        .withBody(PREDICTIONS_LIST.formatted(PROPERTY_TO_UPDATE, PREDICTED_VALUE, nodeId)))
+                        .withBody(PREDICTIONS_LIST.formatted(PROPERTY_TO_UPDATE, predictedValue, nodeId)))
                 .willSetStateTo(STARTED));
     }
 

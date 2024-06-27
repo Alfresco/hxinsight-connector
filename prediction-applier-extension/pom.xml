@@ -40,9 +40,18 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-test</artifactId>
             <scope>test</scope>
             <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>ch.qos.logback</groupId>
                     <artifactId>logback-classic</artifactId>
@@ -128,6 +137,8 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common</include>
+                                    <include>org.alfresco:alfresco-hxinsight-connector-common-authentication</include>
+                                    <include>org.apache.httpcomponents.core5:httpcore5</include>
                                 </includes>
                             </artifactSet>
                         </configuration>

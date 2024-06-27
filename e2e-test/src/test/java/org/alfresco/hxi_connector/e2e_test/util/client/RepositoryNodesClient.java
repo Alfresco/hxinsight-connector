@@ -77,4 +77,23 @@ public class RepositoryNodesClient
                 .then().extract().response()
                 .as(NodeEntry.class).node();
     }
+
+    public Node updateNodeWithContent(String nodeId, String updateBody)
+    {
+        String uri = URL_PATTERN.formatted(baseUrl, nodeId);
+        return given().auth().preemptive().basic(username, password)
+                .contentType("application/json")
+                .body(updateBody)
+                .when().put(uri)
+                .then().extract().response()
+                .as(NodeEntry.class).node();
+    }
+
+    public void deleteNode(String nodeId)
+    {
+        String uri = URL_PATTERN.formatted(baseUrl, nodeId);
+        given().auth().preemptive().basic(username, password)
+                .contentType("application/json")
+                .when().delete(uri);
+    }
 }
