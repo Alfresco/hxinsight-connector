@@ -139,6 +139,7 @@
                                     <include>org.alfresco:alfresco-hxinsight-connector-common</include>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common-authentication</include>
                                     <include>org.apache.httpcomponents.core5:httpcore5</include>
+                                    <include>org.apache.httpcomponents.core5:httpclient5</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
