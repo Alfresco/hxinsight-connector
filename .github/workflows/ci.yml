@@ -153,7 +153,7 @@ jobs:
       - name: "Stop docker-compose"
         run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'prediction-applier-extension,e2e-test' -am Dtest=UpdateNodeE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'prediction-applier-extension,e2e-test' -am -Dtest=UpdateNodeE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
 #  push_docker_images:
 #    name: "Push docker images"
