@@ -68,7 +68,7 @@ public class HxInsightClient
             @Cleanup
             HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
 
-            HttpPost httpPost = new HttpPost(config.questionUrl());
+            HttpPost httpPost = new HttpPost(config.getQuestionUrl());
             httpPost.setEntity(body);
 
             authService.setAuthHeader(httpPost);

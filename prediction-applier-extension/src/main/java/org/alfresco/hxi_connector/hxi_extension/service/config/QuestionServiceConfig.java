@@ -28,14 +28,16 @@ package org.alfresco.hxi_connector.hxi_extension.service.config;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record QuestionServiceConfig(
-        @NotBlank String baseUrl,
-        String questionUrl)
+import lombok.Getter;
+
+@Getter
+
+public final class QuestionServiceConfig
 {
+    private final String questionUrl;
+
     public QuestionServiceConfig(@NotBlank String baseUrl)
     {
-        this(
-                baseUrl,
-                baseUrl + "/v1/questions");
+        this.questionUrl = baseUrl + "/v1/questions";
     }
 }
