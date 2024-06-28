@@ -101,8 +101,8 @@
         <dist.transform.sfs.version>4.0.1</dist.transform.sfs.version>
         <dist.activemq.version>5.18.3</dist.activemq.version>
         <dist.activemq.docker.tag>${dist.activemq.version}-jre17-rockylinux8</dist.activemq.docker.tag>
-        <dist.digital.workspace.version>4.4.0-7099328816</dist.digital.workspace.version>
-        <dist.control.center.version>8.3.0</dist.control.center.version>
+        <dist.digital.workspace.version>4.5.0-9694926934</dist.digital.workspace.version>
+        <dist.control.center.version>8.5.0-9694926934</dist.control.center.version>
         <dist.nginx.version>3.4.2</dist.nginx.version>
         <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
         <dist.search.enterprise.version>4.0.1</dist.search.enterprise.version>
