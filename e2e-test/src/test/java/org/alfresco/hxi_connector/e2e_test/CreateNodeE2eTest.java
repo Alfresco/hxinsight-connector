@@ -74,7 +74,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 public class CreateNodeE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int MAX_ATTEMPTS = 10;
+    private static final int MAX_ATTEMPTS = 5;
     private static final int INITIAL_DELAY_MS = 500;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";

@@ -91,8 +91,7 @@ public class DockerContainers
         pullRepositoryImage(enterprise);
         AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
                 new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, enterprise))
-                        .waitingFor(Wait.forLogMessage(".*Server startup in \\[\\d+\\] milliseconds.*\\n", 1))
-                        .withStartupTimeout(Duration.ofMinutes(5))
+                        .waitingFor(Wait.forHttp("/alfresco").forPort(8080).withStartupTimeout(Duration.ofMinutes(5)))
                         .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
@@ -187,6 +186,7 @@ public class DockerContainers
                 .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT", "8099")
                 .withExposedPorts(5007)
                 .withStartupTimeout(Duration.ofMinutes(2))
+                .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("LiveIngesterContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> liveIngester.withNetwork(n).withNetworkAliases(LIVE_INGESTER_ALIAS));
