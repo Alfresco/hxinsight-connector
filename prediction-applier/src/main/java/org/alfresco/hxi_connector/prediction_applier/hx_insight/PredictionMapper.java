@@ -28,9 +28,9 @@ package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 
 @Component
 public class PredictionMapper

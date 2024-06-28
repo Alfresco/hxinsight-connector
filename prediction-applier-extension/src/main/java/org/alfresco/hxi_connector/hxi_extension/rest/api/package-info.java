@@ -23,20 +23,8 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+@WebApi(name = "hxi", scope = Api.SCOPE.PRIVATE, version = 1)
+package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-import java.io.Serializable;
-import java.util.Date;
-
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
-
-public record PredictionModelResponseEntry(
-        String id,
-        String property,
-        Date predictionDateTime,
-        float confidenceLevel,
-        String modelId,
-        Serializable predictionValue,
-        Serializable previousValue,
-        UpdateType updateType)
-{}
+import org.alfresco.rest.framework.Api;
+import org.alfresco.rest.framework.WebApi;
