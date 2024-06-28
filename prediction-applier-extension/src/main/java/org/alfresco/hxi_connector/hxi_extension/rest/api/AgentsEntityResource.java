@@ -23,20 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-import java.io.Serializable;
-import java.util.Date;
+import lombok.extern.slf4j.Slf4j;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.Agent;
+import org.alfresco.rest.framework.resource.EntityResource;
+import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
+import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
+import org.alfresco.rest.framework.resource.parameters.Parameters;
 
-public record PredictionModelResponseEntry(
-        String id,
-        String property,
-        Date predictionDateTime,
-        float confidenceLevel,
-        String modelId,
-        Serializable predictionValue,
-        Serializable previousValue,
-        UpdateType updateType)
-{}
+@Slf4j
+@EntityResource(name = "agents", title = "AI Agents")
+public class AgentsEntityResource implements EntityResourceAction.Read<Agent>
+{
+    @Override
+    public CollectionWithPagingInfo<Agent> readAll(Parameters params)
+    {
+        return CollectionWithPagingInfo.asPagedCollection();
+    }
+}
