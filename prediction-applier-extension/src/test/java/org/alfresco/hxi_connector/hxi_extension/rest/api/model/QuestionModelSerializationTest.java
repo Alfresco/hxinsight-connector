@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-class QuestionSerializationTest
+class QuestionModelSerializationTest
 {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -51,7 +51,7 @@ class QuestionSerializationTest
                 """;
 
         // when, then
-        assertThrows(UnrecognizedPropertyException.class, () -> objectMapper.readValue(questionSerialized, Question.class));
+        assertThrows(UnrecognizedPropertyException.class, () -> objectMapper.readValue(questionSerialized, QuestionModel.class));
     }
 
     @Test
@@ -67,7 +67,7 @@ class QuestionSerializationTest
                 """;
 
         // when, then
-        assertThrows(UnrecognizedPropertyException.class, () -> objectMapper.readValue(questionSerialized, Question.class));
+        assertThrows(UnrecognizedPropertyException.class, () -> objectMapper.readValue(questionSerialized, QuestionModel.class));
     }
 
     @Test
@@ -83,7 +83,7 @@ class QuestionSerializationTest
                 """;
 
         // when
-        Question question = objectMapper.readValue(questionSerialized, Question.class);
+        QuestionModel question = objectMapper.readValue(questionSerialized, QuestionModel.class);
 
         // then
         assertEquals("What is the capital of France?", question.getQuestion());

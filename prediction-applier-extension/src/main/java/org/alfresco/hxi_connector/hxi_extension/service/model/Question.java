@@ -24,37 +24,17 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
-
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+package org.alfresco.hxi_connector.hxi_extension.service.model;
 
 import jakarta.validation.constraints.NotBlank;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.Accessors;
+import lombok.RequiredArgsConstructor;
 
-@Accessors(prefix = {"_", ""})
-@ToString
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@JsonInclude(NON_NULL)
-@SuppressWarnings("PMD.FieldNamingConventions")
+@RequiredArgsConstructor
 public class Question
 {
-    private String _questionId;
     @NotBlank
-    private String question;
+    private final String question;
     @NotBlank
-    private String restrictionQuery;
-
-    public Question withId(String questionId)
-    {
-        this._questionId = questionId;
-        return this;
-    }
+    private final String restrictionQuery;
 }
