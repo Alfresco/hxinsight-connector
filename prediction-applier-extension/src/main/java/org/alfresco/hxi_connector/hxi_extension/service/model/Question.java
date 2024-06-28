@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.prediction_applier.service.model;
+package org.alfresco.hxi_connector.hxi_extension.service.model;
 
 import jakarta.validation.constraints.NotBlank;
 

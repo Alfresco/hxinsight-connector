@@ -35,7 +35,7 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
-import org.alfresco.hxi_connector.prediction_applier.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;

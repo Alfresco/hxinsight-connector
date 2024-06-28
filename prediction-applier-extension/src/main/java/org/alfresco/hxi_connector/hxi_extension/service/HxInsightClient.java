@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.prediction_applier.service;
+package org.alfresco.hxi_connector.hxi_extension.service;
 
 import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
 import static org.apache.hc.core5.http.HttpStatus.SC_ACCEPTED;
@@ -47,9 +47,9 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
-import org.alfresco.hxi_connector.prediction_applier.service.config.QuestionServiceConfig;
-import org.alfresco.hxi_connector.prediction_applier.service.model.Question;
-import org.alfresco.hxi_connector.prediction_applier.service.util.AuthService;
+import org.alfresco.hxi_connector.hxi_extension.service.config.QuestionServiceConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
+import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
 @Slf4j
 @RequiredArgsConstructor

@@ -37,7 +37,7 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
 
-import org.alfresco.hxi_connector.prediction_applier.service.model.Question;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 
 @Accessors(prefix = {"_", ""})
 @ToString

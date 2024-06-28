@@ -24,7 +24,7 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.prediction_applier.service.util;
+package org.alfresco.hxi_connector.hxi_extension.service.util;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.client5.http.classic.methods.HttpPost;

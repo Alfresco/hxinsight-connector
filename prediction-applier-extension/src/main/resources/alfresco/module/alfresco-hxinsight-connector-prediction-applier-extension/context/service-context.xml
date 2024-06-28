@@ -74,7 +74,7 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.prediction_applier.service.config.QuestionServiceConfig" id="questionServiceConfig">
+    <bean class="org.alfresco.hxi_connector.hxi_extension.service.config.QuestionServiceConfig" id="questionServiceConfig">
         <constructor-arg name="baseUrl" value="${hxi.client.baseUrl}"/>
     </bean>
 
@@ -133,17 +133,17 @@
         <constructor-arg name="authenticationClient" ref="hxInsightAuthClient"/>
     </bean>
 
-    <bean id="authService" class="org.alfresco.hxi_connector.prediction_applier.service.util.AuthService">
+    <bean id="authService" class="org.alfresco.hxi_connector.hxi_extension.service.util.AuthService">
         <constructor-arg name="accessTokenProvider" ref="hxiAccessTokenProvider"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.prediction_applier.service.HxInsightClient" id="hxInsightClient">
+    <bean class="org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient" id="hxInsightClient">
         <constructor-arg name="config" ref="questionServiceConfig"/>
         <constructor-arg name="authService" ref="authService"/>
         <constructor-arg name="objectMapper" ref="alfrescoEventObjectMapper"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.prediction_applier.rest.api.QuestionsEntityResource">
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
     </bean>
 </beans>
