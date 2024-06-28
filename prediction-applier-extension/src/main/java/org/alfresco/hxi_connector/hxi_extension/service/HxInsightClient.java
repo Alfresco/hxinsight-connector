@@ -39,7 +39,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
@@ -47,6 +46,7 @@ import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
+import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.QuestionServiceConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
@@ -61,22 +61,28 @@ public class HxInsightClient
     private final ObjectMapper objectMapper;
     private final CloseableHttpClient client = HttpClients.createDefault();
 
-    @SneakyThrows
     public String askQuestion(Question question)
     {
-        @Cleanup
-        HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
+        try
+        {
+            @Cleanup
+            HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
 
-        HttpPost httpPost = new HttpPost(config.questionUrl());
-        httpPost.setEntity(body);
+            HttpPost httpPost = new HttpPost(config.questionUrl());
+            httpPost.setEntity(body);
 
-        authService.setAuthHeader(httpPost);
+            authService.setAuthHeader(httpPost);
 
-        return client.execute(httpPost, (response) -> {
-            throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
+            return client.execute(httpPost, (response) -> {
+                throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
 
-            return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
-        });
+                return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
+            });
+        }
+        catch (IOException e)
+        {
+            throw new HxInsightConnectorRuntimeException("Failed to ask question", e);
+        }
     }
 
     @PreDestroy
