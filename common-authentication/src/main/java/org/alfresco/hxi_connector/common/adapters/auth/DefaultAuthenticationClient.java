@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
+import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
 import java.io.IOException;
 import java.net.URI;
@@ -69,6 +70,8 @@ public class DefaultAuthenticationClient implements AuthenticationClient
                     .build();
 
             HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
+
+            throwExceptionOnUnexpectedStatusCode(response.statusCode(), EXPECTED_STATUS_CODE);
 
             return objectMapper.readValue(response.body(), AuthenticationResult.class);
         }

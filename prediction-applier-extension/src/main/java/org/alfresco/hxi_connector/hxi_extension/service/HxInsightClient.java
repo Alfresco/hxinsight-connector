@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -48,6 +50,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 @RequiredArgsConstructor
 public class HxInsightClient
 {
+    private static final int EXPECTED_STATUS_CODE = 202;
     private final QuestionServiceConfig config;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
@@ -67,6 +70,8 @@ public class HxInsightClient
                     .build();
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
+
+            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), EXPECTED_STATUS_CODE);
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
                     .questionId();

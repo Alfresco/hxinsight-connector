@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
-
 import java.util.Base64;
 
 import lombok.RequiredArgsConstructor;
@@ -39,6 +37,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @RequiredArgsConstructor
 public class AuthService
 {
+    private static final String AUTHORIZATION = "Authorization";
     static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
     public static final String HXI_AUTH_PROVIDER = "hyland-experience";
     public static final String ALFRESCO_AUTH_PROVIDER = "alfresco";
