@@ -41,7 +41,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
-import org.alfresco.hxi_connector.hxi_extension.service.config.QuestionServiceConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
@@ -51,10 +51,10 @@ import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 public class HxInsightClient
 {
     private static final int EXPECTED_STATUS_CODE = 202;
-    private final QuestionServiceConfig config;
+    private final HxInsightClientConfig config;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client;
 
     public String askQuestion(Question question)
     {

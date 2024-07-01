@@ -32,11 +32,11 @@ import lombok.Getter;
 
 @Getter
 
-public final class QuestionServiceConfig
+public final class HxInsightClientConfig
 {
     private final String questionUrl;
 
-    public QuestionServiceConfig(@NotBlank String baseUrl)
+    public HxInsightClientConfig(@NotBlank String baseUrl)
     {
         this.questionUrl = baseUrl + "/v1/questions";
     }
