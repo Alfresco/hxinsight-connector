@@ -51,9 +51,9 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 @Testcontainers
 @SuppressWarnings({"PMD.FieldNamingConventions"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledIfEnvironmentVariable(named = "IS_GITHUB_ACTION", matches = "true")
+@DisabledIfEnvironmentVariable(named = "GHA_RUN_DC", matches = ".*")
 /**
- * As of now this test class is excluded from GitHub Actions workflow but will run with the maven builds (thus, relies on GITHUB_ACTIONS_DEPLOY_TIMEOUT env variable being set).
+ * As of now this test class is excluded from GitHub Actions workflow but will run with the maven builds (thus, relies on GHA_RUN_DC env variable)
  */
 public class CreateNodeE2eTest extends CreateNodeE2eTestBase
 {
