@@ -20,7 +20,7 @@
         <module>bulk-ingester</module>
         <module>live-ingester</module>
         <module>prediction-applier</module>
-        <module>prediction-applier-extension</module>
+        <module>hxinsight-extension</module>
         <module>distribution</module>
         <module>e2e-test</module>
     </modules>
@@ -92,7 +92,7 @@
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->
         <dist.alfresco.docker.user>alfresco</dist.alfresco.docker.user>
         <dist.alfresco.docker.image>quay.io/alfresco/alfresco-content-repository</dist.alfresco.docker.image>
-        <dist.alfresco.repo.extension>alfresco-hxinsight-connector-prediction-applier-extension</dist.alfresco.repo.extension>
+        <dist.alfresco.repo.extension>alfresco-hxinsight-connector-hxinsight-extension</dist.alfresco.repo.extension>
         <dist.alfresco.version>${alfresco-platform.version}</dist.alfresco.version>
         <dist.share.version>${alfresco-platform.version}</dist.share.version>
         <dist.postgres.version>14.4</dist.postgres.version>
@@ -200,7 +200,7 @@
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
-                <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
+                <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
