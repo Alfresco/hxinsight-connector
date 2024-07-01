@@ -24,21 +24,9 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.service.util;
+package org.alfresco.hxi_connector.common.constant;
 
-import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
-
-import lombok.RequiredArgsConstructor;
-
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-
-@RequiredArgsConstructor
-public class AuthService
+public final class HttpHeaders
 {
-    private final AccessTokenProvider accessTokenProvider;
-
-    public String[] getAuthHeaders()
-    {
-        return new String[]{AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience")};
-    }
+    public static final String AUTHORIZATION = "Authorization";
 }
