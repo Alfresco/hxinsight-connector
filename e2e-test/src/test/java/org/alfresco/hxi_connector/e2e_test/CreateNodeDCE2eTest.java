@@ -43,7 +43,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 /**
  * As of now this single test class needs command line docker-compose executed (../distribution/src/main/resources/docker-compose/docker-compose-minimal.yml) before it is run. It is excluded from the maven builds but run as a separate job in GitHub Actions workflow (thus, relies on GITHUB_ACTIONS_DEPLOY_TIMEOUT being set).
  */
-public class CreateNodeE2eDCTest extends CreateNodeE2eTestBase
+public class CreateNodeDCE2eTest extends CreateNodeE2eTestBase
 {
     @BeforeAll
     @SneakyThrows
