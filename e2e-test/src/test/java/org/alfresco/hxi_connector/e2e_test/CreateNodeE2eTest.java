@@ -33,7 +33,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
+import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 @Testcontainers
 @SuppressWarnings({"PMD.FieldNamingConventions"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@EnabledIfEnvironmentVariable(named = "env.GITHUB_ACTIONS_DEPLOY_TIMEOUT", matches = ".*")
+@DisabledIfEnvironmentVariable(named = "GITHUB_SHA", matches = ".*")
 /**
  * As of now this test class is excluded from GitHub Actions workflow but will run with the maven builds (thus, relies on GITHUB_ACTIONS_DEPLOY_TIMEOUT env variable being set).
  */
