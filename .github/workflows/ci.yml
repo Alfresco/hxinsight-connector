@@ -124,8 +124,6 @@ jobs:
   run_e2e_test:
     name: "Run e2e tests"
     runs-on: ubuntu-latest
-    env:
-      IS_GITHUB_ACTION: true
     #    needs:
 #      - pre_commit
     if: >
@@ -150,10 +148,12 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
-      - name: "Start docker-compose"
-        run: ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
-      - name: "Run e2e plain docker-compose tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'prediction-applier-extension,e2e-test' -am -Dtest=CreateNodeE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Start docker-compose and run e2e docker-compose tests"
+        env:
+          IS_GITHUB_ACTION: true
+        run: |
+          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'prediction-applier-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Stop docker-compose"
         if: always()
         run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
