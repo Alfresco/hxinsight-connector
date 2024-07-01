@@ -75,7 +75,7 @@
         <commons-io.version>2.16.1</commons-io.version>
         <pdfbox.version>3.0.2</pdfbox.version>
         <aws-sdk-s3.version>2.26.11</aws-sdk-s3.version>
-        <wiremock.version>3.6.0</wiremock.version>
+        <wiremock.version>3.8.0</wiremock.version>
 
         <testcontainers.version>1.19.8</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
