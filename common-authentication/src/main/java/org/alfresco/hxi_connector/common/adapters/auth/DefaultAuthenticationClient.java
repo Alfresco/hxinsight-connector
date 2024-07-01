@@ -27,18 +27,17 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
-import java.util.List;
+import java.io.IOException;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.entity.UrlEncodedFormEntity;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.NameValuePair;
-import org.apache.hc.core5.http.io.entity.EntityUtils;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
@@ -51,6 +50,7 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
     protected final AuthProperties authProperties;
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final HttpClient client = HttpClient.newHttpClient();
 
     @Override
     public AuthenticationResult authenticate(String providerId)
@@ -60,21 +60,19 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
         log.atDebug().log("Authentication :: sending token request for {} authorization provider", providerId);
 
-        try (
-                CloseableHttpClient httpClient = HttpClients.createDefault();
-                UrlEncodedFormEntity entity = new UrlEncodedFormEntity(createEncodedBody(authProvider)))
+        try
         {
-            HttpPost httpPost = new HttpPost(authProvider.getTokenUri());
-            httpPost.setHeader("Content-Type", "application/x-www-form-urlencoded");
-            httpPost.setEntity(entity);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(authProvider.getTokenUri()))
+                    .header("Content-Type", "application/x-www-form-urlencoded")
+                    .POST(HttpRequest.BodyPublishers.ofString(createEncodedBody(authProvider)))
+                    .build();
 
-            return httpClient.execute(httpPost, response -> {
-                ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.getCode(), EXPECTED_STATUS_CODE);
+            HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 
-                return objectMapper.readValue(EntityUtils.toString(response.getEntity()), AuthenticationResult.class);
-            });
+            return objectMapper.readValue(response.body(), AuthenticationResult.class);
         }
-        catch (Exception e)
+        catch (IOException | InterruptedException e)
         {
             Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
 
@@ -82,7 +80,7 @@ public class DefaultAuthenticationClient implements AuthenticationClient
         }
     }
 
-    private List<NameValuePair> createEncodedBody(AuthProperties.AuthProvider authProvider)
+    private String createEncodedBody(AuthProperties.AuthProvider authProvider)
     {
         return TokenRequest.builder()
                 .clientId(authProvider.getClientId())

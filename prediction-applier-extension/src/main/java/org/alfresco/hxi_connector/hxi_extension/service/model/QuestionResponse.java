@@ -24,19 +24,10 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.service.util;
+package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import lombok.RequiredArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-
-@RequiredArgsConstructor
-public class AuthService
-{
-    private final AccessTokenProvider accessTokenProvider;
-
-    public String[] getAuthHeaders()
-    {
-        return new String[]{"Authorization", "Bearer " + accessTokenProvider.getAccessToken("hyland-experience")};
-    }
-}
+public record QuestionResponse(
+        @NotBlank String questionId)
+{}
