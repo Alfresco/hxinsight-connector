@@ -26,76 +26,59 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
-import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
-import static org.apache.hc.core5.http.HttpStatus.SC_ACCEPTED;
-
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
 import java.io.IOException;
-import java.util.Map;
-import jakarta.annotation.PreDestroy;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpRequest.BodyPublishers;
+import java.net.http.HttpResponse;
+import java.net.http.HttpResponse.BodyHandlers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.hc.client5.http.classic.methods.HttpPost;
-import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
-import org.apache.hc.client5.http.impl.classic.HttpClients;
-import org.apache.hc.core5.http.HttpEntity;
-import org.apache.hc.core5.http.io.entity.StringEntity;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.QuestionServiceConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
+import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
 @Slf4j
 @RequiredArgsConstructor
 public class HxInsightClient
 {
-    private final static String QUESTION_ID_ENTRY = "questionId";
+    private static final int EXPECTED_STATUS_CODE = 202;
     private final QuestionServiceConfig config;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
-    private final CloseableHttpClient client = HttpClients.createDefault();
+    private final HttpClient client = HttpClient.newHttpClient();
 
     public String askQuestion(Question question)
     {
         try
         {
-            @Cleanup
-            HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
+            String body = objectMapper.writeValueAsString(question);
 
-            HttpPost httpPost = new HttpPost(config.getQuestionUrl());
-            httpPost.setEntity(body);
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(config.getQuestionUrl()))
+                    .header("Content-Type", "application/json")
+                    .headers(authService.getAuthHeaders())
+                    .POST(BodyPublishers.ofString(body))
+                    .build();
 
-            authService.setAuthHeader(httpPost);
+            HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            return client.execute(httpPost, (response) -> {
-                throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
+            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), EXPECTED_STATUS_CODE);
 
-                return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
-            });
+            return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
+                    .questionId();
         }
-        catch (IOException e)
+        catch (IOException | InterruptedException e)
         {
             throw new HxInsightConnectorRuntimeException("Failed to ask question", e);
-        }
-    }
-
-    @PreDestroy
-    public void close()
-    {
-        try
-        {
-            log.trace("Closing the HTTP client");
-            client.close();
-        }
-        catch (IOException e)
-        {
-            log.error("Failed to close the HTTP client", e);
         }
     }
 }
