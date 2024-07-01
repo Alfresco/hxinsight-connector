@@ -51,9 +51,9 @@ class HxInsightClientTest
 {
 
     private final HxInsightClientConfig config = mock(HxInsightClientConfig.class);
-    private final AuthService authService = mock();
+    private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final HttpClient httpClient = mock();
+    private final HttpClient httpClient = mock(HttpClient.class);
 
     private final HxInsightClient hxInsightClient = new HxInsightClient(
             config,
