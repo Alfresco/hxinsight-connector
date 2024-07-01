@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 @Testcontainers
 @SuppressWarnings({"PMD.FieldNamingConventions"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@DisabledIfEnvironmentVariable(named = "GITHUB_SHA", matches = ".*")
+@DisabledIfEnvironmentVariable(named = "IS_GITHUB_ACTION", matches = "true")
 /**
  * As of now this test class is excluded from GitHub Actions workflow but will run with the maven builds (thus, relies on GITHUB_ACTIONS_DEPLOY_TIMEOUT env variable being set).
  */

@@ -39,7 +39,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@EnabledIfEnvironmentVariable(named = "GITHUB_SHA", matches = ".*")
+@EnabledIfEnvironmentVariable(named = "IS_GITHUB_ACTION", matches = "true")
 /**
  * As of now this single test class needs command line docker-compose executed (../distribution/src/main/resources/docker-compose/docker-compose-minimal.yml) before it is run. It is excluded from the maven builds but run as a separate job in GitHub Actions workflow (thus, relies on GITHUB_ACTIONS_DEPLOY_TIMEOUT being set).
  */
