@@ -50,7 +50,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 class HxInsightClientTest
 {
 
-    private final HxInsightClientConfig config = mock();
+    private final HxInsightClientConfig config = mock(HxInsightClientConfig.class);
     private final AuthService authService = mock();
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = mock();
