@@ -25,13 +25,9 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import java.io.IOException;
-
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable;
 import org.testcontainers.containers.BindMode;
@@ -49,7 +45,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
 
 @Testcontainers
-@SuppressWarnings({"PMD.FieldNamingConventions"})
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @DisabledIfEnvironmentVariable(named = "GHA_RUN_DC", matches = ".*")
 /**
@@ -91,26 +87,6 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
-    }
-
-    @AfterEach
-    void tearDown()
-    {
-        WireMock.reset();
-    }
-
-    @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
-    void testCreateNodeContainingImageFile() throws IOException
-    {
-        testCreateNodeContainingImageFileBase();
-    }
-
-    @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
-    void testCreateNodeContainingTextFile() throws IOException
-    {
-        testCreateNodeContainingTextFileBase();
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
