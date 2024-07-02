@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.common.test.util;
 
 import static lombok.AccessLevel.PRIVATE;
 
+import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import lombok.NoArgsConstructor;
@@ -51,20 +52,25 @@ public class RetryUtils
 
     public static void retryWithBackoff(Runnable runnable, int delayMs)
     {
+        retryWithBackoff(runnable, MAX_ATTEMPTS, delayMs);
+    }
+
+    public static void retryWithBackoff(Runnable runnable, int maxAttempts, int delayMs)
+    {
         retryWithBackoff(() -> {
             runnable.run();
             return null;
-        }, delayMs);
+        }, maxAttempts, delayMs);
     }
 
     @SneakyThrows
     public static <T> T retryWithBackoff(Supplier<T> supplier)
     {
-        return retryWithBackoff(supplier, INITIAL_DELAY_MS);
+        return retryWithBackoff(supplier, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 
     @SneakyThrows
-    public static <T> T retryWithBackoff(Supplier<T> supplier, int delayMs)
+    public static <T> T retryWithBackoff(Supplier<T> supplier, int maxAttempts, int delayMs)
     {
         int attempt = 0;
         int delay = delayMs;
@@ -77,13 +83,13 @@ public class RetryUtils
             catch (AssertionError e)
             {
                 attempt++;
-                if (attempt >= MAX_ATTEMPTS)
+                if (attempt >= maxAttempts)
                 {
                     log.atDebug().log("Attempt {} failed", attempt);
                     throw e;
                 }
                 log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delay);
-                Thread.sleep(delay);
+                TimeUnit.MILLISECONDS.sleep(delay);
                 delay *= BACKOFF_MULTIPLIER;
             }
         }
