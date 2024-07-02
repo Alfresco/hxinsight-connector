@@ -61,7 +61,7 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.alfresco</groupId>
-                                            <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
+                                            <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
                                             <version>${project.version}</version>
                                             <outputDirectory>${project.basedir}/target/dependency</outputDirectory>
                                         </artifactItem>
@@ -99,9 +99,9 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.alfresco</groupId>
-                                            <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
+                                            <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
                                             <version>${project.version}</version>
-                                            <outputDirectory>${project.build.directory}/classes/docker/prediction-applier-extension</outputDirectory>
+                                            <outputDirectory>${project.build.directory}/classes/docker/hxinsight-extension</outputDirectory>
                                         </artifactItem>
                                     </artifactItems>
                                 </configuration>
@@ -248,19 +248,19 @@
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>copy-resources-docker-prediction-applier-extension</id>
+                                <id>copy-resources-docker-hxinsight-extension</id>
                                 <phase>process-resources</phase>
                                 <goals>
                                     <goal>copy-resources</goal>
                                 </goals>
                                 <configuration>
-                                    <outputDirectory>${project.build.directory}/classes/docker/prediction-applier-extension</outputDirectory>
+                                    <outputDirectory>${project.build.directory}/classes/docker/hxinsight-extension</outputDirectory>
                                     <resources>
                                         <resource>
-                                            <directory>${project.parent.basedir}/prediction-applier-extension/target/generated-sources/license</directory>
+                                            <directory>${project.parent.basedir}/hxinsight-extension/target/generated-sources/license</directory>
                                         </resource>
                                         <resource>
-                                            <directory>${project.parent.basedir}/prediction-applier-extension/target/generated-resources</directory>
+                                            <directory>${project.parent.basedir}/hxinsight-extension/target/generated-resources</directory>
                                             <includes>
                                                 <include>licenses/*</include>
                                             </includes>

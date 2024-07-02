@@ -8,9 +8,9 @@
         <version>1.0.0-SNAPSHOT</version>
     </parent>
 
-    <name>Alfresco Connector for Hyland Experience Insight :: Prediction Applier Extension for Alfresco Repository</name>
+    <name>Alfresco Connector for Hyland Experience Insight :: Hyland Experience Insight Extension for Alfresco Repository</name>
     <description>Platform/Repo JAR Module (to be included in the alfresco.war)</description>
-    <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
+    <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
     <packaging>jar</packaging>
 
     <dependencyManagement>
