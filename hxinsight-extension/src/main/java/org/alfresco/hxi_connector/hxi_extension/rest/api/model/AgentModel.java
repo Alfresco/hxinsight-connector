@@ -23,31 +23,36 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.hxi_extension.rest.api;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-import java.util.List;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AgentModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
-import org.alfresco.rest.framework.resource.EntityResource;
-import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
-import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
-import org.alfresco.rest.framework.resource.parameters.Parameters;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 
-@Slf4j
+@Accessors(prefix = {"_", ""})
+@ToString
+@Getter
 @AllArgsConstructor
-@EntityResource(name = "agents", title = "AI Agents")
-public class AgentsEntityResource implements EntityResourceAction.Read<AgentModel>
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@EqualsAndHashCode
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class AgentModel
 {
-    private HxInsightClient hxInsightClient;
+    private String _id;
+    private String name;
+    private String description;
 
-    @Override
-    public CollectionWithPagingInfo<AgentModel> readAll(Parameters params)
+    public static AgentModel fromServiceModel(Agent agent)
     {
-        List<AgentModel> agents = hxInsightClient.getAgents().stream().map(AgentModel::fromServiceModel).toList();
-        return CollectionWithPagingInfo.asPaged(params.getPaging(), agents);
+        return new AgentModel(agent.agentId(), agent.name(), agent.description());
     }
 }

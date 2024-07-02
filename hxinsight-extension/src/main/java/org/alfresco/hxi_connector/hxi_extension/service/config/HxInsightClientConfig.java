@@ -31,13 +31,14 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 
 @Getter
-
-public final class QuestionServiceConfig
+public final class HxInsightClientConfig
 {
+    private final String agentUrl;
     private final String questionUrl;
 
-    public QuestionServiceConfig(@NotBlank String baseUrl)
+    public HxInsightClientConfig(@NotBlank String baseUrl)
     {
+        this.agentUrl = baseUrl + "/v1/agents";
         this.questionUrl = baseUrl + "/v1/questions";
     }
 }
