@@ -148,7 +148,18 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
+      - name: "Start docker-compose and run e2e docker-compose tests"
+        env:
+          GHA_RUN_DC: true
+        run: |
+          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'hxinsight-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Stop docker-compose"
+        if: always()
+        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
       - name: "Run e2e tests"
+        env:
+          GHA_RUN_DC: false
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   push_docker_images:
@@ -242,7 +253,7 @@ jobs:
       - name: "Create third party license csv file and add it to the deploy directory"
         run: python3 ./third-party-license-overrides/thirdPartyLicenseCSVCreator.py --project "${{ github.workspace }}" --version "${{ env.RELEASE_VERSION }}" --combined --output "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}"
       - name: "Configure AWS credentials"
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_S3_STAGING_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_S3_STAGING_SECRET_KEY }}
@@ -301,7 +312,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: "Configure AWS credentials"
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_S3_RELEASE_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_S3_RELEASE_SECRET_ACCESS_KEY }}

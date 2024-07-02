@@ -72,11 +72,11 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig" id="questionServiceConfig">
+    <bean id="hxInsightClientConfig" class="org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig">
         <constructor-arg name="baseUrl" value="${hxi.client.baseUrl}"/>
     </bean>
 
-    <bean id="hxi.simpleMappingExceptionResolver" abstract="true" parent="simpleMappingExceptionResolverParent">
+    <bean id="hxInsightSimpleMappingExceptionResolver" abstract="true" parent="simpleMappingExceptionResolverParent">
         <property name="exceptionMappings">
             <map merge="true">
                 <entry key="org.alfresco.hxi_connector.hxi_extension.rest.api.exception.PredictionStateChangedException" value="#{T(org.springframework.extensions.webscripts.Status).STATUS_CONFLICT}" />
@@ -85,10 +85,10 @@
     </bean>
     <bean class="org.alfresco.util.BeanExtender">
         <property name="beanName" value="simpleMappingExceptionResolverParent"/>
-        <property name="extendingBeanName" value="hxi.simpleMappingExceptionResolver"/>
+        <property name="extendingBeanName" value="hxInsightSimpleMappingExceptionResolver"/>
     </bean>
 
-    <bean id="hxiAuthProperties" class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties">
+    <bean id="hxInsightAuthProperties" class="org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties">
         <property name="providers">
             <map>
                 <entry key="hyland-experience">
@@ -123,21 +123,21 @@
         </property>
     </bean>
 
-    <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient">
-        <constructor-arg name="authProperties" ref="hxiAuthProperties"/>
+    <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.hxi_extension.client.HxInsightAuthClient">
+        <constructor-arg name="authProperties" ref="hxInsightAuthProperties"/>
     </bean>
 
-    <bean id="hxiAccessTokenProvider" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider">
+    <bean id="hxInsightAccessTokenProvider" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider">
         <constructor-arg name="authenticationClient" ref="hxInsightAuthClient"/>
     </bean>
 
-    <bean id="authService" class="org.alfresco.hxi_connector.hxi_extension.service.util.AuthService">
-        <constructor-arg name="accessTokenProvider" ref="hxiAccessTokenProvider"/>
+    <bean id="hxInsightAuthService" class="org.alfresco.hxi_connector.hxi_extension.service.util.AuthService">
+        <constructor-arg name="accessTokenProvider" ref="hxInsightAccessTokenProvider"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient" id="hxInsightClient">
+    <bean id="hxInsightClient" class="org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient">
         <constructor-arg name="config" ref="questionServiceConfig"/>
-        <constructor-arg name="authService" ref="authService"/>
+        <constructor-arg name="authService" ref="hxInsightAuthService"/>
         <constructor-arg name="objectMapper" ref="alfrescoEventObjectMapper"/>
     </bean>
 
