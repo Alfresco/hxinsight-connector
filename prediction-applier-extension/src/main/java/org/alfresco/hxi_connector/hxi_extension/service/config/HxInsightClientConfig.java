@@ -24,21 +24,20 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.service.util;
+package org.alfresco.hxi_connector.hxi_extension.service.config;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.core5.http.HttpHeaders;
+import jakarta.validation.constraints.NotBlank;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-
-@RequiredArgsConstructor
-public class AuthService
+public record HxInsightClientConfig(
+        @NotBlank String baseUrl,
+        String agentUrl,
+        String questionUrl)
 {
-    private final AccessTokenProvider accessTokenProvider;
-
-    public void setAuthHeader(HttpUriRequestBase request)
+    public HxInsightClientConfig(@NotBlank String baseUrl)
     {
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience"));
+        this(
+                baseUrl,
+                baseUrl + "/v1/agents",
+                baseUrl + "/v1/questions");
     }
 }

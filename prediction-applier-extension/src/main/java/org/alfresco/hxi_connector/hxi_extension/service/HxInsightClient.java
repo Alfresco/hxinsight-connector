@@ -28,10 +28,12 @@ package org.alfresco.hxi_connector.hxi_extension.service;
 
 import static org.apache.hc.core5.http.ContentType.APPLICATION_JSON;
 import static org.apache.hc.core5.http.HttpStatus.SC_ACCEPTED;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import jakarta.annotation.PreDestroy;
 
@@ -39,15 +41,17 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Cleanup;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.hc.client5.http.classic.methods.HttpGet;
 import org.apache.hc.client5.http.classic.methods.HttpPost;
 import org.apache.hc.client5.http.impl.classic.CloseableHttpClient;
 import org.apache.hc.client5.http.impl.classic.HttpClients;
 import org.apache.hc.core5.http.HttpEntity;
 import org.apache.hc.core5.http.io.entity.StringEntity;
 
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
-import org.alfresco.hxi_connector.hxi_extension.service.config.QuestionServiceConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
@@ -56,33 +60,41 @@ import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 public class HxInsightClient
 {
     private final static String QUESTION_ID_ENTRY = "questionId";
-    private final QuestionServiceConfig config;
+    private final HxInsightClientConfig config;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
     private final CloseableHttpClient client = HttpClients.createDefault();
 
+    @SneakyThrows
+    public List<Agent> getAgents()
+    {
+        HttpGet httpGet = new HttpGet(config.agentUrl());
+
+        authService.setAuthHeader(httpGet);
+
+        return client.execute(httpGet, (response) -> {
+            throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_OK);
+
+            return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<>() {});
+        });
+    }
+
+    @SneakyThrows
     public String askQuestion(Question question)
     {
-        try
-        {
-            @Cleanup
-            HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
+        @Cleanup
+        HttpEntity body = new StringEntity(objectMapper.writeValueAsString(question), APPLICATION_JSON);
 
-            HttpPost httpPost = new HttpPost(config.getQuestionUrl());
-            httpPost.setEntity(body);
+        HttpPost httpPost = new HttpPost(config.questionUrl());
+        httpPost.setEntity(body);
 
-            authService.setAuthHeader(httpPost);
+        authService.setAuthHeader(httpPost);
 
-            return client.execute(httpPost, (response) -> {
-                throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
+        return client.execute(httpPost, (response) -> {
+            throwExceptionOnUnexpectedStatusCode(response.getCode(), SC_ACCEPTED);
 
-                return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
-            });
-        }
-        catch (IOException e)
-        {
-            throw new HxInsightConnectorRuntimeException("Failed to ask question", e);
-        }
+            return objectMapper.readValue(response.getEntity().getContent(), new TypeReference<Map<String, String>>() {}).get(QUESTION_ID_ENTRY);
+        });
     }
 
     @PreDestroy

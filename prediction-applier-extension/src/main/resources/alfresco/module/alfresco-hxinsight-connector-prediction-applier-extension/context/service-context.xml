@@ -67,14 +67,12 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource"/>
-
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.PredictionsEntityResource">
         <property name="nodes" ref="nodes"/>
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.service.config.QuestionServiceConfig" id="questionServiceConfig">
+    <bean class="org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig" id="questionServiceConfig">
         <constructor-arg name="baseUrl" value="${hxi.client.baseUrl}"/>
     </bean>
 
@@ -125,7 +123,7 @@
         </property>
     </bean>
 
-    <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.hxi_extension.client.HxInsightAuthClient">
+    <bean id="hxInsightAuthClient" class="org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient">
         <constructor-arg name="authProperties" ref="hxiAuthProperties"/>
     </bean>
 
@@ -144,6 +142,10 @@
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource">
+        <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AgentsEntityResource">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
     </bean>
 </beans>

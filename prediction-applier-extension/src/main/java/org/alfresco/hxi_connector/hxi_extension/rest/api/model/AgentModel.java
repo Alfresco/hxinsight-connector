@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,22 +23,36 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.util;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import lombok.RequiredArgsConstructor;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.core5.http.HttpHeaders;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 
-@RequiredArgsConstructor
-public class AuthService
+@Accessors(prefix = {"_", ""})
+@ToString
+@Getter
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@EqualsAndHashCode
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class AgentModel
 {
-    private final AccessTokenProvider accessTokenProvider;
+    private String _id;
+    private String name;
+    private String description;
 
-    public void setAuthHeader(HttpUriRequestBase request)
+    public static AgentModel fromServiceModel(Agent agent)
     {
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience"));
+        return new AgentModel(agent.agentId(), agent.name(), agent.description());
     }
 }

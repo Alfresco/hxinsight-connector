@@ -23,22 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.util;
-
-import lombok.RequiredArgsConstructor;
-import org.apache.hc.client5.http.classic.methods.HttpUriRequestBase;
-import org.apache.hc.core5.http.HttpHeaders;
-
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-
-@RequiredArgsConstructor
-public class AuthService
-{
-    private final AccessTokenProvider accessTokenProvider;
-
-    public void setAuthHeader(HttpUriRequestBase request)
-    {
-        request.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience"));
-    }
-}
+public record Agent(String agentId, String name, String description)
+{}
