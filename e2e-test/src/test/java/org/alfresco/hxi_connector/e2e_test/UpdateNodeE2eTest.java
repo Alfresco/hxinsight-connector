@@ -106,14 +106,17 @@ public class UpdateNodeE2eTest
     @Container
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
-    @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer();
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
+            .dependsOn(activemq, hxInsightMock);
     @Container
-    private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer();
+    static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
+            .dependsOn(postgres, activemq, liveIngester);
+    @Container
+    private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
+            .dependsOn(activemq, hxInsightMock);
 
     RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
 
@@ -124,7 +127,6 @@ public class UpdateNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testApplyPredictionToNode() throws IOException
     {
         // given

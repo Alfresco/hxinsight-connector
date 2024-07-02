@@ -148,7 +148,18 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
+      - name: "Start docker-compose and run e2e docker-compose tests"
+        env:
+          GHA_RUN_DC: true
+        run: |
+          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'hxinsight-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Stop docker-compose"
+        if: always()
+        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
       - name: "Run e2e tests"
+        env:
+          GHA_RUN_DC: false
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   push_docker_images:
