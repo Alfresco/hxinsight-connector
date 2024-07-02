@@ -48,8 +48,8 @@ import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoReposito
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
-    private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-prediction-applier-extension");
-    private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-prediction-applier-extension";
+    private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-hxinsight-extension");
+    private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-hxinsight-extension";
     private static final String POSTGRES_IMAGE = "postgres";
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
@@ -91,7 +91,7 @@ public class DockerContainers
         pullRepositoryImage(enterprise);
         AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
                 new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, enterprise))
-                        .withStartupTimeout(Duration.ofMinutes(5))
+                        .waitingFor(Wait.forHttp("/alfresco").forPort(8080).withStartupTimeout(Duration.ofMinutes(5)))
                         .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
@@ -121,7 +121,6 @@ public class DockerContainers
         return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
                 .withExposedPorts(61616, 8161, 5672, 61613)
-                .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
     }
 
@@ -140,7 +139,6 @@ public class DockerContainers
                 .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
                 .withExposedPorts(8095)
-                .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformRouterContainer")));
 
@@ -156,7 +154,6 @@ public class DockerContainers
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
                 .withExposedPorts(8090)
-                .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformCoreContainer")));
 
@@ -172,7 +169,6 @@ public class DockerContainers
                 .withEnv("scheduler.content.age.millis", "86400000")
                 .withEnv("scheduler.cleanup.interval", "86400000")
                 .withExposedPorts(8099)
-                .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2));
 
         Optional.ofNullable(network).ifPresent(n -> sfs.withNetwork(n).withNetworkAliases(SFS_ALIAS));
@@ -189,8 +185,8 @@ public class DockerContainers
                 .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST", "http://shared-file-store")
                 .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT", "8099")
                 .withExposedPorts(5007)
-                .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2))
+                .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("LiveIngesterContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> liveIngester.withNetwork(n).withNetworkAliases(LIVE_INGESTER_ALIAS));
@@ -204,7 +200,6 @@ public class DockerContainers
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n")
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withExposedPorts(5009)
-                .waitingFor(Wait.forListeningPort())
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("PredictionApplierContainer")));
 
