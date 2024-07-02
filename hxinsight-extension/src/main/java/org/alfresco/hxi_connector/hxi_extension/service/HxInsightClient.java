@@ -66,7 +66,7 @@ public class HxInsightClient
     public List<Agent> getAgents()
     {
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.agentUrl()))
+                .uri(URI.create(config.getAgentUrl()))
                 .header("Content-Type", "application/json")
                 .headers(authService.getAuthHeaders())
                 .GET()
@@ -87,7 +87,7 @@ public class HxInsightClient
             String body = objectMapper.writeValueAsString(question);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(config.questionUrl()))
+                    .uri(URI.create(config.getQuestionUrl()))
                     .header("Content-Type", "application/json")
                     .headers(authService.getAuthHeaders())
                     .POST(BodyPublishers.ofString(body))

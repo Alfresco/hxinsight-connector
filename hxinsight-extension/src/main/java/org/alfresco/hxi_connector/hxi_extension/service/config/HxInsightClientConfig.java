@@ -28,16 +28,17 @@ package org.alfresco.hxi_connector.hxi_extension.service.config;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record HxInsightClientConfig(
-        @NotBlank String baseUrl,
-        String agentUrl,
-        String questionUrl)
+import lombok.Getter;
+
+@Getter
+public final class HxInsightClientConfig
 {
+    private final String agentUrl;
+    private final String questionUrl;
+
     public HxInsightClientConfig(@NotBlank String baseUrl)
     {
-        this(
-                baseUrl,
-                baseUrl + "/v1/agents",
-                baseUrl + "/v1/questions");
+        this.agentUrl = baseUrl + "/v1/agents";
+        this.questionUrl = baseUrl + "/v1/questions";
     }
 }
