@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/questions"
+  },
+  "response": {
+    "status": 202,
+    "bodyFileName": "question-id.json"
+  }
+}

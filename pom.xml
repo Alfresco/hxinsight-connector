@@ -20,7 +20,7 @@
         <module>bulk-ingester</module>
         <module>live-ingester</module>
         <module>prediction-applier</module>
-        <module>prediction-applier-extension</module>
+        <module>hxinsight-extension</module>
         <module>distribution</module>
         <module>e2e-test</module>
     </modules>
@@ -68,21 +68,21 @@
         <alfresco-sdk.version>4.7.0</alfresco-sdk.version>
         <alfresco-db-connector.version>4.0.1</alfresco-db-connector.version>
         <alfresco-event-model.version>0.0.27</alfresco-event-model.version>
-        <spring-boot.version>3.3.0</spring-boot.version>
+        <spring-boot.version>3.3.1</spring-boot.version>
         <spring-camel.version>4.6.0</spring-camel.version>
         <commons-lang.version>3.14.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.16.1</commons-io.version>
         <pdfbox.version>3.0.2</pdfbox.version>
-        <aws-sdk-s3.version>2.25.69</aws-sdk-s3.version>
-        <wiremock.version>3.6.0</wiremock.version>
+        <aws-sdk-s3.version>2.26.11</aws-sdk-s3.version>
+        <wiremock.version>3.8.0</wiremock.version>
 
         <testcontainers.version>1.19.8</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
-        <maven-jar-plugin.version>3.4.1</maven-jar-plugin.version>
+        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
@@ -92,7 +92,7 @@
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->
         <dist.alfresco.docker.user>alfresco</dist.alfresco.docker.user>
         <dist.alfresco.docker.image>quay.io/alfresco/alfresco-content-repository</dist.alfresco.docker.image>
-        <dist.alfresco.repo.extension>alfresco-hxinsight-connector-prediction-applier-extension</dist.alfresco.repo.extension>
+        <dist.alfresco.repo.extension>alfresco-hxinsight-connector-hxinsight-extension</dist.alfresco.repo.extension>
         <dist.alfresco.version>${alfresco-platform.version}</dist.alfresco.version>
         <dist.share.version>${alfresco-platform.version}</dist.share.version>
         <dist.postgres.version>14.4</dist.postgres.version>
@@ -101,8 +101,8 @@
         <dist.transform.sfs.version>4.0.1</dist.transform.sfs.version>
         <dist.activemq.version>5.18.3</dist.activemq.version>
         <dist.activemq.docker.tag>${dist.activemq.version}-jre17-rockylinux8</dist.activemq.docker.tag>
-        <dist.digital.workspace.version>4.4.0-7099328816</dist.digital.workspace.version>
-        <dist.control.center.version>8.3.0</dist.control.center.version>
+        <dist.digital.workspace.version>4.5.0-9694926934</dist.digital.workspace.version>
+        <dist.control.center.version>8.5.0-9694926934</dist.control.center.version>
         <dist.nginx.version>3.4.2</dist.nginx.version>
         <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
         <dist.search.enterprise.version>4.0.1</dist.search.enterprise.version>
@@ -200,7 +200,7 @@
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
-                <artifactId>alfresco-hxinsight-connector-prediction-applier-extension</artifactId>
+                <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

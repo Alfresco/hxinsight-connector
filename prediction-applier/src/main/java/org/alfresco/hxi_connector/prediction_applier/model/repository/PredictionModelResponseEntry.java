@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.prediction_applier.model.repository;
 import java.io.Serializable;
 import java.util.Date;
 
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.UpdateType;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
 
 public record PredictionModelResponseEntry(
         String id,

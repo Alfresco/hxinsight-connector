@@ -48,8 +48,8 @@ import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoReposito
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
-    private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-prediction-applier-extension");
-    private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-prediction-applier-extension";
+    private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-hxinsight-extension");
+    private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-hxinsight-extension";
     private static final String POSTGRES_IMAGE = "postgres";
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";

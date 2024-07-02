@@ -51,9 +51,9 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
-import org.alfresco.hxi_connector.prediction_applier.rest.api.model.PredictionModel;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PredictionListenerTest
