@@ -26,10 +26,13 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import java.net.http.HttpClient;
@@ -39,11 +42,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
+import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
@@ -112,6 +117,44 @@ class HxInsightClientTest
         // when
         assertThrows(EndpointClientErrorException.class, () -> hxInsightClient.askQuestion(
                 new Question("Who won last year's Super Bowl?", "")));
+    }
+
+    @SneakyThrows
+    @Test
+    void shouldReturnAnswer()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        String answer = "The Kansas City Chiefs won last year's Super Bowl.";
+        AnswerResponse expectedAnswerResponse = new AnswerResponse(questionId, "", "", "", answer, null);
+        JSONObject responseBody = new JSONObject(expectedAnswerResponse);
+        HttpResponse response = mock(HttpResponse.class);
+        given(response.statusCode()).willReturn(SC_OK);
+        given(response.body()).willReturn(responseBody.toString());
+        given(httpClient.send(any(), any())).willReturn(response);
+        given(config.getAnswerUrl()).willReturn("http://hxinsight/question/%s/answer");
+
+        // when
+        AnswerResponse answerResponse = hxInsightClient.getAnswer(questionId);
+
+        // then
+        then(httpClient).should().send(any(), any());
+        assertEquals(answer, answerResponse.getAnswer());
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldThrowOnNotExpectedStatusCodeWhenGettingAnswer()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        HttpResponse response = mock(HttpResponse.class);
+        given(response.statusCode()).willReturn(SC_BAD_REQUEST);
+        given(httpClient.send(any(), any())).willReturn(response);
+        given(config.getAnswerUrl()).willReturn("http://hxinsight/question/%s/answer");
+
+        // when + then
+        assertThrows(EndpointClientErrorException.class, () -> hxInsightClient.getAnswer(questionId));
     }
 
 }
