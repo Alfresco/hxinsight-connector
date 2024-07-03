@@ -23,22 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
-
-import jakarta.validation.constraints.NotBlank;
-
-import lombok.Getter;
-
-@Getter
-public final class HxInsightClientConfig
-{
-    private final String agentUrl;
-    private final String questionUrl;
-
-    public HxInsightClientConfig(@NotBlank String baseUrl)
-    {
-        this.agentUrl = baseUrl + "/v1/agents";
-        this.questionUrl = baseUrl + "/v1/questions";
-    }
-}
+public record Agent(String agentId, String name, String description)
+{}
