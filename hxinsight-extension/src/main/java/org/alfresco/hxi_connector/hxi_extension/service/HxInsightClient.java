@@ -26,11 +26,17 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
-import static org.apache.http.HttpStatus.SC_ACCEPTED;
-import static org.apache.http.HttpStatus.SC_OK;
-
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
+import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
+import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 import java.io.IOException;
 import java.net.URI;
@@ -41,20 +47,9 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
-
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
-import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
-import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
-import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
-import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
-import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
-import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptException;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
+import static org.apache.http.HttpStatus.SC_OK;
 
 @Slf4j
 @RequiredArgsConstructor
