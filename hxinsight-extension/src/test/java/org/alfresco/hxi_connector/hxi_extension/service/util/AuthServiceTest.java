@@ -37,7 +37,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 class AuthServiceTest
 {
 
-    private final AccessTokenProvider accessTokenProvider = mock();
+    private final AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
     private final AuthService authService = new AuthService(accessTokenProvider);
 
     @Test
