@@ -26,13 +26,6 @@
 
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
-import org.junit.Test;
-import org.springframework.extensions.webscripts.WebScriptException;
-
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -40,6 +33,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.extensions.webscripts.Status.STATUS_BAD_REQUEST;
+
+import java.util.List;
+
+import org.junit.Test;
+import org.springframework.extensions.webscripts.WebScriptException;
+
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
+import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 
 public class QuestionsEntityResourceTest
 {
@@ -66,12 +67,10 @@ public class QuestionsEntityResourceTest
         QuestionModel question = new QuestionModel(
                 null,
                 "What is the capital of France?",
-                ""
-        );
+                "");
 
         String questionId = "a13c4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d";
         given(hxInsightClient.askQuestion(any())).willReturn(questionId);
-
 
         // when
         List<QuestionModel> questionIds = questionsEntityResource.create(List.of(question), null);
