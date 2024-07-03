@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
 import java.io.IOException;
@@ -45,12 +46,15 @@ import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientCo
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
+import org.springframework.extensions.webscripts.Status;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 @Slf4j
 @RequiredArgsConstructor
 public class HxInsightClient
 {
     private static final int EXPECTED_STATUS_CODE = 202;
+    private static final int INTERNAL_SERVER_ERROR = 500;
     private final HxInsightClientConfig config;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
@@ -71,14 +75,15 @@ public class HxInsightClient
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), EXPECTED_STATUS_CODE);
+            ensureThat(httpResponse.statusCode() == EXPECTED_STATUS_CODE,
+                    () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed"));
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
                     .questionId();
         }
         catch (IOException | InterruptedException e)
         {
-            throw new HxInsightConnectorRuntimeException("Failed to ask question", e);
+            throw new WebScriptException(INTERNAL_SERVER_ERROR, "Failed to ask question", e);
         }
     }
 }
