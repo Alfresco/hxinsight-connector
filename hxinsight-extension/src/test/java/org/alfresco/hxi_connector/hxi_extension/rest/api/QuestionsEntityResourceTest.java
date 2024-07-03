@@ -43,7 +43,7 @@ import static org.springframework.extensions.webscripts.Status.STATUS_BAD_REQUES
 
 public class QuestionsEntityResourceTest
 {
-    private final HxInsightClient hxInsightClient = mock();
+    private final HxInsightClient hxInsightClient = mock(HxInsightClient.class);
     private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(hxInsightClient);
 
     @Test
