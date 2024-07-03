@@ -171,6 +171,7 @@ jobs:
       - run_e2e_test
     if: >
       github.event_name == 'push' &&
+      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       !(failure() || cancelled()) &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
