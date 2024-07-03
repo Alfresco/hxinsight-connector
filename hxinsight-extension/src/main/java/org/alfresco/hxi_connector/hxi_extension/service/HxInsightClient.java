@@ -60,7 +60,7 @@ public class HxInsightClient
     private final HxInsightClientConfig config;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client;
 
     @SneakyThrows
     public List<Agent> getAgents()
