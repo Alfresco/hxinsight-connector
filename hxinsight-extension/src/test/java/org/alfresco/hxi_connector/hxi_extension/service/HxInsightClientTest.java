@@ -46,6 +46,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 class HxInsightClientTest
 {
@@ -110,7 +111,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when
-        assertThrows(EndpointClientErrorException.class, () -> hxInsightClient.askQuestion(
+        assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
                 new Question("Who won last year's Super Bowl?", "")));
     }
 
