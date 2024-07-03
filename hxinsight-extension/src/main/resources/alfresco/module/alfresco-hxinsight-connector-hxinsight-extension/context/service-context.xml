@@ -67,8 +67,6 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource"/>
-
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.PredictionsEntityResource">
         <property name="nodes" ref="nodes"/>
         <property name="predictionService" ref="PredictionService"/>
@@ -146,4 +144,6 @@
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
     </bean>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
 </beans>
