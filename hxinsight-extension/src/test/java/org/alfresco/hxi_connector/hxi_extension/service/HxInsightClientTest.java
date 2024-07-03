@@ -83,7 +83,7 @@ class HxInsightClientTest
                 }
                 """.formatted(expectedQuestionId);
 
-        HttpResponse response = mock();
+        HttpResponse response = mock(HttpResponse.class);
 
         given(response.statusCode()).willReturn(202);
         given(response.body()).willReturn(responseBody);
@@ -103,7 +103,7 @@ class HxInsightClientTest
     void shouldThrowOnNotExpectedStatusCode()
     {
         // given
-        HttpResponse response = mock();
+        HttpResponse response = mock(HttpResponse.class);
 
         given(response.statusCode()).willReturn(400);
 
