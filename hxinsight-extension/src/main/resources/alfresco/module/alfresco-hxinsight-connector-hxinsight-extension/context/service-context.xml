@@ -80,7 +80,6 @@
         <property name="exceptionMappings">
             <map merge="true">
                 <entry key="org.alfresco.hxi_connector.hxi_extension.rest.api.exception.PredictionStateChangedException" value="#{T(org.springframework.extensions.webscripts.Status).STATUS_CONFLICT}" />
-                <entry key="org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException" value="#{T(org.springframework.extensions.webscripts.Status).STATUS_INTERNAL_SERVER_ERROR}" />
             </map>
         </property>
     </bean>
