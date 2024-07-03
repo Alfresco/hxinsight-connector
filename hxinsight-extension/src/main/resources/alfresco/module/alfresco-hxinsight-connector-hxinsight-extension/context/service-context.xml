@@ -72,7 +72,7 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
-    <bean id="questionServiceConfig" class="org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig">
+    <bean id="hxInsightClientConfig" class="org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig">
         <constructor-arg name="baseUrl" value="${hxi.client.baseUrl}"/>
     </bean>
 
@@ -139,13 +139,17 @@
     <bean id="httpClient" class="java.net.http.HttpClient" factory-method="newHttpClient"/>
 
     <bean id="hxInsightClient" class="org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient">
-        <constructor-arg name="config" ref="questionServiceConfig"/>
+        <constructor-arg name="config" ref="hxInsightClientConfig"/>
         <constructor-arg name="authService" ref="hxInsightAuthService"/>
         <constructor-arg name="objectMapper" ref="alfrescoEventObjectMapper"/>
         <constructor-arg name="client" ref="httpClient"/>
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource">
+        <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AgentsEntityResource">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
     </bean>
 

@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,22 +23,36 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import jakarta.validation.constraints.NotBlank;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import lombok.experimental.Accessors;
 
+import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
+
+@Accessors(prefix = {"_", ""})
+@ToString
 @Getter
-public final class HxInsightClientConfig
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@EqualsAndHashCode
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class AgentModel
 {
-    private final String agentUrl;
-    private final String questionUrl;
+    private String _id;
+    private String name;
+    private String description;
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
+    public static AgentModel fromServiceModel(Agent agent)
     {
-        this.agentUrl = baseUrl + "/v1/agents";
-        this.questionUrl = baseUrl + "/v1/questions";
+        return new AgentModel(agent.agentId(), agent.name(), agent.description());
     }
 }
