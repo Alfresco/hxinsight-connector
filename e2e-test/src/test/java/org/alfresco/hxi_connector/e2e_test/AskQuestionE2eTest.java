@@ -26,11 +26,12 @@
 package org.alfresco.hxi_connector.e2e_test;
 
 import static io.restassured.RestAssured.given;
-
-import java.util.List;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import io.restassured.common.mapper.TypeRef;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -43,7 +44,6 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -83,15 +83,33 @@ public class AskQuestionE2eTest
                 """;
 
         // when
-        List<QuestionModel> xx = given().auth().preemptive().basic("admin", "admin")
+        Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(questions)
                 .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
-                .then().extract().response()
-                .as(new TypeRef<List<QuestionModel>>() {});
+                .then().extract().response();
 
         // then
-        System.out.println(xx);
+        assertEquals(SC_BAD_REQUEST, response.statusCode());
+        assertTrue(response.body().asString().contains("You can only ask one question at a time."));
+    }
+
+    @Test
+    void shouldReturn400IfNoQuestionsAsked()
+    {
+        // given
+        String questions = "[]";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(questions)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_BAD_REQUEST, response.statusCode());
+        assertTrue(response.body().asString().contains("You can only ask one question at a time."));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
