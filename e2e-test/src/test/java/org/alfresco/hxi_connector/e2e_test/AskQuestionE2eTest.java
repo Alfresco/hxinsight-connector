@@ -49,26 +49,6 @@ import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class AskQuestionE2eTest
 {
-    private static final String PROPERTY_TO_UPDATE = "cm:description";
-    private static final String LIST_PREDICTIONS_SCENARIO = "List-predictions";
-    private static final String PREDICTIONS_AVAILABLE_STATE = "Available";
-    private static final String PREDICTIONS_LIST = """
-            [
-              {
-                "prediction": [
-                  {
-                    "field": "%s",
-                    "confidence": 0.9999999403953552,
-                    "value": "%s"
-                  }
-                ],
-                "objectId": "%s",
-                "modelId": "56785678-5678-5678-5678-567856785678",
-                "enrichmentType": "AUTOCORRECT"
-              }
-            ]
-            """;
-
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
