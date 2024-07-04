@@ -37,7 +37,7 @@ jobs:
         uses: tj-actions/changed-files@d6babd6899969df1a11d14c368283ea4436bca78 # v44.5.2
       - name: Store changed files in env
         run: echo "GITHUB_MODIFIED_FILES=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_ENV
-      #- uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v5.30.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v5.30.0
 
   veracode_sca:
     name: "Veracode - Source Clear Scan (SCA)"
