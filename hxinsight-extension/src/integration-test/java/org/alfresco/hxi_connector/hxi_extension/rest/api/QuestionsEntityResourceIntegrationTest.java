@@ -27,8 +27,12 @@
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static org.apache.hc.core5.http.HttpStatus.SC_ACCEPTED;
+import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.http.entity.ContentType.APPLICATION_JSON;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 
@@ -39,7 +43,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -107,7 +110,8 @@ public class QuestionsEntityResourceIntegrationTest
         List<QuestionModel> questions = List.of(new QuestionModel("", "Is world flat?", ""));
 
         givenThat(post(QUESTION_ENDPOINT)
-                .withHeader(AUTHORIZATION, WireMock.equalTo(AUTH_TOKEN))
+                .withHeader(AUTHORIZATION, equalTo(AUTH_TOKEN))
+                .withHeader(CONTENT_TYPE, equalTo(APPLICATION_JSON.getMimeType()))
                 .withRequestBody(WireMock.equalToJson("""
                         {
                             "question": "Is world flat?",
@@ -115,7 +119,7 @@ public class QuestionsEntityResourceIntegrationTest
                         }
                         """))
                 .willReturn(aResponse()
-                        .withStatus(HttpStatus.SC_OK)
+                        .withStatus(SC_ACCEPTED)
                         .withBody(QUESTION_RESPONSE_BODY)));
 
         // when
