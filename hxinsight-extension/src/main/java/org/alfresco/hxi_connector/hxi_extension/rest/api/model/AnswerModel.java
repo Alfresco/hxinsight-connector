@@ -33,6 +33,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -41,6 +42,7 @@ import org.apache.commons.collections4.SetUtils;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
 @ToString
+@EqualsAndHashCode
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -55,11 +57,11 @@ public class AnswerModel
     public static AnswerModel fromServiceModel(AnswerResponse answer)
     {
         Set<ReferenceModel> references = SetUtils.emptyIfNull(answer.getReferences()).stream().map(ReferenceModel::fromServiceModel).collect(toSet());
-        AnswerModel answerModel = new AnswerModel(answer.getAnswer(), answer.getQuestionId(), references);
-        return answerModel;
+        return new AnswerModel(answer.getAnswer(), answer.getQuestionId(), references);
     }
 
     @ToString
+    @EqualsAndHashCode
     @Getter
     @AllArgsConstructor
     @NoArgsConstructor

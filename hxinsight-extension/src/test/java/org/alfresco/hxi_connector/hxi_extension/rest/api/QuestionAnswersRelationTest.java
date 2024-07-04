@@ -31,8 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
-import static org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient.HXI_API_ERROR;
-
 import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
@@ -87,7 +85,7 @@ class QuestionAnswersRelationTest
     {
         // given
         String questionId = "questionId";
-        given(mockHxInsightClient.getAnswer(questionId)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, HXI_API_ERROR));
+        given(mockHxInsightClient.getAnswer(questionId)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, "Some error message"));
 
         // when + then
         assertThrows(WebScriptException.class, () -> objectUnderTest.readAll(questionId, mockParameters));
