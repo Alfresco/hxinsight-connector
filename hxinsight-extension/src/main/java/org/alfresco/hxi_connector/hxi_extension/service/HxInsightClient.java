@@ -28,7 +28,9 @@ package org.alfresco.hxi_connector.hxi_extension.service;
 
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
 import java.io.IOException;
@@ -45,6 +47,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
@@ -80,7 +83,6 @@ public class HxInsightClient
         return objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
     }
 
-    @SneakyThrows
     public String askQuestion(Question question)
     {
         try
@@ -96,14 +98,15 @@ public class HxInsightClient
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_ACCEPTED);
+            ensureThat(httpResponse.statusCode() == SC_ACCEPTED,
+                    () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed"));
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
                     .questionId();
         }
         catch (IOException | InterruptedException e)
         {
-            throw new HxInsightConnectorRuntimeException("Failed to ask question", e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to ask question", e);
         }
     }
 
