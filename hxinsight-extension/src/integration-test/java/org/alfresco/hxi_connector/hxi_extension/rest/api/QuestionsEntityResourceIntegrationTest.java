@@ -78,6 +78,7 @@ public class QuestionsEntityResourceIntegrationTest
             """.formatted(QUESTION_ID);
 
     @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
     static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainer();
 
     @MockBean
