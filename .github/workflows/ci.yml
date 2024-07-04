@@ -63,7 +63,7 @@ jobs:
     needs:
       - pre_commit
     if: >
-      (github.ref_name == 'feature/ACSA-240_add-sast-scan-on-pr' || github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || github.event_name == 'pull_request') &&
+      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || github.event_name == 'pull_request') &&
       github.actor != 'dependabot[bot]' &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
