@@ -29,7 +29,7 @@ package org.alfresco.hxi_connector.hxi_extension.service;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 
-import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.io.IOException;
 import java.net.URI;
@@ -45,6 +45,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
@@ -75,7 +76,7 @@ public class HxInsightClient
 
         HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-        throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_OK);
+        propagateErrorIfNeeded(httpResponse.statusCode(), SC_OK);
 
         return objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
     }
@@ -96,7 +97,7 @@ public class HxInsightClient
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_ACCEPTED);
+            propagateErrorIfNeeded(httpResponse.statusCode(), SC_ACCEPTED);
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
                     .questionId();
@@ -120,7 +121,7 @@ public class HxInsightClient
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
             log.atDebug().log("Question with id {} received a following answer {}", questionId, httpResponse.body());
 
-            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_OK);
+            propagateErrorIfNeeded(httpResponse.statusCode(), SC_OK);
 
             return objectMapper.readValue(httpResponse.body(), AnswerResponse.class);
         }
@@ -128,5 +129,10 @@ public class HxInsightClient
         {
             throw new HxInsightConnectorRuntimeException("Failed to get answer to question with id %s".formatted(questionId), e);
         }
+    }
+
+    private static void propagateErrorIfNeeded(int responseStatusCode, int expectedStatusCode)
+    {
+        ensureThat(expectedStatusCode == responseStatusCode, () -> new WebScriptException(responseStatusCode, "Hx Insight API returned an error"));
     }
 }
