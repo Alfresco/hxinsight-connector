@@ -81,7 +81,6 @@ public class HxInsightClient
         return objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
     }
 
-    @SneakyThrows
     public String askQuestion(Question question)
     {
         try

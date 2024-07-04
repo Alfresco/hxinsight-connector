@@ -26,12 +26,15 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
+import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
 
@@ -100,18 +103,32 @@ class HxInsightClientTest
 
     @Test
     @SneakyThrows
-    void shouldThrowOnNotExpectedStatusCode()
+    void shouldPassStatusCodeFromHxi()
     {
         // given
-        HttpResponse response = mock(HttpResponse.class);
+        int expectedStatusCode = 418;
 
-        given(response.statusCode()).willReturn(400);
+        HttpResponse response = mock(HttpResponse.class);
+        given(response.statusCode()).willReturn(expectedStatusCode);
 
         given(httpClient.send(any(), any())).willReturn(response);
 
-        // when
-        assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
+        // when, then
+        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
                 new Question("Who won last year's Super Bowl?", "")));
+        assertEquals(expectedStatusCode, exception.getStatus());
     }
 
+    @Test
+    @SneakyThrows
+    void shouldThrowOnNotExpectedStatusCode()
+    {
+        // given
+        doThrow(new IOException("Error occurred")).when(httpClient).send(any(), any());
+
+        // when, then
+        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
+                new Question("Who won last year's Super Bowl?", "")));
+        assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+    }
 }
