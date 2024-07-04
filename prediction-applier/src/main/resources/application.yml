@@ -1,10 +1,6 @@
 spring:
   main:
     web-application-type: none
-  datasource:
-    url: jdbc:postgresql://localhost:5432/alfresco
-    username: alfresco
-    password: alfresco
 
 camel:
   springboot:
@@ -38,9 +34,9 @@ auth:
       client-name: acs-insight-connector
     alfresco:
       type: basic
-      client-id: dummy-client-id
-      username: alfresco
-      password: alfresco
+      client-id:
+      username:
+      password:
   retry:
     attempts: 10
     initial-delay: 500
