@@ -33,8 +33,8 @@ import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
-/** Unit test for {@link Agent} deserialisation. */
-public class AgentDeserializationTest
+/** Unit test for {@link AgentModel} deserialisation. */
+public class AgentModelDeserializationTest
 {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
@@ -51,7 +51,7 @@ public class AgentDeserializationTest
                 """;
 
         // when, then
-        assertThrows(UnrecognizedPropertyException.class, () -> objectMapper.readValue(agentSerialized, Agent.class));
+        assertThrows(UnrecognizedPropertyException.class, () -> objectMapper.readValue(agentSerialized, AgentModel.class));
     }
 
     @Test
@@ -67,9 +67,9 @@ public class AgentDeserializationTest
                 """;
 
         // when
-        Agent agent = new Agent(null, "Agent name", "Agent description");
+        AgentModel agent = new AgentModel(null, "Agent name", "Agent description");
 
         // then
-        assertEquals(agent, objectMapper.readValue(agentSerialized, Agent.class));
+        assertEquals(agent, objectMapper.readValue(agentSerialized, AgentModel.class));
     }
 }
