@@ -57,6 +57,52 @@ jobs:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
           srcclr-install-options: -Dmaven.test.skip -P !test -pl "!common-test,!e2e-test"
 
+  veracode_sast:
+    name: "Pipeline SAST Scan"
+    runs-on: ubuntu-latest
+    needs:
+      - pre_commit
+    if: >
+      (github.ref_name == 'feature/ACSA-240_add-sast-scan-on-pr' || github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || github.event_name == 'pull_request') &&
+      github.actor != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, '[skip build]'))
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.30.0
+      # - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v5.30.0
+      #   with:
+      #     token: ${{ secrets.BOT_GITHUB_TOKEN }}
+      #     repository: "Alfresco/veracode-baseline-archive"
+      #     file-path: "hxinsight-connector/hxinsight-connector-baseline.json"
+      #     target: "baseline.json"
+      - name: "Build application"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+      - name: "Run SAST Scan"
+        uses: veracode/Veracode-pipeline-scan-action@v1.0.16
+        with:
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          file: "distribution/target/alfresco-hxinsight-connector-distribution-*.zip"
+          fail_build: true
+          project_name: hxinsight-connector
+          issue_details: true
+          veracode_policy_name: Alfresco Default
+          summary_output: true
+          summary_output_file: results.json
+          summary_display: true
+          baseline_file: baseline.json
+      - name: "Upload scan result"
+        if: success() || failure()
+        run: zip readable_output.zip results.json
+      - name: "Upload artifact"
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Veracode Pipeline-Scan Results (Human Readable)
+          path: readable_output.zip
+      - name: "Clean Maven cache"
+        run: bash ./scripts/ci/cleanup_cache.sh
+
   pmd_scan:
     name: "PMD Scan"
     runs-on: ubuntu-latest
