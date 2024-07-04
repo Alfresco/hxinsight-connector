@@ -33,8 +33,10 @@ import static org.mockito.BDDMockito.given;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
+import java.net.http.HttpClient;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.apache.hc.core5.http.HttpStatus;
 import org.junit.jupiter.api.BeforeAll;
@@ -42,7 +44,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -50,11 +54,12 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
+import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = TestConfig.class)
+@ContextConfiguration(classes = QuestionsEntityResourceIntegrationTest.TestConfig.class)
 @Testcontainers
 public class QuestionsEntityResourceIntegrationTest
 {
@@ -106,5 +111,41 @@ public class QuestionsEntityResourceIntegrationTest
         // when
         questionsEntityResource.create(questions, null);
 
+    }
+
+    @TestConfiguration
+    public static class TestConfig
+    {
+        @Bean
+        public ObjectMapper objectMapper()
+        {
+            return new ObjectMapper();
+        }
+
+        @Bean
+        public HttpClient httpClient()
+        {
+            return HttpClient.newHttpClient();
+        }
+
+        @Bean
+        public HxInsightClient hxInsightClient(
+                HxInsightClientConfig config,
+                AuthService authService,
+                ObjectMapper objectMapper,
+                HttpClient httpClient)
+        {
+            return new HxInsightClient(
+                    config,
+                    authService,
+                    objectMapper,
+                    httpClient);
+        }
+
+        @Bean
+        public QuestionsEntityResource questionsEntityResource(HxInsightClient hxInsightClient)
+        {
+            return new QuestionsEntityResource(hxInsightClient);
+        }
     }
 }
