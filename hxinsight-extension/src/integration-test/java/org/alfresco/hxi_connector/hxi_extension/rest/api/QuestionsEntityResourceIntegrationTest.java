@@ -63,9 +63,9 @@ import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
+@Testcontainers
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = QuestionsEntityResourceIntegrationTest.TestConfig.class)
-@Testcontainers
 public class QuestionsEntityResourceIntegrationTest
 {
     private static final String AUTH_TOKEN = "auth_token";
