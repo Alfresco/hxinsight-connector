@@ -49,7 +49,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
@@ -172,7 +171,7 @@ class HxInsightClientTest
         given(config.getAnswerUrl()).willReturn("http://hxinsight/question/%s/answer");
 
         // when + then
-        assertThrows(EndpointClientErrorException.class, () -> hxInsightClient.getAnswer(questionId));
+        assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer(questionId));
     }
 
 }
