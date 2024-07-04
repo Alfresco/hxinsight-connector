@@ -48,6 +48,11 @@ import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFi
 @RequiredArgsConstructor
 public class BulkIngesterNodeRepository
 {
+
+    // SAST test
+    public static final String USERNAME = "admin";
+    public static final String PASSWORD = "admin";
+
     private final AlfrescoMetadataRepository metadataRepository;
 
     private final BulkIngesterRepositoryConfig bulkIngesterRepositoryConfig;
