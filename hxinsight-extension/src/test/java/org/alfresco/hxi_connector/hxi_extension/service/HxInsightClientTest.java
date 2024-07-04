@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 import java.io.IOException;
@@ -124,7 +123,7 @@ class HxInsightClientTest
     void shouldThrowOnNotExpectedStatusCode()
     {
         // given
-        doThrow(new IOException("Error occurred")).when(httpClient).send(any(), any());
+        given(httpClient.send(any(), any())).willThrow(IOException.class);
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
