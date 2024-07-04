@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,24 +23,32 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+import java.util.List;
 
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import lombok.Getter;
-
-@Getter
-public final class HxInsightClientConfig
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class AnswerResponse
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
+    private String questionId;
+    private String question;
+    private String agentId;
+    private String agentVersion;
+    private String answer;
+    private List<Reference> references;
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class Reference
     {
-        this.agentUrl = baseUrl + "/v1/agents";
-        this.questionUrl = baseUrl + "/v1/questions";
-        this.answerUrl = questionUrl + "/%s/answer";
+        private String referenceId;
+        private String textReference;
     }
 }

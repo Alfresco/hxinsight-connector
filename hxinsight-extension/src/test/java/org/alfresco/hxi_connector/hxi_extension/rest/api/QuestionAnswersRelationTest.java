@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,24 +23,39 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+import static org.mockito.BDDMockito.then;
 
-import jakarta.validation.constraints.NotBlank;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import lombok.Getter;
+import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 
-@Getter
-public final class HxInsightClientConfig
+@ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+class QuestionAnswersRelationTest
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
+    @Mock
+    private HxInsightClient mockHxInsightClient;
+
+    @InjectMocks
+    private QuestionAnswersRelation objectUnderTest;
+
+    @Test
+    void shouldCallHxInsightClientGetAnswer()
     {
-        this.agentUrl = baseUrl + "/v1/agents";
-        this.questionUrl = baseUrl + "/v1/questions";
-        this.answerUrl = questionUrl + "/%s/answer";
+        // given
+        String questionId = "questionId";
+
+        // when
+        objectUnderTest.readAll(questionId, null);
+
+        // then
+        then(mockHxInsightClient).should().getAnswer(questionId);
     }
 }
