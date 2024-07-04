@@ -28,7 +28,9 @@ package org.alfresco.hxi_connector.hxi_extension.service;
 
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
 import java.io.IOException;
@@ -45,10 +47,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
+import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
@@ -79,7 +83,6 @@ public class HxInsightClient
         return objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
     }
 
-    @SneakyThrows
     public String askQuestion(Question question)
     {
         try
@@ -95,14 +98,38 @@ public class HxInsightClient
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_ACCEPTED);
+            ensureThat(httpResponse.statusCode() == SC_ACCEPTED,
+                    () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed"));
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
                     .questionId();
         }
         catch (IOException | InterruptedException e)
         {
-            throw new HxInsightConnectorRuntimeException("Failed to ask question", e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to ask question", e);
+        }
+    }
+
+    public AnswerResponse getAnswer(String questionId)
+    {
+        try
+        {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(config.getAnswerUrl().formatted(questionId)))
+                    .headers(authService.getAuthHeaders())
+                    .GET()
+                    .build();
+
+            HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
+            log.atDebug().log("Question with id {} received a following answer {}", questionId, httpResponse.body());
+
+            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_OK);
+
+            return objectMapper.readValue(httpResponse.body(), AnswerResponse.class);
+        }
+        catch (IOException | InterruptedException e)
+        {
+            throw new HxInsightConnectorRuntimeException("Failed to get answer to question with id %s".formatted(questionId), e);
         }
     }
 }
