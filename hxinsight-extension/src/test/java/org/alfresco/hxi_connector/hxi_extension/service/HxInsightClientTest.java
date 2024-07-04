@@ -45,8 +45,8 @@ import lombok.SneakyThrows;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
@@ -115,7 +115,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when
-        assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
+        assertThrows(EndpointClientErrorException.class, () -> hxInsightClient.askQuestion(
                 new Question("Who won last year's Super Bowl?", "")));
     }
 
@@ -154,7 +154,7 @@ class HxInsightClientTest
         given(config.getAnswerUrl()).willReturn("http://hxinsight/question/%s/answer");
 
         // when + then
-        assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer(questionId));
+        assertThrows(EndpointClientErrorException.class, () -> hxInsightClient.getAnswer(questionId));
     }
 
 }
