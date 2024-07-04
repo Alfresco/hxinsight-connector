@@ -91,15 +91,6 @@ jobs:
           summary_output_file: results.json
           summary_display: true
           # baseline_file: baseline.json
-      - name: "Upload scan result"
-        if: success() || failure()
-        run: zip readable_output.zip results.json
-      - name: "Upload artifact"
-        if: success() || failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Veracode Pipeline-Scan Results (Human Readable)
-          path: readable_output.zip
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
