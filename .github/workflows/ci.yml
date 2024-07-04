@@ -90,7 +90,7 @@ jobs:
           summary_output: true
           summary_output_file: results.json
           summary_display: true
-          baseline_file: baseline.json
+          # baseline_file: baseline.json
       - name: "Upload scan result"
         if: success() || failure()
         run: zip readable_output.zip results.json
