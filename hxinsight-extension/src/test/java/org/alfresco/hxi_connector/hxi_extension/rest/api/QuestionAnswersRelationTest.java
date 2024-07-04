@@ -25,23 +25,37 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+
+import static org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient.HXI_API_ERROR;
+
+import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AnswerModel;
 import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
+import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
+import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class QuestionAnswersRelationTest
 {
 
     @Mock
     private HxInsightClient mockHxInsightClient;
+    @Mock
+    private Parameters mockParameters;
 
     @InjectMocks
     private QuestionAnswersRelation objectUnderTest;
@@ -51,11 +65,31 @@ class QuestionAnswersRelationTest
     {
         // given
         String questionId = "questionId";
+        AnswerResponse hXAnswer = new AnswerResponse();
+        hXAnswer.setQuestionId(questionId);
+        hXAnswer.setAnswer("Some answer");
+        given(mockHxInsightClient.getAnswer(questionId)).willReturn(hXAnswer);
 
         // when
-        objectUnderTest.readAll(questionId, null);
+        CollectionWithPagingInfo<AnswerModel> answerResponse = objectUnderTest.readAll(questionId, mockParameters);
 
         // then
         then(mockHxInsightClient).should().getAnswer(questionId);
+        Collection<AnswerModel> answerResponseEntries = answerResponse.getCollection();
+        assertEquals(1, answerResponseEntries.size());
+        AnswerModel answer = answerResponseEntries.iterator().next();
+        assertEquals(hXAnswer.getAnswer(), answer.getAnswer());
+        assertEquals(hXAnswer.getQuestionId(), answer.getQuestionId());
+    }
+
+    @Test
+    void shouldFailWhenHxClientThrowsException()
+    {
+        // given
+        String questionId = "questionId";
+        given(mockHxInsightClient.getAnswer(questionId)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, HXI_API_ERROR));
+
+        // when + then
+        assertThrows(WebScriptException.class, () -> objectUnderTest.readAll(questionId, mockParameters));
     }
 }

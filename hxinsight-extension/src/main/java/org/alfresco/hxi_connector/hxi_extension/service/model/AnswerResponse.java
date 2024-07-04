@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import java.util.List;
+import java.util.Set;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -41,7 +41,7 @@ public class AnswerResponse
     private String agentId;
     private String agentVersion;
     private String answer;
-    private List<Reference> references;
+    private Set<Reference> references;
 
     @Data
     @AllArgsConstructor
