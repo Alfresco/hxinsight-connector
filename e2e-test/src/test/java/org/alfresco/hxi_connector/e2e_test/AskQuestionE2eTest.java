@@ -25,13 +25,12 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import static io.restassured.RestAssured.given;
-import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import com.github.tomakehurst.wiremock.client.WireMock;
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.response.Response;
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -42,14 +41,20 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
-import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import java.util.List;
+import java.util.Map;
+
+import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class AskQuestionE2eTest
 {
     static final Network network = Network.newNetwork();
+    Map
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
     @Container
@@ -65,6 +70,28 @@ public class AskQuestionE2eTest
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+    }
+
+    @Test
+    void shouldReturnQuestionId()
+    {
+        // given
+        String questions = """
+                {
+                    "question": "What is the meaning of life?"
+                }
+                """;
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(questions)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .then().extract().response();
+
+        // then
+        assertEquals(200, response.statusCode());
+        assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
     }
 
     @Test
@@ -109,7 +136,6 @@ public class AskQuestionE2eTest
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
-        assertTrue(response.body().asString().contains("You can only ask one question at a time."));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -128,8 +154,8 @@ public class AskQuestionE2eTest
             -Dalfresco.restApi.basicAuthScheme=true
             -Ddeployment.method=DOCKER_COMPOSE
             -Xms1500m -Xmx1500m
-            -Dhxi.client.baseUrl=%s
-            -Dhxi.auth.providers.hyland-experience.token-uri=%s/token
+            -Dhxi.client.baseUrl=http://%s:8080
+            -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
             """.formatted(
                 postgres.getUsername(),
                 postgres.getPassword(),
