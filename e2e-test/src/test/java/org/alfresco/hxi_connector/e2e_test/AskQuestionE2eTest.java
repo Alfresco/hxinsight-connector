@@ -118,8 +118,8 @@ public class AskQuestionE2eTest
                 postgres.getNetworkAliases().stream().findFirst().get(),
                 postgres.getDatabaseName(),
                 activemq.getNetworkAliases().stream().findFirst().get(),
-                hxInsightMock.getBaseUrl(),
-                hxInsightMock.getBaseUrl())
+                hxInsightMock.getNetworkAliases().stream().findFirst().get(),
+                hxInsightMock.getNetworkAliases().stream().findFirst().get())
             .replace("\n", " "));
         // @formatter:on
     }
