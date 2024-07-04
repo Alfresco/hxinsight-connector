@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
@@ -49,6 +50,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
@@ -71,6 +73,8 @@ public class QuestionsEntityResourceIntegrationTest
                 "questionId": "%s"
             }
             """.formatted(QUESTION_ID);
+
+    @Container
     static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainer();
 
     @MockBean
@@ -104,13 +108,22 @@ public class QuestionsEntityResourceIntegrationTest
 
         givenThat(post(QUESTION_ENDPOINT)
                 .withHeader(AUTHORIZATION, WireMock.equalTo(AUTH_TOKEN))
+                .withRequestBody(WireMock.equalToJson("""
+                        {
+                            "question": "Is world flat?",
+                            "restrictionQuery": ""
+                        }
+                        """))
                 .willReturn(aResponse()
                         .withStatus(HttpStatus.SC_OK)
                         .withBody(QUESTION_RESPONSE_BODY)));
 
         // when
-        questionsEntityResource.create(questions, null);
+        List<QuestionModel> returnedQuestions = questionsEntityResource.create(questions, null);
 
+        // then
+        assertEquals(1, returnedQuestions.size());
+        assertEquals(QUESTION_ID, returnedQuestions.get(0).getQuestionId());
     }
 
     @TestConfiguration
