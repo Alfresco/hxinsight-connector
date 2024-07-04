@@ -131,6 +131,7 @@ public class QuestionsEntityResourceIntegrationTest
     }
 
     @TestConfiguration
+    @SuppressWarnings("PMD.TestClassWithoutTestCases")
     public static class TestConfig
     {
         @Bean
