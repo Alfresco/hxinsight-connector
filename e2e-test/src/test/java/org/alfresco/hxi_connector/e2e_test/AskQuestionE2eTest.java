@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -85,7 +86,7 @@ public class AskQuestionE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(200, response.statusCode());
+        assertEquals(SC_OK, response.statusCode());
         assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
     }
 
