@@ -26,41 +26,85 @@
 
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.springframework.extensions.webscripts.Status.STATUS_BAD_REQUEST;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static org.mockito.BDDMockito.given;
+
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
 import java.util.List;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import org.apache.hc.core5.http.HttpStatus;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.extensions.webscripts.WebScriptException;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
+import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(locations = {"classpath:rest/api/question-entity-resource-test-context.xml"})
+@ContextConfiguration(classes = TestConfig.class)
+@Testcontainers
 public class QuestionsEntityResourceIntegrationTest
 {
+    private static final String AUTH_TOKEN = "auth_token";
+    private static final String QUESTION_ENDPOINT = "/v1/questions";
+    private static final String QUESTION_ID = "1ac7b3e7-0b3b-4b3b-8b3b-3b3b3b3b3b3b";
+    private static final String QUESTION_RESPONSE_BODY = """
+            {
+                "questionId": "%s"
+            }
+            """.formatted(QUESTION_ID);
+    static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainer();
+
+    @MockBean
+    private HxInsightClientConfig hxInsightClientConfig;
+
+    @MockBean
+    private AuthService authService;
+
     @Autowired
     private QuestionsEntityResource questionsEntityResource;
 
+    @BeforeAll
+    protected static void beforeAll()
+    {
+        WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+    }
+
+    @BeforeEach
+    void setUp()
+    {
+        WireMock.reset();
+        given(hxInsightClientConfig.getQuestionUrl()).willReturn(hxInsightMock.getBaseUrl() + QUESTION_ENDPOINT);
+        given(authService.getAuthHeaders()).willReturn(new String[]{AUTHORIZATION, AUTH_TOKEN});
+    }
+
     @Test
-    public void shouldFailIfAskedMultipleQuestions()
+    public void shouldAskQuestion()
     {
         // given
-        List<QuestionModel> questions = List.of(mock(QuestionModel.class), mock(QuestionModel.class));
+        List<QuestionModel> questions = List.of(new QuestionModel("", "Is world flat?", ""));
+
+        givenThat(post(QUESTION_ENDPOINT)
+                .withHeader(AUTHORIZATION, WireMock.equalTo(AUTH_TOKEN))
+                .willReturn(aResponse()
+                        .withStatus(HttpStatus.SC_OK)
+                        .withBody(QUESTION_RESPONSE_BODY)));
 
         // when
-        questionsEntityResource.create(questions, mock());
-        WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> questionsEntityResource.create(questions, mock()));
+        questionsEntityResource.create(questions, null);
 
-        assertTrue(webScriptException.getMessage().contains("You can only ask one question at a time."));
-        assertEquals(STATUS_BAD_REQUEST, webScriptException.getStatus());
     }
 }
