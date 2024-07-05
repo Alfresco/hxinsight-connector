@@ -44,6 +44,8 @@ import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 
 public class QuestionsEntityResourceTest
 {
+    private static final String AGENT_ID = "agent-id";
+
     private final HxInsightClient hxInsightClient = mock(HxInsightClient.class);
     private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(hxInsightClient);
 
@@ -67,6 +69,7 @@ public class QuestionsEntityResourceTest
         QuestionModel question = new QuestionModel(
                 null,
                 "What is the capital of France?",
+                AGENT_ID,
                 "");
 
         String questionId = "a13c4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d";

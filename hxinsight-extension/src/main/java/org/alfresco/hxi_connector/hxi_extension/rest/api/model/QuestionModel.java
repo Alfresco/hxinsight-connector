@@ -52,6 +52,8 @@ public class QuestionModel
     @NotBlank
     private String question;
     @NotBlank
+    private String agentId;
+    @NotBlank
     private String restrictionQuery;
 
     public QuestionModel withId(String questionId)
@@ -62,6 +64,6 @@ public class QuestionModel
 
     public Question toQuestion()
     {
-        return new Question(question, restrictionQuery);
+        return new Question(question, agentId, restrictionQuery);
     }
 }
