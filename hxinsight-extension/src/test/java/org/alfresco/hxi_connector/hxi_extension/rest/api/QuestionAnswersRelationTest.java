@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
+import static java.util.Collections.emptySet;
+
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -63,9 +65,7 @@ class QuestionAnswersRelationTest
     {
         // given
         String questionId = "questionId";
-        AnswerResponse hXAnswer = new AnswerResponse();
-        hXAnswer.setQuestionId(questionId);
-        hXAnswer.setAnswer("Some answer");
+        AnswerResponse hXAnswer = AnswerResponse.builder().questionId(questionId).answer("Some answer").build();
         given(mockHxInsightClient.getAnswer(questionId)).willReturn(hXAnswer);
 
         // when
@@ -76,8 +76,8 @@ class QuestionAnswersRelationTest
         Collection<AnswerModel> answerResponseEntries = answerResponse.getCollection();
         assertEquals(1, answerResponseEntries.size());
         AnswerModel answer = answerResponseEntries.iterator().next();
-        assertEquals(hXAnswer.getAnswer(), answer.getAnswer());
-        assertEquals(hXAnswer.getQuestionId(), answer.getQuestionId());
+        AnswerModel expectedAnswer = new AnswerModel(hXAnswer.getAnswer(), hXAnswer.getQuestionId(), emptySet());
+        assertEquals(expectedAnswer, answer);
     }
 
     @Test

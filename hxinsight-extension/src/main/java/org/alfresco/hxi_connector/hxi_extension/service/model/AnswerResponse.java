@@ -28,12 +28,14 @@ package org.alfresco.hxi_connector.hxi_extension.service.model;
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class AnswerResponse
 {
     private String questionId;
@@ -46,6 +48,7 @@ public class AnswerResponse
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @Builder
     public static class Reference
     {
         private String referenceId;

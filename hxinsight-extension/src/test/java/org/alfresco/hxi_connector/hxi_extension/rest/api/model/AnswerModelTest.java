@@ -39,17 +39,12 @@ class AnswerModelTest
     @Test
     void testFromServiceModel()
     {
-        AnswerResponse answer = new AnswerResponse();
         String answerText = "answer";
-        answer.setAnswer(answerText);
         String questionId = "questionId";
-        answer.setQuestionId(questionId);
-        AnswerResponse.Reference reference = new AnswerResponse.Reference();
         String referenceId = "referenceId";
-        reference.setReferenceId(referenceId);
         String referenceText = "referenceText";
-        reference.setTextReference(referenceText);
-        answer.setReferences(Set.of(reference));
+        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, referenceText);
+        AnswerResponse answer = AnswerResponse.builder().answer(answerText).questionId(questionId).references(Set.of(reference)).build();
         AnswerModel.ReferenceModel referenceModel = new AnswerModel.ReferenceModel(referenceId, referenceText);
         AnswerModel expected = new AnswerModel(answerText, questionId, Set.of(referenceModel));
         assertEquals(expected, AnswerModel.fromServiceModel(answer));
@@ -58,12 +53,9 @@ class AnswerModelTest
     @Test
     void testFromServiceModelNullReferences()
     {
-        AnswerResponse answer = new AnswerResponse();
         String answerText = "answer";
-        answer.setAnswer(answerText);
         String questionId = "questionId";
-        answer.setQuestionId(questionId);
-        answer.setReferences(null);
+        AnswerResponse answer = AnswerResponse.builder().answer(answerText).questionId(questionId).references(null).build();
         AnswerModel expected = new AnswerModel(answerText, questionId, Set.of());
         assertEquals(expected, AnswerModel.fromServiceModel(answer));
     }
@@ -71,11 +63,9 @@ class AnswerModelTest
     @Test
     void testFromServiceModelReference()
     {
-        AnswerResponse.Reference reference = new AnswerResponse.Reference();
         String referenceId = "referenceId";
-        reference.setReferenceId(referenceId);
         String referenceText = "referenceText";
-        reference.setTextReference(referenceText);
+        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, referenceText);
         AnswerModel.ReferenceModel expected = new AnswerModel.ReferenceModel(referenceId, referenceText);
         assertEquals(expected, AnswerModel.ReferenceModel.fromServiceModel(reference));
     }
