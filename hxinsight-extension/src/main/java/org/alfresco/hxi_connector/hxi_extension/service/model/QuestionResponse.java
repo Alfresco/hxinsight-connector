@@ -26,8 +26,5 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import jakarta.validation.constraints.NotBlank;
-
-public record QuestionResponse(
-        @NotBlank String questionId)
+public record QuestionResponse(String questionId)
 {}
