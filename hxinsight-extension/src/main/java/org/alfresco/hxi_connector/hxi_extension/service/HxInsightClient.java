@@ -30,7 +30,7 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
 import java.io.IOException;
 import java.net.URI;
@@ -77,8 +77,7 @@ public class HxInsightClient
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            ensureThat(httpResponse.statusCode() == SC_OK,
-                    () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed"));
+            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
 
             return objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
         }
@@ -103,8 +102,7 @@ public class HxInsightClient
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            ensureThat(httpResponse.statusCode() == SC_ACCEPTED,
-                    () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed"));
+            ensureCorrectHttpStatusReturned(SC_ACCEPTED, httpResponse);
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
                     .questionId();
@@ -128,8 +126,7 @@ public class HxInsightClient
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
             log.atDebug().log("Question with id {} received a following answer {}", questionId, httpResponse.body());
 
-            ensureThat(httpResponse.statusCode() == SC_OK,
-                    () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed"));
+            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
 
             return objectMapper.readValue(httpResponse.body(), AnswerResponse.class);
         }
