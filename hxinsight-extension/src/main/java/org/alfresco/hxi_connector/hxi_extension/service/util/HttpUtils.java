@@ -26,12 +26,16 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.util;
 
+import static lombok.AccessLevel.PRIVATE;
+
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.net.http.HttpResponse;
 
+import lombok.NoArgsConstructor;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+@NoArgsConstructor(access = PRIVATE)
 public final class HttpUtils
 {
     public static void ensureCorrectHttpStatusReturned(int expectedStatus, HttpResponse<?> httpResponse)
