@@ -58,6 +58,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
+@SuppressWarnings("PMD.FieldNamingConventions")
 class HxInsightClientTest
 {
     private static final String AGENT_ID = "agent-id";
