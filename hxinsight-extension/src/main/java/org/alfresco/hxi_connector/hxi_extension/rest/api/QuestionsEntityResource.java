@@ -58,8 +58,8 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
 
         QuestionModel question = questions.get(0);
 
-        ensureThat(question.getRestrictionQuery().nodesIds().size() <= questionConfig.maxNodesToAskAbout(),
-                () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask about up to %d nodes at a time.", questionConfig.maxNodesToAskAbout()));
+        ensureThat(question.getRestrictionQuery().nodesIds().size() <= questionConfig.maxContextSizeForQuestion(),
+                () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask about up to %d nodes at a time.", questionConfig.maxContextSizeForQuestion()));
 
         log.info("Received question: {}", question);
 
