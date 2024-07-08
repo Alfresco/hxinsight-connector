@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -152,7 +153,26 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertEquals(SC_OK, response.statusCode());
-        assertEquals(questionId, response.jsonPath().get("list.entries.entry.questionId"));
+        assertEquals(questionId, response.jsonPath().get("list.entries.entry[0].questionId"));
+        assertEquals("This is the answer to the question", response.jsonPath().get("list.entries.entry[0].answer"));
+        assertEquals("276718b0-c3ab-4e11-81d5-96dbbb540269", response.jsonPath().get("list.entries.entry[0].references[0].referenceId"));
+    }
+
+    @Test
+    void shouldNotGetAnswerWheHxIReturnsUnexpectedStatus()
+    {
+        // given
+        String questionId = "non-existing-question-id";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_INTERNAL_SERVER_ERROR, response.statusCode());
+        assertEquals("Unexpected response status code - expecting: 200, received: 404", response.jsonPath().get("error.briefSummary"));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
