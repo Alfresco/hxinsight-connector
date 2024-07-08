@@ -45,7 +45,7 @@ class HttpUtilsTest
         int expectedStatus = 200;
         int actualStatus = 500;
 
-        HttpResponse<?> httpResponse = mock();
+        HttpResponse<?> httpResponse = mock(HttpResponse.class);
         given(httpResponse.statusCode()).willReturn(actualStatus);
 
         // when
@@ -63,7 +63,7 @@ class HttpUtilsTest
         int expectedStatus = 201;
         int actualStatus = 201;
 
-        HttpResponse<?> httpResponse = mock();
+        HttpResponse<?> httpResponse = mock(HttpResponse.class);
         given(httpResponse.statusCode()).willReturn(actualStatus);
 
         // when, then
