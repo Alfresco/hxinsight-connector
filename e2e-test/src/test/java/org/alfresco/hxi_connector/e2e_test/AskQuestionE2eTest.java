@@ -75,7 +75,10 @@ public class AskQuestionE2eTest
         String questions = """
                 {
                     "question": "What is the meaning of life?",
-                    "agentId": "agent-id"
+                    "agentId": "agent-id",
+                    "restrictionQuery": {
+                        "nodesIds": ["node-id"]
+                    }
                 }
                 """;
 
@@ -99,11 +102,17 @@ public class AskQuestionE2eTest
                 [
                     {
                         "question": "What is the meaning of life?",
-                        "agentId": "agent-id"
+                        "agentId": "agent-id",
+                        "restrictionQuery": {
+                            "nodesIds": ["node-id"]
+                        }
                     },
                     {
                         "question": "Who is the president of the United States?",
-                        "agentId": "agent-id"
+                        "agentId": "agent-id",
+                        "restrictionQuery": {
+                            "nodesIds": ["node-id"]
+                        }
                     }
                 ]
                 """;
@@ -137,6 +146,31 @@ public class AskQuestionE2eTest
         assertEquals(SC_BAD_REQUEST, response.statusCode());
     }
 
+    @Test
+    void shouldReturn400IfAskedAboutTooManyNodes()
+    {
+        // given
+        String questions = """
+                {
+                    "question": "What is the meaning of life?",
+                    "agentId": "agent-id",
+                    "restrictionQuery": {
+                        "nodesIds": ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8", "node9", "node10", "node11"]
+                    }
+                }
+                """;
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(questions)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_BAD_REQUEST, response.statusCode());
+    }
+
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         // @formatter:off
@@ -155,6 +189,7 @@ public class AskQuestionE2eTest
             -Xms1500m -Xmx1500m
             -Dhxi.client.baseUrl=http://%s:8080
             -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
+            -Dhxi.question.max-nodes-to-ask-about=10
             """.formatted(
                 postgres.getUsername(),
                 postgres.getPassword(),
