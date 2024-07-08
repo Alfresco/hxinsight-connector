@@ -153,4 +153,8 @@
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig">
+        <constructor-arg name="maxNodesToAskAbout" value="${hxi.question.max-nodes-to-ask-about}"/>
+    </bean>
 </beans>
