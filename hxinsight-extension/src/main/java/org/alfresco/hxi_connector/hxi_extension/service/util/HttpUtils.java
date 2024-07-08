@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.util;
 
-import static org.apache.http.HttpStatus.SC_OK;
-
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.net.http.HttpResponse;
@@ -38,7 +36,7 @@ public final class HttpUtils
 {
     public static void ensureCorrectHttpStatusReturned(int expectedStatus, HttpResponse<?> httpResponse)
     {
-        ensureThat(httpResponse.statusCode() == SC_OK,
+        ensureThat(httpResponse.statusCode() == expectedStatus,
                 () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed, expected status %s, received %s".formatted(expectedStatus, httpResponse.statusCode())));
     }
 }

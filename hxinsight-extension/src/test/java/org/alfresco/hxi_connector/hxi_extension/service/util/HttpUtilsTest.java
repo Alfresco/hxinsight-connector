@@ -59,8 +59,8 @@ class HttpUtilsTest
     void shouldDoNothingIfStatusCodeMatchesExpected()
     {
         // given
-        int expectedStatus = 200;
-        int actualStatus = 200;
+        int expectedStatus = 201;
+        int actualStatus = 201;
 
         HttpResponse<?> httpResponse = mock();
         given(httpResponse.statusCode()).willReturn(actualStatus);
