@@ -7,13 +7,14 @@
     "status": 200,
     "jsonBody": {
       "questionId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
-      "question": "What is the question?",
+      "responseCompleteness": "COMPLETE",
       "answer": "This is the answer to the question",
       "agentId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
       "agentVersion": "1",
       "references": [
         {
-          "referenceId": "276718b0-c3ab-4e11-81d5-96dbbb540269"
+          "referenceId": "276718b0-c3ab-4e11-81d5-96dbbb540269",
+          "textReference": "This is the text reference which led to generating the answer"
         }
       ]
     }
