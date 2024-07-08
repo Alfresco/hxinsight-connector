@@ -39,6 +39,7 @@ import static org.mockito.Mockito.mock;
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
@@ -49,8 +50,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
@@ -58,12 +59,10 @@ import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 class HxInsightClientTest
 {
     private static final String AGENT_ID = "agent-id";
-
-    private final HxInsightClientConfig config = mock(HxInsightClientConfig.class);
+    private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = mock(HttpClient.class);
-
     private final HxInsightClient hxInsightClient = new HxInsightClient(
             config,
             authService,
@@ -74,8 +73,6 @@ class HxInsightClientTest
     void setUp()
     {
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
-
-        given(config.getQuestionUrl()).willReturn("http://hxinsight/question");
 
         given(authService.getAuthHeaders()).willReturn(new String[]{"Authorization", "Bearer token"});
     }
@@ -109,7 +106,7 @@ class HxInsightClientTest
 
     @Test
     @SneakyThrows
-    void shouldPassStatusCodeFromHxi()
+    void shouldPassStatusCodeFromHxi_Question()
     {
         // given
         int expectedStatusCode = 418;
@@ -127,7 +124,7 @@ class HxInsightClientTest
 
     @Test
     @SneakyThrows
-    void shouldThrowOnNotExpectedStatusCode()
+    void shouldSet503StatusCodeOnCheckedException_Question()
     {
         // given
         given(httpClient.send(any(), any())).willThrow(IOException.class);
@@ -151,7 +148,6 @@ class HxInsightClientTest
         given(response.statusCode()).willReturn(SC_OK);
         given(response.body()).willReturn(responseBody.toString());
         given(httpClient.send(any(), any())).willReturn(response);
-        given(config.getAnswerUrl()).willReturn("http://hxinsight/question/%s/answer");
 
         // when
         AnswerResponse answerResponse = hxInsightClient.getAnswer(questionId);
@@ -170,10 +166,74 @@ class HxInsightClientTest
         HttpResponse response = mock(HttpResponse.class);
         given(response.statusCode()).willReturn(SC_BAD_REQUEST);
         given(httpClient.send(any(), any())).willReturn(response);
-        given(config.getAnswerUrl()).willReturn("http://hxinsight/question/%s/answer");
 
         // when + then
-        assertThrows(EndpointClientErrorException.class, () -> hxInsightClient.getAnswer(questionId));
+        assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer(questionId));
     }
 
+    @Test
+    @SneakyThrows
+    void shouldReturnAgents()
+    {
+        // given
+        String responseBody = """
+                [
+                    {
+                        "agentId": "1a3f4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d",
+                        "name": "Security Advisor",
+                        "description": "I can help you to secure your systems."
+                    },
+                    {
+                        "agentId": "1a3f1a3f-1a3f-1a3f-1a3f-1a3f1a3f1a3f",
+                        "name": "Tax Advisor",
+                        "description": "I can help you with your taxes and financial planning."
+                    }
+                ]
+                """;
+        List<Agent> expectedAgents = List.of(
+                new Agent("1a3f4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d", "Security Advisor", "I can help you to secure your systems."),
+                new Agent("1a3f1a3f-1a3f-1a3f-1a3f-1a3f1a3f1a3f", "Tax Advisor", "I can help you with your taxes and financial planning."));
+
+        HttpResponse response = mock(HttpResponse.class);
+
+        given(response.statusCode()).willReturn(SC_OK);
+        given(response.body()).willReturn(responseBody);
+
+        given(httpClient.send(any(), any())).willReturn(response);
+
+        // when
+        List<Agent> actualAgents = hxInsightClient.getAgents();
+
+        // then
+        assertEquals(expectedAgents, actualAgents);
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldPassStatusCodeFromHxi_Agents()
+    {
+        // given
+        int expectedStatusCode = 418;
+
+        HttpResponse response = mock(HttpResponse.class);
+        given(response.statusCode()).willReturn(expectedStatusCode);
+
+        given(httpClient.send(any(), any())).willReturn(response);
+
+        // when, then
+        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.getAgents());
+        assertEquals(expectedStatusCode, exception.getStatus());
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldSet503StatusCodeOnCheckedException_Agents()
+    {
+        // given
+        given(httpClient.send(any(), any())).willThrow(IOException.class);
+
+        // when, then
+        WebScriptException exception = assertThrows(WebScriptException.class, hxInsightClient::getAgents);
+        assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+    }
 }
