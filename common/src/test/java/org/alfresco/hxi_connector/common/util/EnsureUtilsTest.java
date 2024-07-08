@@ -30,9 +30,12 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensurePositive;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.common.exception.ValidationException;
@@ -96,6 +99,20 @@ class EnsureUtilsTest
     void shouldDoNothingIfConditionIsMet()
     {
         ensureThat(1 == 1, () -> new CustomTestException("some message"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {-100, -1, 0})
+    void shouldThrowIfNumberIsNotPositive(int number)
+    {
+        assertThrows(ValidationException.class, () -> ensurePositive(number, "Number should be positive"));
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 10, 100})
+    void shouldDoNothingIfNumberIsPositive(int number)
+    {
+        ensurePositive(number, "Number should be positive");
     }
 
     static class CustomTestException extends HxInsightConnectorRuntimeException
