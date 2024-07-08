@@ -38,5 +38,7 @@ public class Question
     @NotBlank
     private final String question;
     @NotBlank
+    private final String agentId;
+    @NotBlank
     private final String restrictionQuery;
 }
