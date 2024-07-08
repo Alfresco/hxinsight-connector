@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import jakarta.validation.constraints.NotBlank;
-
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.RequiredArgsConstructor;
 
@@ -35,10 +33,7 @@ import lombok.RequiredArgsConstructor;
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class Question
 {
-    @NotBlank
     private final String question;
-    @NotBlank
     private final String agentId;
-    @NotBlank
     private final RestrictionQuery restrictionQuery;
 }
