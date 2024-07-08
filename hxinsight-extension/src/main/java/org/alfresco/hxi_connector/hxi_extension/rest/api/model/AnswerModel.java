@@ -25,15 +25,24 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
+import static java.util.stream.Collectors.toSet;
+
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
+import org.apache.commons.collections4.SetUtils;
+
+import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
 @ToString
+@EqualsAndHashCode
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
@@ -42,4 +51,30 @@ public class AnswerModel
 {
 
     private String answer;
+    private String questionId;
+    private Set<ReferenceModel> references;
+
+    public static AnswerModel fromServiceModel(AnswerResponse answer)
+    {
+        Set<ReferenceModel> references = SetUtils.emptyIfNull(answer.getReferences()).stream().map(ReferenceModel::fromServiceModel).collect(toSet());
+        return new AnswerModel(answer.getAnswer(), answer.getQuestionId(), references);
+    }
+
+    @ToString
+    @EqualsAndHashCode
+    @Getter
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @JsonInclude(NON_NULL)
+    public static class ReferenceModel
+    {
+        private String referenceId;
+        private String referenceText;
+
+        public static ReferenceModel fromServiceModel(AnswerResponse.Reference reference)
+        {
+            return new ReferenceModel(reference.getReferenceId(), reference.getTextReference());
+        }
+    }
+
 }
