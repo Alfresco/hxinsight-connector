@@ -30,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AnswerModel;
 import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.RelationshipResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.RelationshipResourceAction;
@@ -46,7 +47,7 @@ public class QuestionAnswersRelation implements RelationshipResourceAction.Read<
     @WebApiDescription(title = "Get answers to a question")
     public CollectionWithPagingInfo<AnswerModel> readAll(String questionId, Parameters parameters)
     {
-        hxInsightClient.getAnswer(questionId);
-        return CollectionWithPagingInfo.asPagedCollection(new AnswerModel("Dummy answer"));
+        AnswerResponse hxInsightAnswer = hxInsightClient.getAnswer(questionId);
+        return CollectionWithPagingInfo.asPagedCollection(AnswerModel.fromServiceModel(hxInsightAnswer));
     }
 }
