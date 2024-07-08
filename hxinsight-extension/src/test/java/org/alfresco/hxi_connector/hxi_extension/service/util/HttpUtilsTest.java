@@ -35,6 +35,7 @@ import java.net.http.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class HttpUtilsTest
 {
     @Test
