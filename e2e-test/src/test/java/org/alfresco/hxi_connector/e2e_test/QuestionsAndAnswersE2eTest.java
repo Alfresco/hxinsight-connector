@@ -27,7 +27,7 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
-import static org.apache.http.HttpStatus.SC_INTERNAL_SERVER_ERROR;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -174,8 +174,8 @@ public class QuestionsAndAnswersE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(SC_INTERNAL_SERVER_ERROR, response.statusCode());
-        assertEquals("Unexpected response status code - expecting: 200, received: 404", response.jsonPath().get("error.briefSummary"));
+        assertEquals(SC_NOT_FOUND, response.statusCode());
+        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains("Request to hxi failed, expected status 200, received 404"));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -183,7 +183,7 @@ public class QuestionsAndAnswersE2eTest
         // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
             .withJavaOpts(concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq),
-                        (getHxInsightRepoJavaOpts(hxInsightMock)))
+                        getHxInsightRepoJavaOpts(hxInsightMock))
                 );
         // @formatter:on
     }
