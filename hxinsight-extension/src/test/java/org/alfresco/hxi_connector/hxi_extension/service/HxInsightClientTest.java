@@ -58,6 +58,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
 class HxInsightClientTest
 {
+    private static final String AGENT_ID = "agent-id";
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -97,7 +98,7 @@ class HxInsightClientTest
 
         // when
         String actualQuestionId = hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", ""));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, ""));
 
         // then
         assertEquals(expectedQuestionId, actualQuestionId);
@@ -117,7 +118,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", "")));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, "")));
         assertEquals(expectedStatusCode, exception.getStatus());
     }
 
@@ -130,7 +131,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", "")));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, "")));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
     }
 

@@ -74,7 +74,8 @@ public class AskQuestionE2eTest
         // given
         String questions = """
                 {
-                    "question": "What is the meaning of life?"
+                    "question": "What is the meaning of life?",
+                    "agentId": "agent-id"
                 }
                 """;
 
@@ -97,10 +98,12 @@ public class AskQuestionE2eTest
         String questions = """
                 [
                     {
-                        "question": "What is the meaning of life?"
+                        "question": "What is the meaning of life?",
+                        "agentId": "agent-id"
                     },
                     {
-                        "question": "Who is the president of the United States?"
+                        "question": "Who is the president of the United States?",
+                        "agentId": "agent-id"
                     }
                 ]
                 """;
