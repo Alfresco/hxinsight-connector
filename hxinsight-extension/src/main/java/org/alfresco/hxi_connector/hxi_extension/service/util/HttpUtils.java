@@ -24,46 +24,23 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
+package org.alfresco.hxi_connector.hxi_extension.service.util;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static lombok.AccessLevel.PRIVATE;
 
-import jakarta.validation.constraints.NotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
+import java.net.http.HttpResponse;
+
 import lombok.NoArgsConstructor;
-import lombok.ToString;
-import lombok.experimental.Accessors;
+import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
-
-@Accessors(prefix = {"_", ""})
-@ToString
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
-@JsonInclude(NON_NULL)
-@SuppressWarnings("PMD.FieldNamingConventions")
-public class QuestionModel
+@NoArgsConstructor(access = PRIVATE)
+public final class HttpUtils
 {
-    private String _questionId;
-    @NotBlank
-    private String question;
-    @NotBlank
-    private String agentId;
-    @NotBlank
-    private String restrictionQuery;
-
-    public QuestionModel withId(String questionId)
+    public static void ensureCorrectHttpStatusReturned(int expectedStatus, HttpResponse<?> httpResponse)
     {
-        this._questionId = questionId;
-        return this;
-    }
-
-    public Question toQuestion()
-    {
-        return new Question(question, agentId, restrictionQuery);
+        ensureThat(httpResponse.statusCode() == expectedStatus,
+                () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed, expected status %s, received %s".formatted(expectedStatus, httpResponse.statusCode())));
     }
 }

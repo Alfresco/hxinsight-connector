@@ -30,8 +30,7 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
+import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
 import java.io.IOException;
 import java.net.URI;
@@ -45,7 +44,6 @@ import java.util.List;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.WebScriptException;
 
@@ -66,21 +64,27 @@ public class HxInsightClient
     private final ObjectMapper objectMapper;
     private final HttpClient client;
 
-    @SneakyThrows
     public List<Agent> getAgents()
     {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(config.getAgentUrl()))
-                .header("Content-Type", "application/json")
-                .headers(authService.getAuthHeaders())
-                .GET()
-                .build();
+        try
+        {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(config.getAgentUrl()))
+                    .header("Content-Type", "application/json")
+                    .headers(authService.getAuthHeaders())
+                    .GET()
+                    .build();
 
-        HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
+            HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-        throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_OK);
+            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
 
-        return objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
+            return objectMapper.readValue(httpResponse.body(), new TypeReference<>() {});
+        }
+        catch (IOException | InterruptedException e)
+        {
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to ask question", e);
+        }
     }
 
     public String askQuestion(Question question)
@@ -98,8 +102,7 @@ public class HxInsightClient
 
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
 
-            ensureThat(httpResponse.statusCode() == SC_ACCEPTED,
-                    () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed"));
+            ensureCorrectHttpStatusReturned(SC_ACCEPTED, httpResponse);
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
                     .questionId();
@@ -123,7 +126,7 @@ public class HxInsightClient
             HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
             log.atDebug().log("Question with id {} received a following answer {}", questionId, httpResponse.body());
 
-            throwExceptionOnUnexpectedStatusCode(httpResponse.statusCode(), SC_OK);
+            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
 
             return objectMapper.readValue(httpResponse.body(), AnswerResponse.class);
         }
