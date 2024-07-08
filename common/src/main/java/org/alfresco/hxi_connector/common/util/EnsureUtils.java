@@ -39,6 +39,11 @@ import org.alfresco.hxi_connector.common.exception.ValidationException;
 @NoArgsConstructor(access = PRIVATE)
 public class EnsureUtils
 {
+    public static void ensurePositive(int i, String errorMessage, Object... formatArgs)
+    {
+        ensureThat(i > 0, errorMessage, formatArgs);
+    }
+
     public static void ensureNotBlank(String s, String errorMessage, Object... formatArgs)
     {
         ensureThat(Objects.nonNull(s) && !s.isBlank(), errorMessage, formatArgs);
