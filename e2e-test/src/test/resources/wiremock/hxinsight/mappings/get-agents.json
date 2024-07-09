@@ -1,0 +1,34 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/v1/agents"
+  },
+  "response": {
+    "status": 200,
+    "jsonBody": [
+      {
+        "agentId": "61254576-62a3-453f-8cd8-19e2f6554f29",
+        "name": "HR Policy Agent",
+        "agentVersion": "1",
+        "description": "This agent is responsible for HR policy predictions",
+        "personality": "Keep responses professional and concise",
+        "model": "meta-llama3-8b",
+        "allowedSources": [
+          "HR Policy Repository"
+        ]
+      },
+      {
+        "agentId": "b999ee14-3974-41b2-bef8-70ab38c9e642",
+        "name": "Knowledge Base Agent",
+        "agentVersion": "1",
+        "description": "Very smart about product knowledge",
+        "personality": "Keep responses professional but friendly",
+        "model": "meta-llama3-8b",
+        "allowedSources": [
+          "Insight Discovery",
+          "HR Policy Repository"
+        ]
+      }
+    ]
+  }
+}
