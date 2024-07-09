@@ -35,19 +35,23 @@ import static org.mockito.Mockito.mock;
 import static org.springframework.extensions.webscripts.Status.STATUS_BAD_REQUEST;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
 import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 
 public class QuestionsEntityResourceTest
 {
     private static final String AGENT_ID = "agent-id";
 
     private final HxInsightClient hxInsightClient = mock(HxInsightClient.class);
-    private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(hxInsightClient);
+    private final QuestionsApiConfig questionConfig = new QuestionsApiConfig(100);
+    private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(hxInsightClient, questionConfig);
 
     @Test
     public void shouldFailIfAskedMultipleQuestions()
@@ -70,7 +74,7 @@ public class QuestionsEntityResourceTest
                 null,
                 "What is the capital of France?",
                 AGENT_ID,
-                "");
+                new RestrictionQuery(Set.of("node-id")));
 
         String questionId = "a13c4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d";
         given(hxInsightClient.askQuestion(any())).willReturn(questionId);

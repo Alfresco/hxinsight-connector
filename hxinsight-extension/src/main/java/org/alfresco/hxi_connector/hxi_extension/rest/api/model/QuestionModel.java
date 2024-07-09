@@ -36,6 +36,7 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
+import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 
 @Accessors(prefix = {"_", ""})
 @ToString
@@ -49,7 +50,7 @@ public class QuestionModel
     private String _questionId;
     private String question;
     private String agentId;
-    private String restrictionQuery;
+    private RestrictionQuery restrictionQuery;
 
     public QuestionModel withId(String questionId)
     {

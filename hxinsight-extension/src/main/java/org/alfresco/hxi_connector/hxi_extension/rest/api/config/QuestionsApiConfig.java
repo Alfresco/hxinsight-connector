@@ -29,10 +29,10 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api.config;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensurePositive;
 
 public record QuestionsApiConfig(
-        int maxNodesToAskAbout)
+        int maxContextSizeForQuestion)
 {
     public QuestionsApiConfig
     {
-        ensurePositive(maxNodesToAskAbout, "maxNodesToAskAbout must be positive but was %d", maxNodesToAskAbout);
+        ensurePositive(maxContextSizeForQuestion, "maxNodesToAskAbout must be positive but was %d", maxContextSizeForQuestion);
     }
 }

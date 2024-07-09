@@ -80,7 +80,10 @@ public class QuestionsAndAnswersE2eTest
         String questions = """
                 {
                     "question": "What is the meaning of life?",
-                    "agentId": "agent-id"
+                    "agentId": "agent-id",
+                    "restrictionQuery": {
+                        "nodesIds": ["node-id"]
+                    }
                 }
                 """;
 
@@ -104,11 +107,17 @@ public class QuestionsAndAnswersE2eTest
                 [
                     {
                         "question": "What is the meaning of life?",
-                        "agentId": "agent-id"
+                        "agentId": "agent-id",
+                        "restrictionQuery": {
+                            "nodesIds": ["node-id"]
+                        }
                     },
                     {
                         "question": "Who is the president of the United States?",
-                        "agentId": "agent-id"
+                        "agentId": "agent-id",
+                        "restrictionQuery": {
+                            "nodesIds": ["node-id"]
+                        }
                     }
                 ]
                 """;
@@ -130,6 +139,31 @@ public class QuestionsAndAnswersE2eTest
     {
         // given
         String questions = "[]";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(questions)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_BAD_REQUEST, response.statusCode());
+    }
+
+    @Test
+    void shouldReturn400IfAskedAboutTooManyNodes()
+    {
+        // given
+        String questions = """
+                {
+                    "question": "What is the meaning of life?",
+                    "agentId": "agent-id",
+                    "restrictionQuery": {
+                        "nodesIds": ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8", "node9", "node10", "node11"]
+                    }
+                }
+                """;
 
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")

@@ -26,14 +26,8 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import lombok.RequiredArgsConstructor;
+import java.util.Set;
 
-@RequiredArgsConstructor
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
-public class Question
-{
-    private final String question;
-    private final String agentId;
-    private final RestrictionQuery restrictionQuery;
-}
+public record RestrictionQuery(
+        Set<String> nodesIds)
+{}

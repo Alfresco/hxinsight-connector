@@ -34,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
 import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.rest.framework.WebApiDescription;
@@ -47,6 +48,7 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 public class QuestionsEntityResource implements EntityResourceAction.Create<QuestionModel>
 {
     private final HxInsightClient hxInsightClient;
+    private final QuestionsApiConfig questionConfig;
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
@@ -55,6 +57,9 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
         ensureThat(questions.size() == 1, () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask one question at a time."));
 
         QuestionModel question = questions.get(0);
+
+        ensureThat(question.getRestrictionQuery().nodesIds().size() <= questionConfig.maxContextSizeForQuestion(),
+                () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask about up to %d nodes at a time.", questionConfig.maxContextSizeForQuestion()));
 
         log.info("Received question: {}", question);
 
