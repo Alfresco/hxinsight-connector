@@ -39,7 +39,7 @@ import lombok.NoArgsConstructor;
 public class AnswerResponse
 {
     private String questionId;
-    private String question;
+    private String responseCompleteness;
     private String agentId;
     private String agentVersion;
     private String answer;
@@ -52,6 +52,7 @@ public class AnswerResponse
     public static class Reference
     {
         private String referenceId;
+        private String referenceName;
         private String textReference;
     }
 }
