@@ -27,6 +27,8 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -105,35 +107,12 @@ public class DeleteNodeE2eTest
     {
         // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
-                .withJavaOpts("""
-            -Ddb.driver=org.postgresql.Driver
-            -Ddb.username=%s
-            -Ddb.password=%s
-            -Ddb.url=jdbc:postgresql://%s:5432/%s
-            -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
-            -Dalfresco.host=localhost
-            -Dalfresco.port=8080
-            -Dtransform.service.enabled=false
-            -Dalfresco.restApi.basicAuthScheme=true
-            -Ddeployment.method=DOCKER_COMPOSE
-            -Xms1500m -Xmx1500m
-            """.formatted(
-                                postgres.getUsername(),
-                                postgres.getPassword(),
-                                postgres.getNetworkAliases().stream().findFirst().get(),
-                                postgres.getDatabaseName(),
-                                activemq.getNetworkAliases().stream().findFirst().get())
-                        .replace("\n", " "));
+                .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
         // @formatter:on
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerWithin(network)
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
-                        "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
-                        "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key");
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network);
     }
 }

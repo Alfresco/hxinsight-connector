@@ -81,6 +81,30 @@ public class DockerContainers
     private static final String LIVE_INGESTER_ALIAS = "live-ingester";
     private static final String PREDICTION_APPLIER_ALIAS = "prediction-applier";
     private static final String LOCALSTACK_ALIAS = "aws-mock";
+    public static final String MINIMAL_REPO_JAVA_OPTS = """
+            -Ddb.driver=org.postgresql.Driver
+            -Ddb.username=%s
+            -Ddb.password=%s
+            -Ddb.url=jdbc:postgresql://%s:5432/%s
+            -Dcsrf.filter.enabled=false
+            -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
+            -Dalfresco.restApi.basicAuthScheme=true
+            -Ddeployment.method=DOCKER_COMPOSE
+            -Dalfresco.host=alfresco
+            -Dalfresco.port=8080
+            -Xms1500m -Xmx1500m
+            -Dtransform.service.enabled=%s
+            """;
+    public static final String TRANSFORMS_REPO_JAVA_OPTS = """
+            -Dtransform.service.url=http://transform-router:8095
+            -Dsfs.url=http://shared-file-store:8099/
+            -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
+            -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
+            -Djodconverter.url=http://transform-core-aio:8090/
+            -Dimg.url=http://transform-core-aio:8090/
+            -Dtika.url=http://transform-core-aio:8090/
+            -Dtransform.misc.url=http://transform-core-aio:8090/
+            """;
 
     public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network)
     {
@@ -107,25 +131,26 @@ public class DockerContainers
 
     public static @NotNull String getMinimalRepoJavaOpts(PostgreSQLContainer<?> postgresContainer, GenericContainer<?> activemqContainer)
     {
-        return """
-                -Ddb.driver=org.postgresql.Driver
-                -Ddb.username=%s
-                -Ddb.password=%s
-                -Ddb.url=jdbc:postgresql://%s:5432/%s
-                -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
-                -Dalfresco.host=localhost
-                -Dalfresco.port=8080
-                -Dtransform.service.enabled=false
-                -Dalfresco.restApi.basicAuthScheme=true
-                -Ddeployment.method=DOCKER_COMPOSE
-                -Xms1500m -Xmx1500m
-                """.formatted(
+        return MINIMAL_REPO_JAVA_OPTS.formatted(
                 postgresContainer.getUsername(),
                 postgresContainer.getPassword(),
                 postgresContainer.getNetworkAliases().stream().findFirst().get(),
                 postgresContainer.getDatabaseName(),
-                activemqContainer.getNetworkAliases().stream().findFirst().get())
+                activemqContainer.getNetworkAliases().stream().findFirst().get(),
+                "false")
                 .replace("\n", " ");
+    }
+
+    public static @NotNull String getRepoJavaOptsWithTransforms(PostgreSQLContainer<?> postgresContainer, GenericContainer<?> activemqContainer)
+    {
+        return MINIMAL_REPO_JAVA_OPTS.formatted(
+                postgresContainer.getUsername(),
+                postgresContainer.getPassword(),
+                postgresContainer.getNetworkAliases().stream().findFirst().get(),
+                postgresContainer.getDatabaseName(),
+                activemqContainer.getNetworkAliases().stream().findFirst().get(),
+                "true").replace("\n", " ") +
+                TRANSFORMS_REPO_JAVA_OPTS.replace("\n", " ");
     }
 
     public static String getHxInsightRepoJavaOpts(WireMockContainer hxInsightMockContainer)
@@ -234,6 +259,16 @@ public class DockerContainers
         Optional.ofNullable(network).ifPresent(n -> liveIngester.withNetwork(n).withNetworkAliases(LIVE_INGESTER_ALIAS));
 
         return liveIngester;
+    }
+
+    public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, Network network)
+    {
+        return createLiveIngesterContainerWithin(network)
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
+                        "http://%s:8080".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
+                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
+                        "http://%s:8080/token".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
+                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key");
     }
 
     public static GenericContainer<?> createPredictionApplierContainerWithin(Network network)
