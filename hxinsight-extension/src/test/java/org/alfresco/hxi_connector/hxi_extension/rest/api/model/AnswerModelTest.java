@@ -43,7 +43,7 @@ class AnswerModelTest
         String questionId = "questionId";
         String referenceId = "referenceId";
         String referenceText = "referenceText";
-        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, referenceText);
+        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, null, referenceText);
         AnswerResponse answer = AnswerResponse.builder().answer(answerText).questionId(questionId).references(Set.of(reference)).build();
         AnswerModel.ReferenceModel referenceModel = new AnswerModel.ReferenceModel(referenceId, referenceText);
         AnswerModel expected = new AnswerModel(answerText, questionId, Set.of(referenceModel));
@@ -65,7 +65,7 @@ class AnswerModelTest
     {
         String referenceId = "referenceId";
         String referenceText = "referenceText";
-        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, referenceText);
+        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, null, referenceText);
         AnswerModel.ReferenceModel expected = new AnswerModel.ReferenceModel(referenceId, referenceText);
         assertEquals(expected, AnswerModel.ReferenceModel.fromServiceModel(reference));
     }

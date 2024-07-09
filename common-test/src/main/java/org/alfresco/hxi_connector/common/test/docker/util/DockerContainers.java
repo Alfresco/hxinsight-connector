@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -97,6 +98,46 @@ public class DockerContainers
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
 
         return repository;
+    }
+
+    public static String concatJavaOpts(String... opts)
+    {
+        return String.join(" ", opts);
+    }
+
+    public static @NotNull String getMinimalRepoJavaOpts(PostgreSQLContainer<?> postgresContainer, GenericContainer<?> activemqContainer)
+    {
+        return """
+                -Ddb.driver=org.postgresql.Driver
+                -Ddb.username=%s
+                -Ddb.password=%s
+                -Ddb.url=jdbc:postgresql://%s:5432/%s
+                -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
+                -Dalfresco.host=localhost
+                -Dalfresco.port=8080
+                -Dtransform.service.enabled=false
+                -Dalfresco.restApi.basicAuthScheme=true
+                -Ddeployment.method=DOCKER_COMPOSE
+                -Xms1500m -Xmx1500m
+                """.formatted(
+                postgresContainer.getUsername(),
+                postgresContainer.getPassword(),
+                postgresContainer.getNetworkAliases().stream().findFirst().get(),
+                postgresContainer.getDatabaseName(),
+                activemqContainer.getNetworkAliases().stream().findFirst().get())
+                .replace("\n", " ");
+    }
+
+    public static String getHxInsightRepoJavaOpts(WireMockContainer hxInsightMockContainer)
+    {
+        String hXIMockAlias = hxInsightMockContainer.getNetworkAliases().stream().findFirst().get();
+        return """
+                -Dhxi.client.baseUrl=http://%s:8080
+                -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
+                """.formatted(
+                hXIMockAlias,
+                hXIMockAlias)
+                .replace("\n", " ");
     }
 
     public static PostgreSQLContainer<?> createPostgresContainer()

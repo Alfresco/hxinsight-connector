@@ -27,9 +27,14 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
@@ -48,7 +53,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
-public class AskQuestionE2eTest
+public class QuestionsAndAnswersE2eTest
 {
     static final Network network = Network.newNetwork();
     @Container
@@ -137,33 +142,49 @@ public class AskQuestionE2eTest
         assertEquals(SC_BAD_REQUEST, response.statusCode());
     }
 
+    @Test
+    void shouldGetAnswer()
+    {
+        // given
+        String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_OK, response.statusCode());
+        assertEquals(questionId, response.jsonPath().get("list.entries.entry[0].questionId"));
+        assertEquals("This is the answer to the question", response.jsonPath().get("list.entries.entry[0].answer"));
+        assertEquals("276718b0-c3ab-4e11-81d5-96dbbb540269", response.jsonPath().get("list.entries.entry[0].references[0].referenceId"));
+    }
+
+    @Test
+    void shouldNotGetAnswerWheHxIReturnsUnexpectedStatus()
+    {
+        // given
+        String questionId = "non-existing-question-id";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_NOT_FOUND, response.statusCode());
+        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains("Request to hxi failed, expected status 200, received 404"));
+    }
+
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
-            .withJavaOpts("""
-            -Ddb.driver=org.postgresql.Driver
-            -Ddb.username=%s
-            -Ddb.password=%s
-            -Ddb.url=jdbc:postgresql://%s:5432/%s
-            -Dmessaging.broker.url="failover:(nio://%s:61616)?timeout=3000&jms.useCompression=true"
-            -Dalfresco.host=localhost
-            -Dalfresco.port=8080
-            -Dtransform.service.enabled=false
-            -Dalfresco.restApi.basicAuthScheme=true
-            -Ddeployment.method=DOCKER_COMPOSE
-            -Xms1500m -Xmx1500m
-            -Dhxi.client.baseUrl=http://%s:8080
-            -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
-            """.formatted(
-                postgres.getUsername(),
-                postgres.getPassword(),
-                postgres.getNetworkAliases().stream().findFirst().get(),
-                postgres.getDatabaseName(),
-                activemq.getNetworkAliases().stream().findFirst().get(),
-                hxInsightMock.getNetworkAliases().stream().findFirst().get(),
-                hxInsightMock.getNetworkAliases().stream().findFirst().get())
-            .replace("\n", " "));
+            .withJavaOpts(concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq),
+                        getHxInsightRepoJavaOpts(hxInsightMock))
+                );
         // @formatter:on
     }
 }
