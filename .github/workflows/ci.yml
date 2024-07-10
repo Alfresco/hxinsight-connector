@@ -34,9 +34,9 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.30.0
       - uses: actions/checkout@v4
       - id: changed-files
-        uses: tj-actions/changed-files@d6babd6899969df1a11d14c368283ea4436bca78 # v44.5.2
-      - name: Store changed files in env
-        run: echo "GITHUB_MODIFIED_FILES=${{ steps.changed-files.outputs.all_changed_files }}" >> $GITHUB_ENV
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@cb32ac12368ce6ed8d400fa503531044f29304f6
+        with:
+          write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v5.30.0
 
   veracode_sca:
