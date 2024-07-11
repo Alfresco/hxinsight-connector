@@ -1,4 +1,5 @@
 /*
+ * Edited
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -40,5 +41,16 @@ class LiveIngesterApplicationIntegrationTest
     void contextLoads()
     {
         assertEquals(1, 1);
+        if (true)
+        {
+            try
+            {
+                throw new RuntimeException("Runtime Exception");
+            }
+            catch (Error e)
+            {
+                System.out.println("Error swallowed");
+            }
+        }
     }
 }
