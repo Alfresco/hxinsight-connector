@@ -66,6 +66,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId" : "5018ff83-ec45-4a11-95c4-681761752aa7",
+                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
                     "properties" : {
                       "type": {"value": "cm:category"},
@@ -116,6 +117,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
+                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
                     "properties" : {
                       "type": {"value": "cm:content"},

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -35,6 +35,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
@@ -44,11 +45,14 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.No
 public class DeleteNodeCommandHandlerTest
 {
     private static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
+    private static final String SOURCE_ID = "dummy-source-id";
 
     @InjectMocks
     private DeleteNodeCommandHandler deleteNodeCommandHandler;
     @Mock
     private IngestionEngineEventPublisher ingestionEngineEventPublisher;
+    @Mock
+    private IntegrationProperties integrationProperties;
 
     @Test
     public void testHandle()
@@ -56,12 +60,14 @@ public class DeleteNodeCommandHandlerTest
         // given
         DeleteNodeCommand deleteNodeCommand = mock(DeleteNodeCommand.class);
         given(deleteNodeCommand.nodeId()).willReturn(NODE_ID);
+        given(integrationProperties.application()).willReturn(mock(IntegrationProperties.Application.class));
+        given(integrationProperties.application().sourceId()).willReturn(SOURCE_ID);
 
         // when
         deleteNodeCommandHandler.handle(deleteNodeCommand);
 
         // then
-        NodeEvent expectedNodeEvent = new DeleteNodeEvent(NODE_ID);
+        NodeEvent expectedNodeEvent = new DeleteNodeEvent(NODE_ID, SOURCE_ID);
         then(ingestionEngineEventPublisher).should().publishMessage(expectedNodeEvent);
     }
 }
