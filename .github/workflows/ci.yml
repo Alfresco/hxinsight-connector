@@ -33,8 +33,10 @@ jobs:
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.30.0
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - id: changed-files
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@ad428b6611cefe9d63cddcbaa3c877a3db0d1d86
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@9eb4240443e43662ccbfd35fdb697e907c839d1c
         with:
           write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v5.30.0
