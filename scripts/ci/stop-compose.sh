@@ -12,9 +12,9 @@ echo "Killing ACS stack in ${DOCKER_COMPOSE_PATH}"
 
 cd "$(dirname "${DOCKER_COMPOSE_PATH}")"
 
-docker-compose ps
+docker compose ps
 # logs for debug
-docker-compose logs --no-color -t alfresco live-ingester transform-router transform-core-aio
-docker-compose -f "$(basename "${DOCKER_COMPOSE_PATH}")" down
+docker compose logs --no-color -t alfresco live-ingester transform-router transform-core-aio
+docker compose -f "$(basename "${DOCKER_COMPOSE_PATH}")" down
 docker system prune -f
 docker volume prune -f
