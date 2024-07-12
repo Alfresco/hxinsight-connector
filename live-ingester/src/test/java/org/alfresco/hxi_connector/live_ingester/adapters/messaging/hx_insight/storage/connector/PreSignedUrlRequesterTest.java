@@ -222,7 +222,7 @@ class PreSignedUrlRequesterTest
     {
         Storage storageProperties = new Storage(new Storage.Location(endpoint, new Retry()), new Storage.Upload(new Retry()));
         IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
-        return new IntegrationProperties(null, hylandExperienceProperties);
+        return new IntegrationProperties(null, hylandExperienceProperties, new IntegrationProperties.Application("dummy-source-id"));
     }
 
     private void mockEndpointWillRespondWith(int statusCode)

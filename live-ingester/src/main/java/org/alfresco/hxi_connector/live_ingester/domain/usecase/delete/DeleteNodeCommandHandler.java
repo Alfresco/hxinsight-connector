@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 
@@ -38,12 +39,13 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.In
 public class DeleteNodeCommandHandler
 {
     private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
+    private final IntegrationProperties integrationProperties;
 
     public void handle(DeleteNodeCommand deleteNodeCommand)
     {
         String nodeId = deleteNodeCommand.nodeId();
         log.debug("Processing delete command for {}", nodeId);
-        DeleteNodeEvent deleteNodeEvent = new DeleteNodeEvent(nodeId);
+        DeleteNodeEvent deleteNodeEvent = new DeleteNodeEvent(nodeId, integrationProperties.application().sourceId());
         ingestionEngineEventPublisher.publishMessage(deleteNodeEvent);
     }
 }

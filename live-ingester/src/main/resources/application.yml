@@ -1,3 +1,6 @@
+application:
+  source-id: alfresco-dummy-source-id-0a63de491876
+
 spring:
   main:
     web-application-type: none
