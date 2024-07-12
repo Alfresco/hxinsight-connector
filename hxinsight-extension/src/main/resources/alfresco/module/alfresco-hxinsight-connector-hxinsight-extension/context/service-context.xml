@@ -144,7 +144,7 @@
         <constructor-arg name="client" ref="httpClient"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig" id="questionsApiConfig">
+    <bean id="questionsApiConfig" class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig">
         <constructor-arg name="maxContextSizeForQuestion" value="${hxi.question.max-context-size-for-question}"/>
     </bean>
 
