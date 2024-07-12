@@ -38,7 +38,8 @@ import static org.springframework.extensions.webscripts.Status.STATUS_FORBIDDEN;
 import java.util.List;
 import java.util.Set;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig;
@@ -56,12 +57,17 @@ public class QuestionsEntityResourceTest
     private final QuestionPermissionService questionPermissionService = mock(QuestionPermissionService.class);
     private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(hxInsightClient, questionConfig, questionPermissionService);
 
+    @BeforeEach
+    public void setUp()
+    {
+        given(questionPermissionService.hasPermissionToAskAboutDocuments(any())).willReturn(true);
+    }
+
     @Test
     public void shouldFailIfAskedMultipleQuestions()
     {
         // given
         List<QuestionModel> questions = List.of(mock(QuestionModel.class), mock(QuestionModel.class));
-        given(questionPermissionService.hasPermissionToAskAboutDocuments(any())).willReturn(true);
 
         // when
         WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> questionsEntityResource.create(questions, null));
@@ -79,8 +85,6 @@ public class QuestionsEntityResourceTest
                 "What is the capital of France?",
                 AGENT_ID,
                 new RestrictionQuery(Set.of("node-id-1", "node-id-2", "node-id-3", "node-id-4")));
-
-        given(questionPermissionService.hasPermissionToAskAboutDocuments(any())).willReturn(true);
 
         // when
         WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> questionsEntityResource.create(List.of(question), null));
@@ -120,7 +124,6 @@ public class QuestionsEntityResourceTest
 
         String questionId = "a13c4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d";
         given(hxInsightClient.askQuestion(any())).willReturn(questionId);
-        given(questionPermissionService.hasPermissionToAskAboutDocuments(any())).willReturn(true);
 
         // when
         List<QuestionModel> questionIds = questionsEntityResource.create(List.of(question), null);
