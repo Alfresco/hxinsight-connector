@@ -26,13 +26,13 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import static lombok.AccessLevel.NONE;
 
-@Getter
-@RequiredArgsConstructor
-@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+import lombok.Data;
+import lombok.Setter;
+
+@Data
+@Setter(NONE)
 public class Question
 {
     private final String question;
