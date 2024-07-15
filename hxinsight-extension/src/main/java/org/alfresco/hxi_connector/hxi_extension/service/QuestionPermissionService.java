@@ -47,7 +47,7 @@ public class QuestionPermissionService
                 .nodesIds()
                 .stream()
                 .map(nodeId -> validateOrLookupNode(nodes, nodeId))
-                .map(permissionService::hasReadPermission)
-                .allMatch(accessStatus -> AccessStatus.ALLOWED.equals(accessStatus));
+                .map(nodeRef -> permissionService.hasPermission(nodeRef, PermissionService.READ))
+                .allMatch(AccessStatus.ALLOWED::equals);
     }
 }
