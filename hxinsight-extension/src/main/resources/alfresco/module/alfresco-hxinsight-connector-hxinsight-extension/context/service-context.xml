@@ -148,7 +148,7 @@
         <constructor-arg name="maxContextSizeForQuestion" value="${hxi.question.max-context-size-for-question}"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService" id="questionPermissionService">
+    <bean id="questionPermissionService" class="org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService">
         <constructor-arg name="nodes" ref="nodes"/>
         <constructor-arg name="permissionService" ref="PermissionService"/>
     </bean>
