@@ -82,7 +82,7 @@ public class QuestionsAndAnswersE2eTest
                     "question": "What is the meaning of life?",
                     "agentId": "agent-id",
                     "restrictionQuery": {
-                        "nodesIds": ["node-id"]
+                        "nodesIds": ["1a0b110f-1e09-4ca2-b367-fe25e4964a4e"]
                     }
                 }
                 """;
@@ -109,14 +109,14 @@ public class QuestionsAndAnswersE2eTest
                         "question": "What is the meaning of life?",
                         "agentId": "agent-id",
                         "restrictionQuery": {
-                            "nodesIds": ["node-id"]
+                            "nodesIds": ["1a0b110f-1e09-4ca2-b367-fe25e4964a4e"]
                         }
                     },
                     {
                         "question": "Who is the president of the United States?",
                         "agentId": "agent-id",
                         "restrictionQuery": {
-                            "nodesIds": ["node-id"]
+                            "nodesIds": ["1a0b110f-1e09-4ca2-b367-fe25e4964a4e"]
                         }
                     }
                 ]
@@ -214,11 +214,9 @@ public class QuestionsAndAnswersE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        // @formatter:off
+        String javaOpts = concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq), getHxInsightRepoJavaOpts(hxInsightMock));
+
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
-            .withJavaOpts(concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq),
-                        getHxInsightRepoJavaOpts(hxInsightMock))
-                );
-        // @formatter:on
+                .withJavaOpts(javaOpts);
     }
 }
