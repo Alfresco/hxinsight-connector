@@ -1,12 +1,12 @@
 # In order this docker-compose file to work on your local machine, you need to have HOST_IP environment variable set to the IP address of your local machine.
 # It has been added to .env file in this directory but by default it is empty.
 # In the live-ingester service, you need to set the following environment variables:
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE-AUTH_CLIENT-ID
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI
 # In the prediction-applier service, you need to set the following environment variables:
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE-AUTH_CLIENT-ID
+#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI
@@ -351,7 +351,7 @@ services:
       HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST: http://shared-file-store
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT: 8099
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE-AUTH_CLIENT-ID: dummy-client-id
+      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-pass
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://localhost:8002/token
@@ -392,7 +392,7 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE-AUTH_CLIENT-ID: dummy-client-id
+      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-pass
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://localhost:8002/token

@@ -31,7 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
-@SpringBootTest(properties = "spring.security.oauth2.client.registration.hyland-experience-auth.client-id=hx-client-id")
+@SpringBootTest
 @ActiveProfiles("test")
 class LiveIngesterApplicationIntegrationTest
 {

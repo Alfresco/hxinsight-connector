@@ -30,8 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest(properties = {"spring.security.oauth2.client.registration.hyland-experience-auth.client-id=hx-client-id",
-        "spring.security.oauth2.client.registration.alfresco.client-id=alfresco-client-id"})
+@SpringBootTest
 class PredictionApplierApplicationIntegrationTest
 {
 
