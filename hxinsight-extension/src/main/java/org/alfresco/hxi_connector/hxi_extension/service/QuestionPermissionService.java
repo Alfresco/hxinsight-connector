@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.hxi_extension.service;
 
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.util.NodesUtils.validateOrLookupNode;
+import static org.alfresco.service.cmr.security.PermissionService.READ;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,7 +48,7 @@ public class QuestionPermissionService
                 .nodesIds()
                 .stream()
                 .map(nodeId -> validateOrLookupNode(nodes, nodeId))
-                .map(nodeRef -> permissionService.hasPermission(nodeRef, PermissionService.READ))
+                .map(nodeRef -> permissionService.hasPermission(nodeRef, READ))
                 .allMatch(AccessStatus.ALLOWED::equals);
     }
 }
