@@ -154,7 +154,7 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
         });
-        verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
+        verify(exactly(0), anyRequestedFor(urlEqualTo("/v1/ingestion-events")));
     }
 
     @Test
