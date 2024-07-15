@@ -55,6 +55,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class QuestionsAndAnswersE2eTest
 {
+    private static final String PREEXISTING_DOCUMENT_ID = "1a0b110f-1e09-4ca2-b367-fe25e4964a4e";
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -82,10 +83,10 @@ public class QuestionsAndAnswersE2eTest
                     "question": "What is the meaning of life?",
                     "agentId": "agent-id",
                     "restrictionQuery": {
-                        "nodesIds": ["1a0b110f-1e09-4ca2-b367-fe25e4964a4e"]
+                        "nodesIds": ["%s"]
                     }
                 }
-                """;
+                """.formatted(PREEXISTING_DOCUMENT_ID);
 
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
@@ -109,18 +110,18 @@ public class QuestionsAndAnswersE2eTest
                         "question": "What is the meaning of life?",
                         "agentId": "agent-id",
                         "restrictionQuery": {
-                            "nodesIds": ["1a0b110f-1e09-4ca2-b367-fe25e4964a4e"]
+                            "nodesIds": ["%s"]
                         }
                     },
                     {
                         "question": "Who is the president of the United States?",
                         "agentId": "agent-id",
                         "restrictionQuery": {
-                            "nodesIds": ["1a0b110f-1e09-4ca2-b367-fe25e4964a4e"]
+                            "nodesIds": ["%s"]
                         }
                     }
                 ]
-                """;
+                """.formatted(PREEXISTING_DOCUMENT_ID, PREEXISTING_DOCUMENT_ID);
 
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
