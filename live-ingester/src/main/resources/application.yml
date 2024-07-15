@@ -50,9 +50,9 @@ hyland-experience:
     base-url: http://localhost:8001
   storage:
     location:
-      endpoint: ${hyland-experience.insight.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
+      endpoint: ${hyland-experience.insight.base-url}/v1/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
   ingester:
-    endpoint: ${hyland-experience.insight.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
+    endpoint: ${hyland-experience.insight.base-url}/v1/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
 
 auth:
   providers:
