@@ -212,10 +212,8 @@ public class UpdateNodeE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
                 .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
-        // @formatter:on
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
@@ -238,7 +236,7 @@ public class UpdateNodeE2eTest
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL",
-                        "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
+                        "http://%s:8080/v1".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
     }
 }
