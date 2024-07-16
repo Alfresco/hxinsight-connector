@@ -81,7 +81,6 @@ public class QuestionsPermissionsE2eTest
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
-    private static RepositoryClient repositoryClient;
     private static final User regularUser = new User("test", "test");
     private static String publicDocumentId;
     private static String privateDocumentId;
@@ -89,7 +88,7 @@ public class QuestionsPermissionsE2eTest
     @BeforeAll
     public static void beforeAll()
     {
-        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
+        RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
 
         repositoryClient.createUser(regularUser);
