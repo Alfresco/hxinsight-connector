@@ -53,7 +53,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
@@ -70,7 +70,7 @@ abstract class CreateNodeE2eTestBase
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
-    protected RepositoryNodesClient repositoryNodesClient;
+    protected RepositoryClient repositoryClient;
     protected AwsS3Client awsS3Client;
 
     @AfterEach
@@ -88,7 +88,7 @@ abstract class CreateNodeE2eTestBase
         List<S3Object> initialBucketContent = awsS3Client.listS3Content();
 
         // when
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, imageFile);
+        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, imageFile);
 
         // then
         RetryUtils.retryWithBackoff(() -> {
@@ -112,7 +112,7 @@ abstract class CreateNodeE2eTestBase
         List<S3Object> initialBucketContent = awsS3Client.listS3Content();
 
         // when
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
+        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
 
         // then
         RetryUtils.retryWithBackoff(() -> {

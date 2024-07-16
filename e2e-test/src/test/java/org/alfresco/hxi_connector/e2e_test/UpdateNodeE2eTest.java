@@ -40,6 +40,7 @@ import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -60,7 +61,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
@@ -120,7 +121,7 @@ public class UpdateNodeE2eTest
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock);
 
-    RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
+    RepositoryClient repositoryNodesClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
     @BeforeAll
     public static void beforeAll()
