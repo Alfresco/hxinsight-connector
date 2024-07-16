@@ -1,6 +1,6 @@
 application:
   source-id: alfresco-dummy-source-id-0a63de491876
-  version: @project.version@
+  version: "@project.version@"
 
 spring:
   main:
