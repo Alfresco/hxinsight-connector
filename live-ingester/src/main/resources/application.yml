@@ -1,5 +1,6 @@
 application:
   source-id: alfresco-dummy-source-id-0a63de491876
+  version: @project.version@
 
 spring:
   main:
@@ -12,6 +13,7 @@ camel:
 alfresco:
   repository:
     endpoint: activemq:topic:alfresco.repo.event2
+    discovery-endpoint: http://localhost:8080/alfresco/api/discovery
   bulk-ingester:
     endpoint: activemq:queue:bulk-ingester-events
   transform:
@@ -68,9 +70,13 @@ auth:
       client-name: acs-insight-connector
     alfresco:
       type: basic
-      username:
-      password:
+      username: admin
+      password: admin
   retry:
     attempts: 10
     initial-delay: 500
     delay-multiplier: 2
+
+logging:
+  level:
+    org.alfresco: DEBUG

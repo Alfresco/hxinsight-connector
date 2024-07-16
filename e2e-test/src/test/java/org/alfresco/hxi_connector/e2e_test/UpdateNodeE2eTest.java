@@ -110,12 +110,10 @@ public class UpdateNodeE2eTest
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
-    @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, hxInsightMock);
+    private static GenericContainer<?> liveIngester;
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, liveIngester);
+            .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock);
@@ -126,6 +124,8 @@ public class UpdateNodeE2eTest
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+        liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock);
+        liveIngester.start();
     }
 
     @Test
@@ -220,7 +220,8 @@ public class UpdateNodeE2eTest
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network);
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network)
+                .withEnv("ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(repository.getNetworkAliases().stream().findFirst().get()));
     }
 
     private static GenericContainer<?> createPredictionApplierContainer()

@@ -75,11 +75,9 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
     @Container
     private static final LocalStackContainer awsMock = DockerContainers.createLocalStackContainerWithin(network);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, hxInsightMock, awsMock);
-    @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, transformCore, transformRouter, sfs, liveIngester);
+            .dependsOn(postgres, activemq, transformCore, transformRouter, sfs);
+    private static GenericContainer<?> liveIngester;
 
     @BeforeAll
     @SneakyThrows
@@ -89,6 +87,8 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
+        liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, awsMock);
+        liveIngester.start();
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -101,6 +101,7 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network);
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network)
+                .withEnv("ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(repository.getNetworkAliases().stream().findFirst().get()));
     }
 }

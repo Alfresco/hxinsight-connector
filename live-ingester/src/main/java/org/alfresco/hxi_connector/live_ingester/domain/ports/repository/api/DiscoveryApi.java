@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,9 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.repository.api;
 
-import jakarta.validation.constraints.NotBlank;
-
-public record Repository(@NotBlank String endpoint, @NotBlank String discoveryEndpoint)
-{}
+public interface DiscoveryApi
+{
+    String getRepositoryVersion();
+}

@@ -311,4 +311,12 @@ public class DockerContainers
                 .withNetwork(network)
                 .withNetworkAliases(LOCALSTACK_ALIAS);
     }
+
+    public static @NotNull String getAppInfoRegex()
+    {
+        // Since ACS 23.2.1 release was a super quick fix to 23.2.0 it shows as 23.2.0 in the discovery endpoint.
+        // Hence, we cannot use DockerTags.getRepositoryTag() without additional magic here
+        // When we move past 23.2.1 ACS version we can modify this method to return more accurate regex.
+        return "ACS HXI Connector/" + DockerTags.getHxiConnectorTag() + " ACS/.*";
+    }
 }

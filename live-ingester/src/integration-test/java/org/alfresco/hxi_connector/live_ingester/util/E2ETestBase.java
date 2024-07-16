@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.util;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -67,6 +68,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageConfig;
 
@@ -84,6 +86,7 @@ public class E2ETestBase
     private static WireMock hxAuthMock;
     private static WireMock hxInsightMock;
     private static WireMock sfsMock;
+    private static WireMock acsMock;
     protected ContainerSupport containerSupport;
 
     @Autowired
@@ -99,6 +102,8 @@ public class E2ETestBase
     static final WireMockContainer sfsServer = DockerContainers.createWireMockContainer();
     @Container
     static final LocalStackContainer localStackServer = DockerContainers.createLocalStackContainer();
+    @Container
+    static final WireMockContainer acsServer = DockerContainers.createWireMockContainer();
 
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
@@ -121,6 +126,8 @@ public class E2ETestBase
         registry.add("local.aws.region", localStackServer::getRegion);
         registry.add("local.aws.access-key-id", localStackServer::getAccessKey);
         registry.add("local.aws.secret-access-key", localStackServer::getSecretKey);
+
+        registry.add("alfresco.repository.discovery-endpoint", () -> acsServer.getBaseUrl() + "/alfresco/api/discovery");
     }
 
     @BeforeAll
@@ -131,11 +138,37 @@ public class E2ETestBase
         hxAuthMock = new WireMock(hxAuthServer.getHost(), hxAuthServer.getPort());
         hxInsightMock = new WireMock(hxInsightServer.getHost(), hxInsightServer.getPort());
         sfsMock = new WireMock(sfsServer.getHost(), sfsServer.getPort());
+        acsMock = new WireMock(acsServer.getHost(), acsServer.getPort());
         WireMock.configureFor(hxAuthMock);
         WireMock.givenThat(post(AuthUtils.TOKEN_PATH)
                 .willReturn(aResponse()
                         .withStatus(OK)
                         .withBody(AuthUtils.createAuthResponseBody())));
+        WireMock.configureFor(acsMock);
+        WireMock.givenThat(get("/alfresco/api/discovery")
+                .willReturn(aResponse()
+                        .withStatus(OK)
+                        .withBody("""
+                                {
+                                    "entry": {
+                                        "repository": {
+                                            "id": "eb4c123a-5621-4583-98a2-739379e3a345",
+                                            "edition": "Enterprise",
+                                            "version": {
+                                                "major": "%s",
+                                                "minor": "%s",
+                                                "patch": "%s",
+                                                "hotfix": "0",
+                                                "schema": 19200,
+                                                "label": "rc50a6313-blocal",
+                                                "display": "23.3.0.0 (rc50a6313-blocal) schema 19200"
+                                            }
+                                        }
+                                    }
+                                }
+                                """.formatted(DockerTags.getRepositoryTag().split("\\.")[0],
+                                DockerTags.getRepositoryTag().split("\\.")[1],
+                                DockerTags.getRepositoryTag().split("\\.")[2]))));
     }
 
     @BeforeEach

@@ -32,15 +32,18 @@ import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
 import static org.apache.http.HttpHeaders.CONTENT_TYPE;
+import static org.apache.http.HttpHeaders.USER_AGENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.BUCKET_NAME;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getHxInsightMock;
@@ -160,6 +163,7 @@ public class ContainerSupport
         retryWithBackoff(() -> getHxInsightMock().verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withRequestBody(equalToJson(expectedBody))));
         resetWireMock();
     }

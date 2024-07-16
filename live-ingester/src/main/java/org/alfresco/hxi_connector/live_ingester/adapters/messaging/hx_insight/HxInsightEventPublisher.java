@@ -45,6 +45,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
@@ -57,10 +58,12 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     private static final String LOCAL_ENDPOINT = "direct:" + HxInsightEventPublisher.class.getSimpleName();
     private static final String ROUTE_ID = "insight-event-publisher";
     private static final int EXPECTED_STATUS_CODE = 202;
+    public static final String USER_AGENT_DATA = "user-agent-data";
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
     private final AuthService authService;
+    private final ApplicationInfoProvider applicationInfoProvider;
 
     @Override
     public void configure()
@@ -76,8 +79,9 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
             .marshal()
             .json()
             .log("Sending event ${body}")
+            .setHeader(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
             .process(authService::setHxIAuthorizationHeaders)
-            .to(integrationProperties.hylandExperience().ingester().endpoint())
+            .toD(integrationProperties.hylandExperience().ingester().endpoint() + "&userAgent=${header.user-agent-data}")
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)

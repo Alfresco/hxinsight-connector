@@ -28,11 +28,13 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.USER_AGENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
@@ -50,6 +52,7 @@ import java.util.Map;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -80,9 +83,11 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.repository.api.DiscoveryApi;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
 @SpringBootTest(classes = {
@@ -104,6 +109,7 @@ class HxInsightEventPublisherIntegrationTest
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
     private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE, SOURCE_ID);
+    private static final String DUMMY_ACS_VERSION = "23.3.0-dummy";
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
@@ -131,6 +137,7 @@ class HxInsightEventPublisherIntegrationTest
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(INGEST_PATH))
                 .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withRequestBody(new ContainsPattern(NODE_ID)));
         assertThat(thrown).doesNotThrowAnyException();
     }
@@ -173,6 +180,11 @@ class HxInsightEventPublisherIntegrationTest
         registry.add("hyland-experience.ingester.retry.initialDelay", () -> RETRY_DELAY_MS);
     }
 
+    private static @NotNull String getAppInfoRegex()
+    {
+        return "ACS HXI Connector/.* ACS/" + DUMMY_ACS_VERSION + ".*";
+    }
+
     @TestConfiguration
     public static class HxInsightEventPublisherTestConfig
     {
@@ -205,6 +217,19 @@ class HxInsightEventPublisherIntegrationTest
         public AuthService authService()
         {
             return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
+        }
+
+        @Bean
+        public DiscoveryApi dummyDiscoveryApi()
+        {
+            return () -> DUMMY_ACS_VERSION;
+        }
+
+        @Bean
+        public ApplicationInfoProvider dummyApplicationInfoProvider(DiscoveryApi dummyDiscoveryApi, IntegrationProperties integrationProperties)
+        {
+            ApplicationInfoProvider applicationInfoProvider = new ApplicationInfoProvider(dummyDiscoveryApi, integrationProperties);
+            return applicationInfoProvider;
         }
     }
 }
