@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
@@ -32,7 +34,7 @@ import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable;
 
 import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @EnabledIfEnvironmentVariable(named = "GHA_RUN_DC", matches = "true")
@@ -46,7 +48,7 @@ public class CreateNodeDCE2eTest extends CreateNodeE2eTestBase
     @SneakyThrows
     public void beforeAll()
     {
-        repositoryNodesClient = new RepositoryNodesClient("http://localhost:8080", "admin", "admin");
+        repositoryClient = new RepositoryClient("http://localhost:8080", ADMIN_USER);
         awsS3Client = new AwsS3Client("localhost", 4566, BUCKET_NAME);
         WireMock.configureFor("localhost", 8081);
     }

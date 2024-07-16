@@ -39,6 +39,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,7 +60,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
@@ -118,7 +120,7 @@ public class UpdateNodeE2eTest
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock);
 
-    RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
+    RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
     @BeforeAll
     public static void beforeAll()
@@ -132,7 +134,7 @@ public class UpdateNodeE2eTest
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
+        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
         WireMock.reset();
@@ -146,7 +148,7 @@ public class UpdateNodeE2eTest
         assertThat(createdNode.aspects()).doesNotContain(PREDICTION_APPLIED_ASPECT);
         assertThat(createdNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode = repositoryNodesClient.getNode(createdNode.id());
+            Node actualNode = repositoryClient.getNode(createdNode.id());
             assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
@@ -162,7 +164,7 @@ public class UpdateNodeE2eTest
         // given
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
+        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
         WireMock.reset();
@@ -172,12 +174,12 @@ public class UpdateNodeE2eTest
         WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
 
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode = repositoryNodesClient.getNode(createdNode.id());
+            Node actualNode = repositoryClient.getNode(createdNode.id());
             assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
         });
 
         // when
-        Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
+        Node updatedNode = repositoryClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))));
         WireMock.reset();
@@ -188,7 +190,7 @@ public class UpdateNodeE2eTest
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode2 = repositoryNodesClient.getNode(updatedNode.id());
+            Node actualNode2 = repositoryClient.getNode(updatedNode.id());
             assertThat(actualNode2.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)

@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
@@ -42,7 +44,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 
 @Testcontainers
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -83,7 +85,7 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
     @SneakyThrows
     public void beforeAll()
     {
-        repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
+        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);

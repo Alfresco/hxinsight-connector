@@ -56,6 +56,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 public class QuestionsAndAnswersE2eTest
 {
     private static final String PREEXISTING_DOCUMENT_ID = "1a0b110f-1e09-4ca2-b367-fe25e4964a4e";
+    private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/questions";
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -127,7 +128,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(questions)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
                 .then().extract().response();
 
         // then
@@ -145,7 +146,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(questions)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
                 .then().extract().response();
 
         // then
@@ -170,7 +171,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(questions)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
                 .then().extract().response();
 
         // then
