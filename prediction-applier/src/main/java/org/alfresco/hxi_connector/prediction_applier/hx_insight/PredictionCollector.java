@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
+import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.*;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.language.spel.SpelExpression.spel;
@@ -55,20 +56,15 @@ public class PredictionCollector extends RouteBuilder
     private static final String TIMER_ROUTE_ID = "predictions-collector-timer";
     private static final String COLLECTOR_ROUTE_ID = "prediction-collector";
     private static final String BATCH_PROCESSOR_ROUTE_ID = "prediction-batch-processor";
-    private static final String PREDICTIONS_PROCESSOR_ENDPOINT = "direct:" + COLLECTOR_ROUTE_ID + "-" + PredictionCollector.class.getSimpleName();
-    private static final String BATCH_PROCESSOR_ENDPOINT = "direct:" + BATCH_PROCESSOR_ROUTE_ID + "-" + PredictionCollector.class.getSimpleName();
+    private static final String BATCHES_PROCESSOR_ENDPOINT = "direct:" + COLLECTOR_ROUTE_ID + "-" + PredictionCollector.class.getSimpleName();
+    private static final String PREDICTIONS_PROCESSOR_ENDPOINT = "direct:" + BATCH_PROCESSOR_ROUTE_ID + "-" + PredictionCollector.class.getSimpleName();
     private static final String IS_PREDICTION_PROCESSING_PENDING_KEY = "is-prediction-processing-pending";
-    private static final String BATCH_ID_HEADER = "batchId";
-    private static final String BATCHES_PAGE_NO_HEADER = "batchesPageNo";
-    private static final String PREDICTIONS_PAGE_NO_HEADER = "predictionsPageNo";
-    private static final String BATCHES_URL_PATTERN = "%s/v1/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
-    private static final String PREDICTIONS_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
-    private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/v1/prediction-batches/${headers.%s}?httpMethod=PUT";
     private static final String SET_BATCH_STATUS_BODY_TEMPLATE = "{\"status\": \"%s\", \"currentPage\": ${headers.%s}}";
     private static final String IN_PROGRESS_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("IN_PROGRESS", PREDICTIONS_PAGE_NO_HEADER);
     private static final String COMPLETE_BATCH_STATUS_BODY = SET_BATCH_STATUS_BODY_TEMPLATE.formatted("COMPLETE", PREDICTIONS_PAGE_NO_HEADER);
 
     private final InsightPredictionsProperties insightPredictionsProperties;
+    private final HxInsightUrlProducer hxInsightUrlProducer;
     private final AuthService authService;
 
     // @formatter:off
@@ -79,23 +75,18 @@ public class PredictionCollector extends RouteBuilder
     @Override
     public void configure()
     {
-        JacksonDataFormat predictionsBatchDataFormat = new LinkedListJacksonDataFormat(PredictionBatch.class);
-        JacksonDataFormat predictionsDataFormat = new LinkedListJacksonDataFormat(PredictionEntry.class);
-        JacksonDataFormat predictionDataFormat = new JacksonDataFormat(PredictionEntry.class);
-
         from(insightPredictionsProperties.collectorTimerEndpoint())
             .routeId(TIMER_ROUTE_ID)
             .choice().when(this::isProcessingPending)
                 .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
             .otherwise()
                 .log(DEBUG, log, "Triggering prediction processing")
-                .to(PREDICTIONS_PROCESSOR_ENDPOINT);
+                .to(BATCHES_PROCESSOR_ENDPOINT);
 
-        String batchesUrl = BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCHES_PAGE_NO_HEADER);
-        String predictionsUrl = PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
-        String predictionsConfirmationUrl = PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER);
+        String batchesUrl = hxInsightUrlProducer.getBatchesUrl();
+        JacksonDataFormat predictionsBatchDataFormat = new LinkedListJacksonDataFormat(PredictionBatch.class);
 
-        from(PREDICTIONS_PROCESSOR_ENDPOINT)
+        from(BATCHES_PROCESSOR_ENDPOINT)
             .routeId(COLLECTOR_ROUTE_ID)
             .process(setProcessingPending(true))
             .onCompletion()
@@ -109,7 +100,7 @@ public class PredictionCollector extends RouteBuilder
                     .log(DEBUG, log, "Processing prediction batches page ${headers.%s} started".formatted(BATCHES_PAGE_NO_HEADER))
                     .unmarshal(predictionsBatchDataFormat)
                     .split(body())
-                        .to(BATCH_PROCESSOR_ENDPOINT)
+                        .to(PREDICTIONS_PROCESSOR_ENDPOINT)
                     .end()
                     .setHeader(BATCHES_PAGE_NO_HEADER, spel("#{request.headers['%s'] + 1}".formatted(BATCHES_PAGE_NO_HEADER)))
                     .toD(batchesUrl)
@@ -117,7 +108,12 @@ public class PredictionCollector extends RouteBuilder
             .end()
             .log(DEBUG, log, "Finished processing predictions");
 
-        from(BATCH_PROCESSOR_ENDPOINT)
+        String predictionsUrl = hxInsightUrlProducer.getPredictionsUrl();
+        String predictionsConfirmationUrl = hxInsightUrlProducer.getConfirmationUrl();
+        JacksonDataFormat predictionsDataFormat = new LinkedListJacksonDataFormat(PredictionEntry.class);
+        JacksonDataFormat predictionDataFormat = new JacksonDataFormat(PredictionEntry.class);
+
+        from(PREDICTIONS_PROCESSOR_ENDPOINT)
             .routeId(BATCH_PROCESSOR_ROUTE_ID)
             .log(DEBUG, log, "Processing prediction batch ${body.id} started")
             .setHeader(BATCH_ID_HEADER, simple("${body.id}"))

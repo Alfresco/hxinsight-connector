@@ -36,9 +36,11 @@ public class HxInsightUrlProducer
 {
     private static final String BATCHES_URL_PATTERN = "%s/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
     private static final String PREDICTIONS_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=GET&page=${headers.%s}";
-    public static final String BATCHES_PAGE_NO_HEADER = "batchesPageNo";
+    private static final String PREDICTIONS_CONFIRMATION_URL_PATTERN = "%s/prediction-batches/${headers.%s}?httpMethod=PUT";
     public static final String BATCH_ID_HEADER = "batchId";
+    public static final String BATCHES_PAGE_NO_HEADER = "batchesPageNo";
     public static final String PREDICTIONS_PAGE_NO_HEADER = "predictionsPageNo";
+
     private final InsightPredictionsProperties insightPredictionsProperties;
 
     public String getBatchesUrl()
@@ -49,5 +51,10 @@ public class HxInsightUrlProducer
     public String getPredictionsUrl()
     {
         return PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER);
+    }
+
+    public String getConfirmationUrl()
+    {
+        return PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER);
     }
 }
