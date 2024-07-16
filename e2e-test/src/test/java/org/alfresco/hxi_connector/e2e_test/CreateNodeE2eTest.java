@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getRepoJavaOptsWithTransforms;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
