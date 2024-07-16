@@ -48,21 +48,23 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.Up
 class UpdateNodeEventSerializerTest
 {
     private static final String NODE_ID = "node-id";
+    private static final String SOURCE_ID = "dummy-source-id";
 
     private final UpdateNodeEventSerializer serializer = new UpdateNodeEventSerializer();
 
     @Test
     public void shouldSerializeEmptyEvent()
     {
-        UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE);
+        UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID);
 
         String expectedJson = """
                 [
                   {
                     "objectId": "%s",
+                    "sourceId": "%s",
                     "eventType": "create"
                   }
-                ]""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(emptyEvent);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -71,7 +73,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSerializePropertiesToSet()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
 
@@ -79,13 +81,14 @@ class UpdateNodeEventSerializerTest
                 [
                   {
                     "objectId": "%s",
+                    "sourceId": "%s",
                     "eventType": "create",
                     "properties": {
                       "createdAt": {"value": 10000},
                       "modifiedBy": {"value": "000-000-000"}
                     }
                   }
-                ]""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -94,7 +97,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSerializePropertiesToUnset()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, UPDATE)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID)
                 .addUnsetInstruction(CREATED_AT_PROPERTY)
                 .addUnsetInstruction(MODIFIED_BY_PROPERTY);
 
@@ -102,10 +105,11 @@ class UpdateNodeEventSerializerTest
                 [
                   {
                     "objectId": "%s",
+                    "sourceId": "%s",
                     "eventType": "update",
                     "removedProperties": [ "createdAt", "modifiedBy" ]
                   }
-                ]""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -114,7 +118,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void canCopeWithNullUsers()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, null))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
 
@@ -122,13 +126,14 @@ class UpdateNodeEventSerializerTest
                 [
                   {
                     "objectId": "%s",
+                    "sourceId": "%s",
                     "eventType": "create",
                     "properties": {
                       "createdBy": {"value": null},
                       "modifiedBy": {"value": null}
                     }
                   }
-                ]""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -137,7 +142,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSetContentProperty()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf",
                         "application/msword", 123L, "something.doc"));
 
@@ -145,6 +150,7 @@ class UpdateNodeEventSerializerTest
                 [
                   {
                     "objectId": "%s",
+                    "sourceId": "%s",
                     "eventType": "create",
                     "properties": {
                       "cm:content": {
@@ -160,7 +166,7 @@ class UpdateNodeEventSerializerTest
                       }
                     }
                   }
-                ]""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
@@ -169,7 +175,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldOnlySendUpdatedContentMetadata()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, null, null,
                         "application/msword", null, null));
 
@@ -177,6 +183,7 @@ class UpdateNodeEventSerializerTest
                 [
                   {
                     "objectId": "%s",
+                    "sourceId": "%s",
                     "eventType": "create",
                     "properties": {
                       "cm:content": {
@@ -188,7 +195,7 @@ class UpdateNodeEventSerializerTest
                       }
                     }
                   }
-                ]""".formatted(NODE_ID);
+                ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);

@@ -38,12 +38,13 @@ import org.junit.jupiter.api.Test;
 class UpdateNodeEventTest
 {
     private static final String NODE_ID = "node-id";
+    private static final String SOURCE_ID = "dummy-source-id";
 
     @Test
     void shouldOverwriteAlreadySetProperty()
     {
         // given
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID);
 
         NodeProperty<String> name1 = new NodeProperty<>(CREATED_BY_PROPERTY, "admin");
         NodeProperty<String> name2 = new NodeProperty<>(CREATED_BY_PROPERTY, "hruser");
@@ -61,7 +62,7 @@ class UpdateNodeEventTest
     void shouldNotDuplicatePropertiesToUnset()
     {
         // given
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID);
 
         // when
         updateNodeEvent.addUnsetInstruction(CREATED_BY_PROPERTY);

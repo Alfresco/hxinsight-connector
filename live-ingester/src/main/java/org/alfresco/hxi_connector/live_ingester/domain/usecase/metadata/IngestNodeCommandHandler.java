@@ -37,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
@@ -50,12 +51,13 @@ public class IngestNodeCommandHandler
 {
     private final IngestionEngineEventPublisher ingestionEngineEventPublisher;
     private final List<PropertyResolver<?>> propertyResolvers;
+    private final IntegrationProperties integrationProperties;
 
     public void handle(IngestNodeCommand command)
     {
         EventType eventType = command.eventType();
         ensureThat(eventType != DELETE, "Cannot ingest metadata for DELETE event - nodeId %s", command.nodeId());
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(command.nodeId(), eventType);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(command.nodeId(), eventType, integrationProperties.application().sourceId());
 
         command.properties()
                 .stream()

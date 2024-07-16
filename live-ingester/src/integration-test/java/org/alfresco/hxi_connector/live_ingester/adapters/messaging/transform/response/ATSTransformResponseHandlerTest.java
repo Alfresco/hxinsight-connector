@@ -226,7 +226,8 @@ class ATSTransformResponseHandlerTest
                                     mock(),
                                     mock()),
                             mock()),
-                    mock());
+                    mock(),
+                    new IntegrationProperties.Application("dummy-source-id"));
         }
     }
 }

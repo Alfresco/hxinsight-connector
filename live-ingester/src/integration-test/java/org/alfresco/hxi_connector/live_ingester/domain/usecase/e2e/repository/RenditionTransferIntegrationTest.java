@@ -60,6 +60,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "f71dd823-82c7-477c-8490-04cb0e826e67",
+                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
                     "properties": {
                       "cm:content": {

@@ -25,16 +25,19 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.List;
+import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import lombok.Cleanup;
+import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -47,18 +50,11 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
-
-public class DeleteNodeE2eTest
+public class AgentsE2eTest
 {
-    private static final String PARENT_ID = "-my-";
-    private static final String DUMMY_CONTENT = "Dummy's file dummy content";
-
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -68,13 +64,8 @@ public class DeleteNodeE2eTest
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, hxInsightMock);
-    @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, liveIngester);
-
-    RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
+            .dependsOn(postgres, activemq);
 
     @BeforeAll
     public static void beforeAll()
@@ -83,36 +74,30 @@ public class DeleteNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void testReceiveDeleteEvent() throws IOException
+    void shouldReturnAgents()
     {
-        // given
-        @Cleanup
-        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-
+        // given: contained in wiremock file - get-agents.json.
         // when
-        repositoryClient.deleteNode(createdNode.id());
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents")
+                .then().extract().response();
 
         // then
-        RetryUtils.retryWithBackoff(() -> verify(exactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-        verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(matching(".*\"objectId\":\"" + createdNode.id() + "\",\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\",\"eventType\":\"delete\".*")));
+        assertEquals(SC_OK, response.statusCode());
+        Map<String, String> expected0 = Map.of("name", "HR Policy Agent", "description", "This agent is responsible for HR policy predictions", "id", "61254576-62a3-453f-8cd8-19e2f6554f29");
+        Map<String, String> expected1 = Map.of("name", "Knowledge Base Agent", "description", "Very smart about product knowledge", "id", "b999ee14-3974-41b2-bef8-70ab38c9e642");
+        List<Map<String, Map<String, String>>> expected = List.of(Map.of("entry", expected0), Map.of("entry", expected1));
+        assertEquals(expected, response.jsonPath().get("list.entries"));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
-                .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
+                .withJavaOpts(concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq),
+                        getHxInsightRepoJavaOpts(hxInsightMock))
+                );
         // @formatter:on
-    }
-
-    private static GenericContainer<?> createLiveIngesterContainer()
-    {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network);
     }
 }

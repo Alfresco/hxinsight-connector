@@ -49,7 +49,7 @@ import org.apache.activemq.ActiveMQConnectionFactory;
 @SuppressWarnings("PMD.NonThreadSafeSingleton")
 public class ContainerSupport
 {
-    public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/v1/prediction-batches";
+    public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/prediction-batches";
     public static final String REPOSITORY_PREDICTION_ENDPOINT = "/alfresco/api/-default-/private/hxi/versions/1/nodes/%s/predictions";
     private static ContainerSupport instance;
     private final Session session;

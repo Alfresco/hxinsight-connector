@@ -11,7 +11,7 @@ echo "Starting ACS stack with ${DOCKER_COMPOSE_PATH}"
 
 cd "$(dirname "${DOCKER_COMPOSE_PATH}")"
 
-docker-compose -f "$(basename "${DOCKER_COMPOSE_PATH}")" up -d
+docker compose -f "$(basename "${DOCKER_COMPOSE_PATH}")" up -d
 
 if [ $? -eq 0 ]; then
   echo "Docker Compose started ok"
@@ -40,7 +40,7 @@ else
    echo "Waited $COUNTER seconds"
    echo "Alfresco Could not start in time."
    echo "START of Alfresco service logs for investigation"
-   docker-compose logs --tail="all" alfresco
+   docker compose logs --tail="all" alfresco
    echo "END of Alfresco service logs for investigation"
    exit 1
 fi

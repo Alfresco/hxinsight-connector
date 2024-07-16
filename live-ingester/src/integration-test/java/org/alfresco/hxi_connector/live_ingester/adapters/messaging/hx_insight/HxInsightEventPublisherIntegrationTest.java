@@ -100,9 +100,10 @@ class HxInsightEventPublisherIntegrationTest
 {
     private static final String INGEST_PATH = "/ingestion-events";
     private static final String NODE_ID = "node-id";
+    private static final String SOURCE_ID = "dummy-source-id";
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
-    private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE);
+    private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE, SOURCE_ID);
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")

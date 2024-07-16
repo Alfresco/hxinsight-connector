@@ -43,7 +43,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Stora
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
 @Component
-@EnableConfigurationProperties({IntegrationProperties.Alfresco.class, IntegrationProperties.HylandExperience.class})
+@EnableConfigurationProperties({IntegrationProperties.Alfresco.class, IntegrationProperties.HylandExperience.class, IntegrationProperties.Application.class})
 @Validated
 @Data
 @Accessors(fluent = true)
@@ -53,6 +53,7 @@ public class IntegrationProperties
 
     @NotNull private final Alfresco alfresco;
     @NotNull private final HylandExperience hylandExperience;
+    @NotNull private final Application application;
 
     @ConfigurationProperties("alfresco")
     public record Alfresco(
@@ -66,5 +67,10 @@ public class IntegrationProperties
     public record HylandExperience(
             @NotNull @NestedConfigurationProperty Storage storage,
             @NotNull @NestedConfigurationProperty Ingester ingester)
+    {}
+
+    @ConfigurationProperties("application")
+    public record Application(
+            @NotNull String sourceId)
     {}
 }
