@@ -40,6 +40,7 @@ import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -60,7 +61,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryNodesClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
@@ -118,7 +119,7 @@ public class UpdateNodeE2eTest
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock);
 
-    RepositoryNodesClient repositoryNodesClient = new RepositoryNodesClient(repository.getBaseUrl(), "admin", "admin");
+    RepositoryClient repositoryNodesClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
     @BeforeAll
     public static void beforeAll()
@@ -212,10 +213,8 @@ public class UpdateNodeE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
                 .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
-        // @formatter:on
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
@@ -239,7 +238,7 @@ public class UpdateNodeE2eTest
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL",
-                        "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
+                        "http://%s:8080/v1".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
     }
 }
