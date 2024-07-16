@@ -25,10 +25,13 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
-import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.*;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.language.spel.SpelExpression.spel;
+
+import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.BATCHES_PAGE_NO_HEADER;
+import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.BATCH_ID_HEADER;
+import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.PREDICTIONS_PAGE_NO_HEADER;
 
 import java.util.Objects;
 
