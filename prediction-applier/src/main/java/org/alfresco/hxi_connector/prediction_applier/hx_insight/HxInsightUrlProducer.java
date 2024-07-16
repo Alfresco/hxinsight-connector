@@ -32,6 +32,7 @@ import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsPr
 
 @Component
 @RequiredArgsConstructor
+@SuppressWarnings({"PMD.LongVariable"})
 public class HxInsightUrlProducer
 {
     private static final String BATCHES_URL_PATTERN = "%s/prediction-batches?httpMethod=GET&status=APPROVED&page=${headers.%s}";
