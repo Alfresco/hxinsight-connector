@@ -24,18 +24,31 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.service.model;
+package org.alfresco.hxi_connector.hxi_extension.service;
 
-import static lombok.AccessLevel.NONE;
+import static org.alfresco.hxi_connector.hxi_extension.rest.api.util.NodesUtils.validateOrLookupNode;
+import static org.alfresco.service.cmr.security.PermissionService.READ;
 
-import lombok.Data;
-import lombok.Setter;
+import lombok.RequiredArgsConstructor;
 
-@Data
-@Setter(NONE)
-public class Question
+import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
+import org.alfresco.rest.api.Nodes;
+import org.alfresco.service.cmr.security.AccessStatus;
+import org.alfresco.service.cmr.security.PermissionService;
+
+@RequiredArgsConstructor
+public class QuestionPermissionService
 {
-    private final String question;
-    private final String agentId;
-    private final RestrictionQuery restrictionQuery;
+    private final Nodes nodes;
+    private final PermissionService permissionService;
+
+    public boolean hasPermissionToAskAboutDocuments(Question question)
+    {
+        return question.getRestrictionQuery()
+                .nodesIds()
+                .stream()
+                .map(nodeId -> validateOrLookupNode(nodes, nodeId))
+                .map(nodeRef -> permissionService.hasPermission(nodeRef, READ))
+                .allMatch(AccessStatus.ALLOWED::equals);
+    }
 }

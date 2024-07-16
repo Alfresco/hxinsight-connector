@@ -37,6 +37,8 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
 import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
@@ -49,6 +51,7 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
 {
     private final HxInsightClient hxInsightClient;
     private final QuestionsApiConfig questionConfig;
+    private final QuestionPermissionService questionPermissionService;
 
     @Override
     @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
@@ -56,15 +59,18 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
     {
         ensureThat(questions.size() == 1, () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask one question at a time."));
 
-        QuestionModel question = questions.get(0);
-
-        ensureThat(question.getRestrictionQuery().nodesIds().size() <= questionConfig.maxContextSizeForQuestion(),
-                () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask about up to %d nodes at a time.", questionConfig.maxContextSizeForQuestion()));
+        QuestionModel questionModel = questions.get(0);
+        Question question = questionModel.toQuestion();
 
         log.info("Received question: {}", question);
 
-        String questionId = hxInsightClient.askQuestion(question.toQuestion());
+        ensureThat(question.getRestrictionQuery().nodesIds().size() <= questionConfig.maxContextSizeForQuestion(),
+                () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask about up to %d nodes at a time.".formatted(questionConfig.maxContextSizeForQuestion())));
+        ensureThat(questionPermissionService.hasPermissionToAskAboutDocuments(question),
+                () -> new WebScriptException(Status.STATUS_FORBIDDEN, "You don't have permission to ask about some nodes"));
 
-        return List.of(question.withId(questionId));
+        String questionId = hxInsightClient.askQuestion(question);
+
+        return List.of(questionModel.withId(questionId));
     }
 }

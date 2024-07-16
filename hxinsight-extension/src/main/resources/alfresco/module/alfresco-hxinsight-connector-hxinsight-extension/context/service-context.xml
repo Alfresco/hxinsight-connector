@@ -144,8 +144,19 @@
         <constructor-arg name="client" ref="httpClient"/>
     </bean>
 
+    <bean id="questionsApiConfig" class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig">
+        <constructor-arg name="maxContextSizeForQuestion" value="${hxi.question.max-context-size-for-question}"/>
+    </bean>
+
+    <bean id="questionPermissionService" class="org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService">
+        <constructor-arg name="nodes" ref="nodes"/>
+        <constructor-arg name="permissionService" ref="PermissionService"/>
+    </bean>
+
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
+        <constructor-arg name="questionConfig" ref="questionsApiConfig"/>
+        <constructor-arg name="questionPermissionService" ref="questionPermissionService"/>
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AgentsEntityResource">
@@ -153,8 +164,4 @@
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
-
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig">
-        <constructor-arg name="maxContextSizeForQuestion" value="${hxi.question.max-context-size-for-question}"/>
-    </bean>
 </beans>
