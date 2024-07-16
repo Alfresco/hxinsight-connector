@@ -75,15 +75,13 @@ public class DeleteNodeE2eTest
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
 
-    private static GenericContainer<?> liveIngester;
-
     RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
     @BeforeAll
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
-        liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
+        GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
         liveIngester.start();
     }
 

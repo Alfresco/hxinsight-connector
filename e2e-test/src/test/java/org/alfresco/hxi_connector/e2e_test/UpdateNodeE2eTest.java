@@ -111,7 +111,6 @@ public class UpdateNodeE2eTest
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
-    private static GenericContainer<?> liveIngester;
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
@@ -125,7 +124,7 @@ public class UpdateNodeE2eTest
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
-        liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock);
+        GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock);
         liveIngester.start();
     }
 

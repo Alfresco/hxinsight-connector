@@ -86,7 +86,6 @@ public class E2ETestBase
     private static WireMock hxAuthMock;
     private static WireMock hxInsightMock;
     private static WireMock sfsMock;
-    private static WireMock acsMock;
     protected ContainerSupport containerSupport;
 
     @Autowired
@@ -138,12 +137,12 @@ public class E2ETestBase
         hxAuthMock = new WireMock(hxAuthServer.getHost(), hxAuthServer.getPort());
         hxInsightMock = new WireMock(hxInsightServer.getHost(), hxInsightServer.getPort());
         sfsMock = new WireMock(sfsServer.getHost(), sfsServer.getPort());
-        acsMock = new WireMock(acsServer.getHost(), acsServer.getPort());
         WireMock.configureFor(hxAuthMock);
         WireMock.givenThat(post(AuthUtils.TOKEN_PATH)
                 .willReturn(aResponse()
                         .withStatus(OK)
                         .withBody(AuthUtils.createAuthResponseBody())));
+        WireMock acsMock = new WireMock(acsServer.getHost(), acsServer.getPort());
         WireMock.configureFor(acsMock);
         WireMock.givenThat(get("/alfresco/api/discovery")
                 .willReturn(aResponse()
