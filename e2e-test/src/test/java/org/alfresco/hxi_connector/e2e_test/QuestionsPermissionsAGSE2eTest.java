@@ -122,7 +122,7 @@ public class QuestionsPermissionsAGSE2eTest
     }
 
     @Test
-    void adminShouldBeAbleToAskQuestionAboutPrivateDocument()
+    void adminShouldBeAbleToAskQuestionAboutDocumentWithSecurityMark()
     {
         // given
 
@@ -152,7 +152,7 @@ public class QuestionsPermissionsAGSE2eTest
     }
 
     @Test
-    void regularUserShouldNotBeAbleToAskQuestionAboutPrivateDocument()
+    void regularUserShouldNotBeAbleToAskQuestionAboutDocumentWithSecurityMark()
     {
         // when
         Response response = given().auth().preemptive().basic(regularUser.username(), regularUser.password())
