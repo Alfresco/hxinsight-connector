@@ -44,7 +44,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import java.io.ByteArrayInputStream;
 
 import static io.restassured.RestAssured.given;
-import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.GOVERNANCE;
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENT_GOVERNANCE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
@@ -167,7 +167,7 @@ public class QuestionsPermissionsAGSE2eTest
     {
         String javaOpts = concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq), getHxInsightRepoJavaOpts(hxInsightMock));
 
-        return DockerContainers.createExtendedRepositoryContainerWithin(network, GOVERNANCE)
+        return DockerContainers.createExtendedRepositoryContainerWithin(network, ENT_GOVERNANCE)
                 .withJavaOpts(javaOpts);
     }
 }

@@ -35,7 +35,7 @@ public enum RepositoryType
 {
     ENTERPRISE("quay.io/alfresco/alfresco-content-repository"),
     COMMUNITY("alfresco/alfresco-content-repository-community"),
-    GOVERNANCE("quay.io/alfresco/alfresco-governance-repository-enterprise");
+    ENT_GOVERNANCE("quay.io/alfresco/alfresco-governance-repository-enterprise");
 
     private final String imageName;
 }
