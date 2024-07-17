@@ -25,17 +25,16 @@
  */
 package org.alfresco.hxi_connector.e2e_test.util.client;
 
+import static io.restassured.RestAssured.given;
+
+import java.io.File;
+import java.io.InputStream;
+
 import lombok.AllArgsConstructor;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.NodeEntry;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Visibility;
-
-
-import java.io.File;
-import java.io.InputStream;
-
-import static io.restassured.RestAssured.given;
 
 @AllArgsConstructor
 public class RepositoryClient
