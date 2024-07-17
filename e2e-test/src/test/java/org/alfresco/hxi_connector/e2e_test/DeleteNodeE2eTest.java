@@ -118,7 +118,6 @@ public class DeleteNodeE2eTest
     @SneakyThrows
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network)
-                .withEnv("ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(repository.getNetworkAliases().stream().findFirst().get()));
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, network);
     }
 }
