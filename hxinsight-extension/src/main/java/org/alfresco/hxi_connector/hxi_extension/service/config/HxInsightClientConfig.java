@@ -43,6 +43,6 @@ public final class HxInsightClientConfig
         this.agentUrl = baseUrl + "/v1/agents";
         this.questionUrl = baseUrl + "/v1/questions";
         this.answerUrl = questionUrl + "/%s/answer";
-        this.avatarUrl = baseUrl + "/%s/avatars";
+        this.avatarUrl = agentUrl + "/%s/avatars";
     }
 }
