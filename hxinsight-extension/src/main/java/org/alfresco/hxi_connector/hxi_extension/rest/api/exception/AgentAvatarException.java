@@ -30,8 +30,8 @@ import org.alfresco.error.AlfrescoRuntimeException;
 
 public class AgentAvatarException extends AlfrescoRuntimeException
 {
-    public AgentAvatarException(String message)
+    public AgentAvatarException(String message, Throwable cause)
     {
-        super(message);
+        super(message, cause);
     }
 }

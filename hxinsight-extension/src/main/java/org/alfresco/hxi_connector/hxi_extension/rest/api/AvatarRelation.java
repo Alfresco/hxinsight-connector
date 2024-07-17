@@ -83,12 +83,12 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
         catch (IOException | InterruptedException e)
         {
             log.error("Error getting avatar image.", e);
-            throw new AgentAvatarException("Avatar image cannot be received.");
+            throw new AgentAvatarException("Avatar image cannot be received.", e);
         }
         catch (Exception e)
         {
             log.error("Failed to create temp file.", e);
-            throw new AgentAvatarException("Failed to create the avatar temp file.");
+            throw new AgentAvatarException("Failed to create the avatar temp file.", e);
         }
     }
 
