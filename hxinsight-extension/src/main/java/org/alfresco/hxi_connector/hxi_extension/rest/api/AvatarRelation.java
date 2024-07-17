@@ -36,6 +36,7 @@ import java.net.http.HttpResponse;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.alfresco.hxi_connector.hxi_extension.rest.api.exception.AgentAvatarException;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.core.exceptions.NotFoundException;
 import org.alfresco.rest.framework.core.exceptions.RelationshipResourceNotFoundException;
@@ -87,7 +88,7 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
         catch (Exception e)
         {
             log.error("Failed to create temp file.", e);
-            throw new RuntimeException("Failed to create avatar temp file.", e);
+            throw new AgentAvatarException("Failed to create avatar temp file.");
         }
     }
 
