@@ -34,7 +34,6 @@ import lombok.Getter;
 public final class HxInsightClientConfig
 {
     private final String agentUrl;
-    private final String avatarUrl;
     private final String questionUrl;
     private final String answerUrl;
 
@@ -43,6 +42,5 @@ public final class HxInsightClientConfig
         this.agentUrl = baseUrl + "/v1/agents";
         this.questionUrl = baseUrl + "/v1/questions";
         this.answerUrl = questionUrl + "/%s/answer";
-        this.avatarUrl = agentUrl + "/%s/avatars";
     }
 }

@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -58,6 +59,7 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
     {
         if (!avatarId.equals("-default-"))
         {
+            log.info("Avatar id is different than -default-");
             throw new NotFoundException(String.format("Avatar with id=%s not found", avatarId));
         }
 
@@ -77,9 +79,15 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
             File file = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", ".png");
             return new FileBinaryResource(file, null);
         }
+        catch (IOException | InterruptedException e)
+        {
+            log.error("Error getting avatar image.", e);
+            throw new NotFoundException("Avatar image not found.");
+        }
         catch (Exception e)
         {
-            throw new RuntimeException(e);
+            log.error("Failed to create temp file.", e);
+            throw new RuntimeException("Failed to create avatar temp file.", e);
         }
     }
 
