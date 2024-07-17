@@ -80,15 +80,20 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
             File file = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", ".png");
             return new FileBinaryResource(file, null);
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
             log.error("Error getting avatar image.", e);
-            throw new NotFoundException("Avatar image not found.");
+            throw new AgentAvatarException("Avatar image cannot be received.");
+        }
+        catch (InterruptedException e)
+        {
+            log.error("Error getting avatar image.", e);
+            throw new AgentAvatarException("Avatar image could not be received due to an interruption in the operation.");
         }
         catch (Exception e)
         {
             log.error("Failed to create temp file.", e);
-            throw new AgentAvatarException("Failed to create avatar temp file.");
+            throw new AgentAvatarException("Failed to create the avatar temp file.");
         }
     }
 
