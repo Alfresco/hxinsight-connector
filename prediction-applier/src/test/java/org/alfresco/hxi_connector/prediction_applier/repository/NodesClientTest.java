@@ -118,7 +118,7 @@ class NodesClientTest
         mockEndpoint.expectedMessageCount(1);
 
         // when
-        PredictionModel predictionModel = new PredictionModel("property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", AUTOFILL);
+        PredictionModel predictionModel = createPredictionModel();
         PredictionModelResponse actualResponse = producerTemplate.to(NODES_DIRECT_ENDPOINT)
                 .withBody(predictionModel)
                 .request(PredictionModelResponse.class);
@@ -163,6 +163,11 @@ class NodesClientTest
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("received:", 500);
         then(mockAuthService).shouldHaveNoInteractions();
+    }
+
+    private PredictionModel createPredictionModel()
+    {
+        return new PredictionModel(null, "node-id", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", null, AUTOFILL, null);
     }
 
     private RepositoryApiProperties createNodesApiProperties()

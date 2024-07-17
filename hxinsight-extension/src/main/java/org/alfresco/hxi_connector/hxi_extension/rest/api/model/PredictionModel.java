@@ -37,13 +37,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
+import org.alfresco.hxi_connector.hxi_extension.service.util.mapping.Default;
 
-@Accessors(prefix = {"_", ""})
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @JsonInclude(NON_NULL)
+@Getter
+@Accessors(prefix = {"_", ""})
+@NoArgsConstructor
+@AllArgsConstructor(onConstructor_ = @Default)
 @EqualsAndHashCode
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
@@ -57,33 +57,4 @@ public class PredictionModel
     private Serializable _previousValue;
     private UpdateType updateType;
     private ReviewStatus reviewStatus;
-
-    public PredictionModel(String property, Date predictionDateTime, float confidenceLevel, String modelId, Serializable predictionValue, UpdateType updateType)
-    {
-        this.property = property;
-        this.predictionDateTime = predictionDateTime;
-        this.confidenceLevel = confidenceLevel;
-        this.modelId = modelId;
-        this.predictionValue = predictionValue;
-        this.updateType = updateType;
-    }
-
-    public Prediction toServiceModel()
-    {
-        return new Prediction(_id, property, predictionDateTime, confidenceLevel, modelId, predictionValue, _previousValue, updateType, reviewStatus);
-    }
-
-    public static PredictionModel fromServiceModel(Prediction prediction)
-    {
-        return new PredictionModel(
-                prediction.getId(),
-                prediction.getProperty(),
-                prediction.getPredictionDateTime(),
-                prediction.getConfidenceLevel(),
-                prediction.getModelId(),
-                prediction.getPredictionValue(),
-                prediction.getPreviousValue(),
-                prediction.getUpdateType(),
-                prediction.getReviewStatus());
-    }
 }
