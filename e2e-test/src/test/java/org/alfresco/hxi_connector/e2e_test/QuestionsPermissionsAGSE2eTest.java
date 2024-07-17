@@ -106,7 +106,7 @@ public class QuestionsPermissionsAGSE2eTest
 
         String securityGroupId = repositoryClient.createSecurityGroup("test-security-group");
         String securityMarkId = repositoryClient.createSecurityMark(securityGroupId, "super confidential");
-        repositoryClient.classifyNode(superConfidentialDocumentId, securityGroupId, securityMarkId);
+        repositoryClient.secureNode(superConfidentialDocumentId, securityGroupId, securityMarkId);
     }
 
     @Test

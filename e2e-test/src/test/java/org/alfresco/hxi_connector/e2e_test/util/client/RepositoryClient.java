@@ -31,6 +31,7 @@ import java.io.File;
 import java.io.InputStream;
 
 import lombok.AllArgsConstructor;
+
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.NodeEntry;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
@@ -173,11 +174,11 @@ public class RepositoryClient
                 .when().delete(uri);
     }
 
-    public String classifyNode(String nodeId, String securityGroupId, String securityMarkId)
+    public void secureNode(String nodeId, String securityGroupId, String securityMarkId)
     {
         String uri = (GS_API_PATH + "/secured-nodes/%s/securing-marks").formatted(baseUrl, nodeId);
 
-        return given().auth().preemptive().basic(user.username(), user.password())
+        given().auth().preemptive().basic(user.username(), user.password())
                 .contentType("application/json")
                 .body("""
                         [
@@ -188,7 +189,6 @@ public class RepositoryClient
                           }
                         ]
                         """.formatted(securityMarkId, securityGroupId))
-                .when().post(uri)
-                .body().jsonPath().get("entry.id");
+                .when().post(uri);
     }
 }
