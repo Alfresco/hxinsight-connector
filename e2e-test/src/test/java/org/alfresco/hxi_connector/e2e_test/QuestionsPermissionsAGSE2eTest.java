@@ -25,22 +25,12 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import static io.restassured.RestAssured.given;
-import static org.apache.http.HttpStatus.SC_FORBIDDEN;
-import static org.apache.http.HttpStatus.SC_OK;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
-import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
-import static org.alfresco.hxi_connector.e2e_test.util.client.model.Visibility.PRIVATE;
-import static org.alfresco.hxi_connector.e2e_test.util.client.model.Visibility.PUBLIC;
-
-import java.io.ByteArrayInputStream;
-
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -51,10 +41,17 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
-import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
+import java.io.ByteArrayInputStream;
+
+import static io.restassured.RestAssured.given;
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.GOVERNANCE;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+import static org.apache.http.HttpStatus.SC_FORBIDDEN;
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -83,7 +80,7 @@ public class QuestionsPermissionsAGSE2eTest
             .dependsOn(postgres, activemq);
     private static final User regularUser = new User("test", "test");
     private static String publicDocumentId;
-    private static String privateDocumentId;
+    private static String superConfidentialDocumentId;
 
     @BeforeAll
     public static void beforeAll()
@@ -93,21 +90,21 @@ public class QuestionsPermissionsAGSE2eTest
 
         repositoryClient.createUser(regularUser);
 
-        String publicSiteId = repositoryClient.createSite("Test Public Project", PUBLIC);
-        String publicSiteRootDirectory = repositoryClient.getSiteDocumentLibraryId(publicSiteId);
         publicDocumentId = repositoryClient.createNodeWithContent(
-                publicSiteRootDirectory,
+                "-root-",
                 "test public file",
                 new ByteArrayInputStream("test file content".getBytes()),
                 "text/plain").id();
 
-        String privateSiteId = repositoryClient.createSite("Test Private Project", PRIVATE);
-        String privateSiteRootDirectory = repositoryClient.getSiteDocumentLibraryId(privateSiteId);
-        privateDocumentId = repositoryClient.createNodeWithContent(
-                privateSiteRootDirectory,
+        superConfidentialDocumentId = repositoryClient.createNodeWithContent(
+                "-root-",
                 "test private file",
                 new ByteArrayInputStream("test file content".getBytes()),
                 "text/plain").id();
+
+        String securityGroupId = repositoryClient.createSecurityGroup("test-security-group");
+        String securityMarkId = repositoryClient.createSecurityMark(securityGroupId, "super confidential");
+        repositoryClient.classifyNode(superConfidentialDocumentId, securityGroupId, securityMarkId);
     }
 
     @Test
@@ -132,7 +129,7 @@ public class QuestionsPermissionsAGSE2eTest
         // when
         Response response = given().auth().preemptive().basic(ADMIN_USER.username(), ADMIN_USER.password())
                 .contentType("application/json")
-                .body(SAMPLE_QUESTION.formatted(privateDocumentId))
+                .body(SAMPLE_QUESTION.formatted(superConfidentialDocumentId))
                 .when().post(repository.getBaseUrl() + QUESTIONS_URL)
                 .then().extract().response();
 
@@ -160,7 +157,7 @@ public class QuestionsPermissionsAGSE2eTest
         // when
         Response response = given().auth().preemptive().basic(regularUser.username(), regularUser.password())
                 .contentType("application/json")
-                .body(SAMPLE_QUESTION.formatted(privateDocumentId))
+                .body(SAMPLE_QUESTION.formatted(superConfidentialDocumentId))
                 .when().post(repository.getBaseUrl() + QUESTIONS_URL)
                 .then().extract().response();
 
@@ -172,7 +169,7 @@ public class QuestionsPermissionsAGSE2eTest
     {
         String javaOpts = concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq), getHxInsightRepoJavaOpts(hxInsightMock));
 
-        return DockerContainers.createExtendedRepositoryContainerWithin(network)
+        return DockerContainers.createExtendedRepositoryContainerWithin(network, GOVERNANCE)
                 .withJavaOpts(javaOpts);
     }
 }
