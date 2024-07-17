@@ -152,6 +152,8 @@
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
     </bean>
 
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AvatarRelation"/>
+
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig">
