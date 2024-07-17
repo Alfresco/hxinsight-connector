@@ -25,12 +25,21 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_FORBIDDEN;
+import static org.apache.http.HttpStatus.SC_OK;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENT_GOVERNANCE;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+
+import java.io.ByteArrayInputStream;
+
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
-import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
-import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -41,17 +50,10 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import java.io.ByteArrayInputStream;
-
-import static io.restassured.RestAssured.given;
-import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENT_GOVERNANCE;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
-import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
-import static org.apache.http.HttpStatus.SC_FORBIDDEN;
-import static org.apache.http.HttpStatus.SC_OK;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")

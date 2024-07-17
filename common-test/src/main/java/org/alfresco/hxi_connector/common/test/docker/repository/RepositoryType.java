@@ -33,9 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public enum RepositoryType
 {
-    ENTERPRISE("quay.io/alfresco/alfresco-content-repository"),
-    COMMUNITY("alfresco/alfresco-content-repository-community"),
-    ENT_GOVERNANCE("quay.io/alfresco/alfresco-governance-repository-enterprise");
+    ENTERPRISE("quay.io/alfresco/alfresco-content-repository"), COMMUNITY("alfresco/alfresco-content-repository-community"), ENT_GOVERNANCE("quay.io/alfresco/alfresco-governance-repository-enterprise");
 
     private final String imageName;
 }
