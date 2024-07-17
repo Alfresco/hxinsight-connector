@@ -106,6 +106,7 @@ public class RepositoryClient
         return given().auth().preemptive().basic(user.username(), user.password())
                 .contentType("multipart/form-data")
                 .multiPart("filedata", filename, fileContent, mimeType)
+                .multiPart("autoRename", "true")
                 .when().post(uri)
                 .then().extract().response()
                 .as(NodeEntry.class).node();
@@ -117,6 +118,7 @@ public class RepositoryClient
         return given().auth().preemptive().basic(user.username(), user.password())
                 .contentType("multipart/form-data")
                 .multiPart("filedata", content)
+                .multiPart("autoRename", "true")
                 .when().post(uri)
                 .then().extract().response()
                 .as(NodeEntry.class).node();
