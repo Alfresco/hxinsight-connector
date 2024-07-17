@@ -124,8 +124,6 @@ public class QuestionsPermissionsAGSE2eTest
     @Test
     void adminShouldBeAbleToAskQuestionAboutDocumentWithSecurityMark()
     {
-        // given
-
         // when
         Response response = given().auth().preemptive().basic(ADMIN_USER.username(), ADMIN_USER.password())
                 .contentType("application/json")
