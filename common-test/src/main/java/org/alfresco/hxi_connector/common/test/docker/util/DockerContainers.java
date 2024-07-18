@@ -159,7 +159,7 @@ public class DockerContainers
     {
         String hXIMockAlias = hxInsightMockContainer.getNetworkAliases().stream().findFirst().get();
         return """
-                -Dhxi.client.base-url=http://%s:8080/v1
+                -Dhxi.client.base-url=http://%s:8080
                 -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
                 -Dhxi.question.max-context-size-for-question=10
                 """.formatted(
@@ -267,7 +267,7 @@ public class DockerContainers
     {
         return createLiveIngesterContainerWithin(network)
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
-                        "http://%s:8080/v1".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
+                        "http://%s:8080".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key");

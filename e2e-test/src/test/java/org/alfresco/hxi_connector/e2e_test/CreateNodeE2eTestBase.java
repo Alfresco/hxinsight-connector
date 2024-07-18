@@ -95,8 +95,8 @@ abstract class CreateNodeE2eTestBase
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size() + 1);
 
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/v1/ingestion-events"))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
+            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id())));
         }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
@@ -122,8 +122,8 @@ abstract class CreateNodeE2eTestBase
             String actualPdfContent = getPdfContent(s3Object.key());
             assertThat(actualPdfContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
 
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/v1/ingestion-events"))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
+            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id())));
         }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }

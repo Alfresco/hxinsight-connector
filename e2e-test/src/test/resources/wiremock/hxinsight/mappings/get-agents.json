@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/v1/agents"
+    "urlPath": "/agents"
   },
   "response": {
     "status": 200,

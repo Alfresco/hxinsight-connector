@@ -136,7 +136,7 @@ public class UpdateNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/v1/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
         WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
@@ -155,7 +155,7 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
         });
-        verify(exactly(0), anyRequestedFor(urlEqualTo("/v1/ingestion-events")));
+        verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     @Test
@@ -166,7 +166,7 @@ public class UpdateNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/v1/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
         WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
@@ -181,7 +181,7 @@ public class UpdateNodeE2eTest
 
         // when
         Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/v1/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))));
         WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(updatedNode.id(), PREDICTED_VALUE_2);
@@ -197,12 +197,12 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
         });
-        verify(exactly(0), anyRequestedFor(urlEqualTo("/v1/ingestion-events")));
+        verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     private void prepareHxInsightMockToReturnPredictionFor(String nodeId, String predictedValue)
     {
-        givenThat(get(urlPathTemplate("/v1/prediction-batches/{batchId}"))
+        givenThat(get(urlPathTemplate("/prediction-batches/{batchId}"))
                 .inScenario(LIST_PREDICTIONS_SCENARIO)
                 .whenScenarioStateIs(PREDICTIONS_AVAILABLE_STATE)
                 .willReturn(aResponse()
@@ -237,7 +237,7 @@ public class UpdateNodeE2eTest
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL",
-                        "http://%s:8080/v1".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
+                        "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
     }
 }
