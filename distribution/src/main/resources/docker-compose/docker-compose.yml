@@ -46,7 +46,7 @@ services:
         -Dtransform.misc.url=http://transform-core-aio:8090/
         -Dcsrf.filter.enabled=false
         -Dalfresco.restApi.basicAuthScheme=true
-        -Dhxi.client.baseUrl=http://hxinsight-mock:8080
+        -Dhxi.client.base-url=http://hxinsight-mock:8080/v1
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         -Xms1500m -Xmx1500m
         "
@@ -274,7 +274,7 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080
+      HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080/v1
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST: http://shared-file-store
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT: 8099
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
@@ -325,7 +325,7 @@ services:
       AUTH_PROVIDERS_ALFRESCO_CLIENT-ID: dummy-client-id
       AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
       AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
-      HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL: http://hxinsight-mock:8080
+      HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL: http://hxinsight-mock:8080/v1
       ALFRESCO_REPOSITORY_BASE-URL: http://alfresco:8080
     ports:
       - "5009:5009"

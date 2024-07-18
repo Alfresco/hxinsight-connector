@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/presigned-urls"
+    "urlPath": "/v1/presigned-urls"
   },
   "response": {
     "status": 200,
