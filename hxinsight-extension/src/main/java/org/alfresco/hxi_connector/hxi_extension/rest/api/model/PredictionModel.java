@@ -32,19 +32,15 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import org.alfresco.hxi_connector.hxi_extension.service.util.mapping.Default;
-
 @JsonInclude(NON_NULL)
-@Getter
+@Data
 @Accessors(prefix = {"_", ""})
 @NoArgsConstructor
-@AllArgsConstructor(onConstructor_ = @Default)
-@EqualsAndHashCode
+@AllArgsConstructor
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
 {
@@ -57,4 +53,14 @@ public class PredictionModel
     private Serializable _previousValue;
     private UpdateType updateType;
     private ReviewStatus reviewStatus;
+
+    public PredictionModel(String property, Date predictionDateTime, float confidenceLevel, String modelId, Serializable predictionValue, UpdateType updateType)
+    {
+        this.property = property;
+        this.predictionDateTime = predictionDateTime;
+        this.confidenceLevel = confidenceLevel;
+        this.modelId = modelId;
+        this.predictionValue = predictionValue;
+        this.updateType = updateType;
+    }
 }
