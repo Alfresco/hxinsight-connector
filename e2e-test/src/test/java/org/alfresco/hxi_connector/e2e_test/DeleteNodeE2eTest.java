@@ -91,7 +91,7 @@ public class DeleteNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/v1/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
 
         // when
@@ -100,7 +100,7 @@ public class DeleteNodeE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> verify(exactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
-        verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        verify(exactly(1), postRequestedFor(urlEqualTo("/v1/ingestion-events"))
                 .withRequestBody(matching(".*\"objectId\":\"" + createdNode.id() + "\",\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\",\"eventType\":\"delete\".*")));
     }
 
