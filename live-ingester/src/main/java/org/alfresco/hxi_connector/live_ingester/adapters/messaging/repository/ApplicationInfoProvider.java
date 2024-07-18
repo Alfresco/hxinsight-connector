@@ -31,7 +31,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.repository.api.DiscoveryApi;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApi;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -39,6 +39,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.repository.api.Disc
 public class ApplicationInfoProvider
 {
 
+    public static final String APP_INFO_PATTERN = "ACS HXI Connector/%s ACS/%s (%s)";
     private final DiscoveryApi discoveryApi;
     private final IntegrationProperties integrationProperties;
 
@@ -58,6 +59,6 @@ public class ApplicationInfoProvider
         String applicationVersion = integrationProperties.application().version();
         String repositoryVersion = discoveryApi.getRepositoryVersion();
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
-        return "ACS HXI Connector/" + applicationVersion + " ACS/" + repositoryVersion + " (" + osVersion + ")";
+        return APP_INFO_PATTERN.formatted(applicationVersion, repositoryVersion, osVersion);
     }
 }

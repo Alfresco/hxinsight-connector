@@ -78,6 +78,8 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
     @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq, transformCore, transformRouter, sfs);
+    @Container
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
 
     @BeforeAll
     @SneakyThrows
@@ -87,8 +89,6 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
-        GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, awsMock);
-        liveIngester.start();
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()

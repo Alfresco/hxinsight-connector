@@ -36,7 +36,6 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.repository.api.DiscoveryApi;
 
 @Component
 @RequiredArgsConstructor

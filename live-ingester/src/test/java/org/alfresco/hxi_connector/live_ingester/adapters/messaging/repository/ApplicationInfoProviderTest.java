@@ -36,13 +36,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.org.webcompere.systemstubs.jupiter.SystemStub;
+import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
+import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.repository.api.DiscoveryApi;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApi;
 
-@ExtendWith(MockitoExtension.class)
+@ExtendWith({MockitoExtension.class, SystemStubsExtension.class})
 class ApplicationInfoProviderTest
 {
+    @SystemStub
+    private SystemProperties systemProperties;
 
     @Mock
     private DiscoveryApi discoveryApiMock;
@@ -58,9 +63,9 @@ class ApplicationInfoProviderTest
         given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
         given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
         given(discoveryApiMock.getRepositoryVersion()).willReturn("23.2.0");
-        System.setProperty("os.name", "Windows");
-        System.setProperty("os.version", "10");
-        System.setProperty("os.arch", "amd64");
+        systemProperties.set("os.name", "Windows");
+        systemProperties.set("os.version", "10");
+        systemProperties.set("os.arch", "amd64");
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
 
