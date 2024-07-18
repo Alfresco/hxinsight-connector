@@ -52,8 +52,8 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.READ_ALLOWED;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.READ_DENIED;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
 @Slf4j
@@ -86,8 +86,8 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
-        allProperties.put(READ_ALLOWED, getResourceReaderAuthorities(alfrescoNode));
-        allProperties.put(READ_DENIED, getResourceDeniedAuthorities(alfrescoNode));
+        allProperties.put(ALLOW_ACCESS, getResourceReaderAuthorities(alfrescoNode));
+        allProperties.put(DENY_ACCESS, getResourceDeniedAuthorities(alfrescoNode));
 
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
 

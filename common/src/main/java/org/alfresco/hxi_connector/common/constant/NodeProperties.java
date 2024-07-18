@@ -34,6 +34,6 @@ public class NodeProperties
     public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
     public static final String CREATED_AT_PROPERTY = "createdAt";
     public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
-    public static final String READ_ALLOWED = "READ_ALLOWED";
-    public static final String READ_DENIED = "READ_DENIED";
+    public static final String ALLOW_ACCESS = "ALLOW_ACCESS";
+    public static final String DENY_ACCESS = "DENY_ACCESS";
 }
