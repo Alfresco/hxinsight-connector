@@ -26,16 +26,16 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
@@ -44,11 +44,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
-import org.alfresco.hxi_connector.common.constant.NodeProperties;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
@@ -91,9 +90,7 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setAccessControlList(
                 Set.of(
                         createAccessControlEntry(true, GROUP_EVERYONE),
-                        createAccessControlEntry(false, BOB)
-                )
-        );
+                        createAccessControlEntry(false, BOB)));
 
         // when
         IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
@@ -213,7 +210,8 @@ class AlfrescoNodeMapperTest
         return alfrescoNode;
     }
 
-    private AccessControlEntry createAccessControlEntry(boolean allowed, String authority) {
+    private AccessControlEntry createAccessControlEntry(boolean allowed, String authority)
+    {
         AccessControlEntryKey accessControlEntryKey = new AccessControlEntryKey();
         accessControlEntryKey.setNodeId(123L);
         accessControlEntryKey.setAuthority(authority);

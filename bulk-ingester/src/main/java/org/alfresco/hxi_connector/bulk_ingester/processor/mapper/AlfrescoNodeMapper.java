@@ -26,13 +26,17 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
-import org.springframework.stereotype.Component;
+import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
+
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
 import java.io.Serializable;
 import java.time.Instant;
@@ -45,16 +49,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static java.util.Optional.ofNullable;
-import static java.util.function.Predicate.not;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
 @Component
