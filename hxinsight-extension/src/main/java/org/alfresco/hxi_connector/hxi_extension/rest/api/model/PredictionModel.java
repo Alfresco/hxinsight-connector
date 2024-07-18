@@ -38,9 +38,9 @@ import lombok.experimental.Accessors;
 
 @JsonInclude(NON_NULL)
 @Data
-@Accessors(prefix = {"_", ""})
 @NoArgsConstructor
 @AllArgsConstructor
+@Accessors(prefix = {"_", ""})
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
 {
