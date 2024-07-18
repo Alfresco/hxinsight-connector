@@ -26,16 +26,18 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
+import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
+import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -43,12 +45,16 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
+import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.READ_ALLOWED;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.READ_DENIED;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
 @Slf4j
 @Component
@@ -79,6 +85,9 @@ public class AlfrescoNodeMapper
             allProperties.put(ASPECT_NAMES_PROPERTY, aspectNames);
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
+
+        allProperties.put(READ_ALLOWED, getResourceReaderAuthorities(alfrescoNode));
+        allProperties.put(READ_DENIED, getResourceDeniedAuthorities(alfrescoNode));
 
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
@@ -117,5 +126,27 @@ public class AlfrescoNodeMapper
                 .filter(property -> Objects.nonNull(property.getValue()))
                 .filter(property -> !PREDEFINED_PROPERTIES.contains(property.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Serializable getResourceReaderAuthorities(AlfrescoNode node)
+    {
+        return (Serializable) ofNullable(node.getAccessControlList())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(AccessControlEntry::getAllowed)
+                .map(AccessControlEntry::getAccessControlEntryKey)
+                .map(AccessControlEntryKey::getAuthority)
+                .collect(Collectors.toSet());
+    }
+
+    private Serializable getResourceDeniedAuthorities(AlfrescoNode node)
+    {
+        return (Serializable) ofNullable(node.getAccessControlList())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(not(AccessControlEntry::getAllowed))
+                .map(AccessControlEntry::getAccessControlEntryKey)
+                .map(AccessControlEntryKey::getAuthority)
+                .collect(Collectors.toSet());
     }
 }
