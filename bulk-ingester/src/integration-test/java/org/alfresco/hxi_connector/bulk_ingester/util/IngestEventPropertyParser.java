@@ -70,7 +70,8 @@ public final class IngestEventPropertyParser
         {
             value = value.replace("[", "").replace("]", "");
 
-            if (value.isBlank()) {
+            if (value.isBlank())
+            {
                 return (Serializable) Set.of();
             }
 
