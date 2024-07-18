@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -85,10 +84,6 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
             HttpResponse<InputStream> httpResponse = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
             File file = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", ".png");
             return new FileBinaryResource(file, null);
-        }
-        catch (IOException | InterruptedException e)
-        {
-            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to ask question", e);
         }
         catch (Exception e)
         {
