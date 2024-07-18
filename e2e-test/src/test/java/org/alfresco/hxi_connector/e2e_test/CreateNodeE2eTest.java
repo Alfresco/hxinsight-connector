@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getRepoJavaOptsWithTransforms;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
@@ -86,16 +87,16 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
     @SneakyThrows
     public void beforeAll()
     {
-        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
-        awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
-        WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
+        awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
+        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
+        WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         // @formatter:off
-        return DockerContainers.createExtendedRepositoryContainerWithin(network, true)
+        return DockerContainers.createExtendedRepositoryContainerWithin(network, ENTERPRISE)
                 .withJavaOpts(getRepoJavaOptsWithTransforms(postgres, activemq));
         // @formatter:on
     }

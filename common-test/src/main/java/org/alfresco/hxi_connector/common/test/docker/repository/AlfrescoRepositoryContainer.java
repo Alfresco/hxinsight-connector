@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.common.test.docker.repository;
 
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.COMMUNITY;
+
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.PullImageResultCallback;
 import com.github.dockerjava.api.model.PullResponseItem;
@@ -38,18 +40,16 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 @SuppressWarnings("PMD.LongVariable")
 public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoRepositoryContainer>
 {
-    static final String REPOSITORY_IMAGE_DEFAULT = "alfresco/alfresco-content-repository-community";
-    static final String REPOSITORY_ENTERPRISE_IMAGE_DEFAULT = "quay.io/alfresco/alfresco-content-repository";
     static final String REPOSITORY_TAG = DockerTags.getRepositoryTag();
     private static final int REPO_PORT_DEFAULT = 8080;
     private static final int REPO_DEBUG_PORT_DEFAULT = 8000;
 
     public AlfrescoRepositoryContainer()
     {
-        this(false);
+        this(COMMUNITY);
     }
 
-    public static void pullRepositoryImage(boolean enterprise)
+    public static void pullRepositoryImage(RepositoryType repositoryType)
     {
         DockerClient dockerClient = DockerClientFactory.instance().client();
         PullImageResultCallback callback = new PullImageResultCallback() {
@@ -59,13 +59,13 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
                 super.onNext(item);
             }
         };
-        dockerClient.pullImageCmd(String.valueOf(DockerImageName.parse(!enterprise ? REPOSITORY_IMAGE_DEFAULT : REPOSITORY_ENTERPRISE_IMAGE_DEFAULT).withTag(REPOSITORY_TAG)))
+        dockerClient.pullImageCmd(String.valueOf(DockerImageName.parse(repositoryType.getImageName()).withTag(REPOSITORY_TAG)))
                 .exec(callback);
     }
 
-    public AlfrescoRepositoryContainer(boolean enterprise)
+    public AlfrescoRepositoryContainer(RepositoryType repositoryType)
     {
-        this(DockerImageName.parse(!enterprise ? REPOSITORY_IMAGE_DEFAULT : REPOSITORY_ENTERPRISE_IMAGE_DEFAULT).withTag(REPOSITORY_TAG));
+        this(DockerImageName.parse(repositoryType.getImageName()).withTag(REPOSITORY_TAG));
     }
 
     public AlfrescoRepositoryContainer(@NonNull DockerImageName dockerImageName)

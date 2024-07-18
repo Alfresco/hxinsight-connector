@@ -4,7 +4,7 @@
   "newScenarioState": "Empty",
   "request": {
     "method": "GET",
-    "urlPath": "/v1/prediction-batches"
+    "urlPath": "/prediction-batches"
   },
   "response": {
     "status": 200,

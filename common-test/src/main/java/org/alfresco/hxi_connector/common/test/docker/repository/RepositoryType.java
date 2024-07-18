@@ -24,23 +24,16 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
-
-import jakarta.validation.constraints.NotBlank;
+package org.alfresco.hxi_connector.common.test.docker.repository;
 
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 @Getter
-public final class HxInsightClientConfig
+@RequiredArgsConstructor
+public enum RepositoryType
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
+    ENTERPRISE("quay.io/alfresco/alfresco-content-repository"), COMMUNITY("alfresco/alfresco-content-repository-community"), ENT_GOVERNANCE("quay.io/alfresco/alfresco-governance-repository-enterprise");
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
-    {
-        this.agentUrl = baseUrl + "/agents";
-        this.questionUrl = baseUrl + "/questions";
-        this.answerUrl = questionUrl + "/%s/answer";
-    }
+    private final String imageName;
 }

@@ -25,9 +25,8 @@
  */
 package org.alfresco.hxi_connector.common.test.docker.repository;
 
-import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_ENTERPRISE_IMAGE_DEFAULT;
-import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_IMAGE_DEFAULT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_TAG;
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.COMMUNITY;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -55,12 +54,12 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
 
     public AlfrescoRepositoryExtension(@NonNull String extension, @NonNull String localImageName)
     {
-        this(extension, localImageName, false);
+        this(extension, localImageName, COMMUNITY);
     }
 
-    public AlfrescoRepositoryExtension(@NonNull String extension, @NonNull String localImageName, boolean extendEnterprise)
+    public AlfrescoRepositoryExtension(@NonNull String extension, @NonNull String localImageName, RepositoryType repositoryType)
     {
-        this(DockerImageName.parse(!extendEnterprise ? REPOSITORY_IMAGE_DEFAULT : REPOSITORY_ENTERPRISE_IMAGE_DEFAULT).withTag(REPOSITORY_TAG), extension, localImageName);
+        this(DockerImageName.parse(repositoryType.getImageName()).withTag(REPOSITORY_TAG), extension, localImageName);
     }
 
     public AlfrescoRepositoryExtension(@NonNull DockerImageName imageToExtend, @NonNull String extension, @NonNull String localImageName)

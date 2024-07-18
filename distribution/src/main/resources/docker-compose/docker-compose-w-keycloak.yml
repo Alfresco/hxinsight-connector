@@ -68,7 +68,7 @@ services:
         -Didentity-service.auth-server-url=http://${HOST_IP}:8999/auth
         -Didentity-service.realm=alfresco
         -Didentity-service.resource=alfresco
-        -Dhxi.client.baseUrl=http://hxinsight-mock:8080
+        -Dhxi.client.base-url=http://hxinsight-mock:8080
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         -Xms1500m -Xmx1500m
         "

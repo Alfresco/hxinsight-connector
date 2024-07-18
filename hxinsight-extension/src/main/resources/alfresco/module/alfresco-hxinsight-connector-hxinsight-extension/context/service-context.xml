@@ -76,7 +76,7 @@
     </bean>
 
     <bean id="hxInsightClientConfig" class="org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig">
-        <constructor-arg name="baseUrl" value="${hxi.client.baseUrl}"/>
+        <constructor-arg name="baseUrl" value="${hxi.client.base-url}"/>
     </bean>
 
     <bean id="hxInsightSimpleMappingExceptionResolver" abstract="true" parent="simpleMappingExceptionResolverParent">
