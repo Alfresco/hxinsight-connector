@@ -198,7 +198,6 @@ class AlfrescoNodeMapperTest
         return property;
     }
 
-
     private AlfrescoNode nodeWithDefaultProperties()
     {
         AlfrescoNode alfrescoNode = new AlfrescoNode();
