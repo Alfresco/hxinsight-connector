@@ -26,21 +26,35 @@
 
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.spy;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.http.HttpClient;
 
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 
 import org.alfresco.rest.framework.core.exceptions.NotFoundException;
 import org.alfresco.rest.framework.resource.content.BinaryResource;
+import org.alfresco.rest.framework.resource.content.FileBinaryResource;
 
 public class AvatarRelationTest
 {
     private static final String AGENT_ID = "agent-id";
+    private static FileBinaryResource sampleImage;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final AvatarRelation avatarRelation = new AvatarRelation(httpClient);
+
+    @BeforeAll
+    static void setUp() throws IOException
+    {
+        sampleImage = new FileBinaryResource(File.createTempFile("image", ".png"), null);
+    }
 
     @Test
     public void shouldThrowNotFoundExceptionIfAvatarIdIsDifferentThanDefault()
@@ -57,12 +71,14 @@ public class AvatarRelationTest
     {
         // given
         String avatarId = "-default-";
+        AvatarRelation avatarRelationSpy = spy(AvatarRelation.class);
+        doReturn(sampleImage).when(avatarRelationSpy).getSampleAvatar();
 
         // when
-        BinaryResource binaryResource = avatarRelation.readById(AGENT_ID, avatarId, null);
+        BinaryResource binaryResource = avatarRelationSpy.readById(AGENT_ID, avatarId, null);
 
         // then
-        assertNotNull(binaryResource);
+        assertEquals(binaryResource, sampleImage);
     }
 
 }

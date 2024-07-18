@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,9 +36,10 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.exception.AgentAvatarException;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.core.exceptions.NotFoundException;
 import org.alfresco.rest.framework.core.exceptions.RelationshipResourceNotFoundException;
@@ -48,6 +51,7 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 import org.alfresco.util.TempFileProvider;
 
 @Slf4j
+@NoArgsConstructor
 @AllArgsConstructor
 @RelationshipResource(name = "avatars", title = "Avatars of agents", entityResource = AgentsEntityResource.class)
 public class AvatarRelation implements RelationshipResourceAction.ReadById<BinaryResource>
@@ -58,6 +62,8 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
     @WebApiDescription(title = "Get Agent Avatar image")
     public BinaryResource readById(String agentId, String avatarId, Parameters parameters) throws RelationshipResourceNotFoundException
     {
+        log.debug("Avatar requested for agent with id={}", agentId);
+
         if (!avatarId.equals("-default-"))
         {
             log.info("Avatar id is different than -default-");
@@ -67,7 +73,7 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
         return getSampleAvatar();
     }
 
-    private FileBinaryResource getSampleAvatar()
+    protected FileBinaryResource getSampleAvatar()
     {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("https://www.wikipedia.org/portal/wikipedia.org/assets/img/Wikipedia-logo-v2@2x.png"))
@@ -82,14 +88,11 @@ public class AvatarRelation implements RelationshipResourceAction.ReadById<Binar
         }
         catch (IOException | InterruptedException e)
         {
-            log.error("Error getting avatar image.", e);
-            throw new AgentAvatarException("Avatar image cannot be received.", e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to ask question", e);
         }
         catch (Exception e)
         {
-            log.error("Failed to create temp file.", e);
-            throw new AgentAvatarException("Failed to create the avatar temp file.", e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to ask question", e);
         }
     }
-
 }
