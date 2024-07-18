@@ -42,8 +42,10 @@ public class RepositoryClient
 {
     public static final User ADMIN_USER = new User("admin", "admin");
     private static final String API_PATH = "%s/alfresco/api/-default-/public/alfresco/versions/1";
+    private static final String GS_API_PATH = "%s/alfresco/api/-default-/public/gs/versions/1";
     private static final String NODES_URL_PATTERN = API_PATH + "/nodes/%s";
     private static final String SITES_BASE_URL = API_PATH + "/sites";
+    private static final String SECURITY_GROUPS_BASE_URL = GS_API_PATH + "/security-groups";
 
     private final String baseUrl;
     private User user;
@@ -55,12 +57,12 @@ public class RepositoryClient
         given().auth().preemptive().basic(user.username(), user.password())
                 .contentType("application/json")
                 .body("""
-                            {
-                              "id": "%s",
-                              "firstName": "%s",
-                              "email": "test@example.com",
-                              "password": "%s"
-                            }
+                        {
+                          "id": "%s",
+                          "firstName": "%s",
+                          "email": "test@example.com",
+                          "password": "%s"
+                        }
                         """.formatted(userToCreate.username(), userToCreate.username(), userToCreate.password()))
                 .when().post(uri);
     }
@@ -72,10 +74,10 @@ public class RepositoryClient
         return given().auth().preemptive().basic(user.username(), user.password())
                 .contentType("application/json")
                 .body("""
-                            {
-                              "title": "%s",
-                              "visibility": "%s"
-                            }
+                        {
+                          "title": "%s",
+                          "visibility": "%s"
+                        }
                         """.formatted(title, visibility.name()))
                 .when().post(uri)
                 .body().jsonPath().get("entry.id");
@@ -87,6 +89,37 @@ public class RepositoryClient
 
         return given().auth().preemptive().basic(user.username(), user.password())
                 .when().get(uri)
+                .body().jsonPath().get("entry.id");
+    }
+
+    public String createSecurityGroup(String name)
+    {
+        String uri = SECURITY_GROUPS_BASE_URL.formatted(baseUrl);
+
+        return given().auth().preemptive().basic(user.username(), user.password())
+                .contentType("application/json")
+                .body("""
+                        {
+                          "groupName": "%s",
+                          "groupType": "user_requires_all"
+                        }
+                        """.formatted(name))
+                .when().post(uri)
+                .body().jsonPath().get("entry.id");
+    }
+
+    public String createSecurityMark(String securityGroupId, String name)
+    {
+        String uri = (SECURITY_GROUPS_BASE_URL + "/%s/security-marks").formatted(baseUrl, securityGroupId);
+
+        return given().auth().preemptive().basic(user.username(), user.password())
+                .contentType("application/json")
+                .body("""
+                        {
+                          "name": "%s"
+                        }
+                        """.formatted(name))
+                .when().post(uri)
                 .body().jsonPath().get("entry.id");
     }
 
@@ -141,5 +174,23 @@ public class RepositoryClient
         given().auth().preemptive().basic(user.username(), user.password())
                 .contentType("application/json")
                 .when().delete(uri);
+    }
+
+    public void secureNode(String nodeId, String securityGroupId, String securityMarkId)
+    {
+        String uri = (GS_API_PATH + "/secured-nodes/%s/securing-marks").formatted(baseUrl, nodeId);
+
+        given().auth().preemptive().basic(user.username(), user.password())
+                .contentType("application/json")
+                .body("""
+                        [
+                          {
+                            "id": "%s",
+                            "groupId": "%s",
+                            "op": "ADD"
+                          }
+                        ]
+                        """.formatted(securityMarkId, securityGroupId))
+                .when().post(uri);
     }
 }

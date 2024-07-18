@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.common.test.docker.util;
 
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.pullRepositoryImage;
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.COMMUNITY;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -45,6 +46,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryExtension;
+import org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
@@ -108,14 +110,14 @@ public class DockerContainers
 
     public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network)
     {
-        return createExtendedRepositoryContainerWithin(network, false);
+        return createExtendedRepositoryContainerWithin(network, COMMUNITY);
     }
 
-    public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network, boolean enterprise)
+    public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network, RepositoryType repositoryType)
     {
-        pullRepositoryImage(enterprise);
+        pullRepositoryImage(repositoryType);
         AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
-                new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, enterprise))
+                new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, repositoryType))
                         .waitingFor(Wait.forHttp("/alfresco").forPort(8080).withStartupTimeout(Duration.ofMinutes(5)))
                         .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
 

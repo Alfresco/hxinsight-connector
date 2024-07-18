@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getRepoJavaOptsWithTransforms;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
@@ -94,7 +95,7 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         // @formatter:off
-        return DockerContainers.createExtendedRepositoryContainerWithin(network, true)
+        return DockerContainers.createExtendedRepositoryContainerWithin(network, ENTERPRISE)
                 .withJavaOpts(getRepoJavaOptsWithTransforms(postgres, activemq));
         // @formatter:on
     }
