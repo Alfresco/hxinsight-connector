@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/v1/questions"
+    "urlPath": "/questions"
   },
   "response": {
     "status": 202,

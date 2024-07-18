@@ -102,7 +102,6 @@ abstract class CreateNodeE2eTestBase
     }
 
     @Test
-    @SneakyThrows
     @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
     final void testCreateNodeContainingTextFile() throws IOException
     {

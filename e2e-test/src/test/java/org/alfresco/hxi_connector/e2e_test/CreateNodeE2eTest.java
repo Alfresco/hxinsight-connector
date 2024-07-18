@@ -87,10 +87,10 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
     @SneakyThrows
     public void beforeAll()
     {
-        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
-        awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
-        WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
+        awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
+        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
+        WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
