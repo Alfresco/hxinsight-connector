@@ -86,6 +86,7 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
+
         allProperties.put(ALLOW_ACCESS, getResourceReaderAuthorities(alfrescoNode));
         allProperties.put(DENY_ACCESS, getResourceDeniedAuthorities(alfrescoNode));
 
