@@ -26,16 +26,22 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
+import static java.util.Optional.ofNullable;
+import static java.util.function.Predicate.not;
+
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
 import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
@@ -47,6 +53,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
@@ -80,6 +88,9 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
+        allProperties.put(ALLOW_ACCESS, getResourceReaderAuthorities(alfrescoNode));
+        allProperties.put(DENY_ACCESS, getResourceDeniedAuthorities(alfrescoNode));
+
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
         Map<String, Serializable> properties = getProperties(allProperties);
@@ -92,7 +103,7 @@ public class AlfrescoNodeMapper
 
     private long getCreatedAt(AlfrescoNode alfrescoNode)
     {
-        return Optional.ofNullable(alfrescoNode.getCreatedAt())
+        return ofNullable(alfrescoNode.getCreatedAt())
                 .map(ZonedDateTime::toInstant)
                 .map(Instant::getEpochSecond)
                 .orElse(0L);
@@ -117,5 +128,27 @@ public class AlfrescoNodeMapper
                 .filter(property -> Objects.nonNull(property.getValue()))
                 .filter(property -> !PREDEFINED_PROPERTIES.contains(property.getKey()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    private Serializable getResourceReaderAuthorities(AlfrescoNode node)
+    {
+        return (Serializable) ofNullable(node.getAccessControlList())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(AccessControlEntry::getAllowed)
+                .map(AccessControlEntry::getAccessControlEntryKey)
+                .map(AccessControlEntryKey::getAuthority)
+                .collect(Collectors.toSet());
+    }
+
+    private Serializable getResourceDeniedAuthorities(AlfrescoNode node)
+    {
+        return (Serializable) ofNullable(node.getAccessControlList())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(not(AccessControlEntry::getAllowed))
+                .map(AccessControlEntry::getAccessControlEntryKey)
+                .map(AccessControlEntryKey::getAuthority)
+                .collect(Collectors.toSet());
     }
 }
