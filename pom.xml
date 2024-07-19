@@ -68,9 +68,9 @@
         <alfresco-sdk.version>4.7.0</alfresco-sdk.version>
         <alfresco-db-connector.version>4.0.1</alfresco-db-connector.version>
         <alfresco-event-model.version>0.0.28</alfresco-event-model.version>
-        <spring-boot.version>3.3.1</spring-boot.version>
+        <spring-boot.version>3.3.2</spring-boot.version>
         <spring-camel.version>4.7.0</spring-camel.version>
-        <commons-lang.version>3.14.0</commons-lang.version>
+        <commons-lang.version>3.15.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.16.1</commons-io.version>
         <pdfbox.version>3.0.2</pdfbox.version>
@@ -78,7 +78,7 @@
         <wiremock.version>3.8.0</wiremock.version>
         <system-stubs.version>2.1.6</system-stubs.version>
 
-        <testcontainers.version>1.19.8</testcontainers.version>
+        <testcontainers.version>1.20.0</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>

@@ -47,7 +47,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
@@ -132,7 +131,7 @@ public class HxInsightClient
         }
         catch (IOException | InterruptedException e)
         {
-            throw new HxInsightConnectorRuntimeException("Failed to get answer to question with id %s".formatted(questionId), e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to get answer to question with id %s".formatted(questionId), e);
         }
     }
 }

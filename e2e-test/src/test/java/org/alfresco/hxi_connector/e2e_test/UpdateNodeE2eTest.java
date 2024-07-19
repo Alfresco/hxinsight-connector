@@ -201,7 +201,7 @@ public class UpdateNodeE2eTest
 
     private void prepareHxInsightMockToReturnPredictionFor(String nodeId, String predictedValue)
     {
-        givenThat(get(urlPathTemplate("/v1/prediction-batches/{batchId}"))
+        givenThat(get(urlPathTemplate("/prediction-batches/{batchId}"))
                 .inScenario(LIST_PREDICTIONS_SCENARIO)
                 .whenScenarioStateIs(PREDICTIONS_AVAILABLE_STATE)
                 .willReturn(aResponse()
@@ -236,7 +236,7 @@ public class UpdateNodeE2eTest
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL",
-                        "http://%s:8080/v1".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
+                        "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
     }
 }
