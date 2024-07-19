@@ -40,6 +40,8 @@ public class ApplicationInfoProvider
 {
 
     public static final String APP_INFO_PATTERN = "ACS HXI Connector/%s ACS/%s (%s)";
+    public static final String USER_AGENT_DATA = "user-agent-data";
+    public static final String USER_AGENT_PARAM = "&userAgent=${exchangeProperty.%s}".formatted(USER_AGENT_DATA);
     private final DiscoveryApi discoveryApi;
     private final IntegrationProperties integrationProperties;
 

@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 
 import java.util.Set;
 
@@ -58,7 +59,6 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     private static final String LOCAL_ENDPOINT = "direct:" + HxInsightEventPublisher.class.getSimpleName();
     private static final String ROUTE_ID = "insight-event-publisher";
     private static final int EXPECTED_STATUS_CODE = 202;
-    public static final String USER_AGENT_DATA = "user-agent-data";
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
@@ -81,7 +81,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
             .log("Sending event ${body}")
             .setProperty(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
             .process(authService::setHxIAuthorizationHeaders)
-            .toD(integrationProperties.hylandExperience().ingester().endpoint() + "&userAgent=${exchangeProperty.user-agent-data}")
+            .toD(integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
