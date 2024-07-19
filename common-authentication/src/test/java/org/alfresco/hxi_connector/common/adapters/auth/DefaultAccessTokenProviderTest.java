@@ -29,6 +29,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider.REFRESH_OFFSET_SECS;
 
@@ -84,7 +85,7 @@ class DefaultAccessTokenProviderTest
         given(mockAuthenticationClient.authenticate(CLIENT_REGISTRATION_ID)).willReturn(mockResult);
 
         Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
-        tokens.put(CLIENT_REGISTRATION_ID, Map.entry(mockResult, OffsetDateTime.now().minusSeconds(REFRESH_OFFSET_SECS + 1)));
+        tokens.put(CLIENT_REGISTRATION_ID, Map.entry(mock(), OffsetDateTime.now().plusSeconds(REFRESH_OFFSET_SECS - 1)));
         ReflectionTestUtils.setField(objectUnderTest, "accessTokens", tokens);
 
         // when
@@ -102,7 +103,7 @@ class DefaultAccessTokenProviderTest
         given(mockResult.accessToken()).willReturn(TEST_TOKEN);
 
         Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
-        tokens.put(CLIENT_REGISTRATION_ID, Map.entry(mockResult, OffsetDateTime.now().plusSeconds(3600)));
+        tokens.put(CLIENT_REGISTRATION_ID, Map.entry(mockResult, OffsetDateTime.now().plusSeconds(REFRESH_OFFSET_SECS + 1)));
         ReflectionTestUtils.setField(objectUnderTest, "accessTokens", tokens);
 
         // when

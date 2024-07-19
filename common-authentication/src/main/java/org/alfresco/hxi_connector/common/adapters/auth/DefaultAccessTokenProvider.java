@@ -67,7 +67,7 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
 
     private static boolean shouldRefreshToken(Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry)
     {
-        return authenticationResultEntry == null || authenticationResultEntry.getValue().isBefore(OffsetDateTime.now().minusSeconds(
+        return authenticationResultEntry == null || authenticationResultEntry.getValue().isBefore(OffsetDateTime.now().plusSeconds(
                 REFRESH_OFFSET_SECS));
     }
 }
