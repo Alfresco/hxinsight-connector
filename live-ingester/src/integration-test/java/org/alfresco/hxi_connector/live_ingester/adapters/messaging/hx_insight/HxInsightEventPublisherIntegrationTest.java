@@ -184,6 +184,8 @@ class HxInsightEventPublisherIntegrationTest
     @TestConfiguration
     public static class HxInsightEventPublisherTestConfig
     {
+        @MockBean
+        public DiscoveryApiClient discoveryApi;
 
         @Bean
         public AuthProperties authorizationProperties()
@@ -214,8 +216,5 @@ class HxInsightEventPublisherIntegrationTest
         {
             return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
         }
-
-        @MockBean
-        public DiscoveryApiClient discoveryApi;
     }
 }
