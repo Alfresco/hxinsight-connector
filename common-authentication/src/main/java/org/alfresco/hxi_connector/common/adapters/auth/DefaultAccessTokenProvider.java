@@ -29,6 +29,7 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -56,7 +57,7 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
             }
         }
         EnsureUtils.ensureNonNull(token, "Authentication result is null");
-        return token.accessToken();
+        return token.getAccessToken();
     }
 
     private void refreshAuthenticationResult(String providerId)
@@ -69,9 +70,13 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
 
     private static boolean shouldRefreshToken(Token token)
     {
-        return token == null || OffsetDateTime.now().isAfter(token.refreshAt());
+        return token == null || OffsetDateTime.now().isAfter(token.getRefreshAt());
     }
 
-    record Token(String accessToken, OffsetDateTime refreshAt)
-    {}
+    @Data
+    static final class Token
+    {
+        private final String accessToken;
+        private final OffsetDateTime refreshAt;
+    }
 }

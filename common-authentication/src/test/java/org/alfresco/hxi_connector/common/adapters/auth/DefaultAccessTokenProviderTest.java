@@ -74,7 +74,7 @@ class DefaultAccessTokenProviderTest
         assertEquals(TEST_TOKEN, token);
         Map<String, DefaultAccessTokenProvider.Token> accessTokens = (Map<String, DefaultAccessTokenProvider.Token>) ReflectionTestUtils.getField(objectUnderTest, "accessTokens");
         OffsetDateTime offsetDateTime = OffsetDateTime.now().plusSeconds(3600 - REFRESH_OFFSET_SECS).truncatedTo(ChronoUnit.SECONDS);
-        assertEquals(offsetDateTime, accessTokens.get(CLIENT_REGISTRATION_ID).refreshAt().truncatedTo(ChronoUnit.SECONDS));
+        assertEquals(offsetDateTime, accessTokens.get(CLIENT_REGISTRATION_ID).getRefreshAt().truncatedTo(ChronoUnit.SECONDS));
     }
 
     @Test
