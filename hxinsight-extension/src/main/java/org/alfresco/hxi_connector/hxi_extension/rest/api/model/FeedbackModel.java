@@ -23,26 +23,36 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import jakarta.validation.constraints.NotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
+import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
+
+@ToString
 @Getter
-public final class HxInsightClientConfig
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@EqualsAndHashCode
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class FeedbackModel
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
-    private final String feedbackUrl;
+    private FeedbackType feedbackType;
+    private String comments;
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
+    public Feedback toServiceModel()
     {
-        this.agentUrl = baseUrl + "/agents";
-        this.questionUrl = baseUrl + "/questions";
-        this.answerUrl = questionUrl + "/%s/answer";
-        this.feedbackUrl = answerUrl + "/feedback";
+        ensureNonNull(feedbackType, "Feedback type must be provided.");
+        return new Feedback(feedbackType.toServiceModel(), comments);
     }
 }

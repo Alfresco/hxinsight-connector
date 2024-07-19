@@ -23,26 +23,21 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.BAD;
+import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.GOOD;
 
-import jakarta.validation.constraints.NotBlank;
-
-import lombok.Getter;
-
-@Getter
-public final class HxInsightClientConfig
+public enum FeedbackType
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
-    private final String feedbackUrl;
+    LIKE, DISLIKE;
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
+    public org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType toServiceModel()
     {
-        this.agentUrl = baseUrl + "/agents";
-        this.questionUrl = baseUrl + "/questions";
-        this.answerUrl = questionUrl + "/%s/answer";
-        this.feedbackUrl = answerUrl + "/feedback";
+        return switch (this)
+        {
+        case LIKE -> GOOD;
+        case DISLIKE -> BAD;
+        };
     }
 }

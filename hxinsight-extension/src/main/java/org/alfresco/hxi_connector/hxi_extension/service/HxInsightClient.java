@@ -50,6 +50,7 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
@@ -132,6 +133,29 @@ public class HxInsightClient
         catch (IOException | InterruptedException e)
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to get answer to question with id %s".formatted(questionId), e);
+        }
+    }
+
+    public void submitFeedback(String questionId, Feedback feedback)
+    {
+        try
+        {
+            String body = objectMapper.writeValueAsString(feedback);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(config.getFeedbackUrl().formatted(questionId)))
+                    .header("Content-Type", "application/json")
+                    .headers(authService.getAuthHeaders())
+                    .POST(BodyPublishers.ofString(body))
+                    .build();
+
+            HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
+
+            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
+        }
+        catch (IOException | InterruptedException e)
+        {
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to submit feedback for question with id %s".formatted(questionId), e);
         }
     }
 }
