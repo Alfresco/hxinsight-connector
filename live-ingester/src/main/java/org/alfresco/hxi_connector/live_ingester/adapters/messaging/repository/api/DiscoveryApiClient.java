@@ -40,7 +40,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class DiscoveryApiClient extends RouteBuilder implements DiscoveryApi
+public class DiscoveryApiClient extends RouteBuilder
 {
 
     private static final String LOCAL_ENDPOINT = "direct:" + DiscoveryApiClient.class.getSimpleName();
@@ -66,7 +66,6 @@ public class DiscoveryApiClient extends RouteBuilder implements DiscoveryApi
         // @formatter:on
     }
 
-    @Override
     public String getRepositoryVersion()
     {
         DiscoverApiResponse response = camelContext.createFluentProducerTemplate()

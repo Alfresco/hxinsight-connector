@@ -52,6 +52,7 @@ import org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
+    private static final Pattern SPECIAL_REGEX_CHARS = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
     private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-hxinsight-extension");
     private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-hxinsight-extension";
     private static final String POSTGRES_IMAGE = "postgres";
@@ -323,11 +324,13 @@ public class DockerContainers
         // Since ACS 23.2.1 release was a super quick fix to 23.2.0 it shows as 23.2.0 in the discovery endpoint.
         // Hence, we cannot use DockerTags.getRepositoryTag() without additional magic here
         // When we move past 23.2.1 ACS version we can modify this method to return more accurate regex.
-        Pattern specialRegexChars = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
-        String pattern = "ACS HXI Connector\\/%s ACS\\/%s %s";
-        String osInfo = "(" + System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch") + ")";
-        osInfo = specialRegexChars.matcher(osInfo).replaceAll("\\\\$0");
-        String appVersion = specialRegexChars.matcher(DockerTags.getHxiConnectorTag()).replaceAll("\\\\$0");
-        return pattern.formatted(appVersion, ".*", osInfo);
+        String pattern = "ACS HXI Connector\\/%s ACS\\/.*";
+        String appVersion = escapeSpecialChars(DockerTags.getHxiConnectorTag());
+        return pattern.formatted(appVersion);
+    }
+
+    private static String escapeSpecialChars(String string)
+    {
+        return SPECIAL_REGEX_CHARS.matcher(string).replaceAll("\\\\$0");
     }
 }

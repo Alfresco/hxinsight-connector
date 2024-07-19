@@ -41,7 +41,7 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApi;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
 
 @ExtendWith({MockitoExtension.class, SystemStubsExtension.class})
 class ApplicationInfoProviderTest
@@ -50,7 +50,7 @@ class ApplicationInfoProviderTest
     private SystemProperties systemProperties;
 
     @Mock
-    private DiscoveryApi discoveryApiMock;
+    private DiscoveryApiClient discoveryApiMock;
     @Mock
     private IntegrationProperties integrationPropertiesMock;
 

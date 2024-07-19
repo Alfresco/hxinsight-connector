@@ -31,7 +31,7 @@ import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApi;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -42,7 +42,7 @@ public class ApplicationInfoProvider
     public static final String APP_INFO_PATTERN = "ACS HXI Connector/%s ACS/%s (%s)";
     public static final String USER_AGENT_DATA = "user-agent-data";
     public static final String USER_AGENT_PARAM = "&userAgent=${exchangeProperty.%s}".formatted(USER_AGENT_DATA);
-    private final DiscoveryApi discoveryApi;
+    private final DiscoveryApiClient discoveryApiClient;
     private final IntegrationProperties integrationProperties;
 
     private String applicationInfo;
@@ -59,7 +59,7 @@ public class ApplicationInfoProvider
     private String calculateUserAgentData()
     {
         String applicationVersion = integrationProperties.application().version();
-        String repositoryVersion = discoveryApi.getRepositoryVersion();
+        String repositoryVersion = discoveryApiClient.getRepositoryVersion();
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return APP_INFO_PATTERN.formatted(applicationVersion, repositoryVersion, osVersion);
     }

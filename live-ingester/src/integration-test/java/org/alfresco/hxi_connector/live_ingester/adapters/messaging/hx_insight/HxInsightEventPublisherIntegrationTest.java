@@ -43,6 +43,7 @@ import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -52,12 +53,12 @@ import java.util.Map;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.ContainsPattern;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
-import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
@@ -84,7 +85,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApi;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
@@ -94,7 +95,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
         IntegrationProperties.class,
         HxInsightEventPublisher.class,
         HxInsightEventPublisherIntegrationTest.HxInsightEventPublisherTestConfig.class,
-        LiveIngesterAuthClient.class},
+        LiveIngesterAuthClient.class,
+        ApplicationInfoProvider.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableMethodSecurity
@@ -109,7 +111,6 @@ class HxInsightEventPublisherIntegrationTest
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
     private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE, SOURCE_ID);
-    private static final String DUMMY_ACS_VERSION = "23.3.0-dummy";
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")
@@ -180,11 +181,6 @@ class HxInsightEventPublisherIntegrationTest
         registry.add("hyland-experience.ingester.retry.initialDelay", () -> RETRY_DELAY_MS);
     }
 
-    private static @NotNull String getAppInfoRegex()
-    {
-        return "ACS HXI Connector/.* ACS/" + DUMMY_ACS_VERSION + ".*";
-    }
-
     @TestConfiguration
     public static class HxInsightEventPublisherTestConfig
     {
@@ -219,17 +215,7 @@ class HxInsightEventPublisherIntegrationTest
             return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
         }
 
-        @Bean
-        public DiscoveryApi dummyDiscoveryApi()
-        {
-            return () -> DUMMY_ACS_VERSION;
-        }
-
-        @Bean
-        public ApplicationInfoProvider dummyApplicationInfoProvider(DiscoveryApi dummyDiscoveryApi, IntegrationProperties integrationProperties)
-        {
-            ApplicationInfoProvider applicationInfoProvider = new ApplicationInfoProvider(dummyDiscoveryApi, integrationProperties);
-            return applicationInfoProvider;
-        }
+        @MockBean
+        public DiscoveryApiClient discoveryApi;
     }
 }
