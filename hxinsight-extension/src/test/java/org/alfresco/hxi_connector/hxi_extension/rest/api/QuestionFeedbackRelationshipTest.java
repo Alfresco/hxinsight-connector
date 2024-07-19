@@ -51,7 +51,7 @@ public class QuestionFeedbackRelationshipTest
     @InjectMocks
     QuestionFeedbackRelation questionFeedbackRelation;
     @Mock
-    private HxInsightClient mockHxInsightClient;
+    HxInsightClient mockHxInsightClient;
 
     @Test
     void testFeedbackCanBeSubmittedSuccessfully()
