@@ -103,7 +103,7 @@ public class AlfrescoNodeMapper
 
     private long getCreatedAt(AlfrescoNode alfrescoNode)
     {
-        return Optional.ofNullable(alfrescoNode.getCreatedAt())
+        return ofNullable(alfrescoNode.getCreatedAt())
                 .map(ZonedDateTime::toInstant)
                 .map(Instant::getEpochSecond)
                 .orElse(0L);
