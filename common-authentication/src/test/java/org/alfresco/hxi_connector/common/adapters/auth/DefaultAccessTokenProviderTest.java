@@ -29,7 +29,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider.REFRESH_OFFSET_SECS;
 
@@ -73,6 +72,9 @@ class DefaultAccessTokenProviderTest
         then(mockAuthenticationClient).should().authenticate(CLIENT_REGISTRATION_ID);
         then(mockAuthenticationClient).shouldHaveNoMoreInteractions();
         assertEquals(TEST_TOKEN, token);
+        Map<String, DefaultAccessTokenProvider.Token> accessTokens = (Map<String, DefaultAccessTokenProvider.Token>) ReflectionTestUtils.getField(objectUnderTest, "accessTokens");
+        OffsetDateTime offsetDateTime = OffsetDateTime.now().plusSeconds(3600 - REFRESH_OFFSET_SECS).truncatedTo(ChronoUnit.SECONDS);
+        assertEquals(offsetDateTime, accessTokens.get(CLIENT_REGISTRATION_ID).refreshAt().truncatedTo(ChronoUnit.SECONDS));
     }
 
     @Test
@@ -84,8 +86,8 @@ class DefaultAccessTokenProviderTest
         given(mockResult.temporalUnit()).willReturn(ChronoUnit.SECONDS);
         given(mockAuthenticationClient.authenticate(CLIENT_REGISTRATION_ID)).willReturn(mockResult);
 
-        Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
-        tokens.put(CLIENT_REGISTRATION_ID, Map.entry(mock(), OffsetDateTime.now().plusSeconds(REFRESH_OFFSET_SECS - 1)));
+        Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();
+        tokens.put(CLIENT_REGISTRATION_ID, new DefaultAccessTokenProvider.Token(TEST_TOKEN, OffsetDateTime.now().minusSeconds(2)));
         ReflectionTestUtils.setField(objectUnderTest, "accessTokens", tokens);
 
         // when
@@ -99,11 +101,8 @@ class DefaultAccessTokenProviderTest
     @Test
     void givenTokenValid_whenGetAccessToken_thenReturnTokenWithoutRefresh()
     {
-        AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
-        given(mockResult.accessToken()).willReturn(TEST_TOKEN);
-
-        Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
-        tokens.put(CLIENT_REGISTRATION_ID, Map.entry(mockResult, OffsetDateTime.now().plusSeconds(REFRESH_OFFSET_SECS + 1)));
+        Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();
+        tokens.put(CLIENT_REGISTRATION_ID, new DefaultAccessTokenProvider.Token(TEST_TOKEN, OffsetDateTime.now().plusSeconds(2)));
         ReflectionTestUtils.setField(objectUnderTest, "accessTokens", tokens);
 
         // when
