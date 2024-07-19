@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/agents/-default-/avatar"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "avatar.png",
+    "transformerParameters": {
+      "disableBodyFileTemplating": true
+    },
+    "headers": {
+      "Content-Type": "image/png"
+    }
+  },
+  "metadata": {
+    "name": "file-stub"
+  }
+}
