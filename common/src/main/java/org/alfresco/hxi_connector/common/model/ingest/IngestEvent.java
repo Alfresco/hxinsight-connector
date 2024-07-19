@@ -30,13 +30,16 @@ import java.util.Map;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.Getter;
 import lombok.experimental.Accessors;
 
 @Data
 @Accessors(fluent = true)
+@Getter(onMethod = @__(@JsonProperty))
 @AllArgsConstructor
 @Builder
 public class IngestEvent
@@ -48,6 +51,7 @@ public class IngestEvent
 
     @Data
     @Accessors(fluent = true)
+    @Getter(onMethod = @__(@JsonProperty))
     @AllArgsConstructor
     public static class ContentInfo implements Serializable
     {
