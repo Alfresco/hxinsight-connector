@@ -32,19 +32,15 @@ import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
-import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
-
-@Accessors(prefix = {"_", ""})
-@Getter
-@AllArgsConstructor
-@NoArgsConstructor
 @JsonInclude(NON_NULL)
-@EqualsAndHashCode
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Accessors(prefix = {"_", ""})
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionModel
 {
@@ -66,24 +62,5 @@ public class PredictionModel
         this.modelId = modelId;
         this.predictionValue = predictionValue;
         this.updateType = updateType;
-    }
-
-    public Prediction toServiceModel()
-    {
-        return new Prediction(_id, property, predictionDateTime, confidenceLevel, modelId, predictionValue, _previousValue, updateType, reviewStatus);
-    }
-
-    public static PredictionModel fromServiceModel(Prediction prediction)
-    {
-        return new PredictionModel(
-                prediction.getId(),
-                prediction.getProperty(),
-                prediction.getPredictionDateTime(),
-                prediction.getConfidenceLevel(),
-                prediction.getModelId(),
-                prediction.getPredictionValue(),
-                prediction.getPreviousValue(),
-                prediction.getUpdateType(),
-                prediction.getReviewStatus());
     }
 }

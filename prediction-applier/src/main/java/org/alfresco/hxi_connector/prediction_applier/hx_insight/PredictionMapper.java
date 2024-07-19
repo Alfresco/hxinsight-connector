@@ -25,30 +25,37 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.hx_insight;
 
-import org.springframework.stereotype.Component;
+import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.Prediction;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
 
-@Component
-public class PredictionMapper
+@Mapper(componentModel = "spring")
+public interface PredictionMapper
 {
-    public PredictionModel map(PredictionEntry predictionEntry)
+
+    default PredictionModel map(PredictionEntry predictionEntry)
     {
+        if (predictionEntry == null)
+        {
+            return null;
+        }
         if (predictionEntry.predictions().size() != 1)
         {
             throw new HxInsightConnectorRuntimeException("Currently only one prediction per entry is supported.");
         }
 
-        Prediction prediction = predictionEntry.predictions().get(0);
-
-        return new PredictionModel(prediction.field(),
-                null,
-                prediction.confidence(),
-                predictionEntry.modelId(),
-                prediction.value(),
-                predictionEntry.enrichmentType());
+        return map(predictionEntry.predictions().get(0), predictionEntry.modelId(), predictionEntry.enrichmentType());
     }
+
+    @Mapping(target = "property", source = "prediction.field")
+    @Mapping(target = "confidenceLevel", source = "prediction.confidence")
+    @Mapping(target = "predictionValue", source = "prediction.value")
+    @Mapping(target = "modelId", source = "modelId")
+    @Mapping(target = "updateType", source = "enrichmentType")
+    PredictionModel map(Prediction prediction, String modelId, UpdateType enrichmentType);
 }
