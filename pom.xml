@@ -81,6 +81,8 @@
         <testcontainers.version>1.20.0</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
 
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
+
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
@@ -276,6 +278,16 @@
                 <groupId>uk.org.webcompere</groupId>
                 <artifactId>system-stubs-jupiter</artifactId>
                 <version>${system-stubs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
