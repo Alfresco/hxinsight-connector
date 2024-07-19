@@ -28,5 +28,14 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 import java.util.Date;
 import java.util.List;
 
-public record NodeWithPrediction(String id, Date latestPredictionDateTime, List<String> predictedProperties)
-{}
+import lombok.AllArgsConstructor;
+import lombok.Data;
+
+@Data
+@AllArgsConstructor
+public class NodeWithPrediction
+{
+    private String id;
+    private Date latestPredictionDateTime;
+    private List<String> predictedProperties;
+}
