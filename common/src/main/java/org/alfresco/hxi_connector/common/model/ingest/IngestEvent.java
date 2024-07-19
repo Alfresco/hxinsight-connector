@@ -31,16 +31,25 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import lombok.Builder;
+import lombok.Data;
+import lombok.experimental.Accessors;
 
+@Data
+@Accessors(fluent = true)
 @Builder
-public record IngestEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
+public class IngestEvent
 {
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype) implements Serializable
-    {}
+    @NotBlank
+    private String nodeId;
+    private ContentInfo contentInfo;
+    @NotNull private Map<String, Serializable> properties;
+
+    @Data
+    @Accessors(fluent = true)
+    public static class ContentInfo implements Serializable
+    {
+        private long contentSize;
+        private String encoding;
+        private String mimetype;
+    }
 }
