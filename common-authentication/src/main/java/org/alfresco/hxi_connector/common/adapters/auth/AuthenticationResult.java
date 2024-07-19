@@ -36,22 +36,35 @@ import jakarta.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @SuppressWarnings("PMD.UnusedAssignment")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AuthenticationResult(
-        @NotBlank @JsonProperty("access_token") String accessToken,
-        @Positive @JsonProperty("expires_in") int expiresIn,
-        TemporalUnit temporalUnit,
-        @NotBlank @JsonProperty("token_type") String tokenType,
-        @NotBlank String scope,
-        Integer statusCode)
+@Getter
+public class AuthenticationResult
 {
-    public AuthenticationResult
+    @NotBlank
+    @JsonProperty("access_token")
+    String accessToken;
+    @Positive @JsonProperty("expires_in")
+    int expiresIn;
+    TemporalUnit temporalUnit;
+    @NotBlank
+    @JsonProperty("token_type")
+    String tokenType;
+    @NotBlank
+    String scope;
+    Integer statusCode;
+
+    public AuthenticationResult(String accessToken, int expiresIn, TemporalUnit temporalUnit, String tokenType, String scope, Integer statusCode)
     {
-        temporalUnit = requireNonNullElse(temporalUnit, ChronoUnit.SECONDS);
-        statusCode = requireNonNullElse(statusCode, EXPECTED_STATUS_CODE);
+        this.accessToken = accessToken;
+        this.expiresIn = expiresIn;
+        this.temporalUnit = requireNonNullElse(temporalUnit, ChronoUnit.SECONDS);
+        this.tokenType = tokenType;
+        this.scope = scope;
+        this.statusCode = requireNonNullElse(statusCode, EXPECTED_STATUS_CODE);
     }
 }

@@ -55,14 +55,14 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
         }
         EnsureUtils.ensureNonNull(authenticationResultEntry, "Authentication result is null");
         AuthenticationResult authenticationResult = authenticationResultEntry.getKey();
-        return authenticationResult.accessToken();
+        return authenticationResult.getAccessToken();
     }
 
     private void refreshAuthenticationResult(String providerId)
     {
         AuthenticationResult authenticationResult = authenticationClient.authenticate(providerId);
         accessTokens.put(providerId, Map.entry(authenticationResult,
-                OffsetDateTime.now().plus(authenticationResult.expiresIn(), authenticationResult.temporalUnit())));
+                OffsetDateTime.now().plus(authenticationResult.getExpiresIn(), authenticationResult.getTemporalUnit())));
     }
 
     private static boolean shouldRefreshToken(Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry)
