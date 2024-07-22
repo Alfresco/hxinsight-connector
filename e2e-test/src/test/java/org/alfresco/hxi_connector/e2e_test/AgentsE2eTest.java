@@ -26,12 +26,13 @@
 package org.alfresco.hxi_connector.e2e_test;
 
 import static io.restassured.RestAssured.given;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -42,8 +43,6 @@ import java.util.Map;
 import com.github.tomakehurst.wiremock.client.WireMock;
 
 import io.restassured.response.Response;
-import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
-import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -54,6 +53,9 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
+
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -101,14 +103,14 @@ public class AgentsE2eTest
         // given: contained in wiremock file - get-agent-avatar.json.
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
-            .contentType("image/png")
-            .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/-default-/avatar")
-            .then().extract().response();
+                .contentType("image/png")
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/-default-/avatar")
+                .then().extract().response();
 
         // then
         assertEquals(SC_OK, response.statusCode());
         assertArrayEquals(Files.readAllBytes(Paths.get("src/test/resources/wiremock/hxinsight/__files/avatar.png")),
-            IOUtils.toByteArray(response.body().asInputStream()));
+                IOUtils.toByteArray(response.body().asInputStream()));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
