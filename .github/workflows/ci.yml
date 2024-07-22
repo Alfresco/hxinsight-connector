@@ -201,6 +201,49 @@ jobs:
           GHA_RUN_DC: false
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
+  run_e2e_test_java_11:
+    name: "Run e2e tests"
+    runs-on: ubuntu-latest
+    needs:
+      - pre_commit
+    if: >
+      !contains(github.event.head_commit.message, '[skip build]') &&
+      !contains(github.event.head_commit.message, '[skip tests]') &&
+      !contains(github.event.head_commit.message, '[skip e2es]')
+    strategy:
+      fail-fast: false
+      matrix:
+        repoVersion: [ 7.3.2, 7.4.2 ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
+      - name: "Login to Quay.io"
+        uses: docker/login-action@v3.2.0
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - name: "Build JAMP extension"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Build docker images"
+        run: |
+          JAVA_VERSION=11
+          bash ./scripts/ci/buildDockerImages.sh
+      - name: "Start docker-compose and run e2e docker-compose tests"
+        env:
+          GHA_RUN_DC: true
+        run: |
+          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'hxinsight-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Stop docker-compose"
+        if: always()
+        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+      - name: "Run e2e tests"
+        env:
+          GHA_RUN_DC: false
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+
   push_docker_images:
     name: "Push docker images"
     runs-on: ubuntu-latest
