@@ -29,45 +29,54 @@ import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 
 @RequiredArgsConstructor
+@Slf4j
 public class DefaultAccessTokenProvider implements AccessTokenProvider
 {
     static final int REFRESH_OFFSET_SECS = 60;
     private final AuthenticationClient authenticationClient;
 
-    private final Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> accessTokens = new HashMap<>();
+    private final Map<String, Token> accessTokens = new HashMap<>();
 
     @Override
     public String getAccessToken(String providerId)
     {
-        Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry = accessTokens.get(providerId);
+        Token token = accessTokens.get(providerId);
         synchronized (this)
         {
-            if (shouldRefreshToken(authenticationResultEntry))
+            if (shouldRefreshToken(token))
             {
                 refreshAuthenticationResult(providerId);
-                authenticationResultEntry = accessTokens.get(providerId);
+                token = accessTokens.get(providerId);
             }
         }
-        EnsureUtils.ensureNonNull(authenticationResultEntry, "Authentication result is null");
-        AuthenticationResult authenticationResult = authenticationResultEntry.getKey();
-        return authenticationResult.getAccessToken();
+        EnsureUtils.ensureNonNull(token, "Authentication result is null");
+        return token.getAccessToken();
     }
 
     private void refreshAuthenticationResult(String providerId)
     {
+        log.atDebug().log("Refreshing authentication result for provider {}", providerId);
         AuthenticationResult authenticationResult = authenticationClient.authenticate(providerId);
-        accessTokens.put(providerId, Map.entry(authenticationResult,
-                OffsetDateTime.now().plus(authenticationResult.getExpiresIn(), authenticationResult.getTemporalUnit())));
+        accessTokens.put(providerId, new Token(authenticationResult.getAccessToken(),
+                OffsetDateTime.now().plus(authenticationResult.getExpiresIn(), authenticationResult.getTemporalUnit()).minusSeconds(REFRESH_OFFSET_SECS)));
     }
 
-    private static boolean shouldRefreshToken(Map.Entry<AuthenticationResult, OffsetDateTime> authenticationResultEntry)
+    private static boolean shouldRefreshToken(Token token)
     {
-        return authenticationResultEntry == null || authenticationResultEntry.getValue().isBefore(OffsetDateTime.now().minusSeconds(
-                REFRESH_OFFSET_SECS));
+        return token == null || OffsetDateTime.now().isAfter(token.getRefreshAt());
+    }
+
+    @Data
+    public static final class Token
+    {
+        private final String accessToken;
+        private final OffsetDateTime refreshAt;
     }
 }
