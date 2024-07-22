@@ -305,11 +305,4 @@ class HxInsightClientTest
                 new Feedback(GOOD, "This answer was amazing")));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
     }
-
-    @Test
-    @SneakyThrows
-    void testWithNoAssertion()
-    {
-        System.out.println("This test has no assertion");
-    }
 }
