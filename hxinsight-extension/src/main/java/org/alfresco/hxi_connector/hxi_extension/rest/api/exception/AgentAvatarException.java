@@ -23,19 +23,15 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-import java.util.Date;
-import java.util.List;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.exception;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.alfresco.error.AlfrescoRuntimeException;
 
-@Data
-@AllArgsConstructor
-public class NodeWithPrediction
+public class AgentAvatarException extends AlfrescoRuntimeException
 {
-    private String id;
-    private Date latestPredictionDateTime;
-    private List<String> predictedProperties;
+    public AgentAvatarException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
 }

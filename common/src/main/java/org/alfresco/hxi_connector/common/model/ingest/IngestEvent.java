@@ -30,17 +30,35 @@ import java.util.Map;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Accessors;
 
+@JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+@Data
+@Accessors(fluent = true)
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
-public record IngestEvent(
-        @NotBlank String nodeId,
-        ContentInfo contentInfo,
-        @NotNull Map<String, Serializable> properties)
+public class IngestEvent
 {
-    public record ContentInfo(
-            long contentSize,
-            String encoding,
-            String mimetype) implements Serializable
-    {}
+    @NotBlank
+    private String nodeId;
+    private ContentInfo contentInfo;
+    @NotNull private Map<String, Serializable> properties;
+
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    @Data
+    @Accessors(fluent = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ContentInfo implements Serializable
+    {
+        private long contentSize;
+        private String encoding;
+        private String mimetype;
+    }
 }

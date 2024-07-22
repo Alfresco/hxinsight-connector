@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
+import static java.util.stream.Collectors.toList;
+
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -47,7 +49,7 @@ public class AgentsEntityResource implements EntityResourceAction.Read<AgentMode
     @Override
     public CollectionWithPagingInfo<AgentModel> readAll(Parameters params)
     {
-        List<AgentModel> agents = hxInsightClient.getAgents().stream().map(AgentModel::fromServiceModel).toList();
+        List<AgentModel> agents = hxInsightClient.getAgents().stream().map(AgentModel::fromServiceModel).collect(toList());
         return CollectionWithPagingInfo.asPaged(params.getPaging(), agents);
     }
 }
