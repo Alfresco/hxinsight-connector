@@ -243,7 +243,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when, then
-        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.getAgents());
+        WebScriptException exception = assertThrows(WebScriptException.class, hxInsightClient::getAgents);
         assertEquals(expectedStatusCode, exception.getStatus());
     }
 
