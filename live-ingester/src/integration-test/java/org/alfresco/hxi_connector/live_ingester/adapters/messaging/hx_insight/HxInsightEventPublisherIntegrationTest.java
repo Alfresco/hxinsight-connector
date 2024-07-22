@@ -196,7 +196,7 @@ class HxInsightEventPublisherIntegrationTest
             DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(dummyAuthClient);
             Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();
             AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
-            tokens.put(HXI_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.accessToken(), OffsetDateTime.now().plusSeconds(3600)));
+            tokens.put(HXI_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.getAccessToken(), OffsetDateTime.now().plusSeconds(3600)));
             ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
             return dummyAccessTokenProvider;
         }

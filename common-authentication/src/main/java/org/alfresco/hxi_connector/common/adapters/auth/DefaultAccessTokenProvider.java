@@ -64,8 +64,8 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     {
         log.atDebug().log("Refreshing authentication result for provider {}", providerId);
         AuthenticationResult authenticationResult = authenticationClient.authenticate(providerId);
-        accessTokens.put(providerId, new Token(authenticationResult.accessToken(),
-                OffsetDateTime.now().plus(authenticationResult.expiresIn(), authenticationResult.temporalUnit()).minusSeconds(REFRESH_OFFSET_SECS)));
+        accessTokens.put(providerId, new Token(authenticationResult.getAccessToken(),
+                OffsetDateTime.now().plus(authenticationResult.getExpiresIn(), authenticationResult.getTemporalUnit()).minusSeconds(REFRESH_OFFSET_SECS)));
     }
 
     private static boolean shouldRefreshToken(Token token)
