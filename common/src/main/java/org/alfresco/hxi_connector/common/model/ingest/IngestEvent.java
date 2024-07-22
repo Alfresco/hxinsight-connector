@@ -34,11 +34,13 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 @Data
 @Accessors(fluent = true)
+@NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class IngestEvent
@@ -51,6 +53,7 @@ public class IngestEvent
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     @Data
     @Accessors(fluent = true)
+    @NoArgsConstructor
     @AllArgsConstructor
     public static class ContentInfo implements Serializable
     {
