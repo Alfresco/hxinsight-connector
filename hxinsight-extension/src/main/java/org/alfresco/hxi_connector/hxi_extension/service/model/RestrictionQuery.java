@@ -28,6 +28,14 @@ package org.alfresco.hxi_connector.hxi_extension.service.model;
 
 import java.util.Set;
 
-public record RestrictionQuery(
-        Set<String> nodesIds)
-{}
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class RestrictionQuery
+{
+    private Set<String> nodesIds;
+}

@@ -45,7 +45,7 @@ public class QuestionPermissionService
     public boolean hasPermissionToAskAboutDocuments(Question question)
     {
         return question.getRestrictionQuery()
-                .nodesIds()
+                .getNodesIds()
                 .stream()
                 .map(nodeId -> validateOrLookupNode(nodes, nodeId))
                 .map(nodeRef -> permissionService.hasPermission(nodeRef, READ))
