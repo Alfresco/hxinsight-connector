@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,24 +23,18 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.service;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+import org.mapstruct.Mapper;
 
-import jakarta.validation.constraints.NotBlank;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
 
-import lombok.Getter;
-
-@Getter
-public final class HxInsightClientConfig
+@Mapper
+public interface PredictionMapper
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
-    {
-        this.agentUrl = baseUrl + "/agents";
-        this.questionUrl = baseUrl + "/questions";
-        this.answerUrl = questionUrl + "/%s/answer";
-    }
+    Prediction map(PredictionModel predictionModel);
+
+    PredictionModel map(Prediction prediction);
 }

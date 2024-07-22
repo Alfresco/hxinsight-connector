@@ -61,9 +61,9 @@ class DefaultAccessTokenProviderTest
     void givenTokenNotPresent_whenGetAccessToken_thenRefreshToken()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
-        given(mockResult.accessToken()).willReturn(TEST_TOKEN);
-        given(mockResult.expiresIn()).willReturn(3600);
-        given(mockResult.temporalUnit()).willReturn(ChronoUnit.SECONDS);
+        given(mockResult.getAccessToken()).willReturn(TEST_TOKEN);
+        given(mockResult.getExpiresIn()).willReturn(3600);
+        given(mockResult.getTemporalUnit()).willReturn(ChronoUnit.SECONDS);
         given(mockAuthenticationClient.authenticate(CLIENT_REGISTRATION_ID)).willReturn(mockResult);
 
         // when
@@ -81,9 +81,9 @@ class DefaultAccessTokenProviderTest
     void givenTokenExpired_whenGetAccessToken_thenRefreshToken()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
-        given(mockResult.accessToken()).willReturn(TEST_TOKEN);
-        given(mockResult.expiresIn()).willReturn(3600);
-        given(mockResult.temporalUnit()).willReturn(ChronoUnit.SECONDS);
+        given(mockResult.getAccessToken()).willReturn(TEST_TOKEN);
+        given(mockResult.getExpiresIn()).willReturn(3600);
+        given(mockResult.getTemporalUnit()).willReturn(ChronoUnit.SECONDS);
         given(mockAuthenticationClient.authenticate(CLIENT_REGISTRATION_ID)).willReturn(mockResult);
 
         Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();

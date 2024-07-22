@@ -47,7 +47,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
@@ -105,7 +104,7 @@ public class HxInsightClient
             ensureCorrectHttpStatusReturned(SC_ACCEPTED, httpResponse);
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
-                    .questionId();
+                    .getQuestionId();
         }
         catch (IOException | InterruptedException e)
         {
@@ -118,7 +117,7 @@ public class HxInsightClient
         try
         {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(config.getAnswerUrl().formatted(questionId)))
+                    .uri(URI.create(String.format(config.getAnswerUrl(), questionId)))
                     .headers(authService.getAuthHeaders())
                     .GET()
                     .build();
@@ -132,7 +131,7 @@ public class HxInsightClient
         }
         catch (IOException | InterruptedException e)
         {
-            throw new HxInsightConnectorRuntimeException("Failed to get answer to question with id %s".formatted(questionId), e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get answer to question with id %s", questionId), e);
         }
     }
 }

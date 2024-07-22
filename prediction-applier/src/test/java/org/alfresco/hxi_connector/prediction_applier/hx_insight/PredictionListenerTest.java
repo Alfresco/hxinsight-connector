@@ -102,7 +102,7 @@ class PredictionListenerTest
         PredictionEntry predictionEntry = new PredictionEntry("prediction-id", "node-id", null, null);
         String predictionJson = new ObjectMapper().writeValueAsString(predictionEntry);
         PredictionModel predictionModel = new PredictionModel("node-id", null, 0, null, null, null);
-        given(predictionMapperMock.map(any())).willReturn(predictionModel);
+        given(predictionMapperMock.map(any(PredictionEntry.class))).willReturn(predictionModel);
         mockEndpointWillExpectInRequestBody(predictionModel);
 
         // when

@@ -28,11 +28,21 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api.config;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensurePositive;
 
-public record QuestionsApiConfig(
-        int maxContextSizeForQuestion)
+import lombok.Data;
+
+@Data
+public class QuestionsApiConfig
 {
-    public QuestionsApiConfig
+    private int maxContextSizeForQuestion;
+
+    public QuestionsApiConfig(int maxContextSizeForQuestion)
+    {
+        setMaxContextSizeForQuestion(maxContextSizeForQuestion);
+    }
+
+    public void setMaxContextSizeForQuestion(int maxContextSizeForQuestion)
     {
         ensurePositive(maxContextSizeForQuestion, "maxNodesToAskAbout must be positive but was %d", maxContextSizeForQuestion);
+        this.maxContextSizeForQuestion = maxContextSizeForQuestion;
     }
 }

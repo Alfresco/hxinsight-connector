@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -24,23 +24,14 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.exception;
 
-import jakarta.validation.constraints.NotBlank;
+import org.alfresco.error.AlfrescoRuntimeException;
 
-import lombok.Getter;
-
-@Getter
-public final class HxInsightClientConfig
+public class AgentAvatarException extends AlfrescoRuntimeException
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
-
-    public HxInsightClientConfig(@NotBlank String baseUrl)
+    public AgentAvatarException(String message, Throwable cause)
     {
-        this.agentUrl = baseUrl + "/agents";
-        this.questionUrl = baseUrl + "/questions";
-        this.answerUrl = questionUrl + "/%s/answer";
+        super(message, cause);
     }
 }

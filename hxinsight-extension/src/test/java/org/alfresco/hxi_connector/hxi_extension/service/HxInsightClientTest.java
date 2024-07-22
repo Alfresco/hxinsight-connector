@@ -178,6 +178,20 @@ class HxInsightClientTest
 
     @Test
     @SneakyThrows
+    void shouldSet503StatusCodeOnIOException_Answer()
+    {
+        // given
+        given(httpClient.send(any(), any())).willThrow(IOException.class);
+
+        // when
+        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer("dummy-id-1234"));
+
+        // then
+        assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+    }
+
+    @Test
+    @SneakyThrows
     void shouldReturnAgents()
     {
         // given
