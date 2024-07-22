@@ -40,3 +40,5 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - uses: Alfresco/ya-pmd-scan@112e57223a722b4d455fa00974b819629235941c
+        with:
+          pmd-ruleset-ref: "PMD7_3_0"
