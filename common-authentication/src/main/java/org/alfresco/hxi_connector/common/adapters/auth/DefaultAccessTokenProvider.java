@@ -74,7 +74,7 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     }
 
     @Data
-    static final class Token
+    public static final class Token
     {
         private final String accessToken;
         private final OffsetDateTime refreshAt;
