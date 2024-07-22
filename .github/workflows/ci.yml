@@ -39,4 +39,4 @@ jobs:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
-      - uses: Alfresco/ya-pmd-scan@4e43699977ad61ed8f571ed449d33dd03c8cff83
+      - uses: Alfresco/ya-pmd-scan@112e57223a722b4d455fa00974b819629235941c
