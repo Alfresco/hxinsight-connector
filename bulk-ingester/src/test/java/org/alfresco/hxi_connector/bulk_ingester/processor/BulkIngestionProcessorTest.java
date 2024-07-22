@@ -52,7 +52,6 @@ import org.alfresco.hxi_connector.bulk_ingester.spring.ApplicationManager;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class BulkIngestionProcessorTest
 {
     @Mock

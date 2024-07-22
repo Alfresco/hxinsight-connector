@@ -55,7 +55,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNo
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class IngestEventProcessorTest
 {
     private static final String NODE_ID = "07659d13-8d64-4905-a329-6b27fe182023";
