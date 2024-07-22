@@ -77,11 +77,10 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
     @Container
     private static final LocalStackContainer awsMock = DockerContainers.createLocalStackContainerWithin(network);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, hxInsightMock, awsMock);
-    @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, transformCore, transformRouter, sfs, liveIngester);
+            .dependsOn(postgres, activemq, transformCore, transformRouter, sfs);
+    @Container
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
 
     @BeforeAll
     @SneakyThrows
@@ -103,6 +102,6 @@ public class CreateNodeE2eTest extends CreateNodeE2eTestBase
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network);
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, network);
     }
 }

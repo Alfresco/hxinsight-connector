@@ -172,7 +172,8 @@ class HttpFileUploaderTest
     {
         Storage storageProperties = new Storage(new Storage.Location(null, new Retry()), new Storage.Upload(new Retry()));
         IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
-        return new IntegrationProperties(null, hylandExperienceProperties, new IntegrationProperties.Application("dummy-source-id"));
+        IntegrationProperties.Application applicationProperties = new IntegrationProperties.Application("dummy-source-id", "dummy-version");
+        return new IntegrationProperties(null, hylandExperienceProperties, applicationProperties);
     }
 
     private FileUploadRequest createFileUploadRequestMock()

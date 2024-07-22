@@ -71,6 +71,7 @@ public class IntegrationProperties
 
     @ConfigurationProperties("application")
     public record Application(
-            @NotNull String sourceId)
+            @NotNull String sourceId,
+            @NotNull String version)
     {}
 }

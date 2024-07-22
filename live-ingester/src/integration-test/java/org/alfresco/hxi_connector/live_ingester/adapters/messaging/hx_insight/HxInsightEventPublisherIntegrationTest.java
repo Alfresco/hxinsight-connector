@@ -28,11 +28,13 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.USER_AGENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
@@ -41,6 +43,7 @@ import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -55,6 +58,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
@@ -80,6 +84,8 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
@@ -89,7 +95,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
         IntegrationProperties.class,
         HxInsightEventPublisher.class,
         HxInsightEventPublisherIntegrationTest.HxInsightEventPublisherTestConfig.class,
-        LiveIngesterAuthClient.class},
+        LiveIngesterAuthClient.class,
+        ApplicationInfoProvider.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableMethodSecurity
@@ -131,6 +138,7 @@ class HxInsightEventPublisherIntegrationTest
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(INGEST_PATH))
                 .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withRequestBody(new ContainsPattern(NODE_ID)));
         assertThat(thrown).doesNotThrowAnyException();
     }
@@ -176,6 +184,8 @@ class HxInsightEventPublisherIntegrationTest
     @TestConfiguration
     public static class HxInsightEventPublisherTestConfig
     {
+        @MockBean
+        public DiscoveryApiClient discoveryApi;
 
         @Bean
         public AuthProperties authorizationProperties()
@@ -194,9 +204,9 @@ class HxInsightEventPublisherIntegrationTest
         {
             AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(authorizationProperties());
             DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(dummyAuthClient);
-            Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
+            Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();
             AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
-            tokens.put(HXI_AUTH_PROVIDER, Map.entry(dummyAuthResult, OffsetDateTime.now().plusSeconds(3600)));
+            tokens.put(HXI_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.getAccessToken(), OffsetDateTime.now().plusSeconds(3600)));
             ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
             return dummyAccessTokenProvider;
         }

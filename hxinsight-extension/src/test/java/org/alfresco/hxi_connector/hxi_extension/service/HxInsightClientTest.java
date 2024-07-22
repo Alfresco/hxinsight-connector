@@ -36,6 +36,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.GOOD;
+
 import java.io.IOException;
 import java.net.http.HttpClient;
 import java.net.http.HttpResponse;
@@ -54,11 +56,12 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.JUnitTestsShouldIncludeAssert"})
 class HxInsightClientTest
 {
     private static final String AGENT_ID = "agent-id";
@@ -253,6 +256,53 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, hxInsightClient::getAgents);
+        assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+    }
+
+    @Test
+    @SneakyThrows
+    void canSubmitFeedbackWithoutException()
+    {
+        // given
+        HttpResponse response = mock(HttpResponse.class);
+        given(response.statusCode()).willReturn(200);
+
+        given(httpClient.send(any(), any())).willReturn(response);
+
+        // when
+        hxInsightClient.submitFeedback("dummy-id-1234", new Feedback(GOOD, "This answer was amazing"));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldPassStatusCodeFromHxi_Feedback()
+    {
+        // given
+        int expectedStatusCode = 418;
+
+        HttpResponse response = mock(HttpResponse.class);
+        given(response.statusCode()).willReturn(expectedStatusCode);
+
+        given(httpClient.send(any(), any())).willReturn(response);
+
+        // when, then
+        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.submitFeedback(
+                "dummy-id-1234",
+                new Feedback(GOOD, "This answer was amazing")));
+        assertEquals(expectedStatusCode, exception.getStatus());
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldSet503StatusCodeOnCheckedException_Feedback()
+    {
+        // given
+        given(httpClient.send(any(), any())).willThrow(IOException.class);
+
+        // when, then
+        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.submitFeedback(
+                "dummy-id-1234",
+                new Feedback(GOOD, "This answer was amazing")));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
     }
 }

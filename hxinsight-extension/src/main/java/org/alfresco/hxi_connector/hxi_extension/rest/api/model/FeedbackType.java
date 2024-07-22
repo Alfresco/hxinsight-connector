@@ -23,9 +23,24 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-import jakarta.validation.constraints.NotBlank;
+import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.BAD;
+import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.GOOD;
 
-public record Repository(@NotBlank String endpoint, @NotBlank String discoveryEndpoint)
-{}
+public enum FeedbackType
+{
+    LIKE(GOOD), DISLIKE(BAD);
+
+    private final org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType serviceModel;
+
+    FeedbackType(org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType serviceModel)
+    {
+        this.serviceModel = serviceModel;
+    }
+
+    public org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType toServiceModel()
+    {
+        return this.serviceModel;
+    }
+}

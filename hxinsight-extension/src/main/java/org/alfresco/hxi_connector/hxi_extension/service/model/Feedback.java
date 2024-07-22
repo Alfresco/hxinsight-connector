@@ -23,9 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
+package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record Repository(@NotBlank String endpoint, @NotBlank String discoveryEndpoint)
-{}
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Feedback
+{
+    private FeedbackType feedbackType;
+    private String comments;
+}
