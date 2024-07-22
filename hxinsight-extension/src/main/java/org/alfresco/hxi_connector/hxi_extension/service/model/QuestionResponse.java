@@ -26,5 +26,10 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-public record QuestionResponse(String questionId)
-{}
+import lombok.Data;
+
+@Data
+public class QuestionResponse
+{
+    private String questionId;
+}

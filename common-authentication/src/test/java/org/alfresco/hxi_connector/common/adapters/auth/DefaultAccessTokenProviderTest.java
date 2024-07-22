@@ -61,9 +61,9 @@ class DefaultAccessTokenProviderTest
     void givenTokenNotPresent_whenGetAccessToken_thenRefreshToken()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
-        given(mockResult.accessToken()).willReturn(TEST_TOKEN);
-        given(mockResult.expiresIn()).willReturn(3600);
-        given(mockResult.temporalUnit()).willReturn(ChronoUnit.SECONDS);
+        given(mockResult.getAccessToken()).willReturn(TEST_TOKEN);
+        given(mockResult.getExpiresIn()).willReturn(3600);
+        given(mockResult.getTemporalUnit()).willReturn(ChronoUnit.SECONDS);
         given(mockAuthenticationClient.authenticate(CLIENT_REGISTRATION_ID)).willReturn(mockResult);
 
         // when
@@ -78,9 +78,9 @@ class DefaultAccessTokenProviderTest
     void givenTokenExpired_whenGetAccessToken_thenRefreshToken()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
-        given(mockResult.accessToken()).willReturn(TEST_TOKEN);
-        given(mockResult.expiresIn()).willReturn(3600);
-        given(mockResult.temporalUnit()).willReturn(ChronoUnit.SECONDS);
+        given(mockResult.getAccessToken()).willReturn(TEST_TOKEN);
+        given(mockResult.getExpiresIn()).willReturn(3600);
+        given(mockResult.getTemporalUnit()).willReturn(ChronoUnit.SECONDS);
         given(mockAuthenticationClient.authenticate(CLIENT_REGISTRATION_ID)).willReturn(mockResult);
 
         Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
@@ -99,7 +99,7 @@ class DefaultAccessTokenProviderTest
     void givenTokenValid_whenGetAccessToken_thenReturnTokenWithoutRefresh()
     {
         AuthenticationResult mockResult = Mockito.mock(AuthenticationResult.class);
-        given(mockResult.accessToken()).willReturn(TEST_TOKEN);
+        given(mockResult.getAccessToken()).willReturn(TEST_TOKEN);
 
         Map<String, Map.Entry<AuthenticationResult, OffsetDateTime>> tokens = new HashMap<>();
         tokens.put(CLIENT_REGISTRATION_ID, Map.entry(mockResult, OffsetDateTime.now().plusSeconds(3600)));
