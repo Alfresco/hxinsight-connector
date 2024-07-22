@@ -46,15 +46,15 @@ public class ErrorUtils
     {
         if (actualStatusCode == 404)
         {
-            throw new ResourceNotFoundException(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(expectedStatusCode, actualStatusCode));
+            throw new ResourceNotFoundException(String.format(UNEXPECTED_STATUS_CODE_MESSAGE, expectedStatusCode, actualStatusCode));
         }
         else if (actualStatusCode >= 400 && actualStatusCode <= 499)
         {
-            throw new EndpointClientErrorException(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(expectedStatusCode, actualStatusCode));
+            throw new EndpointClientErrorException(String.format(UNEXPECTED_STATUS_CODE_MESSAGE, expectedStatusCode, actualStatusCode));
         }
         else if (actualStatusCode >= 500 && actualStatusCode <= 599)
         {
-            throw new EndpointServerErrorException(UNEXPECTED_STATUS_CODE_MESSAGE.formatted(expectedStatusCode, actualStatusCode));
+            throw new EndpointServerErrorException(String.format(UNEXPECTED_STATUS_CODE_MESSAGE, expectedStatusCode, actualStatusCode));
         }
     }
 
@@ -95,8 +95,7 @@ public class ErrorUtils
             }
             catch (InvocationTargetException | InstantiationException | IllegalAccessException | NoSuchMethodException e)
             {
-                return new HxInsightConnectorRuntimeException("Cannot create new instance of exception: %s due to: %s while processing another exception:"
-                        .formatted(runtimeExceptionType.getSimpleName(), e.getMessage()), cause);
+                return new HxInsightConnectorRuntimeException(String.format("Cannot create new instance of exception: %s due to: %s while processing another exception:", runtimeExceptionType.getSimpleName(), e.getMessage()), cause);
             }
             catch (RuntimeException e)
             {

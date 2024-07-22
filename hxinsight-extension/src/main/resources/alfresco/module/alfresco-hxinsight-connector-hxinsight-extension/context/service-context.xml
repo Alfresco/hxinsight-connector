@@ -61,10 +61,13 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
+    <bean id="predictionMapper" class="org.alfresco.hxi_connector.hxi_extension.service.PredictionMapperImpl"/>
+
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.PredictionChildrenRelation">
         <property name="nodes" ref="nodes"/>
         <property name="transactionService" ref="TransactionService"/>
         <property name="predictionService" ref="PredictionService"/>
+        <property name="predictionMapper" ref="predictionMapper"/>
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.PredictionsEntityResource">
@@ -163,6 +166,8 @@
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AgentsEntityResource">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
     </bean>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AvatarRelation"/>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
 

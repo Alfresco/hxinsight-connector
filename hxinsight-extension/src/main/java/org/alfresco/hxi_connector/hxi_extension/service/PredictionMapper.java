@@ -23,19 +23,18 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
+package org.alfresco.hxi_connector.hxi_extension.service;
 
-import java.util.Date;
-import java.util.List;
+import org.mapstruct.Mapper;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
 
-@Data
-@AllArgsConstructor
-public class NodeWithPrediction
+@Mapper
+public interface PredictionMapper
 {
-    private String id;
-    private Date latestPredictionDateTime;
-    private List<String> predictedProperties;
+
+    Prediction map(PredictionModel predictionModel);
+
+    PredictionModel map(Prediction prediction);
 }

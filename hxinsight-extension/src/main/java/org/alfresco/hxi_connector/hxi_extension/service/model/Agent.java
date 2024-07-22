@@ -25,5 +25,16 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-public record Agent(String agentId, String name, String description)
-{}
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class Agent
+{
+    private String agentId;
+    private String name;
+    private String description;
+}

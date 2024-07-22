@@ -41,6 +41,6 @@ public final class HttpUtils
     public static void ensureCorrectHttpStatusReturned(int expectedStatus, HttpResponse<?> httpResponse)
     {
         ensureThat(httpResponse.statusCode() == expectedStatus,
-                () -> new WebScriptException(httpResponse.statusCode(), "Request to hxi failed, expected status %s, received %s".formatted(expectedStatus, httpResponse.statusCode())));
+                () -> new WebScriptException(httpResponse.statusCode(), String.format("Request to hxi failed, expected status %s, received %s", expectedStatus, httpResponse.statusCode())));
     }
 }

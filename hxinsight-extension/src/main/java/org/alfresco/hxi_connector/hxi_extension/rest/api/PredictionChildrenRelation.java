@@ -34,6 +34,7 @@ import java.util.List;
 import lombok.Setter;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
+import org.alfresco.hxi_connector.hxi_extension.service.PredictionMapper;
 import org.alfresco.hxi_connector.hxi_extension.service.PredictionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
 import org.alfresco.repo.transaction.RetryingTransactionHelper.RetryingTransactionCallback;
@@ -55,6 +56,7 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
     private NodesImpl nodes;
     private TransactionService transactionService;
     private PredictionService predictionService;
+    private PredictionMapper predictionMapper;
 
     @Override
     public CollectionWithPagingInfo<PredictionModel> readAll(String nodeId, Parameters params)
@@ -62,7 +64,7 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
         NodeRef nodeRef = validateOrLookupNode(nodes, nodeId);
 
         List<Prediction> predictions = predictionService.getPredictions(nodeRef);
-        List<PredictionModel> predictionModels = predictions.stream().map(PredictionModel::fromServiceModel).collect(toList());
+        List<PredictionModel> predictionModels = predictions.stream().map(predictionMapper::map).collect(toList());
 
         Paging paging = params.getPaging();
         return ListPage.of(predictionModels, paging);
@@ -72,11 +74,11 @@ public class PredictionChildrenRelation implements RelationshipResourceAction.Re
     public List<PredictionModel> create(String nodeId, List<PredictionModel> predictionModels, Parameters parameters)
     {
         NodeRef nodeRef = validateOrLookupNode(nodes, nodeId);
-        List<Prediction> predictions = predictionModels.stream().map(PredictionModel::toServiceModel).collect(toList());
+        List<Prediction> predictions = predictionModels.stream().map(predictionMapper::map).collect(toList());
 
         RetryingTransactionCallback<List<Prediction>> callback = () -> predictionService.applyPredictions(nodeRef, predictions);
         List<Prediction> outputPredictions = transactionService.getRetryingTransactionHelper().doInTransaction(callback, false, true);
 
-        return outputPredictions.stream().map(PredictionModel::fromServiceModel).collect(toList());
+        return outputPredictions.stream().map(predictionMapper::map).collect(toList());
     }
 }

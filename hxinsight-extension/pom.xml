@@ -13,6 +13,12 @@
     <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
     <packaging>jar</packaging>
 
+    <properties>
+        <maven.build.sourceVersion>11</maven.build.sourceVersion>
+        <maven.build.targetVersion>11</maven.build.targetVersion>
+        <maven.compiler.testRelease>17</maven.compiler.testRelease>
+    </properties>
+
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -96,6 +102,16 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
             <scope>provided</scope>
         </dependency>
     </dependencies>
@@ -225,58 +241,6 @@
             </plugin>
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>java8</id>
-            <activation>
-                <jdk>[1.8,11.0)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <source>1.8</source>
-                            <target>1.8</target>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>java11</id>
-            <activation>
-                <jdk>[11.0, 17)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <release>11</release>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-        <profile>
-            <id>java17</id>
-            <activation>
-                <jdk>[17,)</jdk>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <configuration>
-                            <release>17</release>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <!-- Alfresco Maven Repositories -->
     <repositories>
