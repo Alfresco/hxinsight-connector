@@ -30,6 +30,7 @@ import static org.alfresco.hxi_connector.common.test.docker.repository.Repositor
 
 import java.time.Duration;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -51,6 +52,7 @@ import org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
+    private static final Pattern SPECIAL_REGEX_CHARS = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
     private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-hxinsight-extension");
     private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-hxinsight-extension";
     private static final String POSTGRES_IMAGE = "postgres";
@@ -263,14 +265,17 @@ public class DockerContainers
         return liveIngester;
     }
 
-    public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, Network network)
+    public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, AlfrescoRepositoryContainer acsContainer, Network network)
     {
         return createLiveIngesterContainerWithin(network)
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
                         "http://%s:8080".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key");
+                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key")
+                .withEnv("AUTH_PROVIDERS_ALFRESCO_USERNAME", "admin")
+                .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin")
+                .withEnv("ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(acsContainer.getNetworkAliases().stream().findFirst().get()));
     }
 
     public static GenericContainer<?> createPredictionApplierContainerWithin(Network network)
@@ -312,5 +317,20 @@ public class DockerContainers
         return createLocalStackContainer()
                 .withNetwork(network)
                 .withNetworkAliases(LOCALSTACK_ALIAS);
+    }
+
+    public static @NotNull String getAppInfoRegex()
+    {
+        // Since ACS 23.2.1 release was a super quick fix to 23.2.0 it shows as 23.2.0 in the discovery endpoint.
+        // Hence, we cannot use DockerTags.getRepositoryTag() without additional magic here
+        // When we move past 23.2.1 ACS version we can modify this method to return more accurate regex.
+        String pattern = "ACS HXI Connector\\/%s ACS\\/.*";
+        String appVersion = escapeSpecialChars(DockerTags.getHxiConnectorTag());
+        return pattern.formatted(appVersion);
+    }
+
+    private static String escapeSpecialChars(String string)
+    {
+        return SPECIAL_REGEX_CHARS.matcher(string).replaceAll("\\\\$0");
     }
 }

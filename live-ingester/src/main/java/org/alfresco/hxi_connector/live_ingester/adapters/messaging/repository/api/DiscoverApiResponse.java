@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,9 +23,27 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record Repository(@NotBlank String endpoint, @NotBlank String discoveryEndpoint)
-{}
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+public record DiscoverApiResponse(@NotBlank RepositoryInfoEntry entry)
+{
+    public record RepositoryInfoEntry(@NotBlank RepositoryInfo repository)
+    {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record RepositoryInfo(@NotBlank String id, @NotBlank RepositoryVersion version)
+    {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record RepositoryVersion(@NotBlank String major, @NotBlank String minor, @NotBlank String patch)
+    {}
+
+    public String getFullVersion()
+    {
+        return entry.repository.version.major() + "." + entry.repository.version.minor() + "." + entry.repository.version.patch();
+    }
+}

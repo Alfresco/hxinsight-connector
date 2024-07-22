@@ -41,6 +41,8 @@ services:
         -Dcsrf.filter.enabled=false
         -Dalfresco.restApi.basicAuthScheme=true
         -Xms1500m -Xmx1500m
+        -Dhxi.client.base-url=http://hxinsight-mock:8080
+        -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         "
     ports:
       - "8000:8000"
@@ -142,10 +144,13 @@ services:
       HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST: http://shared-file-store
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT: 8099
+      ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-secret
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://hxinsight-mock:8080/token
+      AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
+      AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
     ports:
       - "5007:5007"
 
