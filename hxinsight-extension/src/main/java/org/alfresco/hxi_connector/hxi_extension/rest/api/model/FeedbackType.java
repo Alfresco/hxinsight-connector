@@ -30,14 +30,17 @@ import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackTyp
 
 public enum FeedbackType
 {
-    LIKE, DISLIKE;
+    LIKE(GOOD), DISLIKE(BAD);
+
+    private final org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType serviceModel;
+
+    FeedbackType(org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType serviceModel)
+    {
+        this.serviceModel = serviceModel;
+    }
 
     public org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType toServiceModel()
     {
-        return switch (this)
-        {
-        case LIKE -> GOOD;
-        case DISLIKE -> BAD;
-        };
+        return this.serviceModel;
     }
 }

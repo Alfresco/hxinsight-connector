@@ -143,7 +143,7 @@ public class HxInsightClient
             String body = objectMapper.writeValueAsString(feedback);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(config.getFeedbackUrl().formatted(questionId)))
+                    .uri(URI.create(String.format(config.getFeedbackUrl(), questionId)))
                     .header("Content-Type", "application/json")
                     .headers(authService.getAuthHeaders())
                     .POST(BodyPublishers.ofString(body))
@@ -155,7 +155,7 @@ public class HxInsightClient
         }
         catch (IOException | InterruptedException e)
         {
-            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, "Failed to submit feedback for question with id %s".formatted(questionId), e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to submit feedback for question with id %s", questionId), e);
         }
     }
 }
