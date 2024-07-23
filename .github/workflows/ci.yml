@@ -202,7 +202,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   run_e2e_test_java_11:
-    name: "Run e2e tests against Java 11"
+    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} and Java 11"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
@@ -213,7 +213,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repoVersion: [ 7.3.2, 7.4.2, 23.2.1 ]
+        repoVersion: [ 7.3.2, 7.4.2 ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
@@ -251,6 +251,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - run_e2e_test_java_11
     if: >
       github.event_name == 'push' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -284,6 +285,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - run_e2e_test_java_11
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -307,6 +309,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - run_e2e_test_java_11
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -353,6 +356,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - run_e2e_test_java_11
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
