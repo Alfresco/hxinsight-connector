@@ -54,6 +54,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
+import org.alfresco.rest.framework.resource.content.BinaryResource;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -156,6 +157,29 @@ public class HxInsightClient
         catch (IOException | InterruptedException e)
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to submit feedback for question with id %s", questionId), e);
+        }
+    }
+
+    public BinaryResource getAvatar(String agentId)
+    {
+        try
+        {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(String.format(config.getAvatarUrl(), agentId)))
+                    .headers(authService.getAuthHeaders())
+                    .GET()
+                    .build();
+
+            HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
+            log.atDebug().log("Agent with id {} received a following avatar {}", agentId, httpResponse.body());
+
+            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
+
+            return objectMapper.readValue(httpResponse.body(), BinaryResource.class);
+        }
+        catch (IOException | InterruptedException e)
+        {
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get avatar for agent with id %s", agentId), e);
         }
     }
 }
