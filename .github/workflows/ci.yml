@@ -109,7 +109,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - uses: Alfresco/ya-pmd-scan@5cfcc5afef1163d4aeb57a3576bc461dbaa6d6c6
         with:
-          pmd-ruleset-ref: "PMD7_3_0"
+          pmd-ruleset-ref-override: "PMD7_3_0"
 
   test_application:
     name: "Build and test application"
