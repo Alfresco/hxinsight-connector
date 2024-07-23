@@ -31,9 +31,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
@@ -44,6 +46,8 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
+import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
 import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
 import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
@@ -63,6 +67,9 @@ class AlfrescoNodeMapperTest
     private static final ZonedDateTime CREATED_AT = ZonedDateTime.parse("2024-01-31T10:15:30+00:00");
     private static final long CREATED_AT_TIMESTAMP = CREATED_AT.toInstant().getEpochSecond();
 
+    private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
+    private static final String BOB = "bob";
+
     private final AlfrescoPropertyMapper alfrescoPropertyMapper = mock();
     private final NamespacePrefixMapper namespacePrefixMapper = new TestNamespaceToPrefixMapper(TEST_PREFIX);
     private final AlfrescoNodeMapper alfrescoNodeMapper = new AlfrescoNodeMapper((node, propertyName) -> alfrescoPropertyMapper, namespacePrefixMapper);
@@ -80,6 +87,10 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setAspects(Set.of(QName.newTransientInstance("", ASPECT_TITLED)));
         alfrescoNode.setCreatedAt(CREATED_AT);
         alfrescoNode.setNodeProperties(Set.of());
+        alfrescoNode.setAccessControlList(
+                Set.of(
+                        createAccessControlEntry(true, GROUP_EVERYONE),
+                        createAccessControlEntry(false, BOB)));
 
         // when
         IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
@@ -91,7 +102,9 @@ class AlfrescoNodeMapperTest
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
                 ASPECT_NAMES_PROPERTY, Set.of(PREFIXED_ASPECT_TITLED),
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP,
+                ALLOW_ACCESS, Set.of(GROUP_EVERYONE),
+                DENY_ACCESS, Set.of(BOB)), ingestEvent.properties());
     }
 
     @Test
@@ -117,7 +130,9 @@ class AlfrescoNodeMapperTest
                 TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP,
+                ALLOW_ACCESS, Set.of(),
+                DENY_ACCESS, Set.of()), ingestEvent.properties());
     }
 
     @Test
@@ -142,7 +157,9 @@ class AlfrescoNodeMapperTest
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP,
+                ALLOW_ACCESS, Set.of(),
+                DENY_ACCESS, Set.of()), ingestEvent.properties());
     }
 
     @Test
@@ -162,7 +179,9 @@ class AlfrescoNodeMapperTest
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP,
+                ALLOW_ACCESS, Set.of(),
+                DENY_ACCESS, Set.of()), ingestEvent.properties());
     }
 
     private NodeProperty mockProperty(String propertyName)
@@ -186,7 +205,21 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setModifier(MODIFIER_ID);
         alfrescoNode.setCreatedAt(CREATED_AT);
         alfrescoNode.setNodeProperties(Set.of());
+        alfrescoNode.setAccessControlList(Set.of());
 
         return alfrescoNode;
+    }
+
+    private AccessControlEntry createAccessControlEntry(boolean allowed, String authority)
+    {
+        AccessControlEntryKey accessControlEntryKey = new AccessControlEntryKey();
+        accessControlEntryKey.setNodeId(123L);
+        accessControlEntryKey.setAuthority(authority);
+
+        AccessControlEntry accessControlEntry = new AccessControlEntry();
+        accessControlEntry.setAllowed(allowed);
+        accessControlEntry.setAccessControlEntryKey(accessControlEntryKey);
+
+        return accessControlEntry;
     }
 }

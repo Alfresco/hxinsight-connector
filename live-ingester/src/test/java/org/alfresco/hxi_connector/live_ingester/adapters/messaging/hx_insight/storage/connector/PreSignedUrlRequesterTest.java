@@ -29,6 +29,7 @@ import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.reset;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -60,6 +61,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PreSignedUrlRequesterTest
@@ -72,6 +74,8 @@ class PreSignedUrlRequesterTest
 
     @Mock
     private AuthService mockAuthService;
+    @Mock
+    private ApplicationInfoProvider mockApplicationInfoProvider;
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
 
@@ -84,11 +88,12 @@ class PreSignedUrlRequesterTest
         openMocks(this);
         camelContext = new DefaultCamelContext();
         IntegrationProperties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT);
-        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties, mockAuthService);
+        given(mockApplicationInfoProvider.getUserAgentData()).willReturn("");
+        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties, mockAuthService, mockApplicationInfoProvider);
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
 
-        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
+        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT + "&userAgent=", MockEndpoint.class);
     }
 
     @AfterEach
