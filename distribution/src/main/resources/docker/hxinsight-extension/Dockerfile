@@ -23,7 +23,6 @@ RUN if [[ "$JAVA_VERSION" == "11" ]]; then \
       mv jdk-* /usr/lib/jvm/temurin-11-jdk && \
       update-alternatives --install /usr/bin/java java /usr/lib/jvm/temurin-11-jdk/bin/java 1 && \
       update-alternatives --remove java $(update-alternatives --display java | head -2 | tail -1 | cut -d " " -f6); \
-      echo "export JAVA_HOME=$(dirname $(dirname $(readlink -f $(type -P java))))" > /etc/profile.d/javahome.sh; \
     fi
 
 USER $USERNAME
