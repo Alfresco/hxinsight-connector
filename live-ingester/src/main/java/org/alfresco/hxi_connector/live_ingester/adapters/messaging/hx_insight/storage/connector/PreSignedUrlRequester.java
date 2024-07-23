@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.s
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -51,6 +52,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
@@ -67,6 +69,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
     private final AuthService authService;
+    private final ApplicationInfoProvider applicationInfoProvider;
 
     @Override
     public void configure()
@@ -79,8 +82,9 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
+            .setProperty(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
             .process(authService::setHxIAuthorizationHeaders)
-            .to(integrationProperties.hylandExperience().storage().location().endpoint())
+            .toD(integrationProperties.hylandExperience().storage().location().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .unmarshal()
