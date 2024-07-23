@@ -27,9 +27,14 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.a
 
 import static org.apache.camel.LoggingLevel.TRACE;
 
+import java.io.IOException;
+import java.util.Optional;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
+import org.apache.camel.CamelExecutionException;
+import org.apache.camel.FluentProducerTemplate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.springframework.stereotype.Component;
@@ -66,11 +71,20 @@ public class DiscoveryApiClient extends RouteBuilder
         // @formatter:on
     }
 
-    public String getRepositoryVersion()
+    public Optional<String> getRepositoryVersion()
     {
-        DiscoverApiResponse response = camelContext.createFluentProducerTemplate()
-                .to(LOCAL_ENDPOINT)
-                .request(DiscoverApiResponse.class);
-        return response.getFullVersion();
+        try (FluentProducerTemplate template = camelContext.createFluentProducerTemplate())
+        {
+            DiscoverApiResponse response = template
+                    .to(LOCAL_ENDPOINT)
+                    .request(DiscoverApiResponse.class);
+            return Optional.ofNullable(response).map(DiscoverApiResponse::getFullVersion);
+        }
+        catch (CamelExecutionException | IOException ex)
+        {
+            log.debug("Failed to get repository version from the Discovery API", ex);
+            return Optional.empty();
+        }
+
     }
 }

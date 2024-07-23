@@ -28,7 +28,10 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.Mockito.mock;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -62,7 +65,7 @@ class ApplicationInfoProviderTest
     {
         given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
         given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
-        given(discoveryApiMock.getRepositoryVersion()).willReturn("23.2.0");
+        given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.of("23.2.0"));
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
@@ -91,6 +94,30 @@ class ApplicationInfoProviderTest
         assertEquals(expectedUserAgentData, actualUserAgentData);
         then(integrationPropertiesMock).shouldHaveNoInteractions();
         then(discoveryApiMock).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void givenNoUserDataYetFetchedAndRepositoryIsOff_whenGetUserAgentDat_thenGetVersionFromAcsPropertiesAndCalculateData()
+    {
+        IntegrationProperties.Alfresco alfresco = mock(IntegrationProperties.Alfresco.class, RETURNS_DEEP_STUBS);
+
+        given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
+        given(integrationPropertiesMock.alfresco()).willReturn(alfresco);
+        given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
+        given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.empty());
+        given(alfresco.repository().version()).willReturn("23.2.0");
+        systemProperties.set("os.name", "Windows");
+        systemProperties.set("os.version", "10");
+        systemProperties.set("os.arch", "amd64");
+        // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
+        String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
+
+        // when
+        String actualUserAgentData = objectUnderTest.getUserAgentData();
+
+        // then
+        assertEquals(expectedUserAgentData, actualUserAgentData);
+        then(discoveryApiMock).should().getRepositoryVersion();
     }
 
 }

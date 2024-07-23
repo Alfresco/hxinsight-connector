@@ -25,12 +25,16 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
+import java.util.Optional;
+import java.util.function.Predicate;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.logging.log4j.util.Strings;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
 
 @Slf4j
@@ -59,7 +63,14 @@ public class ApplicationInfoProvider
     private String calculateUserAgentData()
     {
         String applicationVersion = integrationProperties.application().version();
-        String repositoryVersion = discoveryApiClient.getRepositoryVersion();
+        String repositoryVersion = discoveryApiClient.getRepositoryVersion()
+                .orElseGet(() -> Optional.of(integrationProperties)
+                        .map(IntegrationProperties::alfresco)
+                        .map(IntegrationProperties.Alfresco::repository)
+                        .map(Repository::version)
+                        .filter(Predicate.not(String::isBlank))
+                        .orElseThrow(() -> new IllegalStateException("Repository version is not configured.")));
+
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return APP_INFO_PATTERN.formatted(applicationVersion, repositoryVersion, osVersion);
     }

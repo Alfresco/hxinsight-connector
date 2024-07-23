@@ -27,5 +27,5 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record Repository(@NotBlank String endpoint, @NotBlank String discoveryEndpoint)
+public record Repository(@NotBlank String endpoint, @NotBlank String discoveryEndpoint, String version)
 {}
