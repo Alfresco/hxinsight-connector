@@ -161,7 +161,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   run_e2e_test:
-    name: "Run e2e tests"
+    name: "Run e2e tests using ACS ${{ matrix.repoVersion }}"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
@@ -202,7 +202,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   run_e2e_test_java_11:
-    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} and Java 11"
+    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java 11"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
