@@ -274,6 +274,9 @@ class PreSignedUrlRequesterIntegrationTest
     public static class PreSignedUrlRequesterIntegrationTestConfig
     {
 
+        @MockBean
+        public DiscoveryApiClient discoveryApi;
+
         @Bean
         public AuthProperties authorizationProperties()
         {
@@ -303,8 +306,5 @@ class PreSignedUrlRequesterIntegrationTest
         {
             return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
         }
-
-        @MockBean
-        public DiscoveryApiClient discoveryApi;
     }
 }
