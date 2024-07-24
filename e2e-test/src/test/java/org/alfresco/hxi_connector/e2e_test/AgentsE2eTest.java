@@ -103,7 +103,7 @@ public class AgentsE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("image/png")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/-default-/avatar/-default-")
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/-default-/avatars/-default-")
                 .then().extract().response();
 
         // then
