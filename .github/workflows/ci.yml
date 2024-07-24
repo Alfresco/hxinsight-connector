@@ -184,7 +184,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Drepo.java.version=17
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
       - name: "Start docker-compose and run e2e docker-compose tests"
@@ -224,8 +224,8 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
-      - name: "Build JAMP extension"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Drepo.java.version=11 -Dalfresco-platform.version=${{ matrix.repoVersion }}
+      - name: "Build application"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: |
           JAVA_VERSION=11

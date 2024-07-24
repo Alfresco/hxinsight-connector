@@ -52,7 +52,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <repo.java.version>${java.version}</repo.java.version>
+        <repo.java.version>11</repo.java.version>
         <test.java.version>${java.version}</test.java.version>
         <maven.build.sourceVersion>${java.version}</maven.build.sourceVersion>
         <maven.build.targetVersion>${java.version}</maven.build.targetVersion>
