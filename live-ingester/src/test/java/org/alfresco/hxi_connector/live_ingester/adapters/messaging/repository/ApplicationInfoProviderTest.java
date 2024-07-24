@@ -120,4 +120,16 @@ class ApplicationInfoProviderTest
         then(discoveryApiMock).should().getRepositoryVersion();
     }
 
+    @Test
+    void givenRepositoryIsOffAndNotConfiguredAcsVersion_whenGetUserAgentDat_thenThrownAnError()
+    {
+        given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
+        given(integrationPropertiesMock.alfresco()).willReturn(mock(IntegrationProperties.Alfresco.class));
+        given(integrationPropertiesMock.application().version()).willReturn(null);
+        given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.empty());
+
+        // when, then
+        assertThrows(IllegalStateException.class, () -> objectUnderTest.getUserAgentData());
+    }
+
 }
