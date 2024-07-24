@@ -32,7 +32,7 @@ import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
 import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
-import java.io.IOException;
+import java.io.*;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -55,6 +55,8 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 import org.alfresco.rest.framework.resource.content.BinaryResource;
+import org.alfresco.rest.framework.resource.content.FileBinaryResource;
+import org.alfresco.util.TempFileProvider;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -170,14 +172,19 @@ public class HxInsightClient
                     .GET()
                     .build();
 
-            HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
+            HttpResponse<InputStream> httpResponse = client.send(request, BodyHandlers.ofInputStream());
             log.atDebug().log("Agent with id {} received a following avatar {}", agentId, httpResponse.body());
 
             ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
 
-            return objectMapper.readValue(httpResponse.body(), BinaryResource.class);
+            File file = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", "png");
+            return new FileBinaryResource(file, null);
         }
         catch (IOException | InterruptedException e)
+        {
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get avatar for agent with id %s", agentId), e);
+        }
+        catch (Exception e)
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get avatar for agent with id %s", agentId), e);
         }
