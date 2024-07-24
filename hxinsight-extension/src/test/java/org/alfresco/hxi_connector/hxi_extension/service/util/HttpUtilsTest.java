@@ -26,7 +26,9 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.util;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -35,7 +37,6 @@ import java.net.http.HttpResponse;
 import org.junit.jupiter.api.Test;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class HttpUtilsTest
 {
     @Test
@@ -57,6 +58,7 @@ class HttpUtilsTest
     }
 
     @Test
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void shouldDoNothingIfStatusCodeMatchesExpected()
     {
         // given

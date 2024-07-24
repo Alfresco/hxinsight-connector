@@ -53,7 +53,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNo
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 class IngestContentCommandHandlerTest
 {
