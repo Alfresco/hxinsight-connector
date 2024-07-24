@@ -61,7 +61,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.JUnitTestsShouldIncludeAssert"})
+@SuppressWarnings("PMD.FieldNamingConventions")
 class HxInsightClientTest
 {
     private static final String AGENT_ID = "agent-id";
@@ -243,7 +243,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when, then
-        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.getAgents());
+        WebScriptException exception = assertThrows(WebScriptException.class, hxInsightClient::getAgents);
         assertEquals(expectedStatusCode, exception.getStatus());
     }
 
@@ -261,6 +261,7 @@ class HxInsightClientTest
 
     @Test
     @SneakyThrows
+    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void canSubmitFeedbackWithoutException()
     {
         // given

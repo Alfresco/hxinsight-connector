@@ -161,7 +161,6 @@ public class UpdateNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void testApplyPredictionToUpdatedNode() throws IOException, InterruptedException
     {
         // given
