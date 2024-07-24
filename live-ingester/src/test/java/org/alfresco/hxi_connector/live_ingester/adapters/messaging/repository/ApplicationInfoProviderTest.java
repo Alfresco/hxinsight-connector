@@ -40,8 +40,10 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
 
 @ExtendWith({MockitoExtension.class, SystemStubsExtension.class})
 class ApplicationInfoProviderTest
@@ -60,8 +62,8 @@ class ApplicationInfoProviderTest
     @Test
     void givenNoUserDataYetFetched_whenGetUserAgentData_thenCallAcsApiAndCalculateData()
     {
-        given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
+        given(integrationPropertiesMock.application()).willReturn(mock(Application.class));
+        given(integrationPropertiesMock.application().getVersion()).willReturn("1.0.0");
         given(discoveryApiMock.getRepositoryVersion()).willReturn("23.2.0");
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");

@@ -47,6 +47,7 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.ResourceNotFoundException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -227,7 +228,7 @@ class ATSTransformResponseHandlerTest
                                     mock()),
                             mock()),
                     mock(),
-                    new IntegrationProperties.Application("dummy-source-id", "dummy-version"));
+                    new Application("dummy-source-id", "dummy-version"));
         }
     }
 }

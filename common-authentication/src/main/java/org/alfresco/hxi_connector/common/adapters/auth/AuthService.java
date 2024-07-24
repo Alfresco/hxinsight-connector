@@ -51,24 +51,27 @@ public class AuthService
     {
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
         String authType = authProvider.getType();
-        String authHeaderValue = getAlfrescoAuthHeaderValue(accessTokenProvider, authProvider);
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(AUTHORIZATION, authHeaderValue);
+        exchange.getIn().setHeader(AUTHORIZATION, getAlfrescoAuthHeaderValue(authProvider));
         log.debug("Authorization :: {} {} authorization header added", ALFRESCO_AUTH_PROVIDER, authType);
     }
 
     public void setHxIAuthorizationHeaders(Exchange exchange)
     {
-        final String token = accessTokenProvider.getAccessToken(HXI_AUTH_PROVIDER);
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(HXI_AUTH_PROVIDER);
-        String authHeaderValue = BEARER + token;
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(AUTHORIZATION, authHeaderValue);
+        exchange.getIn().setHeader(AUTHORIZATION, getBearerAuthHeader(HXI_AUTH_PROVIDER));
         exchange.getIn().setHeader(ENVIRONMENT_KEY_HEADER, authProvider.getEnvironmentKey());
         log.debug("Authorization :: {} authorization header added", HXI_AUTH_PROVIDER);
     }
 
-    private String getAlfrescoAuthHeaderValue(AccessTokenProvider accessTokenProvider, AuthProperties.AuthProvider authProvider)
+    public String getAuthHeaderValue(String providerId)
+    {
+        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
+        return providerId.equals(HXI_AUTH_PROVIDER) ? getBearerAuthHeader(HXI_AUTH_PROVIDER) : getAlfrescoAuthHeaderValue(authProvider);
+    }
+
+    private String getAlfrescoAuthHeaderValue(AuthProperties.AuthProvider authProvider)
     {
         if (BASIC.trim().equalsIgnoreCase(authProvider.getType()))
         {
@@ -76,8 +79,13 @@ public class AuthService
         }
         else
         {
-            return BEARER + accessTokenProvider.getAccessToken(ALFRESCO_AUTH_PROVIDER);
+            return getBearerAuthHeader(ALFRESCO_AUTH_PROVIDER);
         }
+    }
+
+    private String getBearerAuthHeader(String providerId)
+    {
+        return BEARER + accessTokenProvider.getAccessToken(providerId);
     }
 
     private static String getBasicAuthenticationHeader(AuthProperties.AuthProvider authProvider)

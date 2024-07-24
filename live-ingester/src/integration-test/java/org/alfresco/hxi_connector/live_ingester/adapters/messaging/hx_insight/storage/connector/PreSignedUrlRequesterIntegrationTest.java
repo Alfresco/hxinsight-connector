@@ -84,14 +84,14 @@ import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvide
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
