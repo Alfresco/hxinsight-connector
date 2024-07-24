@@ -13,8 +13,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.build.sourceVersion>${acs.java.version}</maven.build.sourceVersion>
-        <maven.build.targetVersion>${acs.java.version}</maven.build.targetVersion>
+        <maven.build.sourceVersion>${repo.java.version}</maven.build.sourceVersion>
+        <maven.build.targetVersion>${repo.java.version}</maven.build.targetVersion>
     </properties>
 
     <dependencies>

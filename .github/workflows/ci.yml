@@ -225,7 +225,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Build JAMP extension"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Drepo.java.version=11 -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: |
           JAVA_VERSION=11
