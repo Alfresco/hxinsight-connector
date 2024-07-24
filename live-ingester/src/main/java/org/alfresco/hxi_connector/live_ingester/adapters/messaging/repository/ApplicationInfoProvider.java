@@ -69,7 +69,7 @@ public class ApplicationInfoProvider
                         .map(IntegrationProperties.Alfresco::repository)
                         .map(Repository::version)
                         .filter(Predicate.not(String::isBlank))
-                        .orElseThrow(() -> new IllegalStateException("The repository version cannot be fetched from the Discovery API and the Live Ingester configuration.")));
+                        .orElseThrow(() -> new IllegalStateException("The repository version cannot be retrieved from either the Discovery API or the Live Ingester configuration.")));
 
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return APP_INFO_PATTERN.formatted(applicationVersion, repositoryVersion, osVersion);

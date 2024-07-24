@@ -97,7 +97,7 @@ class ApplicationInfoProviderTest
     }
 
     @Test
-    void givenNoUserDataYetFetchedAndRepositoryIsOff_whenGetUserAgentDat_thenGetRepositoryVersionFromConfigurationAndCalculateData()
+    void givenNoUserDataYetFetchedAndRepositoryIsOff_whenGetUserAgentData_thenGetRepositoryVersionFromConfigurationAndCalculateData()
     {
         IntegrationProperties.Alfresco alfresco = mock(IntegrationProperties.Alfresco.class, RETURNS_DEEP_STUBS);
 
@@ -121,7 +121,7 @@ class ApplicationInfoProviderTest
     }
 
     @Test
-    void givenRepositoryIsOffAndNotConfiguredAcsVersion_whenGetUserAgentDat_thenThrownAnError()
+    void givenRepositoryIsOffAndNotConfiguredAcsVersion_whenGetUserAgentData_thenThrownAnError()
     {
         given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
         given(integrationPropertiesMock.alfresco()).willReturn(mock(IntegrationProperties.Alfresco.class));
