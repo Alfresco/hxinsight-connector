@@ -14,7 +14,6 @@ alfresco:
   repository:
     endpoint: activemq:topic:alfresco.repo.event2
     discovery-endpoint: http://localhost:8080/alfresco/api/discovery
-    version: 23.2.1
   bulk-ingester:
     endpoint: activemq:queue:bulk-ingester-events
   transform:
