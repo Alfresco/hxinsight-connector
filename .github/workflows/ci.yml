@@ -108,8 +108,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - uses: Alfresco/ya-pmd-scan@v4.0.0
-        with:
-          pmd-ruleset-ref-override: "PMD7_3_0"
 
   test_application:
     name: "Build and test application"
