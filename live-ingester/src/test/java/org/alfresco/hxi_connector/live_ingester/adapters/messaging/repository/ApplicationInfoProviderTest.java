@@ -97,7 +97,7 @@ class ApplicationInfoProviderTest
     }
 
     @Test
-    void givenNoUserDataYetFetchedAndRepositoryIsOff_whenGetUserAgentDat_thenGetVersionFromAcsPropertiesAndCalculateData()
+    void givenNoUserDataYetFetchedAndRepositoryIsOff_whenGetUserAgentDat_thenGetRepositoryVersionFromConfigurationAndCalculateData()
     {
         IntegrationProperties.Alfresco alfresco = mock(IntegrationProperties.Alfresco.class, RETURNS_DEEP_STUBS);
 
