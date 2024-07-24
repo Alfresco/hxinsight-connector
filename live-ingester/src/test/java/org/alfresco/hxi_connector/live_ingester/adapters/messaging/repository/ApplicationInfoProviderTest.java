@@ -129,7 +129,7 @@ class ApplicationInfoProviderTest
         given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.empty());
 
         // when, then
-        assertThrows(IllegalStateException.class, () -> objectUnderTest.getUserAgentData());
+        assertThrows(IllegalStateException.class, objectUnderTest::getUserAgentData);
     }
 
 }
