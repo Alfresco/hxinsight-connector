@@ -13,8 +13,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <java.version>11</java.version>
-        <java.test.version>17</java.test.version>
+        <maven.build.sourceVersion>${acs.java.version}</maven.build.sourceVersion>
+        <maven.build.targetVersion>${acs.java.version}</maven.build.targetVersion>
     </properties>
 
     <dependencies>
