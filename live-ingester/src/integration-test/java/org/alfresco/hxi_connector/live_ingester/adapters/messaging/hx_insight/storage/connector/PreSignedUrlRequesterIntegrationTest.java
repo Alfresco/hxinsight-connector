@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.s
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
@@ -108,6 +109,7 @@ class PreSignedUrlRequesterIntegrationTest
 {
     private static final String PRE_SIGNED_URL_PATH = "/presigned-urls";
     private static final String CONTENT_ID = "CONTENT ID";
+    private static final String ACS_VERSION = "7.4.0";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"id\": \"CONTENT ID\"}]";
     private static final int HX_INSIGHT_RESPONSE_CODE = 200;
@@ -145,6 +147,7 @@ class PreSignedUrlRequesterIntegrationTest
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
+                .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(absent()));
         PreSignedUrlResponse expected = new PreSignedUrlResponse(new URL(preSignedUrl), CONTENT_ID);
         assertThat(preSignedUrlResponse).isEqualTo(expected);
@@ -262,6 +265,7 @@ class PreSignedUrlRequesterIntegrationTest
         registry.add("hyland-experience.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
         registry.add("hyland-experience.storage.location.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.storage.location.retry.initial-delay", () -> RETRY_DELAY_MS);
+        registry.add("alfresco.repository.version", () -> ACS_VERSION);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
