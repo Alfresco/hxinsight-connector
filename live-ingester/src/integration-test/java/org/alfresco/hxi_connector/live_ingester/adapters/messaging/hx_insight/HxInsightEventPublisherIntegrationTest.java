@@ -81,9 +81,11 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
@@ -215,6 +217,12 @@ class HxInsightEventPublisherIntegrationTest
         public AuthService authService()
         {
             return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
+        }
+
+        @Bean
+        public Application application()
+        {
+            return new Application("alfresco-dummy-source-id-0a63de491876", DockerTags.getHxiConnectorTag());
         }
     }
 }
