@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
 import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
@@ -39,7 +38,6 @@ import org.alfresco.rest.framework.resource.content.BinaryResource;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @Slf4j
-@NoArgsConstructor
 @AllArgsConstructor
 @RelationshipResource(name = "avatars", title = "Avatars of agents", entityResource = AgentsEntityResource.class)
 public class AvatarRelation implements RelationshipResourceAction.ReadById<BinaryResource>
