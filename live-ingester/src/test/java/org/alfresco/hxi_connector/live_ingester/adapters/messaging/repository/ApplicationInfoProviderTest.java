@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,7 +42,6 @@ import uk.org.webcompere.systemstubs.properties.SystemProperties;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
 import org.alfresco.hxi_connector.common.config.properties.Application;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
 @ExtendWith({MockitoExtension.class, SystemStubsExtension.class})
 class ApplicationInfoProviderTest
@@ -54,7 +52,7 @@ class ApplicationInfoProviderTest
     @Mock
     private DiscoveryApiClient discoveryApiMock;
     @Mock
-    private IntegrationProperties integrationPropertiesMock;
+    private Application applicationPropertiesMock;
 
     @InjectMocks
     private ApplicationInfoProvider objectUnderTest;
@@ -62,8 +60,7 @@ class ApplicationInfoProviderTest
     @Test
     void givenNoUserDataYetFetched_whenGetUserAgentData_thenCallAcsApiAndCalculateData()
     {
-        given(integrationPropertiesMock.application()).willReturn(mock(Application.class));
-        given(integrationPropertiesMock.application().getVersion()).willReturn("1.0.0");
+        given(applicationPropertiesMock.getVersion()).willReturn("1.0.0");
         given(discoveryApiMock.getRepositoryVersion()).willReturn("23.2.0");
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
@@ -91,7 +88,7 @@ class ApplicationInfoProviderTest
 
         // then
         assertEquals(expectedUserAgentData, actualUserAgentData);
-        then(integrationPropertiesMock).shouldHaveNoInteractions();
+        then(applicationPropertiesMock).shouldHaveNoInteractions();
         then(discoveryApiMock).shouldHaveNoInteractions();
     }
 
