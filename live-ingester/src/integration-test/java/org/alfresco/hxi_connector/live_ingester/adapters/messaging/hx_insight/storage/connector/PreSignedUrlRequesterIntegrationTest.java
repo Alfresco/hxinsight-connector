@@ -265,7 +265,7 @@ class PreSignedUrlRequesterIntegrationTest
         registry.add("hyland-experience.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
         registry.add("hyland-experience.storage.location.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.storage.location.retry.initial-delay", () -> RETRY_DELAY_MS);
-        registry.add("alfresco.repository.versionOverride", () -> ACS_VERSION);
+        registry.add("alfresco.repository.version-override", () -> ACS_VERSION);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
