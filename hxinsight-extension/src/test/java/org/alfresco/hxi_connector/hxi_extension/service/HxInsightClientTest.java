@@ -335,7 +335,7 @@ class HxInsightClientTest
                     "questionId": "dummy-id-5678"
                 }
                 """);
-        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/questions");
+        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/submit-question");
         given(httpClient.send(ArgumentMatchers.argThat(questionMatcher), any())).willReturn(questionResponse);
 
         // when
