@@ -30,6 +30,7 @@ import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
@@ -43,6 +44,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor
+@EqualsAndHashCode
 @JsonInclude(NON_NULL)
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class QuestionModel

@@ -26,29 +26,31 @@
 package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
-
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
+import static lombok.AccessLevel.NONE;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
-import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
-
-@AllArgsConstructor
-@JsonInclude(NON_NULL)
+@Accessors(prefix = {"_", ""})
 @Data
+@Setter(NONE)
+@AllArgsConstructor
 @NoArgsConstructor
+@JsonInclude(NON_NULL)
 @SuppressWarnings("PMD.FieldNamingConventions")
-public class FeedbackModel
+public class RetryModel
 {
-    private FeedbackType feedbackType;
+    private String _questionId;
     private String comments;
+    private QuestionModel originalQuestion;
 
-    public Feedback toServiceModel()
+    public RetryModel withId(String questionId)
     {
-        ensureNonNull(feedbackType, "Feedback type must be provided.");
-        return new Feedback(feedbackType.toServiceModel(), comments);
+        this._questionId = questionId;
+        return this;
     }
 }
