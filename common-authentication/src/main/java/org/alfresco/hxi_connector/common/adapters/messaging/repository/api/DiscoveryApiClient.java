@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.common.adapters.messaging.repository.api;
 
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
+
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
@@ -46,7 +48,6 @@ import org.alfresco.hxi_connector.common.util.ErrorUtils;
 @Slf4j
 public class DiscoveryApiClient
 {
-    static final int EXPECTED_STATUS_CODE = 200;
 
     private final String discoveryEndpoint;
     private final AuthService authService;
@@ -71,13 +72,13 @@ public class DiscoveryApiClient
     {
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(discoveryEndpoint))
-                .header(AUTHORIZATION, authService.getAuthHeaderValue(AuthService.ALFRESCO_AUTH_PROVIDER))
+                .header(AUTHORIZATION, authService.getAuthHeader(AuthService.ALFRESCO_AUTH_PROVIDER))
                 .GET()
                 .build();
 
         HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-        throwExceptionOnUnexpectedStatusCode(response.statusCode(), EXPECTED_STATUS_CODE);
+        throwExceptionOnUnexpectedStatusCode(response.statusCode(), SC_OK);
 
         DiscoveryApiResponse discoveryApiResponse = objectMapper.readValue(response.body(), DiscoveryApiResponse.class);
         log.atTrace().log("Discovery API response: {}", discoveryApiResponse);

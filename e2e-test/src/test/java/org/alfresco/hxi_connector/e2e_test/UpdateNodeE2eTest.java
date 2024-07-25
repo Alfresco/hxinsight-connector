@@ -48,11 +48,14 @@ import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.A
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
@@ -124,16 +127,32 @@ public class UpdateNodeE2eTest
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
 
+    private Node createdNode;
+
     RepositoryClient repositoryNodesClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
     @BeforeAll
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+
+    }
+
+    @BeforeEach
+    @SneakyThrows
+    public void setUp()
+    {
+        @Cleanup
+        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
+        createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
+        TimeUnit.SECONDS.sleep(2);
+        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing(createdNode.id()))));
+        resetWiremock();
     }
 
     @AfterEach
-    public void reset()
+    public void resetWiremock()
     {
         WireMock.reset();
         WireMock.resetAllRequests();
@@ -144,12 +163,6 @@ public class UpdateNodeE2eTest
     void testApplyPredictionToNode() throws IOException
     {
         // given
-        @Cleanup
-        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-        reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
 
         // when
@@ -173,13 +186,6 @@ public class UpdateNodeE2eTest
     void testApplyPredictionToUpdatedNode() throws IOException, InterruptedException
     {
         // given
-        @Cleanup
-        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))
-                .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
-        reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
@@ -195,7 +201,7 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
-        reset();
+        resetWiremock();
         prepareHxInsightMockToReturnPredictionFor(updatedNode.id(), PREDICTED_VALUE_2);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);

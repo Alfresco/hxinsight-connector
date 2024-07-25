@@ -52,7 +52,7 @@ public class AuthService
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
         String authType = authProvider.getType();
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(AUTHORIZATION, getAlfrescoAuthHeaderValue(authProvider));
+        exchange.getIn().setHeader(AUTHORIZATION, getAlfrescoAuthHeader(authProvider));
         log.debug("Authorization :: {} {} authorization header added", ALFRESCO_AUTH_PROVIDER, authType);
     }
 
@@ -65,17 +65,17 @@ public class AuthService
         log.debug("Authorization :: {} authorization header added", HXI_AUTH_PROVIDER);
     }
 
-    public String getAuthHeaderValue(String providerId)
+    public String getAuthHeader(String providerId)
     {
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
-        return providerId.equals(HXI_AUTH_PROVIDER) ? getBearerAuthHeader(HXI_AUTH_PROVIDER) : getAlfrescoAuthHeaderValue(authProvider);
+        return providerId.equals(HXI_AUTH_PROVIDER) ? getBearerAuthHeader(HXI_AUTH_PROVIDER) : getAlfrescoAuthHeader(authProvider);
     }
 
-    private String getAlfrescoAuthHeaderValue(AuthProperties.AuthProvider authProvider)
+    private String getAlfrescoAuthHeader(AuthProperties.AuthProvider authProvider)
     {
         if (BASIC.trim().equalsIgnoreCase(authProvider.getType()))
         {
-            return BASIC + getBasicAuthenticationHeader(authProvider);
+            return BASIC + getBasicAuthHeader(authProvider);
         }
         else
         {
@@ -88,7 +88,7 @@ public class AuthService
         return BEARER + accessTokenProvider.getAccessToken(providerId);
     }
 
-    private static String getBasicAuthenticationHeader(AuthProperties.AuthProvider authProvider)
+    private static String getBasicAuthHeader(AuthProperties.AuthProvider authProvider)
     {
         String valueToEncode = authProvider.getUsername() + ":" + authProvider.getPassword();
         return Base64.getEncoder().encodeToString(valueToEncode.getBytes());
