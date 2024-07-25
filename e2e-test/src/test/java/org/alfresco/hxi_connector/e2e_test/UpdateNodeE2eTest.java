@@ -51,6 +51,7 @@ import java.io.InputStream;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -131,6 +132,14 @@ public class UpdateNodeE2eTest
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
     }
 
+    @AfterEach
+    public void reset()
+    {
+        WireMock.reset();
+        WireMock.resetAllRequests();
+        WireMock.resetAllScenarios();
+    }
+
     @Test
     void testApplyPredictionToNode() throws IOException
     {
@@ -140,7 +149,7 @@ public class UpdateNodeE2eTest
         Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))));
-        WireMock.reset();
+        reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
 
         // when
@@ -170,7 +179,7 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
-        WireMock.reset();
+        reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
@@ -186,7 +195,7 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
-        WireMock.reset();
+        reset();
         prepareHxInsightMockToReturnPredictionFor(updatedNode.id(), PREDICTED_VALUE_2);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
