@@ -184,7 +184,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Drepo.java.version=17
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
       - name: "Start docker-compose and run e2e docker-compose tests"
@@ -207,6 +207,7 @@ jobs:
     needs:
       - pre_commit
     if: >
+      github.event_name != 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
