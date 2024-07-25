@@ -208,6 +208,7 @@ jobs:
       - pre_commit
     if: >
       github.event_name != 'pull_request' &&
+      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
@@ -252,7 +253,6 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
-      - run_e2e_test_java_11
     if: >
       github.event_name == 'push' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -286,7 +286,6 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
-      - run_e2e_test_java_11
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -310,7 +309,6 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
-      - run_e2e_test_java_11
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -357,7 +355,6 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
-      - run_e2e_test_java_11
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
