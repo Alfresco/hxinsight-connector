@@ -35,6 +35,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.CamelExecutionException;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
@@ -43,6 +44,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 @Component
 @RequiredArgsConstructor
 @Slf4j
+@ConditionalOnProperty("alfresco.repository.discovery-endpoint")
 public class DiscoveryApiClient extends RouteBuilder
 {
 

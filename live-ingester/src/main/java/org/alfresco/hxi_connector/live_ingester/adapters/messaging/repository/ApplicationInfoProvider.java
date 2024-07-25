@@ -46,7 +46,7 @@ public class ApplicationInfoProvider
     public static final String APP_INFO_PATTERN = "ACS HXI Connector/%s ACS/%s (%s)";
     public static final String USER_AGENT_DATA = "user-agent-data";
     public static final String USER_AGENT_PARAM = "&userAgent=${exchangeProperty.%s}".formatted(USER_AGENT_DATA);
-    private final DiscoveryApiClient discoveryApiClient;
+    private final Optional<DiscoveryApiClient> discoveryApiClient;
     private final IntegrationProperties integrationProperties;
 
     private String applicationInfo;
@@ -68,7 +68,7 @@ public class ApplicationInfoProvider
                 .map(IntegrationProperties.Alfresco::repository)
                 .map(Repository::versionOverride)
                 .filter(Predicate.not(String::isBlank))
-                .orElseGet(() -> discoveryApiClient.getRepositoryVersion()
+                .orElseGet(() -> discoveryApiClient.flatMap(DiscoveryApiClient::getRepositoryVersion)
                         .orElseThrow(() -> new IllegalStateException("The repository version cannot be retrieved from either the Discovery API or the Live Ingester configuration.")));
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return APP_INFO_PATTERN.formatted(applicationVersion, repositoryVersion, osVersion);
