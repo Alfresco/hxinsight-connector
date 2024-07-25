@@ -23,21 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
-import static lombok.AccessLevel.NONE;
-
-import java.util.Set;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Setter;
 
 @Data
-@Setter(NONE)
-public class Question
+@AllArgsConstructor
+public class ObjectReference
 {
-    private final String question;
-    private final String agentId;
-    private final Set<ObjectReference> contextObjects;
+    public String objectId;
 }

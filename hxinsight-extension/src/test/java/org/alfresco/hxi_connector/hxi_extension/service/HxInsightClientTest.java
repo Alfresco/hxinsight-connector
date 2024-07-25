@@ -62,15 +62,15 @@ import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientCo
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
+import org.alfresco.hxi_connector.hxi_extension.service.model.ObjectReference;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
-import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
 @SuppressWarnings("PMD.FieldNamingConventions")
 class HxInsightClientTest
 {
     private static final String AGENT_ID = "agent-id";
-    private static final RestrictionQuery restrictionQuery = new RestrictionQuery(Set.of("dummy-node-id"));
+    private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
 
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
@@ -111,7 +111,7 @@ class HxInsightClientTest
 
         // when
         String actualQuestionId = hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, restrictionQuery));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES));
 
         // then
         assertEquals(expectedQuestionId, actualQuestionId);
@@ -131,7 +131,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, restrictionQuery)));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES)));
         assertEquals(expectedStatusCode, exception.getStatus());
     }
 
@@ -144,7 +144,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, restrictionQuery)));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES)));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
     }
 
@@ -339,7 +339,7 @@ class HxInsightClientTest
         given(httpClient.send(ArgumentMatchers.argThat(questionMatcher), any())).willReturn(questionResponse);
 
         // when
-        Question question = new Question("Create a sonnet about the Super Bowl", AGENT_ID, restrictionQuery);
+        Question question = new Question("Create a sonnet about the Super Bowl", AGENT_ID, OBJECT_REFERENCES);
         String newQuestionId = hxInsightClient.retryQuestion(questionId, "The fourth line was not quite in iambic pentameter", question);
 
         // then
