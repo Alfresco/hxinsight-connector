@@ -40,6 +40,7 @@ import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackTyp
 
 import java.io.IOException;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +52,7 @@ import lombok.SneakyThrows;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
@@ -261,7 +263,6 @@ class HxInsightClientTest
 
     @Test
     @SneakyThrows
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void canSubmitFeedbackWithoutException()
     {
         // given
@@ -272,6 +273,11 @@ class HxInsightClientTest
 
         // when
         hxInsightClient.submitFeedback("dummy-id-1234", new Feedback(GOOD, "This answer was amazing"));
+
+        // then
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals("http://hxinsight/questions/dummy-id-1234/answer/feedback", requestCaptor.getValue().uri().toString());
     }
 
     @Test
