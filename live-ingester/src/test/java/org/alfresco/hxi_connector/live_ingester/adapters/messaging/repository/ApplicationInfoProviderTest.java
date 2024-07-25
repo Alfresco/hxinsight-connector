@@ -104,8 +104,7 @@ class ApplicationInfoProviderTest
         given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
         given(integrationPropertiesMock.alfresco()).willReturn(alfresco);
         given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
-        given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.empty());
-        given(alfresco.repository().version()).willReturn("23.2.0");
+        given(alfresco.repository().versionOverride()).willReturn("23.2.0");
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
@@ -117,7 +116,6 @@ class ApplicationInfoProviderTest
 
         // then
         assertEquals(expectedUserAgentData, actualUserAgentData);
-        then(discoveryApiMock).should().getRepositoryVersion();
     }
 
     @Test

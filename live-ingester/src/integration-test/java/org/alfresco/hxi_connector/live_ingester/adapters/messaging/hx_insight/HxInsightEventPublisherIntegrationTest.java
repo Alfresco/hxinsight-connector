@@ -182,7 +182,7 @@ class HxInsightEventPublisherIntegrationTest
         registry.add("hyland-experience.insight.base-url", wireMockServer::getBaseUrl);
         registry.add("hyland-experience.ingester.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.ingester.retry.initialDelay", () -> RETRY_DELAY_MS);
-        registry.add("alfresco.repository.version", () -> ACS_VERSION);
+        registry.add("alfresco.repository.versionOverride", () -> ACS_VERSION);
     }
 
     @TestConfiguration

@@ -63,14 +63,13 @@ public class ApplicationInfoProvider
     private String calculateUserAgentData()
     {
         String applicationVersion = integrationProperties.application().version();
-        String repositoryVersion = discoveryApiClient.getRepositoryVersion()
-                .orElseGet(() -> Optional.of(integrationProperties)
-                        .map(IntegrationProperties::alfresco)
-                        .map(IntegrationProperties.Alfresco::repository)
-                        .map(Repository::version)
-                        .filter(Predicate.not(String::isBlank))
+        String repositoryVersion = Optional.of(integrationProperties)
+                .map(IntegrationProperties::alfresco)
+                .map(IntegrationProperties.Alfresco::repository)
+                .map(Repository::versionOverride)
+                .filter(Predicate.not(String::isBlank))
+                .orElseGet(() -> discoveryApiClient.getRepositoryVersion()
                         .orElseThrow(() -> new IllegalStateException("The repository version cannot be retrieved from either the Discovery API or the Live Ingester configuration.")));
-
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return APP_INFO_PATTERN.formatted(applicationVersion, repositoryVersion, osVersion);
     }
