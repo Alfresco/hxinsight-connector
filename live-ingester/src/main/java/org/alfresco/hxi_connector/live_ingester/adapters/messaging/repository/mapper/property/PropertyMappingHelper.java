@@ -135,7 +135,6 @@ public class PropertyMappingHelper
         return Stream.of(PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities()));
     }
 
-
     private static boolean isContentRemoved(RepoEvent<DataAttributes<NodeResource>> event)
     {
         Optional<Long> oldSizeOptional = sizeOfContent(event.getData().getResourceBefore());
