@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.config.messaging;
 
+import java.util.Optional;
+import java.util.function.Predicate;
 import jakarta.jms.ConnectionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +42,8 @@ import org.alfresco.hxi_connector.common.adapters.messaging.repository.Applicati
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties.Alfresco;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
 
 @Configuration
 public class LiveIngesterMessagingConfig
@@ -66,7 +70,12 @@ public class LiveIngesterMessagingConfig
     @Bean
     public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, IntegrationProperties integrationProperties)
     {
-        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application());
+        Optional<String> versionOverride = Optional.of(integrationProperties)
+                .map(IntegrationProperties::alfresco)
+                .map(Alfresco::repository)
+                .map(Repository::versionOverride)
+                .filter(Predicate.not(String::isBlank));
+        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application(), versionOverride);
     }
 
 }
