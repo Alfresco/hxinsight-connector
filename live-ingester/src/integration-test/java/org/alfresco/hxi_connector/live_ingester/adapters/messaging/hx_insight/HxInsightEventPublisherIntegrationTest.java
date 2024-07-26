@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -110,6 +111,7 @@ class HxInsightEventPublisherIntegrationTest
     private static final String INGEST_PATH = "/ingestion-events";
     private static final String NODE_ID = "node-id";
     private static final String SOURCE_ID = "dummy-source-id";
+    private static final String ACS_VERSION = "7.4.0";
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
     private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE, SOURCE_ID);
@@ -141,6 +143,7 @@ class HxInsightEventPublisherIntegrationTest
         WireMock.verify(postRequestedFor(urlPathEqualTo(INGEST_PATH))
                 .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
+                .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(new ContainsPattern(NODE_ID)));
         assertThat(thrown).doesNotThrowAnyException();
     }
@@ -223,6 +226,12 @@ class HxInsightEventPublisherIntegrationTest
         public Application application()
         {
             return new Application("alfresco-dummy-source-id-0a63de491876", DockerTags.getHxiConnectorTag());
+        }
+
+        @Bean
+        public String versionOverride()
+        {
+            return ACS_VERSION;
         }
     }
 }

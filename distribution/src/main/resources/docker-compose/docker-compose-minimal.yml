@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   alfresco:
     image: quay.io/alfresco/alfresco-content-repository-hxinsight-extension:${HXINSIGHT_CONNECTOR_TAG}
