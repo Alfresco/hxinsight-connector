@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static java.lang.String.format;
+
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -60,6 +62,8 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class AgentsE2eTest
 {
+    private static final String AGENT_ID = "61254576-62a3-453f-8cd8-19e2f6554f29";
+
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -103,7 +107,7 @@ public class AgentsE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("image/png")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/-default-/avatars/-default-")
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/-default-", AGENT_ID))
                 .then().extract().response();
 
         // then

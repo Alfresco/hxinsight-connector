@@ -173,12 +173,12 @@ public class HxInsightClient
                     .build();
 
             HttpResponse<InputStream> httpResponse = client.send(request, BodyHandlers.ofInputStream());
-            log.atDebug().log("Agent with id {} received a following avatar {}", agentId, httpResponse.body());
 
             ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
+            log.atDebug().log("Agent with id {} received avatar successfully", agentId);
 
-            File file = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", "png");
-            return new FileBinaryResource(file, null);
+            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", "png");
+            return new FileBinaryResource(tempImageFile, null);
         }
         catch (IOException | InterruptedException e)
         {
