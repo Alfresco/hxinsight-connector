@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,21 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.common.config.properties;
 
-package org.alfresco.hxi_connector.hxi_extension.service.model;
+import jakarta.validation.constraints.NotNull;
 
-import static lombok.AccessLevel.NONE;
-
-import java.util.Set;
-
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.Setter;
+import lombok.NoArgsConstructor;
 
 @Data
-@Setter(NONE)
-public class Question
+@AllArgsConstructor
+@NoArgsConstructor
+public final class Application
 {
-    private final String question;
-    private final String agentId;
-    private final Set<ObjectReference> contextObjects;
+    private @NotNull String sourceId;
+    private @NotNull String version;
 }

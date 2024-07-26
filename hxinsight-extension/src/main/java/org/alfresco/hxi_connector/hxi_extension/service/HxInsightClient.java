@@ -30,6 +30,7 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
+import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.RETRY;
 import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
 import java.io.*;
@@ -160,6 +161,15 @@ public class HxInsightClient
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to submit feedback for question with id %s", questionId), e);
         }
+    }
+
+    public String retryQuestion(String questionId, String comments, Question question)
+    {
+        submitFeedback(questionId, Feedback.builder()
+                .feedbackType(RETRY)
+                .comments(comments)
+                .build());
+        return askQuestion(question);
     }
 
     public BinaryResource getAvatar(String agentId)

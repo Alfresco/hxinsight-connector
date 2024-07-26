@@ -47,7 +47,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.st
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class HttpHxInsightStorageClientTest
 {
     private static final String FILE_CONTENT_TYPE = "plain/text";

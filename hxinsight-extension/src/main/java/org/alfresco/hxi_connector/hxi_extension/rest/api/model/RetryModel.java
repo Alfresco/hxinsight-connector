@@ -23,21 +23,34 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-package org.alfresco.hxi_connector.hxi_extension.service.model;
-
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 import static lombok.AccessLevel.NONE;
 
-import java.util.Set;
-
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.Accessors;
 
+@Accessors(prefix = {"_", ""})
 @Data
 @Setter(NONE)
-public class Question
+@AllArgsConstructor
+@NoArgsConstructor
+@JsonInclude(NON_NULL)
+@SuppressWarnings("PMD.FieldNamingConventions")
+public class RetryModel
 {
-    private final String question;
-    private final String agentId;
-    private final Set<ObjectReference> contextObjects;
+    private String _questionId;
+    private String comments;
+    private QuestionModel originalQuestion;
+
+    public RetryModel withId(String questionId)
+    {
+        this._questionId = questionId;
+        return this;
+    }
 }

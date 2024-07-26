@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
@@ -40,6 +41,7 @@ import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackTyp
 
 import java.io.IOException;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Set;
@@ -51,21 +53,24 @@ import lombok.SneakyThrows;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
+import org.alfresco.hxi_connector.hxi_extension.service.model.ObjectReference;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
-import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.JUnitTestsShouldIncludeAssert"})
+@SuppressWarnings("PMD.FieldNamingConventions")
 class HxInsightClientTest
 {
     private static final String AGENT_ID = "agent-id";
-    private static final RestrictionQuery restrictionQuery = new RestrictionQuery(Set.of("dummy-node-id"));
+    private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
 
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
@@ -106,7 +111,7 @@ class HxInsightClientTest
 
         // when
         String actualQuestionId = hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, restrictionQuery));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES));
 
         // then
         assertEquals(expectedQuestionId, actualQuestionId);
@@ -126,7 +131,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, restrictionQuery)));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES)));
         assertEquals(expectedStatusCode, exception.getStatus());
     }
 
@@ -139,7 +144,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, restrictionQuery)));
+                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES)));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
     }
 
@@ -243,7 +248,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when, then
-        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.getAgents());
+        WebScriptException exception = assertThrows(WebScriptException.class, hxInsightClient::getAgents);
         assertEquals(expectedStatusCode, exception.getStatus());
     }
 
@@ -271,6 +276,11 @@ class HxInsightClientTest
 
         // when
         hxInsightClient.submitFeedback("dummy-id-1234", new Feedback(GOOD, "This answer was amazing"));
+
+        // then
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals("http://hxinsight/questions/dummy-id-1234/answer/feedback", requestCaptor.getValue().uri().toString());
     }
 
     @Test
@@ -304,5 +314,35 @@ class HxInsightClientTest
                 "dummy-id-1234",
                 new Feedback(GOOD, "This answer was amazing")));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+    }
+
+    @Test
+    @SneakyThrows
+    void canRetryQuestion()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+
+        HttpResponse feedbackResponse = mock(HttpResponse.class);
+        given(feedbackResponse.statusCode()).willReturn(SC_OK);
+        ArgumentMatcher<? extends HttpRequest> feedbackMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/questions/dummy-id-1234/answer/feedback");
+        given(httpClient.send(ArgumentMatchers.argThat(feedbackMatcher), any())).willReturn(feedbackResponse);
+
+        HttpResponse questionResponse = mock(HttpResponse.class);
+        given(questionResponse.statusCode()).willReturn(SC_ACCEPTED);
+        given(questionResponse.body()).willReturn("""
+                {
+                    "questionId": "dummy-id-5678"
+                }
+                """);
+        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/submit-question");
+        given(httpClient.send(ArgumentMatchers.argThat(questionMatcher), any())).willReturn(questionResponse);
+
+        // when
+        Question question = new Question("Create a sonnet about the Super Bowl", AGENT_ID, OBJECT_REFERENCES);
+        String newQuestionId = hxInsightClient.retryQuestion(questionId, "The fourth line was not quite in iambic pentameter", question);
+
+        // then
+        assertEquals("dummy-id-5678", newQuestionId);
     }
 }

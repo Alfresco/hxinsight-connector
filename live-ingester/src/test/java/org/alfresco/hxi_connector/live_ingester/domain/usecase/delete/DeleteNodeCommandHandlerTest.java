@@ -35,12 +35,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 public class DeleteNodeCommandHandlerTest
 {
@@ -60,8 +60,8 @@ public class DeleteNodeCommandHandlerTest
         // given
         DeleteNodeCommand deleteNodeCommand = mock(DeleteNodeCommand.class);
         given(deleteNodeCommand.nodeId()).willReturn(NODE_ID);
-        given(integrationProperties.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(integrationProperties.application().sourceId()).willReturn(SOURCE_ID);
+        given(integrationProperties.application()).willReturn(mock(Application.class));
+        given(integrationProperties.application().getSourceId()).willReturn(SOURCE_ID);
 
         // when
         deleteNodeCommandHandler.handle(deleteNodeCommand);

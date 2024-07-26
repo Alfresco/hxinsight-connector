@@ -47,7 +47,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest
 {

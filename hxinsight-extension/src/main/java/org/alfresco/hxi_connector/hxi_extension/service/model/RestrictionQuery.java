@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.model;
 
+import static java.util.stream.Collectors.toSet;
+
 import java.util.Set;
 
 import lombok.AllArgsConstructor;
@@ -38,4 +40,9 @@ import lombok.NoArgsConstructor;
 public class RestrictionQuery
 {
     private Set<String> nodesIds;
+
+    public Set<ObjectReference> toContextObjects()
+    {
+        return nodesIds.stream().map(ObjectReference::new).collect(toSet());
+    }
 }
