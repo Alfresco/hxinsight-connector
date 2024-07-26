@@ -70,11 +70,12 @@ public class LiveIngesterMessagingConfig
     @Bean
     public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, IntegrationProperties integrationProperties)
     {
-        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application(), Optional.of(integrationProperties)
+        Optional<String> versionOverride = Optional.of(integrationProperties)
                 .map(IntegrationProperties::alfresco)
                 .map(Alfresco::repository)
                 .map(Repository::versionOverride)
-                .filter(Predicate.not(String::isBlank)));
+                .filter(Predicate.not(String::isBlank));
+        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application(), versionOverride);
     }
 
 }
