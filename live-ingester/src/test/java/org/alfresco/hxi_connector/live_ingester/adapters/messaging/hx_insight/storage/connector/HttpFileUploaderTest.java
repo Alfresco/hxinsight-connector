@@ -52,6 +52,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -172,7 +173,8 @@ class HttpFileUploaderTest
     {
         Storage storageProperties = new Storage(new Storage.Location(null, new Retry()), new Storage.Upload(new Retry()));
         IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
-        return new IntegrationProperties(null, hylandExperienceProperties, new IntegrationProperties.Application("dummy-source-id"));
+        Application applicationProperties = new Application("dummy-source-id", "dummy-version");
+        return new IntegrationProperties(null, hylandExperienceProperties, applicationProperties);
     }
 
     private FileUploadRequest createFileUploadRequestMock()

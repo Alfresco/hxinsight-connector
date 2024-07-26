@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,10 +28,18 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.messaging;
 
 import jakarta.jms.ConnectionFactory;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.config.properties.Application;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
 @Configuration
 public class LiveIngesterMessagingConfig
@@ -41,4 +49,24 @@ public class LiveIngesterMessagingConfig
     {
         return new JmsTransactionManager(connectionFactory);
     }
+
+    @Bean
+    @ConfigurationProperties(prefix = "application")
+    public Application application()
+    {
+        return new Application();
+    }
+
+    @Bean
+    public DiscoveryApiClient discoveryApiClient(IntegrationProperties integrationProperties, AuthService authService, ObjectMapper objectMapper)
+    {
+        return new DiscoveryApiClient(integrationProperties.alfresco().repository().discoveryEndpoint(), authService, objectMapper);
+    }
+
+    @Bean
+    public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, IntegrationProperties integrationProperties)
+    {
+        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application());
+    }
+
 }

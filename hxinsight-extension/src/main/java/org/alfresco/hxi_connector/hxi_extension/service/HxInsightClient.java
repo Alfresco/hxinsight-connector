@@ -30,6 +30,7 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
+import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.RETRY;
 import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
 import java.io.IOException;
@@ -47,10 +48,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
@@ -105,7 +106,7 @@ public class HxInsightClient
             ensureCorrectHttpStatusReturned(SC_ACCEPTED, httpResponse);
 
             return objectMapper.readValue(httpResponse.body(), QuestionResponse.class)
-                    .questionId();
+                    .getQuestionId();
         }
         catch (IOException | InterruptedException e)
         {
@@ -118,7 +119,7 @@ public class HxInsightClient
         try
         {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(config.getAnswerUrl().formatted(questionId)))
+                    .uri(URI.create(String.format(config.getAnswerUrl(), questionId)))
                     .headers(authService.getAuthHeaders())
                     .GET()
                     .build();
@@ -132,7 +133,39 @@ public class HxInsightClient
         }
         catch (IOException | InterruptedException e)
         {
-            throw new HxInsightConnectorRuntimeException("Failed to get answer to question with id %s".formatted(questionId), e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get answer to question with id %s", questionId), e);
         }
+    }
+
+    public void submitFeedback(String questionId, Feedback feedback)
+    {
+        try
+        {
+            String body = objectMapper.writeValueAsString(feedback);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(String.format(config.getFeedbackUrl(), questionId)))
+                    .header("Content-Type", "application/json")
+                    .headers(authService.getAuthHeaders())
+                    .POST(BodyPublishers.ofString(body))
+                    .build();
+
+            HttpResponse<String> httpResponse = client.send(request, BodyHandlers.ofString());
+
+            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
+        }
+        catch (IOException | InterruptedException e)
+        {
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to submit feedback for question with id %s", questionId), e);
+        }
+    }
+
+    public String retryQuestion(String questionId, String comments, Question question)
+    {
+        submitFeedback(questionId, Feedback.builder()
+                .feedbackType(RETRY)
+                .comments(comments)
+                .build());
+        return askQuestion(question);
     }
 }

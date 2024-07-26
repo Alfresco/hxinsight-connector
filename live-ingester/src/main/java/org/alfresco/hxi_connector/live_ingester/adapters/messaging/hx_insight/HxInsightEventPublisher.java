@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 
+import static org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
 import java.util.Set;
@@ -42,6 +43,7 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -61,6 +63,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
     private final AuthService authService;
+    private final ApplicationInfoProvider applicationInfoProvider;
 
     @Override
     public void configure()
@@ -76,8 +79,9 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
             .marshal()
             .json()
             .log("Sending event ${body}")
+            .setProperty(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
             .process(authService::setHxIAuthorizationHeaders)
-            .to(integrationProperties.hylandExperience().ingester().endpoint())
+            .toD(integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)

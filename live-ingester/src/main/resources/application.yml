@@ -1,5 +1,6 @@
 application:
   source-id: alfresco-dummy-source-id-0a63de491876
+  version: "@project.version@"
 
 spring:
   main:
@@ -12,6 +13,7 @@ camel:
 alfresco:
   repository:
     endpoint: activemq:topic:alfresco.repo.event2
+    discovery-endpoint: http://localhost:8080/alfresco/api/discovery
   bulk-ingester:
     endpoint: activemq:queue:bulk-ingester-events
   transform:

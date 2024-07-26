@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static java.util.Objects.requireNonNullElse;
-
 import static org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient.EXPECTED_STATUS_CODE;
 
 import java.time.temporal.ChronoUnit;
@@ -36,22 +34,29 @@ import jakarta.validation.constraints.Positive;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 
 @Validated
 @SuppressWarnings("PMD.UnusedAssignment")
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AuthenticationResult(
-        @NotBlank @JsonProperty("access_token") String accessToken,
-        @Positive @JsonProperty("expires_in") int expiresIn,
-        TemporalUnit temporalUnit,
-        @NotBlank @JsonProperty("token_type") String tokenType,
-        @NotBlank String scope,
-        Integer statusCode)
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AuthenticationResult
 {
-    public AuthenticationResult
-    {
-        temporalUnit = requireNonNullElse(temporalUnit, ChronoUnit.SECONDS);
-        statusCode = requireNonNullElse(statusCode, EXPECTED_STATUS_CODE);
-    }
+    @NotBlank
+    @JsonProperty("access_token")
+    String accessToken;
+    @Positive @JsonProperty("expires_in")
+    int expiresIn;
+    TemporalUnit temporalUnit = ChronoUnit.SECONDS;
+    @NotBlank
+    @JsonProperty("token_type")
+    String tokenType;
+    @NotBlank
+    String scope;
+    Integer statusCode = EXPECTED_STATUS_CODE;
 }

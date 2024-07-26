@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
 import jakarta.validation.constraints.NotNull;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -35,6 +36,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
@@ -43,10 +45,11 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Stora
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
 @Component
-@EnableConfigurationProperties({IntegrationProperties.Alfresco.class, IntegrationProperties.HylandExperience.class, IntegrationProperties.Application.class})
+@EnableConfigurationProperties({IntegrationProperties.Alfresco.class, IntegrationProperties.HylandExperience.class})
 @Validated
 @Data
 @Accessors(fluent = true)
+@AllArgsConstructor
 @SuppressWarnings("PMD.UnusedAssignment")
 public class IntegrationProperties
 {
@@ -67,10 +70,5 @@ public class IntegrationProperties
     public record HylandExperience(
             @NotNull @NestedConfigurationProperty Storage storage,
             @NotNull @NestedConfigurationProperty Ingester ingester)
-    {}
-
-    @ConfigurationProperties("application")
-    public record Application(
-            @NotNull String sourceId)
     {}
 }

@@ -53,6 +53,6 @@ public class AgentModel
 
     public static AgentModel fromServiceModel(Agent agent)
     {
-        return new AgentModel(agent.agentId(), agent.name(), agent.description());
+        return new AgentModel(agent.getAgentId(), agent.getName(), agent.getDescription());
     }
 }

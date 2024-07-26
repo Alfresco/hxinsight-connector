@@ -57,7 +57,7 @@ public class IngestNodeCommandHandler
     {
         EventType eventType = command.eventType();
         ensureThat(eventType != DELETE, "Cannot ingest metadata for DELETE event - nodeId %s", command.nodeId());
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(command.nodeId(), eventType, integrationProperties.application().sourceId());
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(command.nodeId(), eventType, integrationProperties.application().getSourceId());
 
         command.properties()
                 .stream()

@@ -74,11 +74,14 @@
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.16.1</commons-io.version>
         <pdfbox.version>3.0.2</pdfbox.version>
-        <aws-sdk-s3.version>2.26.20</aws-sdk-s3.version>
-        <wiremock.version>3.8.0</wiremock.version>
+        <aws-sdk-s3.version>2.26.22</aws-sdk-s3.version>
+        <wiremock.version>3.9.1</wiremock.version>
+        <system-stubs.version>2.1.6</system-stubs.version>
 
         <testcontainers.version>1.20.0</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-13</wiremock-testcontainers-module.version>
+
+        <mapstruct.version>1.5.5.Final</mapstruct.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
@@ -270,6 +273,21 @@
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock</artifactId>
                 <version>${wiremock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>uk.org.webcompere</groupId>
+                <artifactId>system-stubs-jupiter</artifactId>
+                <version>${system-stubs.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct</artifactId>
+                <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mapstruct</groupId>
+                <artifactId>mapstruct-processor</artifactId>
+                <version>${mapstruct.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

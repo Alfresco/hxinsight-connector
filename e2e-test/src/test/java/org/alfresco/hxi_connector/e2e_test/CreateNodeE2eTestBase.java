@@ -27,10 +27,14 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -97,7 +101,8 @@ abstract class CreateNodeE2eTestBase
 
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id())));
+                    .withRequestBody(containing(createdNode.id()))
+                    .withHeader(USER_AGENT, matching(getAppInfoRegex())));
         }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 
@@ -124,7 +129,8 @@ abstract class CreateNodeE2eTestBase
 
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id())));
+                    .withRequestBody(containing(createdNode.id()))
+                    .withHeader(USER_AGENT, matching(getAppInfoRegex())));
         }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 

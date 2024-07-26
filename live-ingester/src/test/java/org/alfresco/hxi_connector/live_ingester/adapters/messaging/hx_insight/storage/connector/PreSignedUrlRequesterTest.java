@@ -29,6 +29,7 @@ import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.reset;
 import static org.mockito.MockitoAnnotations.openMocks;
@@ -54,6 +55,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -72,6 +75,8 @@ class PreSignedUrlRequesterTest
 
     @Mock
     private AuthService mockAuthService;
+    @Mock
+    private ApplicationInfoProvider mockApplicationInfoProvider;
     CamelContext camelContext;
     MockEndpoint mockEndpoint;
 
@@ -84,11 +89,12 @@ class PreSignedUrlRequesterTest
         openMocks(this);
         camelContext = new DefaultCamelContext();
         IntegrationProperties integrationProperties = integrationPropertiesOf(MOCK_ENDPOINT);
-        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties, mockAuthService);
+        given(mockApplicationInfoProvider.getUserAgentData()).willReturn("");
+        preSignedUrlRequester = new PreSignedUrlRequester(camelContext, integrationProperties, mockAuthService, mockApplicationInfoProvider);
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
 
-        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT, MockEndpoint.class);
+        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT + "&userAgent=", MockEndpoint.class);
     }
 
     @AfterEach
@@ -222,7 +228,8 @@ class PreSignedUrlRequesterTest
     {
         Storage storageProperties = new Storage(new Storage.Location(endpoint, new Retry()), new Storage.Upload(new Retry()));
         IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
-        return new IntegrationProperties(null, hylandExperienceProperties, new IntegrationProperties.Application("dummy-source-id"));
+        Application applicationProperties = new Application("dummy-source-id", "dummy-version");
+        return new IntegrationProperties(null, hylandExperienceProperties, applicationProperties);
     }
 
     private void mockEndpointWillRespondWith(int statusCode)

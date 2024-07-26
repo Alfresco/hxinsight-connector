@@ -61,10 +61,13 @@
         <property name="predictionService" ref="PredictionService"/>
     </bean>
 
+    <bean id="predictionMapper" class="org.alfresco.hxi_connector.hxi_extension.service.PredictionMapperImpl"/>
+
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.PredictionChildrenRelation">
         <property name="nodes" ref="nodes"/>
         <property name="transactionService" ref="TransactionService"/>
         <property name="predictionService" ref="PredictionService"/>
+        <property name="predictionMapper" ref="predictionMapper"/>
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.PredictionsEntityResource">
@@ -80,6 +83,7 @@
         <property name="exceptionMappings">
             <map merge="true">
                 <entry key="org.alfresco.hxi_connector.hxi_extension.rest.api.exception.PredictionStateChangedException" value="#{T(org.springframework.extensions.webscripts.Status).STATUS_CONFLICT}" />
+                <entry key="org.alfresco.hxi_connector.common.exception.ValidationException" value="#{T(org.springframework.extensions.webscripts.Status).STATUS_BAD_REQUEST}" />
             </map>
         </property>
     </bean>
@@ -163,5 +167,11 @@
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
     </bean>
 
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AvatarRelation"/>
+
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionFeedbackRelation">
+        <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
+    </bean>
 </beans>

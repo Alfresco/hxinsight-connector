@@ -31,6 +31,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
@@ -39,16 +40,22 @@ import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.concurrent.TimeUnit;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
+import lombok.SneakyThrows;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
@@ -112,14 +119,15 @@ public class UpdateNodeE2eTest
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, hxInsightMock);
-    @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, liveIngester);
+            .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock);
+    @Container
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
+
+    private Node createdNode;
 
     RepositoryClient repositoryNodesClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
@@ -127,18 +135,34 @@ public class UpdateNodeE2eTest
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+
+    }
+
+    @BeforeEach
+    @SneakyThrows
+    public void setUp()
+    {
+        @Cleanup
+        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
+        createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
+        TimeUnit.SECONDS.sleep(2);
+        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing(createdNode.id()))));
+        resetWiremock();
+    }
+
+    @AfterEach
+    public void resetWiremock()
+    {
+        WireMock.reset();
+        WireMock.resetAllRequests();
+        WireMock.resetAllScenarios();
     }
 
     @Test
     void testApplyPredictionToNode() throws IOException
     {
         // given
-        @Cleanup
-        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-        WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
 
         // when
@@ -159,16 +183,9 @@ public class UpdateNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
-    void testApplyPredictionToUpdatedNode() throws IOException
+    void testApplyPredictionToUpdatedNode() throws IOException, InterruptedException
     {
         // given
-        @Cleanup
-        InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        Node createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy2.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-        WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
@@ -182,8 +199,9 @@ public class UpdateNodeE2eTest
         // when
         Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(updatedNode.id()))));
-        WireMock.reset();
+                .withRequestBody(containing(updatedNode.id()))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
+        resetWiremock();
         prepareHxInsightMockToReturnPredictionFor(updatedNode.id(), PREDICTED_VALUE_2);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
@@ -219,7 +237,7 @@ public class UpdateNodeE2eTest
 
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network);
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, network);
     }
 
     private static GenericContainer<?> createPredictionApplierContainer()
