@@ -45,6 +45,7 @@ public class ApplicationInfoProvider
     private final DiscoveryApiClient discoveryApiClient;
     private final Application applicationProperties;
     private final Optional<String> versionOverride;
+
     private String applicationInfo;
 
     public String getUserAgentData()
