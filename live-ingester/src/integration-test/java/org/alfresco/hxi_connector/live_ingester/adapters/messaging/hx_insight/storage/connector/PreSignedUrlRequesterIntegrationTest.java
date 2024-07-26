@@ -267,7 +267,6 @@ class PreSignedUrlRequesterIntegrationTest
         registry.add("hyland-experience.storage.location.endpoint", PreSignedUrlRequesterIntegrationTest::createEndpointUrl);
         registry.add("hyland-experience.storage.location.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.storage.location.retry.initial-delay", () -> RETRY_DELAY_MS);
-        registry.add("alfresco.repository.version-override", () -> ACS_VERSION);
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
@@ -317,6 +316,12 @@ class PreSignedUrlRequesterIntegrationTest
         public Application application()
         {
             return new Application("alfresco-dummy-source-id-0a63de491876", DockerTags.getHxiConnectorTag());
+        }
+
+        @Bean
+        public String versionOverride()
+        {
+            return ACS_VERSION;
         }
     }
 }

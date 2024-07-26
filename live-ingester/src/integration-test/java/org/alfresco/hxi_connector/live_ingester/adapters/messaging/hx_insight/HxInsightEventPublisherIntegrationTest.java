@@ -184,7 +184,6 @@ class HxInsightEventPublisherIntegrationTest
         registry.add("hyland-experience.insight.base-url", wireMockServer::getBaseUrl);
         registry.add("hyland-experience.ingester.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.ingester.retry.initialDelay", () -> RETRY_DELAY_MS);
-        registry.add("alfresco.repository.version-override", () -> ACS_VERSION);
     }
 
     @TestConfiguration
@@ -227,6 +226,12 @@ class HxInsightEventPublisherIntegrationTest
         public Application application()
         {
             return new Application("alfresco-dummy-source-id-0a63de491876", DockerTags.getHxiConnectorTag());
+        }
+
+        @Bean
+        public String versionOverride()
+        {
+            return ACS_VERSION;
         }
     }
 }

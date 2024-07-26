@@ -29,6 +29,8 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -63,7 +65,7 @@ class ApplicationInfoProviderTest
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
-        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, null);
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.empty());
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
 
@@ -78,7 +80,7 @@ class ApplicationInfoProviderTest
     @Test
     void givenUserDataFetched_whenGetUserAgentData_thenGetDataWithoutCalculation()
     {
-        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, null);
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.empty());
         ReflectionTestUtils.setField(objectUnderTest, "applicationInfo", "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)");
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
@@ -99,7 +101,7 @@ class ApplicationInfoProviderTest
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
-        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, "23.2.0");
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.of("23.2.0"));
 
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
@@ -114,7 +116,7 @@ class ApplicationInfoProviderTest
     @Test
     void givenRepositoryIsOffAndNotConfiguredAcsVersion_whenGetUserAgentData_thenThrownAnError()
     {
-        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, null);
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.empty());
 
         // when, then
         assertThrows(IllegalStateException.class, objectUnderTest::getUserAgentData);

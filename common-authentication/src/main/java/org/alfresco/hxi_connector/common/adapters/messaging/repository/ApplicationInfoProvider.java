@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,7 +44,7 @@ public class ApplicationInfoProvider
     public static final String USER_AGENT_PARAM = String.format("&userAgent=${exchangeProperty.%s}", USER_AGENT_DATA);
     private final DiscoveryApiClient discoveryApiClient;
     private final Application applicationProperties;
-    private final String versionOverride;
+    private final Optional<String> versionOverride;
     private String applicationInfo;
 
     public String getUserAgentData()
@@ -60,8 +59,7 @@ public class ApplicationInfoProvider
     private String calculateUserAgentData()
     {
         String applicationVersion = applicationProperties.getVersion();
-        String repositoryVersion = Optional.ofNullable(versionOverride)
-                .filter(Predicate.not(String::isBlank))
+        String repositoryVersion = versionOverride
                 .orElseGet(() -> getRepositoryVersion()
                         .orElseThrow(() -> new IllegalStateException("The repository version cannot be retrieved from either the Discovery API or the Live Ingester configuration.")));
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
