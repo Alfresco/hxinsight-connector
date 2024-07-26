@@ -31,6 +31,7 @@ import static org.alfresco.service.cmr.security.PermissionService.READ;
 
 import lombok.RequiredArgsConstructor;
 
+import org.alfresco.hxi_connector.hxi_extension.service.model.ObjectReference;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.rest.api.Nodes;
 import org.alfresco.service.cmr.security.AccessStatus;
@@ -44,9 +45,9 @@ public class QuestionPermissionService
 
     public boolean hasPermissionToAskAboutDocuments(Question question)
     {
-        return question.getRestrictionQuery()
-                .getNodesIds()
+        return question.getContextObjects()
                 .stream()
+                .map(ObjectReference::getObjectId)
                 .map(nodeId -> validateOrLookupNode(nodes, nodeId))
                 .map(nodeRef -> permissionService.hasPermission(nodeRef, READ))
                 .allMatch(AccessStatus.ALLOWED::equals);

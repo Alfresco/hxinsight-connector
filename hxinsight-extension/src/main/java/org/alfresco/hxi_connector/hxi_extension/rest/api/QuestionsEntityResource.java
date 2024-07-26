@@ -86,7 +86,7 @@ public class QuestionsEntityResource implements EntityResourceAction.Create<Ques
 
         log.info("Received question: {}", question);
 
-        ensureThat(question.getRestrictionQuery().getNodesIds().size() <= questionConfig.getMaxContextSizeForQuestion(),
+        ensureThat(questionModel.getRestrictionQuery().getNodesIds().size() <= questionConfig.getMaxContextSizeForQuestion(),
                 () -> new WebScriptException(Status.STATUS_BAD_REQUEST, String.format("You can only ask about up to %d nodes at a time.", questionConfig.getMaxContextSizeForQuestion())));
         ensureThat(questionPermissionService.hasPermissionToAskAboutDocuments(question),
                 () -> new WebScriptException(Status.STATUS_FORBIDDEN, "You don't have permission to ask about some nodes"));

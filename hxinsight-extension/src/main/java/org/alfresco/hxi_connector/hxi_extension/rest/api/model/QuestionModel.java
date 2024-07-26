@@ -61,6 +61,6 @@ public class QuestionModel
 
     public Question toQuestion()
     {
-        return new Question(question, agentId, restrictionQuery);
+        return new Question(question, agentId, restrictionQuery.toContextObjects());
     }
 }
