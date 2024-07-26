@@ -21,6 +21,10 @@ services:
       resources:
         limits:
           memory: 1700m
+    depends_on:
+      - postgres
+      - activemq
+      - transform-router
     environment:
       CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n"
       JAVA_TOOL_OPTIONS: "
@@ -70,10 +74,6 @@ services:
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         -Xms1500m -Xmx1500m
         "
-    depends_on:
-      - postgres
-      - activemq
-      - transform-router
     ports:
       - "8000:8000"
     healthcheck:
@@ -115,6 +115,9 @@ services:
       resources:
         limits:
           memory: 512m
+    depends_on:
+      transform-core-aio:
+        condition: service_healthy
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
       ACTIVEMQ_URL: "nio://activemq:61616"
@@ -122,18 +125,15 @@ services:
       FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
       LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER: TRACE
       LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER_MESSAGING: INFO
-    depends_on:
-      transform-core-aio:
-        condition: service_healthy
+    ports:
+      - "8095:8095"
+    links:
+      - activemq
     healthcheck:
       test: curl --fail http://localhost:8095/ || exit 1
       interval: 5s
       timeout: 3s
       retries: 20
-    ports:
-      - "8095:8095"
-    links:
-      - activemq
 
   transform-core-aio:
     image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_CORE_AIO_TAG}
@@ -146,15 +146,15 @@ services:
       ACTIVEMQ_URL: "nio://activemq:61616"
       FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
       LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_BASE_TRANSFORM: TRACE
+    ports:
+      - "8090:8090"
+    links:
+      - activemq
     healthcheck:
       test: curl --fail http://localhost:8090/ || exit 1
       interval: 5s
       timeout: 3s
       retries: 20
-    ports:
-      - "8090:8090"
-    links:
-      - activemq
 
   shared-file-store:
     image: quay.io/alfresco/alfresco-shared-file-store:${SHARED_FILE_STORE_TAG}
@@ -228,9 +228,14 @@ services:
       APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://${HOST_IP}:8080/workspace/assets/silent-refresh.html"
       APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
 
-
   keycloak:
     image: quay.io/keycloak/keycloak:23.0.7
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    depends_on:
+      - keycloakdb
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -244,8 +249,6 @@ services:
     command: ["start-dev", "--import-realm", "--http-relative-path=/auth", "--hostname=localhost", "--http-enabled=true"]
     volumes:
       - ./realms:/opt/keycloak/data/import
-    depends_on:
-      - keycloakdb
     ports:
       - "8999:8080"
 
@@ -264,7 +267,6 @@ services:
     ports:
       - 5433:5433
 
-
   # HTTP proxy to provide HTTP Default port access to services
   proxy:
     image: alfresco/alfresco-acs-nginx:${ACS_NGINX_TAG}
@@ -272,12 +274,12 @@ services:
       resources:
         limits:
           memory: 128m
-    environment:
-      DISABLE_SYNCSERVICE: "true"
     depends_on:
       - alfresco
       - digital-workspace
       - control-center
+    environment:
+      DISABLE_SYNCSERVICE: "true"
     ports:
       - "8080:8080"
     links:
@@ -314,6 +316,11 @@ services:
       resources:
         limits:
           memory: 512m
+    depends_on:
+      elasticsearch:
+        condition: service_started
+      alfresco:
+        condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5006,server=y,suspend=n
       SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
@@ -329,11 +336,6 @@ services:
       ALFRESCO_ACCEPTEDCONTENTMEDIATYPESCACHE_BASEURL: http://transform-core-aio:8090/transform/config
     ports:
       - "5006:5006"
-    depends_on:
-      elasticsearch:
-        condition: service_started
-      alfresco:
-        condition: service_healthy
 
   live-indexing:
     image: quay.io/alfresco/alfresco-elasticsearch-live-indexing:${SEARCH_ENTERPRISE_TAG}
@@ -341,6 +343,9 @@ services:
       resources:
         limits:
           memory: 512m
+    depends_on:
+      reindexing:
+        condition: service_completed_successfully
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n
       ELASTICSEARCH_INDEXNAME: alfresco
@@ -350,9 +355,6 @@ services:
       ALFRESCO_ACCEPTEDCONTENTMEDIATYPESCACHE_BASEURL: http://transform-core-aio:8090/transform/config
     ports:
       - "5005:5005"
-    depends_on:
-      reindexing:
-        condition: service_completed_successfully
 
   live-ingester:
     image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:${HXINSIGHT_CONNECTOR_TAG}
@@ -392,6 +394,11 @@ services:
       resources:
         limits:
           memory: 512m
+    depends_on:
+      live-indexing:
+        condition: service_started
+      alfresco:
+        condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5008,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
@@ -399,11 +406,6 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
       SPRING_DATASOURCE_USERNAME: alfresco
       SPRING_DATASOURCE_PASSWORD: alfresco
-    depends_on:
-      live-indexing:
-        condition: service_started
-      alfresco:
-        condition: service_healthy
     ports:
       - "5008:5008"
 
