@@ -26,16 +26,9 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
-import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.repo.event.v1.model.ContentInfo;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.EventType;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.junit.jupiter.api.Test;
-
-import java.util.Set;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
@@ -48,9 +41,18 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
+
+import java.util.Set;
+
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.repo.event.v1.model.ContentInfo;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.EventType;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
 class PropertiesMapperTest
 {
@@ -459,8 +461,8 @@ class PropertiesMapperTest
         given(event.getData().getResource()).willReturn(NodeResource.builder().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
-        given(((EnterpriseEventData)event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-        given(((EnterpriseEventData)event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
@@ -487,8 +489,8 @@ class PropertiesMapperTest
         given(event.getData().getResource()).willReturn(NodeResource.builder().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
-        given(((EnterpriseEventData)event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-        given(((EnterpriseEventData)event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
