@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,32 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
+package org.alfresco.hxi_connector.common.config.properties;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import jakarta.validation.constraints.NotNull;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
-
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
-
-@AllArgsConstructor
-@JsonInclude(NON_NULL)
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
-@SuppressWarnings("PMD.FieldNamingConventions")
-public class FeedbackModel
+public final class Application
 {
-    private FeedbackType feedbackType;
-    private String comments;
-
-    public Feedback toServiceModel()
-    {
-        ensureNonNull(feedbackType, "Feedback type must be provided.");
-        return new Feedback(feedbackType.toServiceModel(), comments);
-    }
+    private @NotNull String sourceId;
+    private @NotNull String version;
 }

@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
@@ -40,6 +41,7 @@ import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackTyp
 
 import java.io.IOException;
 import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Set;
@@ -51,6 +53,9 @@ import lombok.SneakyThrows;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
@@ -261,7 +266,6 @@ class HxInsightClientTest
 
     @Test
     @SneakyThrows
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
     void canSubmitFeedbackWithoutException()
     {
         // given
@@ -272,6 +276,11 @@ class HxInsightClientTest
 
         // when
         hxInsightClient.submitFeedback("dummy-id-1234", new Feedback(GOOD, "This answer was amazing"));
+
+        // then
+        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals("http://hxinsight/questions/dummy-id-1234/answer/feedback", requestCaptor.getValue().uri().toString());
     }
 
     @Test
@@ -305,5 +314,35 @@ class HxInsightClientTest
                 "dummy-id-1234",
                 new Feedback(GOOD, "This answer was amazing")));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+    }
+
+    @Test
+    @SneakyThrows
+    void canRetryQuestion()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+
+        HttpResponse feedbackResponse = mock(HttpResponse.class);
+        given(feedbackResponse.statusCode()).willReturn(SC_OK);
+        ArgumentMatcher<? extends HttpRequest> feedbackMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/questions/dummy-id-1234/answer/feedback");
+        given(httpClient.send(ArgumentMatchers.argThat(feedbackMatcher), any())).willReturn(feedbackResponse);
+
+        HttpResponse questionResponse = mock(HttpResponse.class);
+        given(questionResponse.statusCode()).willReturn(SC_ACCEPTED);
+        given(questionResponse.body()).willReturn("""
+                {
+                    "questionId": "dummy-id-5678"
+                }
+                """);
+        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/questions");
+        given(httpClient.send(ArgumentMatchers.argThat(questionMatcher), any())).willReturn(questionResponse);
+
+        // when
+        Question question = new Question("Create a sonnet about the Super Bowl", AGENT_ID, restrictionQuery);
+        String newQuestionId = hxInsightClient.retryQuestion(questionId, "The fourth line was not quite in iambic pentameter", question);
+
+        // then
+        assertEquals("dummy-id-5678", newQuestionId);
     }
 }

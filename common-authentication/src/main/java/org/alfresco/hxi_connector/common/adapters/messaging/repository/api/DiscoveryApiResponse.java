@@ -23,27 +23,65 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api;
+package org.alfresco.hxi_connector.common.adapters.messaging.repository.api;
 
 import jakarta.validation.constraints.NotBlank;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-public record DiscoverApiResponse(@NotBlank RepositoryInfoEntry entry)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+public class DiscoveryApiResponse
 {
-    public record RepositoryInfoEntry(@NotBlank RepositoryInfo repository)
-    {}
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record RepositoryInfo(@NotBlank String id, @NotBlank RepositoryVersion version)
-    {}
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record RepositoryVersion(@NotBlank String major, @NotBlank String minor, @NotBlank String patch)
-    {}
+    @NotBlank
+    private RepositoryInfoEntry entry;
 
     public String getFullVersion()
     {
-        return entry.repository.version.major() + "." + entry.repository.version.minor() + "." + entry.repository.version.patch();
+        return entry.getRepository().getVersion().getMajor() + "." +
+                entry.getRepository().getVersion().getMinor() + "." + entry.getRepository().getVersion().getPatch();
     }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class RepositoryInfoEntry
+    {
+        @NotBlank
+        private RepositoryInfo repository;
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RepositoryInfo
+    {
+        @NotBlank
+        private String id;
+        @NotBlank
+        private RepositoryVersion version;
+
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public static class RepositoryVersion
+    {
+        @NotBlank
+        private String major;
+        @NotBlank
+        private String minor;
+        @NotBlank
+        private String patch;
+
+    }
+
 }

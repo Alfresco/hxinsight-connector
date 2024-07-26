@@ -36,6 +36,7 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -43,8 +44,9 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 
 @ExtendWith({MockitoExtension.class, SystemStubsExtension.class})
 class ApplicationInfoProviderTest
@@ -55,22 +57,17 @@ class ApplicationInfoProviderTest
     @Mock
     private DiscoveryApiClient discoveryApiMock;
     @Mock
-    private IntegrationProperties integrationPropertiesMock;
+    private Application applicationPropertiesMock;
 
+    @InjectMocks
     private ApplicationInfoProvider objectUnderTest;
-
-    @BeforeEach
-    public void setup()
-    {
-        objectUnderTest = new ApplicationInfoProvider(Optional.of(discoveryApiMock), integrationPropertiesMock);
-    }
 
     @Test
     void givenNoUserDataYetFetched_whenGetUserAgentData_thenCallAcsApiAndCalculateData()
     {
         given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
         given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
-        given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.of("23.2.0"));
+        given(applicationPropertiesMock.getRepositoryVersion()).willReturn(Optional.of("23.2.0"));
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
@@ -97,7 +94,7 @@ class ApplicationInfoProviderTest
 
         // then
         assertEquals(expectedUserAgentData, actualUserAgentData);
-        then(integrationPropertiesMock).shouldHaveNoInteractions();
+        then(applicationPropertiesMock).shouldHaveNoInteractions();
         then(discoveryApiMock).shouldHaveNoInteractions();
     }
 
@@ -106,9 +103,9 @@ class ApplicationInfoProviderTest
     {
         IntegrationProperties.Alfresco alfresco = mock(IntegrationProperties.Alfresco.class, RETURNS_DEEP_STUBS);
 
-        given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(integrationPropertiesMock.alfresco()).willReturn(alfresco);
-        given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
+        given(applicationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
+        given(applicationPropertiesMock.alfresco()).willReturn(alfresco);
+        given(applicationPropertiesMock.application().version()).willReturn("1.0.0");
         given(alfresco.repository().versionOverride()).willReturn("23.2.0");
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
@@ -126,9 +123,9 @@ class ApplicationInfoProviderTest
     @Test
     void givenRepositoryIsOffAndNotConfiguredAcsVersion_whenGetUserAgentData_thenThrownAnError()
     {
-        given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(integrationPropertiesMock.alfresco()).willReturn(mock(IntegrationProperties.Alfresco.class));
-        given(integrationPropertiesMock.application().version()).willReturn(null);
+        given(applicationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
+        given(applicationPropertiesMock.alfresco()).willReturn(mock(IntegrationProperties.Alfresco.class));
+        given(applicationPropertiesMock.application().version()).willReturn(null);
         given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.empty());
 
         // when, then
