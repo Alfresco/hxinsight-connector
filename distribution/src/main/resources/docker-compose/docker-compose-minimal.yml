@@ -44,15 +44,19 @@ services:
         -Dhxi.client.base-url=http://hxinsight-mock:8080
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         "
+    depends_on:
+      - postgres
+      - activemq
+      - transform-router
     ports:
       - "8000:8000"
       - "8080:8080"
     healthcheck:
       test: curl --fail http://localhost:8080/alfresco || exit 1
-      start_period: 90s
+      start_period: 45s
       interval: 10s
       timeout: 3s
-      retries: 20
+      retries: 30
 
   postgres:
     image: postgres:${POSTGRES_TAG}
@@ -91,6 +95,13 @@ services:
       ACTIVEMQ_URL: "nio://activemq:61616"
       CORE_AIO_URL: "http://transform-core-aio:8090"
       FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+    depends_on:
+      - transform-core-aio
+    healthcheck:
+      test: curl --fail http://localhost:8095/ || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 20
     ports:
       - "8095:8095"
     links:
@@ -136,6 +147,8 @@ services:
       activemq:
         condition: service_started
       alfresco:
+        condition: service_healthy
+      transform-router:
         condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
