@@ -55,13 +55,14 @@ import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ApplicationInfoProvider;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PreSignedUrlRequesterTest
@@ -227,7 +228,7 @@ class PreSignedUrlRequesterTest
     {
         Storage storageProperties = new Storage(new Storage.Location(endpoint, new Retry()), new Storage.Upload(new Retry()));
         IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
-        IntegrationProperties.Application applicationProperties = new IntegrationProperties.Application("dummy-source-id", "dummy-version");
+        Application applicationProperties = new Application("dummy-source-id", "dummy-version");
         return new IntegrationProperties(null, hylandExperienceProperties, applicationProperties);
     }
 

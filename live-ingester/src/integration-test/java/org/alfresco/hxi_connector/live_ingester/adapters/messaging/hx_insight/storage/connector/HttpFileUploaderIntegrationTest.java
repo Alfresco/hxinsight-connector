@@ -55,6 +55,7 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
@@ -66,7 +67,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 @SpringBootTest(classes = {
         IntegrationProperties.class,
         LocalStorageConfig.class,
-        HttpFileUploader.class},
+        HttpFileUploader.class,
+        Application.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
