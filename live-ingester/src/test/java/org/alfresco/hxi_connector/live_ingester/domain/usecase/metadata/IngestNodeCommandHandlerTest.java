@@ -57,6 +57,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.ValidationException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
@@ -69,7 +70,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.pr
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @ExtendWith(MockitoExtension.class)
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class IngestNodeCommandHandlerTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
@@ -104,8 +104,8 @@ class IngestNodeCommandHandlerTest
         @BeforeEach
         void setUp()
         {
-            given(integrationProperties.application()).willReturn(mock(IntegrationProperties.Application.class));
-            given(integrationProperties.application().sourceId()).willReturn(SOURCE_ID);
+            given(integrationProperties.application()).willReturn(mock(Application.class));
+            given(integrationProperties.application().getSourceId()).willReturn(SOURCE_ID);
         }
 
         @Test

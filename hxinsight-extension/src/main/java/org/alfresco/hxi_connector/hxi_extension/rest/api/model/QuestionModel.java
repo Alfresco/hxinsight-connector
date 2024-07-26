@@ -27,20 +27,21 @@
 package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+import static lombok.AccessLevel.NONE;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
-import lombok.Getter;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.Setter;
 import lombok.experimental.Accessors;
 
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 
 @Accessors(prefix = {"_", ""})
-@ToString
-@Getter
+@Data
+@Setter(NONE)
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(NON_NULL)
@@ -60,6 +61,6 @@ public class QuestionModel
 
     public Question toQuestion()
     {
-        return new Question(question, agentId, restrictionQuery);
+        return new Question(question, agentId, restrictionQuery.toContextObjects());
     }
 }

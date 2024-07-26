@@ -28,11 +28,11 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -40,8 +40,9 @@ import uk.org.webcompere.systemstubs.jupiter.SystemStub;
 import uk.org.webcompere.systemstubs.jupiter.SystemStubsExtension;
 import uk.org.webcompere.systemstubs.properties.SystemProperties;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 
 @ExtendWith({MockitoExtension.class, SystemStubsExtension.class})
 class ApplicationInfoProviderTest
@@ -52,20 +53,17 @@ class ApplicationInfoProviderTest
     @Mock
     private DiscoveryApiClient discoveryApiMock;
     @Mock
-    private IntegrationProperties integrationPropertiesMock;
-
-    @InjectMocks
-    private ApplicationInfoProvider objectUnderTest;
+    private Application applicationPropertiesMock;
 
     @Test
     void givenNoUserDataYetFetched_whenGetUserAgentData_thenCallAcsApiAndCalculateData()
     {
-        given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
+        given(applicationPropertiesMock.getVersion()).willReturn("1.0.0");
         given(discoveryApiMock.getRepositoryVersion()).willReturn("23.2.0");
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
+        ApplicationInfoProvider objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.empty());
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
 
@@ -80,6 +78,7 @@ class ApplicationInfoProviderTest
     @Test
     void givenUserDataFetched_whenGetUserAgentData_thenGetDataWithoutCalculation()
     {
+        ApplicationInfoProvider objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.empty());
         ReflectionTestUtils.setField(objectUnderTest, "applicationInfo", "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)");
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
@@ -89,8 +88,36 @@ class ApplicationInfoProviderTest
 
         // then
         assertEquals(expectedUserAgentData, actualUserAgentData);
-        then(integrationPropertiesMock).shouldHaveNoInteractions();
+        then(applicationPropertiesMock).shouldHaveNoInteractions();
         then(discoveryApiMock).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void givenNoUserDataYetFetchedAndRepositoryIsOff_whenGetUserAgentData_thenGetRepositoryVersionFromConfigurationAndCalculateData()
+    {
+        given(applicationPropertiesMock.getVersion()).willReturn("1.0.0");
+        systemProperties.set("os.name", "Windows");
+        systemProperties.set("os.version", "10");
+        systemProperties.set("os.arch", "amd64");
+        ApplicationInfoProvider objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.of("23.2.0"));
+
+        // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
+        String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
+
+        // when
+        String actualUserAgentData = objectUnderTest.getUserAgentData();
+
+        // then
+        assertEquals(expectedUserAgentData, actualUserAgentData);
+    }
+
+    @Test
+    void givenRepositoryIsOffAndNotConfiguredAcsVersion_whenGetUserAgentData_thenThrownAnError()
+    {
+        ApplicationInfoProvider objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, Optional.empty());
+
+        // when, then
+        assertThrows(IllegalStateException.class, objectUnderTest::getUserAgentData);
     }
 
 }

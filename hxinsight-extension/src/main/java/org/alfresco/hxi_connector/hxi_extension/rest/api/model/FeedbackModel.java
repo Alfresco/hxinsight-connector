@@ -32,12 +32,14 @@ import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 
 @AllArgsConstructor
 @JsonInclude(NON_NULL)
 @Data
+@NoArgsConstructor
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class FeedbackModel
 {

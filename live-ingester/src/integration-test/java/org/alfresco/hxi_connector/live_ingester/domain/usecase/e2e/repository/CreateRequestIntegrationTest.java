@@ -31,7 +31,6 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class CreateRequestIntegrationTest extends E2ETestBase
 {
     @Test

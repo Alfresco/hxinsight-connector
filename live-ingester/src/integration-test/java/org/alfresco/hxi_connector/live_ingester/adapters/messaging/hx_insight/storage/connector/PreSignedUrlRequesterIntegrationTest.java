@@ -28,13 +28,16 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.s
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.absent;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
+import static org.apache.http.HttpHeaders.USER_AGENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
@@ -42,6 +45,7 @@ import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.MalformedURLException;
@@ -61,6 +65,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
@@ -80,9 +85,13 @@ import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvide
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
@@ -91,7 +100,8 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
         IntegrationProperties.class,
         PreSignedUrlRequester.class,
         LiveIngesterAuthClient.class,
-        PreSignedUrlRequesterIntegrationTest.PreSignedUrlRequesterIntegrationTestConfig.class},
+        PreSignedUrlRequesterIntegrationTest.PreSignedUrlRequesterIntegrationTestConfig.class,
+        ApplicationInfoProvider.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
@@ -99,11 +109,10 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.st
 @Testcontainers
 class PreSignedUrlRequesterIntegrationTest
 {
-    private static final String NODE_ID = "some-node-ref";
     private static final String PRE_SIGNED_URL_PATH = "/presigned-urls";
     private static final String CONTENT_ID = "CONTENT ID";
+    private static final String ACS_VERSION = "7.4.0";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";
-    private static final String FILE_CONTENT_TYPE = "plain/text";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"id\": \"CONTENT ID\"}]";
     private static final int HX_INSIGHT_RESPONSE_CODE = 200;
     private static final int RETRY_ATTEMPTS = 3;
@@ -139,6 +148,8 @@ class PreSignedUrlRequesterIntegrationTest
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))
+                .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(absent()));
         PreSignedUrlResponse expected = new PreSignedUrlResponse(new URL(preSignedUrl), CONTENT_ID);
         assertThat(preSignedUrlResponse).isEqualTo(expected);
@@ -268,6 +279,9 @@ class PreSignedUrlRequesterIntegrationTest
     public static class PreSignedUrlRequesterIntegrationTestConfig
     {
 
+        @MockBean
+        public DiscoveryApiClient discoveryApi;
+
         @Bean
         public AuthProperties authorizationProperties()
         {
@@ -296,6 +310,18 @@ class PreSignedUrlRequesterIntegrationTest
         public AuthService authService()
         {
             return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
+        }
+
+        @Bean
+        public Application application()
+        {
+            return new Application("alfresco-dummy-source-id-0a63de491876", DockerTags.getHxiConnectorTag());
+        }
+
+        @Bean
+        public String versionOverride()
+        {
+            return ACS_VERSION;
         }
     }
 }

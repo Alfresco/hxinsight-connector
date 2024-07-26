@@ -78,8 +78,8 @@
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.16.1</commons-io.version>
         <pdfbox.version>3.0.2</pdfbox.version>
-        <aws-sdk-s3.version>2.26.21</aws-sdk-s3.version>
-        <wiremock.version>3.9.0</wiremock.version>
+        <aws-sdk-s3.version>2.26.22</aws-sdk-s3.version>
+        <wiremock.version>3.9.1</wiremock.version>
         <system-stubs.version>2.1.6</system-stubs.version>
 
         <testcontainers.version>1.20.0</testcontainers.version>
@@ -91,7 +91,7 @@
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
-        <license-maven-plugin.version>2.3.0</license-maven-plugin.version>
+        <license-maven-plugin.version>2.4.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
         <spotless-plugin.version>2.43.0</spotless-plugin.version>
         <jrebel-maven-plugin.version>1.2.0</jrebel-maven-plugin.version>
