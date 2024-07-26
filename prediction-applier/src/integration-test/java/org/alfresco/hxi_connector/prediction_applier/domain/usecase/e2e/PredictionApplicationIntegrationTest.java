@@ -41,6 +41,7 @@ public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETe
     {
         // given
         containerSupport.prepareHxInsightToReturnPredictionBatch(BATCH_ID, NODE_ID, PREDICTED_VALUE);
+        containerSupport.prepareRepositoryToReturnDiscovery();
 
         // when
         triggerPredictionsCollection();

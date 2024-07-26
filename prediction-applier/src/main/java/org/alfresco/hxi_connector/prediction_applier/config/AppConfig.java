@@ -25,10 +25,35 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.config;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 
-import org.alfresco.hxi_connector.common.config.properties.Retry;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.config.properties.Application;
 
-@ConfigurationProperties("alfresco.repository")
-public record RepositoryApiProperties(String baseUrl, String discoveryEndpoint, Retry retry)
-{}
+@ConfigurationProperties
+public class AppConfig
+{
+
+    @Bean
+    @ConfigurationProperties(prefix = "application")
+    public Application application()
+    {
+        return new Application();
+    }
+
+    @Bean
+    public DiscoveryApiClient discoveryApiClient(RepositoryApiProperties repositoryApiProperties, AuthService authService, ObjectMapper objectMapper)
+    {
+        return new DiscoveryApiClient(repositoryApiProperties.discoveryEndpoint(), authService, objectMapper);
+    }
+
+    @Bean
+    public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, Application applicationProperties)
+    {
+        return new ApplicationInfoProvider(discoveryApiClient, applicationProperties);
+    }
+}
