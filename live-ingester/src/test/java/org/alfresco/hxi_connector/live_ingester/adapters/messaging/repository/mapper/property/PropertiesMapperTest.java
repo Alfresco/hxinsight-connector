@@ -468,8 +468,8 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                PropertyDelta.updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                PropertyDelta.updated(DENY_ACCESS, Set.of(bob)));
+                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
+                updated(DENY_ACCESS, Set.of(bob)));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -496,8 +496,8 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                PropertyDelta.updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                PropertyDelta.updated(DENY_ACCESS, Set.of(bob)));
+                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
+                updated(DENY_ACCESS, Set.of(bob)));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -537,11 +537,11 @@ class PropertiesMapperTest
 
     private static PropertyDelta<Set<String>> allowAccessUpdated()
     {
-        return PropertyDelta.updated(ALLOW_ACCESS, Set.of());
+        return updated(ALLOW_ACCESS, Set.of());
     }
 
     private static PropertyDelta<Set<String>> denyAccessUpdated()
     {
-        return PropertyDelta.updated(DENY_ACCESS, Set.of());
+        return updated(DENY_ACCESS, Set.of());
     }
 }
