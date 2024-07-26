@@ -190,10 +190,6 @@ public class HxInsightClient
             File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", "png");
             return new FileBinaryResource(tempImageFile, null);
         }
-        catch (IOException | InterruptedException e)
-        {
-            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get avatar for agent with id %s", agentId), e);
-        }
         catch (Exception e)
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get avatar for agent with id %s", agentId), e);
