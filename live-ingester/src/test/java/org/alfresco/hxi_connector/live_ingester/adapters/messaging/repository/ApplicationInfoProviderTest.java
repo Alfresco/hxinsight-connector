@@ -28,15 +28,9 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
-import static org.mockito.Mockito.mock;
 
-import java.util.Optional;
-
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -59,18 +53,17 @@ class ApplicationInfoProviderTest
     @Mock
     private Application applicationPropertiesMock;
 
-    @InjectMocks
     private ApplicationInfoProvider objectUnderTest;
 
     @Test
     void givenNoUserDataYetFetched_whenGetUserAgentData_thenCallAcsApiAndCalculateData()
     {
-        given(integrationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(integrationPropertiesMock.application().version()).willReturn("1.0.0");
-        given(applicationPropertiesMock.getRepositoryVersion()).willReturn(Optional.of("23.2.0"));
+        given(applicationPropertiesMock.getVersion()).willReturn("1.0.0");
+        given(discoveryApiMock.getRepositoryVersion()).willReturn("23.2.0");
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, null);
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
 
@@ -85,6 +78,7 @@ class ApplicationInfoProviderTest
     @Test
     void givenUserDataFetched_whenGetUserAgentData_thenGetDataWithoutCalculation()
     {
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, null);
         ReflectionTestUtils.setField(objectUnderTest, "applicationInfo", "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)");
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
@@ -101,15 +95,12 @@ class ApplicationInfoProviderTest
     @Test
     void givenNoUserDataYetFetchedAndRepositoryIsOff_whenGetUserAgentData_thenGetRepositoryVersionFromConfigurationAndCalculateData()
     {
-        IntegrationProperties.Alfresco alfresco = mock(IntegrationProperties.Alfresco.class, RETURNS_DEEP_STUBS);
-
-        given(applicationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(applicationPropertiesMock.alfresco()).willReturn(alfresco);
-        given(applicationPropertiesMock.application().version()).willReturn("1.0.0");
-        given(alfresco.repository().versionOverride()).willReturn("23.2.0");
+        given(applicationPropertiesMock.getVersion()).willReturn("1.0.0");
         systemProperties.set("os.name", "Windows");
         systemProperties.set("os.version", "10");
         systemProperties.set("os.arch", "amd64");
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, "23.2.0");
+
         // Expected User Agent Format: "ACS HXI Connector/[applicationVersion] ACS/[repositoryVersion] ([osName] [osVersion] [osArch])"
         String expectedUserAgentData = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
 
@@ -123,10 +114,7 @@ class ApplicationInfoProviderTest
     @Test
     void givenRepositoryIsOffAndNotConfiguredAcsVersion_whenGetUserAgentData_thenThrownAnError()
     {
-        given(applicationPropertiesMock.application()).willReturn(mock(IntegrationProperties.Application.class));
-        given(applicationPropertiesMock.alfresco()).willReturn(mock(IntegrationProperties.Alfresco.class));
-        given(applicationPropertiesMock.application().version()).willReturn(null);
-        given(discoveryApiMock.getRepositoryVersion()).willReturn(Optional.empty());
+        objectUnderTest = new ApplicationInfoProvider(discoveryApiMock, applicationPropertiesMock, null);
 
         // when, then
         assertThrows(IllegalStateException.class, objectUnderTest::getUserAgentData);

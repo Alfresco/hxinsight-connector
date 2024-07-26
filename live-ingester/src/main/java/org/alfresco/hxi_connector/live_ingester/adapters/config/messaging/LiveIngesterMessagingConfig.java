@@ -66,7 +66,7 @@ public class LiveIngesterMessagingConfig
     @Bean
     public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, IntegrationProperties integrationProperties)
     {
-        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application());
+        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application(), integrationProperties.alfresco().repository().versionOverride());
     }
 
 }

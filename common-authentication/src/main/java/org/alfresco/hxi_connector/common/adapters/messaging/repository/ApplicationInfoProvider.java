@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
+import java.util.Optional;
 import java.util.function.Predicate;
 
 import lombok.RequiredArgsConstructor;
@@ -44,7 +45,7 @@ public class ApplicationInfoProvider
     public static final String USER_AGENT_PARAM = String.format("&userAgent=${exchangeProperty.%s}", USER_AGENT_DATA);
     private final DiscoveryApiClient discoveryApiClient;
     private final Application applicationProperties;
-
+    private final String versionOverride;
     private String applicationInfo;
 
     public String getUserAgentData()
@@ -59,14 +60,24 @@ public class ApplicationInfoProvider
     private String calculateUserAgentData()
     {
         String applicationVersion = applicationProperties.getVersion();
-        String repositoryVersion = Optional.of(integrationProperties)
-                .map(IntegrationProperties::alfresco)
-                .map(IntegrationProperties.Alfresco::repository)
-                .map(Repository::versionOverride)
+        String repositoryVersion = Optional.ofNullable(versionOverride)
                 .filter(Predicate.not(String::isBlank))
-                .orElseGet(() -> discoveryApiClient.flatMap(DiscoveryApiClient::getRepositoryVersion)
+                .orElseGet(() -> getRepositoryVersion()
                         .orElseThrow(() -> new IllegalStateException("The repository version cannot be retrieved from either the Discovery API or the Live Ingester configuration.")));
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return String.format(APP_INFO_PATTERN, applicationVersion, repositoryVersion, osVersion);
+    }
+
+    private Optional<String> getRepositoryVersion()
+    {
+        try
+        {
+            return Optional.ofNullable(discoveryApiClient.getRepositoryVersion());
+        }
+        catch (Exception e)
+        {
+            log.debug("Failed to get repository version from the Discovery API.", e);
+            return Optional.empty();
+        }
     }
 }
