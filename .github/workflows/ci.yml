@@ -115,6 +115,7 @@ jobs:
     needs:
       - pre_commit
     if: >
+      github.event_name == 'push' &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
@@ -141,6 +142,7 @@ jobs:
     needs:
       - pre_commit
     if: >
+      github.event_name == 'push' &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
@@ -166,6 +168,7 @@ jobs:
     needs:
       - pre_commit
     if: >
+      github.event_name == 'push' &&
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
