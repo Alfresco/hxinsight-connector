@@ -8,7 +8,7 @@
     "instructions": "Keep responses professional and concise",
     "modelName": "meta-llama3-8b",
     "sourceIds": [
-      "HR Policy Repository"
+      "c2886904-40d0-4ab9-b5b7-1ea624ccca80"
     ],
     "permissions": [
       {
@@ -29,8 +29,8 @@
     "instructions": "Keep responses professional but friendly",
     "modelName": "meta-llama3-8b",
     "sourceIds": [
-      "Insight Discovery",
-      "HR Policy Repository"
+      "9036b44b-8811-4449-a767-3763e3efa2e0",
+      "c2886904-40d0-4ab9-b5b7-1ea624ccca80"
     ],
     "permissions": [
       {
