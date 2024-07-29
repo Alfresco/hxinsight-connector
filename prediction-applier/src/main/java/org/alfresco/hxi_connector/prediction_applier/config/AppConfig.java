@@ -25,16 +25,19 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.config;
 
+import java.util.Optional;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 
-@ConfigurationProperties
+@Configuration
 public class AppConfig
 {
 
@@ -54,6 +57,6 @@ public class AppConfig
     @Bean
     public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, Application applicationProperties)
     {
-        return new ApplicationInfoProvider(discoveryApiClient, applicationProperties);
+        return new ApplicationInfoProvider(discoveryApiClient, applicationProperties, Optional.empty());
     }
 }
