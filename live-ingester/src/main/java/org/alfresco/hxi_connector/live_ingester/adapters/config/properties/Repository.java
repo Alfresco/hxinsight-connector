@@ -27,5 +27,16 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
 
-public record Repository(@NotBlank String endpoint, @NotBlank String discoveryEndpoint)
-{}
+import org.apache.commons.lang3.StringUtils;
+
+public record Repository(@NotBlank String endpoint, String discoveryEndpoint, String versionOverride)
+{
+    public Repository
+    {
+        if (StringUtils.isBlank(discoveryEndpoint) && StringUtils.isBlank(versionOverride))
+        {
+            throw new IllegalStateException("Either property %s or %s must be set in the Live Ingester configuration."
+                    .formatted("alfresco.repository.discovery-endpoint", "alfresco.repository.version-override"));
+        }
+    }
+}
