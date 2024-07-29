@@ -13,7 +13,6 @@
 #      AUTH_PROVIDERS_ALFRESCO_USERNAME
 #      AUTH_PROVIDERS_ALFRESCO_PASSWORD
 
-
 services:
   alfresco:
     image: quay.io/alfresco/alfresco-content-repository-hxinsight-extension:${HXINSIGHT_CONNECTOR_TAG}

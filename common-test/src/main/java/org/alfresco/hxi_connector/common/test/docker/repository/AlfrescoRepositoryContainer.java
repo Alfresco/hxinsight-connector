@@ -74,12 +74,6 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
         this.addExposedPorts(REPO_PORT_DEFAULT, REPO_DEBUG_PORT_DEFAULT);
     }
 
-    public AlfrescoRepositoryContainer(@NonNull AlfrescoRepositoryExtension repositoryExtension)
-    {
-        super(repositoryExtension);
-        this.addExposedPorts(REPO_PORT_DEFAULT, REPO_DEBUG_PORT_DEFAULT);
-    }
-
     public int getPort()
     {
         return this.getMappedPort(REPO_PORT_DEFAULT);
