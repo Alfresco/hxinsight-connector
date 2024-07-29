@@ -1,21 +1,21 @@
 [
   {
-    "agentId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
+    "id": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
     "name": "HR Policy Agent",
     "description": "This agent is responsible for HR policy predictions",
-    "personality": "Keep responses professional and concise",
-    "model": "meta-llama3-8b",
-    "allowedSources": [
+    "instructions": "Keep responses professional and concise",
+    "modelName": "meta-llama3-8b",
+    "sourceIds": [
       "HR Policy Repository"
     ]
   },
   {
-    "agentId": "b999ee14-3974-41b2-bef8-70ab38c9e642",
+    "id": "b999ee14-3974-41b2-bef8-70ab38c9e642",
     "name": "Knowledge Base Agent",
     "description": "Very smart about product knowledge",
-    "personality": "Keep responses professional but friendly",
-    "model": "meta-llama3-8b",
-    "allowedSources": [
+    "instructions": "Keep responses professional but friendly",
+    "modelName": "meta-llama3-8b",
+    "sourceIds": [
       "Insight Discovery",
       "HR Policy Repository"
     ]

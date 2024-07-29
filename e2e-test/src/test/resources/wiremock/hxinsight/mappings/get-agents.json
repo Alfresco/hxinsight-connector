@@ -7,27 +7,37 @@
     "status": 200,
     "jsonBody": [
       {
-        "agentId": "61254576-62a3-453f-8cd8-19e2f6554f29",
+        "id": "61254576-62a3-453f-8cd8-19e2f6554f29",
         "name": "HR Policy Agent",
-        "agentVersion": "1",
+        "version": "1",
         "description": "This agent is responsible for HR policy predictions",
-        "personality": "Keep responses professional and concise",
-        "model": "meta-llama3-8b",
-        "allowedSources": [
+        "instructions": "Keep responses professional and concise",
+        "modelName": "meta-llama3-8b",
+        "sourceIds": [
           "HR Policy Repository"
-        ]
+        ],
+        "permissions": {
+          "principalType": "user",
+          "id": "e2b9471c-d869-48b4-94ce-5112dd71001c"
+        },
+        "avatarUrl": "https://s3.amazonaws.com/avatars/ecf13dd4-c061-462b-8122-e3203cc40a0d.jpg"
       },
       {
-        "agentId": "b999ee14-3974-41b2-bef8-70ab38c9e642",
+        "id": "b999ee14-3974-41b2-bef8-70ab38c9e642",
         "name": "Knowledge Base Agent",
-        "agentVersion": "1",
+        "version": "1",
         "description": "Very smart about product knowledge",
-        "personality": "Keep responses professional but friendly",
-        "model": "meta-llama3-8b",
-        "allowedSources": [
+        "instructions": "Keep responses professional but friendly",
+        "modelName": "meta-llama3-8b",
+        "sourceIds": [
           "Insight Discovery",
           "HR Policy Repository"
-        ]
+        ],
+        "permissions": {
+          "principalType": "user",
+          "id": "5d684559-810b-499f-8b6b-4f39eb47d367"
+        },
+        "avatarUrl": "https://s3.amazonaws.com/avatars/e2119fa1-9e11-421a-bef3-222667b1db34.jpg"
       }
     ]
   }
