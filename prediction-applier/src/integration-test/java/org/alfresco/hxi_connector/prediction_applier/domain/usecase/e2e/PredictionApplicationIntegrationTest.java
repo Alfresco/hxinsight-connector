@@ -25,16 +25,25 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
 
 import org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e.util.PredictionApplierE2ETestBase;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETestBase
 {
     private static final String NODE_ID = "nodeId";
     private static final String BATCH_ID = "batchId";
     private static final String PREDICTED_VALUE = "New value";
+
+    @AfterEach
+    public void cleanUp()
+    {
+        containerSupport.resetWireMock();
+    }
 
     @Test
     public void testPredictionApplication()
@@ -47,9 +56,26 @@ public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETe
         triggerPredictionsCollection();
 
         // then
+        containerSupport.expectGetBatchesCalled();
         containerSupport.expectBatchStatusWasUpdated(BATCH_ID, "IN_PROGRESS", 1);
         containerSupport.expectBatchStatusWasUpdated(BATCH_ID, "COMPLETE", 2);
 
+        containerSupport.expectDiscoveryEndpointCalled();
         containerSupport.expectRepositoryRequestReceived(NODE_ID, PREDICTED_VALUE);
+    }
+
+    @Test
+    public void testPredictionApplicationFailsWhenDiscoveryApiUnavailable()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnPredictionBatch(BATCH_ID, NODE_ID, PREDICTED_VALUE);
+        containerSupport.prepareRepositoryToFailAtDiscovery();
+
+        // when
+        triggerPredictionsCollection();
+
+        // then
+        containerSupport.expectDiscoveryEndpointCalled();
+        containerSupport.expectNoPredictionBatchesRequestsReceived();
     }
 }
