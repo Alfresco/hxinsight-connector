@@ -5,6 +5,10 @@ services:
       resources:
         limits:
           memory: 1700m
+    depends_on:
+      - postgres
+      - activemq
+      - transform-router
     environment:
       CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n"
       JAVA_TOOL_OPTIONS: "
@@ -47,10 +51,10 @@ services:
       - "8080:8080"
     healthcheck:
       test: curl --fail http://localhost:8080/alfresco || exit 1
-      start_period: 90s
+      start_period: 45s
       interval: 10s
       timeout: 3s
-      retries: 20
+      retries: 30
 
   postgres:
     image: postgres:${POSTGRES_TAG}
@@ -84,15 +88,25 @@ services:
       resources:
         limits:
           memory: 512m
+    depends_on:
+      transform-core-aio:
+        condition: service_healthy
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
       ACTIVEMQ_URL: "nio://activemq:61616"
       CORE_AIO_URL: "http://transform-core-aio:8090"
       FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+      LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER: TRACE
+      LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER_MESSAGING: INFO
     ports:
       - "8095:8095"
     links:
       - activemq
+    healthcheck:
+      test: curl --fail http://localhost:8095/ || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   transform-core-aio:
     image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_CORE_AIO_TAG}
@@ -104,10 +118,16 @@ services:
       JAVA_OPTS: " -Xms256m -Xmx3000m"
       ACTIVEMQ_URL: "nio://activemq:61616"
       FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+      LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_BASE_TRANSFORM: TRACE
     ports:
       - "8090:8090"
     links:
       - activemq
+    healthcheck:
+      test: curl --fail http://localhost:8090/ || exit 1
+      interval: 5s
+      timeout: 3s
+      retries: 20
 
   shared-file-store:
     image: quay.io/alfresco/alfresco-shared-file-store:${SHARED_FILE_STORE_TAG}
@@ -135,14 +155,16 @@ services:
         condition: service_started
       alfresco:
         condition: service_healthy
+      transform-router:
+        condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080
+      ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST: http://shared-file-store
       ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT: 8099
-      ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-secret
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
