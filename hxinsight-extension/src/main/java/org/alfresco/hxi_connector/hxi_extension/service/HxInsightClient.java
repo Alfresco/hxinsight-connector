@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static java.lang.String.format;
+
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
@@ -122,7 +124,7 @@ public class HxInsightClient
         try
         {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(String.format(config.getAnswerUrl(), questionId)))
+                    .uri(URI.create(format(config.getAnswerUrl(), questionId)))
                     .headers(authService.getAuthHeaders())
                     .GET()
                     .build();
@@ -136,7 +138,7 @@ public class HxInsightClient
         }
         catch (IOException | InterruptedException e)
         {
-            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get answer to question with id %s", questionId), e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, format("Failed to get answer to question with id %s", questionId), e);
         }
     }
 
@@ -147,7 +149,7 @@ public class HxInsightClient
             String body = objectMapper.writeValueAsString(feedback);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(String.format(config.getFeedbackUrl(), questionId)))
+                    .uri(URI.create(format(config.getFeedbackUrl(), questionId)))
                     .header("Content-Type", "application/json")
                     .headers(authService.getAuthHeaders())
                     .POST(BodyPublishers.ofString(body))
@@ -159,7 +161,7 @@ public class HxInsightClient
         }
         catch (IOException | InterruptedException e)
         {
-            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to submit feedback for question with id %s", questionId), e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, format("Failed to submit feedback for question with id %s", questionId), e);
         }
     }
 
@@ -177,7 +179,7 @@ public class HxInsightClient
         try
         {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create(String.format(config.getAvatarUrl(), agentId)))
+                    .uri(URI.create(format(config.getAvatarUrl(), agentId)))
                     .headers(authService.getAuthHeaders())
                     .GET()
                     .build();
@@ -187,12 +189,12 @@ public class HxInsightClient
             ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
             log.atDebug().log("Agent with id {} received avatar successfully", agentId);
 
-            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), "RenditionsApi-", "png");
-            return new FileBinaryResource(tempImageFile, null);
+            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), format("avatar-%s", agentId), "png");
+            return new FileBinaryResource(tempImageFile);
         }
         catch (Exception e)
         {
-            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, String.format("Failed to get avatar for agent with id %s", agentId), e);
+            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, format("Failed to get avatar for agent with id %s", agentId), e);
         }
     }
 }
