@@ -187,7 +187,7 @@ public class HxInsightClient
             HttpResponse<InputStream> httpResponse = client.send(request, BodyHandlers.ofInputStream());
 
             ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
-            log.atDebug().log("Agent with id {} received avatar successfully", agentId);
+            log.atDebug().log("Successfully retrieved avatar for Agent with id: {}", agentId);
 
             File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), format("avatar-%s", agentId), "png");
             return new FileBinaryResource(tempImageFile);
