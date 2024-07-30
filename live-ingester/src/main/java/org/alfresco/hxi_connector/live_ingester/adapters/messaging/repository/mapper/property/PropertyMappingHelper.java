@@ -25,10 +25,24 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
+import lombok.NoArgsConstructor;
+import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.repo.event.v1.model.ContentInfo;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.repo.event.v1.model.UserInfo;
+
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
 import static java.util.Optional.ofNullable;
-
 import static lombok.AccessLevel.PRIVATE;
-
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
@@ -41,24 +55,6 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PRO
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.unchanged;
-
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
-import lombok.NoArgsConstructor;
-
-import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.repo.event.v1.model.ContentInfo;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.alfresco.repo.event.v1.model.UserInfo;
 
 @NoArgsConstructor(access = PRIVATE)
 public class PropertyMappingHelper
@@ -124,25 +120,36 @@ public class PropertyMappingHelper
 
     public static Stream<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (isEventTypeCreated(event)) {
-            EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
-
-            return Stream.of(PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities()));
+        if (!isEventTypeCreated(event))
+        {
+            return Stream.empty();
         }
 
-        return Stream.empty();
+        EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
+
+        if (enterpriseEventData.getResourceReaderAuthorities() == null)
+        {
+            return Stream.empty();
+        }
+
+        return Stream.of(PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities()));
     }
 
     public static Stream<PropertyDelta<?>> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (isEventTypeCreated(event))
+        if (!isEventTypeCreated(event))
         {
-            EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
-
-            return Stream.of(PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities()));
+            return Stream.empty();
         }
 
-        return Stream.empty();
+        EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
+
+        if (enterpriseEventData.getResourceDeniedAuthorities() == null)
+        {
+            return Stream.empty();
+        }
+
+        return Stream.of(PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities()));
     }
 
     private static boolean isContentRemoved(RepoEvent<DataAttributes<NodeResource>> event)
