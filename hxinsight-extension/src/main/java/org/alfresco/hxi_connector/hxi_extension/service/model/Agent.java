@@ -34,7 +34,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class Agent
 {
-    private String agentId;
+    private String id;
     private String name;
     private String description;
 }

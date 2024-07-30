@@ -36,6 +36,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -79,6 +80,11 @@ public final class EventUtils
     public static boolean isEventTypeDeleted(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return NODE_DELETED.getType().equals(event.getType());
+    }
+
+    public static boolean isEventTypePermissionsUpdated(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return PERMISSION_UPDATED.getType().equals(event.getType());
     }
 
     public static EventType getEventType(RepoEvent<DataAttributes<NodeResource>> event)
