@@ -36,6 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor(access = PRIVATE)
 @Slf4j
+@SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class RetryUtils
 {
     private static final int MAX_ATTEMPTS = 5;
