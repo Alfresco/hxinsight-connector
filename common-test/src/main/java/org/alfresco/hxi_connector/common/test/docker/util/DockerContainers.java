@@ -211,7 +211,9 @@ public class DockerContainers
                 .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
                 .withExposedPorts(8095)
-                .withStartupTimeout(Duration.ofMinutes(2))
+                .waitingFor(Wait.forHttp("/")
+                        .forPort(8095)
+                        .withStartupTimeout(Duration.ofMinutes(2)))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformRouterContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> transformRouter.withNetwork(n).withNetworkAliases(TRANSFORM_ROUTER_ALIAS));
