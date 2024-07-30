@@ -148,7 +148,7 @@ public class EventProcessor
     {
         if (isEventTypePermissionsUpdated(event))
         {
-            log.debug("Permissions of node {} updated", event.getData().getResource().getId());
+            log.atDebug().log("Permissions of node {} updated", event.getData().getResource().getId());
         }
     }
 
