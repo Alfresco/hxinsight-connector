@@ -69,10 +69,10 @@ public class DockerContainers
     private static final String TRANSFORM_CORE_AIO_TAG = DockerTags.getTransformCoreAioTag();
     private static final String SFS_IMAGE = "quay.io/alfresco/alfresco-shared-file-store";
     private static final String SFS_TAG = DockerTags.getSfsTag();
+    private static final String BULK_INGESTER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-bulk-ingester";
     private static final String LIVE_INGESTER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-live-ingester";
-    private static final String LIVE_INGESTER_TAG = DockerTags.getHxiConnectorTag();
+    private static final String HXI_CONNECTOR_TAG = DockerTags.getHxiConnectorTag();
     private static final String PREDICTION_APPLIER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-prediction-applier";
-    private static final String PREDICTION_APPLIER_TAG = DockerTags.getHxiConnectorTag();
     private static final String DB_USER = "alfresco";
     private static final String DB_PASS = "alfresco";
     private static final String DB_NAME = "alfresco";
@@ -82,6 +82,7 @@ public class DockerContainers
     private static final String TRANSFORM_ROUTER_ALIAS = "transform-router";
     private static final String TRANSFORM_CORE_AIO_ALIAS = "transform-core-aio";
     private static final String SFS_ALIAS = "shared-file-store";
+    private static final String BULK_INGESTER_ALIAS = "bulk-ingester";
     private static final String LIVE_INGESTER_ALIAS = "live-ingester";
     private static final String PREDICTION_APPLIER_ALIAS = "prediction-applier";
     private static final String LOCALSTACK_ALIAS = "aws-mock";
@@ -249,9 +250,30 @@ public class DockerContainers
         return sfs;
     }
 
+    public static GenericContainer<?> createBulkIngesterContainerWithin(PostgreSQLContainer<?> postgresContainer, Network network)
+    {
+        GenericContainer<?> bulkIngester = new GenericContainer<>(DockerImageName.parse(BULK_INGESTER_IMAGE).withTag(HXI_CONNECTOR_TAG))
+                .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5008,server=y,suspend=n")
+                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
+                .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
+                .withEnv("SPRING_DATASOURCE_URL", "jdbc:postgresql://%s:5432/%s".formatted(
+                        postgresContainer.getNetworkAliases().stream().findFirst().get(),
+                        postgresContainer.getDatabaseName()))
+                .withEnv("SPRING_DATASOURCE_USERNAME", postgresContainer.getUsername())
+                .withEnv("SPRING_DATASOURCE_PASSWORD", postgresContainer.getPassword())
+                .withExposedPorts(5008)
+                .withStartupTimeout(Duration.ofMinutes(2))
+                .waitingFor(Wait.forLogMessage(".*Started BulkIngesterApplication.*", 1))
+                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("BulkIngesterContainer")));
+
+        Optional.ofNullable(network).ifPresent(n -> bulkIngester.withNetwork(n).withNetworkAliases(BULK_INGESTER_ALIAS));
+
+        return bulkIngester;
+    }
+
     public static GenericContainer<?> createLiveIngesterContainerWithin(Network network)
     {
-        GenericContainer<?> liveIngester = new GenericContainer<>(DockerImageName.parse(LIVE_INGESTER_IMAGE).withTag(LIVE_INGESTER_TAG))
+        GenericContainer<?> liveIngester = new GenericContainer<>(DockerImageName.parse(LIVE_INGESTER_IMAGE).withTag(HXI_CONNECTOR_TAG))
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n")
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
@@ -267,7 +289,7 @@ public class DockerContainers
         return liveIngester;
     }
 
-    public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, AlfrescoRepositoryContainer acsContainer, Network network)
+    public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, Network network)
     {
         return createLiveIngesterContainerWithin(network)
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
@@ -276,13 +298,18 @@ public class DockerContainers
                         "http://%s:8080/token".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key")
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_USERNAME", "admin")
-                .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin")
+                .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin");
+    }
+
+    public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, AlfrescoRepositoryContainer acsContainer, Network network)
+    {
+        return createLiveIngesterContainerForWireMock(hxInsightMockContainer, network)
                 .withEnv("ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(acsContainer.getNetworkAliases().stream().findFirst().get()));
     }
 
     public static GenericContainer<?> createPredictionApplierContainerWithin(Network network)
     {
-        GenericContainer<?> predictionApplier = new GenericContainer<>(DockerImageName.parse(PREDICTION_APPLIER_IMAGE).withTag(PREDICTION_APPLIER_TAG))
+        GenericContainer<?> predictionApplier = new GenericContainer<>(DockerImageName.parse(PREDICTION_APPLIER_IMAGE).withTag(HXI_CONNECTOR_TAG))
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n")
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withExposedPorts(5009)
