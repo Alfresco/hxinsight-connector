@@ -40,7 +40,6 @@ public class RetryUtils
 {
     private static final int MAX_ATTEMPTS = 5;
     private static final int INITIAL_DELAY_MS = 100;
-    private static final int BACKOFF_MULTIPLIER = 2;
 
     public static void retryWithBackoff(Runnable runnable)
     {
@@ -90,7 +89,7 @@ public class RetryUtils
                 }
                 log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delay);
                 TimeUnit.MILLISECONDS.sleep(delay);
-                delay *= BACKOFF_MULTIPLIER;
+                delay += delayMs;
             }
         }
     }
