@@ -55,7 +55,7 @@ public class ApplicationInfoProvider
             log.debug("Calculating user agent data.");
             applicationInfo = calculateUserAgentData();
         }
-        log.atDebug().log("User agent data: {}", applicationInfo);
+        log.debug("User agent data: {}", applicationInfo);
         return applicationInfo;
     }
 

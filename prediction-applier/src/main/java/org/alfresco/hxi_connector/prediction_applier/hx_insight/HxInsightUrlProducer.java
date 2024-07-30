@@ -60,7 +60,7 @@ public class HxInsightUrlProducer
         return withUserAgentDataPathParam(PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER));
     }
 
-    private String withUserAgentDataPathParam(String url)
+    private static String withUserAgentDataPathParam(String url)
     {
         return url + ApplicationInfoProvider.USER_AGENT_PARAM;
     }
