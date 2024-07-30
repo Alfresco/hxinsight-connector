@@ -30,7 +30,9 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
@@ -44,6 +46,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -77,7 +80,9 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated("cm:name", "some name"),
                 updated("cm:title", "some title"),
-                updated("cm:description", "some description"));
+                updated("cm:description", "some description"),
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -103,7 +108,9 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(TYPE_PROPERTY, type));
+                updated(TYPE_PROPERTY, type),
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -126,7 +133,9 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -151,7 +160,9 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -184,7 +195,9 @@ class PropertiesMapperTest
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(NAME_PROPERTY, name),
-                contentMetadataUpdated(CONTENT_PROPERTY, "application/jpeg", 123L, name));
+                contentMetadataUpdated(CONTENT_PROPERTY, "application/jpeg", 123L, name),
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -215,7 +228,9 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(NAME_PROPERTY, name));
+                updated(NAME_PROPERTY, name),
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -242,7 +257,10 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(updated("cm:description", "some description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated("cm:description", "some description"),
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -268,7 +286,10 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(updated("cm:description", "new description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated("cm:description", "new description"),
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -294,7 +315,10 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted("cm:title"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                deleted("cm:title"),
+                allowAccessUpdated(),
+                denyAccessUpdated());
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -318,7 +342,10 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.unchanged("cm:taggable"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                PropertyDelta.unchanged("cm:taggable"),
+                allowAccessUpdated(),
+                denyAccessUpdated());
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
@@ -339,7 +366,10 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                deleted(CONTENT_PROPERTY),
+                allowAccessUpdated(),
+                denyAccessUpdated());
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
@@ -358,7 +388,10 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "application/msword", 123L, null));
+        Set<PropertyDelta<?>> expected = Set.of(
+                contentMetadataUpdated(CONTENT_PROPERTY, "application/msword", 123L, null),
+                allowAccessUpdated(),
+                denyAccessUpdated());
         assertEquals(expected, propertyDeltas);
     }
 
@@ -380,7 +413,10 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, null));
+        Set<PropertyDelta<?>> expected = Set.of(
+                contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, null),
+                allowAccessUpdated(),
+                denyAccessUpdated());
         assertEquals(expected, propertyDeltas);
     }
 
@@ -402,9 +438,68 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, "newName.bmp"),
-                updated(NAME_PROPERTY, "newName.bmp"));
+        Set<PropertyDelta<?>> expected = Set.of(
+                contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, "newName.bmp"),
+                updated(NAME_PROPERTY, "newName.bmp"),
+                allowAccessUpdated(),
+                denyAccessUpdated());
         assertEquals(expected, propertyDeltas);
+    }
+
+    @Test
+    void shouldAddACLInfo_NodeCreated()
+    {
+        // given
+        String groupEveryone = "GROUP_EVERYONE";
+        String bob = "bob";
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setType(event, NODE_CREATED);
+
+        given(event.getData()).willReturn(mock(EnterpriseEventData.class));
+        given(event.getData().getResource()).willReturn(NodeResource.builder().build());
+        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
+
+        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
+                updated(DENY_ACCESS, Set.of(bob)));
+
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
+    }
+
+    @Test
+    void shouldAddACLInfo_NodeUpdated()
+    {
+        // given
+        String groupEveryone = "GROUP_EVERYONE";
+        String bob = "bob";
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setType(event, NODE_UPDATED);
+
+        given(event.getData()).willReturn(mock(EnterpriseEventData.class));
+        given(event.getData().getResource()).willReturn(NodeResource.builder().build());
+        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
+
+        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
+                updated(DENY_ACCESS, Set.of(bob)));
+
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
@@ -433,10 +528,20 @@ class PropertiesMapperTest
             return event.getData();
         }
 
-        DataAttributes<NodeResource> data = mock();
+        EnterpriseEventData<NodeResource> data = mock();
 
         given(event.getData()).willReturn(data);
 
         return data;
+    }
+
+    private static PropertyDelta<Set<String>> allowAccessUpdated()
+    {
+        return updated(ALLOW_ACCESS, Set.of());
+    }
+
+    private static PropertyDelta<Set<String>> denyAccessUpdated()
+    {
+        return updated(DENY_ACCESS, Set.of());
     }
 }

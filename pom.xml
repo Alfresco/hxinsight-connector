@@ -67,7 +67,7 @@
         <alfresco-platform.version>23.2.1</alfresco-platform.version>
         <alfresco-sdk.version>4.8.0</alfresco-sdk.version>
         <alfresco-db-connector.version>4.0.1</alfresco-db-connector.version>
-        <alfresco-event-model.version>0.0.28</alfresco-event-model.version>
+        <alfresco-event-model.version>0.0.64</alfresco-event-model.version>
         <spring-boot.version>3.3.2</spring-boot.version>
         <spring-camel.version>4.7.0</spring-camel.version>
         <commons-lang.version>3.15.0</commons-lang.version>
@@ -218,7 +218,7 @@
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
-                <artifactId>acs-event-model</artifactId>
+                <artifactId>acs-enterprise-event-model</artifactId>
                 <version>${alfresco-event-model.version}</version>
             </dependency>
             <dependency>
