@@ -89,7 +89,6 @@ public class RetryUtils
                 }
                 log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delay);
                 TimeUnit.MILLISECONDS.sleep(delay);
-                delay += delayMs;
             }
         }
     }
