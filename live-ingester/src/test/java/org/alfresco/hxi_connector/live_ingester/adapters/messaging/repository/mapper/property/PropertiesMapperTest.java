@@ -454,6 +454,29 @@ class PropertiesMapperTest
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
+    @Test
+    void shouldNotAddACLInfoIfNotPresent_NodeCreated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setType(event, NODE_CREATED);
+
+        given(event.getData()).willReturn(mock(EnterpriseEventData.class));
+        given(event.getData().getResource()).willReturn(NodeResource.builder().build());
+        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
+
+        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
+        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
+
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
+    }
+
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
