@@ -30,6 +30,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getPredictionNodeProperties;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeDeleted;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypePermissionsUpdated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeUpdated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isPredictionApplyEvent;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isPredictionNodeEvent;
@@ -95,6 +96,7 @@ public class EventProcessor
         handleMetadataPropertiesChange(event);
         handleContentChange(event);
         handleNodeDeleteEvent(event);
+        handlePermissionsChange(event);
     }
 
     private void handlePredictionNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
@@ -141,4 +143,13 @@ public class EventProcessor
             deleteNodeCommandHandler.handle(deleteNodeCommand);
         }
     }
+
+    private void handlePermissionsChange(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (isEventTypePermissionsUpdated(event))
+        {
+            log.debug("Permissions of node {} updated", event.getData().getResource().getId());
+        }
+    }
+
 }
