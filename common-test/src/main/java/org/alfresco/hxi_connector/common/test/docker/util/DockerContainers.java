@@ -258,8 +258,7 @@ public class DockerContainers
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
                 .withEnv("SPRING_DATASOURCE_URL", "jdbc:postgresql://%s:5432/%s".formatted(
                         postgresContainer.getNetworkAliases().stream().findFirst().get(),
-                        postgresContainer.getDatabaseName())
-                )
+                        postgresContainer.getDatabaseName()))
                 .withEnv("SPRING_DATASOURCE_USERNAME", postgresContainer.getUsername())
                 .withEnv("SPRING_DATASOURCE_PASSWORD", postgresContainer.getPassword())
                 .withExposedPorts(5008)
