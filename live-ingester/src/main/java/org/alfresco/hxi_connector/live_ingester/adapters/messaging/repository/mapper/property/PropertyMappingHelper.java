@@ -41,6 +41,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PRO
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.unchanged;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -123,16 +124,25 @@ public class PropertyMappingHelper
 
     public static Stream<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
+        if (isEventTypeCreated(event)) {
+            EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
 
-        return Stream.of(PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities()));
+            return Stream.of(PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities()));
+        }
+
+        return Stream.empty();
     }
 
     public static Stream<PropertyDelta<?>> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
+        if (isEventTypeCreated(event))
+        {
+            EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
 
-        return Stream.of(PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities()));
+            return Stream.of(PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities()));
+        }
+
+        return Stream.empty();
     }
 
     private static boolean isContentRemoved(RepoEvent<DataAttributes<NodeResource>> event)
