@@ -25,14 +25,14 @@
  */
 package org.alfresco.hxi_connector.common.test.util;
 
-import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
 @Slf4j
@@ -42,7 +42,7 @@ public class RetryUtils
     private static final int INITIAL_DELAY_MS = 100;
     private static final int BACKOFF_MULTIPLIER = 2;
 
-    public static void retryWithBackoff(Runnable runnable)
+    public static void retryWithBackoff(ErrorCatchingRunnable runnable)
     {
         retryWithBackoff(() -> {
             runnable.run();
@@ -50,12 +50,12 @@ public class RetryUtils
         });
     }
 
-    public static void retryWithBackoff(Runnable runnable, int delayMs)
+    public static void retryWithBackoff(ErrorCatchingRunnable runnable, int delayMs)
     {
         retryWithBackoff(runnable, MAX_ATTEMPTS, delayMs);
     }
 
-    public static void retryWithBackoff(Runnable runnable, int maxAttempts, int delayMs)
+    public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts, int delayMs)
     {
         retryWithBackoff(() -> {
             runnable.run();
@@ -79,8 +79,7 @@ public class RetryUtils
             try
             {
                 return supplier.get();
-            }
-            catch (AssertionError e)
+            } catch (AssertionError e)
             {
                 attempt++;
                 if (attempt >= maxAttempts)
@@ -92,6 +91,18 @@ public class RetryUtils
                 TimeUnit.MILLISECONDS.sleep(delay);
                 delay *= BACKOFF_MULTIPLIER;
             }
+        }
+    }
+
+    public interface ErrorCatchingRunnable extends Runnable
+    {
+        void runUnsafe() throws Exception;
+
+        @Override
+        @SneakyThrows
+        default void run()
+        {
+            runUnsafe();
         }
     }
 }
