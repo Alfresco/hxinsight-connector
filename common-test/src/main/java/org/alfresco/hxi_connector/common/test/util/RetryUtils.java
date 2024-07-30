@@ -25,14 +25,14 @@
  */
 package org.alfresco.hxi_connector.common.test.util;
 
-import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import static lombok.AccessLevel.PRIVATE;
 
 import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
-import static lombok.AccessLevel.PRIVATE;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 
 @NoArgsConstructor(access = PRIVATE)
 @Slf4j
@@ -79,7 +79,8 @@ public class RetryUtils
             try
             {
                 return supplier.get();
-            } catch (AssertionError e)
+            }
+            catch (AssertionError e)
             {
                 attempt++;
                 if (attempt >= maxAttempts)

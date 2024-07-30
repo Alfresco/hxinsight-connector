@@ -26,10 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
-import org.springframework.stereotype.Component;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.util.List;
 import java.util.Map;
@@ -37,8 +35,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 
 @Component
 public class CategoryPropertyResolver implements PropertyResolver<Set<String>>
