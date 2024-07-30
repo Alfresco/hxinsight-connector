@@ -54,7 +54,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Testcontainers
-@SuppressWarnings("PMD.FieldNamingConventions")
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.JUnitTestsShouldIncludeAssert"})
 public class BulkIngesterE2eTest
 {
     private static final ObjectMapper objectMapper = new ObjectMapper();
