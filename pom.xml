@@ -99,7 +99,7 @@
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->
         <dist.alfresco.docker.user>alfresco</dist.alfresco.docker.user>
         <dist.alfresco.docker.image>quay.io/alfresco/alfresco-content-repository</dist.alfresco.docker.image>
-        <dist.alfresco.extended.repo.image>alfresco/alfresco-content-repository-hxinsight-extension</dist.alfresco.extended.repo.image>
+        <dist.alfresco.repo.extension>alfresco-hxinsight-connector-hxinsight-extension</dist.alfresco.repo.extension>
         <dist.alfresco.version>${alfresco-platform.version}</dist.alfresco.version>
         <dist.share.version>${alfresco-platform.version}</dist.share.version>
         <dist.postgres.version>14.4</dist.postgres.version>

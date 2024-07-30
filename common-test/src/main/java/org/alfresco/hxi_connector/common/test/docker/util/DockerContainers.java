@@ -46,13 +46,15 @@ import org.testcontainers.utility.DockerImageName;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryExtension;
 import org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerContainers
 {
     private static final Pattern SPECIAL_REGEX_CHARS = Pattern.compile("[{}()\\[\\].+*?^$\\\\|]");
-    private static final String EXTENDED_REPO_IMAGE_NAME = DockerTags.getOrDefault("extended.repo.image", "quay.io/alfresco/alfresco-content-repository-hxinsight-extension");
+    private static final String REPOSITORY_EXTENSION = DockerTags.getOrDefault("repository.extension", "alfresco-hxinsight-connector-hxinsight-extension");
+    private static final String EXTENDED_REPOSITORY_LOCAL_NAME = "localhost/alfresco/alfresco-content-repository-hxinsight-extension";
     private static final String POSTGRES_IMAGE = "postgres";
     private static final String POSTGRES_TAG = DockerTags.getPostgresTag();
     private static final String ACTIVE_MQ_IMAGE = "quay.io/alfresco/alfresco-activemq";
@@ -116,11 +118,10 @@ public class DockerContainers
     public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network, RepositoryType repositoryType)
     {
         pullRepositoryImage(repositoryType);
-        AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(DockerImageName.parse(EXTENDED_REPO_IMAGE_NAME).withTag(DockerTags.getHxiConnectorTag()))
-                .waitingFor(Wait.forHttp("/alfresco")
-                        .forPort(8080)
-                        .withStartupTimeout(Duration.ofMinutes(5)))
-                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
+        AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
+                new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, repositoryType))
+                        .waitingFor(Wait.forHttp("/alfresco").forPort(8080).withStartupTimeout(Duration.ofMinutes(5)))
+                        .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
 
@@ -208,8 +209,6 @@ public class DockerContainers
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
-                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER", "TRACE")
-                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER_MESSAGING", "INFO")
                 .withExposedPorts(8095)
                 .waitingFor(Wait.forHttp("/")
                         .forPort(8095)
@@ -227,7 +226,6 @@ public class DockerContainers
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1024m")
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
-                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_BASE_TRANSFORM", "TRACE")
                 .withExposedPorts(8090)
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformCoreContainer")));
