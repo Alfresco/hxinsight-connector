@@ -477,7 +477,6 @@ class PropertiesMapperTest
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
-
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
         given(event.getType()).willReturn(type.getType());

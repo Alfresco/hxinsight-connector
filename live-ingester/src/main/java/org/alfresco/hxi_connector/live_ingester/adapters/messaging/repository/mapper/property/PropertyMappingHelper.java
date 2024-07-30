@@ -25,24 +25,10 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
-import lombok.NoArgsConstructor;
-import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.repo.event.v1.model.ContentInfo;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.alfresco.repo.event.v1.model.UserInfo;
-
-import java.io.Serializable;
-import java.time.ZonedDateTime;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Stream;
-
 import static java.util.Optional.ofNullable;
+
 import static lombok.AccessLevel.PRIVATE;
+
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
@@ -55,6 +41,23 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PRO
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
+
+import java.io.Serializable;
+import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Stream;
+
+import lombok.NoArgsConstructor;
+
+import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.repo.event.v1.model.ContentInfo;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.repo.event.v1.model.UserInfo;
 
 @NoArgsConstructor(access = PRIVATE)
 public class PropertyMappingHelper
