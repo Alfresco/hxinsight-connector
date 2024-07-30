@@ -58,6 +58,7 @@ public class IntegrationProperties
     @NotNull private final HylandExperience hylandExperience;
     @NotNull private final Application application;
 
+    @Validated
     @ConfigurationProperties("alfresco")
     public record Alfresco(
             @NotNull @NestedConfigurationProperty Repository repository,
@@ -66,6 +67,7 @@ public class IntegrationProperties
             @NotNull @NestedConfigurationProperty Filter filter)
     {}
 
+    @Validated
     @ConfigurationProperties("hyland-experience")
     public record HylandExperience(
             @NotNull @NestedConfigurationProperty Storage storage,
