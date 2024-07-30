@@ -206,12 +206,12 @@ class HxInsightClientTest
         String responseBody = """
                 [
                     {
-                        "agentId": "1a3f4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d",
+                        "id": "1a3f4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d",
                         "name": "Security Advisor",
                         "description": "I can help you to secure your systems."
                     },
                     {
-                        "agentId": "1a3f1a3f-1a3f-1a3f-1a3f-1a3f1a3f1a3f",
+                        "id": "1a3f1a3f-1a3f-1a3f-1a3f-1a3f1a3f1a3f",
                         "name": "Tax Advisor",
                         "description": "I can help you with your taxes and financial planning."
                     }

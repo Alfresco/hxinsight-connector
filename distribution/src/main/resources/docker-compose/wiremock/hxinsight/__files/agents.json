@@ -1,23 +1,45 @@
 [
   {
-    "agentId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
+    "id": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
+    "hxEnvironmentId": "ecf13dd4-c061-462b-8122-e3203cc40a0d",
     "name": "HR Policy Agent",
+    "version": "1",
     "description": "This agent is responsible for HR policy predictions",
-    "personality": "Keep responses professional and concise",
-    "model": "meta-llama3-8b",
-    "allowedSources": [
-      "HR Policy Repository"
-    ]
+    "instructions": "Keep responses professional and concise",
+    "modelName": "meta-llama3-8b",
+    "sourceIds": [
+      "c2886904-40d0-4ab9-b5b7-1ea624ccca80"
+    ],
+    "permissions": [
+      {
+        "principalType": "user",
+        "id": "e2b9471c-d869-48b4-94ce-5112dd71001c"
+      }
+    ],
+    "avatarUrl": "https://s3.amazonaws.com/avatars/ecf13dd4-c061-462b-8122-e3203cc40a0d.jpg",
+    "staticFilter": {},
+    "dynamicFilter": {}
   },
   {
-    "agentId": "b999ee14-3974-41b2-bef8-70ab38c9e642",
+    "id": "b999ee14-3974-41b2-bef8-70ab38c9e642",
+    "hxEnvironmentId": "e2119fa1-9e11-421a-bef3-222667b1db34",
     "name": "Knowledge Base Agent",
+    "version": "1",
     "description": "Very smart about product knowledge",
-    "personality": "Keep responses professional but friendly",
-    "model": "meta-llama3-8b",
-    "allowedSources": [
-      "Insight Discovery",
-      "HR Policy Repository"
-    ]
+    "instructions": "Keep responses professional but friendly",
+    "modelName": "meta-llama3-8b",
+    "sourceIds": [
+      "9036b44b-8811-4449-a767-3763e3efa2e0",
+      "c2886904-40d0-4ab9-b5b7-1ea624ccca80"
+    ],
+    "permissions": [
+      {
+        "principalType": "user",
+        "id": "5d684559-810b-499f-8b6b-4f39eb47d367"
+      }
+    ],
+    "avatarUrl": "https://s3.amazonaws.com/avatars/e2119fa1-9e11-421a-bef3-222667b1db34.jpg",
+    "staticFilter": {},
+    "dynamicFilter": {}
   }
 ]
