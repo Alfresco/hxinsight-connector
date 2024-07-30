@@ -39,13 +39,34 @@ import lombok.Cleanup;
 import lombok.NonNull;
 import lombok.SneakyThrows;
 import org.testcontainers.images.builder.ImageFromDockerfile;
+import org.testcontainers.images.builder.dockerfile.statement.SingleArgumentStatement;
 import org.testcontainers.utility.DockerImageName;
 
 import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 
 public class AlfrescoRepositoryExtension extends ImageFromDockerfile
 {
+    private static final String REPO_JAVA_VERSION = DockerTags.getOrDefault("repository.java.version", "17");
     private static final String LOCAL_IMAGE_DEFAULT = "localhost/alfresco/alfresco-content-repository-extended";
+    private static final String JAVA_11_INSTALLING_SCRIPT = """
+            if [[ "$JAVA_VERSION" == "11" ]]; then
+              ARCH=$(uname -m | sed s/86_//);
+              JAVA_RELEASE=11.0.15_10;
+              curl -fsLo java.tar.gz https://github.com/adoptium/temurin${JAVA_VERSION}-binaries/releases/download/jdk-${JAVA_RELEASE/_/+}/OpenJDK${JAVA_VERSION}U-jre_${ARCH}_linux_hotspot_${JAVA_RELEASE}.tar.gz &&
+              tar xvfz java.tar.gz &&
+              mv jdk-* /usr/lib/jvm/temurin-11-jdk &&
+              update-alternatives --install /usr/bin/java java /usr/lib/jvm/temurin-11-jdk/bin/java 1 &&
+              update-alternatives --remove java $(update-alternatives --display java | head -2 | tail -1 | cut -d " " -f6);
+            fi
+            """.replace("\n", " ");
+    private static final String JAVA_SWITCHING_SCRIPT_NAME = "java-switching-entrypoint.sh";
+    private static final String JAVA_SWITCHING_SCRIPT_PATH = "/" + JAVA_SWITCHING_SCRIPT_NAME;
+    private static final String JAVA_SWITCHING_SCRIPT = """
+            #!/bin/bash -e
+            # Switch to Java 11 if it has been installed
+            [ -d "/usr/lib/jvm/temurin-11-jdk" ] && export JAVA_HOME=/usr/lib/jvm/temurin-11-jdk
+            exec "$@"
+            """;
 
     public AlfrescoRepositoryExtension(@NonNull String extension)
     {
@@ -72,13 +93,20 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
     {
         Path jarFile = findTargetJar(extension);
         this.withFileFromPath(jarFile.toString(), jarFile)
+                .withFileFromString(JAVA_SWITCHING_SCRIPT_NAME, JAVA_SWITCHING_SCRIPT)
                 .withDockerfileFromBuilder(builder -> builder
                         .from(dockerImageName.toString())
                         .user("root")
                         .copy(jarFile.toString().replace("\\", "/"), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
+                        .withStatement(new SingleArgumentStatement("ARG", "JAVA_VERSION"))
+                        .run(JAVA_11_INSTALLING_SCRIPT)
+                        .copy(JAVA_SWITCHING_SCRIPT_NAME, "/")
+                        .run("chmod +x " + JAVA_SWITCHING_SCRIPT_PATH)
                         .run("chown -R -h alfresco /usr/local/tomcat")
                         .user("alfresco")
-                        .build());
+                        .entryPoint(JAVA_SWITCHING_SCRIPT_PATH, "catalina.sh", "run", "-security")
+                        .build())
+                .withBuildArg("JAVA_VERSION", REPO_JAVA_VERSION);
     }
 
     @SneakyThrows
