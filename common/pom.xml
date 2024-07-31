@@ -13,8 +13,8 @@
     <packaging>jar</packaging>
 
     <properties>
-        <maven.build.sourceVersion>${repository.java.version}</maven.build.sourceVersion>
-        <maven.build.targetVersion>${repository.java.version}</maven.build.targetVersion>
+        <maven.build.sourceVersion>${alfresco-platform.java.version}</maven.build.sourceVersion>
+        <maven.build.targetVersion>${alfresco-platform.java.version}</maven.build.targetVersion>
     </properties>
 
     <dependencies>

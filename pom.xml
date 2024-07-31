@@ -52,7 +52,7 @@
 
     <properties>
         <java.version>17</java.version>
-        <repository.java.version>${java.version}</repository.java.version>
+        <alfresco-platform.java.version>${java.version}</alfresco-platform.java.version>
         <maven.build.sourceVersion>${java.version}</maven.build.sourceVersion>
         <maven.build.targetVersion>${java.version}</maven.build.targetVersion>
         <maven.compiler.testRelease>${java.version}</maven.compiler.testRelease>
