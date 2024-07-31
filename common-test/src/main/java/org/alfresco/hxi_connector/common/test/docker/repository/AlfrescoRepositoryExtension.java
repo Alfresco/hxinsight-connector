@@ -48,7 +48,7 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
 {
     private static final String REPO_JAVA_VERSION = DockerTags.getOrDefault("repository.java.version", "17");
     private static final String LOCAL_IMAGE_DEFAULT = "localhost/alfresco/alfresco-content-repository-extended";
-    private static final String JAVA_11_INSTALLING_SCRIPT = """
+    private static final String JAVA_INSTALLING_SCRIPT = """
             if [[ "$JAVA_VERSION" == "11" ]]; then
               ARCH=$(uname -m | sed s/86_//);
               JAVA_RELEASE=11.0.15_10;
@@ -99,7 +99,7 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
                         .user("root")
                         .copy(jarFile.toString().replace("\\", "/"), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
                         .withStatement(new SingleArgumentStatement("ARG", "JAVA_VERSION"))
-                        .run(JAVA_11_INSTALLING_SCRIPT)
+                        .run(JAVA_INSTALLING_SCRIPT)
                         .copy(JAVA_SWITCHING_SCRIPT_NAME, "/")
                         .run("chmod +x " + JAVA_SWITCHING_SCRIPT_PATH)
                         .run("chown -R -h alfresco /usr/local/tomcat")
