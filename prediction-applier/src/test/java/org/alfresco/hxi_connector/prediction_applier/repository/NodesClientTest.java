@@ -167,7 +167,7 @@ class NodesClientTest
 
     private RepositoryApiProperties createNodesApiProperties()
     {
-        return new RepositoryApiProperties(null, null, null, new Retry(RETRY_ATTEMPTS, 0, 1, emptySet()));
+        return new RepositoryApiProperties(null, null, new Retry(RETRY_ATTEMPTS, 0, 1, emptySet()));
     }
 
     private void mockEndpointWillRespondWith(int statusCode)

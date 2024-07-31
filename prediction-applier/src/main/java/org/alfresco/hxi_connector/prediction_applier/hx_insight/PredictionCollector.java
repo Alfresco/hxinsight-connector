@@ -29,6 +29,7 @@ import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.language.spel.SpelExpression.spel;
 
+import static org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.BATCHES_PAGE_NO_HEADER;
 import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.BATCH_ID_HEADER;
 import static org.alfresco.hxi_connector.prediction_applier.hx_insight.HxInsightUrlProducer.PREDICTIONS_PAGE_NO_HEADER;
@@ -45,6 +46,7 @@ import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.prediction_applier.config.InsightPredictionsProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionBatch;
 import org.alfresco.hxi_connector.prediction_applier.model.prediction.PredictionEntry;
@@ -69,6 +71,7 @@ public class PredictionCollector extends RouteBuilder
     private final InsightPredictionsProperties insightPredictionsProperties;
     private final HxInsightUrlProducer hxInsightUrlProducer;
     private final AuthService authService;
+    private final ApplicationInfoProvider applicationInfoProvider;
 
     // @formatter:off
     /**
@@ -80,6 +83,7 @@ public class PredictionCollector extends RouteBuilder
     {
         from(insightPredictionsProperties.collectorTimerEndpoint())
             .routeId(TIMER_ROUTE_ID)
+            .setProperty(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
             .choice().when(this::isProcessingPending)
                 .log(DEBUG, log, "Prediction processing is pending, no need to trigger it")
             .otherwise()

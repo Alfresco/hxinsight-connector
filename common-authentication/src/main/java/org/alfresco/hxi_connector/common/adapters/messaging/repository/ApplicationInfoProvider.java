@@ -52,8 +52,10 @@ public class ApplicationInfoProvider
     {
         if (StringUtils.isBlank(applicationInfo))
         {
+            log.debug("Calculating user agent data.");
             applicationInfo = calculateUserAgentData();
         }
+        log.debug("User agent data: {}", applicationInfo);
         return applicationInfo;
     }
 
