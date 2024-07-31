@@ -40,7 +40,6 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
-import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
 import java.util.Set;
 
