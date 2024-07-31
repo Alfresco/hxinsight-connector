@@ -35,7 +35,9 @@ import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.RETRY;
 import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -189,7 +191,8 @@ public class HxInsightClient
             ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
             log.atDebug().log("Agent with id {} received avatar successfully", agentId);
 
-            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), format("avatar-%s", agentId), "png");
+            String filePrefix = format("avatar-%s-%s", agentId, System.currentTimeMillis());
+            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), filePrefix, "png");
             return new FileBinaryResource(tempImageFile);
         }
         catch (Exception e)

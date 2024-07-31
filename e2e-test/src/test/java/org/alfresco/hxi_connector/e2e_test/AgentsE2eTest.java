@@ -28,9 +28,12 @@ package org.alfresco.hxi_connector.e2e_test;
 import static java.lang.String.format;
 
 import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
@@ -63,6 +66,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 public class AgentsE2eTest
 {
     private static final String AGENT_ID = "61254576-62a3-453f-8cd8-19e2f6554f29";
+    private static final String AVATAR_DEFAULT_ID = "-default-";
 
     static final Network network = Network.newNetwork();
     @Container
@@ -107,13 +111,47 @@ public class AgentsE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("image/png")
-                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/-default-", AGENT_ID))
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", AGENT_ID, AVATAR_DEFAULT_ID))
                 .then().extract().response();
 
         // then
         assertEquals(SC_OK, response.statusCode());
         assertArrayEquals(Files.readAllBytes(Paths.get("src/test/resources/wiremock/hxinsight/__files/avatar.png")),
                 IOUtils.toByteArray(response.body().asInputStream()));
+    }
+
+    @Test
+    void shouldReturn404ForAvatarWithNotDefaultId() throws IOException
+    {
+        // given: contained in wiremock file - get-agent-avatar.json.
+        String avatarId = "sample-avatar-id";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("image/png")
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", AGENT_ID, avatarId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_NOT_FOUND, response.statusCode());
+        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains(format("Avatar with id=%s not found", avatarId)));
+    }
+
+    @Test
+    void shouldNotGetAvatarForNotExistingAgent() throws IOException
+    {
+        // given: contained in wiremock file - get-agent-avatar.json.
+        String nonExistentAgentId = "non-existent-agent-id";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("image/png")
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", nonExistentAgentId, AVATAR_DEFAULT_ID))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_SERVICE_UNAVAILABLE, response.statusCode());
+        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains(format("Failed to get avatar for agent with id %s", nonExistentAgentId)));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
