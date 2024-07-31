@@ -1,3 +1,6 @@
+application:
+  version: "@project.version@"
+
 spring:
   main:
     web-application-type: none
@@ -15,6 +18,7 @@ hyland-experience:
 alfresco:
   repository:
     base-url: http://localhost:8002
+    discovery-endpoint: ${alfresco.repository.base-url}/alfresco/api/discovery
     retry:
       attempts: 10
       initial-delay: 500
