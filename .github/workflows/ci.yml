@@ -211,6 +211,7 @@ jobs:
     needs:
       - pre_commit
     if: >
+      github.event_name != 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
@@ -230,7 +231,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Build application"
         if: env.JAVA_VERSION_SUPPORTED != env.JAVA_VERSION
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
       - name: "Build docker images"
         if: env.JAVA_VERSION_SUPPORTED != env.JAVA_VERSION
         run: |
