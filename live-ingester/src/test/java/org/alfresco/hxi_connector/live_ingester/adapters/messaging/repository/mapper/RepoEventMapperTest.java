@@ -26,29 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
-import static java.util.Collections.emptySet;
-
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.mock;
-
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
-import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
-
-import java.util.Set;
-
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-
 import org.alfresco.hxi_connector.common.exception.ValidationException;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertiesMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
@@ -60,6 +37,31 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.Set;
+
+import static java.util.Collections.emptySet;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.mock;
 
 @ExtendWith(MockitoExtension.class)
 class RepoEventMapperTest
@@ -155,10 +157,10 @@ class RepoEventMapperTest
     }
 
     @Test
-    void shouldNoticeContentDeleted_whenContentRemoved()
+    void shouldNoticeContentDeleted_whenContentRemoved2()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(PERMISSION_UPDATED);
         given(propertiesMapper.mapToPropertyDeltas(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY)));
 
         // when

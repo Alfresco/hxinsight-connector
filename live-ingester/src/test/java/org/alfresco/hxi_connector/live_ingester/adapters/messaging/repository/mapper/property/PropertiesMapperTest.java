@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
+import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -466,6 +467,35 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
+
+        assertEquals(expectedPropertyDeltas, propertyDeltas);
+    }
+
+    @Test
+    void shouldAddACLInfo_NodePermissionsUpdated()
+    {
+        // given
+        String groupEveryone = "GROUP_EVERYONE";
+        String bob = "bob";
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setType(event, PERMISSION_UPDATED);
+
+        given(event.getData()).willReturn(mock(EnterpriseEventData.class));
+        given(event.getData().getResource()).willReturn(NodeResource.builder().build());
+        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
+
+        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
+                updated(DENY_ACCESS, Set.of(bob))
+        );
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }

@@ -40,6 +40,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.isFieldUnchanged;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypePermissionsUpdated;
 
 import java.util.Map;
 import java.util.Objects;
@@ -66,6 +67,10 @@ public class PropertiesMapper
             return allPropertiesUpdated(event);
         }
 
+        if (isEventTypePermissionsUpdated(event)) {
+            return permissionPropertiesUpdated(event);
+        }
+
         return somePropertiesUpdated(event);
     }
 
@@ -75,6 +80,14 @@ public class PropertiesMapper
                 .filter(property -> Objects.nonNull(property.getValue()))
                 .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
         return createSetOfAllProperties(event, propertyDeltas);
+    }
+
+    private Set<PropertyDelta<?>> permissionPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return Stream.concat(
+                calculateAllowAccessDelta(event),
+                calculateDenyAccessDelta(event)
+        ).collect(Collectors.toSet());
     }
 
     private Set<PropertyDelta<?>> somePropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
