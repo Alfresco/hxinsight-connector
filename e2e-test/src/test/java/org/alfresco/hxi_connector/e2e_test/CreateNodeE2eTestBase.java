@@ -70,7 +70,7 @@ abstract class CreateNodeE2eTestBase
 {
     protected static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int MAX_ATTEMPTS = 5;
-    private static final int INITIAL_DELAY_MS = 500;
+    private static final int INITIAL_DELAY_MS = 1000;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
