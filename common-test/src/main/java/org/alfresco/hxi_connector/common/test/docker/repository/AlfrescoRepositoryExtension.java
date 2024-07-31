@@ -48,7 +48,7 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
 {
     private static final String REPO_JAVA_VERSION = DockerTags.getOrDefault("repository.java.version", "17");
     private static final String LOCAL_IMAGE_DEFAULT = "localhost/alfresco/alfresco-content-repository-extended";
-    private static final String JAVA_INSTALLING_SCRIPT = """
+    private static final String JAVA_INSTALL_SCRIPT = """
             if [[ "$JAVA_VERSION" == "11" ]]; then
               ARCH=$(uname -m | sed s/86_//);
               JAVA_RELEASE=11.0.15_10;
@@ -59,9 +59,9 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
               update-alternatives --remove java $(update-alternatives --display java | head -2 | tail -1 | cut -d " " -f6);
             fi
             """.replace("\n", " ");
-    private static final String JAVA_SWITCHING_SCRIPT_NAME = "java-switching-entrypoint.sh";
-    private static final String JAVA_SWITCHING_SCRIPT_PATH = "/" + JAVA_SWITCHING_SCRIPT_NAME;
-    private static final String JAVA_SWITCHING_SCRIPT = """
+    private static final String JAVA_SWITCH_SCRIPT_NAME = "java-switching-entrypoint.sh";
+    private static final String JAVA_SWITCH_SCRIPT_PATH = "/" + JAVA_SWITCH_SCRIPT_NAME;
+    private static final String JAVA_SWITCH_SCRIPT = """
             #!/bin/bash -e
             # Switch to Java 11 if it has been installed
             [ -d "/usr/lib/jvm/temurin-11-jdk" ] && export JAVA_HOME=/usr/lib/jvm/temurin-11-jdk
@@ -93,18 +93,18 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
     {
         Path jarFile = findTargetJar(extension);
         this.withFileFromPath(jarFile.toString(), jarFile)
-                .withFileFromString(JAVA_SWITCHING_SCRIPT_NAME, JAVA_SWITCHING_SCRIPT)
+                .withFileFromString(JAVA_SWITCH_SCRIPT_NAME, JAVA_SWITCH_SCRIPT)
                 .withDockerfileFromBuilder(builder -> builder
                         .from(dockerImageName.toString())
                         .user("root")
                         .copy(jarFile.toString().replace("\\", "/"), "/usr/local/tomcat/webapps/alfresco/WEB-INF/lib/")
                         .withStatement(new SingleArgumentStatement("ARG", "JAVA_VERSION"))
-                        .run(JAVA_INSTALLING_SCRIPT)
-                        .copy(JAVA_SWITCHING_SCRIPT_NAME, "/")
-                        .run("chmod +x " + JAVA_SWITCHING_SCRIPT_PATH)
+                        .run(JAVA_INSTALL_SCRIPT)
+                        .copy(JAVA_SWITCH_SCRIPT_NAME, "/")
+                        .run("chmod +x " + JAVA_SWITCH_SCRIPT_PATH)
                         .run("chown -R -h alfresco /usr/local/tomcat")
                         .user("alfresco")
-                        .entryPoint(JAVA_SWITCHING_SCRIPT_PATH, "catalina.sh", "run", "-security")
+                        .entryPoint(JAVA_SWITCH_SCRIPT_PATH, "catalina.sh", "run", "-security")
                         .build())
                 .withBuildArg("JAVA_VERSION", REPO_JAVA_VERSION);
     }
