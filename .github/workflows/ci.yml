@@ -206,7 +206,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   run_e2e_test_other_supported_java:
-    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java ${{ env.JAVA_VERSION_SUPPORTED }}"
+    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java 11"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
