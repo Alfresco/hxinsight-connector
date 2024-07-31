@@ -107,6 +107,7 @@ public class AlfrescoNodeMapper
                 .map(ZonedDateTime::toInstant)
                 .map(Instant::getEpochSecond)
                 .orElse(0L);
+
     }
 
     private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)
