@@ -25,7 +25,7 @@ env:
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   JAVA_VERSION: "17"
-  JAVA_VERSION_SUPPORTED: "17"
+  JAVA_VERSION_SUPPORTED: "11"
   S3_BUCKET_REGION: "eu-west-1"
 
 jobs:
@@ -216,6 +216,7 @@ jobs:
     if: >
       needs.pre_commit.outputs.java_version_supported != needs.pre_commit.outputs.java_version &&
       github.event_name != 'pull_request' &&
+      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
