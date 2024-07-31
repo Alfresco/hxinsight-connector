@@ -25,6 +25,7 @@ env:
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   JAVA_VERSION: "17"
+  JAVA_VERSION_SUPPORTED: "11"
   S3_BUCKET_REGION: "eu-west-1"
 
 jobs:
@@ -204,12 +205,13 @@ jobs:
           GHA_RUN_DC: false
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
-  run_e2e_test_java_11:
-    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java 11"
+  run_e2e_test_other_supported_java:
+    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java ${{ env.JAVA_VERSION_SUPPORTED }}"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
     if: >
+      env.JAVA_VERSION_SUPPORTED != env.JAVA_VERSION &&
       github.event_name != 'pull_request' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       !contains(github.event.head_commit.message, '[skip build]') &&
@@ -233,7 +235,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: |
-          JAVA_VERSION=11
+          JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED }}
           bash ./scripts/ci/buildDockerImages.sh
       - name: "Start docker-compose and run e2e docker-compose tests"
         env:
@@ -247,7 +249,7 @@ jobs:
       - name: "Run e2e tests"
         env:
           GHA_RUN_DC: false
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Drepository.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
 
   push_docker_images:
     name: "Push docker images"
@@ -274,7 +276,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Drepository.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
       - name: "Push docker images"
         run: bash ./scripts/ci/buildDockerImages.sh -p
         env:
@@ -301,7 +303,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Publish SNAPSHOT artifacts"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} deploy -DskipTests
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} deploy -DskipTests -Drepository.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
@@ -328,7 +330,7 @@ jobs:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Drepository.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
       - name: "Make release and deploy to Nexus"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }}" release:prepare release:perform
@@ -376,7 +378,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Drepository.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
       - name: "Deploy release version to quay.io"
         run: bash ./scripts/ci/releaseDockerImage.sh -v ${{ env.RELEASE_VERSION }}
         env:
