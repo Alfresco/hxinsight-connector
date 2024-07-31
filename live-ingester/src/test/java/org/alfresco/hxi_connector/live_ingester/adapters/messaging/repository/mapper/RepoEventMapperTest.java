@@ -156,10 +156,10 @@ class RepoEventMapperTest
     }
 
     @Test
-    void shouldNoticeContentDeleted_whenContentRemoved2()
+    void shouldNoticeContentDeleted_whenContentRemoved()
     {
         // given
-        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(PERMISSION_UPDATED);
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
         given(propertiesMapper.mapToPropertyDeltas(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY)));
 
         // when
