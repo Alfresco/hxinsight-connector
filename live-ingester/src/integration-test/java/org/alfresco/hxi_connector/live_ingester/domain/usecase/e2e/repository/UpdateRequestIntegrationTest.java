@@ -571,4 +571,102 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
+
+    @Test
+    void testUpdatePermissions()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.permission.Updated",
+                  "id": "158c0396-0f68-48fc-9836-941a8ce30e4f",
+                  "source": "/9b11c3e9-4d71-42d8-a616-089dcbd85034",
+                  "time": "2024-07-31T10:34:15.416Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/permissionUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "e19ad6f9-6c55-42f8-8140-5f3905e34a50",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "9f3380e3-b9b1-4b01-b1c6-ef1f717a9abb",
+                      "primaryHierarchy": [
+                        "8d893085-2e62-43a1-9947-f772d2f7ec5b",
+                        "1bb5693c-08bc-41ce-a4f3-5d75a828d570"
+                      ],
+                      "name": "test",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2024-07-30T11:37:39.182Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "modifiedAt": "2024-07-31T10:31:48.541Z",
+                      "content": {
+                        "mimeType": "text/plain",
+                        "sizeInBytes": 0,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "cm:title": "",
+                        "app:editInline": true,
+                        "cm:categories": [],
+                        "cm:description": "",
+                        "cm:taggable": null,
+                        "cm:author": ""
+                      },
+                      "localizedProperties": {
+                        "cm:title": {
+                          "en": ""
+                        },
+                        "cm:description": {
+                          "en": ""
+                        }
+                      },
+                      "aspectNames": [
+                        "cm:generalclassifiable",
+                        "cm:titled",
+                        "app:inlineeditable",
+                        "cm:author",
+                        "cm:auditable",
+                        "cm:taggable"
+                      ],
+                      "primaryAssocQName": "cm:test",
+                      "secondaryParents": [],
+                      "isFile": true,
+                      "isFolder": false
+                    },
+                    "resourceReaderAuthorities": [
+                      "GROUP_EVERYONE",
+                      "abeecher"
+                    ],
+                    "resourceDeniedAuthorities": []
+                  }
+                }""";
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                [{
+                  "objectId" : "9f3380e3-b9b1-4b01-b1c6-ef1f717a9abb",
+                  "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                  "eventType" : "update",
+                  "properties" : {
+                    "ALLOW_ACCESS" : {
+                      "value" : [ "GROUP_EVERYONE", "abeecher" ]
+                    },
+                    "DENY_ACCESS" : {
+                      "value" : [ ]
+                    }
+                  }
+                }]""";
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+    }
 }
