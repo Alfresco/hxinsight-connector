@@ -251,8 +251,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated("cm:description", "some description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(updated("cm:description", "some description"));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -278,8 +277,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated("cm:description", "new description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(updated("cm:description", "new description"));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -305,8 +303,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                deleted("cm:title"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted("cm:title"));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
@@ -330,8 +327,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                PropertyDelta.unchanged("cm:taggable"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.unchanged("cm:taggable"));
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
@@ -352,8 +348,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                deleted(CONTENT_PROPERTY));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY));
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
 
@@ -397,8 +392,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expected = Set.of(
-                contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, null));
+        Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, null));
         assertEquals(expected, propertyDeltas);
     }
 
@@ -420,8 +414,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expected = Set.of(
-                contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, "newName.bmp"),
+        Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, "newName.bmp"),
                 updated(NAME_PROPERTY, "newName.bmp"));
         assertEquals(expected, propertyDeltas);
     }
