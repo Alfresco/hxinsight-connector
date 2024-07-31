@@ -29,9 +29,11 @@ package org.alfresco.hxi_connector.prediction_applier.config;
 import jakarta.validation.constraints.NotBlank;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.prediction_applier.exception.PredictionApplierRuntimeException;
 
+@Validated
 @ConfigurationProperties(prefix = "hyland-experience.insight.predictions")
 @SuppressWarnings({"PMD.LongVariable", "PMD.UnusedAssignment"})
 public record InsightPredictionsProperties(

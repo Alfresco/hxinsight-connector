@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.util.List;
 import java.util.Map;
@@ -59,12 +60,19 @@ public class CategoryPropertyResolver implements PropertyResolver<Set<String>>
     {
         ensureThat(canResolve(updatedProperty), "Unsupported property: %s", updatedProperty);
 
-        Set<String> ids = ((List<Map<String, Object>>) updatedProperty.getPropertyValue())
+        Object propertyValue = updatedProperty.getPropertyValue();
+
+        if (propertyValue instanceof String)
+        {
+            return Optional.of(updated(updatedProperty.getPropertyName(), Set.of((String) propertyValue)));
+        }
+
+        Set<String> ids = ((List<Map<String, Object>>) propertyValue)
                 .stream()
                 .map(this::getId)
                 .collect(Collectors.toSet());
 
-        return Optional.of(PropertyDelta.updated(updatedProperty.getPropertyName(), ids));
+        return Optional.of(updated(updatedProperty.getPropertyName(), ids));
     }
 
     private String getId(Map<String, Object> entry)
