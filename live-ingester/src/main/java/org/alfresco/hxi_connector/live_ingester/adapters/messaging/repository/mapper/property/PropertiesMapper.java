@@ -67,7 +67,8 @@ public class PropertiesMapper
             return allPropertiesUpdated(event);
         }
 
-        if (isEventTypePermissionsUpdated(event)) {
+        if (isEventTypePermissionsUpdated(event))
+        {
             return permissionPropertiesUpdated(event);
         }
 
@@ -86,8 +87,7 @@ public class PropertiesMapper
     {
         return Stream.concat(
                 calculateAllowAccessDelta(event),
-                calculateDenyAccessDelta(event)
-        ).collect(Collectors.toSet());
+                calculateDenyAccessDelta(event)).collect(Collectors.toSet());
     }
 
     private Set<PropertyDelta<?>> somePropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)

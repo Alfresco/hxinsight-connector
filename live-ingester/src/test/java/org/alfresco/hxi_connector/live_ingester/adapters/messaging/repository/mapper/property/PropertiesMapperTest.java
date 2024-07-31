@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
-import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -42,6 +41,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
 import java.util.Set;
 
@@ -494,8 +494,7 @@ class PropertiesMapperTest
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                updated(DENY_ACCESS, Set.of(bob))
-        );
+                updated(DENY_ACCESS, Set.of(bob)));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
