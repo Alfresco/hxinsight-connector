@@ -138,7 +138,7 @@ public class AgentsE2eTest
     }
 
     @Test
-    void shouldNotGetAvatarForNotExistingAgent() throws IOException
+    void shouldNotGetAvatarForNonExistentAgent() throws IOException
     {
         // given: contained in wiremock file - get-agent-avatar.json.
         String nonExistentAgentId = "non-existent-agent-id";
