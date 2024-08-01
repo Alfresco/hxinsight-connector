@@ -224,11 +224,11 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
       - name: "Build docker images"
-        run: JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }} && bash ./scripts/ci/buildDockerImages.sh
+        run: JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED }} && bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
 
   push_docker_images:
     name: "Push docker images"
