@@ -106,7 +106,7 @@ public class BulkIngesterE2eTest
 
             assertTrue(properties.has(denyAccessFieldName));
             assertEquals(Set.of(), getSetProperty(properties, denyAccessFieldName));
-        }, 10, 500);
+        }, 20, 500);
     }
 
     @SneakyThrows

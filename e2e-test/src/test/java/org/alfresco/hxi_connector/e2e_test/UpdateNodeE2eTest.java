@@ -123,7 +123,7 @@ public class UpdateNodeE2eTest
             .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
-            .dependsOn(activemq, hxInsightMock);
+            .dependsOn(activemq, hxInsightMock, repository);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
 
