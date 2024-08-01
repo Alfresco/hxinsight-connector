@@ -51,7 +51,11 @@
     </distributionManagement>
 
     <properties>
-        <maven.build.sourceVersion>17</maven.build.sourceVersion>
+        <java.version>17</java.version>
+        <alfresco-platform.java.version>${java.version}</alfresco-platform.java.version>
+        <maven.build.sourceVersion>${java.version}</maven.build.sourceVersion>
+        <maven.build.targetVersion>${java.version}</maven.build.targetVersion>
+        <maven.compiler.testRelease>${java.version}</maven.compiler.testRelease>
         <project.scm.organization>Alfresco</project.scm.organization>
         <project.scm.repository>hxinsight-connector</project.scm.repository>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -67,14 +71,14 @@
         <alfresco-platform.version>23.2.1</alfresco-platform.version>
         <alfresco-sdk.version>4.8.0</alfresco-sdk.version>
         <alfresco-db-connector.version>4.0.1</alfresco-db-connector.version>
-        <alfresco-event-model.version>0.0.28</alfresco-event-model.version>
+        <alfresco-event-model.version>0.0.64</alfresco-event-model.version>
         <spring-boot.version>3.3.2</spring-boot.version>
         <spring-camel.version>4.7.0</spring-camel.version>
         <commons-lang.version>3.15.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.16.1</commons-io.version>
         <pdfbox.version>3.0.2</pdfbox.version>
-        <aws-sdk-s3.version>2.26.26</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.26.27</aws-sdk-s3.version>
         <wiremock.version>3.9.1</wiremock.version>
         <system-stubs.version>2.1.6</system-stubs.version>
 
@@ -218,7 +222,7 @@
             </dependency>
             <dependency>
                 <groupId>org.alfresco</groupId>
-                <artifactId>acs-event-model</artifactId>
+                <artifactId>acs-enterprise-event-model</artifactId>
                 <version>${alfresco-event-model.version}</version>
             </dependency>
             <dependency>

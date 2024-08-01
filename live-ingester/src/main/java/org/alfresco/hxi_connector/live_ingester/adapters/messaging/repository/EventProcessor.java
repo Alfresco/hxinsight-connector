@@ -96,7 +96,6 @@ public class EventProcessor
         handleMetadataPropertiesChange(event);
         handleContentChange(event);
         handleNodeDeleteEvent(event);
-        handlePermissionsChange(event);
     }
 
     private void handlePredictionNodeEvent(RepoEvent<DataAttributes<NodeResource>> event)
@@ -110,7 +109,7 @@ public class EventProcessor
 
     private void handleMetadataPropertiesChange(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (isEventTypeCreated(event) || isEventTypeUpdated(event))
+        if (isEventTypeCreated(event) || isEventTypeUpdated(event) || isEventTypePermissionsUpdated(event))
         {
             IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
 
@@ -143,13 +142,4 @@ public class EventProcessor
             deleteNodeCommandHandler.handle(deleteNodeCommand);
         }
     }
-
-    private void handlePermissionsChange(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        if (isEventTypePermissionsUpdated(event))
-        {
-            log.atDebug().log("Permissions of node {} updated", event.getData().getResource().getId());
-        }
-    }
-
 }

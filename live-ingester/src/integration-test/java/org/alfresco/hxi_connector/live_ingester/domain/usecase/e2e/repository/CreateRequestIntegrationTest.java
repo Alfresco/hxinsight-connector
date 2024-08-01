@@ -111,7 +111,9 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                             "content-type": "application/msword"
                           }
                         }
-                      }
+                      },
+                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"value": []}
                     }
                   }
                 ]""";

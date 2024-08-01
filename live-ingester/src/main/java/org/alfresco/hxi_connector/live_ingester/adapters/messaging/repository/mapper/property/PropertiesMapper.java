@@ -29,15 +29,18 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateAllowAccessDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateAspectsDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateContentPropertyDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedAtDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedByDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateDenyAccessDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateModifiedByDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.isFieldUnchanged;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypePermissionsUpdated;
 
 import java.util.Map;
 import java.util.Objects;
@@ -64,6 +67,11 @@ public class PropertiesMapper
             return allPropertiesUpdated(event);
         }
 
+        if (isEventTypePermissionsUpdated(event))
+        {
+            return permissionPropertiesUpdated(event);
+        }
+
         return somePropertiesUpdated(event);
     }
 
@@ -73,6 +81,13 @@ public class PropertiesMapper
                 .filter(property -> Objects.nonNull(property.getValue()))
                 .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
         return createSetOfAllProperties(event, propertyDeltas);
+    }
+
+    private Set<PropertyDelta<?>> permissionPropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return Stream.concat(
+                calculateAllowAccessDelta(event),
+                calculateDenyAccessDelta(event)).collect(Collectors.toSet());
     }
 
     private Set<PropertyDelta<?>> somePropertiesUpdated(RepoEvent<DataAttributes<NodeResource>> event)
@@ -90,7 +105,9 @@ public class PropertiesMapper
                 calculateCreatedByDelta(event),
                 calculateModifiedByDelta(event),
                 calculateAspectsDelta(event),
-                calculateCreatedAtDelta(event))
+                calculateCreatedAtDelta(event),
+                calculateAllowAccessDelta(event),
+                calculateDenyAccessDelta(event))
                 .flatMap(identity())
                 .collect(Collectors.toSet());
     }

@@ -119,7 +119,9 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                             "content-type": "%s"
                           }
                         }
-                      }
+                      },
+                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"value": []}
                     }
                   }
                 ]""".formatted(sourceMimeType);
@@ -224,7 +226,9 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                             "content-type": "%s"
                           }
                         }
-                      }
+                      },
+                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"value": []}
                     }
                   }
                 ]""".formatted(sourceMimeType);
