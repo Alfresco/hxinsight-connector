@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,12 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.service;
 
-package org.alfresco.hxi_connector.common.constant;
+import lombok.RequiredArgsConstructor;
 
-public final class HttpHeaders
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
+import org.alfresco.service.descriptor.DescriptorService;
+
+@RequiredArgsConstructor
+public class AcsRepositoryInformation implements RepositoryInformation
 {
-    public static final String AUTHORIZATION = "Authorization";
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String USER_AGENT = "User-Agent";
+
+    private final DescriptorService descriptorService;
+
+    @Override
+    public String getRepositoryVersion()
+    {
+        return String.format("%s.%s.%s", descriptorService.getServerDescriptor().getVersionMajor(),
+                descriptorService.getServerDescriptor().getVersionMinor(), descriptorService.getServerDescriptor().getVersionRevision());
+    }
 }

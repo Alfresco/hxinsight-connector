@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,12 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
-package org.alfresco.hxi_connector.common.constant;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
-public final class HttpHeaders
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+
+@Slf4j
+@RequiredArgsConstructor
+public class PropertyBasedRepositoryInformation implements RepositoryInformation
 {
-    public static final String AUTHORIZATION = "Authorization";
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String USER_AGENT = "User-Agent";
+
+    private final IntegrationProperties integrationProperties;
+
+    @Override
+    public String getRepositoryVersion()
+    {
+        String versionOverride = integrationProperties.alfresco().repository().versionOverride();
+        EnsureUtils.ensureNotBlank(versionOverride, "Repository version override property is required");
+        log.debug("Using repository version override: {}", versionOverride);
+        return versionOverride;
+    }
 }

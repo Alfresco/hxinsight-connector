@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.config;
 
-import java.util.Optional;
+import java.net.http.HttpClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -34,8 +34,10 @@ import org.springframework.context.annotation.Configuration;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.DiscoveryApiRepositoryInformation;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
 import org.alfresco.hxi_connector.common.config.properties.Application;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 
 @Configuration
 public class AppConfig
@@ -49,14 +51,15 @@ public class AppConfig
     }
 
     @Bean
-    public DiscoveryApiClient discoveryApiClient(RepositoryApiProperties repositoryApiProperties, AuthService authService, ObjectMapper objectMapper)
+    public RepositoryInformation repositoryInformation(RepositoryApiProperties repositoryApiProperties, AuthService authService, ObjectMapper objectMapper)
     {
-        return new DiscoveryApiClient(repositoryApiProperties.discoveryEndpoint(), authService, objectMapper);
+        EnsureUtils.ensureNotBlank(repositoryApiProperties.discoveryEndpoint(), "ACS Discovery API endpoint property must be set");
+        return new DiscoveryApiRepositoryInformation(repositoryApiProperties.discoveryEndpoint(), authService, objectMapper, HttpClient.newHttpClient());
     }
 
     @Bean
-    public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, Application applicationProperties)
+    public ApplicationInfoProvider applicationInfoProvider(RepositoryInformation repositoryInformation, Application applicationProperties)
     {
-        return new ApplicationInfoProvider(discoveryApiClient, applicationProperties, Optional.empty());
+        return new ApplicationInfoProvider(repositoryInformation, applicationProperties);
     }
 }

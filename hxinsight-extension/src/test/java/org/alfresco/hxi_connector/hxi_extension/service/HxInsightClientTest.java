@@ -35,8 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.GOOD;
 
 import java.io.IOException;
@@ -58,6 +60,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
@@ -71,16 +74,21 @@ class HxInsightClientTest
 {
     private static final String AGENT_ID = "agent-id";
     private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
+    private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
 
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = mock(HttpClient.class);
+    private final ApplicationInfoProvider applicationInfoProvider = mock(ApplicationInfoProvider.class);
     private final HxInsightClient hxInsightClient = new HxInsightClient(
             config,
             authService,
             objectMapper,
-            httpClient);
+            httpClient,
+            applicationInfoProvider);
+
+    private ArgumentCaptor<HttpRequest> requestCaptor;
 
     @BeforeEach
     void setUp()
@@ -88,6 +96,8 @@ class HxInsightClientTest
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
         given(authService.getAuthHeaders()).willReturn(new String[]{"Authorization", "Bearer token"});
+        given(applicationInfoProvider.getUserAgentData()).willReturn(USER_AGENT_HEADER);
+        requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
     }
 
     @Test
@@ -115,6 +125,8 @@ class HxInsightClientTest
 
         // then
         assertEquals(expectedQuestionId, actualQuestionId);
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -133,6 +145,8 @@ class HxInsightClientTest
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
                 new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES)));
         assertEquals(expectedStatusCode, exception.getStatus());
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -166,8 +180,9 @@ class HxInsightClientTest
         AnswerResponse answerResponse = hxInsightClient.getAnswer(questionId);
 
         // then
-        then(httpClient).should().send(any(), any());
         assertEquals(answer, answerResponse.getAnswer());
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -182,6 +197,8 @@ class HxInsightClientTest
 
         // when + then
         assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer(questionId));
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -196,6 +213,8 @@ class HxInsightClientTest
 
         // then
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -233,6 +252,8 @@ class HxInsightClientTest
 
         // then
         assertEquals(expectedAgents, actualAgents);
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -250,6 +271,8 @@ class HxInsightClientTest
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, hxInsightClient::getAgents);
         assertEquals(expectedStatusCode, exception.getStatus());
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -262,6 +285,8 @@ class HxInsightClientTest
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, hxInsightClient::getAgents);
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -278,9 +303,9 @@ class HxInsightClientTest
         hxInsightClient.submitFeedback("dummy-id-1234", new Feedback(GOOD, "This answer was amazing"));
 
         // then
-        ArgumentCaptor<HttpRequest> requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
         then(httpClient).should().send(requestCaptor.capture(), any());
         assertEquals("http://hxinsight/questions/dummy-id-1234/answer/feedback", requestCaptor.getValue().uri().toString());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -300,6 +325,8 @@ class HxInsightClientTest
                 "dummy-id-1234",
                 new Feedback(GOOD, "This answer was amazing")));
         assertEquals(expectedStatusCode, exception.getStatus());
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -314,6 +341,8 @@ class HxInsightClientTest
                 "dummy-id-1234",
                 new Feedback(GOOD, "This answer was amazing")));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
+        then(httpClient).should().send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
     @Test
@@ -344,5 +373,7 @@ class HxInsightClientTest
 
         // then
         assertEquals("dummy-id-5678", newQuestionId);
+        then(httpClient).should(atLeast(1)).send(requestCaptor.capture(), any());
+        assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 }

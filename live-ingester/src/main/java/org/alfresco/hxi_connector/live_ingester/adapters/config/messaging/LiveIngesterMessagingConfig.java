@@ -26,24 +26,25 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.config.messaging;
 
-import java.util.Optional;
-import java.util.function.Predicate;
+import java.net.http.HttpClient;
 import jakarta.jms.ConnectionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.DiscoveryApiRepositoryInformation;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties.Alfresco;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.PropertyBasedRepositoryInformation;
 
 @Configuration
 public class LiveIngesterMessagingConfig
@@ -62,20 +63,24 @@ public class LiveIngesterMessagingConfig
     }
 
     @Bean
-    public DiscoveryApiClient discoveryApiClient(IntegrationProperties integrationProperties, AuthService authService, ObjectMapper objectMapper)
+    public RepositoryInformation repositoryInformation(AuthService authService, ObjectMapper objectMapper, IntegrationProperties integrationProperties)
     {
-        return new DiscoveryApiClient(integrationProperties.alfresco().repository().discoveryEndpoint(), authService, objectMapper);
+        if (StringUtils.isNotBlank(integrationProperties.alfresco().repository().versionOverride()))
+        {
+            return new PropertyBasedRepositoryInformation(integrationProperties);
+        }
+        else if (StringUtils.isNotBlank(integrationProperties.alfresco().repository().discoveryEndpoint()))
+        {
+            return new DiscoveryApiRepositoryInformation(integrationProperties.alfresco().repository().discoveryEndpoint(), authService, objectMapper, HttpClient.newHttpClient());
+        }
+        throw new IllegalStateException("Either property alfresco.repository.discovery-endpoint or alfresco.repository.version-override must be set in the Live Ingester configuration.");
     }
 
     @Bean
-    public ApplicationInfoProvider applicationInfoProvider(DiscoveryApiClient discoveryApiClient, IntegrationProperties integrationProperties)
+    @DependsOn("repositoryInformation")
+    public ApplicationInfoProvider applicationInfoProvider(RepositoryInformation repositoryInformation, IntegrationProperties integrationProperties)
     {
-        Optional<String> versionOverride = Optional.of(integrationProperties)
-                .map(IntegrationProperties::alfresco)
-                .map(Alfresco::repository)
-                .map(Repository::versionOverride)
-                .filter(Predicate.not(String::isBlank));
-        return new ApplicationInfoProvider(discoveryApiClient, integrationProperties.application(), versionOverride);
+        return new ApplicationInfoProvider(repositoryInformation, integrationProperties.application());
     }
 
 }

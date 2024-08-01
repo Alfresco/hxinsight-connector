@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,12 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
-package org.alfresco.hxi_connector.common.constant;
-
-public final class HttpHeaders
+public interface RepositoryInformation
 {
-    public static final String AUTHORIZATION = "Authorization";
-    public static final String CONTENT_TYPE = "Content-Type";
-    public static final String USER_AGENT = "User-Agent";
+    String getRepositoryVersion();
 }

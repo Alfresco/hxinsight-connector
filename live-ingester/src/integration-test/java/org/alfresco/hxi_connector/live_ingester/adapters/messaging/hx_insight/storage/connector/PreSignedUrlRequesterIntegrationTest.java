@@ -65,7 +65,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
@@ -86,7 +85,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClie
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -278,10 +277,6 @@ class PreSignedUrlRequesterIntegrationTest
     @TestConfiguration
     public static class PreSignedUrlRequesterIntegrationTestConfig
     {
-
-        @MockBean
-        public DiscoveryApiClient discoveryApi;
-
         @Bean
         public AuthProperties authorizationProperties()
         {
@@ -319,9 +314,9 @@ class PreSignedUrlRequesterIntegrationTest
         }
 
         @Bean
-        public String versionOverride()
+        public RepositoryInformation repositoryInformation()
         {
-            return ACS_VERSION;
+            return () -> ACS_VERSION;
         }
     }
 }
