@@ -192,6 +192,7 @@ public class HxInsightClient
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(format(config.getAvatarUrl(), agentId)))
                     .headers(authService.getAuthHeaders())
+                    .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
                     .GET()
                     .build();
 
