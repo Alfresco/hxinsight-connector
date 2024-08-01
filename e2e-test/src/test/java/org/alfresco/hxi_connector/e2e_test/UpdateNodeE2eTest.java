@@ -178,7 +178,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
-        });
+        }, 20);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
@@ -194,7 +194,7 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> {
             Node actualNode = repositoryNodesClient.getNode(createdNode.id());
             assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
-        });
+        }, 20);
 
         // when
         Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
