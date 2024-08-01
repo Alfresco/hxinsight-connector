@@ -37,6 +37,7 @@ public final class HxInsightClientConfig
     private final String questionUrl;
     private final String answerUrl;
     private final String feedbackUrl;
+    private final String avatarUrl;
 
     public HxInsightClientConfig(@NotBlank String baseUrl)
     {
@@ -44,5 +45,6 @@ public final class HxInsightClientConfig
         this.questionUrl = baseUrl + "/submit-question";
         this.answerUrl = baseUrl + "/questions/%s/answer";
         this.feedbackUrl = answerUrl + "/feedback";
+        this.avatarUrl = agentUrl + "/%s/avatar";
     }
 }

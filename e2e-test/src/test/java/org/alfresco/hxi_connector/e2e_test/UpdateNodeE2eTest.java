@@ -46,14 +46,11 @@ import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainer
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.util.concurrent.TimeUnit;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -122,20 +119,19 @@ public class UpdateNodeE2eTest
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
     @Container
-    private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
             .dependsOn(activemq, hxInsightMock);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
-
-    private Node createdNode;
+    private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
+            .dependsOn(activemq, hxInsightMock, repository, liveIngester);
 
     RepositoryClient repositoryNodesClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
+    Node createdNode;
 
     @BeforeAll
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
-
     }
 
     @BeforeEach
@@ -145,22 +141,13 @@ public class UpdateNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        TimeUnit.SECONDS.sleep(2);
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-        resetWiremock();
-    }
-
-    @AfterEach
-    public void resetWiremock()
-    {
+                .withRequestBody(containing(createdNode.id()))), 500);
         WireMock.reset();
-        WireMock.resetAllRequests();
-        WireMock.resetAllScenarios();
     }
 
     @Test
-    void testApplyPredictionToNode() throws IOException
+    void testApplyPredictionToNode()
     {
         // given
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
@@ -178,12 +165,12 @@ public class UpdateNodeE2eTest
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
-        });
+        }, 500);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     @Test
-    void testApplyPredictionToUpdatedNode() throws IOException, InterruptedException
+    void testApplyPredictionToUpdatedNode()
     {
         // given
         prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
@@ -201,7 +188,7 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
-        resetWiremock();
+        WireMock.reset();
         prepareHxInsightMockToReturnPredictionFor(updatedNode.id(), PREDICTED_VALUE_2);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
@@ -214,7 +201,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
-        });
+        }, 500);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
