@@ -121,7 +121,7 @@ public class AgentsE2eTest
     }
 
     @Test
-    void shouldReturn404ForAvatarWithNotDefaultId() throws IOException
+    void shouldReturn404ForAvatarWithoutDefaultId() throws IOException
     {
         // given: contained in wiremock file - get-agent-avatar.json.
         String avatarId = "sample-avatar-id";
