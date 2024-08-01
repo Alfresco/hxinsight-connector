@@ -192,7 +192,8 @@ public class HxInsightClient
             ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
             log.atDebug().log("Successfully retrieved avatar for Agent with id: {}", agentId);
 
-            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), UUID.randomUUID().toString(), "png");
+            String filePrefix = format("avatar-%s-%s", agentId, UUID.randomUUID());
+            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), filePrefix, "png");
             return new FileBinaryResource(tempImageFile);
         }
         catch (Exception e)
