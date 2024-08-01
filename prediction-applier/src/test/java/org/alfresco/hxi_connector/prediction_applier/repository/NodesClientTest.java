@@ -34,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType.AUTOFILL;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
@@ -85,7 +85,7 @@ class NodesClientTest
     @SneakyThrows
     void beforeAll()
     {
-        initMocks(this);
+        openMocks(this);
         camelContext = new DefaultCamelContext();
         NodesClient nodesClient = new NodesClient(createNodesApiProperties(), mockAuthService);
         camelContext.addRoutes(nodesClient);
@@ -100,7 +100,7 @@ class NodesClientTest
     void tearDown()
     {
         mockEndpoint.reset();
-        initMocks(this);
+        openMocks(this);
     }
 
     @AfterAll
