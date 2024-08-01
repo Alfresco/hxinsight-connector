@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.prediction_applier.repository;
 
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.component.http.HttpMethods.PUT;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
@@ -110,6 +111,7 @@ public class NodesClient extends RouteBuilder
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
+                .log(DEBUG, log, "Node updated successfully - Headers: ${headers}, Body: ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, PredictionModelResponse.class)
                 .log(TRACE, log, "Node updated successfully")
