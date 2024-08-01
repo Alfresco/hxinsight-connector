@@ -39,6 +39,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypePermissionsUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 
@@ -123,7 +124,7 @@ public class PropertyMappingHelper
 
     public static Stream<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (!isEventTypeCreated(event))
+        if (!isEventTypeCreated(event) && !isEventTypePermissionsUpdated(event))
         {
             return Stream.empty();
         }
@@ -140,7 +141,7 @@ public class PropertyMappingHelper
 
     public static Stream<PropertyDelta<?>> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (!isEventTypeCreated(event))
+        if (!isEventTypeCreated(event) && !isEventTypePermissionsUpdated(event))
         {
             return Stream.empty();
         }
