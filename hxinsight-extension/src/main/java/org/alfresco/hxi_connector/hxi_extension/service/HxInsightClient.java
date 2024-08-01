@@ -45,6 +45,7 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
+import java.util.UUID;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -191,8 +192,7 @@ public class HxInsightClient
             ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
             log.atDebug().log("Successfully retrieved avatar for Agent with id: {}", agentId);
 
-            String filePrefix = format("avatar-%s-%s", agentId, System.currentTimeMillis());
-            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), filePrefix, "png");
+            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), UUID.randomUUID().toString(), "png");
             return new FileBinaryResource(tempImageFile);
         }
         catch (Exception e)
