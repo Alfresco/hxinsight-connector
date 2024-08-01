@@ -51,7 +51,11 @@
     </distributionManagement>
 
     <properties>
-        <maven.build.sourceVersion>17</maven.build.sourceVersion>
+        <java.version>17</java.version>
+        <alfresco-platform.java.version>${java.version}</alfresco-platform.java.version>
+        <maven.build.sourceVersion>${java.version}</maven.build.sourceVersion>
+        <maven.build.targetVersion>${java.version}</maven.build.targetVersion>
+        <maven.compiler.testRelease>${java.version}</maven.compiler.testRelease>
         <project.scm.organization>Alfresco</project.scm.organization>
         <project.scm.repository>hxinsight-connector</project.scm.repository>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
