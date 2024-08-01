@@ -25,8 +25,15 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
+import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,6 +45,7 @@ import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainer
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -50,6 +58,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -57,6 +66,8 @@ public class QuestionsAndAnswersE2eTest
 {
     private static final String PREEXISTING_DOCUMENT_ID = "1a0b110f-1e09-4ca2-b367-fe25e4964a4e";
     private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/questions";
+    private static final String SUBMIT_QUESTION_SCENARIO = "Submit-question";
+    private static final String NEXT_QUESTION_STATE = "Next-question";
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -73,6 +84,14 @@ public class QuestionsAndAnswersE2eTest
     public static void beforeAll()
     {
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+    }
+
+    @AfterEach
+    public void resetWiremock()
+    {
+        WireMock.reset();
+        WireMock.resetAllRequests();
+        WireMock.resetAllScenarios();
     }
 
     @Test
@@ -99,6 +118,7 @@ public class QuestionsAndAnswersE2eTest
         // then
         assertEquals(SC_OK, response.statusCode());
         assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/submit-question"))));
     }
 
     @Test
@@ -195,6 +215,7 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(questionId, response.jsonPath().get("list.entries.entry[0].questionId"));
         assertEquals("This is the answer to the question", response.jsonPath().get("list.entries.entry[0].answer"));
         assertEquals("276718b0-c3ab-4e11-81d5-96dbbb540269", response.jsonPath().get("list.entries.entry[0].references[0].referenceId"));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), getRequestedFor(urlEqualTo("/questions/%s/answer".formatted(questionId)))));
     }
 
     @Test
@@ -212,6 +233,176 @@ public class QuestionsAndAnswersE2eTest
         // then
         assertEquals(SC_NOT_FOUND, response.statusCode());
         assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains("Request to hxi failed, expected status 200, received 404"));
+    }
+
+    @Test
+    void shouldSubmitFeedback()
+    {
+        // given
+        String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
+        String feedback = """
+                [
+                    {
+                        "feedbackType": "LIKE",
+                        "comments": "The response was very helpful and detailed. Good bot."
+                    }
+                ]
+                """;
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(feedback)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_CREATED, response.statusCode());
+        assertEquals("LIKE", response.jsonPath().get("entry.feedbackType"));
+        assertEquals("The response was very helpful and detailed. Good bot.", response.jsonPath().get("entry.comments"));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+                .withRequestBody(containing("GOOD"))));
+    }
+
+    @Test
+    void shouldNotSubmitFeedbackWheHxIReturnsUnexpectedStatus()
+    {
+        // given
+        String questionId = "non-existing-question-id";
+        String feedback = """
+                [
+                    {
+                        "feedbackType": "LIKE",
+                        "comments": "The response was very helpful and detailed. Good bot."
+                    }
+                ]
+                """;
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(feedback)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_NOT_FOUND, response.statusCode());
+        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains("Request to hxi failed, expected status 200, received 404"));
+    }
+
+    @Test
+    void shouldReturn400IfNoFeedbackSubmitted()
+    {
+        // given
+        String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
+        String feedback = "[]";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(feedback)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_BAD_REQUEST, response.statusCode());
+    }
+
+    @Test
+    void shouldReturn400IfSubmittedTooMuchFeedback()
+    {
+        // given
+        String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
+        String feedback = """
+                [
+                    {
+                        "feedbackType": "LIKE",
+                        "comments": "The response was very helpful and detailed. Good bot."
+                    },
+                    {
+                        "feedbackType": "LIKE",
+                        "comments": "The response was not bad."
+                    }
+                ]
+                """;
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(feedback)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_BAD_REQUEST, response.statusCode());
+    }
+
+    @Test
+    void shouldRetryQuestion()
+    {
+        // given
+        String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
+        String retry = """
+                {
+                    "comments": "I need more details about the answer.",
+                    "originalQuestion": {
+                        "question": "What is the meaning of life?",
+                        "agentId": "agent-id",
+                        "restrictionQuery": {
+                            "nodesIds": ["%s"]
+                        }
+                    }
+                }
+                """.formatted(PREEXISTING_DOCUMENT_ID);
+        WireMock.setScenarioState(SUBMIT_QUESTION_SCENARIO, NEXT_QUESTION_STATE);
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(retry)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/retry".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_CREATED, response.statusCode());
+        assertEquals("a1eae985-6984-4346-9e08-d430fa8404b2", response.jsonPath().get("entry.questionId"));
+        assertEquals("I need more details about the answer.", response.jsonPath().get("entry.comments"));
+        RetryUtils.retryWithBackoff(() -> {
+            verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+                    .withRequestBody(containing("RETRY")));
+            verify(exactly(1), postRequestedFor(urlEqualTo("/submit-question")));
+        });
+    }
+
+    @Test
+    void shouldReturn400IfRetriedQuestionWithTooManyNodes()
+    {
+        // given
+        String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
+        String retry = """
+                {
+                    "comments": "I need more details about the answer.",
+                    "originalQuestion": {
+                        "question": "What is the meaning of life?",
+                        "agentId": "agent-id",
+                        "restrictionQuery": {
+                            "nodesIds": ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8", "node9", "node10", "node11"]
+                        }
+                    }
+                }
+                """;
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("application/json")
+                .body(retry)
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/retry".formatted(questionId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_BAD_REQUEST, response.statusCode());
+        verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
+        verify(exactly(0), postRequestedFor(urlEqualTo("/submit-question")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()

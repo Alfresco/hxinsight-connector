@@ -1,6 +1,6 @@
 {
   "scenarioName": "Submit-question",
-  "requiredScenarioState": "Started",
+  "requiredScenarioState": "Next-question",
   "request": {
     "method": "POST",
     "urlPath": "/submit-question"
@@ -8,7 +8,7 @@
   "response": {
     "status": 202,
     "jsonBody": {
-      "questionId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
+      "questionId": "a1eae985-6984-4346-9e08-d430fa8404b2",
       "agentId": "agent-id"
     }
   }
