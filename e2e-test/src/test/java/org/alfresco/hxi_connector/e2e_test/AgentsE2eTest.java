@@ -25,19 +25,29 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
+import static java.lang.String.format;
+
 import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import io.restassured.response.Response;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -55,6 +65,9 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class AgentsE2eTest
 {
+    private static final String AGENT_ID = "61254576-62a3-453f-8cd8-19e2f6554f29";
+    private static final String AVATAR_DEFAULT_ID = "-default-";
+
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -89,6 +102,56 @@ public class AgentsE2eTest
         Map<String, String> expected1 = Map.of("name", "Knowledge Base Agent", "description", "Very smart about product knowledge", "id", "b999ee14-3974-41b2-bef8-70ab38c9e642");
         List<Map<String, Map<String, String>>> expected = List.of(Map.of("entry", expected0), Map.of("entry", expected1));
         assertEquals(expected, response.jsonPath().get("list.entries"));
+    }
+
+    @Test
+    void shouldReturnAgentAvatar() throws IOException
+    {
+        // given: contained in wiremock file - get-agent-avatar.json.
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("image/png")
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", AGENT_ID, AVATAR_DEFAULT_ID))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_OK, response.statusCode());
+        assertArrayEquals(Files.readAllBytes(Paths.get("src/test/resources/wiremock/hxinsight/__files/avatar.png")),
+                IOUtils.toByteArray(response.body().asInputStream()));
+    }
+
+    @Test
+    void shouldReturn404ForAvatarWithoutDefaultId() throws IOException
+    {
+        // given: contained in wiremock file - get-agent-avatar.json.
+        String avatarId = "sample-avatar-id";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("image/png")
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", AGENT_ID, avatarId))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_NOT_FOUND, response.statusCode());
+        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains(format("Avatar with id=%s not found", avatarId)));
+    }
+
+    @Test
+    void shouldNotGetAvatarForNonExistentAgent() throws IOException
+    {
+        // given: contained in wiremock file - get-agent-avatar.json.
+        String nonExistentAgentId = "non-existent-agent-id";
+
+        // when
+        Response response = given().auth().preemptive().basic("admin", "admin")
+                .contentType("image/png")
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", nonExistentAgentId, AVATAR_DEFAULT_ID))
+                .then().extract().response();
+
+        // then
+        assertEquals(SC_SERVICE_UNAVAILABLE, response.statusCode());
+        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains(format("Failed to get avatar for agent with id %s", nonExistentAgentId)));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
