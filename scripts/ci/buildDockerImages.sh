@@ -71,7 +71,7 @@ do
     then
       DOCKER_TAG=${PROJECT_VERSION}
     fi
-    docker build --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_REGISTRY}/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" .
+    docker build --label "GIT_COMMIT=${COMMIT_MESSAGE}" --label "GIT_BRANCH=${GITHUB_REF_NAME}" --tag "${DOCKER_REGISTRY}/${DOCKER_IMAGE_REPOSITORY}:${DOCKER_TAG}" --build-arg="JAVA_VERSION=${JAVA_VERSION}" .
   fi
 
   cd -

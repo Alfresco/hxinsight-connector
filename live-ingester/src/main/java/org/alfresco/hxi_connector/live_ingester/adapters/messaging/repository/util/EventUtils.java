@@ -93,7 +93,7 @@ public final class EventUtils
         {
             return CREATE;
         }
-        if (isEventTypeUpdated(event))
+        if (isEventTypeUpdated(event) || isEventTypePermissionsUpdated(event))
         {
             return UPDATE;
         }

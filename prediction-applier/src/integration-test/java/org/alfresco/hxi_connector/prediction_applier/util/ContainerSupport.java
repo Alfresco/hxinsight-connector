@@ -32,8 +32,10 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 
+import java.util.concurrent.TimeUnit;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Session;
@@ -44,6 +46,8 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
 
+import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
+
 @Slf4j
 @Getter
 @SuppressWarnings("PMD.NonThreadSafeSingleton")
@@ -51,6 +55,8 @@ public class ContainerSupport
 {
     public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/prediction-batches";
     public static final String REPOSITORY_PREDICTION_ENDPOINT = "/alfresco/api/-default-/private/hxi/versions/1/nodes/%s/predictions";
+    public static final String USER_AGENT_REGEX = "ACS HXI Connector\\/" + DockerTags.getHxiConnectorTag() + " ACS\\/" + DockerTags.getRepositoryTag() + " .*";
+    public static final String DISCOVERY_ENDPOINT = "/alfresco/api/discovery";
     private static ContainerSupport instance;
     private final Session session;
     private final WireMock hxInsightMock;
@@ -202,6 +208,69 @@ public class ContainerSupport
                 """.formatted(status, page);
 
         retryWithBackoff(() -> getHxInsightMock().verifyThat(putRequestedFor(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT + "/" + batchId))
-                .withRequestBody(equalToJson(expectedBody))));
+                .withRequestBody(equalToJson(expectedBody))
+                .withHeader(USER_AGENT, matching(USER_AGENT_REGEX))));
+    }
+
+    public void expectGetBatchesCalled()
+    {
+        retryWithBackoff(() -> getHxInsightMock().verifyThat(getRequestedFor(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT))
+                .withHeader(USER_AGENT, matching(USER_AGENT_REGEX))));
+    }
+
+    public void prepareRepositoryToReturnDiscovery()
+    {
+        WireMock.configureFor(getRepositoryMock());
+        givenThat(get(urlPathEqualTo(DISCOVERY_ENDPOINT))
+                .willReturn(aResponse()
+                        .withStatus(HTTP_OK)
+                        .withBody("""
+                                {
+                                    "entry": {
+                                        "repository": {
+                                            "id": "dummy-repository-id",
+                                            "version": {
+                                                "major": "%s",
+                                                "minor": "%s",
+                                                "patch": "%s",
+                                                "hotfix": "0",
+                                                "schema": 19200
+                                            }
+                                        }
+                                    }
+                                }
+                                """.formatted(DockerTags.getRepositoryTag().split("\\.")[0],
+                                DockerTags.getRepositoryTag().split("\\.")[1],
+                                DockerTags.getRepositoryTag().split("\\.")[2]))));
+    }
+
+    public void prepareRepositoryToFailAtDiscovery()
+    {
+        WireMock.configureFor(getRepositoryMock());
+        givenThat(get(urlPathEqualTo(DISCOVERY_ENDPOINT)).willReturn(serviceUnavailable()));
+    }
+
+    public void expectDiscoveryEndpointCalled()
+    {
+        retryWithBackoff(() -> getRepositoryMock().verifyThat(getRequestedFor(urlPathEqualTo(DISCOVERY_ENDPOINT))));
+    }
+
+    @SneakyThrows
+    public void expectNoPredictionBatchesRequestsReceived()
+    {
+        TimeUnit.MILLISECONDS.sleep(200);
+        hxInsightMock.verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT)));
+        hxInsightMock.verifyThat(exactly(0), getRequestedFor(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT)));
+        resetWireMock();
+    }
+
+    public void resetWireMock()
+    {
+        WireMock.reset();
+        WireMock.resetAllRequests();
+        hxInsightMock.resetRequests();
+        hxInsightMock.resetMappings();
+        repositoryMock.resetRequests();
+        repositoryMock.resetMappings();
     }
 }

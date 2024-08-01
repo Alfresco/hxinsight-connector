@@ -123,7 +123,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                             "content-type": "application/pdf"
                           }
                         }
-                      }
+                      },
+                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"value": []}
                     }
                   }
                 ]""";
@@ -277,7 +279,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                             "content-type": "application/pdf"
                           }
                         }
-                      }
+                      },
+                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"value": []}
                     }
                   }
                 ]""";

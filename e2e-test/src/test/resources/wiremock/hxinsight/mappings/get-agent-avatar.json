@@ -1,0 +1,19 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/agents/61254576-62a3-453f-8cd8-19e2f6554f29/avatar"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "avatar.png",
+    "transformerParameters": {
+      "disableBodyFileTemplating": true
+    },
+    "headers": {
+      "Content-Type": "image/png"
+    }
+  },
+  "metadata": {
+    "name": "file-stub"
+  }
+}
