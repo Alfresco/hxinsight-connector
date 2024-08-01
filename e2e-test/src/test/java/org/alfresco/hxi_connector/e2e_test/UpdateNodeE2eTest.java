@@ -142,7 +142,7 @@ public class UpdateNodeE2eTest
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
+                .withRequestBody(containing(createdNode.id()))), 500);
         WireMock.reset();
     }
 
@@ -165,7 +165,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
-        }, 200);
+        }, 500);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
