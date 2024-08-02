@@ -140,7 +140,7 @@ jobs:
       - name: "Build app"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Test application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} test -pl '${{ matrix.subproject }}'
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl '${{ matrix.subproject }}'
 
   test_distribution:
     name: "Build application with distribution profile"
