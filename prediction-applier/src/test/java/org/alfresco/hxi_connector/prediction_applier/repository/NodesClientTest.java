@@ -41,7 +41,6 @@ import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClie
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
 
 import java.util.Date;
-import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -114,7 +113,7 @@ class NodesClientTest
     {
         // given
         PredictionModelResponseEntry predictionResponseEntry = new PredictionModelResponseEntry("prediction-id", "property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", "old-value", AUTOFILL);
-        PredictionModelResponse predictionResponse = new PredictionModelResponse(List.of(predictionResponseEntry));
+        PredictionModelResponse predictionResponse = new PredictionModelResponse(predictionResponseEntry);
         mockEndpointWillRespondWith(SC_CREATED, new ObjectMapper().writeValueAsString(predictionResponse));
         mockEndpoint.expectedMessageCount(1);
 
