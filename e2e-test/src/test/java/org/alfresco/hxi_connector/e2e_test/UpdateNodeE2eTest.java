@@ -29,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.anyRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
@@ -38,17 +39,29 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.getSetProperty;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
@@ -107,6 +120,13 @@ public class UpdateNodeE2eTest
             }
             """;
 
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
+    private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
+    public static final String GROUP_EVERYONE = "GROUP_EVERYONE";
+    public static final String ALICE = "abeecher";
+    public static final String MIKE = "mjackson";
+
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -125,7 +145,7 @@ public class UpdateNodeE2eTest
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock, repository, liveIngester);
 
-    RepositoryClient repositoryNodesClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
+    RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
     Node createdNode;
 
     @BeforeAll
@@ -140,7 +160,7 @@ public class UpdateNodeE2eTest
     {
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
-        createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
+        createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))), 500);
         WireMock.reset();
@@ -160,7 +180,7 @@ public class UpdateNodeE2eTest
         assertThat(createdNode.aspects()).doesNotContain(PREDICTION_APPLIED_ASPECT);
         assertThat(createdNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode = repositoryNodesClient.getNode(createdNode.id());
+            Node actualNode = repositoryClient.getNode(createdNode.id());
             assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
@@ -179,12 +199,12 @@ public class UpdateNodeE2eTest
         WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
 
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode = repositoryNodesClient.getNode(createdNode.id());
+            Node actualNode = repositoryClient.getNode(createdNode.id());
             assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
         });
 
         // when
-        Node updatedNode = repositoryNodesClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
+        Node updatedNode = repositoryClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
@@ -196,13 +216,46 @@ public class UpdateNodeE2eTest
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode2 = repositoryNodesClient.getNode(updatedNode.id());
+            Node actualNode2 = repositoryClient.getNode(updatedNode.id());
             assertThat(actualNode2.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
         }, 500);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
+    }
+
+    @Test
+    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    final void testSendPermissionUpdateToHxi()
+    {
+        // when
+        repositoryClient.setReadAccess(createdNode.id(), ALICE, MIKE);
+
+        // then
+        RetryUtils.retryWithBackoff(() -> {
+            List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
+
+            assertFalse(requests.isEmpty());
+
+            Optional<LoggedRequest> permissionsUpdatedEvent = requests.stream()
+                    .filter(request -> request.getBodyAsString().contains(createdNode.id()))
+                    .filter(request -> request.getBodyAsString().contains("update"))
+                    .filter(request -> request.getBodyAsString().contains(ALLOW_ACCESS_PROPERTY))
+                    .findFirst();
+
+            assertTrue(permissionsUpdatedEvent.isPresent());
+
+            JsonNode properties = objectMapper.readTree(permissionsUpdatedEvent.get().getBodyAsString())
+                    .get(0)
+                    .get("properties");
+
+            assertTrue(properties.has(ALLOW_ACCESS_PROPERTY));
+            assertEquals(Set.of(GROUP_EVERYONE, ALICE), asSet(properties.get(ALLOW_ACCESS_PROPERTY).get("value")));
+
+            assertTrue(properties.has(DENY_ACCESS_PROPERTY));
+            assertEquals(Set.of(MIKE), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
+        });
     }
 
     private void prepareHxInsightMockToReturnPredictionFor(String nodeId, String predictedValue)
@@ -218,7 +271,7 @@ public class UpdateNodeE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        return DockerContainers.createExtendedRepositoryContainerWithin(network)
+        return DockerContainers.createExtendedRepositoryContainerWithin(network, ENTERPRISE)
                 .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
     }
 

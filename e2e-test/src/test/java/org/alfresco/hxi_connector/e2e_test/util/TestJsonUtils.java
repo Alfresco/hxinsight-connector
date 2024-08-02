@@ -42,8 +42,8 @@ public final class TestJsonUtils
     private static final ObjectMapper objectMapper = new ObjectMapper();
 
     @SneakyThrows
-    public static Set<String> getSetProperty(JsonNode jsonNode, String propertyName)
+    public static Set<String> asSet(JsonNode json)
     {
-        return objectMapper.readValue(jsonNode.get(propertyName).get("value").toString(), new TypeReference<>() {});
+        return objectMapper.readValue(json.toString(), new TypeReference<>() {});
     }
 }

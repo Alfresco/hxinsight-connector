@@ -32,6 +32,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -175,10 +176,10 @@ abstract class CreateNodeE2eTestBase
                     .get("properties");
 
             assertTrue(properties.has(ALLOW_ACCESS_PROPERTY));
-            assertEquals(Set.of("GROUP_EVERYONE"), getSetProperty(properties, ALLOW_ACCESS_PROPERTY));
+            assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(ALLOW_ACCESS_PROPERTY).get("value")));
 
             assertTrue(properties.has(DENY_ACCESS_PROPERTY));
-            assertEquals(Set.of(), getSetProperty(properties, DENY_ACCESS_PROPERTY));
+            assertEquals(Set.of(), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
         }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 

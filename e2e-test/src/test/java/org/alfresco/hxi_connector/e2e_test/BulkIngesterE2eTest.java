@@ -29,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -102,10 +103,10 @@ public class BulkIngesterE2eTest
                     .get("properties");
 
             assertTrue(properties.has(allowAccessFieldName));
-            assertEquals(Set.of("GROUP_EVERYONE", "guest"), getSetProperty(properties, allowAccessFieldName));
+            assertEquals(Set.of("GROUP_EVERYONE", "guest"), asSet(properties.get(allowAccessFieldName).get("value")));
 
             assertTrue(properties.has(denyAccessFieldName));
-            assertEquals(Set.of(), getSetProperty(properties, denyAccessFieldName));
+            assertEquals(Set.of(), asSet(properties.get(denyAccessFieldName).get("value")));
         }, 10, 500);
     }
 }
