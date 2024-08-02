@@ -70,7 +70,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 @Slf4j
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
+@SuppressWarnings("PMD.FieldNamingConventions")
 public class UpdateNodeLiveIngesterE2eTest
 {
     private static final Network network = Network.newNetwork();

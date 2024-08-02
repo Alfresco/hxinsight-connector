@@ -32,6 +32,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
 
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public final class TestJsonUtils
 {
     private static final ObjectMapper objectMapper = new ObjectMapper();
