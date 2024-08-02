@@ -27,11 +27,16 @@ package org.alfresco.hxi_connector.prediction_applier.repository;
 
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.INFO;
 import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.component.http.HttpMethods.PUT;
+import static org.apache.camel.support.builder.PredicateBuilder.and;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 
 import java.net.UnknownHostException;
+import java.util.Collection;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
@@ -39,6 +44,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.hc.client5.http.HttpHostConnectException;
@@ -51,6 +57,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
+import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
 
 @Component
 @RequiredArgsConstructor
@@ -104,18 +111,32 @@ public class NodesClient extends RouteBuilder
             .errorHandler(noErrorHandler())
             .setHeader(HTTP_METHOD, constant(PUT))
             .process(authService::setAlfrescoAuthorizationHeaders)
-            .log(LoggingLevel.DEBUG, log, "Updating node: ${headers.nodeId} - Headers: ${headers}, Body: ${body}")
+            .log(DEBUG, log, "Prediction :: applying to node: ${headers.nodeId}")
             .toD(URI_PATTERN.formatted(repositoryApiProperties.baseUrl()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
-                .unmarshal()
-                .json(JsonLibrary.Jackson, PredictionModelResponse.class)
-                .log(TRACE, log, "Node updated successfully")
-            .endChoice()
+                .choice().when(body().startsWith("[")) // If the response is a list of predictions
+                    .unmarshal(new LinkedListJacksonDataFormat(PredictionModelResponse.class))
+                .otherwise()
+                    .unmarshal()
+                    .json(JsonLibrary.Jackson, PredictionModelResponse.class)
+                    .setBody(exchange -> List.of(exchange.getIn().getBody(PredictionModelResponse.class)))
+                .end()
+                .choice().when(bodyNotEmpty())
+                    .log(DEBUG, log, "Prediction :: successfully applied to node: ${headers.nodeId}")
+                .otherwise()
+                    .log(INFO, log, "Prediction :: failed to apply to node: ${headers.nodeId}")
+                    .log(TRACE, log, "Headers: ${headers}")
+                .end()
             .end();
         // @formatter:on
+    }
+
+    private Predicate bodyNotEmpty()
+    {
+        return and(body().isNotNull(), bodyAs(Collection.class).method("isEmpty").isEqualTo(false));
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

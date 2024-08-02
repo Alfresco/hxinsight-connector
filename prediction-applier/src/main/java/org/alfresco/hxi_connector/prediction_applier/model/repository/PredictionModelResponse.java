@@ -25,7 +25,5 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.model.repository;
 
-import java.util.List;
-
-public record PredictionModelResponse(List<PredictionModelResponseEntry> entries)
+public record PredictionModelResponse(PredictionModelResponseEntry entry)
 {}
