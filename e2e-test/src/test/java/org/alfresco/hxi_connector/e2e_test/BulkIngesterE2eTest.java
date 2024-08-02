@@ -29,18 +29,17 @@ import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.getSetProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -107,11 +106,5 @@ public class BulkIngesterE2eTest
             assertTrue(properties.has(denyAccessFieldName));
             assertEquals(Set.of(), getSetProperty(properties, denyAccessFieldName));
         }, 400);
-    }
-
-    @SneakyThrows
-    public Set<String> getSetProperty(JsonNode jsonNode, String propertyName)
-    {
-        return objectMapper.readValue(jsonNode.get(propertyName).get("value").toString(), new TypeReference<>() {});
     }
 }
