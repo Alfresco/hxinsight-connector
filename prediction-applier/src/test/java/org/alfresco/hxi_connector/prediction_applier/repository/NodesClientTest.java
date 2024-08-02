@@ -34,13 +34,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType.AUTOFILL;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
 
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -84,7 +85,7 @@ class NodesClientTest
     @SneakyThrows
     void beforeAll()
     {
-        initMocks(this);
+        openMocks(this);
         camelContext = new DefaultCamelContext();
         NodesClient nodesClient = new NodesClient(createNodesApiProperties(), mockAuthService);
         camelContext.addRoutes(nodesClient);
@@ -99,7 +100,7 @@ class NodesClientTest
     void tearDown()
     {
         mockEndpoint.reset();
-        initMocks(this);
+        openMocks(this);
     }
 
     @AfterAll
@@ -113,7 +114,7 @@ class NodesClientTest
     {
         // given
         PredictionModelResponseEntry predictionResponseEntry = new PredictionModelResponseEntry("prediction-id", "property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", "old-value", AUTOFILL);
-        PredictionModelResponse predictionResponse = new PredictionModelResponse(predictionResponseEntry);
+        PredictionModelResponse predictionResponse = new PredictionModelResponse(List.of(predictionResponseEntry));
         mockEndpointWillRespondWith(SC_CREATED, new ObjectMapper().writeValueAsString(predictionResponse));
         mockEndpoint.expectedMessageCount(1);
 

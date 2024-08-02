@@ -28,27 +28,33 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
+import static org.mockito.BDDMockito.given;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.http.HttpClient;
 
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.rest.framework.core.exceptions.NotFoundException;
 import org.alfresco.rest.framework.resource.content.BinaryResource;
 import org.alfresco.rest.framework.resource.content.FileBinaryResource;
 
+@ExtendWith(MockitoExtension.class)
 public class AvatarRelationTest
 {
     private static final String AGENT_ID = "agent-id";
     private static FileBinaryResource sampleImage;
 
-    private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final AvatarRelation avatarRelation = new AvatarRelation(httpClient);
+    @Mock
+    private HxInsightClient mockHxInsightClient;
+    @InjectMocks
+    private AvatarRelation avatarRelation;
 
     @BeforeAll
     static void setUp() throws IOException
@@ -71,11 +77,10 @@ public class AvatarRelationTest
     {
         // given
         String avatarId = "-default-";
-        AvatarRelation avatarRelationSpy = spy(AvatarRelation.class);
-        doReturn(sampleImage).when(avatarRelationSpy).getSampleAvatar();
+        given(mockHxInsightClient.getAvatar(AGENT_ID)).willReturn(sampleImage);
 
         // when
-        BinaryResource binaryResource = avatarRelationSpy.readById(AGENT_ID, avatarId, null);
+        BinaryResource binaryResource = avatarRelation.readById(AGENT_ID, avatarId, null);
 
         // then
         assertEquals(binaryResource, sampleImage);
