@@ -28,10 +28,14 @@ package org.alfresco.hxi_connector.prediction_applier.repository;
 import static org.apache.camel.Exchange.HTTP_METHOD;
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
 import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.INFO;
+import static org.apache.camel.LoggingLevel.TRACE;
 import static org.apache.camel.component.http.HttpMethods.PUT;
+import static org.apache.camel.support.builder.PredicateBuilder.and;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 
 import java.net.UnknownHostException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -40,6 +44,7 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -114,7 +119,6 @@ public class NodesClient extends RouteBuilder
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
-                .log(DEBUG, log, "Node updated successfully - Headers: ${headers}, Body: ${body}")
                 .choice().when(body().startsWith("[")) // If the response is a list of predictions
                     .unmarshal(predictionListDataFormat)
                 .otherwise()
@@ -122,8 +126,19 @@ public class NodesClient extends RouteBuilder
                     .json(JsonLibrary.Jackson, PredictionModelResponse.class)
                     .setBody(exchange -> List.of(exchange.getIn().getBody(PredictionModelResponse.class)))
                 .end()
+                .choice().when(bodyNotEmpty())
+                    .log(DEBUG, log, "Prediction for node: ${headers.nodeId} applied successfully")
+                .otherwise()
+                    .log(INFO, log, "Prediction for node: ${headers.nodeId} not applied")
+                    .log(TRACE, log, "Headers: ${headers}, Body: ${body}")
+                .end()
             .end();
         // @formatter:on
+    }
+
+    private Predicate bodyNotEmpty()
+    {
+        return and(body().isNotNull(), bodyAs(Collection.class).method("isEmpty").isEqualTo(false));
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
