@@ -23,7 +23,27 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+package org.alfresco.hxi_connector.e2e_test.util;
 
-public record PredictionModelResponse(PredictionModelResponseEntry entry)
-{}
+import static lombok.AccessLevel.PRIVATE;
+
+import java.util.Set;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
+
+@NoArgsConstructor(access = PRIVATE)
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.FieldNamingConventions"})
+public final class TestJsonUtils
+{
+    private static final ObjectMapper objectMapper = new ObjectMapper();
+
+    @SneakyThrows
+    public static Set<String> asSet(JsonNode json)
+    {
+        return objectMapper.readValue(json.toString(), new TypeReference<>() {});
+    }
+}
