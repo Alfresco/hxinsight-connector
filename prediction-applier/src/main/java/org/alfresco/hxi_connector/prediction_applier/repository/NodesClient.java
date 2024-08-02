@@ -46,7 +46,6 @@ import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.Predicate;
 import org.apache.camel.builder.RouteBuilder;
-import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
@@ -107,29 +106,28 @@ public class NodesClient extends RouteBuilder
             .to(RETRYABLE_ROUTE)
             .end();
 
-        JacksonDataFormat predictionListDataFormat = new LinkedListJacksonDataFormat(PredictionModelResponse.class);
         from(RETRYABLE_ROUTE)
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
             .setHeader(HTTP_METHOD, constant(PUT))
             .process(authService::setAlfrescoAuthorizationHeaders)
-            .log(DEBUG, log, "Applying prediction to node: ${headers.nodeId}")
+            .log(DEBUG, log, "Prediction :: applying to node: ${headers.nodeId}")
             .toD(URI_PATTERN.formatted(repositoryApiProperties.baseUrl()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
                 .choice().when(body().startsWith("[")) // If the response is a list of predictions
-                    .unmarshal(predictionListDataFormat)
+                    .unmarshal(new LinkedListJacksonDataFormat(PredictionModelResponse.class))
                 .otherwise()
                     .unmarshal()
                     .json(JsonLibrary.Jackson, PredictionModelResponse.class)
                     .setBody(exchange -> List.of(exchange.getIn().getBody(PredictionModelResponse.class)))
                 .end()
                 .choice().when(bodyNotEmpty())
-                    .log(DEBUG, log, "Prediction for node: ${headers.nodeId} applied successfully")
+                    .log(DEBUG, log, "Prediction :: successfully applied to node: ${headers.nodeId}")
                 .otherwise()
-                    .log(INFO, log, "Prediction for node: ${headers.nodeId} not applied")
+                    .log(INFO, log, "Prediction :: failed to apply to node: ${headers.nodeId}")
                     .log(TRACE, log, "Headers: ${headers}")
                 .end()
             .end();
