@@ -8,8 +8,7 @@
   "response": {
     "status": 202,
     "jsonBody": {
-      "questionId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
-      "agentId": "agent-id"
+      "questionId": "5fca2c77-cdc0-4118-9373-e75f53177ff8"
     }
   }
 }

@@ -219,7 +219,7 @@ public class QuestionsAndAnswersE2eTest
     }
 
     @Test
-    void shouldNotGetAnswerWheHxIReturnsUnexpectedStatus()
+    void shouldNotGetAnswerWhenHxIReturnsUnexpectedStatus()
     {
         // given
         String questionId = "non-existing-question-id";
@@ -265,7 +265,7 @@ public class QuestionsAndAnswersE2eTest
     }
 
     @Test
-    void shouldNotSubmitFeedbackWheHxIReturnsUnexpectedStatus()
+    void shouldNotSubmitFeedbackWhenHxIReturnsUnexpectedStatus()
     {
         // given
         String questionId = "non-existing-question-id";
