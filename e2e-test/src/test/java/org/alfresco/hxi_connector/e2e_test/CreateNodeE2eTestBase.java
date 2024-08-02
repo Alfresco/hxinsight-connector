@@ -72,7 +72,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
 @Slf4j
-@SuppressWarnings({"PMD.AbstractClassWithoutAbstractMethod", "PMD.CreateNodeE2eTestBase"})
+@SuppressWarnings({"PMD.AbstractClassWithoutAbstractMethod", "PMD.FieldNamingConventions"})
 /**
  * End-to-end base tests for creating a node with content. Due to some issues with testcontainers environment, this class is extended by 2 other test classes. One of its children is command docker-compose dependent and is enabled for GitHub Actions only and disabled for maven builds. The other child class works the other way around.
  */
