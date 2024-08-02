@@ -72,6 +72,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class UpdateNodeE2eTest
 {
+    private static final int DELAY_MS = 800;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String PREDICTION_APPLIED_ASPECT = "hxi:predictionApplied";
@@ -142,7 +143,7 @@ public class UpdateNodeE2eTest
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         createdNode = repositoryNodesClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))), 500);
+                .withRequestBody(containing(createdNode.id()))), DELAY_MS);
         WireMock.reset();
     }
 
@@ -165,7 +166,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
-        }, 500);
+        }, DELAY_MS);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
@@ -201,7 +202,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
-        }, 500);
+        }, DELAY_MS);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
