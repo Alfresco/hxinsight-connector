@@ -39,18 +39,17 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
-import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.getSetProperty;
 import static org.assertj.core.api.Assertions.assertThat;
-
-import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
-import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

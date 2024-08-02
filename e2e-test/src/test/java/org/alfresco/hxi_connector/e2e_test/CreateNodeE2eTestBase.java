@@ -32,7 +32,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -40,7 +39,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.getSetProperty;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;

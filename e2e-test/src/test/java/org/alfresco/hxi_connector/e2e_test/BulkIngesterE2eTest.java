@@ -29,11 +29,10 @@ import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.getSetProperty;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 
 import java.util.List;
 import java.util.Set;
