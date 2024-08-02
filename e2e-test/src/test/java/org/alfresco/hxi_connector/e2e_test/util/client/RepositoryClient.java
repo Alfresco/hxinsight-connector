@@ -194,24 +194,25 @@ public class RepositoryClient
                 .when().post(uri);
     }
 
-    public void setReadAccess(String nodeId, String allowedUserId, String deniedUserId) {
+    public void setReadAccess(String nodeId, String allowedUserId, String deniedUserId)
+    {
         String uri = NODES_URL_PATTERN.formatted(baseUrl, nodeId);
 
         given().auth().preemptive().basic(user.username(), user.password())
                 .contentType("application/json")
                 .accept("application/json")
                 .body("""
-                {
-                  "permissions":
-                    {
-                      "locallySet":
-                        [
-                          {"authorityId": "%s", "name": "Consumer", "accessStatus":"ALLOWED"},
-                          {"authorityId": "%s", "name": "Read", "accessStatus":"DENIED"}
-                        ]
-                    }
-                }
-                """.formatted(allowedUserId, deniedUserId))
+                        {
+                          "permissions":
+                            {
+                              "locallySet":
+                                [
+                                  {"authorityId": "%s", "name": "Consumer", "accessStatus":"ALLOWED"},
+                                  {"authorityId": "%s", "name": "Read", "accessStatus":"DENIED"}
+                                ]
+                            }
+                        }
+                        """.formatted(allowedUserId, deniedUserId))
                 .when().put(uri);
     }
 }
