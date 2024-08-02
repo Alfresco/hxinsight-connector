@@ -137,8 +137,10 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - name: "Build app"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -am
       - name: "Test application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} test -pl '${{ matrix.subproject }}'
 
   test_distribution:
     name: "Build application with distribution profile"
