@@ -32,6 +32,7 @@ import static org.apache.camel.component.http.HttpMethods.PUT;
 import static org.apache.hc.core5.http.HttpStatus.SC_CREATED;
 
 import java.net.UnknownHostException;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.core.io.JsonEOFException;
@@ -40,6 +41,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.jackson.JacksonDataFormat;
 import org.apache.camel.model.dataformat.JsonLibrary;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.apache.hc.core5.http.MalformedChunkCodingException;
@@ -51,6 +53,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
+import org.alfresco.hxi_connector.prediction_applier.util.LinkedListJacksonDataFormat;
 
 @Component
 @RequiredArgsConstructor
@@ -99,6 +102,7 @@ public class NodesClient extends RouteBuilder
             .to(RETRYABLE_ROUTE)
             .end();
 
+        JacksonDataFormat predictionListDataFormat = new LinkedListJacksonDataFormat(PredictionModelResponse.class);
         from(RETRYABLE_ROUTE)
             .id(ROUTE_ID)
             .errorHandler(noErrorHandler())
@@ -111,9 +115,13 @@ public class NodesClient extends RouteBuilder
                 .process(this::throwExceptionOnUnexpectedStatusCode)
             .otherwise()
                 .log(DEBUG, log, "Node updated successfully - Headers: ${headers}, Body: ${body}")
-                .unmarshal()
-                .json(JsonLibrary.Jackson, PredictionModelResponse.class)
-            .endChoice()
+                .choice().when(body().startsWith("[")) // If the response is a list of predictions
+                    .unmarshal(predictionListDataFormat)
+                .otherwise()
+                    .unmarshal()
+                    .json(JsonLibrary.Jackson, PredictionModelResponse.class)
+                    .setBody(exchange -> List.of(exchange.getIn().getBody(PredictionModelResponse.class)))
+                .end()
             .end();
         // @formatter:on
     }
