@@ -113,7 +113,7 @@ public class NodesClient extends RouteBuilder
             .errorHandler(noErrorHandler())
             .setHeader(HTTP_METHOD, constant(PUT))
             .process(authService::setAlfrescoAuthorizationHeaders)
-            .log(DEBUG, log, "Applying prediction for node: ${headers.nodeId}")
+            .log(DEBUG, log, "Applying prediction to node: ${headers.nodeId}")
             .toD(URI_PATTERN.formatted(repositoryApiProperties.baseUrl()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
@@ -130,7 +130,7 @@ public class NodesClient extends RouteBuilder
                     .log(DEBUG, log, "Prediction for node: ${headers.nodeId} applied successfully")
                 .otherwise()
                     .log(INFO, log, "Prediction for node: ${headers.nodeId} not applied")
-                    .log(TRACE, log, "Headers: ${headers}, Body: ${body}")
+                    .log(TRACE, log, "Headers: ${headers}")
                 .end()
             .end();
         // @formatter:on
