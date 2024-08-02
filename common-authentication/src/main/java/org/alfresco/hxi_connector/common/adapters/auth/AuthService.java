@@ -39,7 +39,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @RequiredArgsConstructor
 public class AuthService
 {
-    static final String ENVIRONMENT_KEY_HEADER = "hxai-environment";
+    static final String ENVIRONMENT_KEY_HEADER = "hxp-environment";
     public static final String HXI_AUTH_PROVIDER = "hyland-experience";
     public static final String ALFRESCO_AUTH_PROVIDER = "alfresco";
     static final String BASIC = "Basic ";
