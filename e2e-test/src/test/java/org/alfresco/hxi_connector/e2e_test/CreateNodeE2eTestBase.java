@@ -27,14 +27,19 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -42,8 +47,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -62,17 +72,20 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
 @Slf4j
-@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
+@SuppressWarnings({"PMD.AbstractClassWithoutAbstractMethod", "PMD.FieldNamingConventions"})
 /**
  * End-to-end base tests for creating a node with content. Due to some issues with testcontainers environment, this class is extended by 2 other test classes. One of its children is command docker-compose dependent and is enabled for GitHub Actions only and disabled for maven builds. The other child class works the other way around.
  */
 abstract class CreateNodeE2eTestBase
 {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     protected static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int MAX_ATTEMPTS = 5;
-    private static final int INITIAL_DELAY_MS = 500;
+    private static final int INITIAL_DELAY_MS = 700;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
+    private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
+    private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
 
     protected RepositoryClient repositoryClient;
     protected AwsS3Client awsS3Client;
@@ -131,6 +144,41 @@ abstract class CreateNodeE2eTestBase
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
+        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
+    }
+
+    @Test
+    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    final void testCreateNodeWithDefaultPermissions()
+    {
+        // when
+        Node createdNode = repositoryClient.createNodeWithContent(
+                PARENT_ID,
+                "test file",
+                new ByteArrayInputStream("test file content".getBytes()),
+                "text/plain");
+
+        // then
+        RetryUtils.retryWithBackoff(() -> {
+            List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
+
+            assertFalse(requests.isEmpty());
+
+            Optional<LoggedRequest> createNodeEvent = requests.stream()
+                    .filter(request -> request.getBodyAsString().contains(createdNode.id()))
+                    .findFirst();
+
+            assertTrue(createNodeEvent.isPresent());
+
+            JsonNode properties = objectMapper.readTree(createNodeEvent.get().getBodyAsString())
+                    .get(0)
+                    .get("properties");
+
+            assertTrue(properties.has(ALLOW_ACCESS_PROPERTY));
+            assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(ALLOW_ACCESS_PROPERTY).get("value")));
+
+            assertTrue(properties.has(DENY_ACCESS_PROPERTY));
+            assertEquals(Set.of(), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
         }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 

@@ -32,15 +32,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
+
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -102,16 +102,10 @@ public class BulkIngesterE2eTest
                     .get("properties");
 
             assertTrue(properties.has(allowAccessFieldName));
-            assertEquals(Set.of("GROUP_EVERYONE", "guest"), getSetProperty(properties, allowAccessFieldName));
+            assertEquals(Set.of("GROUP_EVERYONE", "guest"), asSet(properties.get(allowAccessFieldName).get("value")));
 
             assertTrue(properties.has(denyAccessFieldName));
-            assertEquals(Set.of(), getSetProperty(properties, denyAccessFieldName));
+            assertEquals(Set.of(), asSet(properties.get(denyAccessFieldName).get("value")));
         }, 10, 500);
-    }
-
-    @SneakyThrows
-    public Set<String> getSetProperty(JsonNode jsonNode, String propertyName)
-    {
-        return objectMapper.readValue(jsonNode.get(propertyName).get("value").toString(), new TypeReference<>() {});
     }
 }
