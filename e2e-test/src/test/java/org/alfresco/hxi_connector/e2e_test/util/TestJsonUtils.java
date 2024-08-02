@@ -37,7 +37,7 @@ import lombok.SneakyThrows;
 import static lombok.AccessLevel.PRIVATE;
 
 @NoArgsConstructor(access = PRIVATE)
-@SuppressWarnings("PMD.TestClassWithoutTestCases")
+@SuppressWarnings({"PMD.TestClassWithoutTestCases", "PMD.FieldNamingConventions"})
 public final class TestJsonUtils
 {
     private static final ObjectMapper objectMapper = new ObjectMapper();
