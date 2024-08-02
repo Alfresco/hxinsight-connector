@@ -20,7 +20,7 @@ updates:
     schedule:
       interval: "monthly"
   - package-ecosystem: docker
-    directory: "/distribution/src/main/resources"
+    directory: "distribution/src/main/resources"
     schedule:
       interval: daily
       time: "22:00"
