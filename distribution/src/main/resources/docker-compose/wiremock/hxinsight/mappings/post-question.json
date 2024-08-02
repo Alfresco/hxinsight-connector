@@ -1,10 +1,14 @@
 {
+  "scenarioName": "Submit-question",
+  "requiredScenarioState": "Started",
   "request": {
     "method": "POST",
     "urlPath": "/submit-question"
   },
   "response": {
     "status": 202,
-    "bodyFileName": "question-id.json"
+    "jsonBody": {
+      "questionId": "5fca2c77-cdc0-4118-9373-e75f53177ff8"
+    }
   }
 }
