@@ -70,6 +70,6 @@ class PropertyBasedRepositoryInformationTest
         given(integrationPropertiesMock.alfresco().repository()).willReturn(mock(Repository.class));
         given(integrationPropertiesMock.alfresco().repository().versionOverride()).willReturn(null);
 
-        assertThrows(ValidationException.class, () -> objectUnderTest.getRepositoryVersion());
+        assertThrows(ValidationException.class, objectUnderTest::getRepositoryVersion);
     }
 }

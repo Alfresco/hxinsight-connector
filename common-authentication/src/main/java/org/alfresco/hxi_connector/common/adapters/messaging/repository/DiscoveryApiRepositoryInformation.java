@@ -56,6 +56,7 @@ public class DiscoveryApiRepositoryInformation implements RepositoryInformation
     private final ObjectMapper objectMapper;
     private final HttpClient client;
 
+    @Override
     public String getRepositoryVersion()
     {
         EnsureUtils.ensureNotBlank(discoveryEndpoint, "ACS Discovery API endpoint must not be blank");

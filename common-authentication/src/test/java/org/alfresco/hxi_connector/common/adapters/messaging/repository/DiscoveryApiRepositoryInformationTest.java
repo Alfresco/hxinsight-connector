@@ -60,7 +60,6 @@ class DiscoveryApiRepositoryInformationTest
     private HttpResponse httpResponseMock;
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private DiscoveryApiRepositoryInformation objectUnderTest;
 
     @Test
     void givenVersionOverrideIsEmptyAndApiReturnsVersion_whenGetRepositoryVersion_thenReturnApiVersion()
@@ -90,7 +89,7 @@ class DiscoveryApiRepositoryInformationTest
                 }
                 """);
 
-        objectUnderTest = new DiscoveryApiRepositoryInformation(DISCOVERY_ENDPOINT, authServiceMock, objectMapper, httpClientMock);
+        DiscoveryApiRepositoryInformation objectUnderTest = new DiscoveryApiRepositoryInformation(DISCOVERY_ENDPOINT, authServiceMock, objectMapper, httpClientMock);
 
         // when
         String actualVersion = objectUnderTest.getRepositoryVersion();
@@ -101,13 +100,15 @@ class DiscoveryApiRepositoryInformationTest
     }
 
     @Test
-    void getRepositoryVersion_whenVersionOverrideIsEmptyAndApiFails_throwsIllegalStateException() throws IOException, InterruptedException
+    void givenDiscoverApiFails_whenGetRepositoryVersion_thenThrowException()
+            throws IOException, InterruptedException
     {
+        // given
         given(authServiceMock.getAuthHeader(AuthService.ALFRESCO_AUTH_PROVIDER)).willReturn(BEARER_TOKEN);
         given(httpClientMock.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).willThrow(new IOException());
+        DiscoveryApiRepositoryInformation objectUnderTest = new DiscoveryApiRepositoryInformation(DISCOVERY_ENDPOINT, authServiceMock, objectMapper, httpClientMock);
 
-        objectUnderTest = new DiscoveryApiRepositoryInformation(DISCOVERY_ENDPOINT, authServiceMock, objectMapper, httpClientMock);
-
+        // when + then
         assertThrows(EndpointServerErrorException.class, objectUnderTest::getRepositoryVersion);
     }
 }
