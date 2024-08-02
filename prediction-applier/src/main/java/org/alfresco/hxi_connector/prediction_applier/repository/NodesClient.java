@@ -113,7 +113,7 @@ public class NodesClient extends RouteBuilder
             .errorHandler(noErrorHandler())
             .setHeader(HTTP_METHOD, constant(PUT))
             .process(authService::setAlfrescoAuthorizationHeaders)
-            .log(DEBUG, log, "Updating node: ${headers.nodeId} - Headers: ${headers}, Body: ${body}")
+            .log(DEBUG, log, "Applying prediction for node: ${headers.nodeId}")
             .toD(URI_PATTERN.formatted(repositoryApiProperties.baseUrl()))
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))

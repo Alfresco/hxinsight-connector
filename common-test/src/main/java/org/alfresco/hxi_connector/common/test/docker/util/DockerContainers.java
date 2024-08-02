@@ -331,8 +331,7 @@ public class DockerContainers
     {
         return createWireMockContainer()
                 .withNetwork(network)
-                .withEnv("WIREMOCK_OPTIONS", "--global-response-templating --verbose")
-                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("WireMockContainer")));
+                .withEnv("WIREMOCK_OPTIONS", "--global-response-templating --verbose");
     }
 
     public static LocalStackContainer createLocalStackContainer()

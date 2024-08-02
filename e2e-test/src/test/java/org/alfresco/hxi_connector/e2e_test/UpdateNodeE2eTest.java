@@ -114,7 +114,8 @@ public class UpdateNodeE2eTest
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
-            .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
+            .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY)
+            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("WireMockContainer")));
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
