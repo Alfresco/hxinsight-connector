@@ -32,15 +32,15 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
+
 import java.util.List;
 import java.util.Set;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -71,6 +71,7 @@ public class BulkIngesterE2eTest
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final GenericContainer<?> bulkIngester = DockerContainers.createBulkIngesterContainerWithin(postgres, network)
+            .withEnv("ALFRESCO_FILTER_PATH_ALLOW", "dad275aa-affc-487d-a7ed-92cf8e6ce351")
             .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> liveIngester = DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network)
@@ -87,7 +88,7 @@ public class BulkIngesterE2eTest
     void shouldIncludeACLInHxiUpdates()
     {
         // given
-        String nodeId = "fa6b38cd-442a-4f77-9d3e-dc212a6b809e";
+        String nodeId = "02acf462-533d-4e1b-9825-05fa934140da";
         String allowAccessFieldName = "ALLOW_ACCESS";
         String denyAccessFieldName = "DENY_ACCESS";
 
@@ -102,16 +103,10 @@ public class BulkIngesterE2eTest
                     .get("properties");
 
             assertTrue(properties.has(allowAccessFieldName));
-            assertEquals(Set.of("GROUP_EVERYONE", "guest"), getSetProperty(properties, allowAccessFieldName));
+            assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(allowAccessFieldName).get("value")));
 
             assertTrue(properties.has(denyAccessFieldName));
-            assertEquals(Set.of(), getSetProperty(properties, denyAccessFieldName));
-        }, 20, 500);
-    }
-
-    @SneakyThrows
-    public Set<String> getSetProperty(JsonNode jsonNode, String propertyName)
-    {
-        return objectMapper.readValue(jsonNode.get(propertyName).get("value").toString(), new TypeReference<>() {});
+            assertEquals(Set.of(), asSet(properties.get(denyAccessFieldName).get("value")));
+        }, 10, 200);
     }
 }
