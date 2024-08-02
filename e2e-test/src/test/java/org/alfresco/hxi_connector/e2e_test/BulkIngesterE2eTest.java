@@ -71,6 +71,7 @@ public class BulkIngesterE2eTest
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final GenericContainer<?> bulkIngester = DockerContainers.createBulkIngesterContainerWithin(postgres, network)
+            .withEnv("ALFRESCO_FILTER_PATH_ALLOW", "dad275aa-affc-487d-a7ed-92cf8e6ce351")
             .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> liveIngester = DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, network)
@@ -87,7 +88,7 @@ public class BulkIngesterE2eTest
     void shouldIncludeACLInHxiUpdates()
     {
         // given
-        String nodeId = "fa6b38cd-442a-4f77-9d3e-dc212a6b809e";
+        String nodeId = "02acf462-533d-4e1b-9825-05fa934140da";
         String allowAccessFieldName = "ALLOW_ACCESS";
         String denyAccessFieldName = "DENY_ACCESS";
 
@@ -102,10 +103,10 @@ public class BulkIngesterE2eTest
                     .get("properties");
 
             assertTrue(properties.has(allowAccessFieldName));
-            assertEquals(Set.of("GROUP_EVERYONE", "guest"), asSet(properties.get(allowAccessFieldName).get("value")));
+            assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(allowAccessFieldName).get("value")));
 
             assertTrue(properties.has(denyAccessFieldName));
             assertEquals(Set.of(), asSet(properties.get(denyAccessFieldName).get("value")));
-        }, 10, 500);
+        }, 10, 200);
     }
 }
