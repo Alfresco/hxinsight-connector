@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -77,7 +76,6 @@ public class LiveIngesterMessagingConfig
     }
 
     @Bean
-    @DependsOn("repositoryInformation")
     public ApplicationInfoProvider applicationInfoProvider(RepositoryInformation repositoryInformation, IntegrationProperties integrationProperties)
     {
         return new ApplicationInfoProvider(repositoryInformation, integrationProperties.application());

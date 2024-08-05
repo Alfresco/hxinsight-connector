@@ -60,7 +60,7 @@ public class DiscoveryApiRepositoryInformation implements RepositoryInformation
     public String getRepositoryVersion()
     {
         EnsureUtils.ensureNotBlank(discoveryEndpoint, "ACS Discovery API endpoint must not be blank");
-        log.atDebug().log("Sending ACS Discovery API request to: {}", discoveryEndpoint);
+        log.debug("Sending ACS Discovery API request to: {}", discoveryEndpoint);
         try
         {
             return getDiscoverApiResponse().getFullVersion();

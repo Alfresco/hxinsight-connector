@@ -81,11 +81,9 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = buildRequestWithRequiredHeaders()
                     .uri(URI.create(config.getAgentUrl()))
                     .header(CONTENT_TYPE, "application/json")
-                    .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
-                    .headers(authService.getAuthHeaders())
                     .GET()
                     .build();
 
@@ -107,11 +105,9 @@ public class HxInsightClient
         {
             String body = objectMapper.writeValueAsString(question);
 
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = buildRequestWithRequiredHeaders()
                     .uri(URI.create(config.getQuestionUrl()))
                     .header(CONTENT_TYPE, "application/json")
-                    .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
-                    .headers(authService.getAuthHeaders())
                     .POST(BodyPublishers.ofString(body))
                     .build();
 
@@ -132,10 +128,8 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = buildRequestWithRequiredHeaders()
                     .uri(URI.create(format(config.getAnswerUrl(), questionId)))
-                    .headers(authService.getAuthHeaders())
-                    .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
                     .GET()
                     .build();
 
@@ -158,11 +152,9 @@ public class HxInsightClient
         {
             String body = objectMapper.writeValueAsString(feedback);
 
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = buildRequestWithRequiredHeaders()
                     .uri(URI.create(format(config.getFeedbackUrl(), questionId)))
                     .header(CONTENT_TYPE, "application/json")
-                    .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
-                    .headers(authService.getAuthHeaders())
                     .POST(BodyPublishers.ofString(body))
                     .build();
 
@@ -189,10 +181,8 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = buildRequestWithRequiredHeaders()
                     .uri(URI.create(format(config.getAvatarUrl(), agentId)))
-                    .headers(authService.getAuthHeaders())
-                    .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
                     .GET()
                     .build();
 
@@ -209,5 +199,12 @@ public class HxInsightClient
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, format("Failed to get avatar for agent with id %s", agentId), e);
         }
+    }
+
+    private HttpRequest.Builder buildRequestWithRequiredHeaders()
+    {
+        return HttpRequest.newBuilder()
+                .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
+                .headers(authService.getAuthHeaders());
     }
 }
