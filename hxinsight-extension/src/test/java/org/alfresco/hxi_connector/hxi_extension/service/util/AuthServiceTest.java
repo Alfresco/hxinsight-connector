@@ -26,33 +26,37 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import org.junit.jupiter.api.Test;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import java.util.Map;
+
+import org.junit.jupiter.api.Test;
 
 class AuthServiceTest
 {
-
-    private final AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
-    private final AuthService authService = new AuthService(accessTokenProvider);
+    private final org.alfresco.hxi_connector.common.adapters.auth.AuthService commonAuthService = mock();
+    private final AuthService authService = new AuthService(commonAuthService);
 
     @Test
     void shouldCreateAuthorizationHeader()
     {
         // given
-        String token = "token";
-
-        given(accessTokenProvider.getAccessToken("hyland-experience")).willReturn(token);
+        String token = "Bearer token";
+        given(commonAuthService.getAuthHeaders("hyland-experience")).willReturn(Map.of(AUTHORIZATION, token,
+                HXP_ENVIRONMENT_HEADER, "test-environment", HXP_APP_HEADER, "test-app"));
 
         // when
         String[] headers = authService.getAuthHeaders();
 
         // then
-        assertEquals("Authorization", headers[0]);
-        assertEquals("Bearer " + token, headers[1]);
+        assertThat(headers).containsExactlyInAnyOrder(AUTHORIZATION, token,
+                HXP_ENVIRONMENT_HEADER, "test-environment", HXP_APP_HEADER, "test-app");
     }
 }

@@ -31,6 +31,9 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
+
 import java.util.Base64;
 import java.util.Locale;
 import java.util.Map;
@@ -39,6 +42,7 @@ import org.apache.camel.Exchange;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -47,7 +51,6 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest
 {
-    private static final String ENVIRONMENT_KEY_VALUE = "test-env-key";
     public static final String VALID_TOKEN = "valid-token";
 
     @Mock
@@ -62,12 +65,12 @@ class AuthServiceTest
     @Mock
     private Exchange mockExchange;
 
+    @InjectMocks
     private AuthService objectUnderTest;
 
     @BeforeEach
     void setUp()
     {
-        objectUnderTest = new AuthService(mockAuthProperties, mockAccessTokenProvider, ENVIRONMENT_KEY_VALUE);
         when(mockExchange.getIn()).thenReturn(mock());
     }
 
@@ -121,7 +124,8 @@ class AuthServiceTest
         // then
         thenExpectedAuthHeadersCleared();
         then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
-        then(mockExchange.getIn()).should().setHeader(ENVIRONMENT_KEY_VALUE, dummyEnvKey);
+        then(mockExchange.getIn()).should().setHeader(HXP_ENVIRONMENT_HEADER, dummyEnvKey);
+        then(mockExchange.getIn()).should().setHeader(HXP_APP_HEADER, "hxai-discovery");
     }
 
     private static String getEncodedCredentials(String username, String password)
@@ -133,6 +137,7 @@ class AuthServiceTest
     private void thenExpectedAuthHeadersCleared()
     {
         then(mockExchange.getIn()).should().removeHeader(AUTHORIZATION);
-        then(mockExchange.getIn()).should().removeHeader(ENVIRONMENT_KEY_VALUE);
+        then(mockExchange.getIn()).should().removeHeader(HXP_ENVIRONMENT_HEADER);
+        then(mockExchange.getIn()).should().removeHeader(HXP_APP_HEADER);
     }
 }

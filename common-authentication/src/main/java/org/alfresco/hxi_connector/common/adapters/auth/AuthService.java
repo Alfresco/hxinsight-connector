@@ -25,9 +25,14 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
+import static java.util.Optional.ofNullable;
+
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
 import java.util.Base64;
+import java.util.Map;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,6 +44,9 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @RequiredArgsConstructor
 public class AuthService
 {
+    public static final String HXP_ENVIRONMENT_HEADER = "hxp-environment";
+    public static final String HXP_APP_HEADER = "hxp-app";
+    private static final String HXP_APP_VALUE = "hxai-discovery";
     public static final String HXI_AUTH_PROVIDER = "hyland-experience";
     public static final String ALFRESCO_AUTH_PROVIDER = "alfresco";
     static final String BASIC = "Basic ";
@@ -46,27 +54,52 @@ public class AuthService
 
     private final AuthProperties authProperties;
     private final AccessTokenProvider accessTokenProvider;
-    private final String environmentKeyHeader;
 
     public void setAlfrescoAuthorizationHeaders(Exchange exchange)
     {
-        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
-        String authType = authProvider.getType();
+        String authType = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER).getType();
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(AUTHORIZATION, getAlfrescoAuthHeader(authProvider));
+        getAuthHeaders(ALFRESCO_AUTH_PROVIDER).forEach((key, value) -> exchange.getIn().setHeader(key, value));
         log.debug("Authorization :: {} {} authorization header added", ALFRESCO_AUTH_PROVIDER, authType);
     }
 
     public void setHxIAuthorizationHeaders(Exchange exchange)
     {
-        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(HXI_AUTH_PROVIDER);
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(AUTHORIZATION, getBearerAuthHeader(HXI_AUTH_PROVIDER));
-        exchange.getIn().setHeader(environmentKeyHeader, authProvider.getEnvironmentKey());
+        getAuthHeaders(HXI_AUTH_PROVIDER).forEach((key, value) -> exchange.getIn().setHeader(key, value));
         log.debug("Authorization :: {} authorization header added", HXI_AUTH_PROVIDER);
     }
 
-    public String getAuthHeader(String providerId)
+    public Map<String, String> getAuthHeaders(String providerId)
+    {
+        if (HXI_AUTH_PROVIDER.equals(providerId))
+        {
+            return Map.ofEntries(getAuthHeader(providerId), getHxpEnvironmentHeader(), getHxpAppHeader());
+        }
+        else
+        {
+            return Map.ofEntries(getAuthHeader(providerId));
+        }
+    }
+
+    public Map.Entry<String, String> getAuthHeader(String providerId)
+    {
+        return Map.entry(AUTHORIZATION, getAuthHeaderValue(providerId));
+    }
+
+    protected Map.Entry<String, String> getHxpEnvironmentHeader()
+    {
+        return Map.entry(HXP_ENVIRONMENT_HEADER, ofNullable(authProperties.getProviders().get(HXI_AUTH_PROVIDER))
+                .map(AuthProperties.AuthProvider::getEnvironmentKey)
+                .orElse(EMPTY));
+    }
+
+    protected Map.Entry<String, String> getHxpAppHeader()
+    {
+        return Map.entry(HXP_APP_HEADER, HXP_APP_VALUE);
+    }
+
+    private String getAuthHeaderValue(String providerId)
     {
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
         return providerId.equals(HXI_AUTH_PROVIDER) ? getBearerAuthHeader(HXI_AUTH_PROVIDER) : getAlfrescoAuthHeader(authProvider);
@@ -92,7 +125,8 @@ public class AuthService
     private void clearAuthHeaders(Exchange exchange)
     {
         exchange.getIn().removeHeader(AUTHORIZATION);
-        exchange.getIn().removeHeader(environmentKeyHeader);
+        exchange.getIn().removeHeader(getHxpEnvironmentHeader().getKey());
+        exchange.getIn().removeHeader(getHxpAppHeader().getKey());
     }
 
     private static String getBasicAuthHeader(AuthProperties.AuthProvider authProvider)

@@ -44,10 +44,10 @@ import static org.mockito.Mockito.times;
 import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
-import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.ENVIRONMENT_KEY_VALUE;
+import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TEST_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
-import static org.alfresco.hxi_connector.live_ingester.adapters.config.AuthConfig.ENVIRONMENT_KEY_HEADER;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -143,7 +143,7 @@ class HxInsightEventPublisherIntegrationTest
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(INGEST_PATH))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
-                .withHeader(ENVIRONMENT_KEY_HEADER, equalTo(ENVIRONMENT_KEY_VALUE))
+                .withHeader(HXP_ENVIRONMENT_HEADER, equalTo(TEST_ENVIRONMENT_HEADER))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(containing(NODE_ID)));
@@ -221,7 +221,7 @@ class HxInsightEventPublisherIntegrationTest
         @Bean
         public AuthService authService()
         {
-            return new AuthService(authorizationProperties(), defaultAccessTokenProvider(), ENVIRONMENT_KEY_HEADER);
+            return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
         }
 
         @Bean
