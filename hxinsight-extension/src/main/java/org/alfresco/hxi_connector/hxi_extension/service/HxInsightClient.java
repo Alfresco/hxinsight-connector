@@ -81,7 +81,7 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = buildRequestWithRequiredHeaders()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(config.getAgentUrl()))
                     .header(CONTENT_TYPE, "application/json")
                     .GET()
@@ -105,7 +105,7 @@ public class HxInsightClient
         {
             String body = objectMapper.writeValueAsString(question);
 
-            HttpRequest request = buildRequestWithRequiredHeaders()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(config.getQuestionUrl()))
                     .header(CONTENT_TYPE, "application/json")
                     .POST(BodyPublishers.ofString(body))
@@ -128,7 +128,7 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = buildRequestWithRequiredHeaders()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(format(config.getAnswerUrl(), questionId)))
                     .GET()
                     .build();
@@ -152,7 +152,7 @@ public class HxInsightClient
         {
             String body = objectMapper.writeValueAsString(feedback);
 
-            HttpRequest request = buildRequestWithRequiredHeaders()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(format(config.getFeedbackUrl(), questionId)))
                     .header(CONTENT_TYPE, "application/json")
                     .POST(BodyPublishers.ofString(body))
@@ -181,7 +181,7 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = buildRequestWithRequiredHeaders()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(format(config.getAvatarUrl(), agentId)))
                     .GET()
                     .build();
@@ -201,7 +201,7 @@ public class HxInsightClient
         }
     }
 
-    private HttpRequest.Builder buildRequestWithRequiredHeaders()
+    private HttpRequest.Builder requestWithRequiredHeaders()
     {
         return HttpRequest.newBuilder()
                 .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
