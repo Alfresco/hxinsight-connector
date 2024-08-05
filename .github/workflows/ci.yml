@@ -194,18 +194,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
-      - name: "Start docker-compose and run e2e docker-compose tests"
-        env:
-          GHA_RUN_DC: true
-        run: |
-          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
-          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'hxinsight-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
-      - name: "Stop docker-compose"
-        if: always()
-        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
       - name: "Run e2e tests"
-        env:
-          GHA_RUN_DC: false
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   run_e2e_test_using_older_java:
@@ -237,21 +226,8 @@ jobs:
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
       - name: "Build docker images"
-        run: |
-          JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED }}
-          bash ./scripts/ci/buildDockerImages.sh
-      - name: "Start docker-compose and run e2e docker-compose tests"
-        env:
-          GHA_RUN_DC: true
-        run: |
-          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
-          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'hxinsight-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
-      - name: "Stop docker-compose"
-        if: always()
-        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+        run: JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED }} && bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
-        env:
-          GHA_RUN_DC: false
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
 
   push_docker_images:

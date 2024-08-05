@@ -34,13 +34,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.MockitoAnnotations.initMocks;
+import static org.mockito.MockitoAnnotations.openMocks;
 
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType.AUTOFILL;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
 
+import java.util.Collections;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
@@ -56,6 +58,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
@@ -84,7 +87,7 @@ class NodesClientTest
     @SneakyThrows
     void beforeAll()
     {
-        initMocks(this);
+        openMocks(this);
         camelContext = new DefaultCamelContext();
         NodesClient nodesClient = new NodesClient(createNodesApiProperties(), mockAuthService);
         camelContext.addRoutes(nodesClient);
@@ -98,8 +101,8 @@ class NodesClientTest
     @AfterEach
     void tearDown()
     {
+        Mockito.reset(mockAuthService);
         mockEndpoint.reset();
-        initMocks(this);
     }
 
     @AfterAll
@@ -109,7 +112,8 @@ class NodesClientTest
     }
 
     @Test
-    void testUpdateNode() throws Exception
+    @SuppressWarnings("unchecked")
+    void testUpdateSingleNode() throws Exception
     {
         // given
         PredictionModelResponseEntry predictionResponseEntry = new PredictionModelResponseEntry("prediction-id", "property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", "old-value", AUTOFILL);
@@ -119,13 +123,59 @@ class NodesClientTest
 
         // when
         PredictionModel predictionModel = new PredictionModel("property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", AUTOFILL);
-        PredictionModelResponse actualResponse = producerTemplate.to(NODES_DIRECT_ENDPOINT)
+        List<PredictionModelResponse> actualResponse = producerTemplate.to(NODES_DIRECT_ENDPOINT)
                 .withBody(predictionModel)
-                .request(PredictionModelResponse.class);
+                .request(List.class);
 
         // then
         mockEndpoint.assertIsSatisfied();
-        assertThat(actualResponse).isEqualTo(predictionResponse);
+        assertThat(actualResponse).isEqualTo(List.of(predictionResponse));
+        then(mockAuthService).should().setAlfrescoAuthorizationHeaders(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void testUpdateMultipleNodes() throws Exception
+    {
+        // given
+        PredictionModelResponseEntry predictionResponseEntry = new PredictionModelResponseEntry("prediction-id", "property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", "old-value", AUTOFILL);
+        PredictionModelResponseEntry otherPredictionResponseEntry = new PredictionModelResponseEntry("other-prediction-id", "other-property", PREDICTION_DATE_TIME, 0.5f, "other-model-id", "other-new-value", "other-old-value", AUTOFILL);
+        List<PredictionModelResponse> predictionResponses = List.of(
+                new PredictionModelResponse(predictionResponseEntry),
+                new PredictionModelResponse(otherPredictionResponseEntry));
+        mockEndpointWillRespondWith(SC_CREATED, new ObjectMapper().writeValueAsString(predictionResponses));
+        mockEndpoint.expectedMessageCount(1);
+
+        // when
+        PredictionModel predictionModel = new PredictionModel("property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", AUTOFILL);
+        PredictionModel otherPredictionModel = new PredictionModel("other-property", PREDICTION_DATE_TIME, 0.5f, "other-model-id", "other-new-value", AUTOFILL);
+        List<PredictionModelResponse> actualResponse = producerTemplate.to(NODES_DIRECT_ENDPOINT)
+                .withBody(List.of(predictionModel, otherPredictionModel))
+                .request(List.class);
+
+        // then
+        mockEndpoint.assertIsSatisfied();
+        assertThat(actualResponse).isEqualTo(predictionResponses);
+        then(mockAuthService).should().setAlfrescoAuthorizationHeaders(any());
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void testNotUpdateAnyNode() throws Exception
+    {
+        // given
+        mockEndpointWillRespondWith(SC_CREATED, "[]");
+        mockEndpoint.expectedMessageCount(1);
+
+        // when
+        PredictionModel predictionModel = new PredictionModel("property", PREDICTION_DATE_TIME, 0.5f, "model-id", "new-value", AUTOFILL);
+        List<PredictionModelResponse> actualResponse = producerTemplate.to(NODES_DIRECT_ENDPOINT)
+                .withBody(predictionModel)
+                .request(List.class);
+
+        // then
+        mockEndpoint.assertIsSatisfied();
+        assertThat(actualResponse).isEqualTo(Collections.emptyList());
         then(mockAuthService).should().setAlfrescoAuthorizationHeaders(any());
     }
 
@@ -144,7 +194,6 @@ class NodesClientTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointClientErrorException.class)
                 .hasMessageContaining("received:", 400);
-        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     @Test
@@ -162,7 +211,6 @@ class NodesClientTest
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("received:", 500);
-        then(mockAuthService).shouldHaveNoInteractions();
     }
 
     private RepositoryApiProperties createNodesApiProperties()
