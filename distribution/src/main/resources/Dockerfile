@@ -1,7 +1,7 @@
 # ACTUAL IMAGE
 # More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
-# jre17-rockylinux9 (29/07/2023)
-FROM quay.io/alfresco/alfresco-base-java:jre17-rockylinux9@sha256:8dca9445141dd07b9a6b7a9962f0505546b2ed041b4d5cc785cc9c2d39eeda19
+# jre17-rockylinux9 (22/07/2023)
+FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:72dea15ee3f945df47c6acb9e9ada45ff50f3b358145c50e569c75d859b29ab4
 ENV PORT=8080
 EXPOSE 8080
 ARG JAR_FILE=*-app.jar
