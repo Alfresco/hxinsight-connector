@@ -45,7 +45,9 @@ import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.ENVIRONMENT_KEY_VALUE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
+import static org.alfresco.hxi_connector.live_ingester.adapters.config.AuthConfig.ENVIRONMENT_KEY_HEADER;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
 import java.net.MalformedURLException;
@@ -148,6 +150,7 @@ class PreSignedUrlRequesterIntegrationTest
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
+                .withHeader(ENVIRONMENT_KEY_HEADER, equalTo(ENVIRONMENT_KEY_VALUE))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(absent()));
@@ -309,7 +312,7 @@ class PreSignedUrlRequesterIntegrationTest
         @Bean
         public AuthService authService()
         {
-            return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
+            return new AuthService(authorizationProperties(), defaultAccessTokenProvider(), ENVIRONMENT_KEY_HEADER);
         }
 
         @Bean

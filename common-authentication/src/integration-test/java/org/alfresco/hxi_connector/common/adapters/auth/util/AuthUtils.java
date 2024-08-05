@@ -58,6 +58,7 @@ public class AuthUtils
                 }
             """;
     private static final String AUTH_REQUEST_BODY_PATTERN = "grant_type=%s&client_id=%s&client_secret=%s&scope=%s";
+    public static final String ENVIRONMENT_KEY_VALUE = "test-environment-key";
     public static final String TOKEN_PATH = "/token";
     public static final String AUTH_HEADER = TOKEN_TYPE + " " + ACCESS_TOKEN;
 
@@ -105,7 +106,7 @@ public class AuthUtils
         authProvider.setTokenUri(tokenUri);
         authProvider.setGrantType(AUTH_GRAND_TYPE);
         authProvider.setScope(Set.of(SCOPE));
-        authProvider.setEnvironmentKey("test-environment-key");
+        authProvider.setEnvironmentKey(ENVIRONMENT_KEY_VALUE);
         return authProvider;
     }
 }

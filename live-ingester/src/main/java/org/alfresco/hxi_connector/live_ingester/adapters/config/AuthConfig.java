@@ -42,6 +42,8 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @EnableConfigurationProperties
 public class AuthConfig
 {
+    public static final String ENVIRONMENT_KEY_HEADER = "hxp-environment";
+
     @Bean
     public AccessTokenProvider defaultAccessTokenProvider(AuthenticationClient liveIngesterAuthClient)
     {
@@ -58,7 +60,6 @@ public class AuthConfig
     @Bean
     public AuthService authService(AuthProperties authProperties, AccessTokenProvider defaultAccessTokenProvider)
     {
-        return new AuthService(authProperties, defaultAccessTokenProvider);
+        return new AuthService(authProperties, defaultAccessTokenProvider, ENVIRONMENT_KEY_HEADER);
     }
-
 }

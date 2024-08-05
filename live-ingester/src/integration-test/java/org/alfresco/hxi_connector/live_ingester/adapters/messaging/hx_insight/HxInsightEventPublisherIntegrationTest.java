@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
@@ -44,7 +45,9 @@ import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.ENVIRONMENT_KEY_VALUE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
+import static org.alfresco.hxi_connector.live_ingester.adapters.config.AuthConfig.ENVIRONMENT_KEY_HEADER;
 
 import java.time.OffsetDateTime;
 import java.util.Collections;
@@ -52,8 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.matching.ContainsPattern;
-import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -141,10 +142,11 @@ class HxInsightEventPublisherIntegrationTest
 
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(INGEST_PATH))
-                .withHeader(AUTHORIZATION, new EqualToPattern(AUTH_HEADER))
+                .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
+                .withHeader(ENVIRONMENT_KEY_HEADER, equalTo(ENVIRONMENT_KEY_VALUE))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
-                .withRequestBody(new ContainsPattern(NODE_ID)));
+                .withRequestBody(containing(NODE_ID)));
         assertThat(thrown).doesNotThrowAnyException();
     }
 
@@ -219,7 +221,7 @@ class HxInsightEventPublisherIntegrationTest
         @Bean
         public AuthService authService()
         {
-            return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
+            return new AuthService(authorizationProperties(), defaultAccessTokenProvider(), ENVIRONMENT_KEY_HEADER);
         }
 
         @Bean
