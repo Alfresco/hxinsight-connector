@@ -32,6 +32,8 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.CONTENT_TYPE;
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.RETRY;
 import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
@@ -53,6 +55,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
@@ -72,15 +75,15 @@ public class HxInsightClient
     private final AuthService authService;
     private final ObjectMapper objectMapper;
     private final HttpClient client;
+    private final ApplicationInfoProvider applicationInfoProvider;
 
     public List<Agent> getAgents()
     {
         try
         {
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(config.getAgentUrl()))
-                    .header("Content-Type", "application/json")
-                    .headers(authService.getAuthHeaders())
+                    .header(CONTENT_TYPE, "application/json")
                     .GET()
                     .build();
 
@@ -102,10 +105,9 @@ public class HxInsightClient
         {
             String body = objectMapper.writeValueAsString(question);
 
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(config.getQuestionUrl()))
-                    .header("Content-Type", "application/json")
-                    .headers(authService.getAuthHeaders())
+                    .header(CONTENT_TYPE, "application/json")
                     .POST(BodyPublishers.ofString(body))
                     .build();
 
@@ -126,9 +128,8 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(format(config.getAnswerUrl(), questionId)))
-                    .headers(authService.getAuthHeaders())
                     .GET()
                     .build();
 
@@ -151,10 +152,9 @@ public class HxInsightClient
         {
             String body = objectMapper.writeValueAsString(feedback);
 
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(format(config.getFeedbackUrl(), questionId)))
-                    .header("Content-Type", "application/json")
-                    .headers(authService.getAuthHeaders())
+                    .header(CONTENT_TYPE, "application/json")
                     .POST(BodyPublishers.ofString(body))
                     .build();
 
@@ -181,9 +181,8 @@ public class HxInsightClient
     {
         try
         {
-            HttpRequest request = HttpRequest.newBuilder()
+            HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(format(config.getAvatarUrl(), agentId)))
-                    .headers(authService.getAuthHeaders())
                     .GET()
                     .build();
 
@@ -200,5 +199,12 @@ public class HxInsightClient
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, format("Failed to get avatar for agent with id %s", agentId), e);
         }
+    }
+
+    private HttpRequest.Builder requestWithRequiredHeaders()
+    {
+        return HttpRequest.newBuilder()
+                .header(USER_AGENT, applicationInfoProvider.getUserAgentData())
+                .headers(authService.getAuthHeaders());
     }
 }
