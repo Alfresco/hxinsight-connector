@@ -44,6 +44,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TEST_ENVIRONMENT_HEADER;
@@ -151,6 +152,7 @@ class PreSignedUrlRequesterIntegrationTest
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
                 .withHeader(HXP_ENVIRONMENT_HEADER, equalTo(TEST_ENVIRONMENT_HEADER))
+                .withHeader(HXP_APP_HEADER, equalTo("hxai-discovery"))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(absent()));
