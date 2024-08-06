@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.adapters.messaging.repository.api;
+package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
 import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
@@ -42,21 +42,25 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiResponse;
+import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 
 @RequiredArgsConstructor
 @Slf4j
-public class DiscoveryApiClient
+public class DiscoveryApiRepositoryInformation implements RepositoryInformation
 {
 
     private final String discoveryEndpoint;
     private final AuthService authService;
     private final ObjectMapper objectMapper;
-    private final HttpClient client = HttpClient.newHttpClient();
+    private final HttpClient client;
 
+    @Override
     public String getRepositoryVersion()
     {
-        log.atDebug().log("Sending repository discovery API request to: {}", discoveryEndpoint);
+        EnsureUtils.ensureNotBlank(discoveryEndpoint, "ACS Discovery API endpoint must not be blank");
+        log.debug("Sending ACS Discovery API request to: {}", discoveryEndpoint);
         try
         {
             return getDiscoverApiResponse().getFullVersion();
@@ -82,7 +86,7 @@ public class DiscoveryApiClient
         throwExceptionOnUnexpectedStatusCode(response.statusCode(), SC_OK);
 
         DiscoveryApiResponse discoveryApiResponse = objectMapper.readValue(response.body(), DiscoveryApiResponse.class);
-        log.atTrace().log("Discovery API response: {}", discoveryApiResponse);
+        log.trace("Discovery API response: {}", discoveryApiResponse);
         return discoveryApiResponse;
     }
 }
