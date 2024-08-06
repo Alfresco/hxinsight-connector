@@ -28,29 +28,30 @@ package org.alfresco.hxi_connector.hxi_extension.service.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
-import java.util.Map;
-
 import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
 class AuthServiceTest
 {
-    private final org.alfresco.hxi_connector.common.adapters.auth.AuthService commonAuthService = mock();
-    private final AuthService authService = new AuthService(commonAuthService);
+    // private final org.alfresco.hxi_connector.common.adapters.auth.AuthService commonAuthService = mock(org.alfresco.hxi_connector.common.adapters.auth.AuthService.class);
+    private final AuthProperties authProperties = mock(AuthProperties.class);
+    private final AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
+    private final AuthService authService = new AuthService(authProperties, accessTokenProvider);
 
     @Test
     void shouldCreateAuthorizationHeader()
     {
         // given
         String token = "Bearer token";
-        given(commonAuthService.getAuthHeaders("hyland-experience")).willReturn(Map.of(AUTHORIZATION, token,
-                HXP_ENVIRONMENT_HEADER, "test-environment", HXP_APP_HEADER, "test-app"));
+        /* given(commonAuthService.getAuthHeaders("hyland-experience")).willReturn(Map.of(AUTHORIZATION, token, HXP_ENVIRONMENT_HEADER, "test-environment", HXP_APP_HEADER, "test-app")); */
 
         // when
         String[] headers = authService.getAuthHeaders();

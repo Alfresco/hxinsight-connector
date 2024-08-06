@@ -26,20 +26,22 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service.util;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
-
 import java.util.stream.Stream;
 
-import lombok.RequiredArgsConstructor;
+import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
-@RequiredArgsConstructor
-public class AuthService
+public class AuthService extends org.alfresco.hxi_connector.common.adapters.auth.AuthService
 {
-    private final org.alfresco.hxi_connector.common.adapters.auth.AuthService authService;
+
+    public AuthService(AuthProperties authProperties, AccessTokenProvider accessTokenProvider)
+    {
+        super(authProperties, accessTokenProvider);
+    }
 
     public String[] getAuthHeaders()
     {
-        return authService.getAuthHeaders(HXI_AUTH_PROVIDER).entrySet().stream()
+        return getAuthHeaders(HXI_AUTH_PROVIDER).entrySet().stream()
                 .flatMap(header -> Stream.of(header.getKey(), header.getValue()))
                 .toArray(String[]::new);
     }
