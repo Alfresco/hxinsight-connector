@@ -26,11 +26,14 @@
 package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static org.apache.hc.core5.http.HttpHeaders.AUTHORIZATION;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
 
@@ -47,6 +50,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
+import org.alfresco.hxi_connector.common.constant.HttpHeaders;
 
 @ExtendWith(MockitoExtension.class)
 class AuthServiceTest
@@ -71,15 +75,15 @@ class AuthServiceTest
     @BeforeEach
     void setUp()
     {
-        when(mockExchange.getIn()).thenReturn(mock());
+        lenient().when(mockExchange.getIn()).thenReturn(mock());
     }
 
     @Test
     void givenValidBearerToken_whenSetAlfrescoAuthorizationHeaders_thenBearerHeaderIsSet()
     {
         // given
-        given(mockAccessTokenProvider.getAccessToken(AuthService.ALFRESCO_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
-        given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthService.ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
+        given(mockAccessTokenProvider.getAccessToken(ALFRESCO_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
+        given(mockAuthProperties.getProviders()).willReturn(Map.of(ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
         given(mockAuthProvider.getType()).willReturn(AuthService.BEARER.trim().toLowerCase(Locale.getDefault()));
 
         // when
@@ -94,7 +98,7 @@ class AuthServiceTest
     void givenBasicAlfrescoAuthProvided_whenSetAlfrescoAuthorizationHeaders_thenBasicHeaderIsSet()
     {
         // given
-        given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthService.ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
+        given(mockAuthProperties.getProviders()).willReturn(Map.of(ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
         given(mockAuthProvider.getType()).willReturn(AuthService.BASIC.trim().toLowerCase(Locale.getDefault()));
         String username = "username";
         given(mockAuthProvider.getUsername()).willReturn(username);
@@ -126,6 +130,41 @@ class AuthServiceTest
         then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
         then(mockExchange.getIn()).should().setHeader(HXP_ENVIRONMENT_HEADER, dummyEnvKey);
         then(mockExchange.getIn()).should().setHeader(HXP_APP_HEADER, "hxai-discovery");
+    }
+
+    @Test
+    void testGetHxIAuthHeaders()
+    {
+        // given
+        given(mockAuthProperties.getProviders()).willReturn(mock());
+        given(mockAuthProperties.getProviders().get("hyland-experience")).willReturn(mock());
+        given(mockAuthProperties.getProviders().get("hyland-experience").getEnvironmentKey()).willReturn("test-environment");
+        given(mockAccessTokenProvider.getAccessToken("hyland-experience")).willReturn("token");
+
+        // when
+        Map<String, String> headers = objectUnderTest.getAuthHeaders(HXI_AUTH_PROVIDER);
+
+        // then
+        assertThat(headers).containsExactlyInAnyOrderEntriesOf(Map.of(HttpHeaders.AUTHORIZATION, "Bearer token",
+                HXP_ENVIRONMENT_HEADER, "test-environment", HXP_APP_HEADER, "hxai-discovery"));
+    }
+
+    @Test
+    void testGetAlfrescoAuthHeaders()
+    {
+        // given
+        given(mockAuthProperties.getProviders()).willReturn(mock());
+        given(mockAuthProperties.getProviders().get("alfresco")).willReturn(mock());
+        given(mockAuthProperties.getProviders().get("alfresco").getType()).willReturn("Basic");
+        given(mockAuthProperties.getProviders().get("alfresco").getUsername()).willReturn("user");
+        given(mockAuthProperties.getProviders().get("alfresco").getPassword()).willReturn("pass");
+
+        // when
+        Map<String, String> headers = objectUnderTest.getAuthHeaders(ALFRESCO_AUTH_PROVIDER);
+
+        // then
+        assertThat(headers).containsExactlyEntriesOf(Map.of(
+                HttpHeaders.AUTHORIZATION, "Basic " + Base64.getEncoder().encodeToString("user:pass".getBytes())));
     }
 
     private static String getEncodedCredentials(String username, String password)

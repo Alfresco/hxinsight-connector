@@ -32,6 +32,7 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.RETRY;
 import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
@@ -46,6 +47,7 @@ import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -53,13 +55,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
-import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 import org.alfresco.rest.framework.resource.content.BinaryResource;
 import org.alfresco.rest.framework.resource.content.FileBinaryResource;
 import org.alfresco.util.TempFileProvider;
@@ -80,7 +82,7 @@ public class HxInsightClient
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(config.getAgentUrl()))
                     .header("Content-Type", "application/json")
-                    .headers(authService.getAuthHeaders())
+                    .headers(getAuthHeaders())
                     .GET()
                     .build();
 
@@ -105,7 +107,7 @@ public class HxInsightClient
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(config.getQuestionUrl()))
                     .header("Content-Type", "application/json")
-                    .headers(authService.getAuthHeaders())
+                    .headers(getAuthHeaders())
                     .POST(BodyPublishers.ofString(body))
                     .build();
 
@@ -128,7 +130,7 @@ public class HxInsightClient
         {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(format(config.getAnswerUrl(), questionId)))
-                    .headers(authService.getAuthHeaders())
+                    .headers(getAuthHeaders())
                     .GET()
                     .build();
 
@@ -154,7 +156,7 @@ public class HxInsightClient
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(format(config.getFeedbackUrl(), questionId)))
                     .header("Content-Type", "application/json")
-                    .headers(authService.getAuthHeaders())
+                    .headers(getAuthHeaders())
                     .POST(BodyPublishers.ofString(body))
                     .build();
 
@@ -183,7 +185,7 @@ public class HxInsightClient
         {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(URI.create(format(config.getAvatarUrl(), agentId)))
-                    .headers(authService.getAuthHeaders())
+                    .headers(getAuthHeaders())
                     .GET()
                     .build();
 
@@ -200,5 +202,12 @@ public class HxInsightClient
         {
             throw new WebScriptException(SC_SERVICE_UNAVAILABLE, format("Failed to get avatar for agent with id %s", agentId), e);
         }
+    }
+
+    private String[] getAuthHeaders()
+    {
+        return authService.getAuthHeaders(HXI_AUTH_PROVIDER).entrySet().stream()
+                .flatMap(header -> Stream.of(header.getKey(), header.getValue()))
+                .toArray(String[]::new);
     }
 }
