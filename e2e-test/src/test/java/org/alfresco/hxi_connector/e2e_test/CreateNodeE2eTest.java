@@ -73,6 +73,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
@@ -92,8 +93,7 @@ public class CreateNodeE2eTest
 {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     protected static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int MAX_ATTEMPTS = 10;
-    private static final int INITIAL_DELAY_MS = 500;
+    private static final int INITIAL_DELAY_MS = 300;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
@@ -122,15 +122,17 @@ public class CreateNodeE2eTest
     private static final LocalStackContainer awsMock = DockerContainers.createLocalStackContainerWithin(network);
     @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, transformCore, transformRouter, sfs);
+            .dependsOn(postgres, activemq, transformRouter, sfs);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, hxInsightMock, repository);
+            .dependsOn(activemq, hxInsightMock, awsMock, repository);
 
     @BeforeAll
     @SneakyThrows
     public void beforeAll()
     {
+        // wait for repo to load transform config
+        transformRouter.waitingFor(Wait.forLogMessage(".*GET Transform Config version:.*", 1));
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
@@ -163,7 +165,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
+        }, INITIAL_DELAY_MS);
     }
 
     @Test
@@ -191,7 +193,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
+        }, INITIAL_DELAY_MS);
     }
 
     @Test
@@ -226,7 +228,7 @@ public class CreateNodeE2eTest
 
             assertTrue(properties.has(DENY_ACCESS_PROPERTY));
             assertEquals(Set.of(), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
-        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
+        }, INITIAL_DELAY_MS);
     }
 
     @SneakyThrows
