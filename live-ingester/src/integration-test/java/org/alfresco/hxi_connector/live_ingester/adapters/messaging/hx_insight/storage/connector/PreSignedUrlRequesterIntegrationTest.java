@@ -168,7 +168,7 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(serverError()));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -183,7 +183,7 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(badRequest()));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(1)).requestStorageLocation();
@@ -200,7 +200,7 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody("")));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -219,7 +219,7 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody("[")));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -240,7 +240,7 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody(hxInsightResponse)));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -257,7 +257,7 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();

@@ -33,6 +33,8 @@ import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.BASIC;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.BEARER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
@@ -84,14 +86,14 @@ class AuthServiceTest
         // given
         given(mockAccessTokenProvider.getAccessToken(ALFRESCO_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
         given(mockAuthProperties.getProviders()).willReturn(Map.of(ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
-        given(mockAuthProvider.getType()).willReturn(AuthService.BEARER.trim().toLowerCase(Locale.getDefault()));
+        given(mockAuthProvider.getType()).willReturn(BEARER.trim().toLowerCase(Locale.getDefault()));
 
         // when
         objectUnderTest.setAlfrescoAuthorizationHeaders(mockExchange);
 
         // then
         thenExpectedAuthHeadersCleared();
-        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
+        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, BEARER + VALID_TOKEN);
     }
 
     @Test
@@ -99,7 +101,7 @@ class AuthServiceTest
     {
         // given
         given(mockAuthProperties.getProviders()).willReturn(Map.of(ALFRESCO_AUTH_PROVIDER, mockAuthProvider));
-        given(mockAuthProvider.getType()).willReturn(AuthService.BASIC.trim().toLowerCase(Locale.getDefault()));
+        given(mockAuthProvider.getType()).willReturn(BASIC.trim().toLowerCase(Locale.getDefault()));
         String username = "username";
         given(mockAuthProvider.getUsername()).willReturn(username);
         String password = "password";
@@ -110,15 +112,15 @@ class AuthServiceTest
 
         // then
         thenExpectedAuthHeadersCleared();
-        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BASIC + getEncodedCredentials(username, password));
+        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, BASIC + getEncodedCredentials(username, password));
     }
 
     @Test
     void givenValidBearerToken_whenSetHxIAuthorizationHeaders_thenHeadersAreSet()
     {
         // given
-        given(mockAccessTokenProvider.getAccessToken(AuthService.HXI_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
-        given(mockAuthProperties.getProviders()).willReturn(Map.of(AuthService.HXI_AUTH_PROVIDER, mockAuthProvider));
+        given(mockAccessTokenProvider.getAccessToken(HXI_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
+        given(mockAuthProperties.getProviders()).willReturn(Map.of(HXI_AUTH_PROVIDER, mockAuthProvider));
         String dummyEnvKey = "dummy-environment";
         given(mockAuthProvider.getEnvironmentKey()).willReturn(dummyEnvKey);
 
@@ -127,7 +129,7 @@ class AuthServiceTest
 
         // then
         thenExpectedAuthHeadersCleared();
-        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, AuthService.BEARER + VALID_TOKEN);
+        then(mockExchange.getIn()).should().setHeader(AUTHORIZATION, BEARER + VALID_TOKEN);
         then(mockExchange.getIn()).should().setHeader(HXP_ENVIRONMENT_HEADER, dummyEnvKey);
         then(mockExchange.getIn()).should().setHeader(HXP_APP_HEADER, "hxai-discovery");
     }
