@@ -54,7 +54,6 @@ services:
         "
     ports:
       - "8000:8000"
-      - "8080:8080"
     healthcheck:
       test: curl --fail http://localhost:8080/alfresco || exit 1
       start_period: 45s
