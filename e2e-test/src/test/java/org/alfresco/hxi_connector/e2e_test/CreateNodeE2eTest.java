@@ -134,7 +134,7 @@ public class CreateNodeE2eTest
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         // wait for repo to load transform config
-        RetryUtils.retryWithBackoff(() -> assertThat(transformRouter.getLogs()).contains("GET Transform Config version"), 1000);
+        RetryUtils.retryWithBackoff(() -> assertThat(transformRouter.getLogs()).contains("GET Transform Config version"), 500);
     }
 
     @AfterEach
