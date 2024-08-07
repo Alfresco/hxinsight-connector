@@ -64,7 +64,6 @@ import org.apache.pdfbox.Loader;
 import org.apache.pdfbox.io.RandomAccessReadBuffer;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -142,12 +141,6 @@ public class CreateNodeE2eTest
     void tearDown()
     {
         WireMock.reset();
-    }
-
-    @AfterAll
-    static void afterAll()
-    {
-        repository.getBaseUrl();
     }
 
     @Test
