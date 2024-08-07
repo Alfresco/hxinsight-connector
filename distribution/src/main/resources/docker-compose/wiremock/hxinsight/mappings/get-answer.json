@@ -1,0 +1,10 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPath": "/questions/5fca2c77-cdc0-4118-9373-e75f53177ff8/answer"
+  },
+  "response": {
+    "status": 200,
+    "bodyFileName": "answer.json"
+  }
+}
