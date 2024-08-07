@@ -73,7 +73,6 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
@@ -130,12 +129,12 @@ public class CreateNodeE2eTest
     @BeforeAll
     public void beforeAll() throws IOException, InterruptedException
     {
-        // wait for repo to load transform config
-        transformRouter.waitingFor(Wait.forLogMessage(".*GET Transform Config version.*", 1));
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+        // wait for repo to load transform config
+        RetryUtils.retryWithBackoff(() -> assertThat(transformRouter.getLogs()).contains("GET Transform Config version"), 500);
     }
 
     @AfterEach
