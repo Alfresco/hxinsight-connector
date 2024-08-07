@@ -68,6 +68,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class DeleteNodeE2eTest
 {
+    private static final int DELAY_MS = 300;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
@@ -104,17 +105,18 @@ public class DeleteNodeE2eTest
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
+                .withRequestBody(containing(createdNode.id()))), DELAY_MS);
+        WireMock.reset();
 
         // when
         repositoryClient.deleteNode(createdNode.id());
 
         // then
-        RetryUtils.retryWithBackoff(() -> verify(exactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-        verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(matching(".*\"objectId\":\"" + createdNode.id() + "\",\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\",\"eventType\":\"delete\".*"))
-                .withHeader(USER_AGENT, matching(getAppInfoRegex())));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing("\"objectId\":\"%s\"".formatted(createdNode.id())))
+                .withRequestBody(containing("\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\""))
+                .withRequestBody(containing("\"eventType\":\"delete\""))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))), DELAY_MS);
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
