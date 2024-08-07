@@ -104,7 +104,7 @@ public class DeleteNodeE2eTest
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))), 500);
+                .withRequestBody(containing(createdNode.id()))));
 
         // when
         repositoryClient.deleteNode(createdNode.id());
