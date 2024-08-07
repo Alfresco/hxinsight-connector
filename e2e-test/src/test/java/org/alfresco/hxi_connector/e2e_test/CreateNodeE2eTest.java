@@ -99,9 +99,6 @@ public class CreateNodeE2eTest
     private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
     private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
 
-    protected RepositoryClient repositoryClient;
-    protected AwsS3Client awsS3Client;
-
     private static final Network network = Network.newNetwork();
     @Container
     private static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -127,12 +124,14 @@ public class CreateNodeE2eTest
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
             .dependsOn(activemq, hxInsightMock, awsMock, repository);
 
+    private RepositoryClient repositoryClient;
+    private AwsS3Client awsS3Client;
+
     @BeforeAll
-    @SneakyThrows
-    public void beforeAll()
+    public void beforeAll() throws IOException, InterruptedException
     {
         // wait for repo to load transform config
-        transformRouter.waitingFor(Wait.forLogMessage(".*GET Transform Config version:.*", 1));
+        transformRouter.waitingFor(Wait.forLogMessage(".*GET Transform Config version.*", 1));
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
