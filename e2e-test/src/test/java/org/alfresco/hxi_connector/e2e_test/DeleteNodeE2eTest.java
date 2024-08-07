@@ -46,6 +46,7 @@ import lombok.Cleanup;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -61,32 +62,34 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SuppressWarnings("PMD.FieldNamingConventions")
-
 public class DeleteNodeE2eTest
 {
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
-    static final Network network = Network.newNetwork();
+    private static final Network network = Network.newNetwork();
     @Container
-    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
+    private static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
     @Container
-    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
+    private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
+    private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
     @Container
-    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer().dependsOn(activemq, hxInsightMock, repository);
+    private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
+            .dependsOn(activemq, hxInsightMock, repository);
 
-    RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
+    private RepositoryClient repositoryClient;
 
     @BeforeAll
-    public static void beforeAll()
+    public void beforeAll()
     {
+        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
     }
 
@@ -113,10 +116,8 @@ public class DeleteNodeE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
                 .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
-        // @formatter:on
     }
 
     @SneakyThrows
