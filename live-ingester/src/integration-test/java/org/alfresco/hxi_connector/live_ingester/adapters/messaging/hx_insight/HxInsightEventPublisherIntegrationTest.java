@@ -43,8 +43,8 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TEST_ENVIRONMENT_HEADER;
@@ -197,7 +197,7 @@ class HxInsightEventPublisherIntegrationTest
         {
             AuthProperties authProperties = new AuthProperties();
             AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider(wireMockServer.getBaseUrl());
-            authProperties.setProviders(Map.of(HXI_AUTH_PROVIDER, hXauthProvider));
+            authProperties.setProviders(Map.of(HXP_AUTH_PROVIDER, hXauthProvider));
             authProperties.setRetry(
                     new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
                             Collections.emptySet()));
@@ -211,7 +211,7 @@ class HxInsightEventPublisherIntegrationTest
             DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(dummyAuthClient);
             Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();
             AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
-            tokens.put(HXI_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.getAccessToken(), OffsetDateTime.now().plusSeconds(3600)));
+            tokens.put(HXP_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.getAccessToken(), OffsetDateTime.now().plusSeconds(3600)));
             ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
             return dummyAccessTokenProvider;
         }

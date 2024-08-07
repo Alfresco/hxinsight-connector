@@ -31,6 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
 import java.io.IOException;
@@ -69,7 +70,7 @@ class DiscoveryApiRepositoryInformationTest
             throws IOException, InterruptedException
     {
         // given
-        given(authServiceMock.getAuthHeader(AuthService.ALFRESCO_AUTH_PROVIDER)).willReturn(Map.entry(AUTHORIZATION, BEARER_TOKEN));
+        given(authServiceMock.getAuthHeader(ALFRESCO_AUTH_PROVIDER)).willReturn(Map.entry(AUTHORIZATION, BEARER_TOKEN));
         given(httpClientMock.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).willReturn(httpResponseMock);
         given(httpResponseMock.statusCode()).willReturn(SC_OK);
         given(httpResponseMock.body()).willReturn("""
@@ -107,7 +108,7 @@ class DiscoveryApiRepositoryInformationTest
             throws IOException, InterruptedException
     {
         // given
-        given(authServiceMock.getAuthHeader(AuthService.ALFRESCO_AUTH_PROVIDER)).willReturn(Map.entry(AUTHORIZATION, BEARER_TOKEN));
+        given(authServiceMock.getAuthHeader(ALFRESCO_AUTH_PROVIDER)).willReturn(Map.entry(AUTHORIZATION, BEARER_TOKEN));
         given(httpClientMock.send(any(HttpRequest.class), any(HttpResponse.BodyHandler.class))).willThrow(new IOException());
         DiscoveryApiRepositoryInformation objectUnderTest = new DiscoveryApiRepositoryInformation(DISCOVERY_ENDPOINT, authServiceMock, objectMapper, httpClientMock);
 

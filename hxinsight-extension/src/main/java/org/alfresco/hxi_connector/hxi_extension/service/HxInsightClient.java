@@ -32,7 +32,6 @@ import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.CONTENT_TYPE;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.RETRY;
@@ -212,7 +211,7 @@ public class HxInsightClient
 
     private String[] getAuthHeaders()
     {
-        return authService.getAuthHeaders(HXI_AUTH_PROVIDER).entrySet().stream()
+        return authService.getHxpAuthHeaders().entrySet().stream()
                 .flatMap(header -> Stream.of(header.getKey(), header.getValue()))
                 .toArray(String[]::new);
     }

@@ -38,7 +38,6 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.GOOD;
 
@@ -97,7 +96,7 @@ class HxInsightClientTest
     {
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-        given(authService.getAuthHeaders(HXI_AUTH_PROVIDER)).willReturn(Map.of("Authorization", "Bearer token"));
+        given(authService.getHxpAuthHeaders()).willReturn(Map.of("Authorization", "Bearer token"));
         given(applicationInfoProvider.getUserAgentData()).willReturn(USER_AGENT_HEADER);
         requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
     }

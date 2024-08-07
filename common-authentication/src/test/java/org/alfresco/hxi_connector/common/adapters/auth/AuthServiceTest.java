@@ -35,8 +35,8 @@ import static org.mockito.Mockito.mock;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.BASIC;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.BEARER;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
 
 import java.util.Base64;
@@ -119,8 +119,8 @@ class AuthServiceTest
     void givenValidBearerToken_whenSetHxIAuthorizationHeaders_thenHeadersAreSet()
     {
         // given
-        given(mockAccessTokenProvider.getAccessToken(HXI_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
-        given(mockAuthProperties.getProviders()).willReturn(Map.of(HXI_AUTH_PROVIDER, mockAuthProvider));
+        given(mockAccessTokenProvider.getAccessToken(HXP_AUTH_PROVIDER)).willReturn(VALID_TOKEN);
+        given(mockAuthProperties.getProviders()).willReturn(Map.of(HXP_AUTH_PROVIDER, mockAuthProvider));
         String dummyEnvKey = "dummy-environment";
         given(mockAuthProvider.getEnvironmentKey()).willReturn(dummyEnvKey);
 
@@ -144,7 +144,7 @@ class AuthServiceTest
         given(mockAccessTokenProvider.getAccessToken("hyland-experience")).willReturn("token");
 
         // when
-        Map<String, String> headers = objectUnderTest.getAuthHeaders(HXI_AUTH_PROVIDER);
+        Map<String, String> headers = objectUnderTest.getHxpAuthHeaders();
 
         // then
         assertThat(headers).containsExactlyInAnyOrderEntriesOf(Map.of(HttpHeaders.AUTHORIZATION, "Bearer token",
@@ -162,7 +162,7 @@ class AuthServiceTest
         given(mockAuthProperties.getProviders().get("alfresco").getPassword()).willReturn("pass");
 
         // when
-        Map<String, String> headers = objectUnderTest.getAuthHeaders(ALFRESCO_AUTH_PROVIDER);
+        Map<String, String> headers = objectUnderTest.getAlfrescoAuthHeaders();
 
         // then
         assertThat(headers).containsExactlyEntriesOf(Map.of(
