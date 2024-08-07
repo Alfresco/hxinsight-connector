@@ -41,9 +41,9 @@ public final class HxInsightClientConfig
 
     public HxInsightClientConfig(@NotBlank String baseUrl)
     {
-        this.agentUrl = baseUrl + "/agents";
-        this.questionUrl = baseUrl + "/submit-question";
-        this.answerUrl = baseUrl + "/questions/%s/answer";
+        this.agentUrl = baseUrl + "/integrations/agents";
+        this.questionUrl = baseUrl + "/integrations/submit-question";
+        this.answerUrl = baseUrl + "/integrations/questions/%s/answer";
         this.feedbackUrl = answerUrl + "/feedback";
         this.avatarUrl = agentUrl + "/%s/avatar";
     }

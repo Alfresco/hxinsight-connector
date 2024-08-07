@@ -3,7 +3,7 @@
   "requiredScenarioState": "Next-question",
   "request": {
     "method": "POST",
-    "urlPath": "/submit-question"
+    "urlPath": "/integrations/submit-question"
   },
   "response": {
     "status": 202,
