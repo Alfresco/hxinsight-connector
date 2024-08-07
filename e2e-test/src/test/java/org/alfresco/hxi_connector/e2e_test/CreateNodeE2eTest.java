@@ -93,15 +93,11 @@ public class CreateNodeE2eTest
 {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     protected static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int MAX_ATTEMPTS = 10;
-    private static final int INITIAL_DELAY_MS = 500;
+    private static final int INITIAL_DELAY_MS = 300;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
     private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
-
-    protected RepositoryClient repositoryClient;
-    protected AwsS3Client awsS3Client;
 
     private static final Network network = Network.newNetwork();
     @Container
@@ -123,19 +119,23 @@ public class CreateNodeE2eTest
     private static final LocalStackContainer awsMock = DockerContainers.createLocalStackContainerWithin(network);
     @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, transformCore, transformRouter, sfs);
+            .dependsOn(postgres, activemq, transformRouter, sfs);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, hxInsightMock, repository);
+            .dependsOn(activemq, hxInsightMock, awsMock, repository);
+
+    private RepositoryClient repositoryClient;
+    private AwsS3Client awsS3Client;
 
     @BeforeAll
-    @SneakyThrows
-    public void beforeAll()
+    public void beforeAll() throws IOException, InterruptedException
     {
         awsMock.execInContainer("awslocal", "s3api", "create-bucket", "--bucket", BUCKET_NAME);
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+        // wait for repo to load transform config
+        RetryUtils.retryWithBackoff(() -> assertThat(transformRouter.getLogs()).contains("GET Transform Config version"), 700);
     }
 
     @AfterEach
@@ -170,7 +170,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
+        }, INITIAL_DELAY_MS);
     }
 
     @Test
@@ -198,7 +198,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
+        }, INITIAL_DELAY_MS);
     }
 
     @Test
@@ -233,7 +233,7 @@ public class CreateNodeE2eTest
 
             assertTrue(properties.has(DENY_ACCESS_PROPERTY));
             assertEquals(Set.of(), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
-        }, MAX_ATTEMPTS, INITIAL_DELAY_MS);
+        }, INITIAL_DELAY_MS);
     }
 
     @SneakyThrows
