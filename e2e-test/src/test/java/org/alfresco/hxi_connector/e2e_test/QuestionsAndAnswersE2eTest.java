@@ -207,7 +207,7 @@ public class QuestionsAndAnswersE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/answers".formatted(questionId))
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -227,7 +227,7 @@ public class QuestionsAndAnswersE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/answers".formatted(questionId))
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -253,7 +253,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/feedback".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -282,7 +282,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/feedback".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -301,7 +301,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/feedback".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -330,7 +330,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/feedback".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -360,7 +360,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(retry)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/retry".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/retry".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -396,7 +396,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(retry)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/questions/%s/retry".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/retry".formatted(questionId))
                 .then().extract().response();
 
         // then

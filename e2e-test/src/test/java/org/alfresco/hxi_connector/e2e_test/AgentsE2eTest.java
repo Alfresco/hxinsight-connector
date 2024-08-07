@@ -93,7 +93,7 @@ public class AgentsE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/integrations/agents")
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents")
                 .then().extract().response();
 
         // then
@@ -111,7 +111,7 @@ public class AgentsE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("image/png")
-                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/integrations/agents/%s/avatars/%s", AGENT_ID, AVATAR_DEFAULT_ID))
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", AGENT_ID, AVATAR_DEFAULT_ID))
                 .then().extract().response();
 
         // then
@@ -129,7 +129,7 @@ public class AgentsE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("image/png")
-                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/integrations/agents/%s/avatars/%s", AGENT_ID, avatarId))
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", AGENT_ID, avatarId))
                 .then().extract().response();
 
         // then
@@ -146,7 +146,7 @@ public class AgentsE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("image/png")
-                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/integrations/agents/%s/avatars/%s", nonExistentAgentId, AVATAR_DEFAULT_ID))
+                .when().get(repository.getBaseUrl() + format("/alfresco/api/-default-/private/hxi/versions/1/agents/%s/avatars/%s", nonExistentAgentId, AVATAR_DEFAULT_ID))
                 .then().extract().response();
 
         // then
