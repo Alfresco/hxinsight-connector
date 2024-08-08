@@ -25,9 +25,16 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
+import static java.util.Objects.nonNull;
+import static java.util.Optional.ofNullable;
+
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
+import java.util.AbstractMap;
 import java.util.Base64;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,36 +46,67 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @RequiredArgsConstructor
 public class AuthService
 {
-    static final String ENVIRONMENT_KEY_HEADER = "hxp-environment";
-    public static final String HXI_AUTH_PROVIDER = "hyland-experience";
+    public static final String HXP_ENVIRONMENT_HEADER = "Hxp-Environment";
+    public static final String HXP_APP_HEADER = "Hxp-App";
+    private static final String HXP_APP_VALUE = "hxai-discovery";
+    public static final String HXP_AUTH_PROVIDER = "hyland-experience";
     public static final String ALFRESCO_AUTH_PROVIDER = "alfresco";
     static final String BASIC = "Basic ";
     static final String BEARER = "Bearer ";
+
     private final AuthProperties authProperties;
     private final AccessTokenProvider accessTokenProvider;
 
     public void setAlfrescoAuthorizationHeaders(Exchange exchange)
     {
-        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
-        String authType = authProvider.getType();
+        String authType = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER).getType();
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(AUTHORIZATION, getAlfrescoAuthHeader(authProvider));
+        getAlfrescoAuthHeaders().forEach((key, value) -> exchange.getIn().setHeader(key, value));
         log.debug("Authorization :: {} {} authorization header added", ALFRESCO_AUTH_PROVIDER, authType);
     }
 
     public void setHxIAuthorizationHeaders(Exchange exchange)
     {
-        AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(HXI_AUTH_PROVIDER);
         clearAuthHeaders(exchange);
-        exchange.getIn().setHeader(AUTHORIZATION, getBearerAuthHeader(HXI_AUTH_PROVIDER));
-        exchange.getIn().setHeader(ENVIRONMENT_KEY_HEADER, authProvider.getEnvironmentKey());
-        log.debug("Authorization :: {} authorization header added", HXI_AUTH_PROVIDER);
+        getHxpAuthHeaders().forEach((key, value) -> exchange.getIn().setHeader(key, value));
+        log.debug("Authorization :: {} authorization header added", HXP_AUTH_PROVIDER);
     }
 
-    public String getAuthHeader(String providerId)
+    public Map<String, String> getHxpAuthHeaders()
+    {
+        return Stream.of(getAuthHeader(HXP_AUTH_PROVIDER), getHxpEnvironmentHeader(), getHxpAppHeader())
+                .filter(entry -> nonNull(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public Map<String, String> getAlfrescoAuthHeaders()
+    {
+        return Map.ofEntries(getAuthHeader(ALFRESCO_AUTH_PROVIDER));
+    }
+
+    public Map.Entry<String, String> getAuthHeader(String providerId)
+    {
+        return Map.entry(AUTHORIZATION, getAuthHeaderValue(providerId));
+    }
+
+    protected Map.Entry<String, String> getHxpEnvironmentHeader()
+    {
+        return new AbstractMap.SimpleEntry<>(
+                HXP_ENVIRONMENT_HEADER,
+                ofNullable(authProperties.getProviders().get(HXP_AUTH_PROVIDER))
+                        .map(AuthProperties.AuthProvider::getEnvironmentKey)
+                        .orElse(null));
+    }
+
+    protected Map.Entry<String, String> getHxpAppHeader()
+    {
+        return Map.entry(HXP_APP_HEADER, HXP_APP_VALUE);
+    }
+
+    private String getAuthHeaderValue(String providerId)
     {
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(ALFRESCO_AUTH_PROVIDER);
-        return providerId.equals(HXI_AUTH_PROVIDER) ? getBearerAuthHeader(HXI_AUTH_PROVIDER) : getAlfrescoAuthHeader(authProvider);
+        return providerId.equals(HXP_AUTH_PROVIDER) ? getBearerAuthHeader(HXP_AUTH_PROVIDER) : getAlfrescoAuthHeader(authProvider);
     }
 
     private String getAlfrescoAuthHeader(AuthProperties.AuthProvider authProvider)
@@ -88,15 +126,16 @@ public class AuthService
         return BEARER + accessTokenProvider.getAccessToken(providerId);
     }
 
+    private void clearAuthHeaders(Exchange exchange)
+    {
+        exchange.getIn().removeHeader(AUTHORIZATION);
+        exchange.getIn().removeHeader(getHxpEnvironmentHeader().getKey());
+        exchange.getIn().removeHeader(getHxpAppHeader().getKey());
+    }
+
     private static String getBasicAuthHeader(AuthProperties.AuthProvider authProvider)
     {
         String valueToEncode = authProvider.getUsername() + ":" + authProvider.getPassword();
         return Base64.getEncoder().encodeToString(valueToEncode.getBytes());
-    }
-
-    private static void clearAuthHeaders(Exchange exchange)
-    {
-        exchange.getIn().removeHeader(AUTHORIZATION);
-        exchange.getIn().removeHeader(ENVIRONMENT_KEY_HEADER);
     }
 }

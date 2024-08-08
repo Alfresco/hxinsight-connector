@@ -135,7 +135,8 @@
         <constructor-arg name="authenticationClient" ref="hxInsightAuthClient"/>
     </bean>
 
-    <bean id="hxInsightAuthService" class="org.alfresco.hxi_connector.hxi_extension.service.util.AuthService">
+    <bean id="hxInsightAuthService" class="org.alfresco.hxi_connector.common.adapters.auth.AuthService">
+        <constructor-arg name="authProperties" ref="hxInsightAuthProperties"/>
         <constructor-arg name="accessTokenProvider" ref="hxInsightAccessTokenProvider"/>
     </bean>
 

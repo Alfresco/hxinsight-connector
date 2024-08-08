@@ -46,6 +46,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -60,6 +61,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.springframework.extensions.webscripts.WebScriptException;
 
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
@@ -67,7 +69,6 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.ObjectReference;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
-import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
 
 @SuppressWarnings("PMD.FieldNamingConventions")
 class HxInsightClientTest
@@ -95,7 +96,7 @@ class HxInsightClientTest
     {
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
 
-        given(authService.getAuthHeaders()).willReturn(new String[]{"Authorization", "Bearer token"});
+        given(authService.getHxpAuthHeaders()).willReturn(Map.of("Authorization", "Bearer token"));
         given(applicationInfoProvider.getUserAgentData()).willReturn(USER_AGENT_HEADER);
         requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
     }

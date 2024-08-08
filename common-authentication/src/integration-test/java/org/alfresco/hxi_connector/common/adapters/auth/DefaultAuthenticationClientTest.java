@@ -43,7 +43,7 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
@@ -91,10 +91,10 @@ public abstract class DefaultAuthenticationClientTest
                         .withBody(AuthUtils.createAuthResponseBody())));
 
         // when
-        AuthenticationResult authenticationResult = authenticationClient.authenticate(HXI_AUTH_PROVIDER);
+        AuthenticationResult authenticationResult = authenticationClient.authenticate(HXP_AUTH_PROVIDER);
 
         // then
-        then(authenticationClient).should().authenticate(HXI_AUTH_PROVIDER);
+        then(authenticationClient).should().authenticate(HXP_AUTH_PROVIDER);
         String authRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthMock.getHost() + ":" + hxAuthMock.getPort()))
@@ -113,10 +113,10 @@ public abstract class DefaultAuthenticationClientTest
                 .willReturn(serverError()));
 
         // when
-        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXI_AUTH_PROVIDER));
+        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXP_AUTH_PROVIDER));
 
         // then
-        then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(HXI_AUTH_PROVIDER);
+        then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(HXP_AUTH_PROVIDER);
         assertThat(thrown).isInstanceOf(EndpointServerErrorException.class);
     }
 
@@ -128,10 +128,10 @@ public abstract class DefaultAuthenticationClientTest
                 .willReturn(badRequest()));
 
         // when
-        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXI_AUTH_PROVIDER));
+        Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXP_AUTH_PROVIDER));
 
         // then
-        then(authenticationClient).should(times(1)).authenticate(HXI_AUTH_PROVIDER);
+        then(authenticationClient).should(times(1)).authenticate(HXP_AUTH_PROVIDER);
         assertThat(thrown).isInstanceOf(EndpointClientErrorException.class);
     }
 }

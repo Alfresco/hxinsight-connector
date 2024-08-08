@@ -47,10 +47,12 @@ import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
@@ -66,6 +68,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class DeleteNodeE2eTest
 {
+    private static final int DELAY_MS = 300;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
@@ -76,7 +79,8 @@ public class DeleteNodeE2eTest
     private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
-            .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
+            .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY)
+            .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("WireMockContainer")));
     @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
@@ -101,17 +105,18 @@ public class DeleteNodeE2eTest
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
+                .withRequestBody(containing(createdNode.id()))), DELAY_MS);
+        WireMock.reset();
 
         // when
         repositoryClient.deleteNode(createdNode.id());
 
         // then
-        RetryUtils.retryWithBackoff(() -> verify(exactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))));
-        verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(matching(".*\"objectId\":\"" + createdNode.id() + "\",\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\",\"eventType\":\"delete\".*"))
-                .withHeader(USER_AGENT, matching(getAppInfoRegex())));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing("\"objectId\":\"%s\"".formatted(createdNode.id())))
+                .withRequestBody(containing("\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\""))
+                .withRequestBody(containing("\"eventType\":\"delete\""))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))), DELAY_MS);
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
