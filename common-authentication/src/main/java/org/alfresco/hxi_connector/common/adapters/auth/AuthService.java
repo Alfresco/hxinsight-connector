@@ -25,12 +25,9 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
-import static java.util.Optional.ofNullable;
-
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
+import java.util.AbstractMap;
 import java.util.Base64;
 import java.util.Map;
 
@@ -87,9 +84,7 @@ public class AuthService
 
     protected Map.Entry<String, String> getHxpEnvironmentHeader()
     {
-        return Map.entry(HXP_ENVIRONMENT_HEADER, ofNullable(authProperties.getProviders().get(HXP_AUTH_PROVIDER))
-                .map(AuthProperties.AuthProvider::getEnvironmentKey)
-                .orElse(EMPTY));
+        return new AbstractMap.SimpleEntry<>(HXP_ENVIRONMENT_HEADER, authProperties.getProviders().get(HXP_AUTH_PROVIDER).getEnvironmentKey());
     }
 
     protected Map.Entry<String, String> getHxpAppHeader()
