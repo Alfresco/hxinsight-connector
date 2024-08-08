@@ -120,8 +120,8 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when
-        String actualQuestionId = hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES));
+        String actualQuestionId = hxInsightClient.askQuestion(AGENT_ID,
+                new Question("Who won last year's Super Bowl?", OBJECT_REFERENCES));
 
         // then
         assertEquals(expectedQuestionId, actualQuestionId);
@@ -143,7 +143,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES)));
+                AGENT_ID, new Question("Who won last year's Super Bowl?", OBJECT_REFERENCES)));
         assertEquals(expectedStatusCode, exception.getStatus());
         then(httpClient).should().send(requestCaptor.capture(), any());
         assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
@@ -158,7 +158,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                new Question("Who won last year's Super Bowl?", AGENT_ID, OBJECT_REFERENCES)));
+                AGENT_ID, new Question("Who won last year's Super Bowl?", OBJECT_REFERENCES)));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
     }
 
@@ -364,12 +364,12 @@ class HxInsightClientTest
                     "questionId": "dummy-id-5678"
                 }
                 """);
-        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/integrations/submit-question");
+        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/integrations/agents/agent-id/questions");
         given(httpClient.send(ArgumentMatchers.argThat(questionMatcher), any())).willReturn(questionResponse);
 
         // when
-        Question question = new Question("Create a sonnet about the Super Bowl", AGENT_ID, OBJECT_REFERENCES);
-        String newQuestionId = hxInsightClient.retryQuestion(questionId, "The fourth line was not quite in iambic pentameter", question);
+        Question question = new Question("Create a sonnet about the Super Bowl", OBJECT_REFERENCES);
+        String newQuestionId = hxInsightClient.retryQuestion(AGENT_ID, questionId, "The fourth line was not quite in iambic pentameter", question);
 
         // then
         assertEquals("dummy-id-5678", newQuestionId);
