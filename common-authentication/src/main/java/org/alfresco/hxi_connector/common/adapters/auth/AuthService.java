@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.common.adapters.auth;
 
+import static java.util.Objects.nonNull;
 import static java.util.Optional.ofNullable;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
@@ -32,6 +33,8 @@ import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATI
 import java.util.AbstractMap;
 import java.util.Base64;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -71,7 +74,9 @@ public class AuthService
 
     public Map<String, String> getHxpAuthHeaders()
     {
-        return Map.ofEntries(getAuthHeader(HXP_AUTH_PROVIDER), getHxpEnvironmentHeader(), getHxpAppHeader());
+        return Stream.of(getAuthHeader(HXP_AUTH_PROVIDER), getHxpEnvironmentHeader(), getHxpAppHeader())
+                .filter(entry -> nonNull(entry.getValue()))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
     public Map<String, String> getAlfrescoAuthHeaders()
