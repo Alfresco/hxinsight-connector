@@ -86,7 +86,12 @@ public class AuthService
 
     protected Map.Entry<String, String> getHxpEnvironmentHeader()
     {
-        return new AbstractMap.SimpleEntry<>(HXP_ENVIRONMENT_HEADER, ofNullable(authProperties.getProviders().get(HXP_AUTH_PROVIDER))
+        return new AbstractMap.SimpleEntry<>(
+            HXP_ENVIRONMENT_HEADER,
+            ofNullable(authProperties.getProviders().get(HXP_AUTH_PROVIDER))
+                .map(AuthProperties.AuthProvider::getEnvironmentKey)
+                .orElse(null)
+        );
                 .map(AuthProperties.AuthProvider::getEnvironmentKey)
                 .orElse(null));
     }
