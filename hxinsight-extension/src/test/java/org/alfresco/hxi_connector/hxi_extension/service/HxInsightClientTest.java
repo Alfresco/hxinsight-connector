@@ -50,7 +50,6 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.alfresco.repo.cache.SimpleCache;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,6 +65,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.ObjectReference;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
+import org.alfresco.repo.cache.SimpleCache;
 import org.alfresco.rest.framework.resource.content.BinaryResource;
 
 @SuppressWarnings("PMD.FieldNamingConventions")
