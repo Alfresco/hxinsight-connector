@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,36 +23,45 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
-package org.alfresco.hxi_connector.hxi_extension.service.util;
+package org.alfresco.hxi_connector.hxi_extension.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
+import org.alfresco.service.descriptor.Descriptor;
+import org.alfresco.service.descriptor.DescriptorService;
 
-class AuthServiceTest
+@ExtendWith(MockitoExtension.class)
+class AcsRepositoryInformationTest
 {
 
-    private final AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
-    private final AuthService authService = new AuthService(accessTokenProvider);
+    @Mock
+    private DescriptorService descriptorServiceMock;
+
+    @InjectMocks
+    private AcsRepositoryInformation objectUnderTest;
 
     @Test
-    void shouldCreateAuthorizationHeader()
+    void testGetRepositoryVersion()
     {
         // given
-        String token = "token";
-
-        given(accessTokenProvider.getAccessToken("hyland-experience")).willReturn(token);
+        given(descriptorServiceMock.getServerDescriptor()).willReturn(mock(Descriptor.class));
+        given(descriptorServiceMock.getServerDescriptor().getVersionMajor()).willReturn("23");
+        given(descriptorServiceMock.getServerDescriptor().getVersionMinor()).willReturn("2");
+        given(descriptorServiceMock.getServerDescriptor().getVersionRevision()).willReturn("2");
 
         // when
-        String[] headers = authService.getAuthHeaders();
+        String result = objectUnderTest.getRepositoryVersion();
 
         // then
-        assertEquals("Authorization", headers[0]);
-        assertEquals("Bearer " + token, headers[1]);
+        assertEquals("23.2.2", result);
     }
+
 }

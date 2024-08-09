@@ -25,13 +25,10 @@
  */
 package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
-import java.util.Optional;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
-import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 
 @Slf4j
@@ -42,9 +39,8 @@ public class ApplicationInfoProvider
     public static final String APP_INFO_PATTERN = "ACS HXI Connector/%s ACS/%s (%s)";
     public static final String USER_AGENT_DATA = "user-agent-data";
     public static final String USER_AGENT_PARAM = String.format("&userAgent=${exchangeProperty.%s}", USER_AGENT_DATA);
-    private final DiscoveryApiClient discoveryApiClient;
+    private final RepositoryInformation repositoryInformation;
     private final Application applicationProperties;
-    private final Optional<String> versionOverride;
 
     private String applicationInfo;
 
@@ -62,23 +58,8 @@ public class ApplicationInfoProvider
     private String calculateUserAgentData()
     {
         String applicationVersion = applicationProperties.getVersion();
-        String repositoryVersion = versionOverride
-                .orElseGet(() -> getRepositoryVersion()
-                        .orElseThrow(() -> new IllegalStateException("The repository version cannot be retrieved from either the Discovery API or the Live Ingester configuration.")));
+        String repositoryVersion = repositoryInformation.getRepositoryVersion();
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return String.format(APP_INFO_PATTERN, applicationVersion, repositoryVersion, osVersion);
-    }
-
-    private Optional<String> getRepositoryVersion()
-    {
-        try
-        {
-            return Optional.ofNullable(discoveryApiClient.getRepositoryVersion());
-        }
-        catch (Exception e)
-        {
-            log.debug("Failed to get repository version from the Discovery API.", e);
-            return Optional.empty();
-        }
     }
 }

@@ -52,6 +52,7 @@ import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
@@ -62,10 +63,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.Cleanup;
-import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -81,9 +82,11 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class UpdateNodeE2eTest
 {
+    private static final int DELAY_MS = 800;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String PREDICTION_APPLIED_ASPECT = "hxi:predictionApplied";
@@ -118,24 +121,23 @@ public class UpdateNodeE2eTest
                 }
             }
             """;
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
     private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
     private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
     public static final String GROUP_EVERYONE = "GROUP_EVERYONE";
     public static final String ALICE = "abeecher";
     public static final String MIKE = "mjackson";
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
-    static final Network network = Network.newNetwork();
+    private static final Network network = Network.newNetwork();
     @Container
-    static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
+    private static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
     @Container
-    static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
+    private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
-    static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
+    private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
@@ -144,24 +146,24 @@ public class UpdateNodeE2eTest
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock, repository, liveIngester);
 
-    RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
-    Node createdNode;
+    private RepositoryClient repositoryClient;
+    private Node createdNode;
 
     @BeforeAll
-    public static void beforeAll()
+    public void beforeAll()
     {
+        repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
     }
 
     @BeforeEach
-    @SneakyThrows
-    public void setUp()
+    public void setUp() throws IOException
     {
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
         RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
-                .withRequestBody(containing(createdNode.id()))), 500);
+                .withRequestBody(containing(createdNode.id()))), DELAY_MS);
         WireMock.reset();
     }
 
@@ -184,7 +186,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
-        }, 500);
+        }, DELAY_MS);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
@@ -220,7 +222,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
-        }, 500);
+        }, DELAY_MS);
         verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 

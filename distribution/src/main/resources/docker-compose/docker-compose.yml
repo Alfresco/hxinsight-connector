@@ -22,13 +22,13 @@ services:
         -Dmetadata-keystore.metadata.algorithm=DESede
         "
       JAVA_OPTS: "
-        -Delasticsearch.createIndexIfNotExists=true
         -Ddb.driver=org.postgresql.Driver
         -Ddb.username=alfresco
         -Ddb.password=alfresco
         -Ddb.url=jdbc:postgresql://postgres:5432/alfresco
         -Dindex.subsystem.name=elasticsearch
         -Delasticsearch.host=elasticsearch
+        -Delasticsearch.createIndexIfNotExists=true
         -Delasticsearch.indexName=alfresco
         -Dshare.host=localhost
         -Dshare.port=8080
@@ -351,6 +351,8 @@ services:
       AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
       HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL: http://hxinsight-mock:8080
       ALFRESCO_REPOSITORY_BASE-URL: http://alfresco:8080
+      ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
+      APPLICATION_SOURCE-ID: alfresco-dummy-source-id-0a63de491876
     ports:
       - "5009:5009"
 

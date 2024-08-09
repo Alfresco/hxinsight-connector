@@ -43,8 +43,11 @@ import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
+import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TEST_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.PreSignedUrlRequester.STORAGE_LOCATION_PROPERTY;
 
@@ -65,7 +68,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
@@ -86,7 +88,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClie
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiClient;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -148,6 +150,8 @@ class PreSignedUrlRequesterIntegrationTest
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(PRE_SIGNED_URL_PATH))
                 .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
+                .withHeader(HXP_ENVIRONMENT_HEADER, equalTo(TEST_ENVIRONMENT_HEADER))
+                .withHeader(HXP_APP_HEADER, equalTo("hxai-discovery"))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(absent()));
@@ -163,7 +167,7 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(serverError()));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -178,7 +182,7 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(badRequest()));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(1)).requestStorageLocation();
@@ -195,7 +199,7 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody("")));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -214,7 +218,7 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody("[")));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -235,7 +239,7 @@ class PreSignedUrlRequesterIntegrationTest
                         .withBody(hxInsightResponse)));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -252,7 +256,7 @@ class PreSignedUrlRequesterIntegrationTest
                 .willReturn(aResponse().withFault(Fault.EMPTY_RESPONSE)));
 
         // when
-        Throwable thrown = catchThrowable(() -> locationRequester.requestStorageLocation());
+        Throwable thrown = catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
@@ -278,16 +282,12 @@ class PreSignedUrlRequesterIntegrationTest
     @TestConfiguration
     public static class PreSignedUrlRequesterIntegrationTestConfig
     {
-
-        @MockBean
-        public DiscoveryApiClient discoveryApi;
-
         @Bean
         public AuthProperties authorizationProperties()
         {
             AuthProperties authProperties = new AuthProperties();
             AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider("http://token-uri");
-            authProperties.setProviders(Map.of(HXI_AUTH_PROVIDER, hXauthProvider));
+            authProperties.setProviders(Map.of(HXP_AUTH_PROVIDER, hXauthProvider));
             authProperties.setRetry(
                     new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
                             Collections.emptySet()));
@@ -301,7 +301,7 @@ class PreSignedUrlRequesterIntegrationTest
             DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(dummyAuthClient);
             Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();
             AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
-            tokens.put(HXI_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.getAccessToken(), OffsetDateTime.now().plusSeconds(3600)));
+            tokens.put(HXP_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.getAccessToken(), OffsetDateTime.now().plusSeconds(3600)));
             ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
             return dummyAccessTokenProvider;
         }
@@ -319,9 +319,9 @@ class PreSignedUrlRequesterIntegrationTest
         }
 
         @Bean
-        public String versionOverride()
+        public RepositoryInformation repositoryInformation()
         {
-            return ACS_VERSION;
+            return () -> ACS_VERSION;
         }
     }
 }

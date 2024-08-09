@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,22 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
-package org.alfresco.hxi_connector.hxi_extension.service.util;
-
-import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
-
-import lombok.RequiredArgsConstructor;
-
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-
-@RequiredArgsConstructor
-public class AuthService
+public interface RepositoryInformation
 {
-    private final AccessTokenProvider accessTokenProvider;
-
-    public String[] getAuthHeaders()
-    {
-        return new String[]{AUTHORIZATION, "Bearer " + accessTokenProvider.getAccessToken("hyland-experience")};
-    }
+    String getRepositoryVersion();
 }

@@ -23,7 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.prediction_applier.model.repository;
+package org.alfresco.hxi_connector.hxi_extension.service;
 
-public record PredictionModelResponse(PredictionModelResponseEntry entry)
-{}
+import lombok.RequiredArgsConstructor;
+
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
+import org.alfresco.service.descriptor.DescriptorService;
+
+@RequiredArgsConstructor
+public class AcsRepositoryInformation implements RepositoryInformation
+{
+
+    private final DescriptorService descriptorService;
+
+    @Override
+    public String getRepositoryVersion()
+    {
+        return String.format("%s.%s.%s", descriptorService.getServerDescriptor().getVersionMajor(),
+                descriptorService.getServerDescriptor().getVersionMinor(), descriptorService.getServerDescriptor().getVersionRevision());
+    }
+}

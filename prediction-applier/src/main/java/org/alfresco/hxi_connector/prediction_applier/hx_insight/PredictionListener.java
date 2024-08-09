@@ -57,7 +57,7 @@ public class PredictionListener extends RouteBuilder
 
         from(insightPredictionsProperties.bufferEndpoint())
                 .routeId(ROUTE_ID)
-                .log(LoggingLevel.DEBUG, log, "Prediction body: ${body}")
+                .log(LoggingLevel.TRACE, log, "Prediction :: started processing of: ${body}")
                 .unmarshal()
                 .json(JsonLibrary.Jackson, PredictionEntry.class)
                 .setHeader(NODE_ID_HEADER, simple("${body.objectId}"))

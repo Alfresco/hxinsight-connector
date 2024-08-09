@@ -135,7 +135,8 @@
         <constructor-arg name="authenticationClient" ref="hxInsightAuthClient"/>
     </bean>
 
-    <bean id="hxInsightAuthService" class="org.alfresco.hxi_connector.hxi_extension.service.util.AuthService">
+    <bean id="hxInsightAuthService" class="org.alfresco.hxi_connector.common.adapters.auth.AuthService">
+        <constructor-arg name="authProperties" ref="hxInsightAuthProperties"/>
         <constructor-arg name="accessTokenProvider" ref="hxInsightAccessTokenProvider"/>
     </bean>
 
@@ -173,5 +174,16 @@
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionFeedbackRelation">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
+    </bean>
+
+    <bean id="acsRepositoryInformation" class="org.alfresco.hxi_connector.hxi_extension.service.AcsRepositoryInformation">
+        <constructor-arg name="descriptorService" ref="DescriptorService"/>
+    </bean>
+    <bean id="hxiConnectorProperties" class="org.alfresco.hxi_connector.common.config.properties.Application">
+        <property name="version" value="${hxi.connector.version}"/>
+    </bean>
+    <bean class="org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider">
+        <constructor-arg name="repositoryInformation" ref="acsRepositoryInformation"/>
+        <constructor-arg name="applicationProperties" ref="hxiConnectorProperties"/>
     </bean>
 </beans>

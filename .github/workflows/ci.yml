@@ -19,13 +19,13 @@ env:
   # As the release is triggered by a commit message with "[release]" keyword on a release branch,
   # setting these variables to new values can be done in the same commit and will indicate the release and the dev versions in it.
   DEVELOPMENT_VERSION: "1.0.0-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
-  RELEASE_VERSION: "1.0.0-A7" # The version of the release (tag).
+  RELEASE_VERSION: "1.0.0-A8" # The version of the release (tag).
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   JAVA_VERSION: "17"
-  JAVA_VERSION_SUPPORTED: "11"
+  JAVA_VERSION_SUPPORTED_BY_REPO: "11"
   S3_BUCKET_REGION: "eu-west-1"
 
 jobs:
@@ -33,17 +33,17 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       java_version: ${{ env.JAVA_VERSION }}
-      java_version_supported: ${{ env.JAVA_VERSION_SUPPORTED }}
+      java_version_supported_by_repo: ${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: changed-files
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v5.33.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v6.0.1
         with:
           write-list-to-env: true
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v6.0.1
 
   veracode_sca:
     name: "Veracode - Source Clear Scan (SCA)"
@@ -55,9 +55,9 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v6.0.1
         continue-on-error: true
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
@@ -74,8 +74,8 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v6.0.1
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           repository: "Alfresco/veracode-baseline-archive"
@@ -109,8 +109,8 @@ jobs:
       !contains(github.event.head_commit.message, '[skip tests]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - uses: Alfresco/ya-pmd-scan@v4.0.0
 
   test_application:
@@ -119,7 +119,7 @@ jobs:
     needs:
       - pre_commit
     if: >
-      github.event_name == 'push' &&
+      (github.event_name == 'push' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
@@ -129,14 +129,14 @@ jobs:
                       "live-ingester", "prediction-applier", "hxinsight-extension" ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - name: "Test application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am
 
@@ -146,7 +146,7 @@ jobs:
     needs:
       - pre_commit
     if: >
-      github.event_name == 'push' &&
+      (github.event_name == 'push' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
@@ -155,14 +155,14 @@ jobs:
         repoVersion: [ 7.3.2, 7.4.2, 23.2.1 ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - name: "Build application with distribution profile"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
@@ -172,7 +172,7 @@ jobs:
     needs:
       - pre_commit
     if: >
-      github.event_name == 'push' &&
+      (github.event_name == 'push' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip e2es]')
@@ -182,39 +182,28 @@ jobs:
         repoVersion: [ 7.3.2, 7.4.2, 23.2.1 ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
-      - name: "Start docker-compose and run e2e docker-compose tests"
-        env:
-          GHA_RUN_DC: true
-        run: |
-          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
-          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'hxinsight-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
-      - name: "Stop docker-compose"
-        if: always()
-        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
       - name: "Run e2e tests"
-        env:
-          GHA_RUN_DC: false
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
   run_e2e_test_using_older_java:
-    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java ${{ needs.pre_commit.outputs.java_version_supported }}"
+    name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java ${{ needs.pre_commit.outputs.java_version_supported_by_repo }}"
     runs-on: ubuntu-latest
     needs:
       - pre_commit
     if: >
-      needs.pre_commit.outputs.java_version_supported != needs.pre_commit.outputs.java_version &&
+      needs.pre_commit.outputs.java_version_supported_by_repo != needs.pre_commit.outputs.java_version &&
       github.event_name != 'pull_request' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       !contains(github.event.head_commit.message, '[skip build]') &&
@@ -226,33 +215,20 @@ jobs:
         repoVersion: [ 7.3.2, 7.4.2 ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Build docker images"
-        run: |
-          JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED }}
-          bash ./scripts/ci/buildDockerImages.sh
-      - name: "Start docker-compose and run e2e docker-compose tests"
-        env:
-          GHA_RUN_DC: true
-        run: |
-          ./scripts/ci/start-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
-          mvn ${{ env.MAVEN_CLI_OPTS }} test -pl 'hxinsight-extension,e2e-test' -am -Dtest=CreateNodeDCE2eTest -DfailIfNoTests=false -Dalfresco-platform.version=${{ matrix.repoVersion }}
-      - name: "Stop docker-compose"
-        if: always()
-        run: ./scripts/ci/stop-compose.sh distribution/src/main/resources/docker-compose/docker-compose-minimal.yml
+        run: JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }} && bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
-        env:
-          GHA_RUN_DC: false
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
 
   push_docker_images:
     name: "Push docker images"
@@ -271,15 +247,15 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Push docker images"
         run: bash ./scripts/ci/buildDockerImages.sh -p
         env:
@@ -301,12 +277,12 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - name: "Publish SNAPSHOT artifacts"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} deploy -DskipTests -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} deploy -DskipTests -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
@@ -326,17 +302,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v6.0.1
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Make release and deploy to Nexus"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }}" release:prepare release:perform
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }}" release:prepare release:perform
       - run: mkdir -p deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}
       - name: "Move the final artifacts to a single folder (deploy_dir) to be copied to S3"
         run: mv "distribution/target/alfresco-hxinsight-connector-distribution-${{ env.RELEASE_VERSION }}.zip" "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/"
@@ -373,15 +349,15 @@ jobs:
       - uses: docker/setup-qemu-action@v3
       - uses: docker/setup-buildx-action@v3
       - name: "Login to Quay.io"
-        uses: docker/login-action@v3.2.0
+        uses: docker/login-action@v3.3.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v5.33.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v5.33.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v6.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v6.0.1
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED }}
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Deploy release version to quay.io"
         run: bash ./scripts/ci/releaseDockerImage.sh -v ${{ env.RELEASE_VERSION }}
         env:
