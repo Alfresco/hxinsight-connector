@@ -103,7 +103,7 @@ public class AgentsE2eTest
         LoggedRequest loggedRequest = WireMock.findAll(WireMock.getRequestedFor(WireMock.anyUrl())).get(0);
 
         assertNotNull(loggedRequest);
-        assertEquals("/agents?source=alfresco-dummy-source-id-0a63de491876", loggedRequest.getUrl());
+        assertEquals("/agents?sourceId=alfresco-dummy-source-id-0a63de491876", loggedRequest.getUrl());
 
         assertEquals(SC_OK, response.statusCode());
         Map<String, String> expected0 = Map.of("name", "HR Policy Agent", "description", "This agent is responsible for HR policy predictions", "id", "61254576-62a3-453f-8cd8-19e2f6554f29");

@@ -248,7 +248,7 @@ class HxInsightClientTest
         given(response.statusCode()).willReturn(SC_OK);
         given(response.body()).willReturn(responseBody);
 
-        given(httpClient.send(argThat(req -> req.uri().toString().equals("http://hxinsight/agents?source=" + SOURCE_ID)), any())).willReturn(response);
+        given(httpClient.send(argThat(req -> req.uri().toString().equals("http://hxinsight/agents?sourceId=" + SOURCE_ID)), any())).willReturn(response);
 
         // when
         List<Agent> actualAgents = hxInsightClient.getAgents();
