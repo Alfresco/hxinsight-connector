@@ -396,7 +396,7 @@ public class QuestionsAndAnswersE2eTest
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
         verify(exactly(0), postRequestedFor(urlEqualTo("/integrations/questions/%s/answer/feedback".formatted(questionId))));
-        verify(exactly(0), postRequestedFor(urlEqualTo("/integrations/agents/61254576-62a3-453f-8cd8-19e2f6554f29/questions")));
+        verify(exactly(0), postRequestedFor(urlEqualTo("/integrations/agents/agent-id/questions")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
