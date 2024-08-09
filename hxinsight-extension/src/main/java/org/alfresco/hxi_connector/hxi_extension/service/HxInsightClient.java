@@ -82,8 +82,10 @@ public class HxInsightClient
     {
         try
         {
+            String url = String.format("%s?source=%s", config.getAgentUrl(), applicationInfoProvider.getSourceId());
+
             HttpRequest request = requestWithRequiredHeaders()
-                    .uri(URI.create(config.getAgentUrl()))
+                    .uri(URI.create(url))
                     .header(CONTENT_TYPE, "application/json")
                     .GET()
                     .build();

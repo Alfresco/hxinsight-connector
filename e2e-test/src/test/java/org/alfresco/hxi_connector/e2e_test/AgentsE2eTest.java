@@ -33,6 +33,7 @@ import static org.apache.http.HttpStatus.SC_OK;
 import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.restassured.response.Response;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.BeforeAll;
@@ -97,6 +99,12 @@ public class AgentsE2eTest
                 .then().extract().response();
 
         // then
+
+        LoggedRequest loggedRequest = WireMock.findAll(WireMock.getRequestedFor(WireMock.anyUrl())).get(0);
+
+        assertNotNull(loggedRequest);
+        assertEquals("/agents?source=alfresco-dummy-source-id-0a63de491876", loggedRequest.getUrl());
+
         assertEquals(SC_OK, response.statusCode());
         Map<String, String> expected0 = Map.of("name", "HR Policy Agent", "description", "This agent is responsible for HR policy predictions", "id", "61254576-62a3-453f-8cd8-19e2f6554f29");
         Map<String, String> expected1 = Map.of("name", "Knowledge Base Agent", "description", "Very smart about product knowledge", "id", "b999ee14-3974-41b2-bef8-70ab38c9e642");

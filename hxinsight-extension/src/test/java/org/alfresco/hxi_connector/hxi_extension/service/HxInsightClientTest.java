@@ -33,6 +33,7 @@ import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.atLeast;
@@ -76,7 +77,7 @@ class HxInsightClientTest
     private static final String AGENT_ID = "agent-id";
     private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
     private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
-
+    private static final String SOURCE_ID = "alfresco-dummy-source-id-0a63de491876";
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -98,6 +99,7 @@ class HxInsightClientTest
 
         given(authService.getHxpAuthHeaders()).willReturn(Map.of("Authorization", "Bearer token"));
         given(applicationInfoProvider.getUserAgentData()).willReturn(USER_AGENT_HEADER);
+        given(applicationInfoProvider.getSourceId()).willReturn(SOURCE_ID);
         requestCaptor = ArgumentCaptor.forClass(HttpRequest.class);
     }
 
@@ -246,7 +248,7 @@ class HxInsightClientTest
         given(response.statusCode()).willReturn(SC_OK);
         given(response.body()).willReturn(responseBody);
 
-        given(httpClient.send(any(), any())).willReturn(response);
+        given(httpClient.send(argThat(req -> req.uri().toString().equals("http://hxinsight/agents?source=" + SOURCE_ID)), any())).willReturn(response);
 
         // when
         List<Agent> actualAgents = hxInsightClient.getAgents();
