@@ -204,7 +204,6 @@ jobs:
       - pre_commit
     if: >
       needs.pre_commit.outputs.java_version_supported_by_repo != needs.pre_commit.outputs.java_version &&
-      github.event_name != 'pull_request' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
