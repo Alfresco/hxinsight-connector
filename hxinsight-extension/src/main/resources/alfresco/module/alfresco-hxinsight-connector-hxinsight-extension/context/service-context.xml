@@ -141,11 +141,16 @@
 
     <bean id="httpClient" class="java.net.http.HttpClient" factory-method="newHttpClient"/>
 
+    <bean name="agentsAvatarCache" factory-bean="cacheFactory" factory-method="createCache">
+        <constructor-arg value="cache.agentsAvatarCache" />
+    </bean>
+
     <bean id="hxInsightClient" class="org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient">
         <constructor-arg name="config" ref="hxInsightClientConfig"/>
         <constructor-arg name="authService" ref="hxInsightAuthService"/>
         <constructor-arg name="objectMapper" ref="alfrescoEventObjectMapper"/>
         <constructor-arg name="client" ref="httpClient"/>
+        <constructor-arg name="avatarCache" ref="agentsAvatarCache"/>
     </bean>
 
     <bean id="questionsApiConfig" class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig">

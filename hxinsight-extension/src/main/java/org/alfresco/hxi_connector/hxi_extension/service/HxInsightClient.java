@@ -49,6 +49,7 @@ import java.util.UUID;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.icu.impl.SimpleCache;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.extensions.webscripts.WebScriptException;
@@ -72,6 +73,7 @@ public class HxInsightClient
     private final AuthService authService;
     private final ObjectMapper objectMapper;
     private final HttpClient client;
+    private final SimpleCache<String, BinaryResource> avatarCache;
 
     public List<Agent> getAgents()
     {
@@ -179,6 +181,11 @@ public class HxInsightClient
 
     public BinaryResource getAvatar(String agentId)
     {
+        if (avatarCache.get(agentId) != null)
+        {
+            return avatarCache.get(agentId);
+        }
+
         try
         {
             HttpRequest request = HttpRequest.newBuilder()
@@ -194,7 +201,9 @@ public class HxInsightClient
 
             String filePrefix = format("avatar-%s-%s", agentId, UUID.randomUUID());
             File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), filePrefix, "png");
-            return new FileBinaryResource(tempImageFile);
+            FileBinaryResource avatarImage = new FileBinaryResource(tempImageFile);
+            avatarCache.put(agentId, avatarImage);
+            return avatarImage;
         }
         catch (Exception e)
         {

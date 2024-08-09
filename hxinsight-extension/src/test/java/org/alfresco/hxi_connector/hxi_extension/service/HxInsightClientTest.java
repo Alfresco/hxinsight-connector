@@ -49,6 +49,7 @@ import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.ibm.icu.impl.SimpleCache;
 import lombok.SneakyThrows;
 import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +66,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.ObjectReference;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.util.AuthService;
+import org.alfresco.rest.framework.resource.content.BinaryResource;
 
 @SuppressWarnings("PMD.FieldNamingConventions")
 class HxInsightClientTest
@@ -76,11 +78,13 @@ class HxInsightClientTest
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = mock(HttpClient.class);
+    private final SimpleCache<String, BinaryResource> avatarCache = mock(SimpleCache.class);
     private final HxInsightClient hxInsightClient = new HxInsightClient(
             config,
             authService,
             objectMapper,
-            httpClient);
+            httpClient,
+            avatarCache);
 
     @BeforeEach
     void setUp()
