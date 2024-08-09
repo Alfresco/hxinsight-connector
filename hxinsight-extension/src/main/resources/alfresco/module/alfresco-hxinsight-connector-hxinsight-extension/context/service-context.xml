@@ -181,6 +181,7 @@
     </bean>
     <bean id="hxiConnectorProperties" class="org.alfresco.hxi_connector.common.config.properties.Application">
         <property name="version" value="${hxi.connector.version}"/>
+        <property name="sourceId" value="${hxi.connector.source-id}"/>
     </bean>
     <bean class="org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider">
         <constructor-arg name="repositoryInformation" ref="acsRepositoryInformation"/>
