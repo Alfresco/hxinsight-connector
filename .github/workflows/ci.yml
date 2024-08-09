@@ -19,7 +19,7 @@ env:
   # As the release is triggered by a commit message with "[release]" keyword on a release branch,
   # setting these variables to new values can be done in the same commit and will indicate the release and the dev versions in it.
   DEVELOPMENT_VERSION: "1.0.0-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
-  RELEASE_VERSION: "1.0.0-A8" # The version of the release (tag).
+  RELEASE_VERSION: "1.0.0-A9" # The version of the release (tag).
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -312,7 +312,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Make release and deploy to Nexus"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }}" release:prepare release:perform
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}" release:prepare release:perform
       - run: mkdir -p deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}
       - name: "Move the final artifacts to a single folder (deploy_dir) to be copied to S3"
         run: mv "distribution/target/alfresco-hxinsight-connector-distribution-${{ env.RELEASE_VERSION }}.zip" "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/"
