@@ -106,7 +106,7 @@ class RetryModelSerializationTest
 
         // then
         RetryModel expected = new RetryModel(null, "This was not succinct enough!",
-                new QuestionModel(null, "Explain how the universe works", null, new RestrictionQuery(Set.of("880a0f47-31b1-4101-b20b-4d325e54e8b1"))));
+                new QuestionModel(null, "Explain how the universe works", new RestrictionQuery(Set.of("880a0f47-31b1-4101-b20b-4d325e54e8b1"))));
         assertEquals(expected, retry);
     }
 }

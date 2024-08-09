@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/questions/5fca2c77-cdc0-4118-9373-e75f53177ff8/answer/feedback"
+    "urlPath": "/integrations/questions/5fca2c77-cdc0-4118-9373-e75f53177ff8/answer/feedback"
   },
   "response": {
     "status": 200

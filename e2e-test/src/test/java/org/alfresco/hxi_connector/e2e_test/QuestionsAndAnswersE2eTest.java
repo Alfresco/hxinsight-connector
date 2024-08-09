@@ -65,7 +65,7 @@ import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 public class QuestionsAndAnswersE2eTest
 {
     private static final String PREEXISTING_DOCUMENT_ID = "1a0b110f-1e09-4ca2-b367-fe25e4964a4e";
-    private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/questions";
+    private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions";
     private static final String SUBMIT_QUESTION_SCENARIO = "Submit-question";
     private static final String NEXT_QUESTION_STATE = "Next-question";
     static final Network network = Network.newNetwork();
@@ -101,7 +101,6 @@ public class QuestionsAndAnswersE2eTest
         String questions = """
                 {
                     "question": "What is the meaning of life?",
-                    "agentId": "agent-id",
                     "restrictionQuery": {
                         "nodesIds": ["%s"]
                     }
@@ -112,13 +111,13 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(questions)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions")
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions")
                 .then().extract().response();
 
         // then
         assertEquals(SC_OK, response.statusCode());
         assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/submit-question"))));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/agents/agent-id/questions"))));
     }
 
     @Test
@@ -129,14 +128,12 @@ public class QuestionsAndAnswersE2eTest
                 [
                     {
                         "question": "What is the meaning of life?",
-                        "agentId": "agent-id",
                         "restrictionQuery": {
                             "nodesIds": ["%s"]
                         }
                     },
                     {
                         "question": "Who is the president of the United States?",
-                        "agentId": "agent-id",
                         "restrictionQuery": {
                             "nodesIds": ["%s"]
                         }
@@ -180,7 +177,6 @@ public class QuestionsAndAnswersE2eTest
         String questions = """
                 {
                     "question": "What is the meaning of life?",
-                    "agentId": "agent-id",
                     "restrictionQuery": {
                         "nodesIds": ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8", "node9", "node10", "node11"]
                     }
@@ -215,7 +211,7 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(questionId, response.jsonPath().get("list.entries.entry[0].questionId"));
         assertEquals("This is the answer to the question", response.jsonPath().get("list.entries.entry[0].answer"));
         assertEquals("276718b0-c3ab-4e11-81d5-96dbbb540269", response.jsonPath().get("list.entries.entry[0].references[0].referenceId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), getRequestedFor(urlEqualTo("/questions/%s/answer".formatted(questionId)))));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), getRequestedFor(urlEqualTo("/integrations/questions/%s/answer".formatted(questionId)))));
     }
 
     @Test
@@ -260,7 +256,7 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(SC_CREATED, response.statusCode());
         assertEquals("LIKE", response.jsonPath().get("entry.feedbackType"));
         assertEquals("The response was very helpful and detailed. Good bot.", response.jsonPath().get("entry.comments"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/questions/%s/answer/feedback".formatted(questionId)))
                 .withRequestBody(containing("GOOD"))));
     }
 
@@ -347,7 +343,6 @@ public class QuestionsAndAnswersE2eTest
                     "comments": "I need more details about the answer.",
                     "originalQuestion": {
                         "question": "What is the meaning of life?",
-                        "agentId": "agent-id",
                         "restrictionQuery": {
                             "nodesIds": ["%s"]
                         }
@@ -360,7 +355,7 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(retry)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/retry".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId))
                 .then().extract().response();
 
         // then
@@ -368,9 +363,9 @@ public class QuestionsAndAnswersE2eTest
         assertEquals("a1eae985-6984-4346-9e08-d430fa8404b2", response.jsonPath().get("entry.questionId"));
         assertEquals("I need more details about the answer.", response.jsonPath().get("entry.comments"));
         RetryUtils.retryWithBackoff(() -> {
-            verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+            verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/questions/%s/answer/feedback".formatted(questionId)))
                     .withRequestBody(containing("RETRY")));
-            verify(exactly(1), postRequestedFor(urlEqualTo("/submit-question")));
+            verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/agents/agent-id/questions")));
         });
     }
 
@@ -384,7 +379,6 @@ public class QuestionsAndAnswersE2eTest
                     "comments": "I need more details about the answer.",
                     "originalQuestion": {
                         "question": "What is the meaning of life?",
-                        "agentId": "agent-id",
                         "restrictionQuery": {
                             "nodesIds": ["node1", "node2", "node3", "node4", "node5", "node6", "node7", "node8", "node9", "node10", "node11"]
                         }
@@ -396,13 +390,13 @@ public class QuestionsAndAnswersE2eTest
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
                 .body(retry)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/retry".formatted(questionId))
+                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId))
                 .then().extract().response();
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
-        verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
-        verify(exactly(0), postRequestedFor(urlEqualTo("/submit-question")));
+        verify(exactly(0), postRequestedFor(urlEqualTo("/integrations/questions/%s/answer/feedback".formatted(questionId))));
+        verify(exactly(0), postRequestedFor(urlEqualTo("/integrations/agents/agent-id/questions")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()

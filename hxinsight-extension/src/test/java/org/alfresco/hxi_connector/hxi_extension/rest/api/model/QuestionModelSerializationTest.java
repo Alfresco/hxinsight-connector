@@ -48,7 +48,6 @@ class QuestionModelSerializationTest
                 {
                     "_questionId": "86553f9b-e382-4a1b-b07d-52adae3e96e8",
                     "question": "What is the capital of France?",
-                    "agentId": "agent-id",
                     "restrictionQuery": {
                         "nodesIds": ["node1", "node2"]
                     }
@@ -67,7 +66,6 @@ class QuestionModelSerializationTest
                 {
                     "questionId": "86553f9b-e382-4a1b-b07d-52adae3e96e8",
                     "question": "What is the capital of France?",
-                    "agentId": "agent-id",
                     "restrictionQuery": {
                         "nodesIds": ["node1", "node2"]
                     }
@@ -86,7 +84,6 @@ class QuestionModelSerializationTest
         String questionSerialized = """
                 {
                     "question": "What is the capital of France?",
-                    "agentId": "agent-id",
                     "restrictionQuery": {
                         "nodesIds": ["node1", "node2"]
                     }
@@ -98,7 +95,6 @@ class QuestionModelSerializationTest
 
         // then
         assertEquals("What is the capital of France?", question.getQuestion());
-        assertEquals("agent-id", question.getAgentId());
         assertEquals(Set.of("node1", "node2"), question.getRestrictionQuery().getNodesIds());
     }
 }

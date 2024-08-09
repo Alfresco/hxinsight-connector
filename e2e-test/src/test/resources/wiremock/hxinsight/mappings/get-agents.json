@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/agents"
+    "urlPath": "/integrations/agents"
   },
   "response": {
     "status": 200,

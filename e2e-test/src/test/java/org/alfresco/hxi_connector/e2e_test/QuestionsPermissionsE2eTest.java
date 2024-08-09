@@ -60,11 +60,10 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class QuestionsPermissionsE2eTest
 {
-    private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/questions";
+    private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions";
     private static final String SAMPLE_QUESTION = """
             {
                 "question": "What is the meaning of life?",
-                "agentId": "agent-id",
                 "restrictionQuery": {
                     "nodesIds": ["%s"]
                 }
