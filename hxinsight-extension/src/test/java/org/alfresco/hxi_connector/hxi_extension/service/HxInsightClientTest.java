@@ -78,7 +78,7 @@ class HxInsightClientTest
     private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
     private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
     private static final String SOURCE_ID = "alfresco-dummy-source-id-0a63de491876";
-    private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight/integrations");
+    private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = mock(HttpClient.class);
@@ -248,7 +248,7 @@ class HxInsightClientTest
         given(response.statusCode()).willReturn(SC_OK);
         given(response.body()).willReturn(responseBody);
 
-        given(httpClient.send(argThat(req -> req.uri().toString().equals("http://hxinsight/integrations/agents?sourceId=" + SOURCE_ID)), any())).willReturn(response);
+        given(httpClient.send(argThat(req -> req.uri().toString().equals("http://hxinsight/agents?sourceId=" + SOURCE_ID)), any())).willReturn(response);
 
         // when
         List<Agent> actualAgents = hxInsightClient.getAgents();
@@ -307,7 +307,7 @@ class HxInsightClientTest
 
         // then
         then(httpClient).should().send(requestCaptor.capture(), any());
-        assertEquals("http://hxinsight/integrations/questions/dummy-id-1234/answer/feedback", requestCaptor.getValue().uri().toString());
+        assertEquals("http://hxinsight/questions/dummy-id-1234/answer/feedback", requestCaptor.getValue().uri().toString());
         assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
 
@@ -357,7 +357,7 @@ class HxInsightClientTest
 
         HttpResponse feedbackResponse = mock(HttpResponse.class);
         given(feedbackResponse.statusCode()).willReturn(SC_OK);
-        ArgumentMatcher<? extends HttpRequest> feedbackMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/integrations/questions/dummy-id-1234/answer/feedback");
+        ArgumentMatcher<? extends HttpRequest> feedbackMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/questions/dummy-id-1234/answer/feedback");
         given(httpClient.send(ArgumentMatchers.argThat(feedbackMatcher), any())).willReturn(feedbackResponse);
 
         HttpResponse questionResponse = mock(HttpResponse.class);
@@ -367,7 +367,7 @@ class HxInsightClientTest
                     "questionId": "dummy-id-5678"
                 }
                 """);
-        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/integrations/agents/agent-id/questions");
+        ArgumentMatcher<? extends HttpRequest> questionMatcher = request -> request != null && request.uri().toString().equals("http://hxinsight/agents/agent-id/questions");
         given(httpClient.send(ArgumentMatchers.argThat(questionMatcher), any())).willReturn(questionResponse);
 
         // when

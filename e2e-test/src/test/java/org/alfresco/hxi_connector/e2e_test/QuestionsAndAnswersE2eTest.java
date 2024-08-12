@@ -117,7 +117,7 @@ public class QuestionsAndAnswersE2eTest
         // then
         assertEquals(SC_OK, response.statusCode());
         assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/agents/agent-id/questions"))));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions"))));
     }
 
     @Test
@@ -211,7 +211,7 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(questionId, response.jsonPath().get("list.entries.entry[0].questionId"));
         assertEquals("This is the answer to the question", response.jsonPath().get("list.entries.entry[0].answer"));
         assertEquals("276718b0-c3ab-4e11-81d5-96dbbb540269", response.jsonPath().get("list.entries.entry[0].references[0].referenceId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), getRequestedFor(urlEqualTo("/integrations/questions/%s/answer".formatted(questionId)))));
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), getRequestedFor(urlEqualTo("/questions/%s/answer".formatted(questionId)))));
     }
 
     @Test
@@ -256,7 +256,7 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(SC_CREATED, response.statusCode());
         assertEquals("LIKE", response.jsonPath().get("entry.feedbackType"));
         assertEquals("The response was very helpful and detailed. Good bot.", response.jsonPath().get("entry.comments"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/questions/%s/answer/feedback".formatted(questionId)))
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
                 .withRequestBody(containing("GOOD"))));
     }
 
@@ -363,9 +363,9 @@ public class QuestionsAndAnswersE2eTest
         assertEquals("a1eae985-6984-4346-9e08-d430fa8404b2", response.jsonPath().get("entry.questionId"));
         assertEquals("I need more details about the answer.", response.jsonPath().get("entry.comments"));
         RetryUtils.retryWithBackoff(() -> {
-            verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/questions/%s/answer/feedback".formatted(questionId)))
+            verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
                     .withRequestBody(containing("RETRY")));
-            verify(exactly(1), postRequestedFor(urlEqualTo("/integrations/agents/agent-id/questions")));
+            verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
         });
     }
 
@@ -395,8 +395,8 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
-        verify(exactly(0), postRequestedFor(urlEqualTo("/integrations/questions/%s/answer/feedback".formatted(questionId))));
-        verify(exactly(0), postRequestedFor(urlEqualTo("/integrations/agents/agent-id/questions")));
+        verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
+        verify(exactly(0), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
