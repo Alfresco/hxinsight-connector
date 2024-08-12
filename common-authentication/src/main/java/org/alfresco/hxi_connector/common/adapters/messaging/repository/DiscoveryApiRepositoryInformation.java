@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
 import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
-import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
 import java.io.IOException;
@@ -35,6 +34,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Map;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -74,9 +74,10 @@ public class DiscoveryApiRepositoryInformation implements RepositoryInformation
 
     private DiscoveryApiResponse getDiscoverApiResponse() throws IOException, InterruptedException
     {
+        Map.Entry<String, String> authHeader = authService.getAuthHeader(AuthService.ALFRESCO_AUTH_PROVIDER);
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create(discoveryEndpoint))
-                .header(AUTHORIZATION, authService.getAuthHeader(AuthService.ALFRESCO_AUTH_PROVIDER))
+                .header(authHeader.getKey(), authHeader.getValue())
                 .GET()
                 .build();
 

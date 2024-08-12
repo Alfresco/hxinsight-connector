@@ -60,5 +60,4 @@ public class AuthConfig
     {
         return new AuthService(authProperties, defaultAccessTokenProvider);
     }
-
 }

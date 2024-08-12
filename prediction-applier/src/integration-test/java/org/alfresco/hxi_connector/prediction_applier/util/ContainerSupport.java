@@ -32,8 +32,10 @@ import static java.net.HttpURLConnection.HTTP_OK;
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
+import static org.alfresco.hxi_connector.prediction_applier.config.AuthConfig.HXAI_ENVIRONMENT_HEADER;
 
 import java.util.concurrent.TimeUnit;
 import jakarta.jms.Connection;
@@ -215,7 +217,9 @@ public class ContainerSupport
     public void expectGetBatchesCalled()
     {
         retryWithBackoff(() -> getHxInsightMock().verifyThat(getRequestedFor(urlPathEqualTo(HXI_PREDICTION_BATCHES_ENDPOINT))
-                .withHeader(USER_AGENT, matching(USER_AGENT_REGEX))));
+                .withHeader(USER_AGENT, matching(USER_AGENT_REGEX))
+                .withHeader(HXAI_ENVIRONMENT_HEADER, equalTo("hxi-env-key"))
+                .withHeader(HXP_APP_HEADER, equalTo("hxai-discovery"))));
     }
 
     public void prepareRepositoryToReturnDiscovery()

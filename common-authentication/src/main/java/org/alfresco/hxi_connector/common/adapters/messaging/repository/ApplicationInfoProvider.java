@@ -55,6 +55,11 @@ public class ApplicationInfoProvider
         return applicationInfo;
     }
 
+    public String getSourceId()
+    {
+        return applicationProperties.getSourceId();
+    }
+
     private String calculateUserAgentData()
     {
         String applicationVersion = applicationProperties.getVersion();

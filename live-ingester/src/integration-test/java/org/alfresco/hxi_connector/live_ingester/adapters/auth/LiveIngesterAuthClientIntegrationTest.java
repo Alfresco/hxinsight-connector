@@ -25,7 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.auth;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 
 import java.util.Collections;
 import java.util.Map;
@@ -59,7 +59,7 @@ class LiveIngesterAuthClientIntegrationTest extends DefaultAuthenticationClientT
         {
             AuthProperties authProperties = new AuthProperties();
             AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider(hxAuthMock.getBaseUrl() + AuthUtils.TOKEN_PATH);
-            authProperties.setProviders(Map.of(HXI_AUTH_PROVIDER, hXauthProvider));
+            authProperties.setProviders(Map.of(HXP_AUTH_PROVIDER, hXauthProvider));
             authProperties.setRetry(
                     new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
                             Collections.emptySet()));

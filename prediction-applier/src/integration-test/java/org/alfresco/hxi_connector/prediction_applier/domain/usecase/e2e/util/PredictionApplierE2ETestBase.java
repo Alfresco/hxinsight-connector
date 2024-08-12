@@ -31,7 +31,7 @@ import static lombok.AccessLevel.PROTECTED;
 import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.ALFRESCO_AUTH_PROVIDER;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXI_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TOKEN_PATH;
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.createAuthResponseBody;
 
@@ -88,7 +88,7 @@ public class PredictionApplierE2ETestBase
     @DynamicPropertySource
     static void configureProperties(DynamicPropertyRegistry registry)
     {
-        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), HXI_AUTH_PROVIDER);
+        AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), HXP_AUTH_PROVIDER);
         AuthUtils.overrideAuthProperties(registry, oAuthServer.getBaseUrl(), ALFRESCO_AUTH_PROVIDER);
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();

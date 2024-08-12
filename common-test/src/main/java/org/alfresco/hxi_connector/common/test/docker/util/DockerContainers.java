@@ -102,13 +102,13 @@ public class DockerContainers
             """;
     public static final String TRANSFORMS_REPO_JAVA_OPTS = """
             -Dtransform.service.url=http://transform-router:8095
-            -Dsfs.url=http://shared-file-store:8099/
-            -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
-            -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
-            -Djodconverter.url=http://transform-core-aio:8090/
-            -Dimg.url=http://transform-core-aio:8090/
-            -Dtika.url=http://transform-core-aio:8090/
-            -Dtransform.misc.url=http://transform-core-aio:8090/
+            -Dsfs.url=http://shared-file-store:8099
+            -DlocalTransform.core-aio.url=http://transform-core-aio:8090
+            -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090
+            -Djodconverter.url=http://transform-core-aio:8090
+            -Dimg.url=http://transform-core-aio:8090
+            -Dtika.url=http://transform-core-aio:8090
+            -Dtransform.misc.url=http://transform-core-aio:8090
             """;
 
     public static AlfrescoRepositoryContainer createExtendedRepositoryContainerWithin(Network network)
@@ -121,7 +121,10 @@ public class DockerContainers
         pullRepositoryImage(repositoryType);
         AlfrescoRepositoryContainer repository = new AlfrescoRepositoryContainer(
                 new AlfrescoRepositoryExtension(REPOSITORY_EXTENSION, EXTENDED_REPOSITORY_LOCAL_NAME, repositoryType))
-                        .waitingFor(Wait.forHttp("/alfresco").forPort(8080).withStartupTimeout(Duration.ofMinutes(5)))
+                        .waitingFor(Wait
+                                .forHttp("/alfresco")
+                                .forPort(8080)
+                                .withStartupTimeout(Duration.ofMinutes(5)))
                         .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger(AlfrescoRepositoryContainer.class.getSimpleName())));
 
         Optional.ofNullable(network).ifPresent(n -> repository.withNetwork(n).withNetworkAliases(REPOSITORY_ALIAS));
@@ -206,6 +209,7 @@ public class DockerContainers
     public static GenericContainer<?> createTransformRouterContainerWithin(Network network)
     {
         GenericContainer<?> transformRouter = new GenericContainer<>(DockerImageName.parse(TRANSFORM_ROUTER_IMAGE).withTag(TRANSFORM_ROUTER_TAG))
+                .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5011,server=y,suspend=n")
                 .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("CORE_AIO_URL", "http://transform-core-aio:8090")
@@ -224,11 +228,14 @@ public class DockerContainers
     public static GenericContainer<?> createTransformCoreAioContainerWithin(Network network)
     {
         GenericContainer<?> transformCoreAio = new GenericContainer<>(DockerImageName.parse(TRANSFORM_CORE_AIO_IMAGE).withTag(TRANSFORM_CORE_AIO_TAG))
+                .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5010,server=y,suspend=n")
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1024m")
                 .withEnv("ACTIVEMQ_URL", "nio://activemq:61616")
                 .withEnv("FILE_STORE_URL", "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file")
                 .withExposedPorts(8090)
-                .withStartupTimeout(Duration.ofMinutes(2))
+                .waitingFor(Wait.forHttp("/")
+                        .forPort(8090)
+                        .withStartupTimeout(Duration.ofMinutes(2)))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("TransformCoreContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> transformCoreAio.withNetwork(n).withNetworkAliases(TRANSFORM_CORE_AIO_ALIAS));

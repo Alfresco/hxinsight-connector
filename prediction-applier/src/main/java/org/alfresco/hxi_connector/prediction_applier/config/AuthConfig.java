@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.config;
 
+import java.util.Map;
+
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -42,6 +44,8 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @EnableConfigurationProperties
 public class AuthConfig
 {
+    public static final String HXAI_ENVIRONMENT_HEADER = "hxai-environment";
+
     @Bean
     public AccessTokenProvider defaultAccessTokenProvider(AuthenticationClient predictionApplierHxAuthClient)
     {
@@ -58,7 +62,12 @@ public class AuthConfig
     @Bean
     public AuthService authService(AuthProperties authProperties, AccessTokenProvider defaultAccessTokenProvider)
     {
-        return new AuthService(authProperties, defaultAccessTokenProvider);
+        return new AuthService(authProperties, defaultAccessTokenProvider) {
+            @Override
+            protected Map.Entry<String, String> getHxpEnvironmentHeader()
+            {
+                return Map.entry(HXAI_ENVIRONMENT_HEADER, super.getHxpEnvironmentHeader().getValue());
+            }
+        };
     }
-
 }
