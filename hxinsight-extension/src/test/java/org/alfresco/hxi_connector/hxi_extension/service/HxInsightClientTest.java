@@ -74,6 +74,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 @SuppressWarnings("PMD.FieldNamingConventions")
 class HxInsightClientTest
 {
+    private static final String USER_ID = "user-id";
     private static final String AGENT_ID = "agent-id";
     private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
     private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
@@ -180,7 +181,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when
-        AnswerResponse answerResponse = hxInsightClient.getAnswer(questionId);
+        AnswerResponse answerResponse = hxInsightClient.getAnswer(questionId, USER_ID);
 
         // then
         assertEquals(answer, answerResponse.getAnswer());
@@ -199,7 +200,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willReturn(response);
 
         // when + then
-        assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer(questionId));
+        assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer(questionId, USER_ID));
         then(httpClient).should().send(requestCaptor.capture(), any());
         assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
     }
@@ -212,7 +213,7 @@ class HxInsightClientTest
         given(httpClient.send(any(), any())).willThrow(IOException.class);
 
         // when
-        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer("dummy-id-1234"));
+        WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.getAnswer("dummy-id-1234", USER_ID));
 
         // then
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());

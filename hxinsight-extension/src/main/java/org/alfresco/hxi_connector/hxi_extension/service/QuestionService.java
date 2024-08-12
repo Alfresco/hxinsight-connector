@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,23 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.hxi_extension.service;
 
-package org.alfresco.hxi_connector.hxi_extension.service.model;
+import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
+import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 
-import static lombok.AccessLevel.NONE;
-
-import java.util.Set;
-
-import lombok.Data;
-import lombok.Setter;
-
-@Data
-@Setter(NONE)
-public class Question
+public interface QuestionService
 {
-    private final String question;
-    private final String agentId;
-    private final Set<ObjectReference> contextObjects;
-    @Setter
-    private String userId;
+
+    String askQuestion(Question question);
+
+    AnswerResponse getAnswer(String questionId);
+
+    String retryQuestion(String questionId, String comments, Question question);
 }

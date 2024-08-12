@@ -51,6 +51,7 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 @ExtendWith(MockitoExtension.class)
 class QuestionAnswersRelationTest
 {
+    private static final String USER_ID = "user-id";
 
     @Mock
     private HxInsightClient mockHxInsightClient;
@@ -66,13 +67,13 @@ class QuestionAnswersRelationTest
         // given
         String questionId = "questionId";
         AnswerResponse hXAnswer = AnswerResponse.builder().questionId(questionId).answer("Some answer").build();
-        given(mockHxInsightClient.getAnswer(questionId)).willReturn(hXAnswer);
+        given(mockHxInsightClient.getAnswer(questionId, USER_ID)).willReturn(hXAnswer);
 
         // when
         CollectionWithPagingInfo<AnswerModel> answerResponse = objectUnderTest.readAll(questionId, mockParameters);
 
         // then
-        then(mockHxInsightClient).should().getAnswer(questionId);
+        then(mockHxInsightClient).should().getAnswer(questionId, USER_ID);
         Collection<AnswerModel> answerResponseEntries = answerResponse.getCollection();
         assertEquals(1, answerResponseEntries.size());
         AnswerModel answer = answerResponseEntries.iterator().next();
@@ -85,7 +86,7 @@ class QuestionAnswersRelationTest
     {
         // given
         String questionId = "questionId";
-        given(mockHxInsightClient.getAnswer(questionId)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, "Some error message"));
+        given(mockHxInsightClient.getAnswer(questionId, USER_ID)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, "Some error message"));
 
         // when + then
         assertThrows(WebScriptException.class, () -> objectUnderTest.readAll(questionId, mockParameters));

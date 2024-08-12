@@ -44,18 +44,18 @@ import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 
 public class QuestionsEntityResourceTest
 {
     private static final String AGENT_ID = "agent-id";
 
-    private final HxInsightClient hxInsightClient = mock(HxInsightClient.class);
+    private final QuestionService questionService = mock(QuestionService.class);
     private final QuestionsApiConfig questionConfig = new QuestionsApiConfig(3);
     private final QuestionPermissionService questionPermissionService = mock(QuestionPermissionService.class);
-    private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(hxInsightClient, questionConfig, questionPermissionService);
+    private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(questionService, questionConfig, questionPermissionService);
 
     @BeforeEach
     public void setUp()
@@ -123,7 +123,7 @@ public class QuestionsEntityResourceTest
                 new RestrictionQuery(Set.of("node-id")));
 
         String questionId = "a13c4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d";
-        given(hxInsightClient.askQuestion(any())).willReturn(questionId);
+        given(questionService.askQuestion(any())).willReturn(questionId);
 
         // when
         List<QuestionModel> questionIds = questionsEntityResource.create(List.of(question), null);
