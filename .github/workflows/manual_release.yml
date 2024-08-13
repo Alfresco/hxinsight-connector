@@ -9,7 +9,7 @@ on:
         required: true
         type: choice
         options:
-          - '1.0.0-SNAPSHOT' # Hard coded for now - change type to string when needed
+          - '1.0.0-SNAPSHOT' # Hard coded for now - change type to "string" when needed
       release_version:
         description: 'The version of the release (tag).'
         type: string
