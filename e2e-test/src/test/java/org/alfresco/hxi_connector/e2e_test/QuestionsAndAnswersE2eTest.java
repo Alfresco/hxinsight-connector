@@ -26,10 +26,12 @@
 package org.alfresco.hxi_connector.e2e_test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
@@ -226,8 +228,9 @@ public class QuestionsAndAnswersE2eTest
                     assertThat(jsonPath.<String> get("list.entries.entry[0].references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
                 });
         RetryUtils.retryWithBackoff(() -> {
-            List<LoggedRequest> loggedRequests = WireMock.findAll(WireMock.getRequestedFor(urlPathEqualTo("/questions/%s/answer".formatted(questionId)))
-                    .withQueryParam("userId", WireMock.matching("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
+            List<LoggedRequest> loggedRequests = WireMock.findAll(WireMock.getRequestedFor(urlPathTemplate("/questions/{questionId}/answer"))
+                    .withPathParam("questionId", equalTo(questionId))
+                    .withQueryParam("userId", matching("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
             assertThat(loggedRequests)
                     .hasSize(1)
                     .first()
