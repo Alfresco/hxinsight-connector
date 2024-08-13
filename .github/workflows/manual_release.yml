@@ -1,0 +1,47 @@
+name: Release
+run-name: Release ${{ github.event.inputs.release_version }}
+
+on:
+  workflow_dispatch:
+    inputs:
+      development_version:
+        description: 'The version that will be set in pom files after the release (next dev version)'
+        required: true
+        type: choice
+        options:
+          - '1.0.0-SNAPSHOT' # Hard coded for now - change type to "string" when needed
+      release_version:
+        description: 'The version of the release (tag).'
+        type: string
+        required: true
+
+jobs:
+  trigger_release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v6.0.1
+        with:
+          username: ${{ secrets.BOT_GITHUB_USERNAME }}
+          email: ${{ secrets.BOT_GITHUB_EMAIL }}
+      - name: Release
+        run: |
+          echo "development_version: ${{ github.event.inputs.development_version }}"
+          echo "release_version: ${{ github.event.inputs.release_version }}"
+
+          git checkout -b test-ci
+
+          sed -i '' 's/DEVELOPMENT_VERSION:\ \"[^\"]*\"/DEVELOPMENT_VERSION: \"${{ github.event.inputs.development_version }}\"/g' ./github/workflows/ci.yml
+          sed -i '' 's/RELEASE_VERSION:\ \"[^\"]*\"/RELEASE_VERSION: \"${{ github.event.inputs.release_version }}\"/g' ./github/workflows/ci.yml
+
+          git add .
+
+          git commit -m "${{ github.event.inputs.release_version }} [release]"
+
+          git push origin test-ci
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
