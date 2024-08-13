@@ -1,0 +1,31 @@
+name: Alfresco Connector for Hyland Experience Insight CI
+
+on:
+  workflow_dispatch:
+    inputs:
+      development_version:
+        description: 'The version that will be set in pom files after the release (next dev version)'
+        type: string
+        required: true
+      release_version:
+        description: 'The version of the release (tag).'
+        type: string
+        required: true
+
+
+jobs:
+  trigger_release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: test
+        run: |
+          echo "development_version: ${{ github.event.inputs.development_version }}"
+          echo "release_version: ${{ github.event.inputs.release_version }}"
+          git checkout -b test-ci
+          sed -i '' 's/RELEASE_VERSION:\ \"[^\"]*\"/RELEASE_VERSION: \"${{ github.event.inputs.release_version }}\"/g' ./github/workflows/ci.yml
+          git add .
+          git commit -m "Update release version to ${{ github.event.inputs.release_version }}"
+          git push origin test-ci
