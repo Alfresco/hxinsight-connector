@@ -3,7 +3,7 @@
   "requiredScenarioState": "Next-question",
   "request": {
     "method": "POST",
-    "urlPath": "/submit-question"
+    "urlPath": "/agents/agent-id/questions"
   },
   "response": {
     "status": 202,

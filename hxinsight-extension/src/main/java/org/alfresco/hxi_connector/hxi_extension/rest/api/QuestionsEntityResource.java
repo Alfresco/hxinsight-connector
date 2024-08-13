@@ -25,71 +25,11 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-
-import java.util.List;
-
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.extensions.webscripts.Status;
-import org.springframework.extensions.webscripts.WebScriptException;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.RetryModel;
-import org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService;
-import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
-import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
-import org.alfresco.rest.framework.Operation;
-import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.EntityResource;
-import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
-import org.alfresco.rest.framework.resource.parameters.Parameters;
-import org.alfresco.rest.framework.webscripts.WithResponse;
 
 @Slf4j
-@RequiredArgsConstructor
-@EntityResource(name = "questions", title = "Questions about documents")
-public class QuestionsEntityResource implements EntityResourceAction.Create<QuestionModel>
-{
-    private final QuestionService questionService;
-    private final QuestionsApiConfig questionConfig;
-    private final QuestionPermissionService questionPermissionService;
-
-    @Override
-    @WebApiDescription(title = "Ask question", successStatus = Status.STATUS_OK)
-    public List<QuestionModel> create(List<QuestionModel> questions, Parameters parameters)
-    {
-        ensureThat(questions.size() == 1, () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "You can only ask one question at a time."));
-
-        QuestionModel questionModel = questions.get(0);
-        Question question = validateQuestion(questionModel);
-
-        String questionId = questionService.askQuestion(question);
-
-        return List.of(questionModel.withId(questionId));
-    }
-
-    @Operation("retry")
-    @WebApiDescription(title = "Retry question", description = "Resubmit a question to try to get a better answer.")
-    public RetryModel retry(String questionId, RetryModel retry, Parameters parameters, WithResponse withResponse)
-    {
-        Question question = validateQuestion(retry.getOriginalQuestion());
-
-        String newQuestionId = questionService.retryQuestion(questionId, retry.getComments(), question);
-        return retry.withId(newQuestionId);
-    }
-
-    private Question validateQuestion(QuestionModel questionModel)
-    {
-        Question question = questionModel.toQuestion();
-
-        log.info("Received question: {}", question);
-
-        ensureThat(questionModel.getRestrictionQuery().getNodesIds().size() <= questionConfig.getMaxContextSizeForQuestion(),
-                () -> new WebScriptException(Status.STATUS_BAD_REQUEST, String.format("You can only ask about up to %d nodes at a time.", questionConfig.getMaxContextSizeForQuestion())));
-        ensureThat(questionPermissionService.hasPermissionToAskAboutDocuments(question),
-                () -> new WebScriptException(Status.STATUS_FORBIDDEN, "You don't have permission to ask about some nodes"));
-        return question;
-    }
-}
+@EntityResource(name = "questions", title = "Questions")
+public class QuestionsEntityResource
+{}

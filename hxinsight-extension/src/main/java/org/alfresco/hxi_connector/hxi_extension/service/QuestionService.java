@@ -31,9 +31,9 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 public interface QuestionService
 {
 
-    String askQuestion(Question question);
+    String askQuestion(String agentId, Question question);
 
     AnswerResponse getAnswer(String questionId);
 
-    String retryQuestion(String questionId, String comments, Question question);
+    String retryQuestion(String agentId, String questionId, String comments, Question question);
 }

@@ -194,11 +194,7 @@
 
     <bean id="QuestionService_security" class="org.alfresco.repo.security.permissions.impl.AlwaysProceedMethodInterceptor"/>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource">
-        <constructor-arg name="questionService" ref="QuestionService"/>
-        <constructor-arg name="questionConfig" ref="questionsApiConfig"/>
-        <constructor-arg name="questionPermissionService" ref="questionPermissionService"/>
-    </bean>
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource"/>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AgentsEntityResource">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
@@ -206,9 +202,13 @@
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AvatarRelation"/>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation">
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AgentsQuestionsRelation">
         <constructor-arg name="questionService" ref="QuestionService"/>
+        <constructor-arg name="questionConfig" ref="questionsApiConfig"/>
+        <constructor-arg name="questionPermissionService" ref="questionPermissionService"/>
     </bean>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionFeedbackRelation">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>

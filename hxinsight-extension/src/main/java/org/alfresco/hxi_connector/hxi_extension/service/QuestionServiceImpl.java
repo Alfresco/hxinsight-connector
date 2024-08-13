@@ -43,11 +43,11 @@ public class QuestionServiceImpl implements QuestionService
     private final PersonService personService;
 
     @Override
-    public String askQuestion(Question question)
+    public String askQuestion(String agentId, Question question)
     {
         NodeRef currentUserNodeRef = personService.getPersonOrNull(authenticationService.getCurrentUserName());
         question.setUserId(ofNullable(currentUserNodeRef).map(NodeRef::getId).orElse(null));
-        return hxInsightClient.askQuestion(question);
+        return hxInsightClient.askQuestion(agentId, question);
     }
 
     @Override
@@ -60,10 +60,10 @@ public class QuestionServiceImpl implements QuestionService
     }
 
     @Override
-    public String retryQuestion(String questionId, String comments, Question question)
+    public String retryQuestion(String agentId, String questionId, String comments, Question question)
     {
         NodeRef currentUserNodeRef = personService.getPersonOrNull(authenticationService.getCurrentUserName());
         question.setUserId(ofNullable(currentUserNodeRef).map(NodeRef::getId).orElse(null));
-        return hxInsightClient.retryQuestion(questionId, comments, question);
+        return hxInsightClient.retryQuestion(agentId, questionId, comments, question);
     }
 }
