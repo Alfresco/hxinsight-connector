@@ -35,8 +35,8 @@ jobs:
 
           git checkout -b test-ci
 
-          sed -i '' 's/DEVELOPMENT_VERSION:\ \"[^\"]*\"/DEVELOPMENT_VERSION: \"${{ github.event.inputs.development_version }}\"/g' ./.github/workflows/ci.yml
-          sed -i '' 's/RELEASE_VERSION:\ \"[^\"]*\"/RELEASE_VERSION: \"${{ github.event.inputs.release_version }}\"/g' ./.github/workflows/ci.yml
+          sed -i 's/DEVELOPMENT_VERSION:\ \"[^\"]*\"/DEVELOPMENT_VERSION: \"${{ github.event.inputs.development_version }}\"/g' ./.github/workflows/ci.yml
+          sed -i 's/RELEASE_VERSION:\ \"[^\"]*\"/RELEASE_VERSION: \"${{ github.event.inputs.release_version }}\"/g' ./.github/workflows/ci.yml
 
           git add .
 
