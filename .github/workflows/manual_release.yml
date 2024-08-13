@@ -2,18 +2,9 @@ name: Release
 run-name: Release ${{ github.event.inputs.release_version }}
 
 on:
-  workflow_dispatch:
-    inputs:
-      development_version:
-        description: 'The version that will be set in pom files after the release (next dev version)'
-        required: true
-        type: choice
-        options:
-          - '1.0.0-SNAPSHOT' # Hard coded for now - change type to "string" when needed
-      release_version:
-        description: 'The version of the release (tag).'
-        type: string
-        required: true
+  push:
+    branches:
+      - add-manual-release-2
 
 jobs:
   trigger_release:
