@@ -27,23 +27,28 @@ package org.alfresco.hxi_connector.e2e_test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
-import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+
+import java.util.List;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,6 +64,8 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -68,6 +75,7 @@ public class QuestionsAndAnswersE2eTest
     private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions";
     private static final String SUBMIT_QUESTION_SCENARIO = "Submit-question";
     private static final String NEXT_QUESTION_STATE = "Next-question";
+
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -79,6 +87,8 @@ public class QuestionsAndAnswersE2eTest
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
+
+    private final RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
     @BeforeAll
     public static void beforeAll()
@@ -207,11 +217,26 @@ public class QuestionsAndAnswersE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(SC_OK, response.statusCode());
-        assertEquals(questionId, response.jsonPath().get("list.entries.entry[0].questionId"));
-        assertEquals("This is the answer to the question", response.jsonPath().get("list.entries.entry[0].answer"));
-        assertEquals("276718b0-c3ab-4e11-81d5-96dbbb540269", response.jsonPath().get("list.entries.entry[0].references[0].referenceId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), getRequestedFor(urlEqualTo("/questions/%s/answer".formatted(questionId)))));
+        assertThat(response.statusCode()).isEqualTo(SC_OK);
+        assertThat(response)
+                .extracting(Response::jsonPath)
+                .satisfies(jsonPath -> {
+                    assertThat(jsonPath.<String> get("list.entries.entry[0].questionId")).isEqualTo(questionId);
+                    assertThat(jsonPath.<String> get("list.entries.entry[0].answer")).isEqualTo("This is the answer to the question");
+                    assertThat(jsonPath.<String> get("list.entries.entry[0].references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
+                });
+        RetryUtils.retryWithBackoff(() -> {
+            List<LoggedRequest> loggedRequests = WireMock.findAll(WireMock.getRequestedFor(urlPathEqualTo("/questions/%s/answer".formatted(questionId)))
+                    .withQueryParam("userId", WireMock.matching("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
+            assertThat(loggedRequests)
+                    .hasSize(1)
+                    .first()
+                    .extracting(request -> request.queryParameter("userId").firstValue())
+                    .extracting(repositoryClient::getNode)
+                    .extracting(Node::properties)
+                    .extracting(properties -> properties.get("cm:userName"))
+                    .isEqualTo(ADMIN_USER.username());
+        });
     }
 
     @Test
