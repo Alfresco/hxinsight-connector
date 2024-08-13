@@ -30,10 +30,16 @@ jobs:
         run: |
           echo "development_version: ${{ github.event.inputs.development_version }}"
           echo "release_version: ${{ github.event.inputs.release_version }}"
+
           git checkout -b test-ci
+
+          sed -i '' 's/DEVELOPMENT_VERSION:\ \"[^\"]*\"/DEVELOPMENT_VERSION: \"${{ github.event.inputs.development_version }}\"/g' ./github/workflows/ci.yml
           sed -i '' 's/RELEASE_VERSION:\ \"[^\"]*\"/RELEASE_VERSION: \"${{ github.event.inputs.release_version }}\"/g' ./github/workflows/ci.yml
+
           git add .
+
           git commit -m "${{ github.event.inputs.release_version }} [release]"
+
           git push origin test-ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
