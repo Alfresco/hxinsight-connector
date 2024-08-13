@@ -42,4 +42,5 @@ jobs:
 
           git push origin test-ci
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_USERNAME: ${{ secrets.BOT_GITHUB_USERNAME }}
+          GITHUB_TOKEN: ${{ secrets.BOT_GITHUB_TOKEN }}
