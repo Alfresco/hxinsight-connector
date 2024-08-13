@@ -6,11 +6,10 @@ on:
     inputs:
       development_version:
         description: 'The version that will be set in pom files after the release (next dev version)'
-        type: choice
         required: true
+        type: choice
         options:
           - '1.0.0-SNAPSHOT'
-
       release_version:
         description: 'The version of the release (tag).'
         type: string
