@@ -30,6 +30,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.springframework.extensions.webscripts.Status.STATUS_BAD_REQUEST;
@@ -48,14 +49,14 @@ import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.RestrictionQuery;
 
-public class QuestionsEntityResourceTest
+public class AgentsQuestionsRelationTest
 {
     private static final String AGENT_ID = "agent-id";
 
     private final HxInsightClient hxInsightClient = mock(HxInsightClient.class);
     private final QuestionsApiConfig questionConfig = new QuestionsApiConfig(3);
     private final QuestionPermissionService questionPermissionService = mock(QuestionPermissionService.class);
-    private final QuestionsEntityResource questionsEntityResource = new QuestionsEntityResource(hxInsightClient, questionConfig, questionPermissionService);
+    private final AgentsQuestionsRelation agentsQuestionsRelation = new AgentsQuestionsRelation(hxInsightClient, questionConfig, questionPermissionService);
 
     @BeforeEach
     public void setUp()
@@ -70,7 +71,7 @@ public class QuestionsEntityResourceTest
         List<QuestionModel> questions = List.of(mock(QuestionModel.class), mock(QuestionModel.class));
 
         // when
-        WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> questionsEntityResource.create(questions, null));
+        WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> agentsQuestionsRelation.create(AGENT_ID, questions, null));
 
         assertTrue(webScriptException.getMessage().contains("You can only ask one question at a time."));
         assertEquals(STATUS_BAD_REQUEST, webScriptException.getStatus());
@@ -83,11 +84,10 @@ public class QuestionsEntityResourceTest
         QuestionModel question = new QuestionModel(
                 null,
                 "What is the capital of France?",
-                AGENT_ID,
                 new RestrictionQuery(Set.of("node-id-1", "node-id-2", "node-id-3", "node-id-4")));
 
         // when
-        WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> questionsEntityResource.create(List.of(question), null));
+        WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> agentsQuestionsRelation.create(AGENT_ID, List.of(question), null));
 
         assertTrue(webScriptException.getMessage().contains("You can only ask about up to 3 nodes at a time"));
         assertEquals(STATUS_BAD_REQUEST, webScriptException.getStatus());
@@ -100,13 +100,12 @@ public class QuestionsEntityResourceTest
         QuestionModel question = new QuestionModel(
                 null,
                 "What is the capital of France?",
-                AGENT_ID,
                 new RestrictionQuery(Set.of("node-id-1")));
 
         given(questionPermissionService.hasPermissionToAskAboutDocuments(any())).willReturn(false);
 
         // when
-        WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> questionsEntityResource.create(List.of(question), null));
+        WebScriptException webScriptException = assertThrows(WebScriptException.class, () -> agentsQuestionsRelation.create(AGENT_ID, List.of(question), null));
 
         assertTrue(webScriptException.getMessage().contains("You don't have permission to ask about some nodes"));
         assertEquals(STATUS_FORBIDDEN, webScriptException.getStatus());
@@ -119,14 +118,13 @@ public class QuestionsEntityResourceTest
         QuestionModel question = new QuestionModel(
                 null,
                 "What is the capital of France?",
-                AGENT_ID,
                 new RestrictionQuery(Set.of("node-id")));
 
         String questionId = "a13c4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d";
-        given(hxInsightClient.askQuestion(any())).willReturn(questionId);
+        given(hxInsightClient.askQuestion(eq(AGENT_ID), any())).willReturn(questionId);
 
         // when
-        List<QuestionModel> questionIds = questionsEntityResource.create(List.of(question), null);
+        List<QuestionModel> questionIds = agentsQuestionsRelation.create(AGENT_ID, List.of(question), null);
 
         // then
         assertEquals(1, questionIds.size());

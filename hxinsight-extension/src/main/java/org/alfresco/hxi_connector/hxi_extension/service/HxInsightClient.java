@@ -102,14 +102,14 @@ public class HxInsightClient
         }
     }
 
-    public String askQuestion(Question question)
+    public String askQuestion(String agentId, Question question)
     {
         try
         {
             String body = objectMapper.writeValueAsString(question);
 
             HttpRequest request = requestWithRequiredHeaders()
-                    .uri(URI.create(config.getQuestionUrl()))
+                    .uri(URI.create(format(config.getQuestionUrl(), agentId)))
                     .header(CONTENT_TYPE, "application/json")
                     .POST(BodyPublishers.ofString(body))
                     .build();
@@ -171,13 +171,13 @@ public class HxInsightClient
         }
     }
 
-    public String retryQuestion(String questionId, String comments, Question question)
+    public String retryQuestion(String agentId, String questionId, String comments, Question question)
     {
         submitFeedback(questionId, Feedback.builder()
                 .feedbackType(RETRY)
                 .comments(comments)
                 .build());
-        return askQuestion(question);
+        return askQuestion(agentId, question);
     }
 
     public BinaryResource getAvatar(String agentId)

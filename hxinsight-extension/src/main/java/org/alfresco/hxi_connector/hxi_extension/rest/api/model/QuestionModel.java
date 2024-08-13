@@ -50,7 +50,6 @@ public class QuestionModel
 {
     private String _questionId;
     private String question;
-    private String agentId;
     private RestrictionQuery restrictionQuery;
 
     public QuestionModel withId(String questionId)
@@ -61,6 +60,6 @@ public class QuestionModel
 
     public Question toQuestion()
     {
-        return new Question(question, agentId, restrictionQuery.toContextObjects());
+        return new Question(question, restrictionQuery.toContextObjects());
     }
 }
