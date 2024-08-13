@@ -12,7 +12,6 @@ on:
         type: string
         required: true
 
-
 jobs:
   trigger_release:
     runs-on: ubuntu-latest
