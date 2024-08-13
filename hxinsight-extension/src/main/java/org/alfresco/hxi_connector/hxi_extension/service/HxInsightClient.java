@@ -132,7 +132,7 @@ public class HxInsightClient
         try
         {
             HttpRequest request = requestWithRequiredHeaders()
-                    .uri(URI.create(format(config.getAnswerUrl(), questionId, userId)))
+                    .uri(URI.create(format(config.getAnswerUrl() + "?userId=%s", questionId, userId)))
                     .GET()
                     .build();
 
