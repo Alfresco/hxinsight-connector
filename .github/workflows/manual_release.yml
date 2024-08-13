@@ -4,10 +4,6 @@ run-name: Release ${{ github.event.inputs.release_version }}
 on:
   workflow_dispatch:
     inputs:
-      development_version:
-        description: 'The version that will be set in pom files after the release (next dev version)'
-        type: string
-        required: true
       release_version:
         description: 'The version of the release (tag).'
         type: string
@@ -33,7 +29,6 @@ jobs:
 
           git checkout -b test-ci
 
-          sed -i '' 's/DEVELOPMENT_VERSION:\ \"[^\"]*\"/DEVELOPMENT_VERSION: \"${{ github.event.inputs.development_version }}\"/g' ./github/workflows/ci.yml
           sed -i '' 's/RELEASE_VERSION:\ \"[^\"]*\"/RELEASE_VERSION: \"${{ github.event.inputs.release_version }}\"/g' ./github/workflows/ci.yml
 
           git add .
