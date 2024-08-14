@@ -47,6 +47,7 @@ import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -63,6 +64,7 @@ import org.alfresco.repo.event.v1.model.UserInfo;
 @NoArgsConstructor(access = PRIVATE)
 public class PropertyMappingHelper
 {
+    private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
 
     public static <T> Stream<PropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
             String propertyKey, Function<NodeResource, T> fieldGetter)
@@ -133,7 +135,7 @@ public class PropertyMappingHelper
 
         if (enterpriseEventData.getResourceReaderAuthorities() == null)
         {
-            return Stream.empty();
+            return Stream.of(PropertyDelta.updated(ALLOW_ACCESS, Set.of(GROUP_EVERYONE)));
         }
 
         return Stream.of(PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities()));
