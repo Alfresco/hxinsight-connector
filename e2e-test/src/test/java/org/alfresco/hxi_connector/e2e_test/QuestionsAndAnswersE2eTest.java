@@ -445,16 +445,19 @@ public class QuestionsAndAnswersE2eTest
     }
 
     @SneakyThrows
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private String extractUserIdFromBody(LoggedRequest request)
     {
         return new ObjectMapper().readTree(request.getBodyAsString()).get("userId").asText();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private String extractUserIdFromQueryParam(LoggedRequest request)
     {
         return request.queryParameter("userId").firstValue();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private String getUsernameByNodeId(String nodeId)
     {
         return repositoryClient.getNode(nodeId)
