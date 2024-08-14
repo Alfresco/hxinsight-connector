@@ -158,41 +158,11 @@
         <constructor-arg name="permissionService" ref="PermissionService"/>
     </bean>
 
-    <bean id="questionService" class="org.alfresco.hxi_connector.hxi_extension.service.QuestionServiceImpl">
+    <bean id="questionService" class="org.alfresco.hxi_connector.hxi_extension.service.QuestionService">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>
         <constructor-arg name="authenticationService" ref="AuthenticationService"/>
         <constructor-arg name="personService" ref="PersonService"/>
     </bean>
-
-    <bean id="QuestionService" class="org.springframework.aop.framework.ProxyFactoryBean">
-        <property name="proxyInterfaces">
-            <value>org.alfresco.hxi_connector.hxi_extension.service.QuestionService</value>
-        </property>
-        <property name="target">
-            <ref bean="questionService"/>
-        </property>
-        <property name="interceptorNames">
-            <list>
-                <idref bean="QuestionService_transaction"/>
-                <idref bean="AuditMethodInterceptor"/>
-                <idref bean="exceptionTranslator"/>
-                <idref bean="QuestionService_security"/>
-            </list>
-        </property>
-    </bean>
-
-    <bean id="QuestionService_transaction" class="org.springframework.transaction.interceptor.TransactionInterceptor">
-        <property name="transactionManager">
-            <ref bean="transactionManager"/>
-        </property>
-        <property name="transactionAttributes">
-            <props>
-                <prop key="*">${server.transaction.mode.default}</prop>
-            </props>
-        </property>
-    </bean>
-
-    <bean id="QuestionService_security" class="org.alfresco.repo.security.permissions.impl.AlwaysProceedMethodInterceptor"/>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource"/>
 
@@ -203,12 +173,14 @@
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AvatarRelation"/>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.AgentsQuestionsRelation">
-        <constructor-arg name="questionService" ref="QuestionService"/>
+        <constructor-arg name="questionService" ref="questionService"/>
         <constructor-arg name="questionConfig" ref="questionsApiConfig"/>
         <constructor-arg name="questionPermissionService" ref="questionPermissionService"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation"/>
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionAnswersRelation">
+        <constructor-arg name="questionService" ref="questionService"/>
+    </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionFeedbackRelation">
         <constructor-arg name="hxInsightClient" ref="hxInsightClient"/>

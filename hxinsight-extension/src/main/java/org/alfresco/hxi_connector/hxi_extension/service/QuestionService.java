@@ -25,15 +25,43 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static java.util.Optional.ofNullable;
+
+import lombok.RequiredArgsConstructor;
+
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
+import org.alfresco.service.cmr.repository.NodeRef;
+import org.alfresco.service.cmr.security.AuthenticationService;
+import org.alfresco.service.cmr.security.PersonService;
 
-public interface QuestionService
+@RequiredArgsConstructor
+public class QuestionService
 {
+    private final HxInsightClient hxInsightClient;
+    private final AuthenticationService authenticationService;
+    private final PersonService personService;
 
-    String askQuestion(String agentId, Question question);
+    public String askQuestion(String agentId, Question question)
+    {
+        question.setUserId(getUserId());
+        return hxInsightClient.askQuestion(agentId, question);
+    }
 
-    AnswerResponse getAnswer(String questionId);
+    public AnswerResponse getAnswer(String questionId)
+    {
+        return hxInsightClient.getAnswer(questionId, getUserId());
+    }
 
-    String retryQuestion(String agentId, String questionId, String comments, Question question);
+    public String retryQuestion(String agentId, String questionId, String comments, Question question)
+    {
+        question.setUserId(getUserId());
+        return hxInsightClient.retryQuestion(agentId, questionId, comments, question);
+    }
+
+    private String getUserId()
+    {
+        NodeRef currentUserNodeRef = personService.getPersonOrNull(authenticationService.getCurrentUserName());
+        return ofNullable(currentUserNodeRef).map(NodeRef::getId).orElse(null);
+    }
 }
