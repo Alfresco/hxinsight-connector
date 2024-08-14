@@ -33,7 +33,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_CREATED;
@@ -53,6 +52,7 @@ import java.util.List;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.restassured.response.Response;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -62,13 +62,13 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -130,7 +130,17 @@ public class QuestionsAndAnswersE2eTest
         // then
         assertEquals(SC_OK, response.statusCode());
         assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions"))));
+        RetryUtils.retryWithBackoff(() -> {
+            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agents/{agentId}/questions"))
+                    .withPathParam("agentId", equalTo("agent-id"))
+                    .withRequestBody(containing("userId")));
+            assertThat(loggedRequests)
+                    .hasSize(1)
+                    .first()
+                    .extracting(this::extractUserIdFromBody)
+                    .extracting(this::getUsernameByNodeId)
+                    .isEqualTo(ADMIN_USER.username());
+        });
     }
 
     @Test
@@ -235,10 +245,8 @@ public class QuestionsAndAnswersE2eTest
             assertThat(loggedRequests)
                     .hasSize(1)
                     .first()
-                    .extracting(request -> request.queryParameter("userId").firstValue())
-                    .extracting(repositoryClient::getNode)
-                    .extracting(Node::properties)
-                    .extracting(properties -> properties.get("cm:userName"))
+                    .extracting(this::extractUserIdFromQueryParam)
+                    .extracting(this::getUsernameByNodeId)
                     .isEqualTo(ADMIN_USER.username());
         });
     }
@@ -285,7 +293,7 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(SC_CREATED, response.statusCode());
         assertEquals("LIKE", response.jsonPath().get("entry.feedbackType"));
         assertEquals("The response was very helpful and detailed. Good bot.", response.jsonPath().get("entry.comments"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
                 .withRequestBody(containing("GOOD"))));
     }
 
@@ -392,9 +400,9 @@ public class QuestionsAndAnswersE2eTest
         assertEquals("a1eae985-6984-4346-9e08-d430fa8404b2", response.jsonPath().get("entry.questionId"));
         assertEquals("I need more details about the answer.", response.jsonPath().get("entry.comments"));
         RetryUtils.retryWithBackoff(() -> {
-            verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
                     .withRequestBody(containing("RETRY")));
-            verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
         });
     }
 
@@ -424,8 +432,8 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
-        verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
-        verify(exactly(0), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -434,5 +442,24 @@ public class QuestionsAndAnswersE2eTest
 
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
                 .withJavaOpts(javaOpts);
+    }
+
+    @SneakyThrows
+    private String extractUserIdFromBody(LoggedRequest request)
+    {
+        return new ObjectMapper().readTree(request.getBodyAsString()).get("userId").asText();
+    }
+
+    private String extractUserIdFromQueryParam(LoggedRequest request)
+    {
+        return request.queryParameter("userId").firstValue();
+    }
+
+    private String getUsernameByNodeId(String nodeId)
+    {
+        return repositoryClient.getNode(nodeId)
+                .properties()
+                .get("cm:userName")
+                .toString();
     }
 }

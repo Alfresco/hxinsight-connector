@@ -53,7 +53,6 @@ public class QuestionServiceImpl implements QuestionService
     @Override
     public AnswerResponse getAnswer(String questionId)
     {
-
         NodeRef currentUserNodeRef = personService.getPersonOrNull(authenticationService.getCurrentUserName());
         String userId = ofNullable(currentUserNodeRef).map(NodeRef::getId).orElse(null);
         return hxInsightClient.getAnswer(questionId, userId);
