@@ -128,8 +128,8 @@ public class QuestionsAndAnswersE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(SC_OK, response.statusCode());
-        assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
+        assertThat(response.statusCode()).isEqualTo(SC_OK);
+        assertThat(response.jsonPath().<String> get("entry.questionId")).isEqualTo("5fca2c77-cdc0-4118-9373-e75f53177ff8");
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agents/{agentId}/questions"))
                     .withPathParam("agentId", equalTo("agent-id"))
@@ -231,13 +231,11 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_OK);
-        assertThat(response)
-                .extracting(Response::jsonPath)
-                .satisfies(jsonPath -> {
-                    assertThat(jsonPath.<String> get("list.entries.entry[0].questionId")).isEqualTo(questionId);
-                    assertThat(jsonPath.<String> get("list.entries.entry[0].answer")).isEqualTo("This is the answer to the question");
-                    assertThat(jsonPath.<String> get("list.entries.entry[0].references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
-                });
+        assertThat(response.jsonPath()).satisfies(jsonPath -> {
+            assertThat(jsonPath.<String> get("list.entries.entry[0].questionId")).isEqualTo(questionId);
+            assertThat(jsonPath.<String> get("list.entries.entry[0].answer")).isEqualTo("This is the answer to the question");
+            assertThat(jsonPath.<String> get("list.entries.entry[0].references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
+        });
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> loggedRequests = WireMock.findAll(getRequestedFor(urlPathTemplate("/questions/{questionId}/answer"))
                     .withPathParam("questionId", equalTo(questionId))
@@ -396,13 +394,23 @@ public class QuestionsAndAnswersE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(SC_CREATED, response.statusCode());
-        assertEquals("a1eae985-6984-4346-9e08-d430fa8404b2", response.jsonPath().get("entry.questionId"));
-        assertEquals("I need more details about the answer.", response.jsonPath().get("entry.comments"));
+        assertThat(response.statusCode()).isEqualTo(SC_CREATED);
+        assertThat(response.jsonPath()).satisfies(jsonPath -> {
+            assertThat(jsonPath.<String> get("entry.questionId")).isEqualTo("a1eae985-6984-4346-9e08-d430fa8404b2");
+            assertThat(jsonPath.<String> get("entry.comments")).isEqualTo("I need more details about the answer.");
+        });
         RetryUtils.retryWithBackoff(() -> {
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
                     .withRequestBody(containing("RETRY")));
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
+            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agents/{agentId}/questions"))
+                    .withPathParam("agentId", equalTo("agent-id"))
+                    .withRequestBody(containing("userId")));
+            assertThat(loggedRequests)
+                    .hasSize(1)
+                    .first()
+                    .extracting(this::extractUserIdFromBody)
+                    .extracting(this::getUsernameByNodeId)
+                    .isEqualTo(ADMIN_USER.username());
         });
     }
 

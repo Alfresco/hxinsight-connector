@@ -61,6 +61,8 @@ public class QuestionServiceImpl implements QuestionService
     @Override
     public String retryQuestion(String agentId, String questionId, String comments, Question question)
     {
+        NodeRef currentUserNodeRef = personService.getPersonOrNull(authenticationService.getCurrentUserName());
+        question.setUserId(ofNullable(currentUserNodeRef).map(NodeRef::getId).orElse(null));
         return hxInsightClient.retryQuestion(agentId, questionId, comments, question);
     }
 }
