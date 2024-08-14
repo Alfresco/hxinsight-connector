@@ -26,25 +26,33 @@
 package org.alfresco.hxi_connector.e2e_test;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
 import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
 import static org.apache.http.HttpStatus.SC_OK;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
+
+import java.util.List;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import io.restassured.response.Response;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -54,11 +62,13 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.shaded.com.fasterxml.jackson.databind.ObjectMapper;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -68,6 +78,7 @@ public class QuestionsAndAnswersE2eTest
     private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions";
     private static final String SUBMIT_QUESTION_SCENARIO = "Submit-question";
     private static final String NEXT_QUESTION_STATE = "Next-question";
+
     static final Network network = Network.newNetwork();
     @Container
     static final PostgreSQLContainer<?> postgres = DockerContainers.createPostgresContainerWithin(network);
@@ -79,6 +90,8 @@ public class QuestionsAndAnswersE2eTest
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
+
+    private final RepositoryClient repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
 
     @BeforeAll
     public static void beforeAll()
@@ -115,9 +128,19 @@ public class QuestionsAndAnswersE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(SC_OK, response.statusCode());
-        assertEquals("5fca2c77-cdc0-4118-9373-e75f53177ff8", response.jsonPath().get("entry.questionId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions"))));
+        assertThat(response.statusCode()).isEqualTo(SC_OK);
+        assertThat(response.jsonPath().<String> get("entry.questionId")).isEqualTo("5fca2c77-cdc0-4118-9373-e75f53177ff8");
+        RetryUtils.retryWithBackoff(() -> {
+            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agents/{agentId}/questions"))
+                    .withPathParam("agentId", equalTo("agent-id"))
+                    .withRequestBody(containing("userId")));
+            assertThat(loggedRequests)
+                    .hasSize(1)
+                    .first()
+                    .extracting(this::extractUserIdFromBody)
+                    .extracting(this::getUsernameByNodeId)
+                    .isEqualTo(ADMIN_USER.username());
+        });
     }
 
     @Test
@@ -207,11 +230,23 @@ public class QuestionsAndAnswersE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(SC_OK, response.statusCode());
-        assertEquals(questionId, response.jsonPath().get("list.entries.entry[0].questionId"));
-        assertEquals("This is the answer to the question", response.jsonPath().get("list.entries.entry[0].answer"));
-        assertEquals("276718b0-c3ab-4e11-81d5-96dbbb540269", response.jsonPath().get("list.entries.entry[0].references[0].referenceId"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), getRequestedFor(urlEqualTo("/questions/%s/answer".formatted(questionId)))));
+        assertThat(response.statusCode()).isEqualTo(SC_OK);
+        assertThat(response.jsonPath()).satisfies(jsonPath -> {
+            assertThat(jsonPath.<String> get("list.entries.entry[0].questionId")).isEqualTo(questionId);
+            assertThat(jsonPath.<String> get("list.entries.entry[0].answer")).isEqualTo("This is the answer to the question");
+            assertThat(jsonPath.<String> get("list.entries.entry[0].references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
+        });
+        RetryUtils.retryWithBackoff(() -> {
+            List<LoggedRequest> loggedRequests = WireMock.findAll(getRequestedFor(urlPathTemplate("/questions/{questionId}/answer"))
+                    .withPathParam("questionId", equalTo(questionId))
+                    .withQueryParam("userId", matching("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
+            assertThat(loggedRequests)
+                    .hasSize(1)
+                    .first()
+                    .extracting(this::extractUserIdFromQueryParam)
+                    .extracting(this::getUsernameByNodeId)
+                    .isEqualTo(ADMIN_USER.username());
+        });
     }
 
     @Test
@@ -256,7 +291,7 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(SC_CREATED, response.statusCode());
         assertEquals("LIKE", response.jsonPath().get("entry.feedbackType"));
         assertEquals("The response was very helpful and detailed. Good bot.", response.jsonPath().get("entry.comments"));
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
                 .withRequestBody(containing("GOOD"))));
     }
 
@@ -359,13 +394,23 @@ public class QuestionsAndAnswersE2eTest
                 .then().extract().response();
 
         // then
-        assertEquals(SC_CREATED, response.statusCode());
-        assertEquals("a1eae985-6984-4346-9e08-d430fa8404b2", response.jsonPath().get("entry.questionId"));
-        assertEquals("I need more details about the answer.", response.jsonPath().get("entry.comments"));
+        assertThat(response.statusCode()).isEqualTo(SC_CREATED);
+        assertThat(response.jsonPath()).satisfies(jsonPath -> {
+            assertThat(jsonPath.<String> get("entry.questionId")).isEqualTo("a1eae985-6984-4346-9e08-d430fa8404b2");
+            assertThat(jsonPath.<String> get("entry.comments")).isEqualTo("I need more details about the answer.");
+        });
         RetryUtils.retryWithBackoff(() -> {
-            verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
                     .withRequestBody(containing("RETRY")));
-            verify(exactly(1), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
+            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agents/{agentId}/questions"))
+                    .withPathParam("agentId", equalTo("agent-id"))
+                    .withRequestBody(containing("userId")));
+            assertThat(loggedRequests)
+                    .hasSize(1)
+                    .first()
+                    .extracting(this::extractUserIdFromBody)
+                    .extracting(this::getUsernameByNodeId)
+                    .isEqualTo(ADMIN_USER.username());
         });
     }
 
@@ -395,8 +440,8 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
-        verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
-        verify(exactly(0), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
@@ -405,5 +450,27 @@ public class QuestionsAndAnswersE2eTest
 
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
                 .withJavaOpts(javaOpts);
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private String extractUserIdFromBody(LoggedRequest request)
+    {
+        return new ObjectMapper().readTree(request.getBodyAsString()).get("userId").asText();
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private String extractUserIdFromQueryParam(LoggedRequest request)
+    {
+        return request.queryParameter("userId").firstValue();
+    }
+
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private String getUsernameByNodeId(String nodeId)
+    {
+        return repositoryClient.getNode(nodeId)
+                .properties()
+                .get("cm:userName")
+                .toString();
     }
 }

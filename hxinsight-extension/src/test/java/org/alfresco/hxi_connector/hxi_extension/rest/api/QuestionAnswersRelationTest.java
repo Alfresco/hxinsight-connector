@@ -43,7 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AnswerModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
@@ -51,9 +51,10 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 @ExtendWith(MockitoExtension.class)
 class QuestionAnswersRelationTest
 {
+    private static final String USER_ID = "user-id";
 
     @Mock
-    private HxInsightClient mockHxInsightClient;
+    private QuestionService questionService;
     @Mock
     private Parameters mockParameters;
 
@@ -66,13 +67,13 @@ class QuestionAnswersRelationTest
         // given
         String questionId = "questionId";
         AnswerResponse hXAnswer = AnswerResponse.builder().questionId(questionId).answer("Some answer").build();
-        given(mockHxInsightClient.getAnswer(questionId)).willReturn(hXAnswer);
+        given(questionService.getAnswer(questionId)).willReturn(hXAnswer);
 
         // when
         CollectionWithPagingInfo<AnswerModel> answerResponse = objectUnderTest.readAll(questionId, mockParameters);
 
         // then
-        then(mockHxInsightClient).should().getAnswer(questionId);
+        then(questionService).should().getAnswer(questionId);
         Collection<AnswerModel> answerResponseEntries = answerResponse.getCollection();
         assertEquals(1, answerResponseEntries.size());
         AnswerModel answer = answerResponseEntries.iterator().next();
@@ -85,7 +86,7 @@ class QuestionAnswersRelationTest
     {
         // given
         String questionId = "questionId";
-        given(mockHxInsightClient.getAnswer(questionId)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, "Some error message"));
+        given(questionService.getAnswer(questionId)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, "Some error message"));
 
         // when + then
         assertThrows(WebScriptException.class, () -> objectUnderTest.readAll(questionId, mockParameters));

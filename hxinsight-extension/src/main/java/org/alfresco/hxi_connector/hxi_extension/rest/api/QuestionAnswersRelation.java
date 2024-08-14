@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AnswerModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.rest.framework.WebApiDescription;
 import org.alfresco.rest.framework.resource.RelationshipResource;
@@ -42,12 +42,13 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 @RelationshipResource(name = "answers", title = "Answers to questions about documents", entityResource = QuestionsEntityResource.class)
 public class QuestionAnswersRelation implements RelationshipResourceAction.Read<AnswerModel>
 {
-    private final HxInsightClient hxInsightClient;
+
+    private final QuestionService questionService;
 
     @WebApiDescription(title = "Get answers to a question")
     public CollectionWithPagingInfo<AnswerModel> readAll(String questionId, Parameters parameters)
     {
-        AnswerResponse hxInsightAnswer = hxInsightClient.getAnswer(questionId);
+        AnswerResponse hxInsightAnswer = questionService.getAnswer(questionId);
         return CollectionWithPagingInfo.asPagedCollection(AnswerModel.fromServiceModel(hxInsightAnswer));
     }
 }

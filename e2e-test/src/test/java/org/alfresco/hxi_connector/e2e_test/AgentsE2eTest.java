@@ -164,11 +164,8 @@ public class AgentsE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        // @formatter:off
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
                 .withJavaOpts(concatJavaOpts(getMinimalRepoJavaOpts(postgres, activemq),
-                        getHxInsightRepoJavaOpts(hxInsightMock))
-                );
-        // @formatter:on
+                        getHxInsightRepoJavaOpts(hxInsightMock)));
     }
 }

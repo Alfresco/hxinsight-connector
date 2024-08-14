@@ -37,8 +37,8 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.QuestionModel;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.RetryModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
 import org.alfresco.hxi_connector.hxi_extension.service.QuestionPermissionService;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.rest.framework.Operation;
 import org.alfresco.rest.framework.WebApiDescription;
@@ -52,7 +52,7 @@ import org.alfresco.rest.framework.webscripts.WithResponse;
 @RelationshipResource(name = "questions", title = "Questions about documents", entityResource = AgentsEntityResource.class)
 public class AgentsQuestionsRelation implements RelationshipResourceAction.Create<QuestionModel>
 {
-    private final HxInsightClient hxInsightClient;
+    private final QuestionService questionService;
     private final QuestionsApiConfig questionConfig;
     private final QuestionPermissionService questionPermissionService;
 
@@ -65,7 +65,7 @@ public class AgentsQuestionsRelation implements RelationshipResourceAction.Creat
         QuestionModel questionModel = questions.get(0);
         Question question = validateQuestion(questionModel);
 
-        String questionId = hxInsightClient.askQuestion(agentId, question);
+        String questionId = questionService.askQuestion(agentId, question);
 
         return List.of(questionModel.withId(questionId));
     }
@@ -76,7 +76,7 @@ public class AgentsQuestionsRelation implements RelationshipResourceAction.Creat
     {
         Question question = validateQuestion(retry.getOriginalQuestion());
 
-        String newQuestionId = hxInsightClient.retryQuestion(agentId, questionId, retry.getComments(), question);
+        String newQuestionId = questionService.retryQuestion(agentId, questionId, retry.getComments(), question);
         return retry.withId(newQuestionId);
     }
 
