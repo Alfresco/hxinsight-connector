@@ -449,9 +449,10 @@ class PropertiesMapperTest
     }
 
     @Test
-    void shouldNotAddACLInfoIfNotPresent_NodeCreated()
+    void shouldAddDefaultACLInfoIfNotPresent_NodeCreated()
     {
         // given
+        String groupEveryone = "GROUP_EVERYONE";
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
         setType(event, NODE_CREATED);
@@ -466,7 +467,8 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated(ALLOW_ACCESS, Set.of(groupEveryone)));
 
         assertEquals(expectedPropertyDeltas, propertyDeltas);
     }
