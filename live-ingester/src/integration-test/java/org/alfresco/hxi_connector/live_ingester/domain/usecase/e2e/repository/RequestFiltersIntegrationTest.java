@@ -993,6 +993,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        "createdBy" : {
                          "value" : "admin"
                        },
+                        "ALLOW_ACCESS" : {
+                          "value" : [ "GROUP_EVERYONE" ]
+                        },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf"
                        },
@@ -1273,6 +1276,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        "createdBy" : {
                          "value" : "admin"
                        },
+                        "ALLOW_ACCESS" : {
+                          "value" : [ "GROUP_EVERYONE" ]
+                        },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf"
                        },
