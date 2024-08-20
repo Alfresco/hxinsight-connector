@@ -29,6 +29,8 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
+import java.time.Instant;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -46,6 +48,7 @@ public class DeleteNodeCommandHandlerTest
 {
     private static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
     private static final String SOURCE_ID = "dummy-source-id";
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @InjectMocks
     private DeleteNodeCommandHandler deleteNodeCommandHandler;
@@ -58,8 +61,10 @@ public class DeleteNodeCommandHandlerTest
     public void testHandle()
     {
         // given
-        DeleteNodeCommand deleteNodeCommand = mock(DeleteNodeCommand.class);
-        given(deleteNodeCommand.nodeId()).willReturn(NODE_ID);
+        DeleteNodeCommand deleteNodeCommand = new DeleteNodeCommand(
+                NODE_ID,
+                TIMESTAMP);
+
         given(integrationProperties.application()).willReturn(mock(Application.class));
         given(integrationProperties.application().getSourceId()).willReturn(SOURCE_ID);
 
@@ -67,7 +72,7 @@ public class DeleteNodeCommandHandlerTest
         deleteNodeCommandHandler.handle(deleteNodeCommand);
 
         // then
-        NodeEvent expectedNodeEvent = new DeleteNodeEvent(NODE_ID, SOURCE_ID);
+        NodeEvent expectedNodeEvent = new DeleteNodeEvent(NODE_ID, SOURCE_ID, TIMESTAMP);
         then(ingestionEngineEventPublisher).should().publishMessage(expectedNodeEvent);
     }
 }

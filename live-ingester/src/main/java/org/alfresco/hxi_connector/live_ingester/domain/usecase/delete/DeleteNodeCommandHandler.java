@@ -45,7 +45,7 @@ public class DeleteNodeCommandHandler
     {
         String nodeId = deleteNodeCommand.nodeId();
         log.debug("Processing delete command for {}", nodeId);
-        DeleteNodeEvent deleteNodeEvent = new DeleteNodeEvent(nodeId, integrationProperties.application().getSourceId());
+        DeleteNodeEvent deleteNodeEvent = new DeleteNodeEvent(nodeId, integrationProperties.application().getSourceId(), deleteNodeCommand.timestamp());
         ingestionEngineEventPublisher.publishMessage(deleteNodeEvent);
     }
 }

@@ -33,18 +33,21 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 
+import java.time.Instant;
+
 import org.junit.jupiter.api.Test;
 
 class UpdateNodeEventTest
 {
     private static final String NODE_ID = "node-id";
     private static final String SOURCE_ID = "dummy-source-id";
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @Test
     void shouldOverwriteAlreadySetProperty()
     {
         // given
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID, TIMESTAMP);
 
         NodeProperty<String> name1 = new NodeProperty<>(CREATED_BY_PROPERTY, "admin");
         NodeProperty<String> name2 = new NodeProperty<>(CREATED_BY_PROPERTY, "hruser");
@@ -62,7 +65,7 @@ class UpdateNodeEventTest
     void shouldNotDuplicatePropertiesToUnset()
     {
         // given
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID, TIMESTAMP);
 
         // when
         updateNodeEvent.addUnsetInstruction(CREATED_BY_PROPERTY);

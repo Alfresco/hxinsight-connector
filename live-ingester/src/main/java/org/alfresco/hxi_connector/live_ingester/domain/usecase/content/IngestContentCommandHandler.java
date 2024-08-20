@@ -60,7 +60,7 @@ public class IngestContentCommandHandler
 
     public void handle(TriggerContentIngestionCommand command)
     {
-        TransformRequest transformRequest = new TransformRequest(command.nodeId(), command.mimeType());
+        TransformRequest transformRequest = new TransformRequest(command.nodeId(), command.mimeType(), command.timestamp());
         transformRequester.requestTransform(transformRequest);
     }
 
@@ -78,7 +78,7 @@ public class IngestContentCommandHandler
 
         Set<PropertyDelta<?>> properties = Set.of(
                 contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.transferId(), ingestContentResponse.mimeType()));
-        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, UPDATE, properties);
+        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, UPDATE, properties, command.timestamp());
         log.atDebug().log("Ingestion :: Notifying about node: {} content upload within transfer with ID: {}", nodeId, ingestContentResponse.transferId());
         ingestNodeCommandHandler.handle(ingestNodeCommand);
     }

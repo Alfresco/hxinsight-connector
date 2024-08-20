@@ -45,7 +45,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
         String atsBody = """
                 {
                     "targetReference": "e71dd823-82c7-477c-8490-04cb0e826e66",
-                    "clientData": "{\\"nodeRef\\":\\"f71dd823-82c7-477c-8490-04cb0e826e67\\",\\"targetMimeType\\":\\"application/pdf\\"}"
+                    "clientData": "{\\"nodeRef\\":\\"f71dd823-82c7-477c-8490-04cb0e826e67\\",\\"targetMimeType\\":\\"application/pdf\\", \\"timestamp\\": 1308061016}"
                 }""";
         containerSupport.raiseTransformationCompletedATSEvent(atsBody);
 
@@ -62,6 +62,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
                     "objectId": "f71dd823-82c7-477c-8490-04cb0e826e67",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp": 1308061016,
                     "properties": {
                       "cm:content": {
                         "file": {

@@ -27,10 +27,13 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.delete;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
 
-public record DeleteNodeCommand(String nodeId)
+public record DeleteNodeCommand(
+        String nodeId,
+        long timestamp)
 {
     public DeleteNodeCommand
     {
         ensureNotBlank(nodeId, "Node id cannot be blank.");
+        // ensureThat(timestamp > 0, "Timestamp cannot be negative or zero.");
     }
 }

@@ -34,6 +34,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 @SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
 public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E2ETestBase
 {
+    private static final long TIMESTAMP = 1308061016;
 
     @ParameterizedTest
     @ValueSource(strings = {"text/plain", "text/html", "text/richtext"})
@@ -47,6 +48,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
         String repoEvent = """
                 {
                   "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
+                  "timestamp": %s,
                   "contentInfo": {
                     "contentSize": 330,
                     "encoding": "ISO-8859-1",
@@ -65,7 +67,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
                       "cm:auditable"
                     ]
                   }
-                }""".formatted(sourceMimeType);
+                }""".formatted(TIMESTAMP, sourceMimeType);
         containerSupport.raiseBulkIngesterEvent(repoEvent);
 
         // then
@@ -75,6 +77,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
+                    "timestamp" : %s,
                     "properties" : {
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
@@ -95,7 +98,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
                       }
                     }
                   }
-                ]""".formatted(sourceMimeType);
+                ]""".formatted(TIMESTAMP, sourceMimeType);
         containerSupport.expectHxIngestMessageReceived(expectedBody);
         containerSupport.verifyNoATSRequestReceived(200);
     }

@@ -45,7 +45,7 @@ class DeleteRequestIntegrationTest extends E2ETestBase
                   "type": "org.alfresco.event.node.Deleted",
                   "id": "df329995-d744-427c-bafb-4a31ba7d50e3",
                   "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
-                  "time": "2021-01-27T10:57:02.586606Z",
+                  "time": "2021-01-26T10:29:42.99524Z",
                   "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeDeleted",
                   "datacontenttype": "application/json",
                   "data": {
@@ -63,7 +63,8 @@ class DeleteRequestIntegrationTest extends E2ETestBase
                 {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "delete"
+                    "eventType": "delete",
+                    "timestamp": 1611656982995
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }

@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getEventTimestamp;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getNodeParent;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getPredictionNodeProperties;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
@@ -102,7 +103,7 @@ public class EventProcessor
     {
         if (wasPredictionConfirmed(event))
         {
-            IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), UPDATE, getPredictionNodeProperties(event));
+            IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), UPDATE, getPredictionNodeProperties(event), getEventTimestamp(event));
             ingestNodeCommandHandler.handle(command);
         }
     }

@@ -33,6 +33,7 @@ import java.util.Set;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
@@ -40,6 +41,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
 @Getter
 @ToString
 @EqualsAndHashCode
+@RequiredArgsConstructor
 public class UpdateNodeEvent implements NodeEvent
 {
     private final String objectId;
@@ -48,13 +50,7 @@ public class UpdateNodeEvent implements NodeEvent
     private final Map<String, ContentProperty> contentPropertiesToSet = new HashMap<>();
     private final Set<String> propertiesToUnset = new HashSet<>();
     private final String sourceId;
-
-    public UpdateNodeEvent(String objectId, EventType eventType, String sourceId)
-    {
-        this.objectId = objectId;
-        this.eventType = eventType;
-        this.sourceId = sourceId;
-    }
+    private final long timestamp;
 
     public UpdateNodeEvent addContentInstruction(ContentProperty contentProperty)
     {

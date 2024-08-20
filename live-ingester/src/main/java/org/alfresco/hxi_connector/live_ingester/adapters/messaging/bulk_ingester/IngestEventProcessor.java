@@ -71,7 +71,8 @@ public class IngestEventProcessor
         IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(
                 ingestEvent.nodeId(),
                 CREATE,
-                mapToPropertiesDelta(ingestEvent.contentInfo(), properties));
+                mapToPropertiesDelta(ingestEvent.contentInfo(), properties),
+                ingestEvent.timestamp());
 
         ingestNodeCommandHandler.handle(ingestNodeCommand);
 
@@ -84,8 +85,10 @@ public class IngestEventProcessor
                 log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}", ingestEvent.nodeId(), sourceMimeType);
                 return;
             }
-            TriggerContentIngestionCommand triggerContentIngestionCommand = new TriggerContentIngestionCommand(ingestEvent.nodeId(),
-                    targetMimeType);
+            TriggerContentIngestionCommand triggerContentIngestionCommand = new TriggerContentIngestionCommand(
+                    ingestEvent.nodeId(),
+                    targetMimeType,
+                    ingestEvent.timestamp());
 
             ingestContentCommandHandler.handle(triggerContentIngestionCommand);
         }

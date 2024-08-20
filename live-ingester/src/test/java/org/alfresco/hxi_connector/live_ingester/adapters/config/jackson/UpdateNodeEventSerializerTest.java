@@ -35,6 +35,8 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 
+import java.time.Instant;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -49,13 +51,14 @@ class UpdateNodeEventSerializerTest
 {
     private static final String NODE_ID = "node-id";
     private static final String SOURCE_ID = "dummy-source-id";
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     private final UpdateNodeEventSerializer serializer = new UpdateNodeEventSerializer();
 
     @Test
     public void shouldSerializeEmptyEvent()
     {
-        UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID);
+        UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP);
 
         String expectedJson = """
                 [
@@ -73,7 +76,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSerializePropertiesToSet()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
 
@@ -97,7 +100,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSerializePropertiesToUnset()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID, TIMESTAMP)
                 .addUnsetInstruction(CREATED_AT_PROPERTY)
                 .addUnsetInstruction(MODIFIED_BY_PROPERTY);
 
@@ -118,7 +121,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void canCopeWithNullUsers()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, null))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
 
@@ -142,7 +145,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSetContentProperty()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf",
                         "application/msword", 123L, "something.doc"));
 
@@ -175,7 +178,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldOnlySendUpdatedContentMetadata()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, null, null,
                         "application/msword", null, null));
 

@@ -38,6 +38,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.io.Serializable;
+import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
@@ -60,6 +61,7 @@ class IngestEventProcessorTest
     private static final String NODE_ID = "07659d13-8d64-4905-a329-6b27fe182023";
     private static final String NODE_TYPE = "cm:folder";
     private static final long CREATED_AT = 1000L;
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @Mock
     private IngestNodeCommandHandler ingestNodeCommandHandler;
@@ -82,7 +84,8 @@ class IngestEventProcessorTest
         IngestEvent bulkIngesterEvent = new IngestEvent(
                 NODE_ID,
                 null,
-                properties);
+                properties,
+                TIMESTAMP);
 
         // when
         ingestEventProcessor.process(bulkIngesterEvent);
@@ -94,7 +97,8 @@ class IngestEventProcessorTest
                 Set.of(
                         updated(TYPE_PROPERTY, NODE_TYPE),
                         updated("cm:name", "test folder"),
-                        updated("cm:title", "test folder title")));
+                        updated("cm:title", "test folder title")),
+                TIMESTAMP);
 
         then(ingestNodeCommandHandler).should().handle(eq(expectedCommand));
 
@@ -115,7 +119,8 @@ class IngestEventProcessorTest
                 NODE_ID,
                 contentInfo,
                 Map.of(TYPE_PROPERTY, NODE_TYPE,
-                        CREATED_AT_PROPERTY, CREATED_AT));
+                        CREATED_AT_PROPERTY, CREATED_AT),
+                TIMESTAMP);
         given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(mimeType);
 
         // when
@@ -128,11 +133,12 @@ class IngestEventProcessorTest
                 Set.of(
                         contentMetadataUpdated(CONTENT_PROPERTY, mimeType, 100L, null),
                         updated(TYPE_PROPERTY, NODE_TYPE),
-                        updated(CREATED_AT_PROPERTY, CREATED_AT)));
+                        updated(CREATED_AT_PROPERTY, CREATED_AT)),
+                TIMESTAMP);
         then(ingestNodeCommandHandler).should().handle(expectedCommand);
 
         then(mimeTypeMapper).should().mapMimeType(mimeType);
-        then(ingestContentCommandHandler).should().handle(eq(new TriggerContentIngestionCommand(NODE_ID, mimeType)));
+        then(ingestContentCommandHandler).should().handle(eq(new TriggerContentIngestionCommand(NODE_ID, mimeType, TIMESTAMP)));
     }
 
     @Test
@@ -149,7 +155,8 @@ class IngestEventProcessorTest
                 NODE_ID,
                 contentInfo,
                 Map.of(TYPE_PROPERTY, NODE_TYPE,
-                        CREATED_AT_PROPERTY, CREATED_AT));
+                        CREATED_AT_PROPERTY, CREATED_AT),
+                TIMESTAMP);
         given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
 
         // when
@@ -162,7 +169,8 @@ class IngestEventProcessorTest
                 Set.of(
                         contentMetadataUpdated(CONTENT_PROPERTY, mimeType, 100L, null),
                         updated(TYPE_PROPERTY, NODE_TYPE),
-                        updated(CREATED_AT_PROPERTY, CREATED_AT)));
+                        updated(CREATED_AT_PROPERTY, CREATED_AT)),
+                TIMESTAMP);
         then(ingestNodeCommandHandler).should().handle(expectedCommand);
 
         then(mimeTypeMapper).should().mapMimeType(mimeType);

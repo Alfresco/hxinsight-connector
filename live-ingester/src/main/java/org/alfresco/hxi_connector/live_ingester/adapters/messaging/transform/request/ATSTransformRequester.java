@@ -95,7 +95,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         return new ATSTransformRequest(
                 transformRequest.nodeRef(),
                 targetMimeType,
-                new ClientData(transformRequest.nodeRef(), targetMimeType, attempt),
+                new ClientData(transformRequest.nodeRef(), targetMimeType, attempt, transformRequest.timestamp()),
                 transformOptions,
                 transformProperties.response().queueName());
     }
