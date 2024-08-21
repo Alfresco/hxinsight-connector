@@ -85,6 +85,31 @@ public class BulkIngesterE2eTest
     }
 
     @Test
+    void shouldIncludeBasicProperties()
+    {
+        // given
+        String nodeId = "02acf462-533d-4e1b-9825-05fa934140da";
+        String sourceId = "alfresco-dummy-source-id-0a63de491876";
+        String eventType = "create";
+
+        // when
+        RetryUtils.retryWithBackoff(() -> {
+            List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")).withRequestBody(matching(".*\"objectId\":\"%s.*".formatted(nodeId))));
+
+            assertEquals(1, requests.size());
+
+            JsonNode event = objectMapper.readTree(requests.get(0).getBodyAsString())
+                    .get(0);
+
+            assertEquals(nodeId, event.get("objectId").asText());
+            assertEquals(sourceId, event.get("sourceId").asText());
+            assertEquals(eventType, event.get("eventType").asText());
+            assertTrue(event.has("timestamp"));
+            assertTrue(event.has("properties"));
+        }, 15, 200);
+    }
+
+    @Test
     void shouldIncludeACLInHxiUpdates()
     {
         // given

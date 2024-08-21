@@ -228,6 +228,20 @@ public class UpdateNodeE2eTest
 
     @Test
     @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    final void testSendTimestampToHxi()
+    {
+        // when
+        Node updatedNode = repositoryClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
+
+        // then
+        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+                .withRequestBody(containing(updatedNode.id()))
+                .withRequestBody(containing("timestamp"))
+                .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
+    }
+
+    @Test
+    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
     final void testSendPermissionUpdateToHxi()
     {
         // when
