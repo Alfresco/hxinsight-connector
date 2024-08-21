@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 @Import(MockEventPublisherConfiguration.class)
 class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
 {
-    private static final long TIMESTAMP = 1708329410;
+    private static final long TIMESTAMP = 1_708_329_410L;
 
     @MockBean
     private TimeProvider timeProvider;
