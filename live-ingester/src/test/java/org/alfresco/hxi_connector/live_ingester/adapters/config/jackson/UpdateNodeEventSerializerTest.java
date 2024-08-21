@@ -35,8 +35,6 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 
-import java.time.Instant;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
@@ -51,7 +49,7 @@ class UpdateNodeEventSerializerTest
 {
     private static final String NODE_ID = "node-id";
     private static final String SOURCE_ID = "dummy-source-id";
-    private static final long TIMESTAMP = Instant.now().toEpochMilli();
+    private static final long TIMESTAMP = 1724225729830L;
 
     private final UpdateNodeEventSerializer serializer = new UpdateNodeEventSerializer();
 
@@ -65,7 +63,8 @@ class UpdateNodeEventSerializerTest
                   {
                     "objectId": "%s",
                     "sourceId": "%s",
-                    "eventType": "create"
+                    "eventType": "create",
+                    "timestamp": 1724225729830
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(emptyEvent);
@@ -86,6 +85,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
+                    "timestamp": 1724225729830,
                     "properties": {
                       "createdAt": {"value": 10000},
                       "modifiedBy": {"value": "000-000-000"}
@@ -110,6 +110,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "update",
+                    "timestamp": 1724225729830,
                     "removedProperties": [ "createdAt", "modifiedBy" ]
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
@@ -131,6 +132,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
+                    "timestamp": 1724225729830,
                     "properties": {
                       "createdBy": {"value": null},
                       "modifiedBy": {"value": null}
@@ -155,6 +157,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
+                    "timestamp": 1724225729830,
                     "properties": {
                       "cm:content": {
                         "file": {
@@ -188,6 +191,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
+                    "timestamp": 1724225729830,
                     "properties": {
                       "cm:content": {
                         "file": {
