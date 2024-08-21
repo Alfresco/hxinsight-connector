@@ -47,6 +47,6 @@ public class AlfrescoNodeMapperConfig
     @Bean
     public TimeProvider timeProvider()
     {
-        return System::currentTimeMillis;
+        return () -> System.currentTimeMillis() / 1000;
     }
 }
