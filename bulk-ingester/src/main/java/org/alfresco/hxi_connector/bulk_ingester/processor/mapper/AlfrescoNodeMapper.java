@@ -67,6 +67,7 @@ public class AlfrescoNodeMapper
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
     private final NamespacePrefixMapper namespacePrefixMapper;
+    private final TimeProvider timeProvider;
 
     @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.
     public IngestEvent map(AlfrescoNode alfrescoNode)
@@ -98,7 +99,8 @@ public class AlfrescoNodeMapper
         return new IngestEvent(
                 nodeId,
                 content,
-                properties);
+                properties,
+                timeProvider.getCurrentTimestamp());
     }
 
     private long getCreatedAt(AlfrescoNode alfrescoNode)

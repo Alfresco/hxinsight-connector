@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,30 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
-package org.alfresco.hxi_connector.bulk_ingester.processor.mapper.config;
-
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoPropertyMapper;
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.AlfrescoPropertyMapperFactory;
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
-import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.TimeProvider;
-
-@Configuration
-public class AlfrescoNodeMapperConfig
+public interface TimeProvider
 {
-
-    @Bean
-    public AlfrescoPropertyMapperFactory alfrescoPropertyMapperFactory(NamespacePrefixMapper namespacePrefixMapper)
-    {
-        return (node, propertyName) -> new AlfrescoPropertyMapper(namespacePrefixMapper, node, propertyName);
-    }
-
-    @Bean
-    public TimeProvider timeProvider()
-    {
-        return System::currentTimeMillis;
-    }
+    long getCurrentTimestamp();
 }
