@@ -69,7 +69,7 @@ class AlfrescoNodeMapperTest
 
     private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
     private static final String BOB = "bob";
-    private static final long TIMESTAMP = 1308061016;
+    private static final long TIMESTAMP = 1_308_061_016L;
 
     private final AlfrescoPropertyMapper alfrescoPropertyMapper = mock();
     private final NamespacePrefixMapper namespacePrefixMapper = new TestNamespaceToPrefixMapper(TEST_PREFIX);

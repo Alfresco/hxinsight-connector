@@ -37,7 +37,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
         "logging.level.org.alfresco=DEBUG"})
 public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ETestBase
 {
-    private static final long TIMESTAMP = 1308061016;
+    private static final long TIMESTAMP = 1_308_061_016L;
 
     @ParameterizedTest
     @CsvSource({

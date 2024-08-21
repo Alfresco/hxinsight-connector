@@ -70,7 +70,7 @@ public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegratio
                 Map.of(TYPE_PROPERTY, "file",
                         "cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
                         CREATED_AT_PROPERTY, 2000),
-                1308061016);
+                1_308_061_016L);
 
         // when
         nodePublisher.publish(ingestEvent);

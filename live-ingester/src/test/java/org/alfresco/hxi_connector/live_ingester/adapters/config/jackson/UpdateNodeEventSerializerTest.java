@@ -49,7 +49,7 @@ class UpdateNodeEventSerializerTest
 {
     private static final String NODE_ID = "node-id";
     private static final String SOURCE_ID = "dummy-source-id";
-    private static final long TIMESTAMP = 1724225729830L;
+    private static final long TIMESTAMP = 1_724_225_729_830L;
 
     private final UpdateNodeEventSerializer serializer = new UpdateNodeEventSerializer();
 

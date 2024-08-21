@@ -32,7 +32,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class PredictionRequestIntegrationTest extends E2ETestBase
 {
-    private static final long TIMESTAMP = 1611656982995L;
+    private static final long TIMESTAMP = 1_611_656_982_995L;
 
     @Test
     void testPredictionNodeCreateRequest()
