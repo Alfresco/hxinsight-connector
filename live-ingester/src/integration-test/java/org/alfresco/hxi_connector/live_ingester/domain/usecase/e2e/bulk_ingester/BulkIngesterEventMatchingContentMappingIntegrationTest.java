@@ -37,6 +37,8 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
         "logging.level.org.alfresco=DEBUG"})
 public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ETestBase
 {
+    private static final long TIMESTAMP = 1_308_061_016L;
+
     @ParameterizedTest
     @CsvSource({
             "image/gif,image/png", "image/bmp,image/png", "image/png,image/png", "image/raw,image/png",
@@ -52,6 +54,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
         String repoEvent = """
                 {
                   "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
+                  "timestamp": %s,
                   "contentInfo": {
                     "contentSize": 330,
                     "encoding": "ISO-8859-1",
@@ -70,7 +73,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                       "cm:auditable"
                     ]
                   }
-                }""".formatted(sourceMimeType);
+                }""".formatted(TIMESTAMP, sourceMimeType);
         containerSupport.raiseBulkIngesterEvent(repoEvent);
 
         // then
@@ -80,6 +83,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
+                    "timestamp": %s,
                     "properties" : {
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
@@ -100,7 +104,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                       }
                     }
                   }
-                ]""".formatted(sourceMimeType);
+                ]""".formatted(TIMESTAMP, sourceMimeType);
         containerSupport.expectHxIngestMessageReceived(expectedBody);
 
         String expectedATSRequest = """
@@ -108,7 +112,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
                     "targetMediaType": "%s",
-                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
+                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0,\\"timestamp\\":%s}",
                     "transformOptions": {
                         "timeout": "20000",
                         "resizeWidth": "3840",
@@ -116,7 +120,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                         "allowEnlargement": "false"
                     },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
+                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType, TIMESTAMP);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
 
@@ -135,6 +139,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
         String repoEvent = """
                 {
                   "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
+                  "timestamp": %s,
                   "contentInfo": {
                     "contentSize": 330,
                     "encoding": "ISO-8859-1",
@@ -153,7 +158,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                       "cm:auditable"
                     ]
                   }
-                }""".formatted(sourceMimeType);
+                }""".formatted(TIMESTAMP, sourceMimeType);
         containerSupport.raiseBulkIngesterEvent(repoEvent);
 
         // then
@@ -163,6 +168,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
+                    "timestamp": %s,
                     "properties" : {
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
@@ -183,7 +189,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                       }
                     }
                   }
-                ]""".formatted(sourceMimeType);
+                ]""".formatted(TIMESTAMP, sourceMimeType);
         containerSupport.expectHxIngestMessageReceived(expectedBody);
 
         String expectedATSRequest = """
@@ -191,12 +197,12 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
                     "targetMediaType": "%s",
-                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
+                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0,\\"timestamp\\":%s}",
                     "transformOptions": {
                         "timeout": "20000"
                     },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);
+                }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType, TIMESTAMP);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
 }

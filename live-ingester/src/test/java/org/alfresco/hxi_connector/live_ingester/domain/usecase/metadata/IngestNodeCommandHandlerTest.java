@@ -41,6 +41,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
+import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
@@ -76,6 +77,7 @@ class IngestNodeCommandHandlerTest
     private static final String SOURCE_ID = "dummy-source-id";
     private static final NodeProperty<String> NODE_TITLE = new NodeProperty<>("cm:title", "some title");
     private static final Set<NodeProperty<?>> NODE_PROPERTIES = Set.of(NODE_TITLE);
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @Captor
     ArgumentCaptor<UpdateNodeEvent> updateNodeEventCaptor;
@@ -92,7 +94,7 @@ class IngestNodeCommandHandlerTest
     void emptyDeleteMessageThrowsException()
     {
         // given
-        IngestNodeCommand command = new IngestNodeCommand(NODE_ID, DELETE, emptySet());
+        IngestNodeCommand command = new IngestNodeCommand(NODE_ID, DELETE, emptySet(), TIMESTAMP);
 
         // then
         assertThrows(ValidationException.class, () -> ingestNodeCommandHandler.handle(command));
@@ -117,7 +119,8 @@ class IngestNodeCommandHandlerTest
                     CREATE,
                     NODE_PROPERTIES.stream()
                             .map(nodeProperty -> PropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
-                            .collect(Collectors.toSet()));
+                            .collect(Collectors.toSet()),
+                    TIMESTAMP);
 
             // when
             ingestNodeCommandHandler.handle(command);
@@ -140,7 +143,8 @@ class IngestNodeCommandHandlerTest
             IngestNodeCommand command = new IngestNodeCommand(
                     NODE_ID,
                     CREATE,
-                    Set.of(new ContentPropertyUpdated(CONTENT_PROPERTY, "content-id", "application/pdf", "application/msword", 123L, "something.doc")));
+                    Set.of(new ContentPropertyUpdated(CONTENT_PROPERTY, "content-id", "application/pdf", "application/msword", 123L, "something.doc")),
+                    TIMESTAMP);
 
             // when
             ingestNodeCommandHandler.handle(command);
@@ -149,7 +153,7 @@ class IngestNodeCommandHandlerTest
             then(ingestionEngineEventPublisher).should().publishMessage(updateNodeEventCaptor.capture());
             UpdateNodeEvent updateNodeEvent = updateNodeEventCaptor.getValue();
 
-            UpdateNodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID);
+            UpdateNodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP);
             expected.addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf", "application/msword", 123L, "something.doc"));
             assertEquals(expected, updateNodeEvent);
         }
@@ -158,7 +162,7 @@ class IngestNodeCommandHandlerTest
         void shouldNotSendEmptyUpdate()
         {
             // given
-            IngestNodeCommand command = new IngestNodeCommand(NODE_ID, UPDATE, emptySet());
+            IngestNodeCommand command = new IngestNodeCommand(NODE_ID, UPDATE, emptySet(), TIMESTAMP);
 
             // when
             ingestNodeCommandHandler.handle(command);
@@ -171,13 +175,13 @@ class IngestNodeCommandHandlerTest
         void emptyCreateMessageCreatesNode()
         {
             // given
-            IngestNodeCommand command = new IngestNodeCommand(NODE_ID, CREATE, emptySet());
+            IngestNodeCommand command = new IngestNodeCommand(NODE_ID, CREATE, emptySet(), TIMESTAMP);
 
             // when
             ingestNodeCommandHandler.handle(command);
 
             // then
-            NodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID);
+            NodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP);
             then(ingestionEngineEventPublisher).should().publishMessage(expected);
         }
 

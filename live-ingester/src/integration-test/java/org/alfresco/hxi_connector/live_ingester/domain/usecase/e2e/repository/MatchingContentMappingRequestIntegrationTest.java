@@ -102,6 +102,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "create",
+                    "timestamp" : 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
@@ -132,7 +133,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-01c7-477c-8490-04cb0e826e61",
                     "targetMediaType": "%s",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-01c7-477c-8490-04cb0e826e61\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-01c7-477c-8490-04cb0e826e61\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0,\\"timestamp\\":1611227656423}",
                     "transformOptions": {
                         "timeout":"20000",
                         "resizeWidth": "3840",
@@ -209,6 +210,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "create",
+                    "timestamp" : 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
@@ -239,7 +241,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-01c7-477c-8490-04cb0e826e61",
                     "targetMediaType": "%s",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-01c7-477c-8490-04cb0e826e61\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-01c7-477c-8490-04cb0e826e61\\",\\"targetMimeType\\":\\"%s\\",\\"retryAttempt\\":0,\\"timestamp\\":1611227656423}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType);

@@ -36,4 +36,5 @@ public class DeleteNodeEvent implements NodeEvent
 {
     private final String objectId;
     private final String sourceId;
+    private final long timestamp;
 }

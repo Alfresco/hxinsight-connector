@@ -94,6 +94,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "create",
+                    "timestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
@@ -124,7 +125,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611227656423}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);

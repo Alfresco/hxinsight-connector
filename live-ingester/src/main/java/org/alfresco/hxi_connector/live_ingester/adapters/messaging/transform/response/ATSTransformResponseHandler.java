@@ -87,7 +87,11 @@ public class ATSTransformResponseHandler extends RouteBuilder
             return;
         }
 
-        IngestContentCommand command = new IngestContentCommand(transformResponse.targetReference(), transformResponse.clientData().nodeRef(), transformResponse.clientData().targetMimeType());
+        IngestContentCommand command = new IngestContentCommand(
+                transformResponse.targetReference(),
+                transformResponse.clientData().nodeRef(),
+                transformResponse.clientData().targetMimeType(),
+                transformResponse.clientData().timestamp());
 
         ingestContentCommandHandler.handle(command);
     }
@@ -109,7 +113,10 @@ public class ATSTransformResponseHandler extends RouteBuilder
 
         log.error("Transformation of node {} failed with error {}, retrying (attempt: {})", transformResponse.clientData().nodeRef(), exception.getMessage(), retryAttempt);
 
-        TransformRequest transformRequest = new TransformRequest(transformResponse.clientData().nodeRef(), transformResponse.clientData().targetMimeType());
+        TransformRequest transformRequest = new TransformRequest(
+                transformResponse.clientData().nodeRef(),
+                transformResponse.clientData().targetMimeType(),
+                transformResponse.clientData().timestamp());
         atsTransformRequester.requestTransformRetry(transformRequest, retryAttempt);
     }
 

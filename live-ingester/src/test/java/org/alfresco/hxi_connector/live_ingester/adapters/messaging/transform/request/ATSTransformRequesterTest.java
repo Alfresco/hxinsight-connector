@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.ATSTransformRequester.TIMEOUT_KEY;
 
+import java.time.Instant;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,7 @@ public class ATSTransformRequesterTest
     private static final int TIMEOUT = 123;
     private static final int ATTEMPT = 2;
     private static final String QUEUE_NAME = "queueName";
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @Mock
     IntegrationProperties integrationProperties;
@@ -65,7 +67,7 @@ public class ATSTransformRequesterTest
     {
         // given
         setUpIntegrationProperties(null);
-        TransformRequest transformRequest = new TransformRequest(NODE_REF, TARGET_MIME_TYPE);
+        TransformRequest transformRequest = new TransformRequest(NODE_REF, TARGET_MIME_TYPE, TIMESTAMP);
 
         // when
         ATSTransformRequest atsTransformRequest = atsTransformRequester.toTransformRequest(transformRequest, ATTEMPT);
@@ -82,7 +84,7 @@ public class ATSTransformRequesterTest
         // given
         Map<String, Map<String, String>> transformOptions = Map.of("otherMimeType", Map.of("otherOption", "otherValue"));
         setUpIntegrationProperties(transformOptions);
-        TransformRequest transformRequest = new TransformRequest(NODE_REF, TARGET_MIME_TYPE);
+        TransformRequest transformRequest = new TransformRequest(NODE_REF, TARGET_MIME_TYPE, TIMESTAMP);
 
         // when
         ATSTransformRequest atsTransformRequest = atsTransformRequester.toTransformRequest(transformRequest, ATTEMPT);
@@ -100,7 +102,7 @@ public class ATSTransformRequesterTest
         Map<String, String> mimeTypeOptions = Map.of("option1", "value1", "option2", "value2");
         Map<String, Map<String, String>> transformOptions = Map.of(TARGET_MIME_TYPE, mimeTypeOptions);
         setUpIntegrationProperties(transformOptions);
-        TransformRequest transformRequest = new TransformRequest(NODE_REF, TARGET_MIME_TYPE);
+        TransformRequest transformRequest = new TransformRequest(NODE_REF, TARGET_MIME_TYPE, TIMESTAMP);
 
         // when
         ATSTransformRequest atsTransformRequest = atsTransformRequester.toTransformRequest(transformRequest, ATTEMPT);
@@ -136,7 +138,7 @@ public class ATSTransformRequesterTest
         return new ATSTransformRequest(
                 NODE_REF,
                 TARGET_MIME_TYPE,
-                new ClientData(NODE_REF, TARGET_MIME_TYPE, ATTEMPT),
+                new ClientData(NODE_REF, TARGET_MIME_TYPE, ATTEMPT, TIMESTAMP),
                 expectedTransformOptions,
                 QUEUE_NAME);
     }

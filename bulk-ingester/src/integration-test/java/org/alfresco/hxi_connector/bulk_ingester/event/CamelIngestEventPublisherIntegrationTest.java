@@ -69,7 +69,8 @@ public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegratio
                 new IngestEvent.ContentInfo(1000, "UTF-8", "application/pdf"),
                 Map.of(TYPE_PROPERTY, "file",
                         "cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
-                        CREATED_AT_PROPERTY, 2000));
+                        CREATED_AT_PROPERTY, 2000),
+                1_308_061_016L);
 
         // when
         nodePublisher.publish(ingestEvent);
@@ -87,7 +88,8 @@ public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegratio
                     "type" : "file",
                     "cm:categories" : [ "33cd7d4c-ba12-4006-9642-f9fb2d3bd406" ],
                     "createdAt" : 2000
-                  }
+                  },
+                  "timestamp": 1308061016
                 }""";
 
         testCamelConsumer.assertNMessagesReceived(1);

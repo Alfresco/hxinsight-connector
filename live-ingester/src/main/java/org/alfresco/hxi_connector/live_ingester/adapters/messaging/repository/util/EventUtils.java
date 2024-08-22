@@ -206,4 +206,9 @@ public final class EventUtils
 
         return Set.of(PropertyDelta.updated(predictedPropertyName, predictionValue));
     }
+
+    public static long getEventTimestamp(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return event.getTime().toInstant().toEpochMilli();
+    }
 }

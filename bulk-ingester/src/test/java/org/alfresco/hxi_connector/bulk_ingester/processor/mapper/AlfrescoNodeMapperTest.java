@@ -69,10 +69,25 @@ class AlfrescoNodeMapperTest
 
     private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
     private static final String BOB = "bob";
+    private static final long TIMESTAMP = 1_308_061_016L;
 
     private final AlfrescoPropertyMapper alfrescoPropertyMapper = mock();
     private final NamespacePrefixMapper namespacePrefixMapper = new TestNamespaceToPrefixMapper(TEST_PREFIX);
-    private final AlfrescoNodeMapper alfrescoNodeMapper = new AlfrescoNodeMapper((node, propertyName) -> alfrescoPropertyMapper, namespacePrefixMapper);
+    private final AlfrescoNodeMapper alfrescoNodeMapper = new AlfrescoNodeMapper((node, propertyName) -> alfrescoPropertyMapper, namespacePrefixMapper, () -> TIMESTAMP);
+
+    @Test
+    void shouldAddTimestampToEvent()
+    {
+        // given
+        AlfrescoNode alfrescoNode = new AlfrescoNode();
+        alfrescoNode.setType(QName.newTransientInstance("", TYPE_FOLDER)); // required to avoid NPE
+
+        // when
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
+
+        // then
+        assertEquals(TIMESTAMP, ingestEvent.timestamp());
+    }
 
     @Test
     void shouldMapNodeWithoutContentAndProperties()

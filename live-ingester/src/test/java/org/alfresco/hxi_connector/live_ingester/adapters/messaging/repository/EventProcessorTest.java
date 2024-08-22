@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
+import static java.time.ZoneOffset.UTC;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -39,6 +41,8 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -75,6 +79,7 @@ class EventProcessorTest
 {
     private static final long CONTENT_SIZE = 123L;
     public static final long NO_CONTENT = 0L;
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @Mock
     RepoEventMapper repoEventMapper;
@@ -308,6 +313,8 @@ class EventProcessorTest
         String descriptionProperty = "cm:description";
         String predictedDescription = "predicted description";
 
+        given(mockEvent.getTime()).willReturn(ZonedDateTime.ofInstant(Instant.ofEpochMilli(TIMESTAMP), UTC));
+
         given(mockEvent.getData()).willReturn(mock());
         given(mockEvent.getData().getResource()).willReturn(mock());
         given(mockEvent.getData().getResource().getNodeType()).willReturn(PREDICTION_NODE_TYPE);
@@ -328,7 +335,8 @@ class EventProcessorTest
         IngestNodeCommand expectedCommand = new IngestNodeCommand(
                 parentId,
                 UPDATE,
-                Set.of(PropertyDelta.updated(descriptionProperty, predictedDescription)));
+                Set.of(PropertyDelta.updated(descriptionProperty, predictedDescription)),
+                TIMESTAMP);
 
         // when
         eventProcessor.process(mockExchange);

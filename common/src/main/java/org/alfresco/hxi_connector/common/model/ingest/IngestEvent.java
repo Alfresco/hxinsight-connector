@@ -49,6 +49,7 @@ public class IngestEvent
     private String nodeId;
     private ContentInfo contentInfo;
     @NotNull private Map<String, Serializable> properties;
+    private long timestamp;
 
     @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
     @Data

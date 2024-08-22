@@ -32,6 +32,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class PredictionRequestIntegrationTest extends E2ETestBase
 {
+    private static final long TIMESTAMP = 1_611_656_982_995L;
 
     @Test
     void testPredictionNodeCreateRequest()
@@ -294,6 +295,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "objectId": "34563456-3456-3456-3456-345634563456",
                     "eventType": "update",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "timestamp" : %s,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"]},
@@ -301,7 +303,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     },
                     "removedProperties": ["cm:versionType", "cm:description"]
                   }
-                ]""";
+                ]""".formatted(TIMESTAMP);
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -316,7 +318,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                   "type": "org.alfresco.event.node.Updated",
                   "id": "368818d9-dddd-4b8b-8eab-e050253d7f61",
                   "source": "/08d9b620-48de-4247-8f33-360988d3b19b",
-                  "time": "2022-02-22T22:22:22.22222Z",
+                  "time": "2021-01-26T10:29:42.99524Z",
                   "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
                   "datacontenttype": "application/json",
                   "data": {
@@ -374,11 +376,12 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "objectId": "5f355d16-f824-4173-bf4b-b1ec37ef5549",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp": %s,
                     "properties": {
                       "cm:description": {"value": "predicted value"}
                     }
                   }
-                ]""";
+                ]""".formatted(TIMESTAMP);
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 }

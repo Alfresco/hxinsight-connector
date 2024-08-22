@@ -50,6 +50,7 @@ import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUT
 import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TEST_ENVIRONMENT_HEADER;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
@@ -112,10 +113,11 @@ class HxInsightEventPublisherIntegrationTest
     private static final String INGEST_PATH = "/ingestion-events";
     private static final String NODE_ID = "node-id";
     private static final String SOURCE_ID = "dummy-source-id";
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
     private static final String ACS_VERSION = "7.4.0";
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;
-    private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE, SOURCE_ID);
+    private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, EventType.UPDATE, SOURCE_ID, TIMESTAMP);
 
     @Container
     @SuppressWarnings("PMD.FieldNamingConventions")

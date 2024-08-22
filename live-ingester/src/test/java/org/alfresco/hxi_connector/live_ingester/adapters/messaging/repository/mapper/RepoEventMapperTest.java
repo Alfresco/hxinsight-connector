@@ -26,6 +26,7 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
+import static java.time.ZoneOffset.UTC;
 import static java.util.Collections.emptySet;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,6 +42,8 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -65,6 +68,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 class RepoEventMapperTest
 {
     private static final String NODE_ID = "0fe2919a-e0a6-4033-8d35-168a16cf33fc";
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @Mock
     PropertiesMapper propertiesMapper;
@@ -85,7 +89,7 @@ class RepoEventMapperTest
         TriggerContentIngestionCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
 
         // then
-        TriggerContentIngestionCommand expectedCommand = new TriggerContentIngestionCommand(NODE_ID, mimeType);
+        TriggerContentIngestionCommand expectedCommand = new TriggerContentIngestionCommand(NODE_ID, mimeType, TIMESTAMP);
 
         assertEquals(expectedCommand, actualCommand);
     }
@@ -103,7 +107,8 @@ class RepoEventMapperTest
         IngestNodeCommand expectedEvent = new IngestNodeCommand(
                 NODE_ID,
                 CREATE,
-                emptySet());
+                emptySet(),
+                TIMESTAMP);
 
         assertEquals(expectedEvent, actualEvent);
     }
@@ -139,7 +144,7 @@ class RepoEventMapperTest
         DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
 
         // then
-        DeleteNodeCommand expectedCommand = new DeleteNodeCommand(NODE_ID);
+        DeleteNodeCommand expectedCommand = new DeleteNodeCommand(NODE_ID, TIMESTAMP);
         assertEquals(expectedCommand, deleteNodeCommand);
     }
 
@@ -198,6 +203,7 @@ class RepoEventMapperTest
     private static RepoEvent<DataAttributes<NodeResource>> mockMinimalEvent(EventType eventType)
     {
         RepoEvent<DataAttributes<NodeResource>> event = mock();
+        given(event.getTime()).willReturn(ZonedDateTime.ofInstant(Instant.ofEpochMilli(TIMESTAMP), UTC));
         setType(event, eventType);
         NodeResource nodeResource = mock();
         given(nodeResource.getId()).willReturn(NODE_ID);

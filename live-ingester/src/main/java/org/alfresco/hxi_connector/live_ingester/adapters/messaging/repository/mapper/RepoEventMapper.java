@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getEventTimestamp;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.getEventType;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeDeleted;
@@ -59,7 +60,7 @@ public class RepoEventMapper
 
         final NodeResource resource = event.getData().getResource();
         String mimeType = mimeTypeMapper.mapMimeType(resource.getContent().getMimeType());
-        return new TriggerContentIngestionCommand(resource.getId(), mimeType);
+        return new TriggerContentIngestionCommand(resource.getId(), mimeType, getEventTimestamp(event));
     }
 
     public IngestNodeCommand mapToIngestNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)
@@ -70,12 +71,13 @@ public class RepoEventMapper
         return new IngestNodeCommand(
                 event.getData().getResource().getId(),
                 eventType,
-                propertiesMapper.mapToPropertyDeltas(event));
+                propertiesMapper.mapToPropertyDeltas(event),
+                getEventTimestamp(event));
     }
 
     public DeleteNodeCommand mapToDeleteNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)
     {
         ensureThat(isEventTypeDeleted(event), "Only delete events can be converted to delete commands");
-        return new DeleteNodeCommand(event.getData().getResource().getId());
+        return new DeleteNodeCommand(event.getData().getResource().getId(), getEventTimestamp(event));
     }
 }

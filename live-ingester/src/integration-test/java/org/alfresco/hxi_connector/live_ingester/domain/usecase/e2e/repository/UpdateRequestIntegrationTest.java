@@ -109,6 +109,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp" : 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
@@ -163,7 +164,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0}",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
@@ -201,6 +202,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"}
                     }
@@ -239,6 +241,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Summary for year 2024"}
                     }
@@ -307,6 +310,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp" : 1611656982995,
                     "removedProperties": ["cm:title"]
                   }
                 ]""";
@@ -361,6 +365,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp": 1611656982995,
                     "properties": {
                       "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
                       "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]}
@@ -429,6 +434,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "specversion": "1.0",
                   "type": "org.alfresco.event.node.Updated",
                   "id": "ae5dac3c-25d0-438d-b148-2084d1ab05a6",
+                  "time": "2021-01-26T10:29:42.99524Z",
                   "data": {
                     "resource": {
                       "@type": "NodeResource",
@@ -461,6 +467,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp": 1611656982995,
                     "removedProperties": ["cm:content"]
                   }
                 ]""";
@@ -522,6 +529,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp": 1704798873615,
                     "properties": {
                       "aspectsNames": {"value": ["cm:preferences", "cm:ownable"]}
                     }
@@ -564,6 +572,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
+                    "timestamp" : 1611656982995,
                     "properties": {
                       "cm:name": {"value": "New Folder"}
                     }
@@ -658,6 +667,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "objectId" : "9f3380e3-b9b1-4b01-b1c6-ef1f717a9abb",
                   "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                   "eventType" : "update",
+                  "timestamp" : 1722422055416,
                   "properties" : {
                     "ALLOW_ACCESS" : {
                       "value" : [ "GROUP_EVERYONE", "abeecher" ]

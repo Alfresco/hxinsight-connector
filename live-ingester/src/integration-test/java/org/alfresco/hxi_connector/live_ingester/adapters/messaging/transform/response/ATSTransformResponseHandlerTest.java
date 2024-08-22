@@ -32,6 +32,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 
+import java.time.Instant;
 import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -67,6 +68,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
 @SuppressWarnings("PMD.FieldNamingConventions")
 class ATSTransformResponseHandlerTest
 {
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
     private static final String RESPONSE_ENDPOINT = "direct:transform-response-test";
     private static final Retry retryIngestion = new Retry(
             5,
@@ -94,7 +96,7 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 "e5bcc533-853c-44f1-a02d-3ab1e36a03e6",
                 new ClientData(
-                        "dcc9e89b-c1c0-48a4-814f-98eafab72fdb", "application/pdf", 0),
+                        "dcc9e89b-c1c0-48a4-814f-98eafab72fdb", "application/pdf", 0, TIMESTAMP),
                 400,
                 "Something went wrong!");
 
@@ -115,14 +117,15 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 transformedFileId,
                 new ClientData(
-                        nodeId, "application/pdf", 0),
+                        nodeId, "application/pdf", 0, TIMESTAMP),
                 202,
                 "");
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
                 nodeId,
-                transformResponse.clientData().targetMimeType());
+                transformResponse.clientData().targetMimeType(),
+                TIMESTAMP);
 
         doThrow(new LiveIngesterRuntimeException("Some exception")).when(ingestContentCommandHandler).handle(expectedCommand);
 
@@ -146,18 +149,19 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 transformedFileId,
                 new ClientData(
-                        nodeId, targetMimeType, 0),
+                        nodeId, targetMimeType, 0, TIMESTAMP),
                 202,
                 "");
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
                 nodeId,
-                transformResponse.clientData().targetMimeType());
+                transformResponse.clientData().targetMimeType(),
+                TIMESTAMP);
 
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 
-        TransformRequest expectedTransformRequest = new TransformRequest(nodeId, targetMimeType);
+        TransformRequest expectedTransformRequest = new TransformRequest(nodeId, targetMimeType, TIMESTAMP);
 
         // when
         catchThrowable(() -> simulateResponse(transformResponse));
@@ -179,14 +183,15 @@ class ATSTransformResponseHandlerTest
         TransformResponse transformResponse = new TransformResponse(
                 transformedFileId,
                 new ClientData(
-                        nodeId, targetMimeType, retryTransformation.attempts()),
+                        nodeId, targetMimeType, retryTransformation.attempts(), TIMESTAMP),
                 202,
                 "");
 
         IngestContentCommand expectedCommand = new IngestContentCommand(
                 transformedFileId,
                 nodeId,
-                transformResponse.clientData().targetMimeType());
+                transformResponse.clientData().targetMimeType(),
+                TIMESTAMP);
 
         doThrow(exception).when(ingestContentCommandHandler).handle(expectedCommand);
 

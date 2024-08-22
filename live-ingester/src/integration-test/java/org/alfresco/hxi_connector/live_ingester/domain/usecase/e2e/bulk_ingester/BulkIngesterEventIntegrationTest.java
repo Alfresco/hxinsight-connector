@@ -48,6 +48,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                 {
                   "nodeId": "5018ff83-ec45-4a11-95c4-681761752aa7",
                   "contentInfo": null,
+                  "timestamp": 1707153500,
                   "properties": {
                     "cm:name": "Mexican Spanish",
                     "type": "cm:category",
@@ -68,6 +69,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "objectId" : "5018ff83-ec45-4a11-95c4-681761752aa7",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
+                    "timestamp": 1707153500,
                     "properties" : {
                       "type": {"value": "cm:category"},
                       "createdAt": {"value": 1707153552},
@@ -91,6 +93,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
         String repoEvent = """
                 {
                   "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
+                  "timestamp": 1308061016,
                   "contentInfo": {
                     "contentSize": 330,
                     "encoding": "ISO-8859-1",
@@ -119,6 +122,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
+                    "timestamp": 1308061016,
                     "properties" : {
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
@@ -147,7 +151,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "requestId": "%s",
                     "nodeRef": "workspace://SpacesStore/37be157c-741c-4e51-b781-20d36e4e335a",
                     "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0}",
+                    "clientData": "{\\"nodeRef\\":\\"37be157c-741c-4e51-b781-20d36e4e335a\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1308061016}",
                     "transformOptions": { "timeout":"20000" },
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);

@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 
+import java.time.Instant;
 import java.util.Set;
 
 import lombok.SneakyThrows;
@@ -59,6 +60,7 @@ class IngestContentCommandHandlerTest
     static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
     static final String FILE_ID = "43214321-4321-4321-4321-432143214321";
     static final String UPLOADED_CONTENT_ID = "11112222-4321-4321-4321-333343214444";
+    private static final long TIMESTAMP = Instant.now().toEpochMilli();
 
     @Mock
     TransformRequester transformRequesterMock;
@@ -77,13 +79,13 @@ class IngestContentCommandHandlerTest
     void shouldRequestNodeContentTransformation(String mimeType)
     {
         // given
-        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, mimeType);
+        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, mimeType, TIMESTAMP);
 
         // when
         ingestContentCommandHandler.handle(command);
 
         // then
-        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, mimeType);
+        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, mimeType, TIMESTAMP);
         then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
     }
 
@@ -93,7 +95,7 @@ class IngestContentCommandHandlerTest
     void shouldSendTransformedContentToIngestionEngine(String mimeType)
     {
         // given
-        IngestContentCommand command = new IngestContentCommand(FILE_ID, NODE_ID, mimeType);
+        IngestContentCommand command = new IngestContentCommand(FILE_ID, NODE_ID, mimeType, TIMESTAMP);
 
         File fileToUpload = mock();
         given(transformEngineFileStorageMock.downloadFile(FILE_ID)).willReturn(fileToUpload);
@@ -107,7 +109,8 @@ class IngestContentCommandHandlerTest
         IngestNodeCommand expectedIngestNodeCommand = new IngestNodeCommand(
                 NODE_ID,
                 EventType.UPDATE,
-                Set.of(ContentPropertyUpdated.builder(CONTENT_PROPERTY).id(UPLOADED_CONTENT_ID).mimeType(mimeType).build()));
+                Set.of(ContentPropertyUpdated.builder(CONTENT_PROPERTY).id(UPLOADED_CONTENT_ID).mimeType(mimeType).build()),
+                TIMESTAMP);
 
         then(transformEngineFileStorageMock).should().downloadFile(FILE_ID);
         then(storageClientMock).should().upload(fileToUpload, mimeType, NODE_ID);
