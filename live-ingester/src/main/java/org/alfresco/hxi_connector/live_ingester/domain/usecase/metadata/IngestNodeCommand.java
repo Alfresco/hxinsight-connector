@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import java.util.Set;
 
@@ -45,6 +46,6 @@ public record IngestNodeCommand(
         ensureNotBlank(nodeId, "Node id cannot be blank");
         ensureNonNull(eventType, "Node %s event type cannot be null", nodeId);
         ensureNonNull(properties, "Node %s properties delta cannot be null", nodeId);
-        // ensureThat(timestamp > 0, "Timestamp cannot be negative or zero.");
+        ensureThat(timestamp > 0, "Timestamp cannot be negative or zero.");
     }
 }
