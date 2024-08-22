@@ -118,8 +118,7 @@ public class E2ETestBase
         registry.add("alfresco.bulk-ingester.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
         registry.add("alfresco.transform.request.endpoint", () -> "activemq:queue:" + ATS_QUEUE + "?jmsMessageType=Text");
         registry.add("alfresco.transform.response.endpoint", () -> "activemq:queue:" + ATS_RESPONSE_QUEUE);
-        registry.add("alfresco.transform.shared-file-store.host", () -> "http://" + sfsServer.getHost());
-        registry.add("alfresco.transform.shared-file-store.port", sfsServer::getPort);
+        registry.add("alfresco.transform.shared-file-store.base-url", () -> "http://" + sfsServer.getHost() + ":" + sfsServer.getPort());
 
         registry.add("local.aws.endpoint", localStackServer.getEndpointOverride(S3)::toString);
         registry.add("local.aws.region", localStackServer::getRegion);
