@@ -43,12 +43,13 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 @Configuration
 @EnableRetry
 @EnableConfigurationProperties
-@SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class AuthConfig
 {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception
+    {
         return security
                 .formLogin(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize.requestMatchers("/actuator/health/**").permitAll())
