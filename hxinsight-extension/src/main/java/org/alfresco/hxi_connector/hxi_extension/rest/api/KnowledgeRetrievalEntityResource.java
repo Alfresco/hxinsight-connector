@@ -28,11 +28,11 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api;
 import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
+
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
 import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
-
 
 @RequiredArgsConstructor
 @EntityResource(name = "knowledge-retrieval", title = "Hyland Knowledge Retrieval Url")
