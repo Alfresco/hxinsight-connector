@@ -29,7 +29,7 @@ import jakarta.validation.constraints.NotBlank;
 
 import org.apache.commons.lang3.StringUtils;
 
-public record Repository(@NotBlank String endpoint, String discoveryEndpoint, String versionOverride)
+public record Repository(@NotBlank String eventsEndpoint, String discoveryEndpoint, String versionOverride)
 {
     public Repository
     {

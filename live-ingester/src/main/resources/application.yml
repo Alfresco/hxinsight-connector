@@ -12,8 +12,9 @@ camel:
 
 alfresco:
   repository:
-    endpoint: activemq:topic:alfresco.repo.event2
-    discovery-endpoint: http://localhost:8080/alfresco/api/discovery
+    events-endpoint: activemq:topic:alfresco.repo.event2
+    base-url: http://localhost:8080/alfresco
+    discovery-endpoint: ${alfresco.repository.base-url}/api/discovery
   bulk-ingester:
     endpoint: activemq:queue:bulk-ingester-events
   transform:
@@ -35,8 +36,8 @@ alfresco:
       retry-ingestion:
         attempts: -1
     shared-file-store:
-      host: http://localhost
-      port: 8099
+      base-url: http://localhost:8099
+      file-endpoint: ${alfresco.transform.shared-file-store.base-url}/alfresco/api/-default-/private/sfs/versions/1/file
   filter:
     aspect:
       allow:
