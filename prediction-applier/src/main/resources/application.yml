@@ -32,7 +32,7 @@ auth:
       client-id:
       client-secret:
       token-uri: http://localhost:8001/token
-      grant-type: urn:hyland:params:oauth:grant-type:api-credentials
+      grant-type: client_credentials
       scope:
        - hxp.integrations
       environment-key: hxi-env-key
