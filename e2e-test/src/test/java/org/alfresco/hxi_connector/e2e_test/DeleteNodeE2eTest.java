@@ -115,6 +115,7 @@ public class DeleteNodeE2eTest
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing("\"objectId\":\"%s\"".formatted(createdNode.id())))
                 .withRequestBody(containing("\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\""))
+                .withRequestBody(containing("\"timestamp\""))
                 .withRequestBody(containing("\"eventType\":\"delete\""))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))), DELAY_MS);
     }
