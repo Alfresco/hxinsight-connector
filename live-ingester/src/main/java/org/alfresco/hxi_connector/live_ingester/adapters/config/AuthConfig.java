@@ -47,6 +47,7 @@ public class AuthConfig
 {
 
     @Bean
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception {
         return security
                 .formLogin(AbstractHttpConfigurer::disable)
