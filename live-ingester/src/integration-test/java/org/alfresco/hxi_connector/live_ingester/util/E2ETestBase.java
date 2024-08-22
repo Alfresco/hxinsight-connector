@@ -114,7 +114,7 @@ public class E2ETestBase
 
         registry.add("hyland-experience.insight.base-url", hxInsightServer::getBaseUrl);
 
-        registry.add("alfresco.repository.endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
+        registry.add("alfresco.repository.events-endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
         registry.add("alfresco.bulk-ingester.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
         registry.add("alfresco.transform.request.endpoint", () -> "activemq:queue:" + ATS_QUEUE + "?jmsMessageType=Text");
         registry.add("alfresco.transform.response.endpoint", () -> "activemq:queue:" + ATS_RESPONSE_QUEUE);
