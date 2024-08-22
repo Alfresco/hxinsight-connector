@@ -165,7 +165,7 @@ public class DockerContainers
     {
         String hXIMockAlias = hxInsightMockContainer.getNetworkAliases().stream().findFirst().get();
         return """
-                -Dhxi.client.base-url=http://%s:8080
+                -Dhxi.discovery.base-url=http://%s:8080
                 -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
                 -Dhxi.question.max-context-size-for-question=10
                 """.formatted(

@@ -79,7 +79,7 @@ class HxInsightClientTest
     private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
     private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
     private static final String SOURCE_ID = "alfresco-dummy-source-id-0a63de491876";
-    private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
+    private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight", "http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final HttpClient httpClient = mock(HttpClient.class);

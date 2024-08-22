@@ -33,18 +33,18 @@ import lombok.Getter;
 @Getter
 public final class HxInsightClientConfig
 {
-    private final String agentUrl;
-    private final String questionUrl;
-    private final String answerUrl;
+    private final String agentsUrl;
+    private final String avatarsUrl;
+    private final String questionsUrl;
+    private final String answersUrl;
     private final String feedbackUrl;
-    private final String avatarUrl;
 
-    public HxInsightClientConfig(@NotBlank String baseUrl)
+    public HxInsightClientConfig(@NotBlank String agentsEndpoint, @NotBlank String questionsEndpoint)
     {
-        this.agentUrl = baseUrl + "/agents";
-        this.questionUrl = agentUrl + "/%s/questions";
-        this.answerUrl = baseUrl + "/questions/%s/answer";
-        this.feedbackUrl = answerUrl + "/feedback";
-        this.avatarUrl = agentUrl + "/%s/avatar";
+        this.agentsUrl = agentsEndpoint + "/agents";
+        this.avatarsUrl = agentsUrl + "/%s/avatar";
+        this.questionsUrl = agentsUrl + "/%s/questions";
+        this.answersUrl = questionsEndpoint + "/questions/%s/answer";
+        this.feedbackUrl = answersUrl + "/feedback";
     }
 }
