@@ -38,7 +38,7 @@ import lombok.Setter;
 public class Question
 {
     private final String question;
-    private final Set<ObjectReference> contextObjects;
+    private final Set<String> contextObjectIds;
     @Setter
     private String userId;
 }
