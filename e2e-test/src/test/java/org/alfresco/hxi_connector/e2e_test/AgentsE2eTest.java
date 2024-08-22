@@ -92,6 +92,7 @@ public class AgentsE2eTest
     void shouldReturnAgents()
     {
         // given: contained in wiremock file - get-agents.json.
+
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
@@ -99,7 +100,6 @@ public class AgentsE2eTest
                 .then().extract().response();
 
         // then
-
         LoggedRequest loggedRequest = WireMock.findAll(WireMock.getRequestedFor(WireMock.anyUrl())).get(0);
 
         assertNotNull(loggedRequest);
