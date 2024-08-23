@@ -46,6 +46,7 @@ import org.apache.http.HttpStatus;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.ConfigEntityResource.HxIConfig;
 import org.alfresco.rest.api.model.Aspect;
 
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 public class TestRepoClient
 {
     private static final int TIMEOUT_SECONDS = 300_000;
