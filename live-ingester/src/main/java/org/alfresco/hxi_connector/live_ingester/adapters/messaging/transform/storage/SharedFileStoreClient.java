@@ -58,7 +58,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     private static final String ROUTE_ID = "rendition-downloader";
     private static final int EXPECTED_STATUS_CODE = 200;
     private static final String FILE_ID_HEADER = "fileId";
-    private static final String ENDPOINT_PATTERN = "%s:%d/alfresco/api/-default-/private/sfs/versions/1/file/${headers." + FILE_ID_HEADER + "}?httpMethod=GET&throwExceptionOnFailure=false";
+    private static final String ENDPOINT_PATTERN = "%s/${headers." + FILE_ID_HEADER + "}?httpMethod=GET&throwExceptionOnFailure=false";
 
     private final CamelContext camelContext;
     private final IntegrationProperties integrationProperties;
@@ -73,7 +73,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
             .stop();
 
         Transform.SharedFileStore sfsProperties = integrationProperties.alfresco().transform().sharedFileStore();
-        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.host(), sfsProperties.port());
+        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.fileEndpoint());
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
             .toD(sfsEndpoint)

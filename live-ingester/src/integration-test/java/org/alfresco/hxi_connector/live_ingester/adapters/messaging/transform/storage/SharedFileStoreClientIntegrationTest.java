@@ -149,8 +149,7 @@ class SharedFileStoreClientIntegrationTest
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("alfresco.transform.shared-file-store.host", () -> "http://" + wireMockServer.getHost());
-        registry.add("alfresco.transform.shared-file-store.port", wireMockServer::getPort);
+        registry.add("alfresco.transform.shared-file-store.base-url", () -> "http://" + wireMockServer.getHost() + ":" + wireMockServer.getPort());
         registry.add("alfresco.transform.shared-file-store.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("alfresco.transform.shared-file-store.retry.initialDelay", () -> RETRY_DELAY_MS);
     }

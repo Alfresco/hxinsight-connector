@@ -52,7 +52,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
     public void configure()
     {
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        from(integrationProperties.alfresco().repository().endpoint())
+        from(integrationProperties.alfresco().repository().eventsEndpoint())
                 .transacted()
                 .routeId(ROUTE_ID)
                 .log(DEBUG, log, "Received repo event : ${header.JMSMessageID}")
