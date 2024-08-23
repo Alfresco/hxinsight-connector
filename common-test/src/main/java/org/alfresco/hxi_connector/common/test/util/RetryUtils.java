@@ -50,9 +50,9 @@ public class RetryUtils
         });
     }
 
-    public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts)
+    public static void retryWithBackoff(ErrorCatchingRunnable runnable, int delayMs)
     {
-        retryWithBackoff(runnable, INITIAL_DELAY_MS, maxAttempts);
+        retryWithBackoff(runnable, delayMs, MAX_ATTEMPTS);
     }
 
     public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts, int delayMs)
