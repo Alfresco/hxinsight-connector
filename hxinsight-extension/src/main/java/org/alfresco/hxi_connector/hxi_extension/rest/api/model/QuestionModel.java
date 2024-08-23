@@ -60,6 +60,6 @@ public class QuestionModel
 
     public Question toQuestion()
     {
-        return new Question(question, restrictionQuery.toContextObjects());
+        return new Question(question, restrictionQuery.getNodesIds());
     }
 }

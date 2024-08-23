@@ -68,7 +68,6 @@ import org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientCo
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
-import org.alfresco.hxi_connector.hxi_extension.service.model.ObjectReference;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -76,7 +75,7 @@ class HxInsightClientTest
 {
     private static final String USER_ID = "user-id";
     private static final String AGENT_ID = "agent-id";
-    private static final Set<ObjectReference> OBJECT_REFERENCES = Set.of(new ObjectReference("dummy-node-id"));
+    private static final Set<String> OBJECT_IDS = Set.of("dummy-node-id");
     private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
     private static final String SOURCE_ID = "alfresco-dummy-source-id-0a63de491876";
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight");
@@ -125,7 +124,7 @@ class HxInsightClientTest
 
         // when
         String actualQuestionId = hxInsightClient.askQuestion(AGENT_ID,
-                new Question("Who won last year's Super Bowl?", OBJECT_REFERENCES));
+                new Question("Who won last year's Super Bowl?", OBJECT_IDS));
 
         // then
         assertEquals(expectedQuestionId, actualQuestionId);
@@ -147,7 +146,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                AGENT_ID, new Question("Who won last year's Super Bowl?", OBJECT_REFERENCES)));
+                AGENT_ID, new Question("Who won last year's Super Bowl?", OBJECT_IDS)));
         assertEquals(expectedStatusCode, exception.getStatus());
         then(httpClient).should().send(requestCaptor.capture(), any());
         assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
@@ -162,7 +161,7 @@ class HxInsightClientTest
 
         // when, then
         WebScriptException exception = assertThrows(WebScriptException.class, () -> hxInsightClient.askQuestion(
-                AGENT_ID, new Question("Who won last year's Super Bowl?", OBJECT_REFERENCES)));
+                AGENT_ID, new Question("Who won last year's Super Bowl?", OBJECT_IDS)));
         assertEquals(SC_SERVICE_UNAVAILABLE, exception.getStatus());
     }
 
@@ -372,7 +371,7 @@ class HxInsightClientTest
         given(httpClient.send(ArgumentMatchers.argThat(questionMatcher), any())).willReturn(questionResponse);
 
         // when
-        Question question = new Question("Create a sonnet about the Super Bowl", OBJECT_REFERENCES);
+        Question question = new Question("Create a sonnet about the Super Bowl", OBJECT_IDS);
         String newQuestionId = hxInsightClient.retryQuestion(AGENT_ID, questionId, "The fourth line was not quite in iambic pentameter", question);
 
         // then
