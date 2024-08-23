@@ -73,7 +73,6 @@ public class RetryUtils
     public static <T> T retryWithBackoff(Supplier<T> supplier, int maxAttempts, int delayMs)
     {
         int attempt = 0;
-        int delay = delayMs;
         while (true)
         {
             try
@@ -88,8 +87,8 @@ public class RetryUtils
                     log.atDebug().log("Attempt {} failed", attempt);
                     throw e;
                 }
-                log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delay);
-                TimeUnit.MILLISECONDS.sleep(delay);
+                log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delayMs);
+                TimeUnit.MILLISECONDS.sleep(delayMs);
             }
         }
     }
