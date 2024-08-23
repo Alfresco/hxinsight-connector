@@ -25,24 +25,42 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
-import java.util.Set;
-
-import lombok.RequiredArgsConstructor;
-
+import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
-import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
+import org.apache.commons.validator.routines.UrlValidator;
 
-@RequiredArgsConstructor
-@EntityResource(name = "knowledge-retrieval", title = "Hyland Knowledge Retrieval Url")
-public class KnowledgeRetrievalEntityResource implements EntityResourceAction.Read<String>
+import static java.lang.String.format;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+
+@EntityResource(name = "config", title = "Hyland Experience Insight Configuration")
+public class ConfigEntityResource implements EntityResourceAction.ReadById<ConfigEntityResource.HxIConfig>
 {
-    private final String knowledgeRetrievalUrl;
+    private final HxIConfig config;
+
+    public ConfigEntityResource(String knowledgeRetrievalUrl)
+    {
+        this.config = new HxIConfig(knowledgeRetrievalUrl);
+    }
 
     @Override
-    public CollectionWithPagingInfo<String> readAll(Parameters params)
+    public HxIConfig readById(String id, Parameters parameters) throws EntityNotFoundException
     {
-        return CollectionWithPagingInfo.asPaged(params.getPaging(), Set.of(knowledgeRetrievalUrl));
+        if(!id.equals("-default-")) {
+            throw new EntityNotFoundException(format("%s (you should use id '-default-')", id));
+        }
+
+        return config;
+    }
+
+    public record HxIConfig(String knowledgeRetrievalUrl)
+    {
+        public HxIConfig
+        {
+            ensureNotBlank(knowledgeRetrievalUrl, "Knowledge retrieval url must not be blank.");
+            ensureThat(new UrlValidator().isValid(knowledgeRetrievalUrl), "Knowledge retrieval url must be a valid URL.");
+        }
     }
 }

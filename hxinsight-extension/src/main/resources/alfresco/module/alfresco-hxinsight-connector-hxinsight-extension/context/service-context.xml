@@ -198,7 +198,7 @@
         <constructor-arg name="applicationProperties" ref="hxiConnectorProperties"/>
     </bean>
 
-    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.KnowledgeRetrievalEntityResource">
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.ConfigEntityResource">
         <constructor-arg name="knowledgeRetrievalUrl" value="${hxi.knowledge-retrieval.url}"/>
     </bean>
 </beans>
