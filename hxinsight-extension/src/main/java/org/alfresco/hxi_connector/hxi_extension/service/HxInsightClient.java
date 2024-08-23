@@ -82,7 +82,7 @@ public class HxInsightClient
     {
         try
         {
-            String url = format("%s?sourceId=%s", config.getAgentUrl(), applicationInfoProvider.getSourceId());
+            String url = format("%s?sourceId=%s", config.getAgentsUrl(), applicationInfoProvider.getSourceId());
 
             HttpRequest request = requestWithRequiredHeaders()
                     .uri(URI.create(url))
@@ -109,7 +109,7 @@ public class HxInsightClient
             String body = objectMapper.writeValueAsString(question);
 
             HttpRequest request = requestWithRequiredHeaders()
-                    .uri(URI.create(format(config.getQuestionUrl(), agentId)))
+                    .uri(URI.create(format(config.getQuestionsUrl(), agentId)))
                     .header(CONTENT_TYPE, "application/json")
                     .POST(BodyPublishers.ofString(body))
                     .build();
@@ -132,7 +132,7 @@ public class HxInsightClient
         try
         {
             HttpRequest request = requestWithRequiredHeaders()
-                    .uri(URI.create(format(config.getAnswerUrl() + "?userId=%s", questionId, userId)))
+                    .uri(URI.create(format(config.getAnswersUrl() + "?userId=%s", questionId, userId)))
                     .GET()
                     .build();
 
@@ -185,7 +185,7 @@ public class HxInsightClient
         try
         {
             HttpRequest request = requestWithRequiredHeaders()
-                    .uri(URI.create(format(config.getAvatarUrl(), agentId)))
+                    .uri(URI.create(format(config.getAvatarsUrl(), agentId)))
                     .GET()
                     .build();
 
