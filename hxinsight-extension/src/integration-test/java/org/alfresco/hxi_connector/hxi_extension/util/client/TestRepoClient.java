@@ -48,7 +48,7 @@ import org.alfresco.rest.api.model.Aspect;
 
 public class TestRepoClient
 {
-    private final int TIMEOUT_SECONDS = 300_000;
+    private static final int TIMEOUT_SECONDS = 300_000;
     private final HttpClient httpClient = HttpClient.newBuilder()
             .authenticator(new Authenticator() {
                 @Override
