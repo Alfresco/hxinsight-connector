@@ -25,15 +25,17 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
+import static java.lang.String.format;
+
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+
+import org.apache.commons.validator.routines.UrlValidator;
+
 import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
-import org.apache.commons.validator.routines.UrlValidator;
-
-import static java.lang.String.format;
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 @EntityResource(name = "config", title = "Hyland Experience Insight Configuration")
 public class ConfigEntityResource implements EntityResourceAction.ReadById<ConfigEntityResource.HxIConfig>
@@ -48,7 +50,8 @@ public class ConfigEntityResource implements EntityResourceAction.ReadById<Confi
     @Override
     public HxIConfig readById(String id, Parameters parameters) throws EntityNotFoundException
     {
-        if(!id.equals("-default-")) {
+        if (!id.equals("-default-"))
+        {
             throw new EntityNotFoundException(format("%s (you should use id '-default-')", id));
         }
 
