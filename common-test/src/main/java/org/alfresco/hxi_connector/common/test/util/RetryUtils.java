@@ -52,7 +52,7 @@ public class RetryUtils
 
     public static void retryWithBackoff(ErrorCatchingRunnable runnable, int delayMs)
     {
-        retryWithBackoff(runnable, delayMs, MAX_ATTEMPTS);
+        retryWithBackoff(runnable, MAX_ATTEMPTS, delayMs);
     }
 
     public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts, int delayMs)
