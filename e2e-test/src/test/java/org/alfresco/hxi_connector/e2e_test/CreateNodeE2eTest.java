@@ -92,7 +92,7 @@ public class CreateNodeE2eTest
 {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     protected static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int INITIAL_DELAY_MS = 400;
+    private static final int INITIAL_DELAY_MS = 500;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
