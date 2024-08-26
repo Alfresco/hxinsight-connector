@@ -36,14 +36,14 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.hxi_extension.util.client.AspectsClient;
+import org.alfresco.hxi_connector.hxi_extension.rest.api.ConfigEntityResource.HxIConfig;
+import org.alfresco.hxi_connector.hxi_extension.util.client.TestRepoClient;
 import org.alfresco.rest.api.model.Aspect;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class PredictionApplierExtensionIntegrationTest
 {
-    private static final int TIMEOUT_SECONDS = 300;
     private static final String EXPECTED_HXI_ASPECT = "hxi:predictionApplied";
 
     static final Network network = Network.newNetwork();
@@ -54,16 +54,26 @@ public class PredictionApplierExtensionIntegrationTest
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer();
 
-    AspectsClient aspectsClient = new AspectsClient(repository.getHost(), repository.getPort(), TIMEOUT_SECONDS);
+    TestRepoClient testRepoClient = new TestRepoClient(repository.getHost(), repository.getPort());
 
     @Test
     void testHxIModelInstallation()
     {
         // when
-        Aspect actualAspect = aspectsClient.getAspectById(EXPECTED_HXI_ASPECT);
+        Aspect actualAspect = testRepoClient.getAspectById(EXPECTED_HXI_ASPECT);
 
         // then
         assertThat(actualAspect).isNotNull();
+    }
+
+    @Test
+    void testConfigUrl()
+    {
+        // when
+        HxIConfig config = testRepoClient.getConfig();
+
+        // then
+        assertThat(config.knowledgeRetrievalUrl()).isEqualTo("http://dummy-host.xyz/knowledge-retrieval/bots");
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
