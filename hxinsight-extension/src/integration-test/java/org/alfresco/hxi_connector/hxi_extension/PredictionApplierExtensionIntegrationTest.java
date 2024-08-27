@@ -73,7 +73,7 @@ public class PredictionApplierExtensionIntegrationTest
         HxIConfig config = testRepoClient.getConfig();
 
         // then
-        assertThat(config.knowledgeRetrievalUrl()).isEqualTo("http://dummy-host.xyz/knowledge-retrieval/bots");
+        assertThat(config.getKnowledgeRetrievalUrl()).isEqualTo("http://dummy-host.xyz/knowledge-retrieval/bots");
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
