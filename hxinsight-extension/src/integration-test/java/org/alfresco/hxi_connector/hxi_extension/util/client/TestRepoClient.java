@@ -86,9 +86,10 @@ public class TestRepoClient
             throw new IllegalStateException("Call to aspects endpoint returned unexpected response %s".formatted(response.statusCode()));
         }
 
-        Map<String, HxIConfig> parsedResponse = objectMapper.readValue(response.body(), new TypeReference<>() {});
+        Map<String, Map<String, String>> parsedResponse = objectMapper.readValue(response.body(), new TypeReference<>() {});
+        Map<String, String> configMap = parsedResponse.get("entry");
 
-        return parsedResponse.get("entry");
+        return new HxIConfig(configMap.get("knowledgeRetrievalUrl"));
     }
 
     @SneakyThrows
