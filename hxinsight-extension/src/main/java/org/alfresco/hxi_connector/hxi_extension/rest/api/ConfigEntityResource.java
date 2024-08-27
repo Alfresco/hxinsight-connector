@@ -30,12 +30,7 @@ import static java.lang.String.format;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.experimental.Accessors;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
