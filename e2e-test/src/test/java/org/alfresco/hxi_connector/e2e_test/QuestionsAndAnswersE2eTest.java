@@ -232,7 +232,7 @@ public class QuestionsAndAnswersE2eTest
         // then
         assertThat(response.statusCode()).isEqualTo(SC_OK);
         assertThat(response.jsonPath()).satisfies(jsonPath -> {
-            assertThat(jsonPath.<String> get("list.entries.entry[0].questionId")).isEqualTo(questionId);
+            assertThat(jsonPath.<String> get("list.entries.entry[0].question")).isEqualTo("This is some question");
             assertThat(jsonPath.<String> get("list.entries.entry[0].answer")).isEqualTo("This is the answer to the question");
             assertThat(jsonPath.<String> get("list.entries.entry[0].references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
         });

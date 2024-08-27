@@ -170,14 +170,15 @@ class HxInsightClientTest
     void shouldReturnAnswer()
     {
         // given
-        String questionId = "dummy-id-1234";
+        String question = "Who won last year's Super Bowl?";
         String answer = "The Kansas City Chiefs won last year's Super Bowl.";
-        AnswerResponse expectedAnswerResponse = new AnswerResponse(questionId, "", "", "", answer, null);
+        AnswerResponse expectedAnswerResponse = new AnswerResponse(question, "", "", "", answer, null);
         JSONObject responseBody = new JSONObject(expectedAnswerResponse);
         HttpResponse response = mock(HttpResponse.class);
         given(response.statusCode()).willReturn(SC_OK);
         given(response.body()).willReturn(responseBody.toString());
         given(httpClient.send(any(), any())).willReturn(response);
+        String questionId = "dummy-id-1234";
 
         // when
         AnswerResponse answerResponse = hxInsightClient.getAnswer(questionId, USER_ID);
