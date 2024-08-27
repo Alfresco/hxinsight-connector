@@ -30,6 +30,8 @@ import static java.lang.String.format;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
@@ -58,12 +60,17 @@ public class ConfigEntityResource implements EntityResourceAction.ReadById<Confi
         return config;
     }
 
-    public record HxIConfig(String knowledgeRetrievalUrl)
+    @Getter
+    public static class HxIConfig
     {
-        public HxIConfig
+        private final String knowledgeRetrievalUrl;
+
+        public HxIConfig(String knowledgeRetrievalUrl)
         {
             ensureNotBlank(knowledgeRetrievalUrl, "Knowledge retrieval url must not be blank.");
             ensureThat(new UrlValidator().isValid(knowledgeRetrievalUrl), "Knowledge retrieval url must be a valid URL.");
+
+            this.knowledgeRetrievalUrl = knowledgeRetrievalUrl;
         }
     }
 }
