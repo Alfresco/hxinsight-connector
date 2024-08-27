@@ -31,7 +31,6 @@ import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import org.apache.commons.validator.routines.UrlValidator;
 
 import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
