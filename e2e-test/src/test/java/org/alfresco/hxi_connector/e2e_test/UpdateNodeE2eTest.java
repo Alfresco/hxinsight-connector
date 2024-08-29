@@ -301,7 +301,7 @@ public class UpdateNodeE2eTest
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL",
                         "nio://%s:61616".formatted(activemq.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("ALFRESCO_REPOSITORY_BASE-URL",
-                        "http://%s:8080".formatted(repository.getNetworkAliases().stream().findFirst().get()))
+                        "http://%s:8080/alfresco".formatted(repository.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("ALFRESCO_REPOSITORY_RETRY_ATTEMPTS", "1")
                 .withEnv("ALFRESCO_REPOSITORY_RETRY_INITIAL-DELAY", "0")
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_CLIENT-ID", "dummy-client-id")

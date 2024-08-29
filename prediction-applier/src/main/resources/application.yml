@@ -23,8 +23,8 @@ hyland-experience:
 
 alfresco:
   repository:
-    base-url: http://localhost:8002
-    discovery-endpoint: ${alfresco.repository.base-url}/alfresco/api/discovery
+    base-url: http://localhost:8002/alfresco
+    discovery-endpoint: ${alfresco.repository.base-url}/api/discovery
     retry:
       attempts: 10
       initial-delay: 500
