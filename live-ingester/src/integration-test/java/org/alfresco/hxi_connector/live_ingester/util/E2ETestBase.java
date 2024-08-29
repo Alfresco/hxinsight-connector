@@ -112,7 +112,7 @@ public class E2ETestBase
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
 
-        registry.add("hyland-experience.insight.base-url", hxInsightServer::getBaseUrl);
+        registry.add("hyland-experience.insight.ingestion.base-url", hxInsightServer::getBaseUrl);
 
         registry.add("alfresco.repository.events-endpoint", () -> "activemq:topic:" + REPO_EVENT_TOPIC);
         registry.add("alfresco.bulk-ingester.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);

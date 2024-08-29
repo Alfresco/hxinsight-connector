@@ -186,7 +186,7 @@ class HxInsightEventPublisherIntegrationTest
     @DynamicPropertySource
     static void overrideProperties(DynamicPropertyRegistry registry)
     {
-        registry.add("hyland-experience.insight.base-url", wireMockServer::getBaseUrl);
+        registry.add("hyland-experience.insight.ingestion.base-url", wireMockServer::getBaseUrl);
         registry.add("hyland-experience.ingester.retry.attempts", () -> RETRY_ATTEMPTS);
         registry.add("hyland-experience.ingester.retry.initialDelay", () -> RETRY_DELAY_MS);
     }

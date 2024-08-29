@@ -309,7 +309,7 @@ public class UpdateNodeE2eTest
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin")
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL",
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_BASE-URL",
                         "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
     }
