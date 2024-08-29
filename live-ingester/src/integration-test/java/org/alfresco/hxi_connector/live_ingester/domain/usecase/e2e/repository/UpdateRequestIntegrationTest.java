@@ -738,7 +738,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "@type": "NodeResource",
                       "id": "82c7d723-1dd8-477c-8490-04cb0e826e65",
                       "name": "New Folder",
-                      "nodeType": "cm:folder"
+                      "nodeType": "cm:folder",
                       "createdByUser": {
                         "id": "admin",
                         "displayName": "Administrator"
@@ -748,7 +748,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "id": "abeecher",
                         "displayName": "Alice Beecher"
                       },
-                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ]
                     },
                     "resourceBefore": {
                       "name": "Old Folder"
@@ -767,7 +767,28 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "timestamp" : 1611656982995,
                     "properties": {
-                      "cm:name": {"value": "New Folder"}
+                      "cm:name": {"value": "New Folder"},
+                      "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "aspectsNames" : {
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                      },
+                      "modifiedBy" : {
+                        "value" : "abeecher"
+                      },
+                      "type" : {
+                        "value" : "cm:folder"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      }
                     }
                   }
                 ]""";
