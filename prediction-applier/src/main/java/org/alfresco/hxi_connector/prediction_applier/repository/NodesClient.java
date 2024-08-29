@@ -67,7 +67,7 @@ public class NodesClient extends RouteBuilder
     private static final String RETRYABLE_ROUTE = "direct:retryable-" + NodesClient.class.getSimpleName();
     static final String ROUTE_ID = "repository-nodes";
     public static final String NODE_ID_HEADER = "nodeId";
-    private static final String URI_PATTERN = "%s/alfresco/api/-default-/private/hxi/versions/1/nodes/${headers.nodeId}/predictions?httpMethod=POST&throwExceptionOnFailure=false";
+    private static final String URI_PATTERN = "%s/api/-default-/private/hxi/versions/1/nodes/${headers.nodeId}/predictions?httpMethod=POST&throwExceptionOnFailure=false";
     private static final int EXPECTED_STATUS_CODE = SC_CREATED;
     public static final String UNEXPECTED_STATUS_CODE_MESSAGE = "Unexpected response status code - expecting: %d, received: %d";
     private static final Set<Class<? extends Throwable>> RETRY_REASONS = Set.of(
