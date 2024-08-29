@@ -75,7 +75,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "cm:title": "Purchase Order",
                         "cm:versionType": null,
                         "cm:versionLabel": "1.0",
-                        "cm:taggable": null
+                        "cm:description": null
                       },
                       "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
                       "isFolder": false,
@@ -92,7 +92,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "cm:title": null,
                         "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
-                        "cm:taggable": null,
                         "cm:description": "Old Description"
                       },
                       "aspectNames": [ "cm:versionable", "cm:thumbnailModification", "cm:author" ]
@@ -113,7 +112,37 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
-                      "modifiedBy": {"value": "abeecher"}
+                      "modifiedBy": {"value": "abeecher"},
+                      "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "cm:versionLabel" : {
+                        "value" : "1.0"
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "cm:name" : {
+                        "value" : "purchase-order-scan.pdf"
+                      },
+                      "type" : {
+                        "value" : "cm:content"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      },
+                      "cm:content" : {
+                        "file" : {
+                          "content-metadata" : {
+                            "size" : 531152,
+                            "name" : "purchase-order-scan.pdf",
+                            "content-type" : "application/pdf"
+                          }
+                        }
+                      }
                     },
                     "removedProperties": ["cm:versionType", "cm:description"]
                   }
@@ -140,6 +169,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
                       "name": "purchase-order-scan.pdf",
                       "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "abeecher",
+                        "displayName": "Alice Beecher"
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
                       "content": {
                         "mimeType": "application/pdf",
                         "sizeInBytes": 123,
@@ -204,7 +243,40 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "timestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Purchase Order"}
+                      "cm:title": {"value": "Purchase Order"},
+                      "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "cm:name" : {
+                        "value" : "purchase-order-scan.pdf"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "aspectsNames" : {
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                      },
+                      "modifiedBy" : {
+                        "value" : "abeecher"
+                      },
+                      "type" : {
+                        "value" : "cm:content"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      },
+                      "cm:content" : {
+                        "file" : {
+                          "content-metadata" : {
+                            "size" : 531152,
+                            "name" : "purchase-order-scan.pdf",
+                            "content-type" : "application/pdf"
+                          }
+                        }
+                      }
                     }
                   }
                 ]""";
@@ -243,41 +315,44 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "timestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Summary for year 2024"}
+                      "cm:title": {"value": "Summary for year 2024"},
+                      "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "cm:name" : {
+                        "value" : "purchase-order-scan.pdf"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "aspectsNames" : {
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                      },
+                      "modifiedBy" : {
+                        "value" : "abeecher"
+                      },
+                      "type" : {
+                        "value" : "cm:content"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      },
+                      "cm:content" : {
+                        "file" : {
+                          "content-metadata" : {
+                            "size" : 531152,
+                            "name" : "purchase-order-scan.pdf",
+                            "content-type" : "application/pdf"
+                          }
+                        }
+                      }
                     }
                   }
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
-    }
-
-    /**
-     * This weird situation when we update property from null -> null sometimes happens, and it is probably some defect of our event system
-     */
-    @Test
-    void shouldDoNothingWithUnchangedProperty()
-    {
-        // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        String properties = """
-                {
-                  "cm:taggable": null
-                }
-                """;
-
-        String propertiesBefore = """
-                {
-                  "cm:taggable": null
-                }
-                """;
-
-        String repoEvent = generatePropertiesUpdatedEvent(properties, propertiesBefore);
-
-        // when
-        containerSupport.raiseRepoEvent(repoEvent);
-
-        // then
-        containerSupport.expectNoHxIngestMessagesReceived();
     }
 
     @Test
@@ -311,6 +386,41 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
                     "timestamp" : 1611656982995,
+                    "properties": {
+                        "createdAt" : {
+                          "value" : 1611227655695
+                        },
+                        "createdBy" : {
+                          "value" : "admin"
+                        },
+                        "cm:name" : {
+                          "value" : "purchase-order-scan.pdf"
+                        },
+                        "ALLOW_ACCESS" : {
+                          "value" : [ "GROUP_EVERYONE" ]
+                        },
+                        "aspectsNames" : {
+                          "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                        },
+                        "modifiedBy" : {
+                          "value" : "abeecher"
+                        },
+                        "type" : {
+                          "value" : "cm:content"
+                        },
+                        "DENY_ACCESS" : {
+                          "value" : [ ]
+                        },
+                        "cm:content" : {
+                          "file" : {
+                            "content-metadata" : {
+                              "size" : 531152,
+                              "name" : "purchase-order-scan.pdf",
+                              "content-type" : "application/pdf"
+                            }
+                          }
+                        }
+                    },
                     "removedProperties": ["cm:title"]
                   }
                 ]""";
@@ -368,7 +478,40 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "timestamp": 1611656982995,
                     "properties": {
                       "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
-                      "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]}
+                      "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
+                      "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "cm:name" : {
+                        "value" : "purchase-order-scan.pdf"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "aspectsNames" : {
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                      },
+                      "modifiedBy" : {
+                        "value" : "abeecher"
+                      },
+                      "type" : {
+                        "value" : "cm:content"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      },
+                      "cm:content" : {
+                        "file" : {
+                          "content-metadata" : {
+                            "size" : 531152,
+                            "name" : "purchase-order-scan.pdf",
+                            "content-type" : "application/pdf"
+                          }
+                        }
+                      }
                     }
                   }
                 ]""";
@@ -440,6 +583,17 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
                       "name": "purchase-order-scan.pdf",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "abeecher",
+                        "displayName": "Alice Beecher"
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
                       "content": {
                         "sizeInBytes": 0
                       },
@@ -468,6 +622,35 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
                     "timestamp": 1611656982995,
+                    "properties" : {
+                      "cm:title" : {
+                        "value" : "Purchase Order"
+                      },
+                      "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "cm:name" : {
+                        "value" : "purchase-order-scan.pdf"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "aspectsNames" : {
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                      },
+                      "modifiedBy" : {
+                        "value" : "abeecher"
+                      },
+                      "type" : {
+                        "value" : "cm:content"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      }
+                    },
                     "removedProperties": ["cm:content"]
                   }
                 ]""";
@@ -556,6 +739,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "id": "82c7d723-1dd8-477c-8490-04cb0e826e65",
                       "name": "New Folder",
                       "nodeType": "cm:folder"
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "abeecher",
+                        "displayName": "Alice Beecher"
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
                     },
                     "resourceBefore": {
                       "name": "Old Folder"
@@ -627,7 +820,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "app:editInline": true,
                         "cm:categories": [],
                         "cm:description": "",
-                        "cm:taggable": null,
                         "cm:author": ""
                       },
                       "localizedProperties": {
@@ -674,6 +866,48 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     },
                     "DENY_ACCESS" : {
                       "value" : [ ]
+                    },
+                    "cm:title" : {
+                      "value" : ""
+                    },
+                    "app:editInline" : {
+                      "value" : true
+                    },
+                    "aspectsNames" : {
+                      "value" : [ "cm:generalclassifiable", "app:inlineeditable", "cm:author", "cm:titled", "cm:auditable", "cm:taggable" ]
+                    },
+                    "cm:categories" : {
+                      "value" : [ ]
+                    },
+                    "type" : {
+                      "value" : "cm:content"
+                    },
+                    "cm:description" : {
+                      "value" : ""
+                    },
+                    "createdAt" : {
+                      "value" : 1722339459182
+                    },
+                    "createdBy" : {
+                      "value" : "admin"
+                    },
+                    "cm:name" : {
+                      "value" : "test"
+                    },
+                    "cm:author" : {
+                      "value" : ""
+                    },
+                    "modifiedBy" : {
+                      "value" : "admin"
+                    },
+                    "cm:content" : {
+                      "file" : {
+                        "content-metadata" : {
+                          "size" : 0,
+                          "name" : "test",
+                          "content-type" : "text/plain"
+                        }
+                      }
                     }
                   }
                 }]""";

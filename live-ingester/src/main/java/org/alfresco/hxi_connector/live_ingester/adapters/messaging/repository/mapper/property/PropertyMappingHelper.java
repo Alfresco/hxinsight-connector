@@ -38,18 +38,13 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypeCreated;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isEventTypePermissionsUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 
-import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import lombok.NoArgsConstructor;
 
@@ -143,7 +138,7 @@ public class PropertyMappingHelper
         String sourceFileName = event.getData().getResource().getName();
         String sourceMimeType = contentInfo.map(ContentInfo::getMimeType).orElse(null);
         Long sourceSizeInBytes = contentInfo.map(ContentInfo::getSizeInBytes).orElse(null);
-        if (sourceMimeType == null && sourceSizeInBytes == null && sourceFileName == null)
+        if (sourceMimeType == null && sourceSizeInBytes == null)
         {
             return Optional.empty();
         }

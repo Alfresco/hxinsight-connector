@@ -261,6 +261,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                       "properties": {
                         "cm:title": "Purchase Order",
                         "cm:versionType": null,
+                        "cm:description": null,
                         "cm:versionLabel": "1.0",
                         "hxi:latestPredictionDateTime": "2024-05-08T17:00:42.529Z"
                       },
@@ -297,6 +298,39 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "timestamp" : %s,
                     "properties": {
+                       "createdAt" : {
+                         "value" : 1611227655695
+                       },
+                       "cm:versionLabel" : {
+                         "value" : "1.0"
+                       },
+                       "createdBy" : {
+                         "value" : "admin"
+                       },
+                       "ALLOW_ACCESS" : {
+                         "value" : [ "GROUP_EVERYONE" ]
+                       },
+                       "cm:name" : {
+                         "value" : "purchase-order-scan.pdf"
+                       },
+                       "hxi:latestPredictionDateTime" : {
+                         "value" : "2024-05-08T17:00:42.529Z"
+                       },
+                       "type" : {
+                         "value" : "cm:content"
+                       },
+                       "DENY_ACCESS" : {
+                         "value" : [ ]
+                       },
+                       "cm:content" : {
+                         "file" : {
+                           "content-metadata" : {
+                             "size" : 531152,
+                             "name" : "purchase-order-scan.pdf",
+                             "content-type" : "application/pdf"
+                           }
+                         }
+                       },
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"]},
                       "modifiedBy": {"value": "abeecher"}

@@ -26,13 +26,19 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
+import static java.time.ZoneOffset.UTC;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
@@ -43,7 +49,10 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
+import java.time.ZonedDateTime;
+import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
 
@@ -54,6 +63,7 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
+import org.alfresco.repo.event.v1.model.UserInfo;
 
 class PropertiesMapperTest
 {
@@ -67,7 +77,7 @@ class PropertiesMapperTest
 
         setType(event, NODE_CREATED);
 
-        NodeResource nodeResource = NodeResource.builder()
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
                 .setName("some name")
                 .setProperties(mapWith("cm:title", "some title", "cm:description", "some description"))
                 .build();
@@ -85,7 +95,7 @@ class PropertiesMapperTest
                 allowAccessUpdated(),
                 denyAccessUpdated());
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -98,7 +108,7 @@ class PropertiesMapperTest
 
         setType(event, NODE_CREATED);
 
-        NodeResource nodeResource = NodeResource.builder()
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
                 .setNodeType(type)
                 .build();
 
@@ -113,57 +123,7 @@ class PropertiesMapperTest
                 allowAccessUpdated(),
                 denyAccessUpdated());
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
-    }
-
-    @Test
-    void shouldIgnoreNullName_NodeCreated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_CREATED);
-
-        NodeResource nodeResource = NodeResource.builder()
-                .setName(null)
-                .build();
-
-        setNodeResource(event, nodeResource);
-
-        // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                allowAccessUpdated(),
-                denyAccessUpdated());
-
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
-    }
-
-    @Test
-    void shouldHandleNoPropertiesChange_NodeUpdated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_UPDATED);
-
-        NodeResource nodeResourceBefore = NodeResource.builder().build();
-        NodeResource nodeResource = NodeResource.builder()
-                .setProperties(mapWith("cm:title", "some title", "cm:description", "some description"))
-                .build();
-
-        setNodeResourceBefore(event, nodeResourceBefore);
-        setNodeResource(event, nodeResource);
-
-        // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of();
-
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -179,10 +139,9 @@ class PropertiesMapperTest
         NodeResource nodeResourceBefore = NodeResource.builder()
                 .setName("previous file name")
                 .build();
-        NodeResource nodeResource = NodeResource.builder()
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
                 .setName(name)
                 .setContent(new ContentInfo("application/jpeg", 123L, "UTF-8"))
-                .setProperties(mapWith("cm:title", "some title", "cm:description", "some description"))
                 .build();
 
         setNodeResourceBefore(event, nodeResourceBefore);
@@ -196,7 +155,7 @@ class PropertiesMapperTest
                 updated(NAME_PROPERTY, name),
                 contentMetadataUpdated(CONTENT_PROPERTY, "application/jpeg", 123L, name));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -212,9 +171,8 @@ class PropertiesMapperTest
         NodeResource nodeResourceBefore = NodeResource.builder()
                 .setName("previous folder name")
                 .build();
-        NodeResource nodeResource = NodeResource.builder()
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
                 .setName(name)
-                .setProperties(mapWith("cm:title", "some title", "cm:description", "some description"))
                 .build();
 
         setNodeResourceBefore(event, nodeResourceBefore);
@@ -227,7 +185,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(NAME_PROPERTY, name));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -241,7 +199,7 @@ class PropertiesMapperTest
         NodeResource nodeResourceBefore = NodeResource.builder()
                 .setProperties(mapWith("cm:description", null))
                 .build();
-        NodeResource nodeResource = NodeResource.builder()
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
                 .setProperties(mapWith("cm:title", "some title", "cm:description", "some description"))
                 .build();
 
@@ -252,9 +210,11 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(updated("cm:description", "some description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated("cm:title", "some title"),
+                updated("cm:description", "some description"));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -267,7 +227,7 @@ class PropertiesMapperTest
         NodeResource nodeResourceBefore = NodeResource.builder()
                 .setProperties(mapWith("cm:description", "some description"))
                 .build();
-        NodeResource nodeResource = NodeResource.builder()
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
                 .setProperties(mapWith("cm:title", "some title", "cm:description", "new description"))
                 .build();
 
@@ -278,9 +238,11 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(updated("cm:description", "new description"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                updated("cm:title", "some title"),
+                updated("cm:description", "new description"));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -293,7 +255,7 @@ class PropertiesMapperTest
         NodeResource nodeResourceBefore = NodeResource.builder()
                 .setProperties(mapWith("cm:title", "some title"))
                 .build();
-        NodeResource nodeResource = NodeResource.builder()
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
                 .setProperties(mapWith("cm:title", null, "cm:description", "some description"))
                 .build();
 
@@ -304,32 +266,11 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted("cm:title"));
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                deleted("cm:title"),
+                updated("cm:description", "some description"));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
-    }
-
-    /**
-     * Test that we can cope with update requests from null to null. See https://docs.alfresco.com/content-services/latest/develop/oop-ext-points/events/ for an example of this.
-     */
-    @Test
-    void shouldHandleNullPropertyUnchanged_NodeUpdated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_UPDATED);
-        // Use same null property in before and after.
-        NodeResource nodeResource = NodeResource.builder().setProperties(mapWith("cm:taggable", null)).build();
-        setNodeResourceBefore(event, nodeResource);
-        setNodeResource(event, nodeResource);
-
-        // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(PropertyDelta.unchanged("cm:taggable"));
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -342,7 +283,7 @@ class PropertiesMapperTest
         ContentInfo contentInfo = new ContentInfo(null, 123L, null);
         NodeResource nodeResourceBefore = NodeResource.builder().setContent(contentInfo).build();
         setNodeResourceBefore(event, nodeResourceBefore);
-        NodeResource nodeResource = NodeResource.builder().setContent(null).build();
+        NodeResource nodeResource = nodeResourceWithRequiredFields().setContent(null).build();
         setNodeResource(event, nodeResource);
 
         // when
@@ -350,7 +291,7 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY));
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -361,7 +302,7 @@ class PropertiesMapperTest
         setType(event, NODE_CREATED);
 
         ContentInfo contentInfo = new ContentInfo("application/msword", 123L, null);
-        NodeResource nodeResource = NodeResource.builder().setContent(contentInfo).build();
+        NodeResource nodeResource = nodeResourceWithRequiredFields().setContent(contentInfo).build();
         setNodeResource(event, nodeResource);
 
         // when
@@ -369,10 +310,10 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expected = Set.of(
-                contentMetadataUpdated(CONTENT_PROPERTY, "application/msword", 123L, null),
+                contentMetadataUpdated(CONTENT_PROPERTY, "application/msword", 123L, "some name"),
                 allowAccessUpdated(),
                 denyAccessUpdated());
-        assertEquals(expected, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expected), propertyDeltas);
     }
 
     @Test
@@ -386,15 +327,15 @@ class PropertiesMapperTest
         NodeResource nodeResourceBefore = NodeResource.builder().setContent(oldContentInfo).build();
         setNodeResourceBefore(event, nodeResourceBefore);
         ContentInfo newContentInfo = new ContentInfo("image/bmp", 456L, null);
-        NodeResource nodeResource = NodeResource.builder().setContent(newContentInfo).build();
+        NodeResource nodeResource = nodeResourceWithRequiredFields().setContent(newContentInfo).build();
         setNodeResource(event, nodeResource);
 
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
-        Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, null));
-        assertEquals(expected, propertyDeltas);
+        Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, "some name"));
+        assertEquals(mergeWithDefaultProperties(expected), propertyDeltas);
     }
 
     @Test
@@ -408,7 +349,7 @@ class PropertiesMapperTest
         NodeResource nodeResourceBefore = NodeResource.builder().setName("oldName.jpeg").setContent(oldContentInfo).build();
         setNodeResourceBefore(event, nodeResourceBefore);
         ContentInfo newContentInfo = new ContentInfo("image/bmp", 456L, null);
-        NodeResource nodeResource = NodeResource.builder().setName("newName.bmp").setContent(newContentInfo).build();
+        NodeResource nodeResource = nodeResourceWithRequiredFields().setName("newName.bmp").setContent(newContentInfo).build();
         setNodeResource(event, nodeResource);
 
         // when
@@ -417,7 +358,7 @@ class PropertiesMapperTest
         // then
         Set<PropertyDelta<?>> expected = Set.of(contentMetadataUpdated(CONTENT_PROPERTY, "image/bmp", 456L, "newName.bmp"),
                 updated(NAME_PROPERTY, "newName.bmp"));
-        assertEquals(expected, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expected), propertyDeltas);
     }
 
     @Test
@@ -432,7 +373,7 @@ class PropertiesMapperTest
         setType(event, NODE_CREATED);
 
         given(event.getData()).willReturn(mock(EnterpriseEventData.class));
-        given(event.getData().getResource()).willReturn(NodeResource.builder().build());
+        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
         given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
@@ -445,7 +386,7 @@ class PropertiesMapperTest
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)),
                 updated(DENY_ACCESS, Set.of(bob)));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -458,7 +399,7 @@ class PropertiesMapperTest
         setType(event, NODE_CREATED);
 
         given(event.getData()).willReturn(mock(EnterpriseEventData.class));
-        given(event.getData().getResource()).willReturn(NodeResource.builder().build());
+        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
         given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
@@ -470,7 +411,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     @Test
@@ -485,7 +426,7 @@ class PropertiesMapperTest
         setType(event, PERMISSION_UPDATED);
 
         given(event.getData()).willReturn(mock(EnterpriseEventData.class));
-        given(event.getData().getResource()).willReturn(NodeResource.builder().build());
+        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
         given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
@@ -498,7 +439,7 @@ class PropertiesMapperTest
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)),
                 updated(DENY_ACCESS, Set.of(bob)));
 
-        assertEquals(expectedPropertyDeltas, propertyDeltas);
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
@@ -542,5 +483,41 @@ class PropertiesMapperTest
     private static PropertyDelta<Set<String>> denyAccessUpdated()
     {
         return updated(DENY_ACCESS, Set.of());
+    }
+
+    private static NodeResource.Builder nodeResourceWithRequiredFields()
+    {
+        return NodeResource.builder()
+                .setName("some name")
+                .setNodeType("cm:folder")
+                .setCreatedAt(ZonedDateTime.of(2023, 1, 1, 0, 0, 0, 0, UTC))
+                .setCreatedByUser(new UserInfo("admin", "admin", "admin"))
+                .setModifiedByUser(new UserInfo("admin", "admin", "admin"))
+                .setAspectNames(Set.of("cm:auditable"));
+    }
+
+    private static Set<PropertyDelta<?>> mergeWithDefaultProperties(Set<PropertyDelta<?>> propertyDeltas)
+    {
+        Set<PropertyDelta<?>> defaultProperties = Set.of(
+                updated(NAME_PROPERTY, "some name"),
+                updated(TYPE_PROPERTY, "cm:folder"),
+                updated(CREATED_AT_PROPERTY, 1672531200000L),
+                updated(CREATED_BY_PROPERTY, "admin"),
+                updated(MODIFIED_BY_PROPERTY, "admin"),
+                updated(ASPECT_NAMES_PROPERTY, Set.of("cm:auditable")),
+                updated(ALLOW_ACCESS, Set.of()),
+                updated(DENY_ACCESS, Set.of()));
+
+        Set<PropertyDelta<?>> mergedProperties = new HashSet<>(propertyDeltas);
+
+        Set<String> propertyKeys = propertyDeltas.stream()
+                .map(PropertyDelta::getPropertyName)
+                .collect(Collectors.toSet());
+
+        defaultProperties.stream()
+                .filter(property -> !propertyKeys.contains(property.getPropertyName()))
+                .forEach(mergedProperties::add);
+
+        return mergedProperties;
     }
 }
