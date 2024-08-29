@@ -5,6 +5,7 @@ management:
   endpoints.web.exposure.include: health
   endpoint.health.probes.enabled: true
   health.liveness-state.enabled: true
+  health.readiness-state.enabled: true
 
 camel:
   springboot.main-run-controller: true
@@ -54,12 +55,13 @@ alfresco:
       deny:
 hyland-experience:
   insight:
-    base-url: http://localhost:8001
+    ingestion:
+      base-url: http://localhost:8001
   storage:
     location:
-      endpoint: ${hyland-experience.insight.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
+      endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
   ingester:
-    endpoint: ${hyland-experience.insight.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
+    endpoint: ${hyland-experience.insight.ingestion.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
 
 auth:
   providers:

@@ -1,7 +1,7 @@
 {
-  "questionId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
   "agentId": "61254576-62a3-453f-8cd8-19e2f6554f29",
   "agentVersion": "1",
+  "question": "This is the question",
   "responseCompleteness": "COMPLETE",
   "answer": "This is the answer to the question",
   "references": [

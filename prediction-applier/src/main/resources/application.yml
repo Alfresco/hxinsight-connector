@@ -1,19 +1,24 @@
-application:
-  source-id: alfresco-dummy-source-id-0a63de491876
-  version: "@project.version@"
+server:
+  port: 8080
 
-spring:
-  main:
-    web-application-type: none
+management:
+  endpoints.web.exposure.include: health
+  endpoint.health.probes.enabled: true
+  health.liveness-state.enabled: true
+  health.readiness-state.enabled: true
 
 camel:
   springboot:
     main-run-controller: true
 
+application:
+  source-id: alfresco-dummy-source-id-0a63de491876
+  version: "@project.version@"
+
 hyland-experience:
   insight:
     predictions:
-      source-base-url: http://localhost:8001
+      base-url: http://localhost:8001
       poll-period-millis: 300_000 # 5 minutes
 
 alfresco:
