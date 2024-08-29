@@ -61,64 +61,66 @@ public class PropertyMappingHelper
 {
     private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
 
-    public static PropertyDelta<?> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
+    public static Optional<PropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
             String propertyKey, Function<NodeResource, ?> fieldGetter)
     {
-        return PropertyDelta.updated(propertyKey, fieldGetter.apply(event.getData().getResource()));
+        return ofNullable(event.getData().getResource())
+                .map(fieldGetter)
+                .map(propertyValue -> PropertyDelta.updated(propertyKey, propertyValue));
     }
 
-    public static PropertyDelta<?> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateNamePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, NAME_PROPERTY, NodeResource::getName);
     }
 
-    public static PropertyDelta<?> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateTypeDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, TYPE_PROPERTY, NodeResource::getNodeType);
     }
 
-    public static PropertyDelta<?> calculateCreatedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateCreatedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, CREATED_BY_PROPERTY, nodeResource -> getUserId(nodeResource, NodeResource::getCreatedByUser));
     }
 
-    public static PropertyDelta<?> calculateModifiedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateModifiedByDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, MODIFIED_BY_PROPERTY, nodeResource -> getUserId(nodeResource, NodeResource::getModifiedByUser));
     }
 
-    public static PropertyDelta<?> calculateAspectsDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateAspectsDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, ASPECT_NAMES_PROPERTY, NodeResource::getAspectNames);
     }
 
-    public static PropertyDelta<?> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, CREATED_AT_PROPERTY, nodeResource -> toMilliseconds(nodeResource.getCreatedAt()));
     }
 
-    public static PropertyDelta<?> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
 
         if (enterpriseEventData.getResourceReaderAuthorities() == null)
         {
-            return PropertyDelta.updated(ALLOW_ACCESS, Set.of(GROUP_EVERYONE));
+            return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, Set.of(GROUP_EVERYONE)));
         }
 
-        return PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities());
+        return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities()));
     }
 
-    public static PropertyDelta<?> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    public static Optional<PropertyDelta<?>> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
 
         if (enterpriseEventData.getResourceDeniedAuthorities() == null)
         {
-            return PropertyDelta.updated(DENY_ACCESS, Set.of());
+            return Optional.of(PropertyDelta.updated(DENY_ACCESS, Set.of()));
         }
 
-        return PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities());
+        return Optional.of(PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities()));
     }
 
     private static Long toMilliseconds(ZonedDateTime time)

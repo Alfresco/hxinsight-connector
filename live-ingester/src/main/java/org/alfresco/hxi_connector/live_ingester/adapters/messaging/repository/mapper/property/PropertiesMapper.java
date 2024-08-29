@@ -26,21 +26,9 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
-import lombok.RequiredArgsConstructor;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.repo.event.v1.model.DataAttributes;
-import org.alfresco.repo.event.v1.model.NodeResource;
-import org.alfresco.repo.event.v1.model.RepoEvent;
-import org.springframework.stereotype.Component;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static java.util.Optional.ofNullable;
 import static java.util.function.Function.identity;
+
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateAllowAccessDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateAspectsDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateContentPropertyDelta;
@@ -51,6 +39,21 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Component;
+
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
+
 @Component
 @RequiredArgsConstructor
 public class PropertiesMapper
@@ -59,7 +62,7 @@ public class PropertiesMapper
     {
         Stream<PropertyDelta<?>> customProperties = calculateCustomPropertiesDelta(event);
 
-        List<PropertyDelta<?>> knownProperties = List.of(
+        List<Optional<PropertyDelta<?>>> knownProperties = List.of(
                 calculateNamePropertyDelta(event),
                 calculateTypeDelta(event),
                 calculateCreatedByDelta(event),
@@ -67,12 +70,11 @@ public class PropertiesMapper
                 calculateAspectsDelta(event),
                 calculateCreatedAtDelta(event),
                 calculateAllowAccessDelta(event),
-                calculateDenyAccessDelta(event)
-        );
+                calculateDenyAccessDelta(event));
 
         return Stream.of(customProperties,
-                        knownProperties.stream(),
-                        calculateContentPropertyDelta(event).stream())
+                knownProperties.stream().flatMap(Optional::stream),
+                calculateContentPropertyDelta(event).stream())
                 .flatMap(identity())
                 .collect(Collectors.toSet());
     }
@@ -81,11 +83,7 @@ public class PropertiesMapper
     {
 
         return streamProperties(event.getData().getResource())
-                .map(property -> property.getValue() == null ?
-                        PropertyDelta.deleted(property.getKey()) :
-                        PropertyDelta.updated(property.getKey(), property.getValue()
-                        )
-                );
+                .map(property -> property.getValue() == null ? PropertyDelta.deleted(property.getKey()) : PropertyDelta.updated(property.getKey(), property.getValue()));
     }
 
     private Stream<Map.Entry<String, ?>> streamProperties(NodeResource node)

@@ -208,7 +208,51 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
-        containerSupport.expectNoHxIngestMessagesReceived();
+        containerSupport.expectHxIngestMessageReceived(
+                """
+                        [
+                          {
+                            "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+                            "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                            "eventType": "update",
+                            "timestamp": 1611656982995,
+                            "properties": {
+                              "createdAt" : {
+                                "value" : 1611227655695
+                              },
+                              "createdBy" : {
+                                "value" : "admin"
+                              },
+                              "cm:name" : {
+                                "value" : "purchase-order-scan.pdf"
+                              },
+                              "ALLOW_ACCESS" : {
+                                "value" : [ "GROUP_EVERYONE" ]
+                              },
+                              "aspectsNames" : {
+                                "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                              },
+                              "modifiedBy" : {
+                                "value" : "abeecher"
+                              },
+                              "type" : {
+                                "value" : "cm:content"
+                              },
+                              "DENY_ACCESS" : {
+                                "value" : [ ]
+                              },
+                              "cm:content" : {
+                                "file" : {
+                                  "content-metadata" : {
+                                    "size" : 123,
+                                    "name" : "purchase-order-scan.pdf",
+                                    "content-type" : "application/pdf"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        ]""");
     }
 
     @Test
@@ -714,7 +758,37 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "timestamp": 1704798873615,
                     "properties": {
-                      "aspectsNames": {"value": ["cm:preferences", "cm:ownable"]}
+                      "aspectsNames": {"value": ["cm:preferences", "cm:ownable"]},
+                      "cm:homeFolderProvider" : {
+                        "value" : "bootstrapHomeFolderProvider"
+                      },
+                      "cm:homeFolder" : {
+                        "value" : {
+                          "storeRef" : {
+                            "protocol" : "workspace",
+                            "identifier" : "SpacesStore"
+                          },
+                          "id" : "7f1fa040-e840-40c6-a8a0-da457aca2473"
+                        }
+                      },
+                      "sys:cascadeCRC" : {
+                        "value" : 1040368885
+                      },
+                      "cm:lastName" : {
+                        "value" : ""
+                      },
+                      "cm:name" : {
+                        "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "type" : {
+                        "value" : "cm:person"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      }
                     }
                   }
                 ]""";
