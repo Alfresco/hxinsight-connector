@@ -298,7 +298,7 @@ public class DockerContainers
     public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, Network network)
     {
         return createLiveIngesterContainerWithin(network)
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_INGESTION_BASE-URL",
                         "http://%s:8080".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
