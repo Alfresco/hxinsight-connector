@@ -501,7 +501,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> defaultProperties = Set.of(
                 updated(NAME_PROPERTY, "some name"),
                 updated(TYPE_PROPERTY, "cm:folder"),
-                updated(CREATED_AT_PROPERTY, 1672531200000L),
+                updated(CREATED_AT_PROPERTY, 1_672_531_200_000L),
                 updated(CREATED_BY_PROPERTY, "admin"),
                 updated(MODIFIED_BY_PROPERTY, "admin"),
                 updated(ASPECT_NAMES_PROPERTY, Set.of("cm:auditable")),
