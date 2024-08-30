@@ -301,6 +301,9 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                        "createdAt" : {
                          "value" : 1611227655695
                        },
+                       "modifiedAt" : {
+                         "value" : 1611227655695
+                       },
                        "cm:versionLabel" : {
                          "value" : "1.0"
                        },

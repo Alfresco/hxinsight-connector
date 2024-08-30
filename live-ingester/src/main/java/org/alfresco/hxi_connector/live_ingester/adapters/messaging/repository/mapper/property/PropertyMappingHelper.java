@@ -35,6 +35,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
@@ -97,6 +98,11 @@ public class PropertyMappingHelper
     public static Optional<PropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         return calculatePropertyDelta(event, CREATED_AT_PROPERTY, nodeResource -> toMilliseconds(nodeResource.getCreatedAt()));
+    }
+
+    public static Optional<PropertyDelta<?>> calculateModifiedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return calculatePropertyDelta(event, MODIFIED_AT_PROPERTY, nodeResource -> toMilliseconds(nodeResource.getCreatedAt()));
     }
 
     public static Optional<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)

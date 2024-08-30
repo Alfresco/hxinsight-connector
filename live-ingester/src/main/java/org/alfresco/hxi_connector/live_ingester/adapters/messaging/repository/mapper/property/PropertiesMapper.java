@@ -35,6 +35,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedAtDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateCreatedByDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateDenyAccessDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateModifiedAtDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateModifiedByDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
@@ -66,6 +67,7 @@ public class PropertiesMapper
                 calculateNamePropertyDelta(event),
                 calculateTypeDelta(event),
                 calculateCreatedByDelta(event),
+                calculateModifiedAtDelta(event),
                 calculateModifiedByDelta(event),
                 calculateAspectsDelta(event),
                 calculateCreatedAtDelta(event),

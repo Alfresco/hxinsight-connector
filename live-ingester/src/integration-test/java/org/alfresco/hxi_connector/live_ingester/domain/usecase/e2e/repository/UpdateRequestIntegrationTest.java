@@ -116,6 +116,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "createdAt" : {
                         "value" : 1611227655695
                       },
+                      "modifiedAt" : {
+                        "value" : 1611227655695
+                      },
                       "cm:versionLabel" : {
                         "value" : "1.0"
                       },
@@ -220,6 +223,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                               "createdAt" : {
                                 "value" : 1611227655695
                               },
+                              "modifiedAt" : {
+                                "value" : 1611227655695
+                              },
                               "createdBy" : {
                                 "value" : "admin"
                               },
@@ -289,6 +295,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "modifiedAt" : {
                         "value" : 1611227655695
                       },
                       "createdBy" : {
@@ -363,6 +372,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "createdAt" : {
                         "value" : 1611227655695
                       },
+                      "modifiedAt" : {
+                        "value" : 1611227655695
+                      },
                       "createdBy" : {
                         "value" : "admin"
                       },
@@ -432,6 +444,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "timestamp" : 1611656982995,
                     "properties": {
                         "createdAt" : {
+                          "value" : 1611227655695
+                        },
+                        "modifiedAt" : {
                           "value" : 1611227655695
                         },
                         "createdBy" : {
@@ -524,6 +539,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
                       "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
                       "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "modifiedAt" : {
                         "value" : 1611227655695
                       },
                       "createdBy" : {
@@ -671,6 +689,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "Purchase Order"
                       },
                       "createdAt" : {
+                        "value" : 1611227655695
+                      },
+                      "modifiedAt" : {
                         "value" : 1611227655695
                       },
                       "createdBy" : {
@@ -845,6 +866,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "createdAt" : {
                         "value" : 1611227655695
                       },
+                      "modifiedAt" : {
+                        "value" : 1611227655695
+                      },
                       "createdBy" : {
                         "value" : "admin"
                       },
@@ -981,6 +1005,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "value" : ""
                     },
                     "createdAt" : {
+                      "value" : 1722339459182
+                    },
+                    "modifiedAt" : {
                       "value" : 1722339459182
                     },
                     "createdBy" : {
