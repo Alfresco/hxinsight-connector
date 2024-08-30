@@ -196,6 +196,8 @@ Get Hx Insights configuration.
 }
 ```
 ### Nodes API extension
+Get predicted values for a node.
+
 * Path: `nodes/{nodeId}`
 * Method: `GET`
 * Response:
