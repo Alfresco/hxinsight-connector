@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class RetryUtils
 {
-    private static final int MAX_ATTEMPTS = 10;
+    private static final int MAX_ATTEMPTS = 15;
     private static final int INITIAL_DELAY_MS = 100;
 
     public static void retryWithBackoff(ErrorCatchingRunnable runnable)
