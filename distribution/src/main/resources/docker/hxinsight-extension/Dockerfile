@@ -15,7 +15,7 @@ RUN chown -R -h $USERNAME $TOMCAT_DIR
 
 # Switch between currently installed JRE version and 11
 ARG JAVA_VERSION
-RUN if [[ "$JAVA_VERSION" == "11" ]]; then \
+RUN if [ "$JAVA_VERSION" == "11" ]; then \
       ARCH=$(uname -m | sed s/86_//); \
       JAVA_RELEASE=11.0.24_8; \
       curl -fsLo java.tar.gz https://github.com/adoptium/temurin${JAVA_VERSION}-binaries/releases/download/jdk-${JAVA_RELEASE/_/+}/OpenJDK${JAVA_VERSION}U-jre_${ARCH}_linux_hotspot_${JAVA_RELEASE}.tar.gz && \
