@@ -181,7 +181,7 @@ Get answer for a question.
 ### Hx Insights Configuration API
 Get Hx Insights configuration.
 * Method: `GET`
-* Path: `config`
+* Path: `config/-default-`
 * Response:
     * Status: 200
     * Content-Type: `application/json`
