@@ -63,7 +63,7 @@ public class AgentModelDeserializationTest
                 {
                     "name": "Agent name",
                     "description": "Agent description",
-                    "agentUrl": "https://example.com/avatar.png"
+                    "avatarUrl": "https://example.com/avatar.png"
                 }
                 """;
 
