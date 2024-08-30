@@ -38,6 +38,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
@@ -503,6 +504,7 @@ class PropertiesMapperTest
                 updated(TYPE_PROPERTY, "cm:folder"),
                 updated(CREATED_AT_PROPERTY, 1_672_531_200_000L),
                 updated(CREATED_BY_PROPERTY, "admin"),
+                updated(MODIFIED_AT_PROPERTY, 1_672_531_200_000L),
                 updated(MODIFIED_BY_PROPERTY, "admin"),
                 updated(ASPECT_NAMES_PROPERTY, Set.of("cm:auditable")),
                 updated(ALLOW_ACCESS, Set.of()),
