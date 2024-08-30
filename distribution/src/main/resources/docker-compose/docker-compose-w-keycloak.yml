@@ -70,7 +70,7 @@ services:
         -Didentity-service.auth-server-url=http://${HOST_IP}:8999/auth
         -Didentity-service.realm=alfresco
         -Didentity-service.resource=alfresco
-        -Dhxi.client.base-url=http://hxinsight-mock:8080
+        -Dhxi.discovery.base-url=http://hxinsight-mock:8080
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         -Xms1500m -Xmx1500m
         "
@@ -371,10 +371,9 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      HYLAND-EXPERIENCE_INSIGHT_BASE-URL: http://hxinsight-mock:8080
+      HYLAND-EXPERIENCE_INSIGHT_INGESTION_BASE-URL: http://hxinsight-mock:8080
       ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
-      ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST: http://shared-file-store
-      ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT: 8099
+      ALFRESCO_TRANSFORM_SHARED-FILE-STORE_BASE-URL: http://shared-file-store:8099
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-pass
       AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key

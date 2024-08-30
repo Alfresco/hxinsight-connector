@@ -165,12 +165,12 @@ public class DockerContainers
     {
         String hXIMockAlias = hxInsightMockContainer.getNetworkAliases().stream().findFirst().get();
         return """
-                -Dhxi.client.base-url=http://%s:8080
+                -Dhxi.discovery.agents-endpoint=http://%s:8080
+                -Dhxi.discovery.questions-endpoint=http://%s:8080
                 -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
                 -Dhxi.question.max-context-size-for-question=10
-                """.formatted(
-                hXIMockAlias,
-                hXIMockAlias)
+                """
+                .formatted(hXIMockAlias, hXIMockAlias, hXIMockAlias)
                 .replace("\n", " ");
     }
 
@@ -284,8 +284,7 @@ public class DockerContainers
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n")
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
-                .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_HOST", "http://shared-file-store")
-                .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_PORT", "8099")
+                .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_BASE-URL", "http://shared-file-store:8099")
                 .withExposedPorts(5007)
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
@@ -299,7 +298,7 @@ public class DockerContainers
     public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, Network network)
     {
         return createLiveIngesterContainerWithin(network)
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_BASE-URL",
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_INGESTION_BASE-URL",
                         "http://%s:8080".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))

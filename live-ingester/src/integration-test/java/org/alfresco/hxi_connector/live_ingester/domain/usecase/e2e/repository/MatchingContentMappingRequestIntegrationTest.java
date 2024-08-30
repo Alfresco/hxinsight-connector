@@ -82,8 +82,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:autoVersion": true,
-                        "cm:versionType": "MAJOR",
-                        "cm:taggable": null
+                        "cm:versionType": "MAJOR"
                       },
                       "aspectNames": [ "cm:versionable", "cm:auditable" ],
                       "isFolder": false,
@@ -190,8 +189,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:autoVersion": true,
-                        "cm:versionType": "MAJOR",
-                        "cm:taggable": null
+                        "cm:versionType": "MAJOR"
                       },
                       "aspectNames": [ "cm:versionable", "cm:auditable" ],
                       "isFolder": false,

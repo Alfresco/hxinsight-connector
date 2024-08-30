@@ -47,17 +47,17 @@ public class HxInsightUrlProducer
 
     public String getBatchesUrl()
     {
-        return withUserAgentDataPathParam(BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCHES_PAGE_NO_HEADER));
+        return withUserAgentDataPathParam(BATCHES_URL_PATTERN.formatted(insightPredictionsProperties.baseUrl(), BATCHES_PAGE_NO_HEADER));
     }
 
     public String getPredictionsUrl()
     {
-        return withUserAgentDataPathParam(PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER));
+        return withUserAgentDataPathParam(PREDICTIONS_URL_PATTERN.formatted(insightPredictionsProperties.baseUrl(), BATCH_ID_HEADER, PREDICTIONS_PAGE_NO_HEADER));
     }
 
     public String getConfirmationUrl()
     {
-        return withUserAgentDataPathParam(PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.sourceBaseUrl(), BATCH_ID_HEADER));
+        return withUserAgentDataPathParam(PREDICTIONS_CONFIRMATION_URL_PATTERN.formatted(insightPredictionsProperties.baseUrl(), BATCH_ID_HEADER));
     }
 
     private static String withUserAgentDataPathParam(String url)

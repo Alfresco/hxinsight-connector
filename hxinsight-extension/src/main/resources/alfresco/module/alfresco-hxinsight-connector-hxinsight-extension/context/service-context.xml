@@ -76,7 +76,8 @@
     </bean>
 
     <bean id="hxInsightClientConfig" class="org.alfresco.hxi_connector.hxi_extension.service.config.HxInsightClientConfig">
-        <constructor-arg name="baseUrl" value="${hxi.client.base-url}"/>
+        <constructor-arg name="agentsEndpoint" value="${hxi.discovery.agents-endpoint}"/>
+        <constructor-arg name="questionsEndpoint" value="${hxi.discovery.questions-endpoint}"/>
     </bean>
 
     <bean id="hxInsightSimpleMappingExceptionResolver" abstract="true" parent="simpleMappingExceptionResolverParent">
@@ -196,5 +197,9 @@
     <bean class="org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider">
         <constructor-arg name="repositoryInformation" ref="acsRepositoryInformation"/>
         <constructor-arg name="applicationProperties" ref="hxiConnectorProperties"/>
+    </bean>
+
+    <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.ConfigEntityResource">
+        <constructor-arg name="knowledgeRetrievalUrl" value="${hxi.knowledge-retrieval.url}"/>
     </bean>
 </beans>

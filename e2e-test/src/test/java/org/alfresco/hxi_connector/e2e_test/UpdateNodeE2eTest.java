@@ -301,7 +301,7 @@ public class UpdateNodeE2eTest
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL",
                         "nio://%s:61616".formatted(activemq.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("ALFRESCO_REPOSITORY_BASE-URL",
-                        "http://%s:8080".formatted(repository.getNetworkAliases().stream().findFirst().get()))
+                        "http://%s:8080/alfresco".formatted(repository.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("ALFRESCO_REPOSITORY_RETRY_ATTEMPTS", "1")
                 .withEnv("ALFRESCO_REPOSITORY_RETRY_INITIAL-DELAY", "0")
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_CLIENT-ID", "dummy-client-id")
@@ -309,7 +309,7 @@ public class UpdateNodeE2eTest
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin")
                 .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_SOURCE-BASE-URL",
+                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_BASE-URL",
                         "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
     }

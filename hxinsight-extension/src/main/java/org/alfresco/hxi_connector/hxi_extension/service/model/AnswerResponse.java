@@ -38,7 +38,7 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AnswerResponse
 {
-    private String questionId;
+    private String question;
     private String responseCompleteness;
     private String agentId;
     private String agentVersion;

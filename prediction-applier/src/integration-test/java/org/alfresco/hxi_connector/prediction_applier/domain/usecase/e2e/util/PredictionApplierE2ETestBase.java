@@ -93,12 +93,9 @@ public class PredictionApplierE2ETestBase
 
         brokerUrl = "tcp://localhost:" + activemqBroker.getFirstMappedPort();
         registry.add("spring.activemq.broker-url", () -> brokerUrl);
-
-        registry.add("hyland-experience.insight.predictions.source-base-url", hxInsightServer::getBaseUrl);
-
         registry.add("alfresco.repository.base-url", repositoryServer::getBaseUrl);
-
-        registry.add("hyland-experience.insight.predictions.collectorTimerEndpoint", () -> PREDICTION_COLLECTOR_TRIGGER_ENDPOINT);
+        registry.add("hyland-experience.insight.predictions.base-url", hxInsightServer::getBaseUrl);
+        registry.add("hyland-experience.insight.predictions.collector-timer-endpoint", () -> PREDICTION_COLLECTOR_TRIGGER_ENDPOINT);
     }
 
     @BeforeAll

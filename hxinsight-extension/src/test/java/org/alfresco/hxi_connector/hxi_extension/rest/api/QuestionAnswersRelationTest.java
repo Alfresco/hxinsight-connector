@@ -51,7 +51,6 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 @ExtendWith(MockitoExtension.class)
 class QuestionAnswersRelationTest
 {
-    private static final String USER_ID = "user-id";
 
     @Mock
     private QuestionService questionService;
@@ -65,8 +64,9 @@ class QuestionAnswersRelationTest
     void shouldCallHxInsightClientGetAnswer()
     {
         // given
+        String question = "Some question";
+        AnswerResponse hXAnswer = AnswerResponse.builder().question(question).answer("Some answer").build();
         String questionId = "questionId";
-        AnswerResponse hXAnswer = AnswerResponse.builder().questionId(questionId).answer("Some answer").build();
         given(questionService.getAnswer(questionId)).willReturn(hXAnswer);
 
         // when
@@ -77,7 +77,7 @@ class QuestionAnswersRelationTest
         Collection<AnswerModel> answerResponseEntries = answerResponse.getCollection();
         assertEquals(1, answerResponseEntries.size());
         AnswerModel answer = answerResponseEntries.iterator().next();
-        AnswerModel expectedAnswer = new AnswerModel(hXAnswer.getAnswer(), hXAnswer.getQuestionId(), emptySet());
+        AnswerModel expectedAnswer = new AnswerModel(hXAnswer.getAnswer(), hXAnswer.getQuestion(), emptySet());
         assertEquals(expectedAnswer, answer);
     }
 

@@ -51,13 +51,13 @@ public class AnswerModel
 {
 
     private String answer;
-    private String questionId;
+    private String question;
     private Set<ReferenceModel> references;
 
     public static AnswerModel fromServiceModel(AnswerResponse answer)
     {
         Set<ReferenceModel> references = SetUtils.emptyIfNull(answer.getReferences()).stream().map(ReferenceModel::fromServiceModel).collect(toSet());
-        return new AnswerModel(answer.getAnswer(), answer.getQuestionId(), references);
+        return new AnswerModel(answer.getAnswer(), answer.getQuestion(), references);
     }
 
     @ToString
