@@ -50,9 +50,10 @@ public class AgentModel
     private String _id;
     private String name;
     private String description;
+    private String agentUrl;
 
     public static AgentModel fromServiceModel(Agent agent)
     {
-        return new AgentModel(agent.getId(), agent.getName(), agent.getDescription());
+        return new AgentModel(agent.getId(), agent.getName(), agent.getDescription(), agent.getAvatarUrl());
     }
 }

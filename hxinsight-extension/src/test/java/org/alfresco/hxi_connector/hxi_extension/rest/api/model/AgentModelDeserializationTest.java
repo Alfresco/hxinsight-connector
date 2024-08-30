@@ -62,12 +62,13 @@ public class AgentModelDeserializationTest
         String agentSerialized = """
                 {
                     "name": "Agent name",
-                    "description": "Agent description"
+                    "description": "Agent description",
+                    "agentUrl": "https://example.com/avatar.png"
                 }
                 """;
 
         // when
-        AgentModel agent = new AgentModel(null, "Agent name", "Agent description");
+        AgentModel agent = new AgentModel(null, "Agent name", "Agent description", "https://example.com/avatar.png");
 
         // then
         assertEquals(agent, objectMapper.readValue(agentSerialized, AgentModel.class));
