@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 usage() {
     echo "Create development docker images." 1>&2;
     echo "Usage: $0 [-p] [-t <tag>] [-h]" 1>&2;
