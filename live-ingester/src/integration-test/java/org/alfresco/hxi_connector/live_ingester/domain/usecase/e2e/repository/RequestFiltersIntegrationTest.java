@@ -84,8 +84,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:autoVersion": true,
-                        "cm:versionType": "MAJOR",
-                        "cm:taggable": null
+                        "cm:versionType": "MAJOR"
                       },
                       "aspectNames": [ "cm:versionable", "cm:auditable" ],
                       "isFolder": false,
@@ -241,8 +240,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:autoVersion": true,
-                        "cm:versionType": "MAJOR",
-                        "cm:taggable": null
+                        "cm:versionType": "MAJOR"
                       },
                       "aspectNames": [ "cm:versionable", "cm:auditable", "cm:classifiable" ],
                       "isFolder": false,
@@ -389,7 +387,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "cm:title": "Purchase Order",
                         "cm:versionType": null,
                         "cm:versionLabel": "1.0",
-                        "cm:taggable": null
+                        "cm:description": null
                       },
                       "aspectNames": [ "cm:versionable", "cm:auditable" ],
                       "isFolder": false,
@@ -428,7 +426,37 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
-                      "modifiedBy": {"value": "abeecher"}
+                      "modifiedBy": {"value": "abeecher"},
+                      "createdAt" : {
+                        "value" : 1709378055695
+                      },
+                      "cm:versionLabel" : {
+                        "value" : "1.0"
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "cm:name" : {
+                        "value" : "purchase-order-scan.pdf"
+                      },
+                      "type" : {
+                        "value" : "cm:content"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      },
+                      "cm:content" : {
+                        "file" : {
+                          "content-metadata" : {
+                            "size" : 531152,
+                            "name" : "purchase-order-scan.pdf",
+                            "content-type" : "application/pdf"
+                          }
+                        }
+                      }
                     },
                     "removedProperties": ["cm:versionType", "cm:description"]
                   }
@@ -548,7 +576,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "cm:title": "Purchase Order",
                         "cm:versionType": null,
                         "cm:versionLabel": "1.0",
-                        "cm:taggable": null
+                        "cm:description": null
                       },
                       "aspectNames": [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ],
                       "isFolder": false,
@@ -587,7 +615,37 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
-                      "modifiedBy": {"value": "abeecher"}
+                      "modifiedBy": {"value": "abeecher"},
+                      "createdAt" : {
+                        "value" : 1709378055695
+                      },
+                      "cm:versionLabel" : {
+                        "value" : "1.0"
+                      },
+                      "createdBy" : {
+                        "value" : "admin"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "cm:name" : {
+                        "value" : "purchase-order-scan.pdf"
+                      },
+                      "type" : {
+                        "value" : "cm:content"
+                      },
+                      "DENY_ACCESS" : {
+                        "value" : [ ]
+                      },
+                      "cm:content" : {
+                        "file" : {
+                          "content-metadata" : {
+                            "size" : 531152,
+                            "name" : "purchase-order-scan.pdf",
+                            "content-type" : "application/pdf"
+                          }
+                        }
+                      }
                     },
                     "removedProperties": ["cm:versionType", "cm:description"]
                   }
@@ -946,9 +1004,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:title": "Purchase Order",
-                        "cm:versionType": null,
-                        "cm:versionLabel": "1.0",
-                        "cm:taggable": null
+                        "cm:versionLabel": "1.0"
                       },
                       "aspectNames": [ "cm:versionable", "cm:auditable" ],
                       "isFolder": false,
@@ -966,7 +1022,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "cm:title": null,
                         "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
-                        "cm:taggable": null,
                         "cm:description": "Old Description"
                       },
                       "aspectNames": [ "cm:versionable" ]
@@ -998,9 +1053,12 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        "createdBy" : {
                          "value" : "admin"
                        },
-                        "ALLOW_ACCESS" : {
-                          "value" : [ "GROUP_EVERYONE" ]
-                        },
+                       "ALLOW_ACCESS" : {
+                         "value" : [ "GROUP_EVERYONE" ]
+                       },
+                       "DENY_ACCESS" : {
+                         "value" : [ ]
+                       },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf"
                        },
@@ -1232,10 +1290,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "encoding": "UTF-8"
                       },
                       "properties": {
-                        "cm:title": "Purchase Order",
-                        "cm:versionType": null,
-                        "cm:versionLabel": "1.0",
-                        "cm:taggable": null
+                        "cm:title": "Purchase Order"
                       },
                       "aspectNames": [ "cm:versionable", "cm:auditable" ],
                       "isFolder": false,
@@ -1249,11 +1304,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "displayName": "Administrator"
                       },
                       "properties": {
-                        "cm:title": null,
-                        "cm:versionType": "MAJOR",
-                        "cm:versionLabel": "1.0",
-                        "cm:taggable": null,
-                        "cm:description": "Old Description"
+                        "cm:title": null
                       },
                       "aspectNames": [ "cm:versionable", "sc:secured" ]
                     }
@@ -1278,15 +1329,15 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        "createdAt" : {
                          "value" : 1709378055695
                        },
-                       "cm:versionLabel" : {
-                         "value" : "1.0"
-                       },
                        "createdBy" : {
                          "value" : "admin"
                        },
-                        "ALLOW_ACCESS" : {
-                          "value" : [ "GROUP_EVERYONE" ]
-                        },
+                       "ALLOW_ACCESS" : {
+                         "value" : [ "GROUP_EVERYONE" ]
+                       },
+                       "DENY_ACCESS" : {
+                         "value" : [ ]
+                       },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf"
                        },
