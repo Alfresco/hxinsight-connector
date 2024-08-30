@@ -50,7 +50,7 @@ public class AgentModel
     private String _id;
     private String name;
     private String description;
-    private String agentUrl;
+    private String avatarUrl;
 
     public static AgentModel fromServiceModel(Agent agent)
     {

@@ -35,14 +35,16 @@ List of agents that are available for Hx Insights.
             "entry": {
               "name": "HR Policy Agent",
               "description": "This agent is responsible for HR policy predictions",
-              "id": "5fca2c77-cdc0-4118-9373-e75f53177ff8"
+              "id": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
+              "avatarUrl": "https://dummy-host.xyz/avatars/agent2.png"
             }
           },
           {
             "entry": {
               "name": "Knowledge Base Agent",
               "description": "Very smart about product knowledge",
-              "id": "b999ee14-3974-41b2-bef8-70ab38c9e642"
+              "id": "b999ee14-3974-41b2-bef8-70ab38c9e642",
+              "avatarUrl": "https://dummy-host.xyz/avatars/agent2.png"
             }
           }
         ]
