@@ -52,15 +52,6 @@ List of agents that are available for Hx Insights.
     }
     ```
 
-#### Get Agent's Avatar
-Get the avatar image of an agent.
-* Method: `GET`
-* Path: `/agents/{agentId}/avatars`
-* Response:
-    * Status: 200
-    * Content-Type: `image/png`
-    * Body: Image data
-
 ### Questions API
 
 #### Ask Question
