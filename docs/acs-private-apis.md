@@ -2,6 +2,8 @@
 
 ## Purpose
 
+This document describes private REST APIs that are available in Alfresco Content Services (ACS) Extension for Hx Insight integration.
+
 ## Endpoints
 
 Base path for all endpoints mentioned below is `{acs_host}/alfresco/api/-default-/private/hxi/versions/1`
