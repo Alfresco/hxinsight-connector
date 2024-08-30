@@ -44,6 +44,9 @@ jobs:
         with:
           write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v6.0.1
+      - run: |
+          uname -m
+          echo $(uname -m)
 
   veracode_sca:
     name: "Veracode - Source Clear Scan (SCA)"
