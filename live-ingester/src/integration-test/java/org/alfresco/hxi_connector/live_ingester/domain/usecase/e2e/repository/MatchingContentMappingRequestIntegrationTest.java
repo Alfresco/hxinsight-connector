@@ -105,6 +105,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
+                      "modifiedAt": {"value" : 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
                       "cm:name": {"value": "purchase-order-scan.bmp"},
@@ -212,6 +213,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
+                      "modifiedAt": {"value": 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
                       "cm:name": {"value": "purchase-order-scan.bmp"},

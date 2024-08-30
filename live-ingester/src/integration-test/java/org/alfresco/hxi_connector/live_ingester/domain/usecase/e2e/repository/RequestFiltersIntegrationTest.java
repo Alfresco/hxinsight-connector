@@ -109,6 +109,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1709378055695},
+                      "modifiedAt" : {"value" : 1709378055695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
                       "cm:name": {"value": "purchase-order-scan.pdf"},
@@ -265,6 +266,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1709378055695},
+                      "modifiedAt": {"value": 1709378055695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"]},
                       "cm:name": {"value": "purchase-order-scan.pdf"},
@@ -428,6 +430,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
                       "modifiedBy": {"value": "abeecher"},
                       "createdAt" : {
+                        "value" : 1709378055695
+                      },
+                      "modifiedAt" : {
                         "value" : 1709378055695
                       },
                       "cm:versionLabel" : {
@@ -617,6 +622,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
                       "modifiedBy": {"value": "abeecher"},
                       "createdAt" : {
+                        "value" : 1709378055695
+                      },
+                      "modifiedAt" : {
                         "value" : 1709378055695
                       },
                       "cm:versionLabel" : {
@@ -1047,6 +1055,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        "createdAt" : {
                          "value" : 1709378055695
                        },
+                       "modifiedAt" : {
+                         "value" : 1709378055695
+                       },
                        "cm:versionLabel" : {
                          "value" : "1.0"
                        },
@@ -1327,6 +1338,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
+                         "value" : 1709378055695
+                       },
+                       "modifiedAt" : {
                          "value" : 1709378055695
                        },
                        "createdBy" : {
