@@ -37,9 +37,7 @@ import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.RETRY;
 import static org.alfresco.hxi_connector.hxi_extension.service.util.HttpUtils.ensureCorrectHttpStatusReturned;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -47,7 +45,6 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -64,9 +61,6 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Feedback;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Question;
 import org.alfresco.hxi_connector.hxi_extension.service.model.QuestionResponse;
-import org.alfresco.rest.framework.resource.content.BinaryResource;
-import org.alfresco.rest.framework.resource.content.FileBinaryResource;
-import org.alfresco.util.TempFileProvider;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -178,30 +172,6 @@ public class HxInsightClient
                 .comments(comments)
                 .build());
         return askQuestion(agentId, question);
-    }
-
-    public BinaryResource getAvatar(String agentId)
-    {
-        try
-        {
-            HttpRequest request = requestWithRequiredHeaders()
-                    .uri(URI.create(format(config.getAvatarsUrl(), agentId)))
-                    .GET()
-                    .build();
-
-            HttpResponse<InputStream> httpResponse = client.send(request, BodyHandlers.ofInputStream());
-
-            ensureCorrectHttpStatusReturned(SC_OK, httpResponse);
-            log.atDebug().log("Successfully retrieved avatar for Agent with id: {}", agentId);
-
-            String filePrefix = format("avatar-%s-%s", agentId, UUID.randomUUID());
-            File tempImageFile = TempFileProvider.createTempFile(httpResponse.body(), filePrefix, "png");
-            return new FileBinaryResource(tempImageFile);
-        }
-        catch (Exception e)
-        {
-            throw new WebScriptException(SC_SERVICE_UNAVAILABLE, format("Failed to get avatar for agent with id %s", agentId), e);
-        }
     }
 
     private HttpRequest.Builder requestWithRequiredHeaders()
