@@ -49,15 +49,25 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 @JsonInclude(NON_NULL)
 public class AnswerModel
 {
+    private static final String RESPONSE_STATUS_COMPLETE = "COMPLETE";
 
     private String answer;
     private String question;
+    private boolean isComplete;
     private Set<ReferenceModel> references;
 
     public static AnswerModel fromServiceModel(AnswerResponse answer)
     {
-        Set<ReferenceModel> references = SetUtils.emptyIfNull(answer.getReferences()).stream().map(ReferenceModel::fromServiceModel).collect(toSet());
-        return new AnswerModel(answer.getAnswer(), answer.getQuestion(), references);
+        Set<ReferenceModel> references = SetUtils.emptyIfNull(answer.getReferences())
+                .stream()
+                .map(ReferenceModel::fromServiceModel)
+                .collect(toSet());
+
+        return new AnswerModel(
+                answer.getAnswer(),
+                answer.getQuestion(),
+                RESPONSE_STATUS_COMPLETE.equals(answer.getResponseCompleteness()),
+                references);
     }
 
     @ToString

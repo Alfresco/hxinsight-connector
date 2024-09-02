@@ -140,6 +140,7 @@ Get answer for a question.
     * Entry object (wrapped with list/pagination information):
         * `question` [string]
         * `answer` [string]
+        * `isCompleted` [boolean]
         * `references` [object]:
             * `referenceId` [string]
             * `referenceText` [string]
@@ -159,6 +160,7 @@ Get answer for a question.
                 "entry": {
                     "question": "This is the question",
                     "answer": "This is the answer to the question",
+                    "isCompleted": false,
                     "references": [
                         {
                             "referenceId": "276718b0-c3ab-4e11-81d5-96dbbb540269",

@@ -37,6 +37,8 @@ import java.util.Collection;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -60,12 +62,17 @@ class QuestionAnswersRelationTest
     @InjectMocks
     private QuestionAnswersRelation objectUnderTest;
 
-    @Test
-    void shouldCallHxInsightClientGetAnswer()
+    @ParameterizedTest
+    @CsvSource(value = {"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
+    void shouldCallHxInsightClientGetAnswer(String responseCompleteness, boolean isComplete)
     {
         // given
         String question = "Some question";
-        AnswerResponse hXAnswer = AnswerResponse.builder().question(question).answer("Some answer").build();
+        AnswerResponse hXAnswer = AnswerResponse.builder()
+                .question(question)
+                .responseCompleteness(responseCompleteness)
+                .answer("Some answer")
+                .build();
         String questionId = "questionId";
         given(questionService.getAnswer(questionId)).willReturn(hXAnswer);
 
@@ -77,7 +84,7 @@ class QuestionAnswersRelationTest
         Collection<AnswerModel> answerResponseEntries = answerResponse.getCollection();
         assertEquals(1, answerResponseEntries.size());
         AnswerModel answer = answerResponseEntries.iterator().next();
-        AnswerModel expectedAnswer = new AnswerModel(hXAnswer.getAnswer(), hXAnswer.getQuestion(), emptySet());
+        AnswerModel expectedAnswer = new AnswerModel(hXAnswer.getAnswer(), hXAnswer.getQuestion(), isComplete, emptySet());
         assertEquals(expectedAnswer, answer);
     }
 
