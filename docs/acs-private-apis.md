@@ -2,6 +2,8 @@
 
 ## Purpose
 
+This document describes private REST APIs that are available in Alfresco Content Services (ACS) Extension for Hx Insight integration.
+
 ## Endpoints
 
 Base path for all endpoints mentioned below is `{acs_host}/alfresco/api/-default-/private/hxi/versions/1`
@@ -172,7 +174,7 @@ Get answer for a question.
 ### Hx Insights Configuration API
 Get Hx Insights configuration.
 * Method: `GET`
-* Path: `config`
+* Path: `config/-default-`
 * Response:
     * Status: 200
     * Content-Type: `application/json`
@@ -187,6 +189,8 @@ Get Hx Insights configuration.
 }
 ```
 ### Nodes API extension
+Get predicted values for a node.
+
 * Path: `nodes/{nodeId}`
 * Method: `GET`
 * Response:
