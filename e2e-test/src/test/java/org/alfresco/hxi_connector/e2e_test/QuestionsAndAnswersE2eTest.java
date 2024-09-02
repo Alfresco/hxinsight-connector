@@ -226,15 +226,15 @@ public class QuestionsAndAnswersE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers".formatted(questionId))
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId))
                 .then().extract().response();
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_OK);
         assertThat(response.jsonPath()).satisfies(jsonPath -> {
-            assertThat(jsonPath.<String> get("list.entries.entry[0].question")).isEqualTo("This is some question");
-            assertThat(jsonPath.<String> get("list.entries.entry[0].answer")).isEqualTo("This is the answer to the question");
-            assertThat(jsonPath.<String> get("list.entries.entry[0].references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
+            assertThat(jsonPath.<String> get("entry.question")).isEqualTo("This is some question");
+            assertThat(jsonPath.<String> get("entry.answer")).isEqualTo("This is the answer to the question");
+            assertThat(jsonPath.<String> get("entry.references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
         });
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> loggedRequests = WireMock.findAll(getRequestedFor(urlPathTemplate("/questions/{questionId}/answer"))
@@ -258,7 +258,7 @@ public class QuestionsAndAnswersE2eTest
         // when
         Response response = given().auth().preemptive().basic("admin", "admin")
                 .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers".formatted(questionId))
+                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId))
                 .then().extract().response();
 
         // then
