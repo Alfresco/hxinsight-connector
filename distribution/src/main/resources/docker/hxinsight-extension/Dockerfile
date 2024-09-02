@@ -14,7 +14,7 @@ COPY Dockerfile licenses/*.* $TOMCAT_DIR/webapps/alfresco/WEB-INF/classes/alfres
 RUN chown -R -h $USERNAME $TOMCAT_DIR
 
 # Switch between currently installed JRE version and 11
-ARG JAVA_VERSION
+ARG JAVA_VERSION=""
 RUN if [[ "$JAVA_VERSION" == "11" ]]; then \
       ARCH=$(uname -m | sed s/86_//); \
       JAVA_RELEASE=11.0.24_8; \

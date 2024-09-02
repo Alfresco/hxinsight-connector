@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -e
 
 usage() {
     echo "Create development docker images." 1>&2;
@@ -21,7 +22,6 @@ while getopts ":hpt:" arg; do
       ;;
     h | *) # Display help.
       usage
-      exit 0
       ;;
   esac
 done
@@ -46,7 +46,7 @@ do
     then
       # The docker tag can be at most 128 characters long. Leave enough characters for the build number and a separator and replace any invalid characters.
       MAX_LENGTH=$((127-${#GITHUB_RUN_NUMBER}))
-      DOCKER_TAG_BASE=`echo ${GITHUB_REF_NAME} | sed "s|[^a-zA-Z0-9.\-]|_|g" | cut -c "1-${MAX_LENGTH}"`
+      DOCKER_TAG_BASE=$(echo "${GITHUB_REF_NAME}" | sed "s|[^a-zA-Z0-9.\-]|_|g" | cut -c "1-${MAX_LENGTH}")
       if [[ "${DOCKER_TAG_BASE}" == "master" ]]
       then
         if [[ "${DOCKER_TAG}" == "" ]]

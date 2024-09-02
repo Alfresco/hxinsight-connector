@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
-set -x
+set -ex
 
-scriptDir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-scriptName=`basename "$0"`
+scriptName=$(basename "$0")
 
 usage="Usage: ${scriptName} [options]
 
@@ -39,7 +37,7 @@ do
         continue
     fi
 
-    cd ${dockerBuildDir}
+    cd "${dockerBuildDir}"
     echo "Build docker image in:: ${dockerBuildDir}"
     # Load properties related to this docker image.
     source ./build.properties

@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 set -ev
 
-find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT" | xargs -r -l rm -rf
+find "${HOME}/.m2/repository/" -type d -name "*-SNAPSHOT" -print0 | xargs -0 -r -l rm -rf
