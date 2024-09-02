@@ -39,7 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class RetryUtils
 {
-    private static final int MAX_ATTEMPTS = 10;
+    private static final int MAX_ATTEMPTS = 15;
     private static final int INITIAL_DELAY_MS = 100;
 
     public static void retryWithBackoff(ErrorCatchingRunnable runnable)
@@ -50,9 +50,9 @@ public class RetryUtils
         });
     }
 
-    public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts)
+    public static void retryWithBackoff(ErrorCatchingRunnable runnable, int delayMs)
     {
-        retryWithBackoff(runnable, INITIAL_DELAY_MS, maxAttempts);
+        retryWithBackoff(runnable, MAX_ATTEMPTS, delayMs);
     }
 
     public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts, int delayMs)
@@ -73,7 +73,6 @@ public class RetryUtils
     public static <T> T retryWithBackoff(Supplier<T> supplier, int maxAttempts, int delayMs)
     {
         int attempt = 0;
-        int delay = delayMs;
         while (true)
         {
             try
@@ -88,8 +87,8 @@ public class RetryUtils
                     log.atDebug().log("Attempt {} failed", attempt);
                     throw e;
                 }
-                log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delay);
-                TimeUnit.MILLISECONDS.sleep(delay);
+                log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delayMs);
+                TimeUnit.MILLISECONDS.sleep(delayMs);
             }
         }
     }
