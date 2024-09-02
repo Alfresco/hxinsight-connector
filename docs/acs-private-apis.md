@@ -137,7 +137,7 @@ Get answer for a question.
 * Response:
     * Status: 200
     * Content-Type: `application/json`
-    * Entry object (wrapped with list/pagination information):
+    * Body (entry of):
         * `question` [string]
         * `answer` [string]
         * `isCompleted` [boolean]
@@ -147,27 +147,14 @@ Get answer for a question.
     * Sample
 ```json
 {
-    "list": {
-        "pagination": {
-            "count": 1,
-            "hasMoreItems": false,
-            "totalItems": 1,
-            "skipCount": 0,
-            "maxItems": 100
-        },
-        "entries": [
+    "entry": {
+        "question": "This is the question",
+        "answer": "This is the answer to the question",
+        "isCompleted": false,
+        "references": [
             {
-                "entry": {
-                    "question": "This is the question",
-                    "answer": "This is the answer to the question",
-                    "isCompleted": false,
-                    "references": [
-                        {
-                            "referenceId": "276718b0-c3ab-4e11-81d5-96dbbb540269",
-                            "referenceText": "This is the text reference which led to generating the answer"
-                        }
-                    ]
-                }
+                "referenceId": "276718b0-c3ab-4e11-81d5-96dbbb540269",
+                "referenceText": "This is the text reference which led to generating the answer"
             }
         ]
     }
