@@ -62,7 +62,7 @@ class QuestionAnswersRelationTest
     private QuestionAnswersRelation objectUnderTest;
 
     @ParameterizedTest
-    @CsvSource(value = {"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
+    @CsvSource({"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
     void shouldCallHxInsightClientGetAnswer(String responseCompleteness, boolean isComplete)
     {
         // given

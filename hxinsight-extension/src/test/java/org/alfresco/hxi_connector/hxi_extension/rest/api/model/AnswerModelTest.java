@@ -39,7 +39,7 @@ class AnswerModelTest
 {
 
     @ParameterizedTest
-    @CsvSource(value = {"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
+    @CsvSource({"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
     void testFromServiceModel(String responseCompleteness, boolean isComplete)
     {
         String answerText = "answer";
