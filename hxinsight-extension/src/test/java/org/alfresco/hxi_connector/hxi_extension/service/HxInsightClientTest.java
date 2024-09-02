@@ -231,18 +231,20 @@ class HxInsightClientTest
                     {
                         "id": "1a3f4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d",
                         "name": "Security Advisor",
-                        "description": "I can help you to secure your systems."
+                        "description": "I can help you to secure your systems.",
+                        "avatarUrl": "https://example.com/avatar.png"
                     },
                     {
                         "id": "1a3f1a3f-1a3f-1a3f-1a3f-1a3f1a3f1a3f",
                         "name": "Tax Advisor",
-                        "description": "I can help you with your taxes and financial planning."
+                        "description": "I can help you with your taxes and financial planning.",
+                        "avatarUrl": "https://example.com/avatar.png"
                     }
                 ]
                 """;
         List<Agent> expectedAgents = List.of(
-                new Agent("1a3f4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d", "Security Advisor", "I can help you to secure your systems."),
-                new Agent("1a3f1a3f-1a3f-1a3f-1a3f-1a3f1a3f1a3f", "Tax Advisor", "I can help you with your taxes and financial planning."));
+                new Agent("1a3f4b3d-4b3d-4b3d-4b3d-4b3d4b3d4b3d", "Security Advisor", "I can help you to secure your systems.", "https://example.com/avatar.png"),
+                new Agent("1a3f1a3f-1a3f-1a3f-1a3f-1a3f1a3f1a3f", "Tax Advisor", "I can help you with your taxes and financial planning.", "https://example.com/avatar.png"));
 
         HttpResponse response = mock(HttpResponse.class);
 

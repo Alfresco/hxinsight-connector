@@ -37,4 +37,5 @@ public class Agent
     private String id;
     private String name;
     private String description;
+    private String avatarUrl;
 }

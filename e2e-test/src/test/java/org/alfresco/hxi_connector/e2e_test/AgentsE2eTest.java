@@ -106,8 +106,8 @@ public class AgentsE2eTest
         assertEquals("/agents?sourceId=alfresco-dummy-source-id-0a63de491876", loggedRequest.getUrl());
 
         assertEquals(SC_OK, response.statusCode());
-        Map<String, String> expected0 = Map.of("name", "HR Policy Agent", "description", "This agent is responsible for HR policy predictions", "id", "61254576-62a3-453f-8cd8-19e2f6554f29");
-        Map<String, String> expected1 = Map.of("name", "Knowledge Base Agent", "description", "Very smart about product knowledge", "id", "b999ee14-3974-41b2-bef8-70ab38c9e642");
+        Map<String, String> expected0 = Map.of("name", "HR Policy Agent", "description", "This agent is responsible for HR policy predictions", "id", "61254576-62a3-453f-8cd8-19e2f6554f29", "avatarUrl", "https://s3.amazonaws.com/avatars/ecf13dd4-c061-462b-8122-e3203cc40a0d.jpg");
+        Map<String, String> expected1 = Map.of("name", "Knowledge Base Agent", "description", "Very smart about product knowledge", "id", "b999ee14-3974-41b2-bef8-70ab38c9e642", "avatarUrl", "https://s3.amazonaws.com/avatars/e2119fa1-9e11-421a-bef3-222667b1db34.jpg");
         List<Map<String, Map<String, String>>> expected = List.of(Map.of("entry", expected0), Map.of("entry", expected1));
         assertEquals(expected, response.jsonPath().get("list.entries"));
     }
