@@ -133,7 +133,7 @@ TBD - not ready on Hx Insight side yet.
 ### Answers API
 Get answer for a question.
 * Method: `GET`
-* Path: `questions/{questionId}/answers`
+* Path: `questions/{questionId}/answers/-default-`
 * Response:
     * Status: 200
     * Content-Type: `application/json`
