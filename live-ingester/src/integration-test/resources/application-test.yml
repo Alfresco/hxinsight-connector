@@ -12,6 +12,8 @@ alfresco:
         '[image/tiff]': "image/png"
         '[image/*]': "image/jpeg"
         '[application/*]': "application/pdf"
+  repository:
+    version-override: "23.3.0"
 hyland-experience:
   authentication:
     retry:

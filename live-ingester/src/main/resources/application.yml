@@ -20,6 +20,10 @@ alfresco:
     events-endpoint: activemq:topic:alfresco.repo.event2
     base-url: http://localhost:8080/alfresco
     discovery-endpoint: ${alfresco.repository.base-url}/api/discovery
+    health-probe:
+      endpoint: ${alfresco.repository.base-url}
+      timeout-seconds: 1800
+      interval-seconds: 30
   bulk-ingester:
     endpoint: activemq:queue:bulk-ingester-events
   transform:
