@@ -25,10 +25,29 @@
  */
 package org.alfresco.hxi_connector.prediction_applier.config;
 
+import jakarta.validation.constraints.Positive;
+
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 
 @ConfigurationProperties("alfresco.repository")
-public record RepositoryApiProperties(String baseUrl, String discoveryEndpoint, Retry retry)
-{}
+public record RepositoryApiProperties(String baseUrl, String discoveryEndpoint, Retry retry, HealthProbe healthProbe)
+{
+
+    public RepositoryApiProperties
+    {
+        if (StringUtils.isNotBlank(discoveryEndpoint) && StringUtils.isBlank(healthProbe.endpoint()))
+        {
+            throw new IllegalStateException("Property %s must be set in the Prediction Applier configuration when property %s is set."
+                    .formatted("alfresco.repository.health-probe.endpoint", "alfresco.repository.discovery-endpoint"));
+        }
+    }
+
+    @Validated
+    public record HealthProbe(String endpoint, @Positive @DefaultValue("1800") int timeoutSeconds, @Positive @DefaultValue("30") int intervalSeconds)
+    {}
+}

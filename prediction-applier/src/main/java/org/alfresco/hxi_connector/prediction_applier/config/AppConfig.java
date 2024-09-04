@@ -31,8 +31,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.DiscoveryApiRepositoryInformation;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
@@ -51,10 +53,23 @@ public class AppConfig
     }
 
     @Bean
-    public RepositoryInformation repositoryInformation(RepositoryApiProperties repositoryApiProperties, AuthService authService, ObjectMapper objectMapper)
+    public HttpClient httpClient()
+    {
+        return HttpClient.newHttpClient();
+    }
+
+    @Bean
+    @Profile("!test")
+    public AcsHealthProbe acsHealthProbe(HttpClient httpClient, RepositoryApiProperties repositoryApiProperties)
+    {
+        return new AcsHealthProbe(httpClient, repositoryApiProperties.healthProbe().endpoint(), repositoryApiProperties.healthProbe().timeoutSeconds(), repositoryApiProperties.healthProbe().intervalSeconds(), true);
+    }
+
+    @Bean
+    public RepositoryInformation repositoryInformation(RepositoryApiProperties repositoryApiProperties, AuthService authService, ObjectMapper objectMapper, HttpClient httpClient, AcsHealthProbe acsHealthProbe)
     {
         EnsureUtils.ensureNotBlank(repositoryApiProperties.discoveryEndpoint(), "ACS Discovery API endpoint property must be set");
-        return new DiscoveryApiRepositoryInformation(repositoryApiProperties.discoveryEndpoint(), authService, objectMapper, HttpClient.newHttpClient());
+        return new DiscoveryApiRepositoryInformation(repositoryApiProperties.discoveryEndpoint(), authService, objectMapper, httpClient);
     }
 
     @Bean

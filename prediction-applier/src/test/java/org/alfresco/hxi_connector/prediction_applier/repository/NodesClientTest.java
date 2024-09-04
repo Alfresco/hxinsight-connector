@@ -215,7 +215,7 @@ class NodesClientTest
 
     private RepositoryApiProperties createNodesApiProperties()
     {
-        return new RepositoryApiProperties(null, null, new Retry(RETRY_ATTEMPTS, 0, 1, emptySet()));
+        return new RepositoryApiProperties(null, null, new Retry(RETRY_ATTEMPTS, 0, 1, emptySet()), new RepositoryApiProperties.HealthProbe("health-probe-endpoint", 3, 1));
     }
 
     private void mockEndpointWillRespondWith(int statusCode)

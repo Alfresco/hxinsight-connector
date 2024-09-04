@@ -56,9 +56,11 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.prediction_applier.IntegrationTestConfig;
 import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 
-@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
+@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"},
+        classes = IntegrationTestConfig.class)
 @ActiveProfiles("test")
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers
