@@ -200,15 +200,16 @@ services:
       - alfresco
       - digital-workspace
       - control-center
+      - share
     environment:
       DISABLE_SYNCSERVICE: "true"
     ports:
       - "8080:8080"
     links:
-      - digital-workspace
       - alfresco
-      - share
+      - digital-workspace
       - control-center
+      - share
 
   elasticsearch:
     image: elasticsearch:${ELASTICSEARCH_TAG}

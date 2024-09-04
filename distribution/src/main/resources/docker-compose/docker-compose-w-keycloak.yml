@@ -1,9 +1,4 @@
-# In the live-ingester service, you need to set the following environment variables:
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI
-# In the prediction-applier service, you need to set the following environment variables:
+# In the live-ingester and prediction-applier services, you need to set the following environment variables:
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
 #      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
@@ -47,15 +42,13 @@ services:
         -Didentity-service.authentication.validation.failure.silent=false
         -Didentity-service.enable-basic-auth=true
         -Didentity-service.authentication.enabled=true
-        -Didentity-service.auth-server-url=http://host.docker.internal:8999/auth
+        -Didentity-service.auth-server-url=http://auth-provider:8080/auth
         -Didentity-service.realm=alfresco
         -Didentity-service.resource=alfresco
         -Dhxi.discovery.base-url=http://hxinsight-mock:8080
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         -Xms1500m -Xmx1500m
         "
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   postgres:
     extends:
@@ -86,61 +79,60 @@ services:
     extends:
       file: docker-compose.yml
       service: share
-    environment:
-      JAVA_OPTS: "
-        -Dalfresco.host=host.docker.internal
-        -Dalfresco.port=8080
-        -Dalfresco.context=alfresco
-        -Dalfresco.protocol=http
-        -Xms512m -Xmx512m
-        "
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   digital-workspace:
     extends:
       file: docker-compose.yml
       service: digital-workspace
     environment:
-      BASE_PATH: ./
-      APP_BASE_SHARE_URL: "http://host.docker.internal:8080/workspace/#//preview/s"
-      APP_CONFIG_PROVIDER: "ECM"
       APP_CONFIG_AUTH_TYPE: "OAUTH"
-      APP_CONFIG_OAUTH2_HOST: "http://host.docker.internal:8999/auth/realms/alfresco"
+      APP_CONFIG_OAUTH2_HOST: "http://localhost:8080/auth/realms/alfresco"
       APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
       APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
       APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
       APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
       APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://host.docker.internal:8080/workspace/assets/silent-refresh.html"
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
       APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
-      API_URL: "http://host.docker.internal:8080"
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
+      API_URL: "http://alfresco:8080"
 
   control-center:
     extends:
       file: docker-compose.yml
       service: control-center
     environment:
-      BASE_PATH: ./
-      APP_CONFIG_PROVIDER: "ECM"
       APP_CONFIG_AUTH_TYPE: "OAUTH"
-      APP_CONFIG_OAUTH2_HOST: "http://host.docker.internal:8999/auth/realms/alfresco"
+      APP_CONFIG_OAUTH2_HOST: "http://localhost:8080/auth/realms/alfresco"
       APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
       APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
       APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
       APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
       APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://host.docker.internal:8080/workspace/assets/silent-refresh.html"
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
       APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   proxy:
-    extends:
-      file: docker-compose.yml
-      service: proxy
+    image: nginx:stable-alpine
+    deploy:
+      resources:
+        limits:
+          memory: 128m
+    depends_on:
+      - alfresco
+      - digital-workspace
+      - control-center
+      - share
+      - auth-provider
+    ports:
+      - "8080:8080"
+    links:
+      - alfresco
+      - digital-workspace
+      - control-center
+      - share
+      - auth-provider
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
 
   elasticsearch:
     extends:
@@ -166,11 +158,9 @@ services:
       AUTH_PROVIDERS_ALFRESCO_CLIENTID: alfresco
       AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET:
       AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: password
-      AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://host.docker.internal:8999/auth/realms/alfresco/protocol/openid-connect/token
+      AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
       AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
       AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   bulk-ingester:
     extends:
@@ -186,11 +176,9 @@ services:
       AUTH_PROVIDERS_ALFRESCO_CLIENTID: alfresco
       AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET:
       AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: password
-      AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://host.docker.internal:8999/auth/realms/alfresco/protocol/openid-connect/token
+      AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
       AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
       AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
-    extra_hosts:
-      - "host.docker.internal:host-gateway"
 
   hxinsight-mock:
     extends:
