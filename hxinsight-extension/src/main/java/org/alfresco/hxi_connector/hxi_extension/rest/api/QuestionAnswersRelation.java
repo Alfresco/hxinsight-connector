@@ -25,6 +25,10 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api;
 
+import static java.lang.String.format;
+
+import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -32,23 +36,27 @@ import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AnswerModel;
 import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 import org.alfresco.rest.framework.WebApiDescription;
+import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
+import org.alfresco.rest.framework.core.exceptions.RelationshipResourceNotFoundException;
 import org.alfresco.rest.framework.resource.RelationshipResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.RelationshipResourceAction;
-import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @Slf4j
 @RequiredArgsConstructor
 @RelationshipResource(name = "answers", title = "Answers to questions about documents", entityResource = QuestionsEntityResource.class)
-public class QuestionAnswersRelation implements RelationshipResourceAction.Read<AnswerModel>
+public class QuestionAnswersRelation implements RelationshipResourceAction.ReadById<AnswerModel>
 {
 
     private final QuestionService questionService;
 
+    @Override
     @WebApiDescription(title = "Get answers to a question")
-    public CollectionWithPagingInfo<AnswerModel> readAll(String questionId, Parameters parameters)
+    public AnswerModel readById(String questionId, String id, Parameters parameters) throws RelationshipResourceNotFoundException
     {
+        ensureThat(id.equals("-default-"), () -> new EntityNotFoundException(format("%s (you should use id '-default-')", id)));
+
         AnswerResponse hxInsightAnswer = questionService.getAnswer(questionId);
-        return CollectionWithPagingInfo.asPagedCollection(AnswerModel.fromServiceModel(hxInsightAnswer));
+        return AnswerModel.fromServiceModel(hxInsightAnswer);
     }
 }
