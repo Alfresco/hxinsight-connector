@@ -173,10 +173,10 @@ services:
         limits:
           memory: 128m
     environment:
-      APP_CONFIG_PROVIDER: "ECM"
-      APP_CONFIG_AUTH_TYPE: "BASIC"
       BASE_PATH: ./
       APP_BASE_SHARE_URL: "http://localhost:8080/workspace/#/preview/s"
+      APP_CONFIG_PROVIDER: "ECM"
+      APP_CONFIG_AUTH_TYPE: "BASIC"
 
   control-center:
     image: quay.io/alfresco/alfresco-control-center:${CONTROL_CENTER_TAG}
@@ -185,9 +185,9 @@ services:
         limits:
           memory: 128m
     environment:
+      BASE_PATH: ./
       APP_CONFIG_PROVIDER: "ECM"
       APP_CONFIG_AUTH_TYPE: "BASIC"
-      BASE_PATH: ./
 
   # HTTP proxy to provide HTTP Default port access to services
   proxy:
@@ -249,7 +249,7 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5006,server=y,suspend=n
       SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
-      SPRING_ACTIVEMQ_BROKER-URL: nio://activemq:61616
+      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       ALFRESCO_REINDEX_BATCH_SIZE: 100
       ALFRESCO_REINDEX_CONCURRENT_PROCESSORS: 4
       ALFRESCO_REINDEX_FROM_ID: 0
@@ -295,13 +295,13 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      HYLAND-EXPERIENCE_INSIGHT_INGESTION_BASE-URL: http://hxinsight-mock:8080
-      ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
-      ALFRESCO_TRANSFORM_SHARED-FILE-STORE_BASE-URL: http://shared-file-store:8099
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-secret
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://hxinsight-mock:8080/token
+      HYLANDEXPERIENCE_INSIGHT_INGESTION_BASEURL: http://hxinsight-mock:8080
+      ALFRESCO_REPOSITORY_DISCOVERYENDPOINT: http://alfresco:8080/alfresco/api/discovery
+      ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL: http://shared-file-store:8099
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID: dummy-client-id
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTSECRET: dummy-client-secret
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY: hxai-env-key
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI: http://hxinsight-mock:8080/token
       AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
       AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
     ports:
@@ -341,17 +341,17 @@ services:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-secret
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://hxinsight-mock:8080/token
-      AUTH_PROVIDERS_ALFRESCO_CLIENT-ID: dummy-client-id
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID: dummy-client-id
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTSECRET: dummy-client-secret
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY: hxai-env-key
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI: http://hxinsight-mock:8080/token
+      HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_BASEURL: http://hxinsight-mock:8080
+      AUTH_PROVIDERS_ALFRESCO_CLIENTID: dummy-client-id
       AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
       AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
-      HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_BASE-URL: http://hxinsight-mock:8080
-      ALFRESCO_REPOSITORY_BASE-URL: http://alfresco:8080/alfresco
-      ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
-      APPLICATION_SOURCE-ID: alfresco-dummy-source-id-0a63de491876
+      ALFRESCO_REPOSITORY_BASEURL: http://alfresco:8080/alfresco
+      ALFRESCO_REPOSITORY_DISCOVERYENDPOINT: http://alfresco:8080/alfresco/api/discovery
+      APPLICATION_SOURCEID: alfresco-dummy-source-id-0a63de491876
     ports:
       - "5009:5009"
 

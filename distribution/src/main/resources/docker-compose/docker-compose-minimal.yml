@@ -25,12 +25,10 @@ services:
         -Dtransform.misc.url=http://transform-core-aio:8090/
         -Dcsrf.filter.enabled=false
         -Dalfresco.restApi.basicAuthScheme=true
-        -Xms1500m -Xmx1500m
         -Dhxi.discovery.base-url=http://hxinsight-mock:8080
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
+        -Xms1500m -Xmx1500m
         "
-    ports:
-      - "8080:8080"
 
   postgres:
     extends:
