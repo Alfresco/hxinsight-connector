@@ -670,7 +670,8 @@
         "*"
       ],
       "webOrigins": [
-        "*"
+        "http://localhost*",
+        "https://localhost*"
       ],
       "notBefore": 0,
       "bearerOnly": false,
