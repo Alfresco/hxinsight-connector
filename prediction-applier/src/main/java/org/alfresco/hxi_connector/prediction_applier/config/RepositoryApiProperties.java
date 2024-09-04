@@ -42,7 +42,7 @@ public record RepositoryApiProperties(String baseUrl, String discoveryEndpoint, 
     {
         if (StringUtils.isNotBlank(discoveryEndpoint) && StringUtils.isBlank(healthProbe.endpoint()))
         {
-            throw new IllegalStateException("Property %s must be set in the Live Ingester configuration when property %s is set."
+            throw new IllegalStateException("Property %s must be set in the Prediction Applier configuration when property %s is set."
                     .formatted("alfresco.repository.health-probe.endpoint", "alfresco.repository.discovery-endpoint"));
         }
     }
