@@ -90,11 +90,11 @@ services:
       APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
       APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
       APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
-      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/logout"
       APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
       APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
-      API_URL: "http://alfresco:8080"
+      API_URL: "http://localhost:8080"
 
   control-center:
     extends:
@@ -106,8 +106,8 @@ services:
       APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
       APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
       APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
-      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/logout"
       APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
       APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
 
