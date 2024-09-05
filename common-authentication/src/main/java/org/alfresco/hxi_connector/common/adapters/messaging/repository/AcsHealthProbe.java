@@ -69,7 +69,7 @@ public class AcsHealthProbe
             try
             {
                 HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create(acsHealthEndpoint)).build(), HttpResponse.BodyHandlers.ofString());
-                if (!isErrorCode(response.statusCode()))
+                if (!isNotErrorCode(response.statusCode()))
                 {
                     log.debug("ACS is available.");
                     return;
@@ -99,8 +99,8 @@ public class AcsHealthProbe
         TimeUnit.SECONDS.sleep(retryIntervalSeconds);
     }
 
-    private static boolean isErrorCode(int statusCode)
+    private static boolean isNotErrorCode(int statusCode)
     {
-        return statusCode >= 400 && statusCode <= 599;
+        return statusCode >= 100 && statusCode < 400;
     }
 }
