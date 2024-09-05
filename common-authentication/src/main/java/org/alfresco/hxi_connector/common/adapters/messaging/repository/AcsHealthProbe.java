@@ -25,9 +25,6 @@
  */
 package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
-import static org.apache.hc.core5.http.HttpStatus.SC_CLIENT_ERROR;
-import static org.apache.hc.core5.http.HttpStatus.SC_OK;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -67,14 +64,12 @@ public class AcsHealthProbe
         log.debug("Sending ACS Health Probe request to: {}", acsHealthEndpoint);
         long timeout = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(retryTimeoutSeconds);
         long currentTime;
-        int statusCode;
         do
         {
             try
             {
                 HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create(acsHealthEndpoint)).build(), HttpResponse.BodyHandlers.ofString());
-                statusCode = response.statusCode();
-                if (statusCode >= SC_OK && statusCode < SC_CLIENT_ERROR)
+                if (isNotErrorCode(response.statusCode()))
                 {
                     log.debug("ACS is available.");
                     return;
@@ -102,5 +97,10 @@ public class AcsHealthProbe
     {
         log.debug("ACS is not available. Retrying in {} seconds", retryIntervalSeconds);
         TimeUnit.SECONDS.sleep(retryIntervalSeconds);
+    }
+
+    private static boolean isNotErrorCode(int statusCode)
+    {
+        return statusCode >= 100 && statusCode < 400;
     }
 }
