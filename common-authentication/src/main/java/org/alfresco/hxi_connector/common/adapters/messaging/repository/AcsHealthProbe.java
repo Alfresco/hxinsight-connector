@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
+import static org.apache.hc.core5.http.HttpStatus.SC_CLIENT_ERROR;
 import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 
 import java.io.IOException;
@@ -73,7 +74,7 @@ public class AcsHealthProbe
             {
                 HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create(acsHealthEndpoint)).build(), HttpResponse.BodyHandlers.ofString());
                 statusCode = response.statusCode();
-                if (statusCode == SC_OK)
+                if (statusCode >= SC_OK && statusCode < SC_CLIENT_ERROR)
                 {
                     log.debug("ACS is available.");
                     return;
