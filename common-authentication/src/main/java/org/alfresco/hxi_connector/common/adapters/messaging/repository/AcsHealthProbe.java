@@ -69,7 +69,7 @@ public class AcsHealthProbe
             try
             {
                 HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create(acsHealthEndpoint)).build(), HttpResponse.BodyHandlers.ofString());
-                if (!isNotErrorCode(response.statusCode()))
+                if (isNotErrorCode(response.statusCode()))
                 {
                     log.debug("ACS is available.");
                     return;
