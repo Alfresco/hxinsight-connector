@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -25,20 +25,20 @@
  */
 package org.alfresco.hxi_connector.prediction_applier;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import java.net.http.HttpClient;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 
-@SpringBootTest(classes = IntegrationTestConfig.class)
-@ActiveProfiles("test")
-class PredictionApplierApplicationIntegrationTest
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe;
+
+@TestConfiguration
+public class IntegrationTestConfig
 {
 
-    @Test
-    void contextLoads()
+    @Bean
+    public AcsHealthProbe dummyHealthProbe()
     {
-        assertEquals(1, 1);
+        return new AcsHealthProbe(HttpClient.newHttpClient(), "http://localhost:8080", 5, 1, false);
     }
 }

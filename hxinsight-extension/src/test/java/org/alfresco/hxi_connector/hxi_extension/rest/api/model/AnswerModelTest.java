@@ -30,23 +30,38 @@ import static org.junit.jupiter.api.Assertions.*;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
 class AnswerModelTest
 {
 
-    @Test
-    void testFromServiceModel()
+    @ParameterizedTest
+    @CsvSource({"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
+    void testFromServiceModel(String responseCompleteness, boolean isComplete)
     {
         String answerText = "answer";
         String question = "Some question";
         String referenceId = "referenceId";
         String referenceText = "referenceText";
-        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, null, referenceText);
-        AnswerResponse answer = AnswerResponse.builder().answer(answerText).question(question).references(Set.of(reference)).build();
-        AnswerModel.ReferenceModel referenceModel = new AnswerModel.ReferenceModel(referenceId, referenceText);
-        AnswerModel expected = new AnswerModel(answerText, question, Set.of(referenceModel));
+
+        AnswerResponse answer = AnswerResponse
+                .builder()
+                .answer(answerText)
+                .question(question)
+                .responseCompleteness(responseCompleteness)
+                .references(
+                        Set.of(new AnswerResponse.Reference(referenceId, null, referenceText)))
+                .build();
+
+        AnswerModel expected = new AnswerModel(
+                answerText,
+                question,
+                isComplete,
+                Set.of(new AnswerModel.ReferenceModel(referenceId, referenceText)));
+
         assertEquals(expected, AnswerModel.fromServiceModel(answer));
     }
 
@@ -55,8 +70,15 @@ class AnswerModelTest
     {
         String answerText = "answer";
         String question = "Some question";
-        AnswerResponse answer = AnswerResponse.builder().answer(answerText).question(question).references(null).build();
-        AnswerModel expected = new AnswerModel(answerText, question, Set.of());
+
+        AnswerResponse answer = AnswerResponse.builder()
+                .answer(answerText)
+                .question(question)
+                .references(null)
+                .build();
+
+        AnswerModel expected = new AnswerModel(answerText, question, false, Set.of());
+
         assertEquals(expected, AnswerModel.fromServiceModel(answer));
     }
 

@@ -33,10 +33,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
-import java.util.Collection;
-
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -45,12 +45,13 @@ import org.springframework.extensions.webscripts.WebScriptException;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AnswerModel;
 import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
-import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
+import org.alfresco.rest.framework.core.exceptions.EntityNotFoundException;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
 
 @ExtendWith(MockitoExtension.class)
 class QuestionAnswersRelationTest
 {
+    private static final String DEFAULT_ID = "-default-";
 
     @Mock
     private QuestionService questionService;
@@ -60,25 +61,39 @@ class QuestionAnswersRelationTest
     @InjectMocks
     private QuestionAnswersRelation objectUnderTest;
 
-    @Test
-    void shouldCallHxInsightClientGetAnswer()
+    @ParameterizedTest
+    @CsvSource({"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
+    void shouldCallHxInsightClientGetAnswer(String responseCompleteness, boolean isComplete)
     {
         // given
         String question = "Some question";
-        AnswerResponse hXAnswer = AnswerResponse.builder().question(question).answer("Some answer").build();
+        AnswerResponse hXAnswer = AnswerResponse.builder()
+                .question(question)
+                .responseCompleteness(responseCompleteness)
+                .answer("Some answer")
+                .build();
         String questionId = "questionId";
         given(questionService.getAnswer(questionId)).willReturn(hXAnswer);
 
         // when
-        CollectionWithPagingInfo<AnswerModel> answerResponse = objectUnderTest.readAll(questionId, mockParameters);
+        AnswerModel answerResponse = objectUnderTest.readById(questionId, DEFAULT_ID, mockParameters);
 
         // then
         then(questionService).should().getAnswer(questionId);
-        Collection<AnswerModel> answerResponseEntries = answerResponse.getCollection();
-        assertEquals(1, answerResponseEntries.size());
-        AnswerModel answer = answerResponseEntries.iterator().next();
-        AnswerModel expectedAnswer = new AnswerModel(hXAnswer.getAnswer(), hXAnswer.getQuestion(), emptySet());
-        assertEquals(expectedAnswer, answer);
+
+        AnswerModel expectedAnswer = new AnswerModel(hXAnswer.getAnswer(), hXAnswer.getQuestion(), isComplete, emptySet());
+
+        assertEquals(expectedAnswer, answerResponse);
+    }
+
+    @Test
+    void shouldFailIfIdIsNotDefault()
+    {
+        // given
+        String questionId = "questionId";
+
+        // when, then
+        assertThrows(EntityNotFoundException.class, () -> objectUnderTest.readById(questionId, "random-id", mockParameters));
     }
 
     @Test
@@ -89,6 +104,6 @@ class QuestionAnswersRelationTest
         given(questionService.getAnswer(questionId)).willThrow(new WebScriptException(SC_SERVICE_UNAVAILABLE, "Some error message"));
 
         // when + then
-        assertThrows(WebScriptException.class, () -> objectUnderTest.readAll(questionId, mockParameters));
+        assertThrows(WebScriptException.class, () -> objectUnderTest.readById(questionId, DEFAULT_ID, mockParameters));
     }
 }

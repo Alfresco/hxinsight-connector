@@ -29,7 +29,10 @@ alfresco:
       attempts: 10
       initial-delay: 500
       delay-multiplier: 2
-
+    health-probe:
+      endpoint: ${alfresco.repository.base-url}
+      timeout-seconds: 1800
+      interval-seconds: 30
 auth:
   providers:
     hyland-experience:

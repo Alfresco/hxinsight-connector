@@ -32,6 +32,9 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.retry.annotation.EnableRetry;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.web.SecurityFilterChain;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
@@ -45,6 +48,17 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 public class AuthConfig
 {
     public static final String HXAI_ENVIRONMENT_HEADER = "hxai-environment";
+
+    @Bean
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
+    public SecurityFilterChain securityFilterChain(HttpSecurity security) throws Exception
+    {
+        return security
+                .formLogin(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/actuator/health/**").permitAll())
+                .authorizeHttpRequests(authorize -> authorize.anyRequest().denyAll())
+                .build();
+    }
 
     @Bean
     public AccessTokenProvider defaultAccessTokenProvider(AuthenticationClient predictionApplierHxAuthClient)

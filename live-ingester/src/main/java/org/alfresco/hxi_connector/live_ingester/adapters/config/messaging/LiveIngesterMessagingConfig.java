@@ -38,6 +38,7 @@ import org.springframework.jms.connection.JmsTransactionManager;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.DiscoveryApiRepositoryInformation;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
@@ -48,6 +49,9 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.Pr
 @Configuration
 public class LiveIngesterMessagingConfig
 {
+
+    public static final String CONFIGURATION_ERR_MESSAGE = "One of properties: 'alfresco.repository.discovery-endpoint' or 'alfresco.repository.version-override' must be set in the Live Ingester configuration.";
+
     @Bean
     public PlatformTransactionManager jmsTransactionManager(ConnectionFactory connectionFactory)
     {
@@ -62,7 +66,30 @@ public class LiveIngesterMessagingConfig
     }
 
     @Bean
-    public RepositoryInformation repositoryInformation(AuthService authService, ObjectMapper objectMapper, IntegrationProperties integrationProperties)
+    public HttpClient httpClient()
+    {
+        return HttpClient.newHttpClient();
+    }
+
+    @Bean
+    public AcsHealthProbe acsHealthProbe(HttpClient httpClient, IntegrationProperties integrationProperties)
+    {
+        boolean isVersionOverrideBlank = StringUtils.isBlank(integrationProperties.alfresco().repository().versionOverride());
+        boolean isDiscoverEndpointBlank = StringUtils.isBlank(integrationProperties.alfresco().repository().discoveryEndpoint());
+        if (isVersionOverrideBlank && isDiscoverEndpointBlank)
+        {
+            throw new IllegalStateException(CONFIGURATION_ERR_MESSAGE);
+        }
+        return new AcsHealthProbe(httpClient,
+                integrationProperties.alfresco().repository().healthProbe().endpoint(),
+                integrationProperties.alfresco().repository().healthProbe().timeoutSeconds(),
+                integrationProperties.alfresco().repository().healthProbe().intervalSeconds(),
+                isVersionOverrideBlank);
+    }
+
+    @Bean
+    public RepositoryInformation repositoryInformation(AuthService authService, ObjectMapper objectMapper, IntegrationProperties integrationProperties,
+            HttpClient httpClient)
     {
         if (StringUtils.isNotBlank(integrationProperties.alfresco().repository().versionOverride()))
         {
@@ -70,9 +97,9 @@ public class LiveIngesterMessagingConfig
         }
         else if (StringUtils.isNotBlank(integrationProperties.alfresco().repository().discoveryEndpoint()))
         {
-            return new DiscoveryApiRepositoryInformation(integrationProperties.alfresco().repository().discoveryEndpoint(), authService, objectMapper, HttpClient.newHttpClient());
+            return new DiscoveryApiRepositoryInformation(integrationProperties.alfresco().repository().discoveryEndpoint(), authService, objectMapper, httpClient);
         }
-        throw new IllegalStateException("Either property alfresco.repository.discovery-endpoint or alfresco.repository.version-override must be set in the Live Ingester configuration.");
+        throw new IllegalStateException(CONFIGURATION_ERR_MESSAGE);
     }
 
     @Bean
