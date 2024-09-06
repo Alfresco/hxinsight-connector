@@ -218,8 +218,8 @@ services:
         limits:
           memory: 1700m
     environment:
-      XPACK_SECURITY_ENABLED: false
-      DISCOVERY_TYPE: single-node
+      - xpack.security.enabled=false
+      - discovery.type=single-node
     ulimits:
       memlock:
         soft: -1
