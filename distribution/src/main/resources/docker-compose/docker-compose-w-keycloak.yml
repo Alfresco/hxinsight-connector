@@ -1,50 +1,25 @@
-# In order this docker-compose file to work on your local machine, you need to have HOST_IP environment variable set to the IP address of your local machine.
-# It has been added to .env file in this directory but by default it is empty.
-# In the live-ingester service, you need to set the following environment variables:
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI
-# In the prediction-applier service, you need to set the following environment variables:
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY
-#      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI
+# In the live-ingester and prediction-applier services, you need to set the following environment variables:
+#      AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID
+#      AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTSECRET
+#      AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY
+#      AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI
 #      AUTH_PROVIDERS_ALFRESCO_USERNAME
 #      AUTH_PROVIDERS_ALFRESCO_PASSWORD
 
-
 services:
   alfresco:
-    image: quay.io/alfresco/alfresco-content-repository-hxinsight-extension:${HXINSIGHT_CONNECTOR_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 1700m
-    depends_on:
-      - postgres
-      - activemq
-      - transform-router
+    extends:
+      file: docker-compose.yml
+      service: alfresco
     environment:
-      CATALINA_OPTS: "-agentlib:jdwp=transport=dt_socket,address=*:8000,server=y,suspend=n"
-      JAVA_TOOL_OPTIONS: "
-        -Dencryption.keystore.type=JCEKS
-        -Dencryption.cipherAlgorithm=DESede/CBC/PKCS5Padding
-        -Dencryption.keyAlgorithm=DESede
-        -Dencryption.keystore.location=/usr/local/tomcat/shared/classes/alfresco/extension/keystore/keystore
-        -Dmetadata-keystore.password=mp6yc0UD9e
-        -Dmetadata-keystore.aliases=metadata
-        -Dmetadata-keystore.metadata.password=oKIWzVdEdA
-        -Dmetadata-keystore.metadata.algorithm=DESede
-        "
       JAVA_OPTS: "
-        -Delasticsearch.createIndexIfNotExists=true
         -Ddb.driver=org.postgresql.Driver
         -Ddb.username=alfresco
         -Ddb.password=alfresco
         -Ddb.url=jdbc:postgresql://postgres:5432/alfresco
         -Dindex.subsystem.name=elasticsearch
         -Delasticsearch.host=elasticsearch
+        -Delasticsearch.createIndexIfNotExists=true
         -Delasticsearch.indexName=alfresco
         -Dshare.host=localhost
         -Dshare.port=8080
@@ -55,187 +30,174 @@ services:
         -Ddeployment.method=DOCKER_COMPOSE
         -Dtransform.service.enabled=true
         -Dtransform.service.url=http://transform-router:8095
-        -Dsfs.url=http://shared-file-store:8099/
-        -DlocalTransform.core-aio.url=http://transform-core-aio:8090/
-        -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090/
-        -Djodconverter.url=http://transform-core-aio:8090/
-        -Dimg.url=http://transform-core-aio:8090/
-        -Dtika.url=http://transform-core-aio:8090/
-        -Dtransform.misc.url=http://transform-core-aio:8090/
+        -Dsfs.url=http://shared-file-store:8099
+        -DlocalTransform.core-aio.url=http://transform-core-aio:8090
+        -Dalfresco-pdf-renderer.url=http://transform-core-aio:8090
+        -Djodconverter.url=http://transform-core-aio:8090
+        -Dimg.url=http://transform-core-aio:8090
+        -Dtika.url=http://transform-core-aio:8090
+        -Dtransform.misc.url=http://transform-core-aio:8090
         -Dcsrf.filter.enabled=false
         -Dauthentication.chain=identity-service1:identity-service,alfrescoNtlm1:alfrescoNtlm
         -Didentity-service.authentication.validation.failure.silent=false
         -Didentity-service.enable-basic-auth=true
         -Didentity-service.authentication.enabled=true
-        -Didentity-service.auth-server-url=http://${HOST_IP}:8999/auth
+        -Didentity-service.auth-server-url=http://auth-provider:8080/auth
         -Didentity-service.realm=alfresco
         -Didentity-service.resource=alfresco
         -Dhxi.discovery.base-url=http://hxinsight-mock:8080
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
         -Xms1500m -Xmx1500m
         "
-    ports:
-      - "8000:8000"
-    healthcheck:
-      test: curl --fail http://localhost:8080/alfresco || exit 1
-      start_period: 45s
-      interval: 10s
-      timeout: 3s
-      retries: 30
 
   postgres:
-    image: postgres:${POSTGRES_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    environment:
-      POSTGRES_PASSWORD: alfresco
-      POSTGRES_USER: alfresco
-      POSTGRES_DB: alfresco
-    command: postgres -c max_connections=300 -c log_min_messages=LOG
-    ports:
-      - "5432:5432"
+    extends:
+      file: docker-compose.yml
+      service: postgres
 
   activemq:
-    image: quay.io/alfresco/alfresco-activemq:${ACTIVE_MQ_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 1g
-    ports:
-      - "8161:8161" # Web Console
-      - "5672:5672" # AMQP
-      - "61616:61616" # OpenWire
-      - "61613:61613" # STOMP
+    extends:
+      file: docker-compose.yml
+      service: activemq
 
   transform-router:
-    image: quay.io/alfresco/alfresco-transform-router:${TRANSFORM_ROUTER_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    depends_on:
-      transform-core-aio:
-        condition: service_healthy
-    environment:
-      JAVA_OPTS: " -Xms256m -Xmx512m"
-      ACTIVEMQ_URL: "nio://activemq:61616"
-      CORE_AIO_URL: "http://transform-core-aio:8090"
-      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
-      LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER: TRACE
-      LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER_MESSAGING: INFO
-    ports:
-      - "8095:8095"
-    links:
-      - activemq
-    healthcheck:
-      test: curl --fail http://localhost:8095/ || exit 1
-      interval: 5s
-      timeout: 3s
-      retries: 20
+    extends:
+      file: docker-compose.yml
+      service: transform-router
 
   transform-core-aio:
-    image: quay.io/alfresco/alfresco-transform-core-aio:${TRANSFORM_CORE_AIO_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 3000m
-    environment:
-      JAVA_OPTS: " -Xms256m -Xmx3000m"
-      ACTIVEMQ_URL: "nio://activemq:61616"
-      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
-      LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_BASE_TRANSFORM: TRACE
-    ports:
-      - "8090:8090"
-    links:
-      - activemq
-    healthcheck:
-      test: curl --fail http://localhost:8090/ || exit 1
-      interval: 5s
-      timeout: 3s
-      retries: 20
+    extends:
+      file: docker-compose.yml
+      service: transform-core-aio
 
   shared-file-store:
-    image: quay.io/alfresco/alfresco-shared-file-store:${SHARED_FILE_STORE_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    environment:
-      JAVA_OPTS: " -Xms256m -Xmx512m"
-      scheduler.content.age.millis: 86400000
-      scheduler.cleanup.interval: 86400000
-    ports:
-      - "8099:8099"
-    volumes:
-      - shared-file-store-volume:/tmp/Alfresco/sfs
+    extends:
+      file: docker-compose.yml
+      service: shared-file-store
 
   share:
-    image: quay.io/alfresco/alfresco-share:${SHARE_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 1024m
-    environment:
-      REPO_HOST: "alfresco"
-      REPO_PORT: "8080"
-      JAVA_OPTS: "
-        -Dalfresco.host=${HOST_IP}
-        -Dalfresco.port=8080
-        -Dalfresco.context=alfresco
-        -Dalfresco.protocol=http
-        -Xms512m -Xmx512m
-        "
+    extends:
+      file: docker-compose.yml
+      service: share
 
   digital-workspace:
-    image: quay.io/alfresco/alfresco-digital-workspace:${DIGITAL_WORKSPACE_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 128m
+    extends:
+      file: docker-compose.yml
+      service: digital-workspace
     environment:
-      BASE_PATH: ./
-      APP_CONFIG_PROVIDER: "ECM"
-      APP_BASE_SHARE_URL: "http://${HOST_IP}:8080/workspace/#//preview/s"
-      API_URL: "http://${HOST_IP}:8080"
       APP_CONFIG_AUTH_TYPE: "OAUTH"
-      APP_CONFIG_OAUTH2_HOST: "http://${HOST_IP}:8999/auth/realms/alfresco"
+      APP_CONFIG_OAUTH2_HOST: "http://localhost:8080/auth/realms/alfresco"
       APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
       APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
       APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
-      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://${HOST_IP}:8080/workspace/assets/silent-refresh.html"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/logout"
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
       APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
+      API_URL: "http://localhost:8080"
 
   control-center:
-    image: quay.io/alfresco/alfresco-control-center:${CONTROL_CENTER_TAG}
+    extends:
+      file: docker-compose.yml
+      service: control-center
+    environment:
+      APP_CONFIG_AUTH_TYPE: "OAUTH"
+      APP_CONFIG_OAUTH2_HOST: "http://localhost:8080/auth/realms/alfresco"
+      APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
+      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
+      APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace"
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/logout"
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
+      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
+
+  proxy:
+    image: nginx:stable-alpine
     deploy:
       resources:
         limits:
           memory: 128m
-    environment:
-      BASE_PATH: ./
-      APP_CONFIG_PROVIDER: "ECM"
-      APP_CONFIG_AUTH_TYPE: "OAUTH"
-      APP_CONFIG_OAUTH2_HOST: "http://${HOST_IP}:8999/auth/realms/alfresco"
-      APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
-      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
-      APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
-      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/"
-      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://${HOST_IP}:8080/workspace/assets/silent-refresh.html"
-      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
+    depends_on:
+      - alfresco
+      - digital-workspace
+      - control-center
+      - share
+      - auth-provider
+    ports:
+      - "8080:8080"
+    links:
+      - alfresco
+      - digital-workspace
+      - control-center
+      - share
+      - auth-provider
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
 
-  keycloak:
-    image: quay.io/keycloak/keycloak:23.0.7
+  elasticsearch:
+    extends:
+      file: docker-compose.yml
+      service: elasticsearch
+
+  reindexing:
+    extends:
+      file: docker-compose.yml
+      service: reindexing
+
+  live-indexing:
+    extends:
+      file: docker-compose.yml
+      service: live-indexing
+
+  live-ingester:
+    extends:
+      file: docker-compose.yml
+      service: live-ingester
+    environment:
+      AUTH_PROVIDERS_ALFRESCO_TYPE: oauth2
+      AUTH_PROVIDERS_ALFRESCO_CLIENTID: alfresco
+      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET:
+      AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: password
+      AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
+      AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
+      AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
+
+  bulk-ingester:
+    extends:
+      file: docker-compose.yml
+      service: bulk-ingester
+
+  prediction-applier:
+    extends:
+      file: docker-compose.yml
+      service: prediction-applier
+    environment:
+      AUTH_PROVIDERS_ALFRESCO_TYPE: oauth2
+      AUTH_PROVIDERS_ALFRESCO_CLIENTID: alfresco
+      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET:
+      AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: password
+      AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
+      AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
+      AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
+
+  hxinsight-mock:
+    extends:
+      file: docker-compose.yml
+      service: hxinsight-mock
+
+  aws-mock:
+    extends:
+      file: docker-compose.yml
+      service: aws-mock
+
+  auth-provider:
+    image: quay.io/keycloak/keycloak:${KEYCLOAK_TAG}
     deploy:
       resources:
         limits:
           memory: 512m
     depends_on:
-      - keycloakdb
+      - auth-provider-db
     environment:
       KEYCLOAK_ADMIN: admin
       KEYCLOAK_ADMIN_PASSWORD: admin
@@ -243,7 +205,7 @@ services:
       KC_METRICS_ENABLED: true
       KC_HEALTH_ENABLED: true
       KC_DB: postgres
-      KC_DB_URL: jdbc:postgresql://keycloakdb:5433/keycloak
+      KC_DB_URL: jdbc:postgresql://auth-provider-db:5433/keycloak
       KC_DB_USER: keycloak
       KC_DB_PASSWORD: keycloak
     command: ["start-dev", "--import-realm", "--http-relative-path=/auth", "--hostname=localhost", "--http-enabled=true"]
@@ -252,217 +214,20 @@ services:
     ports:
       - "8999:8080"
 
-  keycloakdb:
+  auth-provider-db:
     image: postgres:${POSTGRES_TAG}
     deploy:
       resources:
         limits:
           memory: 512m
     environment:
-      - POSTGRES_PASSWORD=keycloak
-      - POSTGRES_USER=keycloak
-      - POSTGRES_DB=keycloak
-      - PGPORT=5433
+      POSTGRES_PASSWORD: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_DB: keycloak
+      PGPORT: 5433
     command: postgres -c max_connections=300 -c log_min_messages=LOG
     ports:
-      - 5433:5433
-
-  # HTTP proxy to provide HTTP Default port access to services
-  proxy:
-    image: alfresco/alfresco-acs-nginx:${ACS_NGINX_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 128m
-    depends_on:
-      - alfresco
-      - digital-workspace
-      - control-center
-    environment:
-      DISABLE_SYNCSERVICE: "true"
-    ports:
-      - "8080:8080"
-    links:
-      - digital-workspace
-      - alfresco
-      - share
-      - control-center
-
-  elasticsearch:
-    image: elasticsearch:${ELASTICSEARCH_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 1700m
-    environment:
-      - xpack.security.enabled=false
-      - discovery.type=single-node
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-      nofile:
-        soft: 65536
-        hard: 65536
-    cap_add:
-      - IPC_LOCK
-    ports:
-      - "9200:9200"
-      - "9300:9300"
-
-  reindexing:
-    image: quay.io/alfresco/alfresco-elasticsearch-reindexing:${SEARCH_ENTERPRISE_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    depends_on:
-      elasticsearch:
-        condition: service_started
-      alfresco:
-        condition: service_healthy
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5006,server=y,suspend=n
-      SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
-      SPRING_ACTIVEMQ_BROKER-URL: nio://activemq:61616
-      ALFRESCO_REINDEX_BATCH_SIZE: 100
-      ALFRESCO_REINDEX_CONCURRENT_PROCESSORS: 4
-      ALFRESCO_REINDEX_FROM_ID: 0
-      ALFRESCO_REINDEX_TO_ID: 1000
-      ALFRESCO_REINDEX_JOB_NAME: reindexByIds
-      ELASTICSEARCH_INDEX_NAME: alfresco
-      ALFRESCO_REINDEX_PATHINDEXINGENABLED: true
-      ALFRESCO_ACCEPTEDCONTENTMEDIATYPESCACHE_BASEURL: http://transform-core-aio:8090/transform/config
-    ports:
-      - "5006:5006"
-
-  live-indexing:
-    image: quay.io/alfresco/alfresco-elasticsearch-live-indexing:${SEARCH_ENTERPRISE_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    depends_on:
-      reindexing:
-        condition: service_completed_successfully
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5005,server=y,suspend=n
-      ELASTICSEARCH_INDEXNAME: alfresco
-      SPRING_ELASTICSEARCH_REST_URIS: http://elasticsearch:9200
-      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      ALFRESCO_SHAREDFILESTORE_BASEURL: http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file/
-      ALFRESCO_ACCEPTEDCONTENTMEDIATYPESCACHE_BASEURL: http://transform-core-aio:8090/transform/config
-    ports:
-      - "5005:5005"
-
-  live-ingester:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:${HXINSIGHT_CONNECTOR_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    depends_on:
-      activemq:
-        condition: service_started
-      transform-router:
-        condition: service_healthy
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
-      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
-      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      HYLAND-EXPERIENCE_INSIGHT_INGESTION_BASE-URL: http://hxinsight-mock:8080
-      ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT: http://alfresco:8080/alfresco/api/discovery
-      ALFRESCO_TRANSFORM_SHARED-FILE-STORE_BASE-URL: http://shared-file-store:8099
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-pass
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://localhost:8002/token
-      AUTH_PROVIDERS_ALFRESCO_CLIENT-ID: alfresco
-      AUTH_PROVIDERS_ALFRESCO_TYPE: oauth2
-      AUTH_PROVIDERS_ALFRESCO_GRANT-TYPE: password
-      AUTH_PROVIDERS_ALFRESCO_TOKEN-URI: http://${HOST_IP}:8999/auth/realms/alfresco/protocol/openid-connect/token
-      AUTH_PROVIDERS_ALFRESCO_USERNAME:
-      AUTH_PROVIDERS_ALFRESCO_PASSWORD:
-    ports:
-      - "5007:5007"
-
-  bulk-ingester:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-bulk-ingester:${HXINSIGHT_CONNECTOR_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    depends_on:
-      live-indexing:
-        condition: service_started
-      alfresco:
-        condition: service_healthy
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5008,server=y,suspend=n
-      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
-      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
-      SPRING_DATASOURCE_USERNAME: alfresco
-      SPRING_DATASOURCE_PASSWORD: alfresco
-    ports:
-      - "5008:5008"
-
-  prediction-applier:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-prediction-applier:${HXINSIGHT_CONNECTOR_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-    depends_on:
-      alfresco:
-        condition: service_healthy
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
-      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
-      SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID: dummy-client-id
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-SECRET: dummy-client-pass
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_ENVIRONMENT-KEY: hxai-env-key
-      AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI: http://localhost:8002/token
-      AUTH_PROVIDERS_ALFRESCO_CLIENT-ID: alfresco
-      AUTH_PROVIDERS_ALFRESCO_TYPE: oauth2
-      AUTH_PROVIDERS_ALFRESCO_GRANT-TYPE: password
-      AUTH_PROVIDERS_ALFRESCO_TOKEN-URI: http://${HOST_IP}:8999/auth/realms/alfresco/protocol/openid-connect/token
-      AUTH_PROVIDERS_ALFRESCO_USERNAME:
-      AUTH_PROVIDERS_ALFRESCO_PASSWORD:
-    ports:
-      - "5009:5009"
-
-  hxinsight-mock:
-    image: wiremock/wiremock:${WIREMOCK_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-    command: "--global-response-templating --permitted-system-keys=AWS_.* --verbose"
-    environment:
-      AWS_HOST: aws-mock
-      AWS_PORT: 4566
-      AWS_S3_BUCKET_NAME: hxinsight-bucket-mock
-    volumes:
-      - ./wiremock/hxinsight:/home/wiremock
-
-  aws-mock:
-    image: localstack/localstack:${LOCALSTACK_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 256m
-    environment:
-      SERVICES: s3
-      BUCKET_NAME: hxinsight-bucket-mock
-    ports:
-      - "4566:4566"
-    volumes:
-      - "./init-aws.sh:/etc/localstack/init/ready.d/init-aws.sh"
-      - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "5433:5433"
 
 volumes:
   shared-file-store-volume:
