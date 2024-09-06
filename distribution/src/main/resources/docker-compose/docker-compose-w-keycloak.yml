@@ -155,12 +155,11 @@ services:
       service: live-ingester
     environment:
       AUTH_PROVIDERS_ALFRESCO_TYPE: oauth2
-      AUTH_PROVIDERS_ALFRESCO_CLIENTID: alfresco
-      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET:
-      AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: password
+      AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: client_credentials
       AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
-      AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
-      AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
+      AUTH_PROVIDERS_ALFRESCO_CLIENTID: hxi-connector
+      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET: xNnSJ6sJzQE7iHChE2pn35kHOhcACt6h
+      AUTH_PROVIDERS_ALFRESCO_SCOPE: openid email profile
 
   bulk-ingester:
     extends:
@@ -173,12 +172,12 @@ services:
       service: prediction-applier
     environment:
       AUTH_PROVIDERS_ALFRESCO_TYPE: oauth2
-      AUTH_PROVIDERS_ALFRESCO_CLIENTID: alfresco
-      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET:
-      AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: password
+      AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: client_credentials
       AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
-      AUTH_PROVIDERS_ALFRESCO_USERNAME: admin
-      AUTH_PROVIDERS_ALFRESCO_PASSWORD: admin
+      AUTH_PROVIDERS_ALFRESCO_CLIENTID: hxi-connector
+      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET: xNnSJ6sJzQE7iHChE2pn35kHOhcACt6h
+      AUTH_PROVIDERS_ALFRESCO_SCOPE: openid email profile
+      AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI: http://hxinsight-mock:8080/token
 
   hxinsight-mock:
     extends:
