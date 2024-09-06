@@ -54,7 +54,7 @@ public class AwsS3Client
         S3Bucket s3Bucket = xmlMapper.readValue(given()
                 .contentType("application/xml")
                 .when()
-                .get("%s/%s/".formatted(baseUrl, bucketName))
+                .get("%s/%s".formatted(baseUrl, bucketName))
                 .then()
                 .extract().response()
                 .asString(), S3Bucket.class);

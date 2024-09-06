@@ -142,8 +142,8 @@ services:
           memory: 512m
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
-      scheduler.content.age.millis: 86400000
-      scheduler.cleanup.interval: 86400000
+      SCHEDULER_CONTENT_AGE_MILLIS: 86400000
+      SCHEDULER_CLEANUP_INTERVAL: 86400000
     ports:
       - "8099:8099"
     volumes:
@@ -202,7 +202,7 @@ services:
       - control-center
       - share
     environment:
-      DISABLE_SYNCSERVICE: "true"
+      DISABLE_SYNCSERVICE: true
     ports:
       - "8080:8080"
     links:
@@ -218,8 +218,8 @@ services:
         limits:
           memory: 1700m
     environment:
-      - xpack.security.enabled=false
-      - discovery.type=single-node
+      XPACK_SECURITY_ENABLED: false
+      DISCOVERY_TYPE: single-node
     ulimits:
       memlock:
         soft: -1
