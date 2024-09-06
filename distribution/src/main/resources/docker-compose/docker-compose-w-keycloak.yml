@@ -177,7 +177,6 @@ services:
       AUTH_PROVIDERS_ALFRESCO_CLIENTID: hxi-connector
       AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET: xNnSJ6sJzQE7iHChE2pn35kHOhcACt6h
       AUTH_PROVIDERS_ALFRESCO_SCOPE: openid email profile
-      AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI: http://hxinsight-mock:8080/token
 
   hxinsight-mock:
     extends:
