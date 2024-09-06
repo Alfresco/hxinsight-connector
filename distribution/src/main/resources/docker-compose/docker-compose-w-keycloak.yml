@@ -191,7 +191,7 @@ services:
       service: aws-mock
 
   auth-provider:
-    image: quay.io/keycloak/keycloak:${KEYCLOAK_TAG}
+    image: keycloak/keycloak:${KEYCLOAK_TAG}
     deploy:
       resources:
         limits:
