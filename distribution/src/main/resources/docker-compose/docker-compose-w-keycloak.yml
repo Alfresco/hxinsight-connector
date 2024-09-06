@@ -158,7 +158,7 @@ services:
       AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: client_credentials
       AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
       AUTH_PROVIDERS_ALFRESCO_CLIENTID: hxi-connector
-      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET: xNnSJ6sJzQE7iHChE2pn35kHOhcACt6h
+      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET: secret
       AUTH_PROVIDERS_ALFRESCO_SCOPE: openid email profile
 
   bulk-ingester:
@@ -175,7 +175,7 @@ services:
       AUTH_PROVIDERS_ALFRESCO_GRANTTYPE: client_credentials
       AUTH_PROVIDERS_ALFRESCO_TOKENURI: http://auth-provider:8080/auth/realms/alfresco/protocol/openid-connect/token
       AUTH_PROVIDERS_ALFRESCO_CLIENTID: hxi-connector
-      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET: xNnSJ6sJzQE7iHChE2pn35kHOhcACt6h
+      AUTH_PROVIDERS_ALFRESCO_CLIENTSECRET: secret
       AUTH_PROVIDERS_ALFRESCO_SCOPE: openid email profile
 
   hxinsight-mock:
