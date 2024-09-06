@@ -126,8 +126,23 @@ Ask a question for Hx Insights (not ready on Hx Insight side yet).
     ```
 
 
-#### Send feedback on a question
-TBD - not ready on Hx Insight side yet.
+#### Send feedback on an answer
+Send feedback about an answer from Hx Insight (not ready on Hx Insight side yet).
+* Method: `POST`
+* Path: `/questions/{questionId}/feedback`
+* Request:
+    * Content-Type: `application/json`
+    * Body:
+        * `comments` [string]
+        * `feedbackType` [LIKE|DISLIKE]
+    * Sample
+    ```json
+    {
+      "comments": "I need more details about the answer.",
+      "feedbackType": "DISLIKE"
+    }
+    ```
+
 
 
 ### Answers API
@@ -160,6 +175,7 @@ Get answer for a question.
     }
 }
 ```
+
 ### Hx Insights Configuration API
 Get Hx Insights configuration.
 * Method: `GET`
@@ -177,8 +193,9 @@ Get Hx Insights configuration.
     }
 }
 ```
+
 ### Nodes API extension
-Get predicted values for a node.
+Get properties affected by predictions for a given node.
 
 * Path: `nodes/{nodeId}`
 * Method: `GET`
@@ -204,4 +221,93 @@ Get predicted values for a node.
 
 ### Predictions API
 
-TBD
+#### Get Predictions
+Get predicted values for a node.
+
+* Path: `nodes/{nodeId}/predictions`
+* Method: `GET`
+* Response:
+    * Status: 200
+    * Content-Type: `application/json`
+    * Entry object (wrapped with list/pagination information):
+        * `id` [string]
+        * `property` [string]
+        * `predictionValue` [value]
+        * `previousValue` [value]
+        * `confidenceLevel` [number]
+        * `modelId` [string]
+        * `reviewStatus` [UNREVIEWED|CONFIRMED|REJECTED]
+        * `updateType` [AUTOFILL|AUTOCORRECT]
+    * Sample
+```json
+{
+  "list": {
+    "pagination": {
+      "count": 1,
+      "hasMoreItems": false,
+      "totalItems": 1,
+      "skipCount": 0,
+      "maxItems": 100
+    },
+    "entries": [
+      {
+        "entry": {
+          "confidenceLevel": 0.97,
+          "modelId": "56785678-5678-5678-5678-567856785678",
+          "property": "cm:description",
+          "reviewStatus": "UNREVIEWED",
+          "id": "9bc52780-a41f-4c54-8527-80a41f2c54ac",
+          "previousValue": "Budget file for the web site redesign",
+          "predictionValue": "budget",
+          "updateType": "AUTOCORRECT"
+        }
+      }
+    ]
+  }
+}
+```
+
+#### Submit Predictions [Internal]
+Submit predicted values for a node. Note that this is not intended to be used by the UI.
+
+* Path: `nodes/{nodeId}/predictions`
+* Method: `POST`
+* Request:
+    * Content-Type: `application/json`
+    * Body:
+        * `id` [string]
+        * `property` [string]
+        * `predictionValue` [value]
+        * `confidenceLevel` [number]
+        * `modelId` [string]
+        * `reviewStatus` [UNREVIEWED|CONFIRMED|REJECTED]
+        * `updateType` [AUTOFILL|AUTOCORRECT]
+        * `predictionDateTime` [timestamp]
+    * Sample:
+```json
+{
+    "property": "cm:title",
+    "predictionValue": "Hello",
+    "confidenceLevel": 0.95,
+    "updateType": "AUTOCORRECT",
+    "modelId": "56785678-5678-5678-5678-567856785678",
+    "predictionDateTime":"2024-09-06T11:45:00.000+0000",
+    "reviewStatus": "UNREVIEWED"
+}
+```
+
+#### Review Prediction
+Review a predicted value for a node (not ready for use yet - see ACS-7949).
+
+* Path: `nodes/{nodeId}/predictions/{predictionId}/review`
+* Method: `POST`
+* Request:
+    * Content-Type: `application/json`
+    * Body:
+        * `reviewStatus` [UNREVIEWED|CONFIRMED|REJECTED]
+* Sample:
+```json
+{
+    "reviewStatus": "CONFIRMED"
+}
+```
