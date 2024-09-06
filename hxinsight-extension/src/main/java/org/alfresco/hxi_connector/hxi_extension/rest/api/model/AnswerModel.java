@@ -49,7 +49,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 @JsonInclude(NON_NULL)
 public class AnswerModel
 {
-    private static final String RESPONSE_STATUS_COMPLETE = "COMPLETE";
+    private static final String RESPONSE_STATUS_COMPLETE = "complete";
 
     private String answer;
     private String question;
@@ -66,7 +66,7 @@ public class AnswerModel
         return new AnswerModel(
                 answer.getAnswer(),
                 answer.getQuestion(),
-                RESPONSE_STATUS_COMPLETE.equals(answer.getResponseCompleteness()),
+                RESPONSE_STATUS_COMPLETE.equalsIgnoreCase(answer.getResponseCompleteness()),
                 references);
     }
 
