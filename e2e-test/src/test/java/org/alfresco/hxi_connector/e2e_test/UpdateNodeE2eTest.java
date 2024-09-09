@@ -300,17 +300,17 @@ public class UpdateNodeE2eTest
         return DockerContainers.createPredictionApplierContainerWithin(network)
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL",
                         "nio://%s:61616".formatted(activemq.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("ALFRESCO_REPOSITORY_BASE-URL",
+                .withEnv("ALFRESCO_REPOSITORY_BASEURL",
                         "http://%s:8080/alfresco".formatted(repository.getNetworkAliases().stream().findFirst().get()))
                 .withEnv("ALFRESCO_REPOSITORY_RETRY_ATTEMPTS", "1")
-                .withEnv("ALFRESCO_REPOSITORY_RETRY_INITIAL-DELAY", "0")
-                .withEnv("AUTH_PROVIDERS_ALFRESCO_CLIENT-ID", "dummy-client-id")
+                .withEnv("ALFRESCO_REPOSITORY_RETRY_INITIALDELAY", "0")
+                .withEnv("AUTH_PROVIDERS_ALFRESCO_CLIENTID", "dummy-client-id")
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_USERNAME", "admin")
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin")
-                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
+                .withEnv("AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI",
                         "http://%s:8080/token".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_BASE-URL",
+                .withEnv("HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_BASEURL",
                         "http://%s:8080".formatted(hxInsightMock.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_PREDICTIONS_POLL-PERIOD-MILLIS", "100");
+                .withEnv("HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_POLLPERIODMILLIS", "100");
     }
 }

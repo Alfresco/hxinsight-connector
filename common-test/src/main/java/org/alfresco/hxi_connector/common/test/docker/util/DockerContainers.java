@@ -247,8 +247,8 @@ public class DockerContainers
     {
         GenericContainer<?> sfs = new GenericContainer<>(DockerImageName.parse(SFS_IMAGE).withTag(SFS_TAG))
                 .withEnv("JAVA_OPTS", "-Xms256m -Xmx512m")
-                .withEnv("scheduler.content.age.millis", "86400000")
-                .withEnv("scheduler.cleanup.interval", "86400000")
+                .withEnv("SCHEDULER_CONTENT_AGE_MILLIS", "86400000")
+                .withEnv("SCHEDULER_CLEANUP_INTERVAL", "86400000")
                 .withExposedPorts(8099)
                 .withStartupTimeout(Duration.ofMinutes(2));
 
@@ -284,7 +284,7 @@ public class DockerContainers
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n")
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
-                .withEnv("ALFRESCO_TRANSFORM_SHARED-FILE-STORE_BASE-URL", "http://shared-file-store:8099")
+                .withEnv("ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL", "http://shared-file-store:8099")
                 .withExposedPorts(5007)
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
@@ -298,11 +298,11 @@ public class DockerContainers
     public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, Network network)
     {
         return createLiveIngesterContainerWithin(network)
-                .withEnv("HYLAND-EXPERIENCE_INSIGHT_INGESTION_BASE-URL",
+                .withEnv("HYLANDEXPERIENCE_INSIGHT_INGESTION_BASEURL",
                         "http://%s:8080".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_TOKEN-URI",
+                .withEnv("AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI",
                         "http://%s:8080/token".formatted(hxInsightMockContainer.getNetworkAliases().stream().findFirst().get()))
-                .withEnv("AUTH_PROVIDERS_HYLAND-EXPERIENCE_CLIENT-ID", "dummy-client-key")
+                .withEnv("AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID", "dummy-client-key")
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_USERNAME", "admin")
                 .withEnv("AUTH_PROVIDERS_ALFRESCO_PASSWORD", "admin");
     }
@@ -310,7 +310,7 @@ public class DockerContainers
     public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, AlfrescoRepositoryContainer acsContainer, Network network)
     {
         return createLiveIngesterContainerForWireMock(hxInsightMockContainer, network)
-                .withEnv("ALFRESCO_REPOSITORY_DISCOVERY-ENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(acsContainer.getNetworkAliases().stream().findFirst().get()));
+                .withEnv("ALFRESCO_REPOSITORY_DISCOVERYENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(acsContainer.getNetworkAliases().stream().findFirst().get()));
     }
 
     public static GenericContainer<?> createPredictionApplierContainerWithin(Network network)

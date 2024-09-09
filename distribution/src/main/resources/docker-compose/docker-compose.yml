@@ -98,9 +98,9 @@ services:
         condition: service_healthy
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
-      ACTIVEMQ_URL: "nio://activemq:61616"
-      CORE_AIO_URL: "http://transform-core-aio:8090"
-      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+      ACTIVEMQ_URL: nio://activemq:61616
+      CORE_AIO_URL: http://transform-core-aio:8090
+      FILE_STORE_URL: http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
       LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER: TRACE
       LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_ROUTER_MESSAGING: INFO
     ports:
@@ -121,8 +121,8 @@ services:
           memory: 3000m
     environment:
       JAVA_OPTS: " -Xms256m -Xmx3000m"
-      ACTIVEMQ_URL: "nio://activemq:61616"
-      FILE_STORE_URL: "http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file"
+      ACTIVEMQ_URL: nio://activemq:61616
+      FILE_STORE_URL: http://shared-file-store:8099/alfresco/api/-default-/private/sfs/versions/1/file
       LOGGING_LEVEL_ORG_ALFRESCO_TRANSFORM_BASE_TRANSFORM: TRACE
     ports:
       - "8090:8090"
@@ -142,8 +142,8 @@ services:
           memory: 512m
     environment:
       JAVA_OPTS: " -Xms256m -Xmx512m"
-      scheduler.content.age.millis: 86400000
-      scheduler.cleanup.interval: 86400000
+      SCHEDULER_CONTENT_AGE_MILLIS: 86400000
+      SCHEDULER_CLEANUP_INTERVAL: 86400000
     ports:
       - "8099:8099"
     volumes:
@@ -156,8 +156,8 @@ services:
         limits:
           memory: 1024m
     environment:
-      REPO_HOST: "alfresco"
-      REPO_PORT: "8080"
+      REPO_HOST: alfresco
+      REPO_PORT: 8080
       JAVA_OPTS: "
         -Dalfresco.host=localhost
         -Dalfresco.port=8080
@@ -174,9 +174,10 @@ services:
           memory: 128m
     environment:
       BASE_PATH: ./
-      APP_BASE_SHARE_URL: "http://localhost:8080/workspace/#/preview/s"
-      APP_CONFIG_PROVIDER: "ECM"
-      APP_CONFIG_AUTH_TYPE: "BASIC"
+      APP_BASE_SHARE_URL: http://localhost:8080/workspace/#/preview/s
+      APP_CONFIG_PLUGIN_PROCESS_SERVICE: false
+      APP_CONFIG_PROVIDER: ECM
+      APP_CONFIG_AUTH_TYPE: BASIC
 
   control-center:
     image: quay.io/alfresco/alfresco-control-center:${CONTROL_CENTER_TAG}
@@ -186,8 +187,9 @@ services:
           memory: 128m
     environment:
       BASE_PATH: ./
-      APP_CONFIG_PROVIDER: "ECM"
-      APP_CONFIG_AUTH_TYPE: "BASIC"
+      APP_CONFIG_PLUGIN_PROCESS_SERVICE: false
+      APP_CONFIG_PROVIDER: ECM
+      APP_CONFIG_AUTH_TYPE: BASIC
 
   # HTTP proxy to provide HTTP Default port access to services
   proxy:
@@ -202,7 +204,7 @@ services:
       - control-center
       - share
     environment:
-      DISABLE_SYNCSERVICE: "true"
+      DISABLE_SYNCSERVICE: true
     ports:
       - "8080:8080"
     links:

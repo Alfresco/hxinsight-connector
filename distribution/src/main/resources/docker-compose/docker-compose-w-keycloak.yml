@@ -86,31 +86,31 @@ services:
       file: docker-compose.yml
       service: digital-workspace
     environment:
-      APP_CONFIG_AUTH_TYPE: "OAUTH"
-      APP_CONFIG_OAUTH2_HOST: "http://localhost:8080/auth/realms/alfresco"
-      APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
-      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
-      APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
-      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace"
-      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/logout"
-      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
-      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
-      API_URL: "http://localhost:8080"
+      APP_CONFIG_AUTH_TYPE: OAUTH
+      APP_CONFIG_OAUTH2_HOST: http://localhost:8080/auth/realms/alfresco
+      APP_CONFIG_OAUTH2_CLIENTID: alfresco
+      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: true
+      APP_CONFIG_OAUTH2_SILENT_LOGIN: true
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: /workspace
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: /workspace
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: http://localhost:8080/workspace/assets/silent-refresh.html
+      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: false
+      API_URL: http://localhost:8080
 
   control-center:
     extends:
       file: docker-compose.yml
       service: control-center
     environment:
-      APP_CONFIG_AUTH_TYPE: "OAUTH"
-      APP_CONFIG_OAUTH2_HOST: "http://localhost:8080/auth/realms/alfresco"
-      APP_CONFIG_OAUTH2_CLIENTID: "alfresco"
-      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: "\"true\""
-      APP_CONFIG_OAUTH2_SILENT_LOGIN: "\"true\""
-      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: "/workspace"
-      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: "/workspace/logout"
-      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: "http://localhost:8080/workspace/assets/silent-refresh.html"
-      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: "\"false\""
+      APP_CONFIG_AUTH_TYPE: OAUTH
+      APP_CONFIG_OAUTH2_HOST: http://localhost:8080/auth/realms/alfresco
+      APP_CONFIG_OAUTH2_CLIENTID: alfresco
+      APP_CONFIG_OAUTH2_IMPLICIT_FLOW: true
+      APP_CONFIG_OAUTH2_SILENT_LOGIN: true
+      APP_CONFIG_OAUTH2_REDIRECT_LOGIN: /workspace
+      APP_CONFIG_OAUTH2_REDIRECT_LOGOUT: /workspace
+      APP_CONFIG_OAUTH2_REDIRECT_SILENT_IFRAME_URI: http://localhost:8080/workspace/assets/silent-refresh.html
+      APP_CONFIG_OAUTH2_REQUIRE_HTTPS: false
 
   proxy:
     image: nginx:stable-alpine
@@ -190,7 +190,7 @@ services:
       service: aws-mock
 
   auth-provider:
-    image: quay.io/keycloak/keycloak:${KEYCLOAK_TAG}
+    image: keycloak/keycloak:${KEYCLOAK_TAG}
     deploy:
       resources:
         limits:
