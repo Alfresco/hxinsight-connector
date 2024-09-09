@@ -47,6 +47,7 @@ services:
         -Didentity-service.resource=alfresco
         -Dhxi.discovery.base-url=http://hxinsight-mock:8080
         -Dhxi.auth.providers.hyland-experience.token-uri=http://hxinsight-mock:8080/token
+        -Dserviceaccount.role.service-account-hxi-connector=ROLE_ADMIN_SERVICE_ACCOUNT
         -Xms1500m -Xmx1500m
         "
 
