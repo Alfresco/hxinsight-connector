@@ -61,13 +61,13 @@ public class AcsHealthProbe
 
     void checkAcsAlive() throws InterruptedException
     {
-        log.debug("Sending ACS Health Probe request to: {}", acsHealthEndpoint);
         long timeout = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(retryTimeoutSeconds);
         long currentTime;
         do
         {
             try
             {
+                log.debug("Sending ACS Health Probe request to: {}", acsHealthEndpoint);
                 HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create(acsHealthEndpoint)).build(), HttpResponse.BodyHandlers.ofString());
                 if (isNotErrorCode(response.statusCode()))
                 {
