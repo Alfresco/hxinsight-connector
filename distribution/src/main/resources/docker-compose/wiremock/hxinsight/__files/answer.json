@@ -2,7 +2,7 @@
   "agentId": "61254576-62a3-453f-8cd8-19e2f6554f29",
   "agentVersion": "1",
   "question": "This is the question",
-  "responseCompleteness": "COMPLETE",
+  "responseCompleteness": "Complete",
   "answer": "This is the answer to the question",
   "references": [
     {
