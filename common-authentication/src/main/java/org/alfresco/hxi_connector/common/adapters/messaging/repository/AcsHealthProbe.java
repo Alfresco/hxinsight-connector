@@ -67,11 +67,11 @@ public class AcsHealthProbe
         {
             try
             {
-                log.debug("Sending ACS Health Probe request to: {}", acsHealthEndpoint);
+                log.info("Sending ACS Health Probe request to: {}", acsHealthEndpoint);
                 HttpResponse<String> response = client.send(HttpRequest.newBuilder().uri(URI.create(acsHealthEndpoint)).build(), HttpResponse.BodyHandlers.ofString());
                 if (isNotErrorCode(response.statusCode()))
                 {
-                    log.debug("ACS is available.");
+                    log.info("ACS is available at {}.", acsHealthEndpoint);
                     return;
                 }
                 else
@@ -89,13 +89,13 @@ public class AcsHealthProbe
             }
         } while (timeout >= currentTime);
 
-        log.debug("ACS health probe failed after {} seconds. ACS is not available.", retryTimeoutSeconds);
-        throw new EndpointServerErrorException("ACS is not available.");
+        log.error("ACS health probe failed after {} seconds. ACS is not available at {} endpoint.", retryTimeoutSeconds, acsHealthEndpoint);
+        throw new EndpointServerErrorException("ACS is not available at %s".formatted(acsHealthEndpoint));
     }
 
     private void sleep() throws InterruptedException
     {
-        log.debug("ACS is not available. Retrying in {} seconds", retryIntervalSeconds);
+        log.warn("ACS is not available. Retrying in {} seconds", retryIntervalSeconds);
         TimeUnit.SECONDS.sleep(retryIntervalSeconds);
     }
 
