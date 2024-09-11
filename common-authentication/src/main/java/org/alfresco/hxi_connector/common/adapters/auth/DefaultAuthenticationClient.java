@@ -26,9 +26,7 @@
 package org.alfresco.hxi_connector.common.adapters.auth;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
-import static org.alfresco.hxi_connector.common.util.ErrorUtils.throwExceptionOnUnexpectedStatusCode;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -47,6 +45,7 @@ import org.alfresco.hxi_connector.common.util.ErrorUtils;
 @Slf4j
 public class DefaultAuthenticationClient implements AuthenticationClient
 {
+    public static final String AUTH_ERROR_LOG_MESSAGE = "Authentication :: failed to authenticate with authorization provider: {}. Response body: {}";
     public static final int EXPECTED_STATUS_CODE = 200;
 
     protected final AuthProperties authProperties;
@@ -71,14 +70,17 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
             HttpResponse<String> response = client.send(request, BodyHandlers.ofString());
 
-            throwExceptionOnUnexpectedStatusCode(response.statusCode(), EXPECTED_STATUS_CODE);
+            if (isErrorCode(response.statusCode()))
+            {
+                log.error(AUTH_ERROR_LOG_MESSAGE, providerId, response.body());
+            }
+            ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.statusCode(), EXPECTED_STATUS_CODE);
 
             return objectMapper.readValue(response.body(), AuthenticationResult.class);
         }
-        catch (IOException | InterruptedException e)
+        catch (Exception e)
         {
             Set<Class<? extends Throwable>> retryReasons = authProperties.getRetry().reasons();
-
             throw ErrorUtils.wrapErrorIfNecessary(e, retryReasons);
         }
     }
@@ -94,5 +96,10 @@ public class DefaultAuthenticationClient implements AuthenticationClient
                 .password(authProvider.getPassword())
                 .build()
                 .getTokenRequestBody();
+    }
+
+    private static boolean isErrorCode(int statusCode)
+    {
+        return statusCode >= 400 && statusCode <= 599;
     }
 }

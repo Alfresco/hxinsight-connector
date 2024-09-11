@@ -44,12 +44,21 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
+import static org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient.AUTH_ERROR_LOG_MESSAGE;
+import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLogsListAppender;
 
+import java.util.Objects;
+
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Body;
 import com.github.tomakehurst.wiremock.matching.EqualToPattern;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import org.apache.camel.LoggingLevel;
 import org.apache.hc.core5.http.HttpStatus;
+import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -109,8 +118,9 @@ public abstract class DefaultAuthenticationClientTest
     protected void testAuthorize_serverError_doRetry()
     {
         // given
+        ListAppender<ILoggingEvent> authLogsAppender = createLogsListAppender(DefaultAuthenticationClient.class);
         givenThat(post(AuthUtils.TOKEN_PATH)
-                .willReturn(serverError()));
+                .willReturn(serverError().withResponseBody(new Body(jsonErrorBody("Server error")))));
 
         // when
         Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXP_AUTH_PROVIDER));
@@ -118,14 +128,21 @@ public abstract class DefaultAuthenticationClientTest
         // then
         then(authenticationClient).should(times(RETRY_ATTEMPTS)).authenticate(HXP_AUTH_PROVIDER);
         assertThat(thrown).isInstanceOf(EndpointServerErrorException.class);
+
+        String expectedErrorLog = createExpectedErrorLog("Server error");
+        Condition<String> errorLog = new Condition<>(log -> log.equals(expectedErrorLog), "error log");
+        assertThat(authLogsAppender.list)
+                .extracting(Objects::toString)
+                .areExactly(RETRY_ATTEMPTS, errorLog);
     }
 
     @Test
     protected void testAuthorize_clientError_dontRetry()
     {
         // given
+        ListAppender<ILoggingEvent> authLogsAppender = createLogsListAppender(DefaultAuthenticationClient.class);
         givenThat(post(AuthUtils.TOKEN_PATH)
-                .willReturn(badRequest()));
+                .willReturn(badRequest().withResponseBody(new Body(jsonErrorBody("Bad request")))));
 
         // when
         Throwable thrown = catchThrowable(() -> authenticationClient.authenticate(HXP_AUTH_PROVIDER));
@@ -133,5 +150,21 @@ public abstract class DefaultAuthenticationClientTest
         // then
         then(authenticationClient).should(times(1)).authenticate(HXP_AUTH_PROVIDER);
         assertThat(thrown).isInstanceOf(EndpointClientErrorException.class);
+
+        String expectedErrorLog = createExpectedErrorLog("Bad request");
+        assertThat(authLogsAppender.list)
+                .extracting(Objects::toString)
+                .contains(expectedErrorLog);
+    }
+
+    protected static String jsonErrorBody(String errorMessage)
+    {
+        return "{\"error\": \"" + errorMessage + "\"}";
+    }
+
+    private static String createExpectedErrorLog(String errorMessage)
+    {
+        return "[%s] ".concat(AUTH_ERROR_LOG_MESSAGE.replace("{}", "%s"))
+                .formatted(LoggingLevel.ERROR.name(), HXP_AUTH_PROVIDER, jsonErrorBody(errorMessage));
     }
 }
