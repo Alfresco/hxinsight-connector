@@ -41,6 +41,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClientTest;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
+import org.alfresco.hxi_connector.common.config.properties.Retry;
 
 @SpringBootTest(classes = {LiveIngesterAuthClientIntegrationTest.LiveIngesterAuthClientIntegrationTestConfig.class, LiveIngesterAuthClient.class},
         properties = "logging.level.org.alfresco=DEBUG")
@@ -60,9 +61,7 @@ class LiveIngesterAuthClientIntegrationTest extends DefaultAuthenticationClientT
             AuthProperties authProperties = new AuthProperties();
             AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider(hxAuthMock.getBaseUrl() + AuthUtils.TOKEN_PATH);
             authProperties.setProviders(Map.of(HXP_AUTH_PROVIDER, hXauthProvider));
-            authProperties.setRetry(
-                    new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
-                            Collections.emptySet()));
+            authProperties.setRetry(new Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1, Collections.emptySet()));
             return authProperties;
         }
     }

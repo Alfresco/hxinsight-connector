@@ -62,6 +62,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClientTest;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
+import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.auth.PredictionApplierAuthClient;
 
@@ -112,9 +113,7 @@ class PredictionApplierAuthClientIntegrationTest extends DefaultAuthenticationCl
             AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider(hxAuthMock.getBaseUrl() + AuthUtils.TOKEN_PATH);
             AuthProperties.AuthProvider alfrescoAuthProvider = AuthUtils.createAuthProvider(ACS_MOCK.getBaseUrl() + AuthUtils.TOKEN_PATH);
             authProperties.setProviders(Map.of(HXP_AUTH_PROVIDER, hXauthProvider, ALFRESCO_AUTH_PROVIDER, alfrescoAuthProvider));
-            authProperties.setRetry(
-                    new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
-                            Collections.emptySet()));
+            authProperties.setRetry(new Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1, Collections.emptySet()));
             return authProperties;
         }
     }
