@@ -49,14 +49,14 @@ public class AncestorFilterApplier implements RepoEventFilterApplier
         primaryHierarchy.add(nodeResource.getId());
         final List<String> allowed = filter.path().allow();
         final List<String> denied = filter.path().deny();
-        log.atDebug().log("Applying ancestor filters on repo node id: {}", nodeResource.getId());
+        log.atDebug().log("Filtering :: Applying ancestor filters on repo node id: {}", nodeResource.getId());
         return CollectionFilter.filter(primaryHierarchy, allowed, denied);
     }
 
     @Override
     public boolean isNodeBeforeAllowed(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
     {
-        log.atDebug().log("Applying ancestor filters on previous version of repo node id: {}", nodeResourceBefore.getId());
+        log.atDebug().log("Filtering :: Applying ancestor filters on previous version of repo node id: {}", nodeResourceBefore.getId());
         final List<String> primaryHierarchy = nodeResourceBefore.getPrimaryHierarchy();
         if (primaryHierarchy == null)
         {

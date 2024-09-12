@@ -42,7 +42,7 @@ public final class CollectionFilter
         final boolean allow = isAllowed(fields, allowed);
         final boolean deny = isDenied(fields, denied);
         boolean result = allow && !deny;
-        log.atDebug().log("Node fields collection: {}. Allowed values: {}. Denied values: {}. Is allowed: {}", fields, allowed, denied, result);
+        log.atDebug().log("Filtering :: Node fields collection: {}. Allowed values: {}. Denied values: {}. Is allowed: {}", fields, allowed, denied, result);
         return result;
     }
 

@@ -87,18 +87,18 @@ public class RepoEventFilterHandler
         final boolean eventTypeUpdated = EventUtils.isEventTypeUpdated(repoEvent);
         for (RepoEventFilterApplier filterApplier : repoEventFilterAppliers)
         {
-            log.atDebug().log("Applying filters {} to current repo event of id: {}", filter, repoEvent.getId());
+            log.atDebug().log("Filtering :: Applying filters {} to current repo event of id: {}", filter, repoEvent.getId());
             final boolean allow = filterApplier.isNodeAllowed(repoEvent.getData().getResource(), filter);
             allowCurrentNode = allowCurrentNode && allow;
             if (eventTypeUpdated && allowPreviousNode)
             {
-                log.atDebug().log("Applying filters {} to previous version of repo event of id: {}", filter, repoEvent.getId());
+                log.atDebug().log("Filtering :: Applying filters {} to previous version of repo event of id: {}", filter, repoEvent.getId());
                 allowPreviousNode = filterApplier.isNodeBeforeAllowed(allow, repoEvent.getData().getResourceBefore(), filter);
             }
         }
         final Optional<String> eventTypeOverride = eventTypeUpdated ? resolveEventType(allowPreviousNode, allowCurrentNode) : Optional.empty();
         final boolean overallResult = allowCurrentNode || (allowPreviousNode && eventTypeUpdated);
-        log.atDebug().log("Overall filtering results. Allow: {}, allow current: {}, allow previous: {}", overallResult, allowCurrentNode, allowPreviousNode);
+        log.atDebug().log("Filtering :: Overall filtering results. Allow: {}, allow current: {}, allow previous: {}", overallResult, allowCurrentNode, allowPreviousNode);
         return new FilteringResults(overallResult, eventTypeOverride);
     }
 

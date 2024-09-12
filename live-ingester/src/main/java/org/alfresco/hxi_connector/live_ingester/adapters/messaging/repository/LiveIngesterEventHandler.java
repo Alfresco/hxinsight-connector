@@ -26,6 +26,8 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.ERROR;
+import static org.apache.camel.LoggingLevel.INFO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -51,12 +53,19 @@ public class LiveIngesterEventHandler extends RouteBuilder
     @Override
     public void configure()
     {
+        String eventSource = integrationProperties.alfresco().repository().eventsEndpoint();
+        onException(Exception.class)
+                .log(ERROR, log, "Repository :: Unexpected state while processing event from: %s".formatted(eventSource))
+                .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+                .stop();
+
         SecurityContext securityContext = SecurityContextHolder.getContext();
-        from(integrationProperties.alfresco().repository().eventsEndpoint())
+        from(eventSource)
                 .transacted()
                 .routeId(ROUTE_ID)
-                .log(DEBUG, log, "Received repo event : ${header.JMSMessageID}")
+                .log(DEBUG, log, "Repository :: Received event: ${body}")
                 .setBody(camelEventMapper::repoEventFrom)
+                .log(INFO, log, "Repository :: Received event with ID: ${body.id} and type: ${body.type} for node: ${body.data?.resource?.id}")
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)
                 .end();

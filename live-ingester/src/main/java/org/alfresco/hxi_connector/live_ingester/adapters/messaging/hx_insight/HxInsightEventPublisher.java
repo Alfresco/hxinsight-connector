@@ -26,6 +26,8 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.INFO;
 
 import static org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
@@ -69,19 +71,22 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     public void configure()
     {
         // @formatter:off
+        String ingestionEndpoint = integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .log(LoggingLevel.ERROR, log, "Ingestion :: Unexpected response - Endpoint: %s".formatted(ingestionEndpoint))
+            .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
+            .log(INFO, log, "Ingestion :: Sending event of type: ${body.eventType} for node with ID: ${body.objectId}")
             .marshal()
             .json()
-            .log("Sending event ${body}")
             .setProperty(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
+            .log(DEBUG, log, "Ingestion :: Sending event: ${body}. Headers: ${headers}. Endpoint: " + ingestionEndpoint)
             .process(authService::setHxIAuthorizationHeaders)
-            .toD(integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM)
+            .toD(ingestionEndpoint)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)

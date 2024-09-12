@@ -41,7 +41,7 @@ public final class FieldFilter
         final boolean allow = isAllowed(nodeField, allowed);
         final boolean deny = isDenied(nodeField, denied);
         boolean result = allow && !deny;
-        log.atDebug().log("Node field: {}. Allowed values: {}. Denied values: {}. Is allowed: {}", nodeField, allowed, denied, result);
+        log.atDebug().log("Filtering :: Node field: {}. Allowed values: {}. Denied values: {}. Is allowed: {}", nodeField, allowed, denied, result);
         return result;
     }
 

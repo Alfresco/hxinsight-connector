@@ -43,5 +43,4 @@ public record TransformResponse(
         @NotNull @JsonDeserialize(using = ClientDataDeserializer.class) @JsonSerialize(using = ClientDataSerializer.class) ClientData clientData,
         @Positive int status,
         String errorDetails)
-
 {}

@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.ERROR;
 
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
@@ -36,7 +37,6 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
@@ -67,13 +67,14 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     public void configure()
     {
         // @formatter:off
+        Transform.SharedFileStore sfsProperties = integrationProperties.alfresco().transform().sharedFileStore();
+        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.fileEndpoint());
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .log(ERROR, log, "Transform :: Unexpected response while downloading rendition - Endpoint: %s".formatted(sfsEndpoint))
+            .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
-        Transform.SharedFileStore sfsProperties = integrationProperties.alfresco().transform().sharedFileStore();
-        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.fileEndpoint());
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
             .toD(sfsEndpoint)
