@@ -39,8 +39,8 @@ import org.springframework.context.event.EventListener;
 
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 
-@RequiredArgsConstructor
 @Slf4j
+@RequiredArgsConstructor
 public class AcsHealthProbe
 {
 
@@ -50,16 +50,21 @@ public class AcsHealthProbe
     private final int retryIntervalSeconds;
     private final boolean enabled;
 
+    public static class AcsHealthy
+    {};
+
     @EventListener(ApplicationReadyEvent.class)
-    public void runAfterStart() throws InterruptedException
+    public AcsHealthy runAfterStart() throws InterruptedException
     {
         if (enabled)
         {
-            checkAcsAlive();
+            return checkAcsAlive();
         }
+
+        return new AcsHealthy();
     }
 
-    void checkAcsAlive() throws InterruptedException
+    AcsHealthy checkAcsAlive() throws InterruptedException
     {
         long timeout = System.currentTimeMillis() + TimeUnit.SECONDS.toMillis(retryTimeoutSeconds);
         long currentTime;
@@ -72,7 +77,7 @@ public class AcsHealthProbe
                 if (isNotErrorCode(response.statusCode()))
                 {
                     log.info("ACS is available at {}.", acsHealthEndpoint);
-                    return;
+                    return new AcsHealthy();
                 }
                 else
                 {
