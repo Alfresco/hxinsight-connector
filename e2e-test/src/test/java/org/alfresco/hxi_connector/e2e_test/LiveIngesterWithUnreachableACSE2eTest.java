@@ -55,7 +55,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
+@SuppressWarnings({"PMD.FieldNamingConventions"})
 public class LiveIngesterWithUnreachableACSE2eTest
 {
     private static final String PARENT_ID = "-my-";

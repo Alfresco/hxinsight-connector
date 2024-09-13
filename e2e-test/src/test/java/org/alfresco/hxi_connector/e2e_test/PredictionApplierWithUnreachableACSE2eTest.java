@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
+@SuppressWarnings({"PMD.FieldNamingConventions"})
 public class PredictionApplierWithUnreachableACSE2eTest
 {
 
