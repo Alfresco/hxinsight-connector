@@ -45,7 +45,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -67,17 +66,16 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     public void configure()
     {
         // @formatter:off
-        Transform.SharedFileStore sfsProperties = integrationProperties.alfresco().transform().sharedFileStore();
-        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.fileEndpoint());
+        String fileEndpoint = ENDPOINT_PATTERN.formatted(integrationProperties.alfresco().transform().sharedFileStore().fileEndpoint());
         onException(Exception.class)
-            .log(ERROR, log, "Transform :: Unexpected response while downloading rendition - Endpoint: %s".formatted(sfsEndpoint))
+            .log(ERROR, log, "Transform :: Unexpected response while downloading rendition - Endpoint: %s".formatted(fileEndpoint))
             .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
-            .toD(sfsEndpoint)
+            .toD(fileEndpoint)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::convertBodyToFile)

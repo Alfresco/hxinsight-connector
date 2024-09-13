@@ -60,7 +60,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
     @Override
     public void configure()
     {
-        String transformEndpoint = integrationProperties.alfresco().transform().response().endpoint();
+        String transformEndpoint = integrationProperties.alfresco().transform().request().endpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Transform :: Unexpected response while requesting for transformation - Endpoint: %s".formatted(transformEndpoint))
                 .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
@@ -80,6 +80,8 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         ATSTransformRequest atsTransformRequest = toTransformRequest(transformRequest, 0);
         camelContext.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
+        log.info("Transform :: Successfully sent transform request for node: {} and target type: {}",
+                transformRequest.nodeRef(), transformRequest.targetMimeType());
     }
 
     public void requestTransformRetry(TransformRequest transformRequest, int attempt)
