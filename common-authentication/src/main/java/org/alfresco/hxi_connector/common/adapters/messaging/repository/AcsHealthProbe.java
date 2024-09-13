@@ -51,7 +51,7 @@ public class AcsHealthProbe
     private final boolean enabled;
 
     public static class AcsHealthy
-    {};
+    {}
 
     @EventListener(ApplicationReadyEvent.class)
     public AcsHealthy runAfterStart() throws InterruptedException

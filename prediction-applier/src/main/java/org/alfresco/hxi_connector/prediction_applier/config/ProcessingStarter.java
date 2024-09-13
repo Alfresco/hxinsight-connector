@@ -41,6 +41,7 @@ public class ProcessingStarter
     private final CamelContext camelContext;
 
     @EventListener(AcsHealthy.class)
+    @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void startProcessing() throws Exception
     {
         log.info("Starting camel routes");
