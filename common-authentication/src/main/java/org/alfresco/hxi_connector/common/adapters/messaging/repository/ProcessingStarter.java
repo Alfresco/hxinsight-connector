@@ -23,18 +23,16 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.config.setup;
+package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe.AcsHealthy;
 
 @Slf4j
-@Component
 @RequiredArgsConstructor
 public class ProcessingStarter
 {
