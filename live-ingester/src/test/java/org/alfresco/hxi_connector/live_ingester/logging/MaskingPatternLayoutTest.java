@@ -54,7 +54,7 @@ class MaskingPatternLayoutTest
     @BeforeEach
     void setUp()
     {
-        given(loggingEventMock.getTimeStamp()).willReturn(1629857730123L);
+        given(loggingEventMock.getTimeStamp()).willReturn(1_629_857_730_123L);
         given(loggingEventMock.getThreadName()).willReturn("thread1");
         given(loggingEventMock.getLevel()).willReturn(Level.INFO);
         given(loggingEventMock.getLoggerName()).willReturn(MaskingPatternLayoutTest.class.getName());
