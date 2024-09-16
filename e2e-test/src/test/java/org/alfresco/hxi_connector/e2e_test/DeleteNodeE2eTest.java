@@ -129,6 +129,8 @@ public class DeleteNodeE2eTest
     @SneakyThrows
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, network);
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, network)
+                .withEnv("ALFRESCO_REPOSITORY_DISCOVERY_ENDPOINT", "")
+                .withEnv("ALFRESCO_REPOSITORY_VERSION_OVERRIDE", "23.3.0");
     }
 }
