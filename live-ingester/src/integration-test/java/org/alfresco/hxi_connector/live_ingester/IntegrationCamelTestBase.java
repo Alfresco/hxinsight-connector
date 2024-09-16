@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester;
 
+import lombok.SneakyThrows;
 import org.apache.camel.CamelContext;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,8 @@ public class IntegrationCamelTestBase
     private CamelContext camelContext;
 
     @BeforeEach
-    public void setUp() throws Exception
+    @SneakyThrows
+    public void setUp()
     {
         camelContext.getRouteController().startAllRoutes();
     }
