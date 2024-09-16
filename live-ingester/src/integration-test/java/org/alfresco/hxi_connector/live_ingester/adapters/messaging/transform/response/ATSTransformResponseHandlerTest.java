@@ -37,9 +37,7 @@ import java.util.Set;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.SneakyThrows;
-import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -90,15 +88,6 @@ class ATSTransformResponseHandlerTest
 
     @Autowired
     private ProducerTemplate producerTemplate;
-
-    @Autowired
-    private CamelContext camelContext;
-
-    @BeforeEach
-    void setUp() throws Exception
-    {
-        camelContext.getRouteController().startAllRoutes();
-    }
 
     @Test
     void shouldSkipProcessingIfTransformationFailedWith400Error()
