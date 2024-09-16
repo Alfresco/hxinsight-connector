@@ -285,6 +285,7 @@ public class DockerContainers
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
                 .withEnv("ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL", "http://shared-file-store:8099")
+                .withEnv("ALFRESCO_REPOSITORY_HEALTH_PROBE_INTERVAL_SECONDS", "1")
                 .withExposedPorts(5007)
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
