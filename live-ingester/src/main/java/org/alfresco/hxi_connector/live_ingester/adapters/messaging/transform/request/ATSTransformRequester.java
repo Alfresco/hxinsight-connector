@@ -63,7 +63,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         String transformEndpoint = integrationProperties.alfresco().transform().request().endpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Transform :: Unexpected response while requesting for transformation - Endpoint: %s".formatted(transformEndpoint))
-                .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+                .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
                 .stop();
 
         from(LOCAL_ENDPOINT)

@@ -76,7 +76,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         String uploadEndpoint = "${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false";
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while uploading content - Endpoint: %s".formatted(uploadEndpoint))
-            .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+            .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
             .process(this::wrapErrorIfNecessary)
             .stop();
 

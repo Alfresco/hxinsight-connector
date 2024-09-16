@@ -69,7 +69,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
         String fileEndpoint = ENDPOINT_PATTERN.formatted(integrationProperties.alfresco().transform().sharedFileStore().fileEndpoint());
         onException(Exception.class)
             .log(ERROR, log, "Transform :: Unexpected response while downloading rendition - Endpoint: %s".formatted(fileEndpoint))
-            .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+            .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
             .process(this::wrapErrorIfNecessary)
             .stop();
 

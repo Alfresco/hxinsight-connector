@@ -74,7 +74,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         String ingestionEndpoint = integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
             .log(LoggingLevel.ERROR, log, "Ingestion :: Unexpected response - Endpoint: %s".formatted(ingestionEndpoint))
-            .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+            .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
             .process(this::wrapErrorIfNecessary)
             .stop();
 

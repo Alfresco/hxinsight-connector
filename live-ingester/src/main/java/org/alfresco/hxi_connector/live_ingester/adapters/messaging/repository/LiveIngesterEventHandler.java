@@ -56,7 +56,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
         String eventSource = integrationProperties.alfresco().repository().eventsEndpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Repository :: Unexpected state while processing event from: %s".formatted(eventSource))
-                .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+                .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
                 .stop();
 
         SecurityContext securityContext = SecurityContextHolder.getContext();

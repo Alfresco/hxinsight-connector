@@ -78,7 +78,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         String storageRequestEndpoint = integrationProperties.hylandExperience().storage().location().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while requesting pre-signed URL - Endpoint: %s".formatted(storageRequestEndpoint))
-            .to("log:%s?level=ERROR&multiline=true&logMask=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+            .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
