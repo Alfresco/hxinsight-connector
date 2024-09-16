@@ -115,7 +115,7 @@ class PreSignedUrlRequesterIntegrationTest
     private static final String CONTENT_ID = "CONTENT ID";
     private static final String ACS_VERSION = "7.4.0";
     private static final String CAMEL_ENDPOINT_PATTERN = "%s%s?httpMethod=POST&throwExceptionOnFailure=false";
-    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"id\": \"CONTENT ID\"}]";
+    private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"id\": \"CONTENT ID\", \"Authorization\": \"lol\", \"password\": \"topSecret\"}]";
     private static final int HX_INSIGHT_RESPONSE_CODE = 200;
     private static final int RETRY_ATTEMPTS = 3;
     private static final int RETRY_DELAY_MS = 0;

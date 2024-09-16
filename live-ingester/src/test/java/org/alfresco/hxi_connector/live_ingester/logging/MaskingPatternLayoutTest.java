@@ -56,7 +56,7 @@ class MaskingPatternLayoutTest
     {
         given(loggingEventMock.getTimeStamp()).willReturn(1629857730123L);
         given(loggingEventMock.getThreadName()).willReturn("thread1");
-        given(loggingEventMock.getLevel()).willReturn(Level.DEBUG);
+        given(loggingEventMock.getLevel()).willReturn(Level.INFO);
         given(loggingEventMock.getLoggerName()).willReturn(MaskingPatternLayoutTest.class.getName());
     }
 
@@ -94,7 +94,7 @@ class MaskingPatternLayoutTest
         String actualLogMessage = maskingPatternLayout.doLayout(loggingEventMock);
 
         // then
-        String expectedLogMessage = "2021-08-25 04:15:30.123 [thread1] DEBUG o.a.h.l.l.MaskingPatternLayoutTest - ".concat(expectedLogEntry);
+        String expectedLogMessage = "2021-08-25 04:15:30.123 [thread1] INFO o.a.h.l.l.MaskingPatternLayoutTest - ".concat(expectedLogEntry);
         assertThat(actualLogMessage.strip()).isEqualTo(expectedLogMessage.strip());
     }
 

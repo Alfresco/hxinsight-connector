@@ -40,15 +40,15 @@ public class MaskingPatternLayout extends PatternLayout
     private static final String MASK = "*****";
     private static final String MASK_FIELD_REGEX_DEFAULT = "\\\"?%s\\\"?\\s*[:=]\\s*[^:=]\\\"?(?!\"\\*\\*\\*\\*\\*\"|[*])[^,\\r\\n]*\\\"?[^,}\\]\\s]";
 
-    private final List<String> maskedFields = new ArrayList<>();
+    private final List<String> sensitiveFields = new ArrayList<>();
     private Pattern multilinePattern;
 
-    public void addMaskField(String maskField)
+    public void addMaskField(String sensitiveFieldName)
     {
-        maskedFields.add(maskField);
+        sensitiveFields.add(sensitiveFieldName);
         multilinePattern = Pattern.compile(
                 // build pattern using logical OR
-                String.join("|", maskedFields.stream().map(MASK_FIELD_REGEX_DEFAULT::formatted).toArray(String[]::new)),
+                String.join("|", sensitiveFields.stream().map(MASK_FIELD_REGEX_DEFAULT::formatted).toArray(String[]::new)),
                 Pattern.MULTILINE);
     }
 
