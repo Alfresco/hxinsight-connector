@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
+import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
@@ -122,15 +123,13 @@ public class DeleteNodeE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        return DockerContainers.createExtendedRepositoryContainerWithin(network)
+        return DockerContainers.createExtendedRepositoryContainerWithin(network, ENTERPRISE)
                 .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
     }
 
     @SneakyThrows
     private static GenericContainer<?> createLiveIngesterContainer()
     {
-        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, network)
-                .withEnv("ALFRESCO_REPOSITORY_DISCOVERY_ENDPOINT", "")
-                .withEnv("ALFRESCO_REPOSITORY_VERSION_OVERRIDE", "23.3.0");
+        return DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, network);
     }
 }
