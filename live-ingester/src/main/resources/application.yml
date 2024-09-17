@@ -6,10 +6,10 @@ management:
   endpoint.health.probes.enabled: true
   health.liveness-state.enabled: true
   health.readiness-state.enabled: true
-
 camel:
   springboot.main-run-controller: true
   dataformat.jackson.autoDiscoverObjectMapper: true
+  main.auto-startup: false
 
 application:
   source-id: alfresco-dummy-source-id-0a63de491876

@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.prediction_applier.config;
 import java.net.http.HttpClient;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.camel.CamelContext;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,6 +38,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.DiscoveryApiRepositoryInformation;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ProcessingStarter;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
@@ -76,5 +78,11 @@ public class AppConfig
     public ApplicationInfoProvider applicationInfoProvider(RepositoryInformation repositoryInformation, Application applicationProperties)
     {
         return new ApplicationInfoProvider(repositoryInformation, applicationProperties);
+    }
+
+    @Bean
+    public ProcessingStarter processingStarter(CamelContext camelContext)
+    {
+        return new ProcessingStarter(camelContext);
     }
 }
