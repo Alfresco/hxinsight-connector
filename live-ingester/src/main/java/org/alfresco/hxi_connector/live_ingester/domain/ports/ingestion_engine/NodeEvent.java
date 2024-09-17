@@ -25,9 +25,15 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
+
 public interface NodeEvent
 {
     String getObjectId();
 
     String getSourceId();
+
+    long getTimestamp();
+
+    EventType getEventType();
 }

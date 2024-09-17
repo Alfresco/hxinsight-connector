@@ -67,42 +67,48 @@ class MaskingPatternLayoutTest
                         "Headers: {Authorization=Basic random-token, Content-Type=application/json}",
                         "Headers: {Authorization=*****, Content-Type=application/json}"),
                 Arguments.of(
-                        "Authorization = Basic random-token, Content-Type= application/json",
-                        "Authorization = *****, Content-Type= application/json"),
+                        "Authorization = Basic random-token, Content-Type = application/json",
+                        "Authorization = *****, Content-Type = application/json"),
+                Arguments.of(
+                        "Authorization = \nBasic random-token, Content-Type = application/json",
+                        "Authorization = \n*****, Content-Type = application/json"),
                 Arguments.of(
                         "\"Authorization\": \"Basic random-token\", \"Content-Type\": \"application/json\"",
                         "\"Authorization\": \"*****\", \"Content-Type\": \"application/json\""),
                 Arguments.of(
-                        "Body: { \"login\": \"nick\", \"password\": \"SecretPass\" }",
-                        "Body: { \"login\": \"nick\", \"password\": \"*****\" }"),
+                        "Authorization :: some message",
+                        "Authorization :: some message"),
                 Arguments.of(
-                        "{ \"login\": \"nick\", \"password\": \"secret\", \"secret\": \"password\", \"name\": \"John\" }",
-                        "{ \"login\": \"nick\", \"password\": \"*****\", \"secret\": \"*****\", \"name\": \"John\" }"),
+                        "Body: { \"login\": \"moniker\", \"password\": \"SecretPass\" }",
+                        "Body: { \"login\": \"moniker\", \"password\": \"*****\" }"),
                 Arguments.of(
-                        "{ \"login\": \"nick\", \"name\": \"John\" }",
-                        "{ \"login\": \"nick\", \"name\": \"John\" }"));
+                        "{ \"login\": \"moniker\", \"password\": \"secret\", \"secret\": \n\"password\", \"name\": \"John\" }",
+                        "{ \"login\": \"moniker\", \"password\": \"*****\", \"secret\": \n\"*****\", \"name\": \"John\" }"),
+                Arguments.of(
+                        "{ \"login\": \"moniker\", \"name\": \"John\" }",
+                        "{ \"login\": \"moniker\", \"name\": \"John\" }"));
     }
 
     @ParameterizedTest
     @MethodSource("loggingInputAndExpectedEntries")
-    void testLogMasking(String logInput, String expectedLogEntry)
+    void testLogMasking(String logInput, String expectedLogMessage)
     {
         // given
         given(loggingEventMock.getFormattedMessage()).willReturn(logInput);
 
         // when
-        String actualLogMessage = maskingPatternLayout.doLayout(loggingEventMock);
+        String actualLogEntry = maskingPatternLayout.doLayout(loggingEventMock);
 
         // then
-        String expectedLogMessage = "2021-08-25 04:15:30.123 [thread1] INFO o.a.h.l.l.MaskingPatternLayoutTest - ".concat(expectedLogEntry);
-        assertThat(actualLogMessage.strip()).isEqualTo(expectedLogMessage.strip());
+        String expectedLogEntry = "2021-08-25 04:15:30.123 [thread1] INFO  o.a.h.l.l.MaskingPatternLayoutTest - %s".formatted(expectedLogMessage);
+        assertThat(actualLogEntry).isEqualTo(expectedLogEntry);
     }
 
     private static MaskingPatternLayout createMaskingPatternLayout(String... sensitiveFields)
     {
         MaskingPatternLayout maskingPatternLayout = new MaskingPatternLayout();
         maskingPatternLayout.setContext((LoggerContext) LoggerFactory.getILoggerFactory());
-        maskingPatternLayout.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n");
+        maskingPatternLayout.setPattern("%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg");
         Stream.of(sensitiveFields).forEach(maskingPatternLayout::addMaskField);
         maskingPatternLayout.start();
         return maskingPatternLayout;

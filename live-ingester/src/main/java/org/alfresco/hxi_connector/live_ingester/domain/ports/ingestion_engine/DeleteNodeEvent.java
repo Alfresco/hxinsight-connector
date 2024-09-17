@@ -29,6 +29,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
+
 @Getter
 @EqualsAndHashCode
 @RequiredArgsConstructor
@@ -37,4 +39,5 @@ public class DeleteNodeEvent implements NodeEvent
     private final String objectId;
     private final String sourceId;
     private final long timestamp;
+    private final EventType eventType = EventType.DELETE;
 }
