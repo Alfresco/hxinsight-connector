@@ -103,8 +103,8 @@ class MaskingPatternLayoutTest
         String actualLogEntry = maskingPatternLayout.doLayout(loggingEventMock);
 
         // then
-        String expectedDate = NOW.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
-        String expectedLogEntry = "%s [thread1] INFO  o.a.h.l.l.MaskingPatternLayoutTest - %s".formatted(expectedDate, expectedLogMessage);
+        String expectedLogTime = NOW.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        String expectedLogEntry = "%s [thread1] INFO  o.a.h.l.l.MaskingPatternLayoutTest - %s".formatted(expectedLogTime, expectedLogMessage);
         assertThat(actualLogEntry).isEqualTo(expectedLogEntry);
     }
 
