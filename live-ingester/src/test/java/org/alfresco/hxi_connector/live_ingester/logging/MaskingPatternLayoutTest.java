@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.logging;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.BDDMockito.given;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
 import ch.qos.logback.classic.Level;
@@ -45,6 +47,7 @@ import org.slf4j.LoggerFactory;
 @ExtendWith(MockitoExtension.class)
 class MaskingPatternLayoutTest
 {
+    private static final ZonedDateTime NOW = ZonedDateTime.now();
 
     @Mock
     ILoggingEvent loggingEventMock;
@@ -54,7 +57,7 @@ class MaskingPatternLayoutTest
     @BeforeEach
     void setUp()
     {
-        given(loggingEventMock.getTimeStamp()).willReturn(1_629_857_730_123L);
+        given(loggingEventMock.getTimeStamp()).willReturn(NOW.toInstant().toEpochMilli());
         given(loggingEventMock.getThreadName()).willReturn("thread1");
         given(loggingEventMock.getLevel()).willReturn(Level.INFO);
         given(loggingEventMock.getLoggerName()).willReturn(MaskingPatternLayoutTest.class.getName());
@@ -100,7 +103,8 @@ class MaskingPatternLayoutTest
         String actualLogEntry = maskingPatternLayout.doLayout(loggingEventMock);
 
         // then
-        String expectedLogEntry = "2021-08-25 04:15:30.123 [thread1] INFO  o.a.h.l.l.MaskingPatternLayoutTest - %s".formatted(expectedLogMessage);
+        String expectedDate = NOW.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"));
+        String expectedLogEntry = "%s [thread1] INFO  o.a.h.l.l.MaskingPatternLayoutTest - %s".formatted(expectedDate, expectedLogMessage);
         assertThat(actualLogEntry).isEqualTo(expectedLogEntry);
     }
 
