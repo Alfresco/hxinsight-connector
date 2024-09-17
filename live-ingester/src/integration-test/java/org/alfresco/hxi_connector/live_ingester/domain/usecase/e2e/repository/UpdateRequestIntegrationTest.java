@@ -129,7 +129,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "type" : {
                         "value" : "cm:content"
@@ -230,7 +231,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "value" : "admin"
                               },
                               "cm:name" : {
-                                "value" : "purchase-order-scan.pdf"
+                                "value" : "purchase-order-scan.pdf",
+                                "annotation" : "name"
                               },
                               "ALLOW_ACCESS" : {
                                 "value" : [ "GROUP_EVERYONE" ]
@@ -304,7 +306,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -379,7 +382,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -453,7 +457,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           "value" : "admin"
                         },
                         "cm:name" : {
-                          "value" : "purchase-order-scan.pdf"
+                          "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                         },
                         "ALLOW_ACCESS" : {
                           "value" : [ "GROUP_EVERYONE" ]
@@ -548,7 +553,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -698,7 +704,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -799,7 +806,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : ""
                       },
                       "cm:name" : {
-                        "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e"
+                        "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -862,7 +870,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "timestamp" : 1611656982995,
                     "properties": {
-                      "cm:name": {"value": "New Folder"},
+                      "cm:name": {
+                        "value": "New Folder",
+                        "annotation" : "name"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695
                       },
@@ -1014,7 +1025,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "value" : "admin"
                     },
                     "cm:name" : {
-                      "value" : "test"
+                      "value" : "test",
+                      "annotation" : "name"
                     },
                     "cm:author" : {
                       "value" : ""

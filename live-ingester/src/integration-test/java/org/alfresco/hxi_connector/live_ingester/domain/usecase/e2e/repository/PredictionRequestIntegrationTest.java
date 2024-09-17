@@ -314,7 +314,8 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "value" : [ "GROUP_EVERYONE" ]
                        },
                        "cm:name" : {
-                         "value" : "purchase-order-scan.pdf"
+                         "value" : "purchase-order-scan.pdf",
+                         "annotation" : "name"
                        },
                        "hxi:latestPredictionDateTime" : {
                          "value" : "2024-05-08T17:00:42.529Z"

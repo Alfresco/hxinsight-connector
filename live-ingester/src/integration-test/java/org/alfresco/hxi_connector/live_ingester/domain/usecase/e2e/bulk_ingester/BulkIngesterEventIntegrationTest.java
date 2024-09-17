@@ -76,7 +76,10 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "System"},
                       "modifiedBy": {"value": "admin"},
                       "aspectsNames": {"value": ["cm:auditable"]},
-                      "cm:name": {"value": "Mexican Spanish"}
+                      "cm:name": {
+                        "value": "Mexican Spanish",
+                        "annotation" : "name"
+                      }
                     }
                   }
                 ]""";
@@ -129,7 +132,10 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "modifiedBy": {"value": "hr_user"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
                       "createdAt": {"value": 1308061016},
-                      "cm:name": {"value": "dashboard.xml"},
+                      "cm:name": {
+                        "value": "dashboard.xml",
+                        "annotation" : "name"
+                      },
                       "cm:isContentIndexed": {"value": true},
                       "cm:isIndexed": {"value": false},
                       "cm:content": {
