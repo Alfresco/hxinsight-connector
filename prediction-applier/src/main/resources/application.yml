@@ -10,6 +10,8 @@ management:
 camel:
   springboot:
     main-run-controller: true
+  main:
+    auto-startup: false
 
 application:
   source-id: alfresco-dummy-source-id-0a63de491876
@@ -42,7 +44,7 @@ auth:
       token-uri: http://localhost:8001/token
       grant-type: client_credentials
       scope:
-       - hxp.integrations
+        - hxp.integrations
       environment-key: hxi-env-key
       client-name: acs-insight-connector
     alfresco:

@@ -51,6 +51,7 @@ import org.springframework.context.annotation.Bean;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.ResourceNotFoundException;
+import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
@@ -63,10 +64,10 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
 
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
-        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class})
+        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class, IntegrationCamelTestBase.class})
 @EnableAutoConfiguration
 @SuppressWarnings("PMD.FieldNamingConventions")
-class ATSTransformResponseHandlerTest
+class ATSTransformResponseHandlerTest extends IntegrationCamelTestBase
 {
     private static final long TIMESTAMP = Instant.now().toEpochMilli();
     private static final String RESPONSE_ENDPOINT = "direct:transform-response-test";

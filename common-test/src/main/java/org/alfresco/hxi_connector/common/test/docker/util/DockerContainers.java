@@ -285,6 +285,7 @@ public class DockerContainers
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
                 .withEnv("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616")
                 .withEnv("ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL", "http://shared-file-store:8099")
+                .withEnv("ALFRESCO_REPOSITORY_HEALTH_PROBE_INTERVAL_SECONDS", "1")
                 .withExposedPorts(5007)
                 .withStartupTimeout(Duration.ofMinutes(2))
                 .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
@@ -310,7 +311,7 @@ public class DockerContainers
     public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, AlfrescoRepositoryContainer acsContainer, Network network)
     {
         return createLiveIngesterContainerForWireMock(hxInsightMockContainer, network)
-                .withEnv("ALFRESCO_REPOSITORY_DISCOVERYENDPOINT", "http://%s:8080/alfresco/api/discovery".formatted(acsContainer.getNetworkAliases().stream().findFirst().get()));
+                .withEnv("ALFRESCO_REPOSITORY_BASE_URL", "http://%s:8080/alfresco".formatted(acsContainer.getNetworkAliases().stream().findFirst().get()));
     }
 
     public static GenericContainer<?> createPredictionApplierContainerWithin(Network network)

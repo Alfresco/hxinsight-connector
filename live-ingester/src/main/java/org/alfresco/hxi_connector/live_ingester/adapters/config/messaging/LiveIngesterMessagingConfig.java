@@ -30,6 +30,7 @@ import java.net.http.HttpClient;
 import jakarta.jms.ConnectionFactory;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.camel.CamelContext;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +42,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.DiscoveryApiRepositoryInformation;
+import org.alfresco.hxi_connector.common.adapters.messaging.repository.ProcessingStarter;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -108,4 +110,9 @@ public class LiveIngesterMessagingConfig
         return new ApplicationInfoProvider(repositoryInformation, integrationProperties.application());
     }
 
+    @Bean
+    public ProcessingStarter processingStarter(CamelContext camelContext)
+    {
+        return new ProcessingStarter(camelContext);
+    }
 }
