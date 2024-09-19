@@ -100,7 +100,10 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       "modifiedAt": {"value" : 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                      "cm:name": {"value": "purchase-order-scan.doc"},
+                      "cm:name": {
+                        "value": "purchase-order-scan.doc",
+                        "annotation" : "name"
+                      },
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "admin"},

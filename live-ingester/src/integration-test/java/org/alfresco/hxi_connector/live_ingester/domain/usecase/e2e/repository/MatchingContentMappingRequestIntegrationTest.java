@@ -108,7 +108,10 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "modifiedAt": {"value" : 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                      "cm:name": {"value": "purchase-order-scan.bmp"},
+                      "cm:name": {
+                        "value": "purchase-order-scan.bmp",
+                        "annotation" : "name"
+                      },
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "admin"},
@@ -216,7 +219,10 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "modifiedAt": {"value": 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                      "cm:name": {"value": "purchase-order-scan.bmp"},
+                      "cm:name": {
+                        "value": "purchase-order-scan.bmp",
+                        "annotation" : "name"
+                      },
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "admin"},
