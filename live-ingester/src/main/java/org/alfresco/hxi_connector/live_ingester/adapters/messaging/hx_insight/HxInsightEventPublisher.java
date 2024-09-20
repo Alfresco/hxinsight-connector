@@ -131,6 +131,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void logMaskedExchangeState(Exchange exchange)
     {
         LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);

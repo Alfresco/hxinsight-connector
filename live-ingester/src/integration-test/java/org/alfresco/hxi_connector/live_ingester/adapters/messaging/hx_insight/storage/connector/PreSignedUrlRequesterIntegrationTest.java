@@ -281,7 +281,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
         ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(PreSignedUrlRequester.class);
 
         // when
-        catchThrowable(() -> locationRequester.requestStorageLocation());
+        catchThrowable(locationRequester::requestStorageLocation);
 
         // then
         List<String> logs = logEntries.list.stream().map(ILoggingEvent::getFormattedMessage).toList();

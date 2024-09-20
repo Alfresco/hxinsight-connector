@@ -74,6 +74,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .end();
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void logMaskedExchangeState(Exchange exchange)
     {
         LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);

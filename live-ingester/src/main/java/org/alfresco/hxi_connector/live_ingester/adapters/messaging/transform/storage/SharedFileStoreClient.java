@@ -128,6 +128,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void logMaskedExchangeState(Exchange exchange)
     {
         LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);

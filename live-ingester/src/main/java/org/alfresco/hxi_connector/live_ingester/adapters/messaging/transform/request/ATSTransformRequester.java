@@ -114,6 +114,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
                 transformProperties.response().queueName());
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void logMaskedExchangeState(Exchange exchange)
     {
         LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);

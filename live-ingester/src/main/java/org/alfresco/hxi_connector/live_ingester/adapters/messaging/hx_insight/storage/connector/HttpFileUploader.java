@@ -171,6 +171,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void logMaskedExchangeState(Exchange exchange)
     {
         LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
