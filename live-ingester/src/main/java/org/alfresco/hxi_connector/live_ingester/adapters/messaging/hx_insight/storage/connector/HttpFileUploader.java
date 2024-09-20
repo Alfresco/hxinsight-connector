@@ -78,7 +78,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         String uploadEndpoint = "${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false";
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while uploading content - Endpoint: %s".formatted(uploadEndpoint))
-            .process(this::logMaskedExchangeState)
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
@@ -169,11 +169,5 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
 
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void logMaskedExchangeState(Exchange exchange)
-    {
-        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }

@@ -35,7 +35,6 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
@@ -66,7 +65,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         String transformEndpoint = integrationProperties.alfresco().transform().request().endpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Transform :: Unexpected response while requesting for transformation - Endpoint: %s".formatted(transformEndpoint))
-                .process(this::logMaskedExchangeState)
+                .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
                 .stop();
 
         from(LOCAL_ENDPOINT)
@@ -112,11 +111,5 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
                 new ClientData(transformRequest.nodeRef(), targetMimeType, attempt, transformRequest.timestamp()),
                 transformOptions,
                 transformProperties.response().queueName());
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void logMaskedExchangeState(Exchange exchange)
-    {
-        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }

@@ -31,7 +31,6 @@ import static org.apache.camel.LoggingLevel.INFO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.event.Level;
 import org.springframework.security.core.context.SecurityContext;
@@ -59,7 +58,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
         String eventSource = integrationProperties.alfresco().repository().eventsEndpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Repository :: Unexpected state while processing event from: %s".formatted(eventSource))
-                .process(this::logMaskedExchangeState)
+                .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
                 .stop();
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -72,11 +71,5 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)
                 .end();
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void logMaskedExchangeState(Exchange exchange)
-    {
-        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }

@@ -71,7 +71,7 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
         String fileEndpoint = ENDPOINT_PATTERN.formatted(integrationProperties.alfresco().transform().sharedFileStore().fileEndpoint());
         onException(Exception.class)
             .log(ERROR, log, "Transform :: Unexpected response while downloading rendition - Endpoint: %s".formatted(fileEndpoint))
-            .process(this::logMaskedExchangeState)
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
@@ -126,11 +126,5 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.alfresco().transform().sharedFileStore().retry().reasons();
 
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void logMaskedExchangeState(Exchange exchange)
-    {
-        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }

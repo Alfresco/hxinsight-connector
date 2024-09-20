@@ -80,7 +80,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         String storageRequestEndpoint = integrationProperties.hylandExperience().storage().location().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while requesting pre-signed URL - Endpoint: %s".formatted(storageRequestEndpoint))
-            .process(this::logMaskedExchangeState)
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
@@ -167,11 +167,5 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
 
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void logMaskedExchangeState(Exchange exchange)
-    {
-        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }

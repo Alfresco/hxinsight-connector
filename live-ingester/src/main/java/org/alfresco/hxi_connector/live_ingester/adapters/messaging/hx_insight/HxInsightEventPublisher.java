@@ -76,7 +76,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         String ingestionEndpoint = integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
             .log(LoggingLevel.ERROR, log, "Ingestion :: Unexpected response - Endpoint: %s".formatted(ingestionEndpoint))
-            .process(this::logMaskedExchangeState)
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
@@ -129,11 +129,5 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().ingester().retry().reasons();
 
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void logMaskedExchangeState(Exchange exchange)
-    {
-        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }
