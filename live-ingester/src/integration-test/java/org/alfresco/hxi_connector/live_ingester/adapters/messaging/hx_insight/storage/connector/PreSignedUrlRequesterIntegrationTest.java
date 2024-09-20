@@ -56,11 +56,15 @@ import java.net.URL;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.fasterxml.jackson.core.io.JsonEOFException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Body;
 import com.github.tomakehurst.wiremock.http.Fault;
 import org.apache.hc.core5.http.NoHttpResponseException;
 import org.junit.jupiter.api.BeforeAll;
@@ -94,6 +98,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -264,6 +269,26 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
         assertThat(thrown)
                 .cause().isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(NoHttpResponseException.class);
+    }
+
+    @Test
+    @SuppressWarnings({"ThrowableNotThrown", "ResultOfMethodCallIgnored"})
+    void testLoggingOnError()
+    {
+        // given
+        givenThat(post(PRE_SIGNED_URL_PATH)
+                .willReturn(badRequest().withResponseBody(new Body("{\"error\": \"Bad request\"}"))));
+        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(PreSignedUrlRequester.class);
+
+        // when
+        catchThrowable(() -> locationRequester.requestStorageLocation());
+
+        // then
+        List<String> logs = logEntries.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+        assertThat(logs)
+                .isNotEmpty()
+                .last().asString()
+                .contains("Authorization=***", "Body: {\"error\": \"Bad request\"}");
     }
 
     @DynamicPropertySource

@@ -35,13 +35,16 @@ import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ATSTransformRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
@@ -63,7 +66,7 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
         String transformEndpoint = integrationProperties.alfresco().transform().request().endpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Transform :: Unexpected response while requesting for transformation - Endpoint: %s".formatted(transformEndpoint))
-                .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+                .process(this::logMaskedExchangeState)
                 .stop();
 
         from(LOCAL_ENDPOINT)
@@ -109,5 +112,10 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
                 new ClientData(transformRequest.nodeRef(), targetMimeType, attempt, transformRequest.timestamp()),
                 transformOptions,
                 transformProperties.response().queueName());
+    }
+
+    private void logMaskedExchangeState(Exchange exchange)
+    {
+        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }

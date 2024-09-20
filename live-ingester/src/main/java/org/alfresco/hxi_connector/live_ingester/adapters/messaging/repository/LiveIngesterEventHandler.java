@@ -31,13 +31,16 @@ import static org.apache.camel.LoggingLevel.INFO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.event.Level;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
 
 @Component
 @Slf4j
@@ -56,7 +59,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
         String eventSource = integrationProperties.alfresco().repository().eventsEndpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Repository :: Unexpected state while processing event from: %s".formatted(eventSource))
-                .to("log:%s?level=ERROR&multiline=true&showBody=true&showHeaders=true&showProperties=true&showStackTrace=true".formatted(log.getName()))
+                .process(this::logMaskedExchangeState)
                 .stop();
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
@@ -69,5 +72,10 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)
                 .end();
+    }
+
+    private void logMaskedExchangeState(Exchange exchange)
+    {
+        LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR);
     }
 }

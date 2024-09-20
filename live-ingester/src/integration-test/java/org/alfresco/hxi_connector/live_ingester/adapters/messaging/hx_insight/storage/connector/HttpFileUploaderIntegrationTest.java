@@ -39,6 +39,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import lombok.Cleanup;
 import org.apache.hc.client5.http.HttpHostConnectException;
 import org.junit.jupiter.api.BeforeAll;
@@ -59,6 +61,7 @@ import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
@@ -163,6 +166,31 @@ class HttpFileUploaderIntegrationTest extends IntegrationCamelTestBase
         // then
         then(fileUploader).should(times(1)).upload(any(), any());
         assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+    }
+
+    @Test
+    @SuppressWarnings({"ThrowableNotThrown", "ResultOfMethodCallIgnored"})
+    void testLoggingOnError() throws IOException
+    {
+        // given
+        @Cleanup
+        InputStream fileContent = new ByteArrayInputStream(OBJECT_CONTENT.getBytes());
+        File fileToUpload = new File(fileContent);
+        URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl("invalid-bucket", OBJECT_KEY, OBJECT_CONTENT_TYPE);
+
+        FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
+        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(HttpFileUploader.class);
+
+        // when
+        catchThrowable(() -> fileUploader.upload(fileUploadRequest, NODE_ID));
+
+        // then
+        List<String> logs = logEntries.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+        assertThat(logs)
+                .isNotEmpty()
+                .last().asString()
+                .contains("<Code>NoSuchBucket</Code>", "<BucketName>invalid-bucket</BucketName>")
+                .doesNotContain("Authorization=");
     }
 
     @DynamicPropertySource
