@@ -56,7 +56,7 @@ public class DeleteNodeEventSerializer extends StdSerializer<DeleteNodeEvent>
 
             jgen.writeStringField("objectId", event.getObjectId());
             jgen.writeStringField("sourceId", event.getSourceId());
-            jgen.writeNumberField("timestamp", event.getTimestamp());
+            jgen.writeNumberField("sourceTimestamp", event.getTimestamp());
 
             jgen.writeStringField("eventType", "delete");
 

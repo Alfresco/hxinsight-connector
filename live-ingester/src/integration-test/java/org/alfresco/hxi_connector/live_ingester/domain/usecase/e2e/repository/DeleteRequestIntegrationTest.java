@@ -64,7 +64,7 @@ class DeleteRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "delete",
-                    "timestamp": 1611656982995
+                    "sourceTimestamp": 1611656982995
                 }""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }

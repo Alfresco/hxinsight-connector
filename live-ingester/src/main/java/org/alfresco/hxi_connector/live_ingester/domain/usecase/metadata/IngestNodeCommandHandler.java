@@ -61,7 +61,7 @@ public class IngestNodeCommandHandler
                 command.nodeId(),
                 eventType,
                 integrationProperties.application().getSourceId(),
-                command.timestamp());
+                command.sourceTimestamp());
 
         command.properties()
                 .stream()
