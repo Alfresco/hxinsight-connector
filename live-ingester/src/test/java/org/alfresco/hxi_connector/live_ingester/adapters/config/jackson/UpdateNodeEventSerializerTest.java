@@ -64,7 +64,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
-                    "timestamp": 1724225729830
+                    "sourceTimestamp": 1724225729830
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(emptyEvent);
@@ -85,7 +85,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
-                    "timestamp": 1724225729830,
+                    "sourceTimestamp": 1724225729830,
                     "properties": {
                       "createdAt": {"value": 10000},
                       "modifiedBy": {"value": "000-000-000"}
@@ -110,7 +110,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "update",
-                    "timestamp": 1724225729830,
+                    "sourceTimestamp": 1724225729830,
                     "removedProperties": [ "createdAt", "modifiedBy" ]
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
@@ -132,7 +132,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
-                    "timestamp": 1724225729830,
+                    "sourceTimestamp": 1724225729830,
                     "properties": {
                       "createdBy": {"value": null},
                       "modifiedBy": {"value": null}
@@ -157,7 +157,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
-                    "timestamp": 1724225729830,
+                    "sourceTimestamp": 1724225729830,
                     "properties": {
                       "cm:content": {
                         "file": {
@@ -191,7 +191,7 @@ class UpdateNodeEventSerializerTest
                     "objectId": "%s",
                     "sourceId": "%s",
                     "eventType": "create",
-                    "timestamp": 1724225729830,
+                    "sourceTimestamp": 1724225729830,
                     "properties": {
                       "cm:content": {
                         "file": {

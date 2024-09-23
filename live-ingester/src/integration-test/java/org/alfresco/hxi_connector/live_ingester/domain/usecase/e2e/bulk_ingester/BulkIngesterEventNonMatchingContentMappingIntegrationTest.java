@@ -77,7 +77,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType" : "create",
-                    "timestamp" : %s,
+                    "sourceTimestamp" : %s,
                     "properties" : {
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},

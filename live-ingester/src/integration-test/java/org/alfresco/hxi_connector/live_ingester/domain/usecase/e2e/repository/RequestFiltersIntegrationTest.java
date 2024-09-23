@@ -105,7 +105,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e01",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "create",
-                    "timestamp": 1611227656423,
+                    "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1709378055695},
@@ -262,7 +262,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e03",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "create",
-                    "timestamp": 1611227656423,
+                    "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1709378055695},
@@ -424,7 +424,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e05",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp": 1611656982995,
+                    "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
@@ -616,7 +616,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e07",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp": 1611656982995,
+                    "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
@@ -1047,7 +1047,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                      "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e13",
                      "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                      "eventType" : "create",
-                     "timestamp": 1611656982995,
+                     "sourceTimestamp": 1611656982995,
                      "properties" : {
                        "cm:title" : {
                          "value" : "Purchase Order"
@@ -1173,7 +1173,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                       "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e14",
                       "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                      "timestamp": 1611656982995,
+                      "sourceTimestamp": 1611656982995,
                       "eventType" : "delete"
                     }
                 """;
@@ -1255,7 +1255,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                       "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e15",
                       "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                      "timestamp" : 1611656982995,
+                      "sourceTimestamp" : 1611656982995,
                       "eventType" : "delete"
                     }
                 """;
@@ -1332,7 +1332,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                      "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e16",
                      "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                      "eventType" : "create",
-                     "timestamp": 1611656982995,
+                     "sourceTimestamp": 1611656982995,
                      "properties" : {
                        "cm:title" : {
                          "value" : "Purchase Order"
