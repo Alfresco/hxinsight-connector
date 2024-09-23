@@ -161,7 +161,7 @@ public class CreateNodeE2eTest
 
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id()).and(containing("timestamp")))
+                    .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
         }, INITIAL_DELAY_MS);
     }
@@ -189,7 +189,7 @@ public class CreateNodeE2eTest
 
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id()).and(containing("timestamp")))
+                    .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
         }, INITIAL_DELAY_MS);
     }

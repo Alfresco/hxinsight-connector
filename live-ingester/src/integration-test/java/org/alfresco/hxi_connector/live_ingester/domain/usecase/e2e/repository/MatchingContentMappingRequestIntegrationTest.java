@@ -101,14 +101,17 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "create",
-                    "timestamp" : 1611227656423,
+                    "sourceTimestamp" : 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
                       "modifiedAt": {"value" : 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                      "cm:name": {"value": "purchase-order-scan.bmp"},
+                      "cm:name": {
+                        "value": "purchase-order-scan.bmp",
+                        "annotation" : "name"
+                      },
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "admin"},
@@ -209,14 +212,17 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "create",
-                    "timestamp" : 1611227656423,
+                    "sourceTimestamp" : 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
                       "createdAt": {"value": 1611227655695},
                       "modifiedAt": {"value": 1611227655695},
                       "cm:versionType": {"value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                      "cm:name": {"value": "purchase-order-scan.bmp"},
+                      "cm:name": {
+                        "value": "purchase-order-scan.bmp",
+                        "annotation" : "name"
+                      },
                       "type": {"value": "cm:content"},
                       "createdBy": {"value": "admin"},
                       "modifiedBy": {"value": "admin"},

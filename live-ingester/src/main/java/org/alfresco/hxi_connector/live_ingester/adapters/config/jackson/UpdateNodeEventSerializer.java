@@ -48,6 +48,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
 @Component
 public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 {
+    private static final String NAME = "cm:name";
 
     public UpdateNodeEventSerializer()
     {
@@ -71,7 +72,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             jgen.writeStringField("sourceId", event.getSourceId());
 
             jgen.writeStringField("eventType", serializeEventType(event.getEventType()));
-            jgen.writeNumberField("timestamp", event.getTimestamp());
+            jgen.writeNumberField("sourceTimestamp", event.getTimestamp());
 
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
             {
@@ -102,6 +103,14 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     {
         try
         {
+            if (fieldType.equals(VALUE) && name.equals(NAME))
+            {
+                jgen.writeObjectFieldStart(name);
+                jgen.writeObjectField(getLowerCase(fieldType), value);
+                jgen.writeObjectField("annotation", "name");
+                jgen.writeEndObject();
+                return;
+            }
             jgen.writeObjectFieldStart(name);
             jgen.writeObjectField(getLowerCase(fieldType), value);
             jgen.writeEndObject();

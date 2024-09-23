@@ -108,7 +108,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp" : 1611656982995,
+                    "sourceTimestamp" : 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
@@ -129,7 +129,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "type" : {
                         "value" : "cm:content"
@@ -218,7 +219,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                             "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                             "eventType": "update",
-                            "timestamp": 1611656982995,
+                            "sourceTimestamp": 1611656982995,
                             "properties": {
                               "createdAt" : {
                                 "value" : 1611227655695
@@ -230,7 +231,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "value" : "admin"
                               },
                               "cm:name" : {
-                                "value" : "purchase-order-scan.pdf"
+                                "value" : "purchase-order-scan.pdf",
+                                "annotation" : "name"
                               },
                               "ALLOW_ACCESS" : {
                                 "value" : [ "GROUP_EVERYONE" ]
@@ -291,7 +293,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp": 1611656982995,
+                    "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "createdAt" : {
@@ -304,7 +306,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -366,7 +369,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp": 1611656982995,
+                    "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Summary for year 2024"},
                       "createdAt" : {
@@ -379,7 +382,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -441,7 +445,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp" : 1611656982995,
+                    "sourceTimestamp" : 1611656982995,
                     "properties": {
                         "createdAt" : {
                           "value" : 1611227655695
@@ -453,7 +457,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           "value" : "admin"
                         },
                         "cm:name" : {
-                          "value" : "purchase-order-scan.pdf"
+                          "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                         },
                         "ALLOW_ACCESS" : {
                           "value" : [ "GROUP_EVERYONE" ]
@@ -534,7 +539,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp": 1611656982995,
+                    "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
                       "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
@@ -548,7 +553,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -683,7 +689,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp": 1611656982995,
+                    "sourceTimestamp": 1611656982995,
                     "properties" : {
                       "cm:title" : {
                         "value" : "Purchase Order"
@@ -698,7 +704,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin"
                       },
                       "cm:name" : {
-                        "value" : "purchase-order-scan.pdf"
+                        "value" : "purchase-order-scan.pdf",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -777,7 +784,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp": 1704798873615,
+                    "sourceTimestamp": 1704798873615,
                     "properties": {
                       "aspectsNames": {"value": ["cm:preferences", "cm:ownable"]},
                       "cm:homeFolderProvider" : {
@@ -799,7 +806,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : ""
                       },
                       "cm:name" : {
-                        "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e"
+                        "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                        "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -860,9 +868,12 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "eventType": "update",
-                    "timestamp" : 1611656982995,
+                    "sourceTimestamp" : 1611656982995,
                     "properties": {
-                      "cm:name": {"value": "New Folder"},
+                      "cm:name": {
+                        "value": "New Folder",
+                        "annotation" : "name"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695
                       },
@@ -978,7 +989,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "objectId" : "9f3380e3-b9b1-4b01-b1c6-ef1f717a9abb",
                   "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                   "eventType" : "update",
-                  "timestamp" : 1722422055416,
+                  "sourceTimestamp" : 1722422055416,
                   "properties" : {
                     "ALLOW_ACCESS" : {
                       "value" : [ "GROUP_EVERYONE", "abeecher" ]
@@ -1014,7 +1025,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "value" : "admin"
                     },
                     "cm:name" : {
-                      "value" : "test"
+                      "value" : "test",
+                      "annotation" : "name"
                     },
                     "cm:author" : {
                       "value" : ""
