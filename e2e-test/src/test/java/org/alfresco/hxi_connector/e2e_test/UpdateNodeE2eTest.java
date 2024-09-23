@@ -236,7 +236,7 @@ public class UpdateNodeE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
-                .withRequestBody(containing("timestamp"))
+                .withRequestBody(containing("sourceTimestamp"))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
     }
 

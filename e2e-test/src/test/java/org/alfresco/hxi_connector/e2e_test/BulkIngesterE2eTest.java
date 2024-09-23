@@ -104,7 +104,7 @@ public class BulkIngesterE2eTest
             assertEquals(nodeId, event.get("objectId").asText());
             assertEquals(sourceId, event.get("sourceId").asText());
             assertEquals(eventType, event.get("eventType").asText());
-            assertTrue(event.has("timestamp"));
+            assertTrue(event.has("sourceTimestamp"));
             assertTrue(event.has("properties"));
         }, 15, 200);
     }
