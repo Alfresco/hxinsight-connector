@@ -45,6 +45,9 @@ class ATSTransformResponseHandlerTest
                         {"requestId":"dedc19a9-d214-4832-91e1-1dca3e34ce4e","status":201,"errorDetails":null,"sourceReference":"6a47d27c-0503-49b7-a6da-23c4b381c9a3","targetReference":"bccd309c-e104-4a85-84a8-93598f8ea51b","clientData":"{\\"nodeRef\\":\\"7a82cd4e-215b-4e2f-82cd-4e215b9e2f9e\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1727175016824}","schema":1,"internalContext":null}
                         """, true),
                 Arguments.of("""
+                        {"requestId":"b79a8e6c-c22a-4b2b-8510-cfd1937578f4","status":400,"errorDetails":"08250077 Transformation failed occurred.","sourceReference":"56804085-1ed6-4b1a-a4ca-6fd4268c7491","targetReference":"8d864f52-eb33-49a1-b3da-6a825cbcdc47","clientData":"{\\"nodeRef\\":\\"e7af4b5b-c812-429b-a9c2-34b98fa0eaac\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1727175018945}","schema":1,"internalContext":null}
+                        """, false),
+                Arguments.of("""
                         {
                           "requestId" : "9cb47782-ec93-4008-bd0a-4fa0b1c7d092",
                           "status" : 201,
