@@ -64,10 +64,13 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
 
 @SpringBootTest(
         properties = {"logging.level.org.alfresco=DEBUG"},
-        classes = {ATSTransformResponseHandler.class, ATSTransformResponseHandlerTest.IntegrationPropertiesTestConfig.class, IntegrationCamelTestBase.class})
+        classes = {
+                ATSTransformResponseHandler.class,
+                ATSTransformResponseHandlerIntegrationTest.IntegrationPropertiesTestConfig.class,
+                IntegrationCamelTestBase.class})
 @EnableAutoConfiguration
 @SuppressWarnings("PMD.FieldNamingConventions")
-class ATSTransformResponseHandlerTest extends IntegrationCamelTestBase
+class ATSTransformResponseHandlerIntegrationTest extends IntegrationCamelTestBase
 {
     private static final long TIMESTAMP = Instant.now().toEpochMilli();
     private static final String RESPONSE_ENDPOINT = "direct:transform-response-test";
