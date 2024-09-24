@@ -294,9 +294,11 @@ services:
         condition: service_started
       transform-router:
         condition: service_healthy
+      alfresco:
+        condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
-      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+      LOGGING_LEVEL_ORG_ALFRESCO: INFO
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       ALFRESCO_REPOSITORY_BASEURL: http://alfresco:8080/alfresco
       ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL: http://shared-file-store:8099
@@ -323,7 +325,7 @@ services:
         condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5008,server=y,suspend=n
-      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+      LOGGING_LEVEL_ORG_ALFRESCO: INFO
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/alfresco
       SPRING_DATASOURCE_USERNAME: alfresco
@@ -342,7 +344,7 @@ services:
         condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n
-      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+      LOGGING_LEVEL_ORG_ALFRESCO: INFO
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       ALFRESCO_REPOSITORY_BASEURL: http://alfresco:8080/alfresco
       HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_BASEURL: http://hxinsight-mock:8080

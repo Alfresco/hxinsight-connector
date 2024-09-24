@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.re
 
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.ERROR;
+import static org.apache.camel.LoggingLevel.WARN;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,6 +51,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
 public class ATSTransformResponseHandler extends RouteBuilder
 {
     private static final String ROUTE_ID = "transform-events-consumer";
+    private static final int EXPECTED_STATUS_CODE = 201;
+    static final String EXPECTED_STATUS_CODE_REGEX = "[\\s\\S]*\"status\"\\s*:\\s*%s[^0-9][\\s\\S]*".formatted(EXPECTED_STATUS_CODE);
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final IntegrationProperties integrationProperties;
@@ -58,18 +61,24 @@ public class ATSTransformResponseHandler extends RouteBuilder
     @Override
     public void configure()
     {
+        String transformationSource = integrationProperties.alfresco().transform().response().endpoint();
         onException(EmptyRenditionException.class, ResourceNotFoundException.class)
+                .log(WARN, log, "Transform :: Unexpected state while processing rendition from: %s due to: ${exception.message}. Body: ${body}".formatted(transformationSource))
                 .process(this::retryContentTransformation);
 
         onException(Exception.class)
-                .log(ERROR, log, "Retrying ${routeId}, attempt ${header.CamelRedeliveryCounter} due to ${exception.message}")
+                .log(ERROR, log, "Transform :: Retrying ${routeId}, attempt ${header.CamelRedeliveryCounter} due to ${exception.message}. Body: ${body}")
                 .maximumRedeliveries(integrationProperties.alfresco().transform().response().retryIngestion().attempts())
                 .redeliveryDelay(integrationProperties.alfresco().transform().response().retryIngestion().initialDelay())
                 .backOffMultiplier(integrationProperties.alfresco().transform().response().retryIngestion().delayMultiplier());
 
-        from(integrationProperties.alfresco().transform().response().endpoint())
+        from(transformationSource)
                 .routeId(ROUTE_ID)
-                .log(DEBUG, log, "Received transform completed event : ${body}")
+                .choice().when(body().regex(EXPECTED_STATUS_CODE_REGEX))
+                .log(DEBUG, log, "Transform :: Received transform completed event: ${body}")
+                .otherwise()
+                .log(WARN, log, "Transform :: Transformation failed. Body: ${body}")
+                .end()
                 .unmarshal()
                 .json(JsonLibrary.Jackson, TransformResponse.class)
                 .process(this::ingestContent)
@@ -80,10 +89,8 @@ public class ATSTransformResponseHandler extends RouteBuilder
     private void ingestContent(Exchange exchange)
     {
         TransformResponse transformResponse = exchange.getIn().getBody(TransformResponse.class);
-
         if (transformResponse.status() == 400)
         {
-            log.atDebug().log("Rendition of node {} failed with status {}. Details: {}", transformResponse.clientData().nodeRef(), transformResponse.status(), transformResponse.errorDetails());
             return;
         }
 
@@ -107,11 +114,11 @@ public class ATSTransformResponseHandler extends RouteBuilder
 
         if (retryAttempt > maxAttempts)
         {
-            log.error("Transformation of node {} failed with error {}, max number of retries ({}) exceeded", transformResponse.clientData().nodeRef(), exception.getMessage(), maxAttempts);
+            log.error("Transform :: Transformation of node {} failed with error {}, max number of retries ({}) exceeded", transformResponse.clientData().nodeRef(), exception.getMessage(), maxAttempts);
             return;
         }
 
-        log.error("Transformation of node {} failed with error {}, retrying (attempt: {})", transformResponse.clientData().nodeRef(), exception.getMessage(), retryAttempt);
+        log.info("Transform :: Transformation of node {} failed with error {}, retrying (attempt: {})", transformResponse.clientData().nodeRef(), exception.getMessage(), retryAttempt);
 
         TransformRequest transformRequest = new TransformRequest(
                 transformResponse.clientData().nodeRef(),
@@ -119,5 +126,4 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 transformResponse.clientData().timestamp());
         atsTransformRequester.requestTransformRetry(transformRequest, retryAttempt);
     }
-
 }

@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
+import static java.util.Locale.ENGLISH;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
 @Component
 public class DeleteNodeEventSerializer extends StdSerializer<DeleteNodeEvent>
@@ -57,8 +60,7 @@ public class DeleteNodeEventSerializer extends StdSerializer<DeleteNodeEvent>
             jgen.writeStringField("objectId", event.getObjectId());
             jgen.writeStringField("sourceId", event.getSourceId());
             jgen.writeNumberField("sourceTimestamp", event.getTimestamp());
-
-            jgen.writeStringField("eventType", "delete");
+            jgen.writeStringField("eventType", serializeEventType(event.getEventType()));
 
             jgen.writeEndObject();
         }
@@ -66,5 +68,10 @@ public class DeleteNodeEventSerializer extends StdSerializer<DeleteNodeEvent>
         {
             throw new JsonSerializationException("Property serialization failed", e);
         }
+    }
+
+    private String serializeEventType(EventType eventType)
+    {
+        return eventType.toString().toLowerCase(ENGLISH);
     }
 }

@@ -54,9 +54,13 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.http.Body;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
@@ -89,6 +93,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
+import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -182,6 +187,26 @@ class HxInsightEventPublisherIntegrationTest extends IntegrationCamelTestBase
         // then
         then(ingestionEngineEventPublisher).should(times(1)).publishMessage(NODE_EVENT);
         assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+    }
+
+    @Test
+    @SuppressWarnings({"ThrowableNotThrown", "ResultOfMethodCallIgnored"})
+    void testLoggingOnError()
+    {
+        // given
+        givenThat(post(INGEST_PATH)
+                .willReturn(badRequest().withResponseBody(new Body("{\"error\": \"Bad request\"}"))));
+        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(HxInsightEventPublisher.class);
+
+        // when
+        catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
+
+        // then
+        List<String> logs = logEntries.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
+        assertThat(logs)
+                .isNotEmpty()
+                .last().asString()
+                .contains("Authorization=***", "Body: {\"error\": \"Bad request\"}");
     }
 
     @DynamicPropertySource

@@ -26,6 +26,8 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.INFO;
 
 import static org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
@@ -38,6 +40,7 @@ import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.event.Level;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -47,6 +50,7 @@ import org.alfresco.hxi_connector.common.adapters.messaging.repository.Applicati
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
@@ -69,19 +73,22 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     public void configure()
     {
         // @formatter:off
+        String ingestionEndpoint = integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .log(LoggingLevel.ERROR, log, "Ingestion :: Unexpected response - Endpoint: %s".formatted(ingestionEndpoint))
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
+            .log(INFO, log, "Ingestion :: Sending event of type: ${body.eventType} for node with ID: ${body.objectId}")
             .marshal()
             .json()
-            .log("Sending event ${body}")
             .setProperty(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
+            .log(DEBUG, log, "Ingestion :: Sending event: ${body}. Headers: ${headers}. Endpoint: " + ingestionEndpoint)
             .process(authService::setHxIAuthorizationHeaders)
-            .toD(integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM)
+            .toD(ingestionEndpoint)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
@@ -123,5 +130,4 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
 
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
-
 }

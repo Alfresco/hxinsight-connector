@@ -47,14 +47,14 @@ public class TypeFilterApplier implements RepoEventFilterApplier
         final String nodeType = nodeResource.getNodeType();
         final List<String> allowed = filter.type().allow();
         final List<String> denied = filter.type().deny();
-        log.atDebug().log("Applying type filters on node id: {}", nodeResource.getId());
+        log.atDebug().log("Filtering :: Applying type filters on node id: {}", nodeResource.getId());
         return FieldFilter.filter(nodeType, allowed, denied);
     }
 
     @Override
     public boolean isNodeBeforeAllowed(boolean currentlyAllowed, NodeResource nodeResourceBefore, Filter filter)
     {
-        log.atDebug().log("Applying type filters on previous version of repo node id: {}", nodeResourceBefore.getId());
+        log.atDebug().log("Filtering :: Applying type filters on previous version of repo node id: {}", nodeResourceBefore.getId());
         final String nodeType = nodeResourceBefore.getNodeType();
         if (nodeType == null)
         {

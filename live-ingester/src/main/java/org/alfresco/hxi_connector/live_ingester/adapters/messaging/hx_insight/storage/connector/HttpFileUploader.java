@@ -29,6 +29,7 @@ import static java.net.URLDecoder.decode;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.ERROR;
 
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
@@ -42,10 +43,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpMethods;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.event.Level;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -53,6 +54,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
@@ -73,8 +75,10 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     public void configure()
     {
         // @formatter:off
+        String uploadEndpoint = "${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false";
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Upload :: Unexpected response while uploading to S3. Body: ${body}")
+            .log(ERROR, log, "Storage :: Unexpected response while uploading content - Endpoint: %s".formatted(uploadEndpoint))
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
@@ -83,7 +87,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
             .setHeader(Exchange.HTTP_METHOD, constant(HttpMethods.PUT))
             .marshal()
             .mimeMultipart()
-            .toD("${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false")
+            .toD(uploadEndpoint)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isNotEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::throwExceptionOnUnexpectedStatusCode)
@@ -112,7 +116,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     .withHeaders(headers)
                     .withBody(fileData)
                     .request();
-            log.atDebug().log("Upload :: {} rendition of the node: {} successfully uploaded to pre-signed URL: {}", fileUploadRequest.contentType(), nodeId, fileUploadRequest.storageLocation().getPath());
+            log.atInfo().log("Storage :: Rendition of type: {} for node: {} successfully uploaded to pre-signed URL: {}", fileUploadRequest.contentType(), nodeId, fileUploadRequest.storageLocation().getPath());
         }
         catch (Exception e)
         {
@@ -123,7 +127,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
             }
             catch (IOException ioe)
             {
-                log.atDebug().log("Upload :: Stream reset failed due to: {}", ioe.getMessage());
+                log.atWarn().log("Storage :: Rendition stream NOT reset properly after node %s content upload fail due to: %s".formatted(nodeId, ioe.getMessage()), ioe);
                 throw e;
             }
         }

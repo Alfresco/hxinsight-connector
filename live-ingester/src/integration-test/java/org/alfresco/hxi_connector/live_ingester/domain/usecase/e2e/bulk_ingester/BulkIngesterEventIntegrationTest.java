@@ -162,6 +162,5 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
-
     }
 }

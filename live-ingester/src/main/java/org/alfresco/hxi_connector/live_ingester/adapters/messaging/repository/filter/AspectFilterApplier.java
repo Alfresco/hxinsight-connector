@@ -49,7 +49,7 @@ public class AspectFilterApplier implements RepoEventFilterApplier
         final Set<String> aspectNames = SetUtils.emptyIfNull(nodeResource.getAspectNames());
         final List<String> allowed = filter.aspect().allow();
         final List<String> denied = filter.aspect().deny();
-        log.atDebug().log("Applying aspect filters on node id: {}", nodeResource.getId());
+        log.atDebug().log("Filtering :: Applying aspect filters on node id: {}", nodeResource.getId());
         return CollectionFilter.filter(aspectNames, allowed, denied);
     }
 

@@ -72,7 +72,7 @@ public class IngestContentCommandHandler
 
         ensureThat(!downloadedFile.isEmpty(), () -> new EmptyRenditionException(nodeId));
 
-        log.atDebug().log("Transform :: Downloaded from SFS content of node: {} in file with ID: {}", nodeId, fileId);
+        log.atDebug().log("Transform :: Rendition download complete for node: {} as file with ID: {}", nodeId, fileId);
 
         IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, command.mimeType(), nodeId);
 

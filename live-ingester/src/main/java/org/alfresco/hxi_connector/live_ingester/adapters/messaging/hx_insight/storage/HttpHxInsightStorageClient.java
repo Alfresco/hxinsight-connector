@@ -55,11 +55,13 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
     public IngestContentResponse upload(File file, String contentType, String nodeId)
     {
         PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation();
-        log.atDebug().log("Storage :: Received target location with transfer ID: {} for node: {}", preSignedUrlResponse.id(), nodeId);
+        log.atDebug().log("Storage :: Received target location with transfer ID: {} for node: {}",
+                preSignedUrlResponse.id(), nodeId);
         URL preSignedUrl = preSignedUrlResponse.url();
         try (InputStream fileData = file.data())
         {
-            log.atDebug().log("Upload :: Transferring to S3 content of node: {} with size of {} bytes", nodeId, fileData.available());
+            log.atDebug().log("Storage :: Uploading content rendition of node: {} with size of {} bytes to: {}",
+                    nodeId, fileData.available(), preSignedUrl.getPath());
             fileUploader.upload(new FileUploadRequest(new File(fileData), contentType, preSignedUrl), nodeId);
         }
         catch (IOException e)

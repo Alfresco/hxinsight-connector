@@ -26,6 +26,9 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request;
 
+import static org.apache.camel.LoggingLevel.DEBUG;
+import static org.apache.camel.LoggingLevel.ERROR;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,12 +36,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.event.Level;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.model.ATSTransformRequest;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
 
@@ -57,26 +62,34 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
     @Override
     public void configure()
     {
+        String transformEndpoint = integrationProperties.alfresco().transform().request().endpoint();
+        onException(Exception.class)
+                .log(ERROR, log, "Transform :: Unexpected response while requesting for transformation - Endpoint: %s".formatted(transformEndpoint))
+                .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
+                .stop();
+
         from(LOCAL_ENDPOINT)
                 .routeId(ROUTE_ID)
                 .marshal()
                 .json()
-                .to(integrationProperties.alfresco().transform().request().endpoint());
+                .log(DEBUG, log, "Transform :: Sending transform request: ${body}")
+                .to(transformEndpoint);
     }
 
     @Override
     public void requestTransform(TransformRequest transformRequest)
     {
         ATSTransformRequest atsTransformRequest = toTransformRequest(transformRequest, 0);
-        log.info("Sending request to ATS: {}", atsTransformRequest);
         camelContext.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
+        log.info("Transform :: Successfully sent transform request for node: {} and target type: {}",
+                transformRequest.nodeRef(), transformRequest.targetMimeType());
     }
 
     public void requestTransformRetry(TransformRequest transformRequest, int attempt)
     {
         ATSTransformRequest atsTransformRequest = toTransformRequest(transformRequest, attempt);
-        log.info("Retrying transformation. request: {} attempt: {}", atsTransformRequest, attempt);
+        log.info("Transform :: Redelivering transform request: {} attempt: {}", atsTransformRequest, attempt);
         camelContext.createProducerTemplate()
                 .sendBody(LOCAL_ENDPOINT, atsTransformRequest);
     }
@@ -99,5 +112,4 @@ public class ATSTransformRequester extends RouteBuilder implements TransformRequ
                 transformOptions,
                 transformProperties.response().queueName());
     }
-
 }

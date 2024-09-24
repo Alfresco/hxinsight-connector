@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.ERROR;
 
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
@@ -36,8 +37,8 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
+import org.slf4j.event.Level;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -45,7 +46,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -67,16 +68,16 @@ public class SharedFileStoreClient extends RouteBuilder implements TransformEngi
     public void configure()
     {
         // @formatter:off
+        String fileEndpoint = ENDPOINT_PATTERN.formatted(integrationProperties.alfresco().transform().sharedFileStore().fileEndpoint());
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Unexpected response. Body: ${body}")
+            .log(ERROR, log, "Transform :: Unexpected response while downloading rendition - Endpoint: %s".formatted(fileEndpoint))
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
-        Transform.SharedFileStore sfsProperties = integrationProperties.alfresco().transform().sharedFileStore();
-        String sfsEndpoint = ENDPOINT_PATTERN.formatted(sfsProperties.fileEndpoint());
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
-            .toD(sfsEndpoint)
+            .toD(fileEndpoint)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .process(this::convertBodyToFile)

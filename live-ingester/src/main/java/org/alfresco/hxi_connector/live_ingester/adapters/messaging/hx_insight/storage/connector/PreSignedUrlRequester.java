@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector;
 
 import static org.apache.camel.Exchange.HTTP_RESPONSE_CODE;
+import static org.apache.camel.LoggingLevel.ERROR;
 
 import static org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
@@ -40,9 +41,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
 import org.apache.camel.Exchange;
-import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
+import org.slf4j.event.Level;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
@@ -53,6 +54,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
@@ -75,8 +77,10 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     public void configure()
     {
         // @formatter:off
+        String storageRequestEndpoint = integrationProperties.hylandExperience().storage().location().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
-            .log(LoggingLevel.ERROR, log, "Storage :: Unexpected response while requesting pre-signed URL. Body: ${body}")
+            .log(ERROR, log, "Storage :: Unexpected response while requesting pre-signed URL - Endpoint: %s".formatted(storageRequestEndpoint))
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
             .process(this::wrapErrorIfNecessary)
             .stop();
 
@@ -84,7 +88,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             .id(ROUTE_ID)
             .setProperty(USER_AGENT_DATA, applicationInfoProvider::getUserAgentData)
             .process(authService::setHxIAuthorizationHeaders)
-            .toD(integrationProperties.hylandExperience().storage().location().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM)
+            .toD(storageRequestEndpoint)
             .choice()
             .when(header(HTTP_RESPONSE_CODE).isEqualTo(String.valueOf(EXPECTED_STATUS_CODE)))
                 .unmarshal()
@@ -164,5 +168,4 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
 
         ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
-
 }
