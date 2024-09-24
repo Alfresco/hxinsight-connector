@@ -52,7 +52,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
 {
     private static final String ROUTE_ID = "transform-events-consumer";
     private static final int EXPECTED_STATUS_CODE = 201;
-    private static final String EXPECTED_STATUS_CODE_REGEX = "[\\s\\S]*\"status\"\\s*:\\s*%s[\\s\\S]*".formatted(EXPECTED_STATUS_CODE);
+    private static final String EXPECTED_STATUS_CODE_REGEX = "[\\s\\S]*\"status\"\\s*:\\s*%s[^0-9][\\s\\S]*".formatted(EXPECTED_STATUS_CODE);
 
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final IntegrationProperties integrationProperties;
