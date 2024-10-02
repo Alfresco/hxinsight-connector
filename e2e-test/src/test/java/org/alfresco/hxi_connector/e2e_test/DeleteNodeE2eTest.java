@@ -69,7 +69,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 @SuppressWarnings("PMD.FieldNamingConventions")
 public class DeleteNodeE2eTest
 {
-    private static final int DELAY_MS = 1000;
+    private static final int DELAY_MS = 1200;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
 
