@@ -55,7 +55,7 @@ class PropertyBasedRepositoryInformationTest
     {
         given(integrationPropertiesMock.alfresco()).willReturn(mock(IntegrationProperties.Alfresco.class));
         given(integrationPropertiesMock.alfresco().repository()).willReturn(mock(Repository.class));
-        String versionOverride = "23.3.0";
+        String versionOverride = "23.4.0-M1";
         given(integrationPropertiesMock.alfresco().repository().versionOverride()).willReturn(versionOverride);
 
         String actualVersion = objectUnderTest.getRepositoryVersion();

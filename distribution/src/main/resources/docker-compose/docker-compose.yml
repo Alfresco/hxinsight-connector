@@ -178,6 +178,7 @@ services:
       APP_CONFIG_PLUGIN_PROCESS_SERVICE: false
       APP_CONFIG_PROVIDER: ECM
       APP_CONFIG_AUTH_TYPE: BASIC
+      APP_CONFIG_PLUGIN_KNOWLEDGE_RETRIEVAL: false
 
   control-center:
     image: quay.io/alfresco/alfresco-control-center:${CONTROL_CENTER_TAG}
