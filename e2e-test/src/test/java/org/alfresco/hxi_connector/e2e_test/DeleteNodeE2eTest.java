@@ -86,7 +86,6 @@ public class DeleteNodeE2eTest
             .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
             .dependsOn(activemq, hxInsightMock, repository);
 
     private RepositoryClient repositoryClient;
