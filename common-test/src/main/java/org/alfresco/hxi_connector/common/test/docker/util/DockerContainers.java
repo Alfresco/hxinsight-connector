@@ -288,7 +288,9 @@ public class DockerContainers
                 .withEnv("ALFRESCO_REPOSITORY_HEALTH_PROBE_INTERVAL_SECONDS", "1")
                 .withExposedPorts(5007)
                 .withStartupTimeout(Duration.ofMinutes(2))
-                .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
+                .waitingFor(Wait.forHttp("/actuator/health/readiness")
+                        .forPort(8080)
+                        .withStartupTimeout(Duration.ofMinutes(2)))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("LiveIngesterContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> liveIngester.withNetwork(n).withNetworkAliases(LIVE_INGESTER_ALIAS));
