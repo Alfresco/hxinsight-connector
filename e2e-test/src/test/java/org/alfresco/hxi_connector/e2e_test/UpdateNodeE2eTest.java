@@ -37,7 +37,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 import static com.github.tomakehurst.wiremock.stubbing.Scenario.STARTED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -141,7 +140,7 @@ public class UpdateNodeE2eTest
             .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
-            .dependsOn(activemq, repository, hxInsightMock);
+            .dependsOn(activemq, hxInsightMock, repository);
     @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
             .dependsOn(activemq, hxInsightMock, repository, liveIngester);
@@ -162,7 +161,7 @@ public class UpdateNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))), DELAY_MS);
         WireMock.reset();
     }
@@ -187,7 +186,7 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
         }, DELAY_MS);
-        verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
+        WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     @Test
@@ -206,7 +205,7 @@ public class UpdateNodeE2eTest
 
         // when
         Node updatedNode = repositoryClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
         WireMock.reset();
@@ -223,7 +222,7 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
         }, DELAY_MS);
-        verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
+        WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     @Test
@@ -234,7 +233,7 @@ public class UpdateNodeE2eTest
         Node updatedNode = repositoryClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
 
         // then
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withRequestBody(containing("sourceTimestamp"))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));

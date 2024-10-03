@@ -30,7 +30,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.verify;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
@@ -87,6 +86,7 @@ public class DeleteNodeE2eTest
             .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
+            .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
             .dependsOn(activemq, hxInsightMock, repository);
 
     private RepositoryClient repositoryClient;
@@ -105,7 +105,7 @@ public class DeleteNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))), DELAY_MS);
         WireMock.reset();
 
@@ -113,7 +113,7 @@ public class DeleteNodeE2eTest
         repositoryClient.deleteNode(createdNode.id());
 
         // then
-        RetryUtils.retryWithBackoff(() -> verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing("\"objectId\":\"%s\"".formatted(createdNode.id())))
                 .withRequestBody(containing("\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\""))
                 .withRequestBody(containing("\"sourceTimestamp\""))
