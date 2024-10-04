@@ -31,7 +31,6 @@ import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
-import org.apache.camel.Route;
 import org.springframework.context.event.EventListener;
 
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe.AcsHealthy;
@@ -46,20 +45,20 @@ public class ProcessingStarter
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void startProcessing() throws Exception
     {
-        log.info("Starting Camel routes");
+        log.info("Starting Camel routes: \n\t{}", getRoutesIds());
         camelContext.getRouteController().startAllRoutes();
 
         while (camelContext.getRouteController().isStartingRoutes())
         {
             TimeUnit.MILLISECONDS.sleep(100);
         }
-        log.atInfo().log("All Camel routes started: \n\t{}", getRoutes());
+        log.atInfo().log("All Camel routes started successfully");
     }
 
-    private String getRoutes()
+    private String getRoutesIds()
     {
-        return camelContext.getRouteController().getControlledRoutes().stream()
-                .map(Route::getId)
+        return camelContext.getRoutes().stream()
+                .map(route -> route.getId().concat(" - ").concat(route.getEndpoint().toString()))
                 .collect(Collectors.joining("\n\t"));
     }
 }
