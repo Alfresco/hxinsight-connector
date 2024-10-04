@@ -92,7 +92,7 @@ public class CreateNodeE2eTest
 {
     private static final ObjectMapper objectMapper = new ObjectMapper();
     protected static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int INITIAL_DELAY_MS = 500;
+    private static final int DELAY_MS = 500;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
@@ -134,7 +134,7 @@ public class CreateNodeE2eTest
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
         // wait for repo to load transform config
-        RetryUtils.retryWithBackoff(() -> assertThat(transformRouter.getLogs()).contains("GET Transform Config version"), 800);
+        RetryUtils.retryWithBackoff(() -> assertThat(transformRouter.getLogs()).contains("GET Transform Config version"), 1000);
     }
 
     @AfterEach
@@ -163,7 +163,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, INITIAL_DELAY_MS);
+        }, DELAY_MS);
     }
 
     @Test
@@ -191,7 +191,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, INITIAL_DELAY_MS);
+        }, DELAY_MS);
     }
 
     @Test
@@ -226,7 +226,7 @@ public class CreateNodeE2eTest
 
             assertTrue(properties.has(DENY_ACCESS_PROPERTY));
             assertEquals(Set.of(), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
-        }, INITIAL_DELAY_MS);
+        }, DELAY_MS);
     }
 
     @SneakyThrows

@@ -25,6 +25,9 @@
  */
 package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
@@ -42,7 +45,20 @@ public class ProcessingStarter
     @SuppressWarnings("PMD.SignatureDeclareThrowsException")
     public void startProcessing() throws Exception
     {
-        log.info("Starting camel routes");
+        log.info("Starting Camel routes: \n\t{}", getRoutesIds());
         camelContext.getRouteController().startAllRoutes();
+
+        while (camelContext.getRouteController().isStartingRoutes())
+        {
+            TimeUnit.MILLISECONDS.sleep(100);
+        }
+        log.atInfo().log("All Camel routes started successfully");
+    }
+
+    private String getRoutesIds()
+    {
+        return camelContext.getRoutes().stream()
+                .map(route -> route.getId().concat(" - ").concat(route.getEndpoint().toString()))
+                .collect(Collectors.joining("\n\t"));
     }
 }
