@@ -287,7 +287,6 @@ public class DockerContainers
                 .withEnv("ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL", "http://shared-file-store:8099")
                 .withEnv("ALFRESCO_REPOSITORY_HEALTH_PROBE_INTERVAL_SECONDS", "1")
                 .withExposedPorts(8080, 5007)
-                .withStartupTimeout(Duration.ofMinutes(2))
                 .waitingFor(Wait.forHttp("/actuator/health/readiness")
                         .forPort(8080)
                         .withStartupTimeout(Duration.ofMinutes(2)))
@@ -321,8 +320,10 @@ public class DockerContainers
         GenericContainer<?> predictionApplier = new GenericContainer<>(DockerImageName.parse(PREDICTION_APPLIER_IMAGE).withTag(HXI_CONNECTOR_TAG))
                 .withEnv("JAVA_TOOL_OPTIONS", "-agentlib:jdwp=transport=dt_socket,address=*:5009,server=y,suspend=n")
                 .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
-                .withExposedPorts(5009)
-                .withStartupTimeout(Duration.ofMinutes(2))
+                .withExposedPorts(8080, 5009)
+                .waitingFor(Wait.forHttp("/actuator/health/readiness")
+                        .forPort(8080)
+                        .withStartupTimeout(Duration.ofMinutes(2)))
                 .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("PredictionApplierContainer")));
 
         Optional.ofNullable(network).ifPresent(n -> predictionApplier.withNetwork(n).withNetworkAliases(PREDICTION_APPLIER_ALIAS));

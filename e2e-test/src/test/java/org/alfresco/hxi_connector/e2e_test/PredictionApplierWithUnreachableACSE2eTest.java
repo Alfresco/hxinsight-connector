@@ -42,6 +42,7 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
@@ -78,11 +79,13 @@ public class PredictionApplierWithUnreachableACSE2eTest
             .dependsOn(postgres, activemq, transformRouter, sfs);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
+            .waitingFor(Wait.forLogMessage(".*Started LiveIngesterApplication.*", 1))
             .withEnv("ALFRESCO_REPOSITORY_BASE_URL", "http://localhost:1938/alfresco") // <- random unreachable port
             .dependsOn(activemq, hxInsightMock, awsMock, repository);
 
     @Container
     private static final GenericContainer<?> predictionApplier = createPredictionApplierContainer()
+            .waitingFor(Wait.forLogMessage(".*Started PredictionApplierApplication.*", 1))
             .withEnv("ALFRESCO_REPOSITORY_BASE_URL", "http://localhost:1938/alfresco") // <- random unreachable port
             .dependsOn(activemq, hxInsightMock, repository, liveIngester);
 
