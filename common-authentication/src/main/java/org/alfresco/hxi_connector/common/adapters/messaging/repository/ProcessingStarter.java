@@ -26,10 +26,12 @@
 package org.alfresco.hxi_connector.common.adapters.messaging.repository;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
+import org.apache.camel.Route;
 import org.springframework.context.event.EventListener;
 
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe.AcsHealthy;
@@ -47,13 +49,17 @@ public class ProcessingStarter
         log.info("Starting Camel routes");
         camelContext.getRouteController().startAllRoutes();
 
-        if (log.isDebugEnabled())
+        while (camelContext.getRouteController().isStartingRoutes())
         {
-            while (camelContext.getRouteController().isStartingRoutes())
-            {
-                TimeUnit.MILLISECONDS.sleep(100);
-            }
-            log.debug("All Camel routes started");
+            TimeUnit.MILLISECONDS.sleep(100);
         }
+        log.atInfo().log("All Camel routes started: \n\t{}", getRoutes());
+    }
+
+    private String getRoutes()
+    {
+        return camelContext.getRouteController().getControlledRoutes().stream()
+                .map(Route::getId)
+                .collect(Collectors.joining("\n\t"));
     }
 }
