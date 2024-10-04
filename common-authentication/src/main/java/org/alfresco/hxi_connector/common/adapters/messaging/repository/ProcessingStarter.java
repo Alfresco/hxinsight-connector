@@ -46,10 +46,14 @@ public class ProcessingStarter
     {
         log.info("Starting Camel routes");
         camelContext.getRouteController().startAllRoutes();
-        while (camelContext.getRouteController().isStartingRoutes())
+
+        if (log.isDebugEnabled())
         {
-            TimeUnit.MILLISECONDS.sleep(100);
+            while (camelContext.getRouteController().isStartingRoutes())
+            {
+                TimeUnit.MILLISECONDS.sleep(100);
+            }
+            log.debug("All Camel routes started");
         }
-        log.info("All Camel routes started");
     }
 }
