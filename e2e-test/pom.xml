@@ -4,7 +4,7 @@
     <parent>
         <groupId>org.alfresco</groupId>
         <artifactId>alfresco-hxinsight-connector-parent</artifactId>
-        <version>1.0.1-SNAPSHOT</version>
+        <version>1.0.1-A1</version>
     </parent>
 
     <name>Alfresco Connector for Hyland Experience Insight :: E2E Test</name>
