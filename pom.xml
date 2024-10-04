@@ -68,7 +68,7 @@
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
         <skipE2eTests>${skipTests}</skipE2eTests>
 
-        <alfresco-platform.version>23.3.0</alfresco-platform.version>
+        <alfresco-platform.version>23.4.0-M1</alfresco-platform.version>
         <alfresco-sdk.version>4.9.0</alfresco-sdk.version>
         <alfresco-db-connector.version>4.1.0</alfresco-db-connector.version>
         <alfresco-event-model.version>0.0.68</alfresco-event-model.version>
@@ -103,16 +103,16 @@
         <dist.alfresco.version>${alfresco-platform.version}</dist.alfresco.version>
         <dist.share.version>${alfresco-platform.version}</dist.share.version>
         <dist.postgres.version>14.4</dist.postgres.version>
-        <dist.transform.router.version>4.0.1</dist.transform.router.version>
-        <dist.transform.core.aio.version>5.0.1</dist.transform.core.aio.version>
-        <dist.transform.sfs.version>4.0.1</dist.transform.sfs.version>
-        <dist.activemq.version>5.18.3</dist.activemq.version>
+        <dist.transform.router.version>4.1.4</dist.transform.router.version>
+        <dist.transform.core.aio.version>5.1.4</dist.transform.core.aio.version>
+        <dist.transform.sfs.version>4.1.4</dist.transform.sfs.version>
+        <dist.activemq.version>5.18.5</dist.activemq.version>
         <dist.activemq.docker.tag>${dist.activemq.version}-jre17-rockylinux8</dist.activemq.docker.tag>
-        <dist.digital.workspace.version>5.0.0-10676746076</dist.digital.workspace.version>
-        <dist.control.center.version>9.0.0-10676746076</dist.control.center.version>
+        <dist.digital.workspace.version>5.1.0</dist.digital.workspace.version>
+        <dist.control.center.version>9.1.0</dist.control.center.version>
         <dist.nginx.version>3.4.2</dist.nginx.version>
         <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
-        <dist.search.enterprise.version>4.0.1</dist.search.enterprise.version>
+        <dist.search.enterprise.version>4.1.0</dist.search.enterprise.version>
         <dist.localstack.version>3.2.0</dist.localstack.version>
         <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
         <dist.keycloak.version>24.0.5</dist.keycloak.version>
