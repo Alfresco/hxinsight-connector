@@ -3,7 +3,7 @@
   "agentVersion": "1",
   "question": "This is the question",
   "responseCompleteness": "Complete",
-  "answer": "This is a mocked answer to the question, which reference to the dummy file",
+  "answer": "This is a mocked answer to the question, which references to the dummy file",
   "references": [
     {
       "referenceId": "1a0b110f-1e09-4ca2-b367-fe25e4964a4e",
