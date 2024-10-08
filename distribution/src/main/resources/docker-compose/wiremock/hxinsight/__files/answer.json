@@ -3,10 +3,10 @@
   "agentVersion": "1",
   "question": "This is the question",
   "responseCompleteness": "Complete",
-  "answer": "This is the answer to the question",
+  "answer": "This is a mocked answer to the question, which references to the dummy file",
   "references": [
     {
-      "referenceId": "276718b0-c3ab-4e11-81d5-96dbbb540269",
+      "referenceId": "1a0b110f-1e09-4ca2-b367-fe25e4964a4e",
       "textReference": "This is the text reference which led to generating the answer"
     }
   ]
