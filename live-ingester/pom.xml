@@ -78,7 +78,7 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>acs-enterprise-event-model</artifactId>
+            <artifactId>acs-event-model</artifactId>
         </dependency>
 
         <dependency>

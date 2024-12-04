@@ -55,9 +55,9 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.alfresco.repo.event.v1.model.EventData;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -373,12 +373,12 @@ class PropertiesMapperTest
 
         setType(event, NODE_CREATED);
 
-        given(event.getData()).willReturn(mock(EnterpriseEventData.class));
+        given(event.getData()).willReturn(mock(EventData.class));
         given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
-        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
@@ -399,12 +399,12 @@ class PropertiesMapperTest
 
         setType(event, NODE_CREATED);
 
-        given(event.getData()).willReturn(mock(EnterpriseEventData.class));
+        given(event.getData()).willReturn(mock(EventData.class));
         given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
-        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
-        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
@@ -426,12 +426,12 @@ class PropertiesMapperTest
 
         setType(event, PERMISSION_UPDATED);
 
-        given(event.getData()).willReturn(mock(EnterpriseEventData.class));
+        given(event.getData()).willReturn(mock(EventData.class));
         given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
-        given(((EnterpriseEventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-        given(((EnterpriseEventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
@@ -469,7 +469,7 @@ class PropertiesMapperTest
             return event.getData();
         }
 
-        EnterpriseEventData<NodeResource> data = mock();
+        EventData<NodeResource> data = mock();
 
         given(event.getData()).willReturn(data);
 
