@@ -49,10 +49,10 @@ import java.util.function.Function;
 
 import lombok.NoArgsConstructor;
 
-import org.alfresco.enterprise.repo.event.v1.model.EnterpriseEventData;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
+import org.alfresco.repo.event.v1.model.EventData;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
@@ -107,26 +107,26 @@ public class PropertyMappingHelper
 
     public static Optional<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
+        EventData eventData = (EventData) event.getData();
 
-        if (enterpriseEventData.getResourceReaderAuthorities() == null)
+        if (eventData.getResourceReaderAuthorities() == null)
         {
             return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, Set.of(GROUP_EVERYONE)));
         }
 
-        return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, enterpriseEventData.getResourceReaderAuthorities()));
+        return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, eventData.getResourceReaderAuthorities()));
     }
 
     public static Optional<PropertyDelta<?>> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        EnterpriseEventData enterpriseEventData = (EnterpriseEventData) event.getData();
+        EventData eventData = (EventData) event.getData();
 
-        if (enterpriseEventData.getResourceDeniedAuthorities() == null)
+        if (eventData.getResourceDeniedAuthorities() == null)
         {
             return Optional.of(PropertyDelta.updated(DENY_ACCESS, Set.of()));
         }
 
-        return Optional.of(PropertyDelta.updated(DENY_ACCESS, enterpriseEventData.getResourceDeniedAuthorities()));
+        return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));
     }
 
     private static Long toMilliseconds(ZonedDateTime time)

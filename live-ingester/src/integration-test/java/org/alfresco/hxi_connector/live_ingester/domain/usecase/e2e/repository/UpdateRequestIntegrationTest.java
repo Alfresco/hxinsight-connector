@@ -190,6 +190,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       }
                     },
                     "resourceBefore": {
+                      "@type": "NodeResource",
                       "content": {
                         "mimeType": "application/pdf",
                         "sizeInBytes": 123,
@@ -767,6 +768,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "isFile": false
                     },
                     "resourceBefore": {
+                      "@type": "NodeResource",
                       "properties": {
                         "cm:preferenceValues": null
                       },
@@ -854,6 +856,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ]
                     },
                     "resourceBefore": {
+                      "@type": "NodeResource",
                       "name": "Old Folder"
                     }
                   }
