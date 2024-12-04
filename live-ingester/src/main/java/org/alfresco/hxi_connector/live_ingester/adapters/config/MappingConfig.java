@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import org.alfresco.repo.event.databind.ObjectMapperFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -36,6 +35,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.DeleteNo
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeEventSerializer;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
+import org.alfresco.repo.event.databind.ObjectMapperFactory;
 
 @Configuration
 public class MappingConfig
