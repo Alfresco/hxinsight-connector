@@ -107,26 +107,26 @@ public class PropertyMappingHelper
 
     public static Optional<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        EventData EventData = (EventData) event.getData();
+        EventData eventData = (EventData) event.getData();
 
-        if (EventData.getResourceReaderAuthorities() == null)
+        if (eventData.getResourceReaderAuthorities() == null)
         {
             return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, Set.of(GROUP_EVERYONE)));
         }
 
-        return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, EventData.getResourceReaderAuthorities()));
+        return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, eventData.getResourceReaderAuthorities()));
     }
 
     public static Optional<PropertyDelta<?>> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        EventData EventData = (EventData) event.getData();
+        EventData eventData = (EventData) event.getData();
 
-        if (EventData.getResourceDeniedAuthorities() == null)
+        if (eventData.getResourceDeniedAuthorities() == null)
         {
             return Optional.of(PropertyDelta.updated(DENY_ACCESS, Set.of()));
         }
 
-        return Optional.of(PropertyDelta.updated(DENY_ACCESS, EventData.getResourceDeniedAuthorities()));
+        return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));
     }
 
     private static Long toMilliseconds(ZonedDateTime time)
