@@ -1,0 +1,7 @@
+url: /v1/presigned-urls
+headers:
+  authorization: string
+  content-type: application/json
+  hxp-environment: string
+  user-agent: string
+  count: string

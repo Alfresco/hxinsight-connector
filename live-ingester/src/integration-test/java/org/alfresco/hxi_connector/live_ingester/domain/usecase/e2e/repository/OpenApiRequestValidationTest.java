@@ -34,6 +34,9 @@ import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
+
 public class OpenApiRequestValidationTest
 {
 
@@ -43,13 +46,9 @@ public class OpenApiRequestValidationTest
     @Test
     void testRequestToPresignedUrls()
     {
-        Request request = SimpleRequest.Builder.post("/v1/presigned-urls")
-                .withHeader("authorization", "string")
-                .withHeader("content-type", "application/json")
-                .withHeader("hxp-environment", "string")
-                .withHeader("user-agent", "string")
-                .withHeader("count", "string")
-                .build();
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/get-presigned-url-request.yml");
+
+        Request request = makeRequest(hxInsightRequest);
 
         assertThat(classUnderTest.validateRequest(request).getMessages()).isEqualTo(Collections.emptyList());
     }
@@ -57,51 +56,18 @@ public class OpenApiRequestValidationTest
     @Test
     void testRequestToIngestionEvents()
     {
-        Request request = SimpleRequest.Builder.post("/v1/ingestion-events")
-                .withHeader("authorization", "string")
-                .withHeader("content-type", "application/json")
-                .withHeader("hxp-environment", "string")
-                .withHeader("user-agent", "string")
-                .withBody(expectedBody)
-                .build();
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/create-document-request.yml");
+
+        Request request = makeRequest(hxInsightRequest);
 
         // assertThat(classUnderTest.validateRequest(request).getMessages()).isEqualTo(expectedBody);
         assertThat(classUnderTest.validateRequest(request).getMessages()).isEqualTo(Collections.emptyList());
     }
 
-    String expectedBody = """
-            [
-              {
-                "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                "eventType": "create",
-                "sourceTimestamp": 1611227656423,
-                "properties": {
-                  "cm:autoVersion": {"value": true},
-                  "createdAt": {"value": 1611227655695},
-                  "modifiedAt": {"value" : 1611227655695},
-                  "cm:versionType": {"value": "MAJOR"},
-                  "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                  "cm:name": {
-                    "value": "purchase-order-scan.doc",
-                    "annotation" : "name"
-                  },
-                  "type": {"value": "cm:content"},
-                  "createdBy": {"value": "admin"},
-                  "modifiedBy": {"value": "admin"},
-                  "cm:content": {
-                    "file": {
-                      "content-metadata": {
-                        "size": 531152,
-                        "name": "purchase-order-scan.doc",
-                        "content-type": "application/msword"
-                      }
-                    }
-                  },
-                  "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                  "DENY_ACCESS": {"value": []}
-                }
-              }
-            ]""";
-
+    private static Request makeRequest(HxInsightRequest hxInsightRequest)
+    {
+        SimpleRequest.Builder builder = SimpleRequest.Builder.post(hxInsightRequest.url());
+        hxInsightRequest.headers().forEach(builder::withHeader);
+        return builder.withBody(hxInsightRequest.body()).build();
+    }
 }
