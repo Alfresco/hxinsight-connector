@@ -30,6 +30,8 @@ import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQ
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
 public class CreateRequestIntegrationTest extends E2ETestBase
 {
@@ -87,41 +89,8 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedBody = """
-                [
-                  {
-                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "create",
-                    "sourceTimestamp": 1611227656423,
-                    "properties": {
-                      "cm:autoVersion": {"value": true},
-                      "createdAt": {"value": 1611227655695},
-                      "modifiedAt": {"value" : 1611227655695},
-                      "cm:versionType": {"value": "MAJOR"},
-                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
-                      "cm:name": {
-                        "value": "purchase-order-scan.doc",
-                        "annotation" : "name"
-                      },
-                      "type": {"value": "cm:content"},
-                      "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "admin"},
-                      "cm:content": {
-                        "file": {
-                          "content-metadata": {
-                            "size": 531152,
-                            "name": "purchase-order-scan.doc",
-                            "content-type": "application/msword"
-                          }
-                        }
-                      },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
-                    }
-                  }
-                ]""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        HxInsightRequest request = RequestLoader.load("/expected-hxinsight-requests/create-document-request.yml");
+        containerSupport.expectHxIngestMessageReceived(request.body());
 
         String expectedATSRequest = """
                 {
