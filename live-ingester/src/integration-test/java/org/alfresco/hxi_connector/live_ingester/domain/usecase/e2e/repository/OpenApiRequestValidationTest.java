@@ -27,8 +27,6 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Collections;
-
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
@@ -50,18 +48,37 @@ public class OpenApiRequestValidationTest
 
         Request request = makeRequest(hxInsightRequest);
 
-        assertThat(classUnderTest.validateRequest(request).getMessages()).isEqualTo(Collections.emptyList());
+        assertThat(classUnderTest.validateRequest(request).getMessages()).isEmpty();
     }
 
     @Test
-    void testRequestToIngestionEvents()
+    void testCreateRequestToIngestionEvents()
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/create-document-request.yml");
 
         Request request = makeRequest(hxInsightRequest);
 
-        // assertThat(classUnderTest.validateRequest(request).getMessages()).isEqualTo(expectedBody);
-        assertThat(classUnderTest.validateRequest(request).getMessages()).isEqualTo(Collections.emptyList());
+        assertThat(classUnderTest.validateRequest(request).getMessages()).isEmpty();
+    }
+
+    @Test
+    void testUpdateRequestToIngestionEvents()
+    {
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/update-document-request.yml");
+
+        Request request = makeRequest(hxInsightRequest);
+
+        assertThat(classUnderTest.validateRequest(request).getMessages()).isEmpty();
+    }
+
+    @Test
+    void testDeleteRequestToIngestionEvents()
+    {
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/delete-document-request.yml");
+
+        Request request = makeRequest(hxInsightRequest);
+
+        assertThat(classUnderTest.validateRequest(request).getMessages()).isEmpty();
     }
 
     private static Request makeRequest(HxInsightRequest hxInsightRequest)

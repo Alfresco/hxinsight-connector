@@ -1,6 +1,6 @@
 url: /v1/ingestion-events
 headers:
-  authorization: application/json
+  authorization: string
   content-type: application/json
   hxp-environment: string
   user-agent: string
