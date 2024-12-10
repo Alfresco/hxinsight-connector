@@ -34,22 +34,23 @@ import java.util.Map;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class RequestLoader
 {
-    private final static ObjectMapper jsonMapper = new ObjectMapper();
-    private final static ObjectMapper yamlMapper = new ObjectMapper(new YAMLFactory());
+    private final static ObjectMapper JSON_MAPPER = new ObjectMapper();
+    private final static ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
 
     public static HxInsightRequest load(String path)
     {
         Map<String, Object> data;
         try (InputStream stream = HxInsightRequest.class.getResourceAsStream(path))
         {
-            data = yamlMapper.readValue(stream.readAllBytes(), HashMap.class);
+            data = YAML_MAPPER.readValue(stream.readAllBytes(), HashMap.class);
         }
         catch (IOException e)
         {
@@ -61,7 +62,7 @@ public class RequestLoader
         {
             try
             {
-                bodyAsString = jsonMapper.writeValueAsString(body);
+                bodyAsString = JSON_MAPPER.writeValueAsString(body);
             }
             catch (JsonProcessingException e)
             {
