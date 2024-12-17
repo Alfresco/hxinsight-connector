@@ -30,6 +30,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
+import io.swagger.v3.parser.core.models.ParseOptions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
@@ -38,8 +40,21 @@ import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 public class OpenApiRequestValidationTest
 {
 
-    private final OpenApiInteractionValidator classUnderTest = OpenApiInteractionValidator.createForSpecificationUrl("http://hxai-data-platform-dev-swagger-ui.s3-website-us-east-1.amazonaws.com/docs/insight-ingestion-api-swagger.json")
-            .build();
+    private static OpenApiInteractionValidator classUnderTest;
+
+    @BeforeAll
+    static void setUp()
+    {
+        final ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolveFully(true);
+        parseOptions.setFlatten(true);
+        parseOptions.setFlattenComposedSchemas(true);
+
+        classUnderTest = OpenApiInteractionValidator
+                .createForSpecificationUrl("http://hxai-data-platform-dev-swagger-ui.s3-website-us-east-1.amazonaws.com/docs/insight-ingestion-api-swagger.json")
+                .withParseOptions(parseOptions)
+                .build();
+    }
 
     @Test
     void testRequestToPresignedUrls()
