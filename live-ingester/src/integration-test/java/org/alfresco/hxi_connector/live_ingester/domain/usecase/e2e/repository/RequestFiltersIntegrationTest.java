@@ -1179,12 +1179,14 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
 
         // then send a delete event
         String expectedBody = """
-                  {
+                  [
+                    {
                       "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e14",
                       "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                       "sourceTimestamp": 1611656982995,
                       "eventType" : "delete"
                     }
+                  ]
                 """;
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
@@ -1261,12 +1263,14 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
 
         // then send a delete event
         String expectedBody = """
-                  {
+                  [
+                    {
                       "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e15",
                       "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                       "sourceTimestamp" : 1611656982995,
                       "eventType" : "delete"
                     }
+                  ]
                 """;
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
