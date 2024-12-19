@@ -86,6 +86,7 @@
         <wiremock-testcontainers-module.version>1.0-alpha-14</wiremock-testcontainers-module.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
+        <swagger-request-validator.version>2.44.1</swagger-request-validator.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
@@ -293,6 +294,11 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.atlassian.oai</groupId>
+                <artifactId>swagger-request-validator-core</artifactId>
+                <version>${swagger-request-validator.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

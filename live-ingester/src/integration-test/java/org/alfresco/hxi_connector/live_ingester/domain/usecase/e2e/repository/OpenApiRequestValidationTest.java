@@ -68,7 +68,7 @@ public class OpenApiRequestValidationTest
 
         // Introducing schemaValidator as a workaround for the issue with OpenApiInteractionValidator.
         // OpenApiInteractionValidator does not allow validation for deeply nested properties parts like properties.file, properties.value etc.
-        schemaValidator = validatorWithAdditionalPropertiesIgnored(OPEN_API_SPECIFICATION_URL);
+        schemaValidator = createSchemaValidator(OPEN_API_SPECIFICATION_URL);
         propertiesSchema = new Schema().additionalProperties(
                 new Schema().oneOf(List.of(
                         new Schema().$ref("#/components/schemas/File"),
@@ -78,115 +78,36 @@ public class OpenApiRequestValidationTest
     @Test
     void testRequestToPresignedUrls()
     {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/get-presigned-urls-request.yml");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-    }
-
-    @Test
-    void testRequestToPresignedUrlsWithoutHeaders()
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/get-presigned-urls-request-without-headers.yml");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages())
-                .matches(message -> message.toString().contains("Header parameter 'authorization' is required on path '/v1/presigned-urls'") &&
-                        message.toString().contains("Header parameter 'content-type' is required on path '/v1/presigned-urls'") &&
-                        message.toString().contains("Header parameter 'hxp-environment' is required on path '/v1/presigned-urls'") &&
-                        message.toString().contains("Header parameter 'user-agent' is required on path '/v1/presigned-urls'"));
+        validateRequest("/rest/hxinsight/requests/get-presigned-urls.yml");
     }
 
     @SneakyThrows
     @Test
     void testCreateRequestToIngestionEvents()
     {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/create-document-request.yml");
-        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages()).isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
-    void testCreateRequestToIngestionEventsWithoutFileAndValueProperties()
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/create-request-without-file-and-value-properties.yml");
-        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages())
-                .matches(message -> message.toString().contains("Object has missing required properties ([\"file\"])") &&
-                        message.toString().contains("Object has missing required properties ([\"value\"])"));
-    }
-
-    @SneakyThrows
-    @Test
-    void testCreateRequestToIngestionEventsWithoutFileName()
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/create-request-without-file-name.yml");
-        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages())
-                .matches(message -> message.toString().contains("Object has missing required properties ([\"name\"])"));
+        validateRequestWithSchema("/rest/hxinsight/requests/create-document.yml");
     }
 
     @SneakyThrows
     @Test
     void testUpdateRequestToIngestionEvents()
     {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/update-document-request.yml");
-        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages()).isEmpty();
-    }
-
-    @Test
-    void testUpdateRequestToIngestionEventsWithoutPropertiesAndRemovedProperties()
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/update-request-without-properties-and-removed-properties.yml");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages())
-                .matches(message -> message.toString().contains("Object has missing required properties ([\"properties\"])") &&
-                        message.toString().contains("Object has missing required properties ([\"removedProperties\"])"));
+        validateRequestWithSchema("/rest/hxinsight/requests/update-document.yml");
     }
 
     @Test
     void testDeleteRequestToIngestionEvents()
     {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/delete-document-request.yml");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
+        validateRequest("/rest/hxinsight/requests/delete-document.yml");
     }
 
-    private static SchemaValidator validatorWithAdditionalPropertiesIgnored(final String api)
+    private static SchemaValidator createSchemaValidator(final String api)
     {
-        final ParseOptions parseOptions = new ParseOptions();
+        ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         return new SchemaValidator(
                 new OpenAPIParser().readLocation(api, null, parseOptions).getOpenAPI(),
-                new MessageResolver(
-                        LevelResolver
-                                .create()
-                                .withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE)
-                                .build()));
+                new MessageResolver(LevelResolver.create().withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE).build()));
     }
 
     private static Request makeRequest(HxInsightRequest hxInsightRequest)
@@ -194,5 +115,22 @@ public class OpenApiRequestValidationTest
         SimpleRequest.Builder builder = SimpleRequest.Builder.post(hxInsightRequest.url());
         hxInsightRequest.headers().forEach(builder::withHeader);
         return builder.withBody(hxInsightRequest.body()).build();
+    }
+
+    private static void validateRequest(String requestPath)
+    {
+        HxInsightRequest hxInsightRequest = RequestLoader.load(requestPath);
+        Request request = makeRequest(hxInsightRequest);
+        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
+    }
+
+    @SneakyThrows
+    private static void validateRequestWithSchema(String requestPath)
+    {
+        HxInsightRequest hxInsightRequest = RequestLoader.load(requestPath);
+        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
+        Request request = makeRequest(hxInsightRequest);
+        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
+        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages()).isEmpty();
     }
 }

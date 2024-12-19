@@ -104,7 +104,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        HxInsightRequest request = RequestLoader.load("/expected-hxinsight-requests/update-document-request.yml");
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/update-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
     }
 

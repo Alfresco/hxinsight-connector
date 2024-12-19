@@ -89,7 +89,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        HxInsightRequest request = RequestLoader.load("/expected-hxinsight-requests/create-document-request.yml");
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
         String expectedATSRequest = """

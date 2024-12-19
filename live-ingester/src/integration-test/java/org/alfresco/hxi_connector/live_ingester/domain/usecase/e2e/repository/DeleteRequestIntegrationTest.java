@@ -61,7 +61,7 @@ class DeleteRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        HxInsightRequest request = RequestLoader.load("/expected-hxinsight-requests/delete-document-request.yml");
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/delete-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
     }
 }
