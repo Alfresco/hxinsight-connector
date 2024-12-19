@@ -78,36 +78,60 @@ public class OpenApiRequestValidationTest
     @Test
     void testRequestToPresignedUrls()
     {
-        validateRequest("/rest/hxinsight/requests/get-presigned-urls.yml");
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/get-presigned-urls.yml");
+
+        Request request = makeRequest(hxInsightRequest);
+
+        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void testCreateRequestToIngestionEvents()
     {
-        validateRequestWithSchema("/rest/hxinsight/requests/create-document.yml");
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/create-document.yml");
+        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
+
+        Request request = makeRequest(hxInsightRequest);
+
+        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
+        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages()).isEmpty();
     }
 
     @SneakyThrows
     @Test
     void testUpdateRequestToIngestionEvents()
     {
-        validateRequestWithSchema("/rest/hxinsight/requests/update-document.yml");
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/update-document.yml");
+        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
+
+        Request request = makeRequest(hxInsightRequest);
+
+        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
+        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages()).isEmpty();
     }
 
     @Test
     void testDeleteRequestToIngestionEvents()
     {
-        validateRequest("/rest/hxinsight/requests/delete-document.yml");
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/delete-document.yml");
+
+        Request request = makeRequest(hxInsightRequest);
+
+        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
 
     private static SchemaValidator createSchemaValidator(final String api)
     {
-        ParseOptions parseOptions = new ParseOptions();
+        final ParseOptions parseOptions = new ParseOptions();
         parseOptions.setResolve(true);
         return new SchemaValidator(
                 new OpenAPIParser().readLocation(api, null, parseOptions).getOpenAPI(),
-                new MessageResolver(LevelResolver.create().withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE).build()));
+                new MessageResolver(
+                        LevelResolver
+                                .create()
+                                .withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE)
+                                .build()));
     }
 
     private static Request makeRequest(HxInsightRequest hxInsightRequest)
@@ -115,22 +139,5 @@ public class OpenApiRequestValidationTest
         SimpleRequest.Builder builder = SimpleRequest.Builder.post(hxInsightRequest.url());
         hxInsightRequest.headers().forEach(builder::withHeader);
         return builder.withBody(hxInsightRequest.body()).build();
-    }
-
-    private static void validateRequest(String requestPath)
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load(requestPath);
-        Request request = makeRequest(hxInsightRequest);
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-    }
-
-    @SneakyThrows
-    private static void validateRequestWithSchema(String requestPath)
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load(requestPath);
-        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
-        Request request = makeRequest(hxInsightRequest);
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-        assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages()).isEmpty();
     }
 }
