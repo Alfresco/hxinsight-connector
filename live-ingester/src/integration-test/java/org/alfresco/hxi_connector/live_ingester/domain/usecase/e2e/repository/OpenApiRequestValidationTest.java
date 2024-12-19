@@ -25,11 +25,22 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
+import static com.atlassian.oai.validator.schema.SchemaValidator.ADDITIONAL_PROPERTIES_KEY;
 import static org.assertj.core.api.Assertions.assertThat;
+
+import java.util.List;
 
 import com.atlassian.oai.validator.OpenApiInteractionValidator;
 import com.atlassian.oai.validator.model.Request;
 import com.atlassian.oai.validator.model.SimpleRequest;
+import com.atlassian.oai.validator.report.LevelResolver;
+import com.atlassian.oai.validator.report.MessageResolver;
+import com.atlassian.oai.validator.report.ValidationReport;
+import com.atlassian.oai.validator.schema.SchemaValidator;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.swagger.parser.OpenAPIParser;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -40,20 +51,25 @@ import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 public class OpenApiRequestValidationTest
 {
 
+    private static final String OPEN_API_SPECIFICATION_URL = "http://hxai-data-platform-dev-swagger-ui.s3-website-us-east-1.amazonaws.com/docs/insight-ingestion-api-swagger.json";
     private static OpenApiInteractionValidator classUnderTest;
+    private static Schema propertiesSchema;
+    private static SchemaValidator schemaValidator;
 
     @BeforeAll
     static void setUp()
     {
-        final ParseOptions parseOptions = new ParseOptions();
-        parseOptions.setResolveFully(true);
-        parseOptions.setFlatten(true);
-        parseOptions.setFlattenComposedSchemas(true);
 
         classUnderTest = OpenApiInteractionValidator
-                .createForSpecificationUrl("http://hxai-data-platform-dev-swagger-ui.s3-website-us-east-1.amazonaws.com/docs/insight-ingestion-api-swagger.json")
-                .withParseOptions(parseOptions)
+                .createForSpecificationUrl(OPEN_API_SPECIFICATION_URL)
+                .withLevelResolver(LevelResolver.create().withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE).build())
                 .build();
+
+        schemaValidator = validatorWithAdditionalPropertiesIgnored(OPEN_API_SPECIFICATION_URL);
+        propertiesSchema = new Schema().additionalProperties(
+                new Schema().oneOf(List.of(
+                        new Schema().$ref("#/components/schemas/File"),
+                        new Schema().$ref("#/components/schemas/Value"))));
     }
 
     @Test
@@ -67,23 +83,25 @@ public class OpenApiRequestValidationTest
     }
 
     @Test
-    void testCreateRequestToIngestionEvents()
+    void testCreateRequestToIngestionEvents() throws Exception
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/create-document-request.yml");
 
         Request request = makeRequest(hxInsightRequest);
 
         assertThat(classUnderTest.validateRequest(request).getMessages()).isEmpty();
+        validatePropertiesField(hxInsightRequest.body(), propertiesSchema);
     }
 
     @Test
-    void testUpdateRequestToIngestionEvents()
+    void testUpdateRequestToIngestionEvents() throws Exception
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/expected-hxinsight-requests/update-document-request.yml");
 
         Request request = makeRequest(hxInsightRequest);
 
         assertThat(classUnderTest.validateRequest(request).getMessages()).isEmpty();
+        validatePropertiesField(hxInsightRequest.body(), propertiesSchema);
     }
 
     @Test
@@ -96,10 +114,36 @@ public class OpenApiRequestValidationTest
         assertThat(classUnderTest.validateRequest(request).getMessages()).isEmpty();
     }
 
+    private static SchemaValidator validatorWithAdditionalPropertiesIgnored(final String api)
+    {
+        final ParseOptions parseOptions = new ParseOptions();
+        parseOptions.setResolve(true);
+        return new SchemaValidator(
+                new OpenAPIParser().readLocation(api, null, parseOptions).getOpenAPI(),
+                new MessageResolver(
+                        LevelResolver
+                                .create()
+                                .withLevel(ADDITIONAL_PROPERTIES_KEY, ValidationReport.Level.IGNORE)
+                                .build()));
+    }
+
     private static Request makeRequest(HxInsightRequest hxInsightRequest)
     {
         SimpleRequest.Builder builder = SimpleRequest.Builder.post(hxInsightRequest.url());
         hxInsightRequest.headers().forEach(builder::withHeader);
         return builder.withBody(hxInsightRequest.body()).build();
+    }
+
+    private void validatePropertiesField(String propertiesBody, Schema propertiesSchema) throws Exception
+    {
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode requestBodyNode = objectMapper.readTree(propertiesBody);
+        JsonNode propertiesNode = requestBodyNode.get(0).get("properties");
+
+        if (propertiesNode != null)
+        {
+            ValidationReport validationReport = schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null);
+            assertThat(validationReport.getMessages()).isEmpty();
+        }
     }
 }
