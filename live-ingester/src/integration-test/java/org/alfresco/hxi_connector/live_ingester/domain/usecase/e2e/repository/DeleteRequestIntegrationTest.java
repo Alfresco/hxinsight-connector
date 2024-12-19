@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 class DeleteRequestIntegrationTest extends E2ETestBase
@@ -59,13 +61,7 @@ class DeleteRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedBody = """
-                {
-                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "delete",
-                    "sourceTimestamp": 1611656982995
-                }""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        HxInsightRequest request = RequestLoader.load("/expected-hxinsight-requests/delete-document-request.yml");
+        containerSupport.expectHxIngestMessageReceived(request.body());
     }
 }

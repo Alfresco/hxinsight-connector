@@ -30,6 +30,8 @@ import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQ
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
 @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
 public class UpdateRequestIntegrationTest extends E2ETestBase
@@ -102,56 +104,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedBody = """
-                [
-                  {
-                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
-                    "sourceTimestamp" : 1611656982995,
-                    "properties": {
-                      "cm:title": {"value": "Purchase Order"},
-                      "aspectsNames": {"value": ["cm:versionable", "cm:author", "cm:titled"]},
-                      "modifiedBy": {"value": "abeecher"},
-                      "createdAt" : {
-                        "value" : 1611227655695
-                      },
-                      "modifiedAt" : {
-                        "value" : 1611227655695
-                      },
-                      "cm:versionLabel" : {
-                        "value" : "1.0"
-                      },
-                      "createdBy" : {
-                        "value" : "admin"
-                      },
-                      "ALLOW_ACCESS" : {
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
-                      "cm:name" : {
-                        "value" : "purchase-order-scan.pdf",
-                        "annotation" : "name"
-                      },
-                      "type" : {
-                        "value" : "cm:content"
-                      },
-                      "DENY_ACCESS" : {
-                        "value" : [ ]
-                      },
-                      "cm:content" : {
-                        "file" : {
-                          "content-metadata" : {
-                            "size" : 531152,
-                            "name" : "purchase-order-scan.pdf",
-                            "content-type" : "application/pdf"
-                          }
-                        }
-                      }
-                    },
-                    "removedProperties": ["cm:versionType", "cm:description"]
-                  }
-                ]""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        HxInsightRequest request = RequestLoader.load("/expected-hxinsight-requests/update-document-request.yml");
+        containerSupport.expectHxIngestMessageReceived(request.body());
     }
 
     @Test
