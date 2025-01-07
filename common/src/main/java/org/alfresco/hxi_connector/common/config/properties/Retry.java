@@ -60,10 +60,8 @@ public class Retry
             JsonEOFException.class,
             MismatchedInputException.class);
 
-    @Min(-1)
-    private int attempts;
-    @PositiveOrZero
-    private int initialDelay;
+    @Min(-1) private int attempts;
+    @PositiveOrZero private int initialDelay;
     @Positive private double delayMultiplier;
     @NotNull private Set<Class<? extends Throwable>> reasons;
 

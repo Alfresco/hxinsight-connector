@@ -169,8 +169,7 @@ public class AlfrescoPropertyMapper
         case DOUBLE -> of(propertyValue.getDoubleValue());
         case STRING -> of(propertyValue.getStringValue());
         case SERIALIZABLE -> deserializeObject(propertyValue);
-        default ->
-        {
+        default -> {
             log.error("Property {} type not recognized. Cannot extract value {}. Node: {}", propertyName, propertyValue, alfrescoNode.getId());
 
             yield empty();
