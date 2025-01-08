@@ -1,7 +1,7 @@
 url: /v1/presigned-urls
 headers:
-  authorization: string
+  authorization: Bearer .*
   content-type: application/json
-  hxp-environment: string
-  user-agent: string
+  hxp-environment: hxai-.*
+  user-agent: ACS HXI Connector/.* ACS/.*
   count: string
