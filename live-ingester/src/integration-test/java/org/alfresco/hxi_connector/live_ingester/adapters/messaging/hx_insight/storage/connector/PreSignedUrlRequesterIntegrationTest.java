@@ -68,12 +68,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -128,7 +128,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
     @SuppressWarnings("PMD.FieldNamingConventions")
     static final WireMockContainer wireMockServer = DockerContainers.createWireMockContainer();
 
-    @SpyBean
+    @MockitoSpyBean
     StorageLocationRequester locationRequester;
 
     @BeforeAll
