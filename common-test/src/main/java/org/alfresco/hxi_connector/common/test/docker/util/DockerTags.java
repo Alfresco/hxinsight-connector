@@ -93,25 +93,6 @@ public class DockerTags
         return value;
     }
 
-    public static String get(String propertyKey)
-    {
-        if (properties == null)
-        {
-            loadProperties(false);
-        }
-
-        if (properties != null)
-        {
-            String property = properties.getProperty(propertyKey);
-            if (property != null && !property.startsWith("@") && !property.endsWith("@"))
-            {
-                return property;
-            }
-        }
-
-        throw new NoSuchElementException("Property: '" + propertyKey + "' not found");
-    }
-
     public static Set<Object> keySet()
     {
         if (properties == null)
@@ -164,7 +145,7 @@ public class DockerTags
 
     public static String getHxiConnectorTag()
     {
-        return get("hxi.connector.tag");
+        return getProperty("hxi.connector.tag");
     }
 
     private static void loadProperties()
