@@ -8,6 +8,8 @@ Connector for sending ACS events to Hx Insight and updating the Repository with 
 
 ### Development Environment
 
+#### To run tests in IntelliJ IDEA you should first build application with `mvn clean install -DskipTests -Pdistribution`
+
 To set up a local developer environment then build the jar, the docker image and finally run the docker-compose environment:
 
 ```bash
