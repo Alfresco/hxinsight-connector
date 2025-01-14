@@ -233,7 +233,7 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
 
   nightly_tests:
-    name: "Run nightly Tests"
+    name: "Run nightly tests"
     runs-on: ubuntu-latest
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     steps:
@@ -245,9 +245,9 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
           distribution: 'adopt'
       - name: "Build application"
-      - run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Run OpenApi Specification tests"
-      - run: mvn test -Dtest=OpenApiRequestValidationTest
+        run: mvn test -Dtest=OpenApiRequestValidationTest
       - name: "Notify on failure"
         if: failure()
         run: |
