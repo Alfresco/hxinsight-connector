@@ -13,6 +13,8 @@ on:
       - fix/**
       - master
       - release/**
+  schedule:
+    - cron: "0 0 * * *"  # Runs every night at midnight
 
 env:
   # Both variables are required to be set before the release process starts .
@@ -228,6 +230,27 @@ jobs:
         run: JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }} && bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
+
+  nightly_tests:
+    name: "Run nightly Tests"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+      - name: "Set up JDK 17"
+        uses: actions/setup-java@v3
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+          distribution: 'adopt'
+      - name: "Build application"
+      - run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+      - name: "Run OpenApi Specification tests"
+      - run: mvn test -Dtest=OpenApiRequestValidationTest
+      - name: "Notify on failure"
+        if: failure()
+        run: |
+          curl -H 'Content-Type: application/json' -d '{"text": "Nightly tests failed. Please check the logs for more details."}' ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
 
   push_docker_images:
     name: "Push docker images"
