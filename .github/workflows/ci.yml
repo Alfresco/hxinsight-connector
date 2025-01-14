@@ -14,7 +14,7 @@ on:
       - master
       - release/**
   schedule:
-    - cron: "*/2 * * * *"  # Runs every night at midnight
+    - cron: "0 0 * * *"  # Runs every night at midnight
 
 env:
   # Both variables are required to be set before the release process starts .
