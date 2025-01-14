@@ -54,7 +54,7 @@ body: [
       "cm:content": {
         "file": {
           "content-metadata": {
-            "size": 531152,
+
             "name": "purchase-order-scan.pdf",
             "content-type": "application/pdf"
           }
