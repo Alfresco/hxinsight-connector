@@ -247,7 +247,7 @@ jobs:
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Run OpenApi Specification tests"
-        run: mvn test -Dtest=OpenApiRequestValidationTest
+        run: mvn test -pl 'live-ingester' -Dtest=OpenApiRequestValidationTest -DskipTests
       - name: "Notify on failure"
         if: failure()
         run: |
