@@ -238,15 +238,12 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
-      - name: "Set up JDK 17"
-        uses: actions/setup-java@v3
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-          distribution: 'adopt'
+      - name: "Set up JDK"
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.8.0
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+        run: mvn clean install -DskipTests -pl live-ingester
       - name: "Run OpenApi Specification tests"
-        run: mvn test -Dtest=OpenApiRequestValidationTest
+        run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
       - name: "Notify on failure"
         if: failure()
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.8.0
