@@ -234,7 +234,7 @@ jobs:
   nightly_tests:
     name: "Run nightly tests"
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'push'
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
@@ -249,8 +249,11 @@ jobs:
         run: mvn test -Dtest=OpenApiRequestValidationTest
       - name: "Notify on failure"
         if: failure()
-        run: |
-          curl -H 'Content-Type: application/json' -d '{"text": "Nightly tests failed. Please check the logs for more details."}' ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.8.0
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          message: "Nightly tests failed"
+          status: failure
 
   push_docker_images:
     name: "Push docker images"
