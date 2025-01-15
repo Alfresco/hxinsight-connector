@@ -14,9 +14,8 @@ on:
       - master
       - release/**
   schedule:
-    - cron: "0 10 * * *"  # Runs every night at midnight
+    - cron: "0 0 * * *"  # Runs every night at midnight
       branches:
-        - feature/**
         - master
 
 env:
