@@ -301,6 +301,7 @@
                 <version>${swagger-request-validator.version}</version>
             </dependency>
         </dependencies>
+
     </dependencyManagement>
 
     <build>
