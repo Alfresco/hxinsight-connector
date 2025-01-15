@@ -14,7 +14,10 @@ on:
       - master
       - release/**
   schedule:
-    - cron: "0 0 * * *"  # Runs every night at midnight
+    - cron: "0 10 * * *"  # Runs every night at midnight
+      branches:
+        - feature/**
+        - master
 
 env:
   # Both variables are required to be set before the release process starts .
@@ -234,7 +237,7 @@ jobs:
   nightly_tests:
     name: "Run nightly tests"
     runs-on: ubuntu-latest
-    if: github.event_name == 'push'
+    if: github.event_name == 'schedule'
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
@@ -250,7 +253,6 @@ jobs:
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           message: "Nightly tests failed"
-          status: failure
 
   push_docker_images:
     name: "Push docker images"
