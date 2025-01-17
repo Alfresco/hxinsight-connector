@@ -74,7 +74,7 @@ public class ContainerSupport
 {
     public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/prediction-batches";
     public static final String REPOSITORY_PREDICTION_ENDPOINT = "/api/-default-/private/hxi/versions/1/nodes/%s/predictions";
-    public static final String USER_AGENT_REGEX = "ACS HXI Connector\\/" + DockerTags.getHxiConnectorTag() + " ACS\\/" + DockerTags.getRepositoryTag().replaceAll("\\.\\d+$", "") + " .*";
+    public static final String USER_AGENT_REGEX = "ACS HXI Connector\\/" + DockerTags.getHxiConnectorTag() + " ACS\\/" + DockerTags.getRepositoryTag() + " .*";
     public static final String DISCOVERY_ENDPOINT = "/api/discovery";
     private static ContainerSupport instance;
     private final Session session;
