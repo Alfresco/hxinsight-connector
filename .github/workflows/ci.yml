@@ -253,7 +253,7 @@ jobs:
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           message: "Nightly tests failed"
-  
+
   push_docker_images:
     name: "Push docker images"
     runs-on: ubuntu-latest
