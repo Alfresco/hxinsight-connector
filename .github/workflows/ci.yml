@@ -13,7 +13,10 @@ on:
       - fix/**
       - master
       - release/**
-
+  schedule:
+        - cron: "0 0 * * *"  # Runs every night at midnight
+          branches:
+            - master
 env:
   # Both variables are required to be set before the release process starts .
   # As the release is triggered by a commit message with "[release]" keyword on a release branch,
@@ -31,6 +34,7 @@ env:
 jobs:
   pre_commit:
     runs-on: ubuntu-latest
+    if: github.event_name != 'schedule'
     outputs:
       java_version: ${{ env.JAVA_VERSION }}
       java_version_supported_by_repo: ${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
@@ -229,6 +233,26 @@ jobs:
       - name: "Run e2e tests"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
 
+  nightly_tests:
+    name: "Run nightly tests"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+      - name: "Set up JDK"
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.8.0
+      - name: "Build application"
+        run: mvn clean install -DskipTests -pl live-ingester
+      - name: "Run OpenApi Specification tests"
+        run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
+      - name: "Notify on failure"
+        if: failure()
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.8.0
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          message: "Nightly tests failed"
+        
   push_docker_images:
     name: "Push docker images"
     runs-on: ubuntu-latest
