@@ -29,7 +29,21 @@ import static java.net.HttpURLConnection.HTTP_CREATED;
 import static java.net.HttpURLConnection.HTTP_NO_CONTENT;
 import static java.net.HttpURLConnection.HTTP_OK;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.configureFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.client.WireMock.exactly;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.put;
+import static com.github.tomakehurst.wiremock.client.WireMock.putRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.serviceUnavailable;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.apache.camel.Exchange.CONTENT_TYPE;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
@@ -37,7 +51,10 @@ import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 import static org.alfresco.hxi_connector.prediction_applier.config.AuthConfig.HXAI_ENVIRONMENT_HEADER;
 
+import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.Session;
@@ -224,6 +241,8 @@ public class ContainerSupport
 
     public void prepareRepositoryToReturnDiscovery()
     {
+        List<String> versionDetails = extractVersionDetails(DockerTags.getRepositoryTag());
+
         WireMock.configureFor(getRepositoryMock());
         givenThat(get(urlPathEqualTo(DISCOVERY_ENDPOINT))
                 .willReturn(aResponse()
@@ -243,9 +262,20 @@ public class ContainerSupport
                                         }
                                     }
                                 }
-                                """.formatted(DockerTags.getRepositoryTag().split("\\.")[0],
-                                DockerTags.getRepositoryTag().split("\\.")[1],
-                                DockerTags.getRepositoryTag().split("\\.")[2]))));
+                                """.formatted(versionDetails.get(0), versionDetails.get(1), versionDetails.get(2)))));
+    }
+
+    public static List<String> extractVersionDetails(String version)
+    {
+        String regex = "(\\d+)\\.(\\d+)\\.(\\d+)(?:-([A-Za-z]+)\\.(\\d+))?";
+        Pattern pattern = Pattern.compile(regex);
+        Matcher matcher = pattern.matcher(version);
+
+        String major = matcher.group(1);
+        String minor = matcher.group(2);
+        String hotfix = matcher.group(3);
+
+        return List.of(major, minor, hotfix);
     }
 
     public void prepareRepositoryToFailAtDiscovery()
