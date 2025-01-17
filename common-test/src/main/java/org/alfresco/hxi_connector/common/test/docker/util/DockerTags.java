@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -50,7 +50,6 @@ public class DockerTags
     private static final String TRANSFORM_ROUTER_TAG_DEFAULT = "4.0.1";
     private static final String TRANSFORM_CORE_AIO_TAG_DEFAULT = "5.0.1";
     private static final String SFS_TAG_DEFAULT = "4.0.1";
-    private static final String HXI_CONNECTOR_TAG_DEFAULT = "1.0.0-SNAPSHOT";
     private static final String PROPERTIES_FILE = "docker-tags.properties";
 
     private static Properties properties;
@@ -146,7 +145,7 @@ public class DockerTags
 
     public static String getHxiConnectorTag()
     {
-        return getOrDefault("hxi.connector.tag", HXI_CONNECTOR_TAG_DEFAULT);
+        return getProperty("hxi.connector.tag");
     }
 
     private static void loadProperties()

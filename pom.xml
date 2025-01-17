@@ -72,13 +72,13 @@
         <alfresco-sdk.version>4.10.0</alfresco-sdk.version>
         <alfresco-db-connector.version>4.3.0-A.1</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.2</alfresco-event-model.version>
-        <spring-boot.version>3.3.6</spring-boot.version>
+        <spring-boot.version>3.4.1</spring-boot.version>
         <spring-camel.version>4.9.0</spring-camel.version>
         <commons-lang.version>3.17.0</commons-lang.version>
         <commons-collections.version>4.4</commons-collections.version>
         <commons-io.version>2.18.0</commons-io.version>
         <pdfbox.version>3.0.3</pdfbox.version>
-        <aws-sdk-s3.version>2.29.33</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.29.46</aws-sdk-s3.version>
         <wiremock.version>3.10.0</wiremock.version>
         <system-stubs.version>2.1.7</system-stubs.version>
 
@@ -86,14 +86,15 @@
         <wiremock-testcontainers-module.version>1.0-alpha-14</wiremock-testcontainers-module.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
+        <swagger-request-validator.version>2.44.1</swagger-request-validator.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
-        <license-maven-plugin.version>2.4.0</license-maven-plugin.version>
+        <license-maven-plugin.version>2.5.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-        <spotless-plugin.version>2.43.0</spotless-plugin.version>
+        <spotless-plugin.version>2.44.1</spotless-plugin.version>
         <jrebel-maven-plugin.version>1.2.1</jrebel-maven-plugin.version>
 
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->
@@ -293,6 +294,11 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.atlassian.oai</groupId>
+                <artifactId>swagger-request-validator-core</artifactId>
+                <version>${swagger-request-validator.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

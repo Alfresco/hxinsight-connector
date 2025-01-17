@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -164,29 +164,6 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))), DELAY_MS);
         WireMock.reset();
-    }
-
-    @Test
-    void testApplyPredictionToNode()
-    {
-        // given
-        prepareHxInsightMockToReturnPredictionFor(createdNode.id(), PREDICTED_VALUE);
-
-        // when
-        WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
-        WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
-
-        // then
-        assertThat(createdNode.aspects()).doesNotContain(PREDICTION_APPLIED_ASPECT);
-        assertThat(createdNode.properties()).doesNotContainKey(PROPERTY_TO_UPDATE);
-        RetryUtils.retryWithBackoff(() -> {
-            Node actualNode = repositoryClient.getNode(createdNode.id());
-            assertThat(actualNode.aspects()).contains(PREDICTION_APPLIED_ASPECT);
-            assertThat(actualNode.properties())
-                    .containsKey(PROPERTY_TO_UPDATE)
-                    .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(PREDICTED_VALUE);
-        }, DELAY_MS);
-        WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     @Test

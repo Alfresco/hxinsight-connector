@@ -55,6 +55,7 @@ public class DeleteNodeEventSerializer extends StdSerializer<DeleteNodeEvent>
     {
         try
         {
+            jgen.writeStartArray();
             jgen.writeStartObject();
 
             jgen.writeStringField("objectId", event.getObjectId());
@@ -63,6 +64,7 @@ public class DeleteNodeEventSerializer extends StdSerializer<DeleteNodeEvent>
             jgen.writeStringField("eventType", serializeEventType(event.getEventType()));
 
             jgen.writeEndObject();
+            jgen.writeEndArray();
         }
         catch (Exception e)
         {
