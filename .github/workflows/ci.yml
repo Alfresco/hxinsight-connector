@@ -298,6 +298,7 @@ jobs:
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       github.event_name != 'pull_request' &&
+      github.event_name != 'schedule' &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
