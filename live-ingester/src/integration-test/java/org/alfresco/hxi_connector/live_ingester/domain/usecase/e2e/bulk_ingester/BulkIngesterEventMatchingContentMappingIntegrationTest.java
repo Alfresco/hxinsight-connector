@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -85,11 +85,11 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "eventType" : "create",
                     "sourceTimestamp": %s,
                     "properties" : {
-                      "type": {"value": "cm:content"},
-                      "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "hr_user"},
-                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
-                      "createdAt": {"value": 1308061016},
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
+                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
+                      "createdAt": {"value": 1308061016, "annotation": "dateCreated"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"
@@ -173,11 +173,11 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "eventType" : "create",
                     "sourceTimestamp": %s,
                     "properties" : {
-                      "type": {"value": "cm:content"},
-                      "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "hr_user"},
-                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"]},
-                      "createdAt": {"value": 1308061016},
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
+                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
+                      "createdAt": {"value": 1308061016, "annotation": "dateCreated"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"

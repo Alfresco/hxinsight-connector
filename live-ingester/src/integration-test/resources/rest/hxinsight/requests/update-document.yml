@@ -19,22 +19,27 @@ body: [
           "cm:versionable",
           "cm:author",
           "cm:titled"
-        ]
+        ],
+        "annotation": "aspects"
       },
       "modifiedBy": {
-        "value": "abeecher"
+        "value": "abeecher",
+        "annotation": "modifiedBy"
       },
       "createdAt": {
-        "value": 1611227655695
+        "value": 1611227655695,
+        "annotation": "dateCreated"
       },
       "modifiedAt": {
-        "value": 1611227655695
+        "value": 1611227655695,
+        "annotation": "dateModified"
       },
       "cm:versionLabel": {
         "value": "1.0"
       },
       "createdBy": {
-        "value": "admin"
+        "value": "admin",
+        "annotation": "createdBy"
       },
       "ALLOW_ACCESS": {
         "value": [
@@ -46,7 +51,8 @@ body: [
         "annotation": "name"
       },
       "type": {
-        "value": "cm:content"
+        "value": "cm:content",
+        "annotation": "type"
       },
       "DENY_ACCESS": {
         "value": []

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -108,17 +108,17 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
-                      "createdAt": {"value": 1709378055695},
-                      "modifiedAt" : {"value" : 1709378055695},
+                      "createdAt": {"value": 1709378055695, "annotation": "dateCreated"},
+                      "modifiedAt" : {"value" : 1709378055695, "annotation" : "dateModified"},
                       "cm:versionType": {"value": "MAJOR"},
-                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
+                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "type": {"value": "cm:content"},
-                      "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "admin"},
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
                         "file": {
                           "content-metadata": {
@@ -268,17 +268,17 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
-                      "createdAt": {"value": 1709378055695},
-                      "modifiedAt": {"value": 1709378055695},
+                      "createdAt": {"value": 1709378055695, "annotation": "dateCreated"},
+                      "modifiedAt": {"value": 1709378055695, "annotation": "dateModified"},
                       "cm:versionType": {"value": "MAJOR"},
-                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"]},
+                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "type": {"value": "cm:content"},
-                      "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "admin"},
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
                         "file": {
                           "content-metadata": {
@@ -433,19 +433,22 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
-                      "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ]},
-                      "modifiedBy": {"value": "abeecher"},
+                      "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ], "annotation" : "aspects"},
+                      "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
                       "createdAt" : {
-                        "value" : 1709378055695
+                        "value" : 1709378055695,
+                        "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1709378055695
+                        "value" : 1709378055695,
+                        "annotation" : "dateModified"
                       },
                       "cm:versionLabel" : {
                         "value" : "1.0"
                       },
                       "createdBy" : {
-                        "value" : "admin"
+                        "value" : "admin",
+                        "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -454,9 +457,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "type" : {
-                        "value" : "cm:content"
-                      },
+                      "type": {"value": "cm:content", "annotation": "type"},
                       "DENY_ACCESS" : {
                         "value" : [ ]
                       },
@@ -626,19 +627,22 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
-                      "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ]},
-                      "modifiedBy": {"value": "abeecher"},
+                      "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ], "annotation": "aspects"},
+                      "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
                       "createdAt" : {
-                        "value" : 1709378055695
+                        "value" : 1709378055695,
+                        "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1709378055695
+                        "value" : 1709378055695,
+                        "annotation" : "dateModified"
                       },
                       "cm:versionLabel" : {
                         "value" : "1.0"
                       },
                       "createdBy" : {
-                        "value" : "admin"
+                        "value" : "admin",
+                        "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
@@ -647,9 +651,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "type" : {
-                        "value" : "cm:content"
-                      },
+                      "type": {"value": "cm:content", "annotation": "type"},
                       "DENY_ACCESS" : {
                         "value" : [ ]
                       },
@@ -1061,16 +1063,19 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : 1709378055695
+                         "value" : 1709378055695,
+                         "annotation" : "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : 1709378055695
+                         "value" : 1709378055695,
+                         "annotation" : "dateModified"
                        },
                        "cm:versionLabel" : {
                          "value" : "1.0"
                        },
                        "createdBy" : {
-                         "value" : "admin"
+                         "value" : "admin",
+                         "annotation" : "createdBy"
                        },
                        "ALLOW_ACCESS" : {
                          "value" : [ "GROUP_EVERYONE" ]
@@ -1083,14 +1088,14 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "annotation" : "name"
                        },
                        "aspectsNames" : {
-                         "value" : [ "cm:versionable", "cm:auditable" ]
+                         "value" : [ "cm:versionable", "cm:auditable" ],
+                         "annotation" : "aspects"
                        },
                        "modifiedBy" : {
-                         "value" : "abeecher"
+                         "value" : "abeecher",
+                         "annotation" : "modifiedBy"
                        },
-                       "type" : {
-                         "value" : "cm:content"
-                       },
+                       "type": {"value": "cm:content", "annotation": "type"},
                        "cm:content" : {
                          "file" : {
                            "content-metadata" : {
@@ -1351,13 +1356,16 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : 1709378055695
+                         "value" : 1709378055695,
+                         "annotation" : "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : 1709378055695
+                         "value" : 1709378055695,
+                         "annotation" : "dateModified"
                        },
                        "createdBy" : {
-                         "value" : "admin"
+                         "value" : "admin",
+                         "annotation" : "createdBy"
                        },
                        "ALLOW_ACCESS" : {
                          "value" : [ "GROUP_EVERYONE" ]
@@ -1370,14 +1378,14 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "annotation" : "name"
                        },
                        "aspectsNames" : {
-                         "value" : [ "cm:versionable", "cm:auditable" ]
+                         "value" : [ "cm:versionable", "cm:auditable" ],
+                         "annotation" : "aspects"
                        },
                        "modifiedBy" : {
-                         "value" : "abeecher"
+                         "value" : "abeecher",
+                         "annotation" : "modifiedBy"
                        },
-                       "type" : {
-                         "value" : "cm:content"
-                       },
+                       "type": {"value": "cm:content", "annotation": "type"},
                        "cm:content" : {
                          "file" : {
                            "content-metadata" : {

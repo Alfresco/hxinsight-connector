@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -87,8 +87,8 @@ class UpdateNodeEventSerializerTest
                     "eventType": "create",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
-                      "createdAt": {"value": 10000},
-                      "modifiedBy": {"value": "000-000-000"}
+                      "createdAt": {"value": 10000, "annotation": "dateCreated"},
+                      "modifiedBy": {"value": "000-000-000", "annotation": "modifiedBy"}
                     }
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
@@ -134,8 +134,8 @@ class UpdateNodeEventSerializerTest
                     "eventType": "create",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
-                      "createdBy": {"value": null},
-                      "modifiedBy": {"value": null}
+                      "createdBy": {"value": null, "annotation": "createdBy"},
+                      "modifiedBy": {"value": null, "annotation": "modifiedBy"}
                     }
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -299,16 +299,19 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "sourceTimestamp" : %s,
                     "properties": {
                        "createdAt" : {
-                         "value" : 1611227655695
+                         "value" : 1611227655695,
+                         "annotation": "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : 1611227655695
+                         "value" : 1611227655695,
+                         "annotation": "dateModified"
                        },
                        "cm:versionLabel" : {
                          "value" : "1.0"
                        },
                        "createdBy" : {
-                         "value" : "admin"
+                         "value" : "admin",
+                         "annotation": "createdBy"
                        },
                        "ALLOW_ACCESS" : {
                          "value" : [ "GROUP_EVERYONE" ]
@@ -321,7 +324,8 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "value" : "2024-05-08T17:00:42.529Z"
                        },
                        "type" : {
-                         "value" : "cm:content"
+                         "value" : "cm:content",
+                         "annotation" : "type"
                        },
                        "DENY_ACCESS" : {
                          "value" : [ ]
@@ -336,8 +340,8 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          }
                        },
                       "cm:title": {"value": "Purchase Order"},
-                      "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"]},
-                      "modifiedBy": {"value": "abeecher"}
+                      "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"], "annotation": "aspects"},
+                      "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"}
                     },
                     "removedProperties": ["cm:versionType", "cm:description"]
                   }

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -177,13 +177,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "sourceTimestamp": 1611656982995,
                             "properties": {
                               "createdAt" : {
-                                "value" : 1611227655695
+                                "value" : 1611227655695,
+                                "annotation" : "dateCreated"
                               },
                               "modifiedAt" : {
-                                "value" : 1611227655695
+                                "value" : 1611227655695,
+                                "annotation" : "dateModified"
                               },
                               "createdBy" : {
-                                "value" : "admin"
+                                "value" : "admin",
+                                "annotation" : "createdBy"
                               },
                               "cm:name" : {
                                 "value" : "purchase-order-scan.pdf",
@@ -193,13 +196,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "value" : [ "GROUP_EVERYONE" ]
                               },
                               "aspectsNames" : {
-                                "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                                "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
+                                "annotation" : "aspects"
                               },
                               "modifiedBy" : {
-                                "value" : "abeecher"
+                                "value" : "abeecher",
+                                "annotation" : "modifiedBy"
                               },
                               "type" : {
-                                "value" : "cm:content"
+                                "value" : "cm:content",
+                                "annotation" : "type"
                               },
                               "DENY_ACCESS" : {
                                 "value" : [ ]
@@ -252,13 +258,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
                       "createdAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateModified"
                       },
                       "createdBy" : {
-                        "value" : "admin"
+                        "value" : "admin",
+                        "annotation" : "createdBy"
                       },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
@@ -268,13 +277,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
-                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
+                        "annotation" : "aspects"
                       },
                       "modifiedBy" : {
-                        "value" : "abeecher"
+                        "value" : "abeecher",
+                        "annotation" : "modifiedBy"
                       },
                       "type" : {
-                        "value" : "cm:content"
+                        "value" : "cm:content",
+                        "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
                         "value" : [ ]
@@ -328,13 +340,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:title": {"value": "Summary for year 2024"},
                       "createdAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateModified"
                       },
                       "createdBy" : {
-                        "value" : "admin"
+                        "value" : "admin",
+                        "annotation" : "createdBy"
                       },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
@@ -344,13 +359,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
-                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
+                        "annotation" : "aspects"
                       },
                       "modifiedBy" : {
-                        "value" : "abeecher"
+                        "value" : "abeecher",
+                        "annotation" : "modifiedBy"
                       },
                       "type" : {
-                        "value" : "cm:content"
+                        "value" : "cm:content",
+                        "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
                         "value" : [ ]
@@ -403,13 +421,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "sourceTimestamp" : 1611656982995,
                     "properties": {
                         "createdAt" : {
-                          "value" : 1611227655695
+                          "value" : 1611227655695,
+                          "annotation" : "dateCreated"
                         },
                         "modifiedAt" : {
-                          "value" : 1611227655695
+                          "value" : 1611227655695,
+                          "annotation" : "dateModified"
                         },
                         "createdBy" : {
-                          "value" : "admin"
+                          "value" : "admin",
+                          "annotation" : "createdBy"
                         },
                         "cm:name" : {
                           "value" : "purchase-order-scan.pdf",
@@ -419,13 +440,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           "value" : [ "GROUP_EVERYONE" ]
                         },
                         "aspectsNames" : {
-                          "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                          "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
+                          "annotation" : "aspects"
                         },
                         "modifiedBy" : {
-                          "value" : "abeecher"
+                          "value" : "abeecher",
+                          "annotation" : "modifiedBy"
                         },
                         "type" : {
-                          "value" : "cm:content"
+                          "value" : "cm:content",
+                          "annotation" : "type"
                         },
                         "DENY_ACCESS" : {
                           "value" : [ ]
@@ -499,13 +523,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
                       "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
                       "createdAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateModified"
                       },
                       "createdBy" : {
-                        "value" : "admin"
+                        "value" : "admin",
+                        "annotation" : "createdBy"
                       },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
@@ -515,13 +542,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
-                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
+                        "annotation" : "aspects"
                       },
                       "modifiedBy" : {
-                        "value" : "abeecher"
+                        "value" : "abeecher",
+                        "annotation" : "modifiedBy"
                       },
                       "type" : {
-                        "value" : "cm:content"
+                        "value" : "cm:content",
+                        "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
                         "value" : [ ]
@@ -650,13 +680,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "Purchase Order"
                       },
                       "createdAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateModified"
                       },
                       "createdBy" : {
-                        "value" : "admin"
+                        "value" : "admin",
+                        "annotation" : "createdBy"
                       },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
@@ -666,13 +699,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
-                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
+                        "annotation" : "aspects"
                       },
                       "modifiedBy" : {
-                        "value" : "abeecher"
+                        "value" : "abeecher",
+                        "annotation" : "modifiedBy"
                       },
                       "type" : {
-                        "value" : "cm:content"
+                        "value" : "cm:content",
+                        "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
                         "value" : [ ]
@@ -742,7 +778,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "sourceTimestamp": 1704798873615,
                     "properties": {
-                      "aspectsNames": {"value": ["cm:preferences", "cm:ownable"]},
+                      "aspectsNames": {"value": ["cm:preferences", "cm:ownable"], "annotation": "aspects"},
                       "cm:homeFolderProvider" : {
                         "value" : "bootstrapHomeFolderProvider"
                       },
@@ -769,7 +805,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "type" : {
-                        "value" : "cm:person"
+                        "value" : "cm:person",
+                        "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
                         "value" : [ ]
@@ -832,25 +869,31 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "createdAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1611227655695
+                        "value" : 1611227655695,
+                        "annotation" : "dateModified"
                       },
                       "createdBy" : {
-                        "value" : "admin"
+                        "value" : "admin",
+                        "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
-                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ]
+                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
+                        "annotation" : "aspects"
                       },
                       "modifiedBy" : {
-                        "value" : "abeecher"
+                        "value" : "abeecher",
+                        "annotation" : "modifiedBy"
                       },
                       "type" : {
-                        "value" : "cm:folder"
+                        "value" : "cm:folder",
+                        "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
                         "value" : [ ]
@@ -961,25 +1004,29 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "value" : true
                     },
                     "aspectsNames" : {
-                      "value" : [ "cm:generalclassifiable", "app:inlineeditable", "cm:author", "cm:titled", "cm:auditable", "cm:taggable" ]
+                      "value" : [ "cm:generalclassifiable", "app:inlineeditable", "cm:author", "cm:titled", "cm:auditable", "cm:taggable" ], "annotation" : "aspects"
                     },
                     "cm:categories" : {
                       "value" : [ ]
                     },
                     "type" : {
-                      "value" : "cm:content"
+                      "value" : "cm:content",
+                      "annotation" : "type"
                     },
                     "cm:description" : {
                       "value" : ""
                     },
                     "createdAt" : {
-                      "value" : 1722339459182
+                      "value" : 1722339459182,
+                      "annotation" : "dateCreated"
                     },
                     "modifiedAt" : {
-                      "value" : 1722339459182
+                      "value" : 1722339459182,
+                      "annotation" : "dateModified"
                     },
                     "createdBy" : {
-                      "value" : "admin"
+                      "value" : "admin",
+                      "annotation" : "createdBy"
                     },
                     "cm:name" : {
                       "value" : "test",
@@ -989,7 +1036,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "value" : ""
                     },
                     "modifiedBy" : {
-                      "value" : "admin"
+                      "value" : "admin",
+                      "annotation" : "modifiedBy"
                     },
                     "cm:content" : {
                       "file" : {

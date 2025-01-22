@@ -12,17 +12,17 @@ body: [
     "sourceTimestamp": 1611227656423,
     "properties": {
       "cm:autoVersion": {"value": true},
-      "createdAt": {"value": 1611227655695},
-      "modifiedAt": {"value" : 1611227655695},
+      "createdAt": {"value": 1611227655695, "annotation" : "dateCreated"},
+      "modifiedAt": {"value" : 1611227655695, "annotation" : "dateModified"},
       "cm:versionType": {"value": "MAJOR"},
-      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
+      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation" : "aspects"},
       "cm:name": {
         "value": "purchase-order-scan.doc",
         "annotation" : "name"
       },
-      "type": {"value": "cm:content"},
-      "createdBy": {"value": "admin"},
-      "modifiedBy": {"value": "admin"},
+      "type": {"value": "cm:content", "annotation" : "type"},
+      "createdBy": {"value": "admin", "annotation" : "createdBy"},
+      "modifiedBy": {"value": "admin", "annotation" : "modifiedBy"},
       "cm:content": {
         "file": {
           "content-metadata": {
