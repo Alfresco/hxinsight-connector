@@ -74,7 +74,7 @@ public class ContainerSupport
 {
     public static final String HXI_PREDICTION_BATCHES_ENDPOINT = "/prediction-batches";
     public static final String REPOSITORY_PREDICTION_ENDPOINT = "/api/-default-/private/hxi/versions/1/nodes/%s/predictions";
-    public static final String USER_AGENT_REGEX = "ACS HXI Connector\\/" + DockerTags.getHxiConnectorTag() + " ACS\\/" + DockerTags.getRepositoryTag() + " .*";
+    public static final String USER_AGENT_REGEX = "ACS HXI Connector/" + DockerTags.getHxiConnectorTag() + " ACS/" + DockerTags.getRepositoryTag().split("-")[0] + " .*";
     public static final String DISCOVERY_ENDPOINT = "/api/discovery";
     private static ContainerSupport instance;
     private final Session session;
@@ -267,15 +267,22 @@ public class ContainerSupport
 
     public static List<String> extractVersionDetails(String version)
     {
-        String regex = "(\\d+)\\.(\\d+)\\.(\\d+)(?:-([A-Za-z]+)\\.(\\d+))?";
+        String regex = "(\\d+)\\.(\\d+)\\.(\\d+)(?:-([A-Za-z]+)\\.?(\\d+))?";
         Pattern pattern = Pattern.compile(regex);
         Matcher matcher = pattern.matcher(version);
 
-        String major = matcher.group(1);
-        String minor = matcher.group(2);
-        String hotfix = matcher.group(3);
+        if (matcher.find())
+        {
+            String major = matcher.group(1);
+            String minor = matcher.group(2);
+            String hotfix = matcher.group(3);
 
-        return List.of(major, minor, hotfix);
+            return List.of(major, minor, hotfix);
+        }
+        else
+        {
+            throw new IllegalStateException("No match found for version details in input: " + version);
+        }
     }
 
     public void prepareRepositoryToFailAtDiscovery()
