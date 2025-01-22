@@ -1,0 +1,92 @@
+name: Veracode and Nightly Tests run
+
+on:
+  pull_request:
+    branches:
+      - master
+      - release/**
+
+  push:
+    branches:
+      - master
+      - release/**
+  schedule:
+    - cron: "0 0 * * *"  # Runs every night at midnight
+
+env:
+  MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
+  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+  JAVA_VERSION: "17"
+  JAVA_VERSION_SUPPORTED_BY_REPO: "11"
+
+jobs:
+  veracode_sca:
+    name: "Veracode - Source Clear Scan (SCA)"
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'schedule' || github.actor == 'dependabot[bot]') &&
+      !contains(github.event.head_commit.message, '[skip build]')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.8.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.8.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v8.8.0
+        continue-on-error: true
+        with:
+          srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
+
+  veracode_sast:
+    name: "Pipeline SAST Scan"
+    runs-on: ubuntu-latest
+    if: >
+      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || github.event_name == 'schedule') &&
+      github.actor != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, '[skip build]')
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.8.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v8.8.0
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          repository: "Alfresco/veracode-baseline-archive"
+          file-path: "hxinsight-connector/hxinsight-connector-baseline.json"
+          target: "baseline.json"
+      - name: "Build application"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+      - name: "Run SAST Scan"
+        uses: veracode/Veracode-pipeline-scan-action@v1.0.17
+        with:
+          vid: ${{ secrets.VERACODE_API_ID }}
+          vkey: ${{ secrets.VERACODE_API_KEY }}
+          file: "distribution/target/alfresco-hxinsight-connector-distribution-*.zip"
+          fail_build: false
+          project_name: hxinsight-connector
+          issue_details: true
+          veracode_policy_name: Alfresco Default
+          summary_output: true
+          summary_output_file: results.json
+          summary_display: true
+          baseline_file: baseline.json
+      - name: "Clean Maven cache"
+        run: bash ./scripts/ci/cleanup_cache.sh
+
+  nightly_tests:
+    name: "Run nightly tests"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
+      - name: "Set up JDK"
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.8.0
+      - name: "Build application"
+        run: mvn clean install -DskipTests -pl live-ingester
+      - name: "Run OpenApi Specification tests"
+        run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
+      - name: "Notify on failure"
+        if: failure()
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.8.0
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          message: "Nightly tests failed"
