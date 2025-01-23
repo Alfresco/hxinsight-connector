@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -49,6 +49,12 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Ev
 public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 {
     private static final String NAME = "cm:name";
+    private static final String CREATED_AT = "createdAt";
+    private static final String MODIFIED_AT = "modifiedAt";
+    private static final String ASPECTS_NAMES = "aspectsNames";
+    private static final String TYPE = "type";
+    private static final String CREATED_BY = "createdBy";
+    private static final String MODIFIED_BY = "modifiedBy";
 
     public UpdateNodeEventSerializer()
     {
@@ -103,16 +109,34 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     {
         try
         {
-            if (fieldType.equals(VALUE) && name.equals(NAME))
-            {
-                jgen.writeObjectFieldStart(name);
-                jgen.writeObjectField(getLowerCase(fieldType), value);
-                jgen.writeObjectField("annotation", "name");
-                jgen.writeEndObject();
-                return;
-            }
             jgen.writeObjectFieldStart(name);
             jgen.writeObjectField(getLowerCase(fieldType), value);
+            switch (name)
+            {
+            case CREATED_AT:
+                jgen.writeObjectField("annotation", "dateCreated");
+                break;
+            case MODIFIED_AT:
+                jgen.writeObjectField("annotation", "dateModified");
+                break;
+            case ASPECTS_NAMES:
+                jgen.writeObjectField("annotation", "aspects");
+                break;
+            case NAME:
+                jgen.writeObjectField("annotation", "name");
+                break;
+            case TYPE:
+                jgen.writeObjectField("annotation", "type");
+                break;
+            case CREATED_BY:
+                jgen.writeObjectField("annotation", "createdBy");
+                break;
+            case MODIFIED_BY:
+                jgen.writeObjectField("annotation", "modifiedBy");
+                break;
+            default:
+                break;
+            }
             jgen.writeEndObject();
         }
         catch (IOException e)

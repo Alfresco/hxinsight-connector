@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -100,17 +100,17 @@ class NonMatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
-                      "createdAt": {"value": 1611227655695},
-                      "modifiedAt": {"value" : 1611227655695},
+                      "createdAt": {"value": 1611227655695, "annotation": "dateCreated"},
+                      "modifiedAt": {"value" : 1611227655695, "annotation": "dateModified"},
                       "cm:versionType": {"value": "MAJOR"},
-                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"]},
+                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.bmp",
                         "annotation" : "name"
                       },
-                      "type": {"value": "cm:content"},
-                      "createdBy": {"value": "admin"},
-                      "modifiedBy": {"value": "admin"},
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
                         "file": {
                           "content-metadata": {
