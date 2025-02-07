@@ -44,7 +44,6 @@ import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.parser.core.models.ParseOptions;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
@@ -86,7 +85,6 @@ public class OpenApiRequestValidationTest
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
 
-    @Disabled("This test is disabled because the OpenApi Specification update is not finished yet.")
     @SneakyThrows
     @Test
     void testCreateRequestToIngestionEvents()
@@ -100,7 +98,6 @@ public class OpenApiRequestValidationTest
         assertThat(schemaValidator.validate(propertiesNode.toString(), propertiesSchema, null).getMessages()).isEmpty();
     }
 
-    @Disabled("This test is disabled because the OpenApi Specification update is not finished yet.")
     @SneakyThrows
     @Test
     void testUpdateRequestToIngestionEvents()
