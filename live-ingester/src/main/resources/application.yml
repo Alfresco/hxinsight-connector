@@ -62,6 +62,7 @@ hyland-experience:
     ingestion:
       base-url: http://localhost:8001
   storage:
+    digest-algorithm: SHA-256
     location:
       endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
   ingester:
