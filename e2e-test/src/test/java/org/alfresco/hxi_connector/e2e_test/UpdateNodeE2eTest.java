@@ -231,7 +231,7 @@ public class UpdateNodeE2eTest
 
             Optional<LoggedRequest> permissionsUpdatedEvent = requests.stream()
                     .filter(request -> request.getBodyAsString().contains(createdNode.id()))
-                    .filter(request -> request.getBodyAsString().contains("update"))
+                    .filter(request -> request.getBodyAsString().contains("createOrUpdate"))
                     .filter(request -> request.getBodyAsString().contains(ALLOW_ACCESS_PROPERTY))
                     .findFirst();
 
