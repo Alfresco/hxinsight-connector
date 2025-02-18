@@ -41,16 +41,16 @@ public final class ContentUtils
 {
     public static String generateDigestIdentifier(DigestIdentifierParams params)
     {
-        String input = params.getNodeId() + "-" + params.getPropertyName() + "-" + params.getVersionNumber();
+        String input = params.nodeId() + "-" + params.propertyName() + "-" + params.versionNumber();
         try
         {
-            MessageDigest digest = MessageDigest.getInstance(params.getDigestAlgorithm());
+            MessageDigest digest = MessageDigest.getInstance(params.digestAlgorithm());
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new IllegalArgumentException("Invalid digest identifier algorithm: " + params.getDigestAlgorithm(), e);
+            throw new IllegalArgumentException("Invalid digest identifier algorithm: " + params.digestAlgorithm(), e);
         }
     }
 }
