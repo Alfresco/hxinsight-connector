@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -33,7 +33,7 @@ import static org.mockito.BDDMockito.then;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
@@ -93,7 +93,7 @@ class IngestEventProcessorTest
         // then
         IngestNodeCommand expectedCommand = new IngestNodeCommand(
                 NODE_ID,
-                CREATE,
+                CREATE_OR_UPDATE,
                 Set.of(
                         updated(TYPE_PROPERTY, NODE_TYPE),
                         updated("cm:name", "test folder"),
@@ -129,7 +129,7 @@ class IngestEventProcessorTest
         // then
         IngestNodeCommand expectedCommand = new IngestNodeCommand(
                 NODE_ID,
-                CREATE,
+                CREATE_OR_UPDATE,
                 Set.of(
                         contentMetadataUpdated(CONTENT_PROPERTY, mimeType, 100L, null),
                         updated(TYPE_PROPERTY, NODE_TYPE),
@@ -165,7 +165,7 @@ class IngestEventProcessorTest
         // then
         IngestNodeCommand expectedCommand = new IngestNodeCommand(
                 NODE_ID,
-                CREATE,
+                CREATE_OR_UPDATE,
                 Set.of(
                         contentMetadataUpdated(CONTENT_PROPERTY, mimeType, 100L, null),
                         updated(TYPE_PROPERTY, NODE_TYPE),
