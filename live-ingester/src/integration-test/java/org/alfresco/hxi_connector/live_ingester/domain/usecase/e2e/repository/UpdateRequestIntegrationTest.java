@@ -193,6 +193,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "name"
                               },
                               "ALLOW_ACCESS" : {
+                                "type" : "string",
                                 "value" : [ "GROUP_EVERYONE" ]
                               },
                               "aspectsNames" : {
@@ -208,6 +209,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "type"
                               },
                               "DENY_ACCESS" : {
+                                "type" : "string",
                                 "value" : [ ]
                               },
                               "cm:content" : {
@@ -256,7 +258,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {
+                        "type" : "string",
+                        "value": "Purchase Order"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -274,6 +279,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -289,6 +295,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       },
                       "cm:content" : {
@@ -338,7 +345,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "update",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Summary for year 2024"},
+                      "cm:title": {
+                        "type" : "string",
+                        "value": "Summary for year 2024"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -356,6 +366,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -371,6 +382,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       },
                       "cm:content" : {
@@ -434,9 +446,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         },
                         "cm:name" : {
                           "value" : "purchase-order-scan.pdf",
-                        "annotation" : "name"
+                          "annotation" : "name"
                         },
                         "ALLOW_ACCESS" : {
+                          "type" : "string",
                           "value" : [ "GROUP_EVERYONE" ]
                         },
                         "aspectsNames" : {
@@ -452,6 +465,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           "annotation" : "type"
                         },
                         "DENY_ACCESS" : {
+                          "type" : "string",
                           "value" : [ ]
                         },
                         "cm:content" : {
@@ -539,6 +553,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -554,6 +569,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       },
                       "cm:content" : {
@@ -677,6 +693,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611656982995,
                     "properties" : {
                       "cm:title" : {
+                        "type" : "string",
                         "value" : "Purchase Order"
                       },
                       "createdAt" : {
@@ -696,6 +713,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -711,6 +729,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       }
                     },
@@ -802,6 +821,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "type" : {
@@ -809,6 +829,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       }
                     }
@@ -881,6 +902,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "string",
+                        "type": "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -896,6 +919,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type": "string",
+                        "type": "string",
                         "value" : [ ]
                       }
                     }
@@ -992,12 +1017,18 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
                     "ALLOW_ACCESS" : {
+                      "type": "string",
+                      "type": "string",
                       "value" : [ "GROUP_EVERYONE", "abeecher" ]
                     },
                     "DENY_ACCESS" : {
+                      "type": "string",
+                      "type": "string",
                       "value" : [ ]
                     },
                     "cm:title" : {
+                      "type": "string",
+                      "type": "string",
                       "value" : ""
                     },
                     "app:editInline" : {

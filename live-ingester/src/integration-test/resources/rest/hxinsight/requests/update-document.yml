@@ -12,6 +12,7 @@ body: [
     "sourceTimestamp": 1611656982995,
     "properties": {
       "cm:title": {
+        "type": "string",
         "value": "Purchase Order"
       },
       "aspectsNames": {
@@ -35,6 +36,7 @@ body: [
         "annotation": "dateModified"
       },
       "cm:versionLabel": {
+        "type": "string",
         "value": "1.0"
       },
       "createdBy": {
@@ -42,6 +44,7 @@ body: [
         "annotation": "createdBy"
       },
       "ALLOW_ACCESS": {
+        "type": "string",
         "value": [
           "GROUP_EVERYONE"
         ]
@@ -55,6 +58,7 @@ body: [
         "annotation": "type"
       },
       "DENY_ACCESS": {
+        "type": "string",
         "value": []
       },
       "cm:content": {

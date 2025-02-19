@@ -55,6 +55,12 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String TYPE = "type";
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
+    private static final String AUTO_VERSION = "cm:autoVersion";
+    private static final String VERSION_TYPE = "cm:versionType";
+    private static final String ALLOW_ACCESS = "ALLOW_ACCESS";
+    private static final String DENY_ACCESS = "DENY_ACCESS";
+    private static final String TITLE = "cm:title";
+    private static final String VERSION_LABEL = "cm:versionLabel";
 
     public UpdateNodeEventSerializer()
     {
@@ -133,6 +139,24 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                 break;
             case MODIFIED_BY:
                 jgen.writeObjectField("annotation", "modifiedBy");
+                break;
+            case AUTO_VERSION:
+                jgen.writeObjectField("type", "boolean");
+                break;
+            case VERSION_TYPE:
+                jgen.writeObjectField("type", "string");
+                break;
+            case ALLOW_ACCESS:
+                jgen.writeObjectField("type", "string");
+                break;
+            case DENY_ACCESS:
+                jgen.writeObjectField("type", "string");
+                break;
+            case TITLE:
+                jgen.writeObjectField("type", "string");
+                break;
+            case VERSION_LABEL:
+                jgen.writeObjectField("type", "string");
                 break;
             default:
                 break;

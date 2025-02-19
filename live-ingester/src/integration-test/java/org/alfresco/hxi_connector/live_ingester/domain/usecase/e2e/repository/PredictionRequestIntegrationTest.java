@@ -307,6 +307,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation": "dateModified"
                        },
                        "cm:versionLabel" : {
+                         "type" : "string",
                          "value" : "1.0"
                        },
                        "createdBy" : {
@@ -314,6 +315,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation": "createdBy"
                        },
                        "ALLOW_ACCESS" : {
+                         "type" : "string",
                          "value" : [ "GROUP_EVERYONE" ]
                        },
                        "cm:name" : {
@@ -328,6 +330,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation" : "type"
                        },
                        "DENY_ACCESS" : {
+                         "type" : "string",
                          "value" : [ ]
                        },
                        "cm:content" : {
@@ -339,7 +342,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                            }
                          }
                        },
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {"type": "string", "value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"], "annotation": "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"}
                     },
