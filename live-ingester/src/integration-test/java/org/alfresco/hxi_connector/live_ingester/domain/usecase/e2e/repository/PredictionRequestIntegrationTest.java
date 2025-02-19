@@ -294,7 +294,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "34563456-3456-3456-3456-345634563456",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
                     "sourceTimestamp" : %s,
                     "properties": {
@@ -342,8 +342,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                       "cm:title": {"value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"], "annotation": "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"}
-                    },
-                    "removedProperties": ["cm:versionType", "cm:description"]
+                    }
                   }
                 ]""".formatted(TIMESTAMP);
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -417,7 +416,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "5f355d16-f824-4173-bf4b-b1ec37ef5549",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": %s,
                     "properties": {
                       "cm:description": {"value": "predicted value"}
