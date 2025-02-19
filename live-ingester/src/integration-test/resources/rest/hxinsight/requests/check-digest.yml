@@ -1,0 +1,6 @@
+url: /v1/check-digest/{{sourceId}}/{{rootId}}/{{digest}}
+headers:
+  authorization: string
+  content-type: application/json
+  hxp-environment: string
+  user-agent: string

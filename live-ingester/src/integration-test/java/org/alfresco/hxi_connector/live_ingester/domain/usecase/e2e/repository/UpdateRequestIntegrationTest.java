@@ -75,7 +75,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:title": "Purchase Order",
-                        "cm:versionType": null,
+                        "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
                         "cm:description": null
                       },
@@ -104,7 +104,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/update-document.yml");
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-or-update-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
     }
 
@@ -173,7 +173,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           {
                             "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                             "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                            "eventType": "update",
+                            "eventType": "createOrUpdate",
                             "sourceTimestamp": 1611656982995,
                             "properties": {
                               "createdAt" : {
@@ -193,6 +193,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "name"
                               },
                               "ALLOW_ACCESS" : {
+                                "type" : "string",
                                 "value" : [ "GROUP_EVERYONE" ]
                               },
                               "aspectsNames" : {
@@ -208,6 +209,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "type"
                               },
                               "DENY_ACCESS" : {
+                                "type" : "string",
                                 "value" : [ ]
                               },
                               "cm:content" : {
@@ -253,10 +255,13 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {
+                        "type" : "string",
+                        "value": "Purchase Order"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -274,6 +279,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -289,6 +295,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       },
                       "cm:content" : {
@@ -335,10 +342,13 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Summary for year 2024"},
+                      "cm:title": {
+                        "type" : "string",
+                        "value": "Summary for year 2024"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -356,6 +366,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -371,6 +382,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       },
                       "cm:content" : {
@@ -383,88 +395,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         }
                       }
                     }
-                  }
-                ]""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
-    }
-
-    @Test
-    void shouldDeleteProperty()
-    {
-        // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        String properties = """
-                {
-                  "cm:title": null
-                }
-                """;
-
-        String propertiesBefore = """
-                {
-                  "cm:title": "Summary for year 2024"
-                }
-                """;
-
-        String repoEvent = generatePropertiesUpdatedEvent(properties, propertiesBefore);
-
-        // when
-        containerSupport.raiseRepoEvent(repoEvent);
-
-        // then
-        String expectedBody = """
-                [
-                  {
-                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
-                    "sourceTimestamp" : 1611656982995,
-                    "properties": {
-                        "createdAt" : {
-                          "value" : 1611227655695,
-                          "annotation" : "dateCreated"
-                        },
-                        "modifiedAt" : {
-                          "value" : 1611227655695,
-                          "annotation" : "dateModified"
-                        },
-                        "createdBy" : {
-                          "value" : "admin",
-                          "annotation" : "createdBy"
-                        },
-                        "cm:name" : {
-                          "value" : "purchase-order-scan.pdf",
-                        "annotation" : "name"
-                        },
-                        "ALLOW_ACCESS" : {
-                          "value" : [ "GROUP_EVERYONE" ]
-                        },
-                        "aspectsNames" : {
-                          "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
-                          "annotation" : "aspects"
-                        },
-                        "modifiedBy" : {
-                          "value" : "abeecher",
-                          "annotation" : "modifiedBy"
-                        },
-                        "type" : {
-                          "value" : "cm:content",
-                          "annotation" : "type"
-                        },
-                        "DENY_ACCESS" : {
-                          "value" : [ ]
-                        },
-                        "cm:content" : {
-                          "file" : {
-                            "content-metadata" : {
-                              "size" : 531152,
-                              "name" : "purchase-order-scan.pdf",
-                              "content-type" : "application/pdf"
-                            }
-                          }
-                        }
-                    },
-                    "removedProperties": ["cm:title"]
                   }
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -517,7 +447,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
@@ -539,6 +469,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -554,6 +485,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       },
                       "cm:content" : {
@@ -620,107 +552,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     }
 
     @Test
-    void testRemovingContentFromNode()
-    {
-        // given
-        containerSupport.prepareHxInsightToReturnSuccess();
-
-        String repoEvent = """
-                {
-                  "specversion": "1.0",
-                  "type": "org.alfresco.event.node.Updated",
-                  "id": "ae5dac3c-25d0-438d-b148-2084d1ab05a6",
-                  "time": "2021-01-26T10:29:42.99524Z",
-                  "data": {
-                    "resource": {
-                      "@type": "NodeResource",
-                      "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                      "name": "purchase-order-scan.pdf",
-                      "nodeType": "cm:content",
-                      "createdByUser": {
-                        "id": "admin",
-                        "displayName": "Administrator"
-                      },
-                      "createdAt": "2021-01-21T11:14:15.695Z",
-                      "modifiedByUser": {
-                        "id": "abeecher",
-                        "displayName": "Alice Beecher"
-                      },
-                      "aspectNames": [ "cm:versionable", "cm:author", "cm:titled" ],
-                      "content": {
-                        "sizeInBytes": 0
-                      },
-                      "properties": {
-                        "cm:title": "Purchase Order"
-                      }
-                    },
-                    "resourceBefore": {
-                      "@type": "NodeResource",
-                      "content": {
-                        "mimeType": "application/pdf",
-                        "sizeInBytes": 531152,
-                        "encoding": "UTF-8"
-                      }
-                    }
-                  }
-                }""";
-        // when
-        containerSupport.raiseRepoEvent(repoEvent);
-
-        // then
-        String expectedBody = """
-                [
-                  {
-                    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
-                    "sourceTimestamp": 1611656982995,
-                    "properties" : {
-                      "cm:title" : {
-                        "value" : "Purchase Order"
-                      },
-                      "createdAt" : {
-                        "value" : 1611227655695,
-                        "annotation" : "dateCreated"
-                      },
-                      "modifiedAt" : {
-                        "value" : 1611227655695,
-                        "annotation" : "dateModified"
-                      },
-                      "createdBy" : {
-                        "value" : "admin",
-                        "annotation" : "createdBy"
-                      },
-                      "cm:name" : {
-                        "value" : "purchase-order-scan.pdf",
-                        "annotation" : "name"
-                      },
-                      "ALLOW_ACCESS" : {
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
-                      "aspectsNames" : {
-                        "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
-                        "annotation" : "aspects"
-                      },
-                      "modifiedBy" : {
-                        "value" : "abeecher",
-                        "annotation" : "modifiedBy"
-                      },
-                      "type" : {
-                        "value" : "cm:content",
-                        "annotation" : "type"
-                      },
-                      "DENY_ACCESS" : {
-                        "value" : [ ]
-                      }
-                    },
-                    "removedProperties": ["cm:content"]
-                  }
-                ]""";
-        containerSupport.expectHxIngestMessageReceived(expectedBody);
-    }
-
-    @Test
     void testLogInEvent()
     {
         // given
@@ -775,7 +606,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1704798873615,
                     "properties": {
                       "aspectsNames": {"value": ["cm:preferences", "cm:ownable"], "annotation": "aspects"},
@@ -802,6 +633,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "type" : {
@@ -809,6 +641,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "string",
                         "value" : [ ]
                       }
                     }
@@ -861,7 +694,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611656982995,
                     "properties": {
                       "cm:name": {
@@ -881,6 +714,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "string",
+                        "type": "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -896,6 +731,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type": "string",
+                        "type": "string",
                         "value" : [ ]
                       }
                     }
@@ -988,16 +825,22 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 [{
                   "objectId" : "9f3380e3-b9b1-4b01-b1c6-ef1f717a9abb",
                   "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                  "eventType" : "update",
+                  "eventType" : "createOrUpdate",
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
                     "ALLOW_ACCESS" : {
+                      "type": "string",
+                      "type": "string",
                       "value" : [ "GROUP_EVERYONE", "abeecher" ]
                     },
                     "DENY_ACCESS" : {
+                      "type": "string",
+                      "type": "string",
                       "value" : [ ]
                     },
                     "cm:title" : {
+                      "type": "string",
+                      "type": "string",
                       "value" : ""
                     },
                     "app:editInline" : {

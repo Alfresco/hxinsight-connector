@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -38,7 +38,6 @@ import java.util.stream.Collectors;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 
 @Component
@@ -78,13 +77,5 @@ public class CategoryPropertyResolver implements PropertyResolver<Set<String>>
     private String getId(Map<String, Object> entry)
     {
         return (String) entry.get("id");
-    }
-
-    @Override
-    public Optional<PropertyDelta<Set<String>>> resolveDeleted(PropertyDeleted<?> deletedProperty)
-    {
-        ensureThat(canResolve(deletedProperty), "Unsupported property: %s", deletedProperty);
-
-        return Optional.of((PropertyDelta<Set<String>>) deletedProperty);
     }
 }

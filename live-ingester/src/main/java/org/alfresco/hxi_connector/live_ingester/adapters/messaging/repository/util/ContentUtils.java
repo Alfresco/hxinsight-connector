@@ -32,6 +32,8 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
+import java.util.HashSet;
+import java.util.Set;
 
 import lombok.NoArgsConstructor;
 
@@ -39,18 +41,30 @@ import lombok.NoArgsConstructor;
 @SuppressWarnings({"PMD.PrematureDeclaration", "PMD.SimplifyBooleanReturns"})
 public final class ContentUtils
 {
+    private static final Set<String> SEEN_DIGESTS = new HashSet<>();
+
     public static String generateDigestIdentifier(DigestIdentifierParams params)
     {
-        String input = params.getNodeId() + "-" + params.getPropertyName() + "-" + params.getVersionNumber();
+        String input = params.nodeId() + "-" + params.propertyName() + "-" + params.versionNumber();
         try
         {
-            MessageDigest digest = MessageDigest.getInstance(params.getDigestAlgorithm());
+            MessageDigest digest = MessageDigest.getInstance(params.digestAlgorithm());
             byte[] hash = digest.digest(input.getBytes(StandardCharsets.UTF_8));
             return Base64.getEncoder().encodeToString(hash);
         }
         catch (NoSuchAlgorithmException e)
         {
-            throw new IllegalArgumentException("Invalid digest identifier algorithm: " + params.getDigestAlgorithm(), e);
+            throw new IllegalArgumentException("Invalid digest identifier algorithm: " + params.digestAlgorithm(), e);
         }
+    }
+
+    public static boolean isContentSeenBefore(String digestIdentifier)
+    {
+        return SEEN_DIGESTS.contains(digestIdentifier);
+    }
+
+    public static void markContentAsSeen(String digestIdentifier)
+    {
+        SEEN_DIGESTS.add(digestIdentifier);
     }
 }

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,8 +29,10 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.mockStatic;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
 import java.time.Instant;
 import java.util.Set;
@@ -41,8 +43,13 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.context.ContextConfiguration;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.ContentUtils;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.DigestIdentifierParams;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
@@ -51,16 +58,19 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.Tr
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
 
 @ExtendWith(MockitoExtension.class)
+@ContextConfiguration(classes = {IngestContentCommandHandler.class})
 class IngestContentCommandHandlerTest
 {
     static final String NODE_ID = "12341234-1234-1234-1234-123412341234";
     static final String FILE_ID = "43214321-4321-4321-4321-432143214321";
     static final String UPLOADED_CONTENT_ID = "11112222-4321-4321-4321-333343214444";
     private static final long TIMESTAMP = Instant.now().toEpochMilli();
+
+    @Value("${hyland-experience.storage.digest-algorithm:SHA-256}")
+    private String digestAlgorithm;
 
     @Mock
     TransformRequester transformRequesterMock;
@@ -80,13 +90,22 @@ class IngestContentCommandHandlerTest
     {
         // given
         TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, mimeType, TIMESTAMP);
+        String digestIdentifier = "calculated-digest";
 
-        // when
-        ingestContentCommandHandler.handle(command);
+        try (MockedStatic<ContentUtils> contentUtilsMockedStatic = mockStatic(ContentUtils.class))
+        {
+            contentUtilsMockedStatic.when(() -> ContentUtils.generateDigestIdentifier(new DigestIdentifierParams(digestAlgorithm, NODE_ID, CONTENT_PROPERTY, "1.0")))
+                    .thenReturn(digestIdentifier);
+            contentUtilsMockedStatic.when(() -> ContentUtils.isContentSeenBefore(digestIdentifier)).thenReturn(false);
 
-        // then
-        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, mimeType, TIMESTAMP);
-        then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
+            // when
+            ingestContentCommandHandler.handle(command);
+
+            // then
+            TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, mimeType, TIMESTAMP);
+            then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
+            contentUtilsMockedStatic.verify(() -> ContentUtils.markContentAsSeen(digestIdentifier));
+        }
     }
 
     @ParameterizedTest
@@ -99,7 +118,10 @@ class IngestContentCommandHandlerTest
 
         File fileToUpload = mock();
         given(transformEngineFileStorageMock.downloadFile(FILE_ID)).willReturn(fileToUpload);
-        IngestContentResponse ingestContentResponse = new IngestContentResponse(UPLOADED_CONTENT_ID, mimeType);
+
+        IngestContentResponse ingestContentResponse = mock(IngestContentResponse.class);
+        given(ingestContentResponse.transferId()).willReturn(UPLOADED_CONTENT_ID);
+        given(ingestContentResponse.mimeType()).willReturn(mimeType);
         given(storageClientMock.upload(fileToUpload, mimeType, NODE_ID)).willReturn(ingestContentResponse);
 
         // when
@@ -108,7 +130,7 @@ class IngestContentCommandHandlerTest
         // then
         IngestNodeCommand expectedIngestNodeCommand = new IngestNodeCommand(
                 NODE_ID,
-                EventType.UPDATE,
+                CREATE_OR_UPDATE,
                 Set.of(ContentPropertyUpdated.builder(CONTENT_PROPERTY).id(UPLOADED_CONTENT_ID).mimeType(mimeType).build()),
                 TIMESTAMP);
 

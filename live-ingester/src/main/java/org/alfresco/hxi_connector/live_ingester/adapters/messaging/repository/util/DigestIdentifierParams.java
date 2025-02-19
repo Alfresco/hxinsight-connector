@@ -27,24 +27,4 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util;
 
 public record DigestIdentifierParams(String digestAlgorithm, String nodeId, String propertyName, String versionNumber)
-{
-    public String getDigestAlgorithm()
-    {
-        return digestAlgorithm;
-    }
-
-    public String getNodeId()
-    {
-        return nodeId;
-    }
-
-    public String getPropertyName()
-    {
-        return propertyName;
-    }
-
-    public String getVersionNumber()
-    {
-        return versionNumber;
-    }
-}
+{}
