@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,9 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -48,7 +46,6 @@ public class UpdateNodeEvent implements NodeEvent
     private final EventType eventType;
     private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
     private final Map<String, ContentProperty> contentPropertiesToSet = new HashMap<>();
-    private final Set<String> propertiesToUnset = new HashSet<>();
     private final String sourceId;
     private final long timestamp;
 
@@ -61,13 +58,6 @@ public class UpdateNodeEvent implements NodeEvent
     public UpdateNodeEvent addMetadataInstruction(NodeProperty<?> metadataProperty)
     {
         metadataPropertiesToSet.put(metadataProperty.name(), metadataProperty);
-
-        return this;
-    }
-
-    public UpdateNodeEvent addUnsetInstruction(String metadataPropertyName)
-    {
-        propertiesToUnset.add(metadataPropertyName);
 
         return this;
     }

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,15 +30,12 @@ import static java.util.Collections.emptySet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.*;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.assertContainsSameElements;
 
 import java.time.Instant;
@@ -63,7 +60,6 @@ import org.alfresco.hxi_connector.common.exception.ValidationException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
@@ -116,7 +112,7 @@ class IngestNodeCommandHandlerTest
             // given
             IngestNodeCommand command = new IngestNodeCommand(
                     NODE_ID,
-                    CREATE,
+                    CREATE_OR_UPDATE,
                     NODE_PROPERTIES.stream()
                             .map(nodeProperty -> PropertyDelta.updated(nodeProperty.name(), nodeProperty.value()))
                             .collect(Collectors.toSet()),
@@ -132,8 +128,7 @@ class IngestNodeCommandHandlerTest
             UpdateNodeEvent updateNodeEvent = updateNodeEventCaptor.getValue();
 
             assertContainsSameElements(expectedNodePropertiesToSet, updateNodeEvent.getMetadataPropertiesToSet().values());
-            assertTrue(updateNodeEvent.getPropertiesToUnset().isEmpty(), "There should be no properties to unset");
-            assertEquals(updateNodeEvent.getEventType(), CREATE);
+            assertEquals(updateNodeEvent.getEventType(), CREATE_OR_UPDATE);
         }
 
         @Test
@@ -142,7 +137,7 @@ class IngestNodeCommandHandlerTest
             // given
             IngestNodeCommand command = new IngestNodeCommand(
                     NODE_ID,
-                    CREATE,
+                    CREATE_OR_UPDATE,
                     Set.of(new ContentPropertyUpdated(CONTENT_PROPERTY, "content-id", "application/pdf", "application/msword", 123L, "something.doc")),
                     TIMESTAMP);
 
@@ -153,16 +148,16 @@ class IngestNodeCommandHandlerTest
             then(ingestionEngineEventPublisher).should().publishMessage(updateNodeEventCaptor.capture());
             UpdateNodeEvent updateNodeEvent = updateNodeEventCaptor.getValue();
 
-            UpdateNodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP);
+            UpdateNodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
             expected.addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf", "application/msword", 123L, "something.doc"));
             assertEquals(expected, updateNodeEvent);
         }
 
         @Test
-        void shouldNotSendEmptyUpdate()
+        void shouldNotSendEmptyCreateOrUpdate()
         {
             // given
-            IngestNodeCommand command = new IngestNodeCommand(NODE_ID, UPDATE, emptySet(), TIMESTAMP);
+            IngestNodeCommand command = new IngestNodeCommand(NODE_ID, CREATE_OR_UPDATE, emptySet(), TIMESTAMP);
 
             // when
             ingestNodeCommandHandler.handle(command);
@@ -170,21 +165,5 @@ class IngestNodeCommandHandlerTest
             // then
             then(ingestionEngineEventPublisher).shouldHaveNoInteractions();
         }
-
-        @Test
-        void emptyCreateMessageCreatesNode()
-        {
-            // given
-            IngestNodeCommand command = new IngestNodeCommand(NODE_ID, CREATE, emptySet(), TIMESTAMP);
-
-            // when
-            ingestNodeCommandHandler.handle(command);
-
-            // then
-            NodeEvent expected = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP);
-            then(ingestionEngineEventPublisher).should().publishMessage(expected);
-        }
-
     }
-
 }

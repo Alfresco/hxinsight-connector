@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -90,7 +90,7 @@ public class BulkIngesterE2eTest
         // given
         String nodeId = "02acf462-533d-4e1b-9825-05fa934140da";
         String sourceId = "alfresco-dummy-source-id-0a63de491876";
-        String eventType = "create";
+        String eventType = "createOrUpdate";
 
         // when
         RetryUtils.retryWithBackoff(() -> {

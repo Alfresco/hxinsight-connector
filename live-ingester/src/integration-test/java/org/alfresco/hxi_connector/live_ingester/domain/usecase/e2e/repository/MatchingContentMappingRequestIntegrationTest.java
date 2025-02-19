@@ -100,13 +100,13 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611227656423,
                     "properties": {
-                      "cm:autoVersion": {"value": true},
+                      "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": 1611227655695, "annotation": "dateCreated"},
                       "modifiedAt": {"value" : 1611227655695, "annotation": "dateModified"},
-                      "cm:versionType": {"value": "MAJOR"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.bmp",
@@ -124,8 +124,8 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"type": "string", "value": []}
                     }
                   }
                 ]""".formatted(sourceMimeType);
@@ -211,13 +211,13 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611227656423,
                     "properties": {
-                      "cm:autoVersion": {"value": true},
+                      "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": 1611227655695, "annotation": "dateCreated"},
                       "modifiedAt": {"value": 1611227655695, "annotation": "dateModified"},
-                      "cm:versionType": {"value": "MAJOR"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.bmp",
@@ -235,8 +235,8 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"type": "string", "value": []}
                     }
                   }
                 ]""".formatted(sourceMimeType);

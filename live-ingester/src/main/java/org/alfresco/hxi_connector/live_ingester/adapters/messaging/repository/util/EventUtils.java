@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,9 +30,7 @@ import static java.util.Optional.ofNullable;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.*;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -91,11 +89,11 @@ public final class EventUtils
     {
         if (isEventTypeCreated(event))
         {
-            return CREATE;
+            return CREATE_OR_UPDATE;
         }
         if (isEventTypeUpdated(event) || isEventTypePermissionsUpdated(event))
         {
-            return UPDATE;
+            return CREATE_OR_UPDATE;
         }
         if (isEventTypeDeleted(event))
         {

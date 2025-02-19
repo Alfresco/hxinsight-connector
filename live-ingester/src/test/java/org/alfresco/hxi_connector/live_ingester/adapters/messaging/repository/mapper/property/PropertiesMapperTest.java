@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -43,7 +43,6 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
@@ -243,55 +242,6 @@ class PropertiesMapperTest
                 updated("cm:title", "some title"),
                 updated("cm:description", "new description"));
 
-        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
-    }
-
-    @Test
-    void shouldHandlePropertyDeletion_NodeUpdated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_UPDATED);
-        NodeResource nodeResourceBefore = NodeResource.builder()
-                .setProperties(mapWith("cm:title", "some title"))
-                .build();
-        NodeResource nodeResource = nodeResourceWithRequiredFields()
-                .setProperties(mapWith("cm:title", null, "cm:description", "some description"))
-                .build();
-
-        setNodeResourceBefore(event, nodeResourceBefore);
-        setNodeResource(event, nodeResource);
-
-        // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                deleted("cm:title"),
-                updated("cm:description", "some description"));
-
-        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
-    }
-
-    @Test
-    void shouldHandleContentDeleted_NodeUpdated()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-        setType(event, NODE_UPDATED);
-
-        ContentInfo contentInfo = new ContentInfo(null, 123L, null);
-        NodeResource nodeResourceBefore = NodeResource.builder().setContent(contentInfo).build();
-        setNodeResourceBefore(event, nodeResourceBefore);
-        NodeResource nodeResource = nodeResourceWithRequiredFields().setContent(null).build();
-        setNodeResource(event, nodeResource);
-
-        // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(deleted(CONTENT_PROPERTY));
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
 

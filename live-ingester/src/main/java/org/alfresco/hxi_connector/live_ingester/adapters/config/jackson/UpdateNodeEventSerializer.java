@@ -32,7 +32,6 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
 
 import java.io.IOException;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -43,7 +42,6 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exceptio
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FileMetadata;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
 @Component
 public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
@@ -55,6 +53,12 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String TYPE = "type";
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
+    private static final String AUTO_VERSION = "cm:autoVersion";
+    private static final String VERSION_TYPE = "cm:versionType";
+    private static final String ALLOW_ACCESS = "ALLOW_ACCESS";
+    private static final String DENY_ACCESS = "DENY_ACCESS";
+    private static final String TITLE = "cm:title";
+    private static final String VERSION_LABEL = "cm:versionLabel";
 
     public UpdateNodeEventSerializer()
     {
@@ -77,7 +81,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             jgen.writeStringField("objectId", event.getObjectId());
             jgen.writeStringField("sourceId", event.getSourceId());
 
-            jgen.writeStringField("eventType", serializeEventType(event.getEventType()));
+            jgen.writeStringField("eventType", event.getEventType().getValue());
             jgen.writeNumberField("sourceTimestamp", event.getTimestamp());
 
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
@@ -86,14 +90,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                 event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
                 jgen.writeEndObject();
-            }
-
-            Set<String> metadataPropertiesToUnset = event.getPropertiesToUnset();
-            if (!metadataPropertiesToUnset.isEmpty())
-            {
-                jgen.writeArrayFieldStart("removedProperties");
-                metadataPropertiesToUnset.forEach(propertyName -> writePropertyName(jgen, propertyName));
-                jgen.writeEndArray();
             }
 
             jgen.writeEndObject();
@@ -111,32 +107,8 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             jgen.writeObjectFieldStart(name);
             jgen.writeObjectField(getLowerCase(fieldType), value);
-            switch (name)
-            {
-            case CREATED_AT:
-                jgen.writeObjectField("annotation", "dateCreated");
-                break;
-            case MODIFIED_AT:
-                jgen.writeObjectField("annotation", "dateModified");
-                break;
-            case ASPECTS_NAMES:
-                jgen.writeObjectField("annotation", "aspects");
-                break;
-            case NAME:
-                jgen.writeObjectField("annotation", "name");
-                break;
-            case TYPE:
-                jgen.writeObjectField("annotation", "type");
-                break;
-            case CREATED_BY:
-                jgen.writeObjectField("annotation", "createdBy");
-                break;
-            case MODIFIED_BY:
-                jgen.writeObjectField("annotation", "modifiedBy");
-                break;
-            default:
-                break;
-            }
+            writeAnnotation(jgen, name);
+            writeType(jgen, name);
             jgen.writeEndObject();
         }
         catch (IOException e)
@@ -145,21 +117,53 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    private void writePropertyName(JsonGenerator jgen, String propertyName)
+    private void writeAnnotation(JsonGenerator jgen, String name) throws IOException
     {
-        try
+        switch (name)
         {
-            jgen.writeString(propertyName);
-        }
-        catch (IOException e)
-        {
-            throw new JsonSerializationException("UpdateNodeEvent serialization failed", e);
+        case CREATED_AT:
+            jgen.writeObjectField("annotation", "dateCreated");
+            break;
+        case MODIFIED_AT:
+            jgen.writeObjectField("annotation", "dateModified");
+            break;
+        case ASPECTS_NAMES:
+            jgen.writeObjectField("annotation", "aspects");
+            break;
+        case NAME:
+            jgen.writeObjectField("annotation", "name");
+            break;
+        case TYPE:
+            jgen.writeObjectField("annotation", "type");
+            break;
+        case CREATED_BY:
+            jgen.writeObjectField("annotation", "createdBy");
+            break;
+        case MODIFIED_BY:
+            jgen.writeObjectField("annotation", "modifiedBy");
+            break;
+        default:
+            break;
         }
     }
 
-    private String serializeEventType(EventType eventType)
+    private void writeType(JsonGenerator jgen, String name) throws IOException
     {
-        return getLowerCase(eventType);
+        switch (name)
+        {
+        case AUTO_VERSION:
+            jgen.writeObjectField("type", "boolean");
+            break;
+        case VERSION_TYPE:
+        case ALLOW_ACCESS:
+        case DENY_ACCESS:
+        case TITLE:
+        case VERSION_LABEL:
+            jgen.writeObjectField("type", "string");
+            break;
+        default:
+            break;
+        }
     }
 
     private String getLowerCase(Object object)
