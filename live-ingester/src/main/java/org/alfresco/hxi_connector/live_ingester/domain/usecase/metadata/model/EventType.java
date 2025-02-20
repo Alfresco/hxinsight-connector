@@ -25,20 +25,17 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
+import lombok.Getter;
+
 public enum EventType
 {
     CREATE_OR_UPDATE("createOrUpdate"), DELETE("delete");
 
+    @Getter
     private final String value;
 
     EventType(String value)
     {
         this.value = value;
-    }
-
-    @Override
-    public String toString()
-    {
-        return this.value;
     }
 }

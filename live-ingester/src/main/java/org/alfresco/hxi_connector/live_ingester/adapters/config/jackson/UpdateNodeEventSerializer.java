@@ -75,7 +75,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             jgen.writeStringField("objectId", event.getObjectId());
             jgen.writeStringField("sourceId", event.getSourceId());
 
-            jgen.writeStringField("eventType", event.getEventType().toString());
+            jgen.writeStringField("eventType", event.getEventType().getValue());
             jgen.writeNumberField("sourceTimestamp", event.getTimestamp());
 
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
