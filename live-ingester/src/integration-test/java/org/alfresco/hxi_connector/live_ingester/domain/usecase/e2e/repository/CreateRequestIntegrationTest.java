@@ -41,7 +41,6 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
-        // when
         String repoEvent = """
                 {
                   "specversion": "1.0",
@@ -87,6 +86,8 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                     "resourceDeniedAuthorities": []
                   }
                 }""";
+
+        // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
