@@ -34,6 +34,9 @@ body: [
         "value": 1611227655695,
         "annotation": "dateModified"
       },
+      "cm:versionType": {
+        "value": "MAJOR"
+      },
       "cm:versionLabel": {
         "value": "1.0"
       },

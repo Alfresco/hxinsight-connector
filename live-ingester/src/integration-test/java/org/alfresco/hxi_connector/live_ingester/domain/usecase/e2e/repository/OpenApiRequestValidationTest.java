@@ -67,17 +67,6 @@ public class OpenApiRequestValidationTest
 
     @SneakyThrows
     @Test
-    void testCreateRequestToIngestionEvents()
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/create-document.yml");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-    }
-
-    @SneakyThrows
-    @Test
     void testUploadReferencesRequestToIngestionEvents()
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/upload-references-document.yml");
@@ -89,9 +78,9 @@ public class OpenApiRequestValidationTest
 
     @SneakyThrows
     @Test
-    void testUpdateRequestToIngestionEvents()
+    void testCreateOrUpdateRequestToIngestionEvents()
     {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/update-document.yml");
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/create-or-update-document.yml");
 
         Request request = makeRequest(hxInsightRequest);
 

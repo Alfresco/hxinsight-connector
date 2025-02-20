@@ -75,7 +75,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:title": "Purchase Order",
-                        "cm:versionType": null,
+                        "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
                         "cm:description": null
                       },
@@ -104,7 +104,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/update-document.yml");
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-or-update-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
     }
 
