@@ -42,7 +42,6 @@ import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
 public class OpenApiRequestValidationTest
 {
-
     private static final String OPEN_API_SPECIFICATION_URL = "http://hxai-data-platform-dev-swagger-ui.s3-website-us-east-1.amazonaws.com/docs/insight-ingestion-api-swagger.json";
     private static OpenApiInteractionValidator openApiInteractionValidator;
 
