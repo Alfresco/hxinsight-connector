@@ -147,16 +147,6 @@ public class PropertyMappingHelper
         return Optional.of(contentMetadataUpdated(CONTENT_PROPERTY, sourceMimeType, sourceSizeInBytes, sourceFileName));
     }
 
-    /**
-     * Find the specified content size in bytes, or an empty Optional if it is not mentioned.
-     */
-    private static Optional<Long> sizeOfContent(NodeResource nodeResource)
-    {
-        return ofNullable(nodeResource)
-                .map(NodeResource::getContent)
-                .map(ContentInfo::getSizeInBytes);
-    }
-
     private static String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)
     {
         return ofNullable(node)
