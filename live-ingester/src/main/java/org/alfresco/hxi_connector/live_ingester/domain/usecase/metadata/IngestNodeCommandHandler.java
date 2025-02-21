@@ -70,8 +70,7 @@ public class IngestNodeCommandHandler
 
         if (updateNodeEvent.getEventType() == CREATE_OR_UPDATE
                 && updateNodeEvent.getContentPropertiesToSet().isEmpty()
-                && updateNodeEvent.getMetadataPropertiesToSet().isEmpty()
-                && updateNodeEvent.getPropertiesToUnset().isEmpty())
+                && updateNodeEvent.getMetadataPropertiesToSet().isEmpty())
         {
             log.debug("Ignoring empty metadata update: {}", updateNodeEvent);
             return;

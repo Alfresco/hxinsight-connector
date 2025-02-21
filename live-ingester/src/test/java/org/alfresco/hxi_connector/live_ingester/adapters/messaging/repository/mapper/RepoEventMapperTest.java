@@ -35,16 +35,13 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 
 import java.time.Instant;
 import java.time.ZonedDateTime;
-import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -57,7 +54,6 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.ma
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventType;
@@ -157,21 +153,6 @@ class RepoEventMapperTest
 
         // then
         assertThrows(ValidationException.class, () -> repoEventMapper.mapToDeleteNodeCommand(event));
-    }
-
-    @Test
-    void shouldNoticeContentDeleted_whenContentRemoved()
-    {
-        // given
-        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_UPDATED);
-        given(propertiesMapper.mapToPropertyDeltas(event)).willReturn(Set.of(deleted(CONTENT_PROPERTY)));
-
-        // when
-        IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
-
-        // then
-        Set<PropertyDelta<?>> expected = Set.of(deleted(CONTENT_PROPERTY));
-        assertEquals(expected, ingestNodeCommand.properties(), "Expected content to be removed");
     }
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)

@@ -26,7 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -59,20 +58,5 @@ class UpdateNodeEventTest
         // then
         assertFalse(updateNodeEvent.getMetadataPropertiesToSet().containsValue(name1));
         assertTrue(updateNodeEvent.getMetadataPropertiesToSet().containsValue(name2));
-    }
-
-    @Test
-    void shouldNotDuplicatePropertiesToUnset()
-    {
-        // given
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
-
-        // when
-        updateNodeEvent.addUnsetInstruction(CREATED_BY_PROPERTY);
-        updateNodeEvent.addUnsetInstruction(CREATED_BY_PROPERTY);
-
-        // then
-        assertEquals(1, updateNodeEvent.getPropertiesToUnset().size());
-        assertTrue(updateNodeEvent.getPropertiesToUnset().contains(CREATED_BY_PROPERTY));
     }
 }

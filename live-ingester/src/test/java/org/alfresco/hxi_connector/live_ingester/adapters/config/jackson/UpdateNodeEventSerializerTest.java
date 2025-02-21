@@ -97,27 +97,6 @@ class UpdateNodeEventSerializerTest
     }
 
     @Test
-    public void shouldSerializePropertiesToUnset()
-    {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
-                .addUnsetInstruction(CREATED_AT_PROPERTY)
-                .addUnsetInstruction(MODIFIED_BY_PROPERTY);
-
-        String expectedJson = """
-                [
-                  {
-                    "objectId": "%s",
-                    "sourceId": "%s",
-                    "eventType": "createOrUpdate",
-                    "sourceTimestamp": 1724225729830
-                  }
-                ]""".formatted(NODE_ID, SOURCE_ID);
-        String actualJson = serialize(event);
-
-        assertJsonEquals(expectedJson, actualJson);
-    }
-
-    @Test
     public void canCopeWithNullUsers()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
