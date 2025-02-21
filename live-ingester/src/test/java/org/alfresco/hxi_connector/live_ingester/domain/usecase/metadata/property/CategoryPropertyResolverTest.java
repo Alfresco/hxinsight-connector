@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,11 +27,8 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.util.List;
@@ -54,33 +51,9 @@ class CategoryPropertyResolverTest
     CategoryPropertyResolver categoryPropertyResolver = new CategoryPropertyResolver();
 
     @Test
-    void shouldBeAbleToResolveCategoriesProperty()
-    {
-        assertTrue(categoryPropertyResolver.canResolve(deleted("cm:categories")));
-    }
-
-    @Test
-    void shouldBeAbleToResolveTaggableProperty()
-    {
-        assertTrue(categoryPropertyResolver.canResolve(deleted("cm:taggable")));
-    }
-
-    @Test
-    void shouldNotBeAbleToResolveOtherProperties()
-    {
-        assertFalse(categoryPropertyResolver.canResolve(deleted("cm:other")));
-    }
-
-    @Test
     void shouldThrowIfTryingToResolveUpdatedUnsupportedProperty()
     {
         assertThrows(ValidationException.class, () -> categoryPropertyResolver.resolveUpdated(updated("cm:other", "")));
-    }
-
-    @Test
-    void shouldThrowIfTryingToResolveDeletedUnsupportedProperty()
-    {
-        assertThrows(ValidationException.class, () -> categoryPropertyResolver.resolveDeleted(deleted("cm:other")));
     }
 
     @Test
@@ -117,22 +90,6 @@ class CategoryPropertyResolverTest
         PropertyDelta<Set<String>> expectedProperty = updated("cm:taggable", Set.of("51d0b636-3c3b-4e33-ba1f-098474f53e8c", "a9f57ef6-2acf-4b2a-ae85-82cf552bec58"));
 
         assertEquals(expectedProperty, resolvedProperty);
-    }
-
-    @Test
-    void shouldDoNothingWithDeletedProperty()
-    {
-        // given
-        String taggable = "cm:taggable";
-
-        // when
-        var resolvedProperty = categoryPropertyResolver.resolveDeleted(deleted(taggable));
-
-        // then
-        PropertyDelta<?> expectedProperty = deleted(taggable);
-
-        assertTrue(resolvedProperty.isPresent());
-        assertEquals(expectedProperty, resolvedProperty.get());
     }
 
     private List<Object> getTaggablePropertyValue(String json)

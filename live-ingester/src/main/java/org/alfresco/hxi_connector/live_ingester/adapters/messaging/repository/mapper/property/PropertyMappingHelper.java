@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -40,7 +40,6 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.deleted;
 
 import java.time.ZonedDateTime;
 import java.util.Optional;
@@ -136,11 +135,6 @@ public class PropertyMappingHelper
 
     public static Optional<PropertyDelta<?>> calculateContentPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        if (isContentRemoved(event))
-        {
-            return Optional.of(deleted(CONTENT_PROPERTY));
-        }
-
         // Note that we cannot include the reference to the rendition until it is generated.
         Optional<ContentInfo> contentInfo = ofNullable(event.getData().getResource().getContent());
         String sourceFileName = event.getData().getResource().getName();
@@ -151,19 +145,6 @@ public class PropertyMappingHelper
             return Optional.empty();
         }
         return Optional.of(contentMetadataUpdated(CONTENT_PROPERTY, sourceMimeType, sourceSizeInBytes, sourceFileName));
-    }
-
-    private static boolean isContentRemoved(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        Optional<Long> oldSizeOptional = sizeOfContent(event.getData().getResourceBefore());
-        if (oldSizeOptional.isEmpty())
-        {
-            // Content wasn't updated.
-            return false;
-        }
-        long oldSize = oldSizeOptional.get();
-        long newSize = sizeOfContent(event.getData().getResource()).orElse(0L);
-        return newSize == 0 && oldSize != 0;
     }
 
     /**
