@@ -36,6 +36,7 @@ body: [
         "annotation": "dateModified"
       },
       "cm:versionType": {
+        "type": "string",
         "value": "MAJOR"
       },
       "cm:versionLabel": {
