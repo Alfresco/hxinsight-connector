@@ -104,7 +104,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e01",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
@@ -264,7 +264,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e03",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
@@ -429,7 +429,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e05",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
@@ -470,8 +470,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       }
-                    },
-                    "removedProperties": ["cm:versionType", "cm:description"]
+                    }
                   }
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -623,7 +622,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e07",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {"value": "Purchase Order"},
@@ -664,8 +663,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       }
-                    },
-                    "removedProperties": ["cm:versionType", "cm:description"]
+                    }
                   }
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -1056,7 +1054,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                      "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e13",
                      "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                     "eventType" : "create",
+                     "eventType" : "createOrUpdate",
                      "sourceTimestamp": 1611656982995,
                      "properties" : {
                        "cm:title" : {
@@ -1349,7 +1347,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                   {
                      "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e16",
                      "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                     "eventType" : "create",
+                     "eventType" : "createOrUpdate",
                      "sourceTimestamp": 1611656982995,
                      "properties" : {
                        "cm:title" : {

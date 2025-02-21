@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -36,7 +36,7 @@ import static org.mockito.Mockito.mock;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_APPLIED_ASPECT;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_NODE_TYPE;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_TIME_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
@@ -334,7 +334,7 @@ class EventProcessorTest
 
         IngestNodeCommand expectedCommand = new IngestNodeCommand(
                 parentId,
-                UPDATE,
+                CREATE_OR_UPDATE,
                 Set.of(PropertyDelta.updated(descriptionProperty, predictedDescription)),
                 TIMESTAMP);
 

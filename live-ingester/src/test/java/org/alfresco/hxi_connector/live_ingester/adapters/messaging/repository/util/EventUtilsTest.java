@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -34,9 +34,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.PREDICTION_REVIEW_STATUS_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.*;
 import static org.alfresco.repo.event.v1.model.EventType.CHILD_ASSOC_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
@@ -138,7 +136,7 @@ class EventUtilsTest
         EventType eventType = EventUtils.getEventType(event);
 
         // then
-        assertEquals(CREATE, eventType);
+        assertEquals(CREATE_OR_UPDATE, eventType);
     }
 
     @Test
@@ -152,7 +150,7 @@ class EventUtilsTest
         EventType eventType = EventUtils.getEventType(event);
 
         // then
-        assertEquals(UPDATE, eventType);
+        assertEquals(CREATE_OR_UPDATE, eventType);
     }
 
     @Test

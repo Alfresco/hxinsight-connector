@@ -100,7 +100,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},
@@ -211,7 +211,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"value": true},

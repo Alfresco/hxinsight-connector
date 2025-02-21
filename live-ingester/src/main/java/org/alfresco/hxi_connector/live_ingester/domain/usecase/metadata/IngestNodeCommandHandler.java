@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,8 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.DELETE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +68,7 @@ public class IngestNodeCommandHandler
                 .flatMap(Optional::stream)
                 .forEach(propertyDelta -> propertyDelta.applyOn(updateNodeEvent));
 
-        if (updateNodeEvent.getEventType() == UPDATE
+        if (updateNodeEvent.getEventType() == CREATE_OR_UPDATE
                 && updateNodeEvent.getContentPropertiesToSet().isEmpty()
                 && updateNodeEvent.getMetadataPropertiesToSet().isEmpty()
                 && updateNodeEvent.getPropertiesToUnset().isEmpty())

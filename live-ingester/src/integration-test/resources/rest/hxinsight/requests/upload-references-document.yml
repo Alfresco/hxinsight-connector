@@ -1,0 +1,22 @@
+url: /v1/ingestion-events
+headers:
+  authorization: string
+  content-type: application/json
+  hxp-environment: string
+  user-agent: string
+body: [
+  {
+    "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
+    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+    "eventType": "createOrUpdate",
+    "sourceTimestamp": 1611656982995,
+    "properties": {
+      "cm:content": {
+        "file": {
+          "id": "ecc22bdc-ac8e-4736-a36a-8b9ContentId",
+          "content-type": "application/pdf"
+        }
+      }
+    }
+  }
+]
