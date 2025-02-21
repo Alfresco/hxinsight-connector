@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -85,7 +85,8 @@ public class PropertiesMapper
     {
 
         return streamProperties(event.getData().getResource())
-                .map(property -> property.getValue() == null ? PropertyDelta.deleted(property.getKey()) : PropertyDelta.updated(property.getKey(), property.getValue()));
+                .filter(property -> property.getValue() != null)
+                .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
     }
 
     private Stream<Map.Entry<String, ?>> streamProperties(NodeResource node)
