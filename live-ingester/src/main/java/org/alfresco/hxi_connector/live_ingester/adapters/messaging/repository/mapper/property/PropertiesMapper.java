@@ -85,6 +85,7 @@ public class PropertiesMapper
     {
 
         return streamProperties(event.getData().getResource())
+                .filter(property -> property.getValue() != null)
                 .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
     }
 
