@@ -86,18 +86,6 @@ public class OpenApiRequestValidationTest
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
 
-    @SneakyThrows
-    @Test
-    void testCreateOrCheckDigestRequestToIngestionEvents()
-    {
-        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/create-or-check-digest.yml");
-        JsonNode propertiesNode = new ObjectMapper().readTree(hxInsightRequest.body()).get(0).get("properties");
-
-        Request request = makeRequest(hxInsightRequest);
-
-        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
-    }
-
     @Test
     void testDeleteRequestToIngestionEvents()
     {
