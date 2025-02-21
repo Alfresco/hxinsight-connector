@@ -53,6 +53,12 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String TYPE = "type";
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
+    private static final String AUTO_VERSION = "cm:autoVersion";
+    private static final String VERSION_TYPE = "cm:versionType";
+    private static final String ALLOW_ACCESS = "ALLOW_ACCESS";
+    private static final String DENY_ACCESS = "DENY_ACCESS";
+    private static final String TITLE = "cm:title";
+    private static final String VERSION_LABEL = "cm:versionLabel";
 
     public UpdateNodeEventSerializer()
     {
@@ -101,37 +107,62 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             jgen.writeObjectFieldStart(name);
             jgen.writeObjectField(getLowerCase(fieldType), value);
-            switch (name)
-            {
-            case CREATED_AT:
-                jgen.writeObjectField("annotation", "dateCreated");
-                break;
-            case MODIFIED_AT:
-                jgen.writeObjectField("annotation", "dateModified");
-                break;
-            case ASPECTS_NAMES:
-                jgen.writeObjectField("annotation", "aspects");
-                break;
-            case NAME:
-                jgen.writeObjectField("annotation", "name");
-                break;
-            case TYPE:
-                jgen.writeObjectField("annotation", "type");
-                break;
-            case CREATED_BY:
-                jgen.writeObjectField("annotation", "createdBy");
-                break;
-            case MODIFIED_BY:
-                jgen.writeObjectField("annotation", "modifiedBy");
-                break;
-            default:
-                break;
-            }
+            writeAnnotation(jgen, name);
+            writeType(jgen, name);
             jgen.writeEndObject();
         }
         catch (IOException e)
         {
             throw new JsonSerializationException("UpdateNodeEvent serialization failed", e);
+        }
+    }
+
+    private void writeAnnotation(JsonGenerator jgen, String name) throws IOException
+    {
+        switch (name)
+        {
+        case CREATED_AT:
+            jgen.writeObjectField("annotation", "dateCreated");
+            break;
+        case MODIFIED_AT:
+            jgen.writeObjectField("annotation", "dateModified");
+            break;
+        case ASPECTS_NAMES:
+            jgen.writeObjectField("annotation", "aspects");
+            break;
+        case NAME:
+            jgen.writeObjectField("annotation", "name");
+            break;
+        case TYPE:
+            jgen.writeObjectField("annotation", "type");
+            break;
+        case CREATED_BY:
+            jgen.writeObjectField("annotation", "createdBy");
+            break;
+        case MODIFIED_BY:
+            jgen.writeObjectField("annotation", "modifiedBy");
+            break;
+        default:
+            break;
+        }
+    }
+
+    private void writeType(JsonGenerator jgen, String name) throws IOException
+    {
+        switch (name)
+        {
+        case AUTO_VERSION:
+            jgen.writeObjectField("type", "boolean");
+            break;
+        case VERSION_TYPE:
+        case ALLOW_ACCESS:
+        case DENY_ACCESS:
+        case TITLE:
+        case VERSION_LABEL:
+            jgen.writeObjectField("type", "string");
+            break;
+        default:
+            break;
         }
     }
 
