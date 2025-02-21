@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,7 +29,6 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.propert
 import java.util.Optional;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyDeleted;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 
 public interface PropertyResolver<T>
@@ -37,6 +36,4 @@ public interface PropertyResolver<T>
     boolean canResolve(PropertyDelta<?> propertyDelta);
 
     Optional<PropertyDelta<T>> resolveUpdated(PropertyUpdated<?> updatedProperty);
-
-    Optional<PropertyDelta<T>> resolveDeleted(PropertyDeleted<?> deletedProperty);
 }

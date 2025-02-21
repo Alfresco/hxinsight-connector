@@ -30,7 +30,6 @@ import static java.util.Collections.emptySet;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
@@ -129,7 +128,6 @@ class IngestNodeCommandHandlerTest
             UpdateNodeEvent updateNodeEvent = updateNodeEventCaptor.getValue();
 
             assertContainsSameElements(expectedNodePropertiesToSet, updateNodeEvent.getMetadataPropertiesToSet().values());
-            assertTrue(updateNodeEvent.getPropertiesToUnset().isEmpty(), "There should be no properties to unset");
             assertEquals(updateNodeEvent.getEventType(), CREATE_OR_UPDATE);
         }
 
