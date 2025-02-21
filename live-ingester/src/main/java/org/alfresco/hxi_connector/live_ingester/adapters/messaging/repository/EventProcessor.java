@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -37,7 +37,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.isPredictionNodeEvent;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasContentChanged;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasPredictionConfirmed;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -103,7 +103,7 @@ public class EventProcessor
     {
         if (wasPredictionConfirmed(event))
         {
-            IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), UPDATE, getPredictionNodeProperties(event), getEventTimestamp(event));
+            IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), CREATE_OR_UPDATE, getPredictionNodeProperties(event), getEventTimestamp(event));
             ingestNodeCommandHandler.handle(command);
         }
     }

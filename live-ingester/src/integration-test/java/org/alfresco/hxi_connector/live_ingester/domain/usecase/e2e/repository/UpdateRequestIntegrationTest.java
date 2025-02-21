@@ -75,7 +75,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       },
                       "properties": {
                         "cm:title": "Purchase Order",
-                        "cm:versionType": null,
+                        "cm:versionType": "MAJOR",
                         "cm:versionLabel": "1.0",
                         "cm:description": null
                       },
@@ -104,7 +104,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/update-document.yml");
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-or-update-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
     }
 
@@ -173,7 +173,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           {
                             "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                             "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                            "eventType": "update",
+                            "eventType": "createOrUpdate",
                             "sourceTimestamp": 1611656982995,
                             "properties": {
                               "createdAt" : {
@@ -255,7 +255,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {
@@ -342,7 +342,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:title": {
@@ -429,7 +429,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611656982995,
                     "properties": {
                         "createdAt" : {
@@ -477,8 +477,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             }
                           }
                         }
-                    },
-                    "removedProperties": ["cm:title"]
+                    }
                   }
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -531,7 +530,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
                       "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
@@ -689,7 +688,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties" : {
                       "cm:title" : {
@@ -732,8 +731,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "type" : "string",
                         "value" : [ ]
                       }
-                    },
-                    "removedProperties": ["cm:content"]
+                    }
                   }
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
@@ -794,7 +792,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1704798873615,
                     "properties": {
                       "aspectsNames": {"value": ["cm:preferences", "cm:ownable"], "annotation": "aspects"},
@@ -882,7 +880,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
                     "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611656982995,
                     "properties": {
                       "cm:name": {
@@ -1013,7 +1011,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 [{
                   "objectId" : "9f3380e3-b9b1-4b01-b1c6-ef1f717a9abb",
                   "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                  "eventType" : "update",
+                  "eventType" : "createOrUpdate",
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
                     "ALLOW_ACCESS" : {

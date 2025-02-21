@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
+import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
 public class RenditionTransferIntegrationTest extends E2ETestBase
 {
@@ -38,14 +40,14 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareSFSToReturnFile("e71dd823-82c7-477c-8490-04cb0e826e66", "test-file.pdf");
-        containerSupport.prepareHxIToReturnStorageLocation("CONTENT ID");
+        containerSupport.prepareHxIToReturnStorageLocation("ecc22bdc-ac8e-4736-a36a-8b9ContentId");
         containerSupport.prepareHxInsightToReturnSuccess();
 
         // when
         String atsBody = """
                 {
                     "targetReference": "e71dd823-82c7-477c-8490-04cb0e826e66",
-                    "clientData": "{\\"nodeRef\\":\\"f71dd823-82c7-477c-8490-04cb0e826e67\\",\\"targetMimeType\\":\\"application/pdf\\", \\"timestamp\\": 1308061016}"
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\", \\"timestamp\\": 1611656982995}"
                 }""";
         containerSupport.raiseTransformationCompletedATSEvent(atsBody);
 
@@ -56,23 +58,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
 
         containerSupport.expectFileUploadedToS3("test-file.pdf");
 
-        String hxiBody = """
-                [
-                  {
-                    "objectId": "f71dd823-82c7-477c-8490-04cb0e826e67",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
-                    "eventType": "update",
-                    "sourceTimestamp": 1308061016,
-                    "properties": {
-                      "cm:content": {
-                        "file": {
-                          "id": "CONTENT ID",
-                          "content-type": "application/pdf"
-                        }
-                      }
-                    }
-                  }
-                ]""";
-        containerSupport.expectHxIngestMessageReceived(hxiBody);
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/upload-references-document.yml");
+        containerSupport.expectHxIngestMessageReceived(request.body());
     }
 }

@@ -32,8 +32,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,14 +55,14 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSerializeEmptyEvent()
     {
-        UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP);
+        UpdateNodeEvent emptyEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
 
         String expectedJson = """
                 [
                   {
                     "objectId": "%s",
                     "sourceId": "%s",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1724225729830
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
@@ -75,7 +74,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSerializePropertiesToSet()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
 
@@ -84,7 +83,7 @@ class UpdateNodeEventSerializerTest
                   {
                     "objectId": "%s",
                     "sourceId": "%s",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
                       "createdAt": {"value": 10000, "annotation": "dateCreated"},
@@ -100,7 +99,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSerializePropertiesToUnset()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID, TIMESTAMP)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addUnsetInstruction(CREATED_AT_PROPERTY)
                 .addUnsetInstruction(MODIFIED_BY_PROPERTY);
 
@@ -109,9 +108,8 @@ class UpdateNodeEventSerializerTest
                   {
                     "objectId": "%s",
                     "sourceId": "%s",
-                    "eventType": "update",
-                    "sourceTimestamp": 1724225729830,
-                    "removedProperties": [ "createdAt", "modifiedBy" ]
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
@@ -122,7 +120,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void canCopeWithNullUsers()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, null))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, null));
 
@@ -131,7 +129,7 @@ class UpdateNodeEventSerializerTest
                   {
                     "objectId": "%s",
                     "sourceId": "%s",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
                       "createdBy": {"value": null, "annotation": "createdBy"},
@@ -147,7 +145,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldSetContentProperty()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf",
                         "application/msword", 123L, "something.doc"));
 
@@ -156,7 +154,7 @@ class UpdateNodeEventSerializerTest
                   {
                     "objectId": "%s",
                     "sourceId": "%s",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
                       "cm:content": {
@@ -181,7 +179,7 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldOnlySendUpdatedContentMetadata()
     {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE, SOURCE_ID, TIMESTAMP)
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, null, null,
                         "application/msword", null, null));
 
@@ -190,7 +188,7 @@ class UpdateNodeEventSerializerTest
                   {
                     "objectId": "%s",
                     "sourceId": "%s",
-                    "eventType": "create",
+                    "eventType": "createOrUpdate",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
                       "cm:content": {

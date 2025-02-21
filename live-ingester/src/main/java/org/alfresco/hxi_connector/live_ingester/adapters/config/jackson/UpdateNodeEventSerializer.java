@@ -32,7 +32,6 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
 
 import java.io.IOException;
-import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -43,7 +42,6 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exceptio
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FileMetadata;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
 @Component
 public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
@@ -83,7 +81,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             jgen.writeStringField("objectId", event.getObjectId());
             jgen.writeStringField("sourceId", event.getSourceId());
 
-            jgen.writeStringField("eventType", serializeEventType(event.getEventType()));
+            jgen.writeStringField("eventType", event.getEventType().getValue());
             jgen.writeNumberField("sourceTimestamp", event.getTimestamp());
 
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
@@ -92,14 +90,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                 event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
                 jgen.writeEndObject();
-            }
-
-            Set<String> metadataPropertiesToUnset = event.getPropertiesToUnset();
-            if (!metadataPropertiesToUnset.isEmpty())
-            {
-                jgen.writeArrayFieldStart("removedProperties");
-                metadataPropertiesToUnset.forEach(propertyName -> writePropertyName(jgen, propertyName));
-                jgen.writeEndArray();
             }
 
             jgen.writeEndObject();
@@ -174,23 +164,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         default:
             break;
         }
-    }
-
-    private void writePropertyName(JsonGenerator jgen, String propertyName)
-    {
-        try
-        {
-            jgen.writeString(propertyName);
-        }
-        catch (IOException e)
-        {
-            throw new JsonSerializationException("UpdateNodeEvent serialization failed", e);
-        }
-    }
-
-    private String serializeEventType(EventType eventType)
-    {
-        return getLowerCase(eventType);
     }
 
     private String getLowerCase(Object object)

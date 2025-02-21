@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentPropertyUpdated;
 
 import java.util.Set;
@@ -78,7 +78,7 @@ public class IngestContentCommandHandler
 
         Set<PropertyDelta<?>> properties = Set.of(
                 contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.transferId(), ingestContentResponse.mimeType()));
-        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, UPDATE, properties, command.timestamp());
+        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, CREATE_OR_UPDATE, properties, command.timestamp());
         log.atDebug().log("Ingestion :: Notifying about node: {} content upload within transfer with ID: {}", nodeId, ingestContentResponse.transferId());
         ingestNodeCommandHandler.handle(ingestNodeCommand);
     }

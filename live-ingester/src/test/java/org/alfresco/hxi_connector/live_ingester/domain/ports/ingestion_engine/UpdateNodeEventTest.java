@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,7 +31,7 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.UPDATE;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
 import java.time.Instant;
 
@@ -47,7 +47,7 @@ class UpdateNodeEventTest
     void shouldOverwriteAlreadySetProperty()
     {
         // given
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID, TIMESTAMP);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
 
         NodeProperty<String> name1 = new NodeProperty<>(CREATED_BY_PROPERTY, "admin");
         NodeProperty<String> name2 = new NodeProperty<>(CREATED_BY_PROPERTY, "hruser");
@@ -65,7 +65,7 @@ class UpdateNodeEventTest
     void shouldNotDuplicatePropertiesToUnset()
     {
         // given
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, UPDATE, SOURCE_ID, TIMESTAMP);
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
 
         // when
         updateNodeEvent.addUnsetInstruction(CREATED_BY_PROPERTY);

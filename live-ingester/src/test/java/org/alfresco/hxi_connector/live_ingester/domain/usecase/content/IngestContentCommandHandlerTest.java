@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,6 +31,7 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
 import java.time.Instant;
 import java.util.Set;
@@ -51,7 +52,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.Tr
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
 
 @ExtendWith(MockitoExtension.class)
@@ -108,7 +108,7 @@ class IngestContentCommandHandlerTest
         // then
         IngestNodeCommand expectedIngestNodeCommand = new IngestNodeCommand(
                 NODE_ID,
-                EventType.UPDATE,
+                CREATE_OR_UPDATE,
                 Set.of(ContentPropertyUpdated.builder(CONTENT_PROPERTY).id(UPLOADED_CONTENT_ID).mimeType(mimeType).build()),
                 TIMESTAMP);
 
