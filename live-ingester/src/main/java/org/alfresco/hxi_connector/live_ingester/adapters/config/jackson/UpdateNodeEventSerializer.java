@@ -106,7 +106,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 
             if (!annotationAdded)
             {
-                writeType(jgen, name, value);
+                writeType(jgen, value);
             }
 
             jgen.writeEndObject();
@@ -147,7 +147,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    private void writeType(JsonGenerator jgen, String name, Object value) throws IOException
+    private void writeType(JsonGenerator jgen, Object value) throws IOException
     {
         if (value instanceof Boolean)
         {

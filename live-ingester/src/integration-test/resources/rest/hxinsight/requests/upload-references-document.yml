@@ -12,6 +12,7 @@ body: [
     "sourceTimestamp": 1611656982995,
     "properties": {
       "cm:content": {
+        "type": "object",
         "file": {
           "id": "ecc22bdc-ac8e-4736-a36a-8b9ContentId",
           "content-type": "application/pdf"

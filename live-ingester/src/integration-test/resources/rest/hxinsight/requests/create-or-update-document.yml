@@ -48,7 +48,7 @@ body: [
         "annotation": "createdBy"
       },
       "ALLOW_ACCESS": {
-        "type": "string",
+        "type": "object",
         "value": [
           "GROUP_EVERYONE"
         ]
@@ -62,10 +62,11 @@ body: [
         "annotation": "type"
       },
       "DENY_ACCESS": {
-        "type": "string",
+        "type": "object",
         "value": []
       },
       "cm:content": {
+        "type": "object",
         "file": {
           "content-metadata": {
             "size": 531152,
