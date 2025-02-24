@@ -137,6 +137,7 @@ class UpdateNodeEventSerializerTest
                     "sourceTimestamp": 1724225729830,
                     "properties": {
                       "cm:content": {
+                        "type": "object",
                         "file": {
                           "id": "content-id",
                           "content-type": "application/pdf",
@@ -171,6 +172,7 @@ class UpdateNodeEventSerializerTest
                     "sourceTimestamp": 1724225729830,
                     "properties": {
                       "cm:content": {
+                        "type": "object",
                         "file": {
                           "content-metadata": {
                             "content-type": "application/msword"
