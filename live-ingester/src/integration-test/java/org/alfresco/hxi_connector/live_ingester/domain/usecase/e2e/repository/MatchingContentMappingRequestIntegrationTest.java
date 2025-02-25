@@ -116,6 +116,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
+                        "type": "object",
                         "file": {
                           "content-metadata": {
                             "size": 531152,
@@ -124,8 +125,8 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"type": "string", "value": []}
+                      "ALLOW_ACCESS": {"type": "object", "value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"type": "object", "value": []}
                     }
                   }
                 ]""".formatted(sourceMimeType);
@@ -227,6 +228,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
+                        "type" : "object",
                         "file": {
                           "content-metadata": {
                             "size": 531152,
@@ -235,8 +237,8 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"type": "string", "value": []}
+                      "ALLOW_ACCESS": {"type": "object", "value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"type": "object", "value": []}
                     }
                   }
                 ]""".formatted(sourceMimeType);

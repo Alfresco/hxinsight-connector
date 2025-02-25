@@ -315,7 +315,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation": "createdBy"
                        },
                        "ALLOW_ACCESS" : {
-                         "type" : "string",
+                         "type" : "object",
                          "value" : [ "GROUP_EVERYONE" ]
                        },
                        "cm:name" : {
@@ -323,6 +323,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation" : "name"
                        },
                        "hxi:latestPredictionDateTime" : {
+                         "type" : "string",
                          "value" : "2024-05-08T17:00:42.529Z"
                        },
                        "type" : {
@@ -330,10 +331,11 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation" : "type"
                        },
                        "DENY_ACCESS" : {
-                         "type" : "string",
+                         "type" : "object",
                          "value" : [ ]
                        },
                        "cm:content" : {
+                         "type" : "object",
                          "file" : {
                            "content-metadata" : {
                              "size" : 531152,
@@ -422,7 +424,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": %s,
                     "properties": {
-                      "cm:description": {"value": "predicted value"}
+                      "cm:description": {"type": "string", "value": "predicted value"}
                     }
                   }
                 ]""".formatted(TIMESTAMP);
