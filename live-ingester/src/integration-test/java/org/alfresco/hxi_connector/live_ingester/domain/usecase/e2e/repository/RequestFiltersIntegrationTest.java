@@ -107,10 +107,10 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611227656423,
                     "properties": {
-                      "cm:autoVersion": {"value": true},
+                      "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": 1709378055695, "annotation": "dateCreated"},
                       "modifiedAt" : {"value" : 1709378055695, "annotation" : "dateModified"},
-                      "cm:versionType": {"value": "MAJOR"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.pdf",
@@ -120,6 +120,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
+                        "type" : "object",
                         "file": {
                           "content-metadata": {
                             "name": "purchase-order-scan.pdf",
@@ -128,8 +129,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
+                      "ALLOW_ACCESS": {"type": "object", "value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"type": "object", "value": []}
                     }
                   }
                 ]""";
@@ -267,10 +268,10 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611227656423,
                     "properties": {
-                      "cm:autoVersion": {"value": true},
+                      "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": 1709378055695, "annotation": "dateCreated"},
                       "modifiedAt": {"value": 1709378055695, "annotation": "dateModified"},
-                      "cm:versionType": {"value": "MAJOR"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.pdf",
@@ -280,6 +281,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
+                        "type": "object",
                         "file": {
                           "content-metadata": {
                             "name": "purchase-order-scan.pdf",
@@ -288,8 +290,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
+                      "ALLOW_ACCESS": {"type": "object", "value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"type": "object", "value": []}
                     }
                   }
                 ]""";
@@ -432,7 +434,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {"type": "string", "value": "Purchase Order"},
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ], "annotation" : "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
                       "createdAt" : {
@@ -444,6 +446,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "annotation" : "dateModified"
                       },
                       "cm:versionLabel" : {
+                        "type": "string",
                         "value" : "1.0"
                       },
                       "createdBy" : {
@@ -451,6 +454,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "object",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "cm:name" : {
@@ -459,9 +463,11 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       },
                       "type": {"value": "cm:content", "annotation": "type"},
                       "DENY_ACCESS" : {
+                        "type": "object",
                         "value" : [ ]
                       },
                       "cm:content" : {
+                        "type": "object",
                         "file" : {
                           "content-metadata" : {
                             "size" : 531152,
@@ -625,7 +631,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {"type": "string", "value": "Purchase Order"},
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ], "annotation": "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
                       "createdAt" : {
@@ -637,6 +643,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "annotation" : "dateModified"
                       },
                       "cm:versionLabel" : {
+                        "type": "string",
                         "value" : "1.0"
                       },
                       "createdBy" : {
@@ -644,6 +651,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "object",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "cm:name" : {
@@ -652,9 +660,11 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       },
                       "type": {"value": "cm:content", "annotation": "type"},
                       "DENY_ACCESS" : {
+                        "type": "object",
                         "value" : [ ]
                       },
                       "cm:content" : {
+                        "type": "object",
                         "file" : {
                           "content-metadata" : {
                             "size" : 531152,
@@ -1058,6 +1068,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                      "sourceTimestamp": 1611656982995,
                      "properties" : {
                        "cm:title" : {
+                         "type": "string",
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
@@ -1069,6 +1080,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "annotation" : "dateModified"
                        },
                        "cm:versionLabel" : {
+                         "type": "string",
                          "value" : "1.0"
                        },
                        "createdBy" : {
@@ -1076,9 +1088,11 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "annotation" : "createdBy"
                        },
                        "ALLOW_ACCESS" : {
+                         "type": "object",
                          "value" : [ "GROUP_EVERYONE" ]
                        },
                        "DENY_ACCESS" : {
+                         "type": "object",
                          "value" : [ ]
                        },
                        "cm:name" : {
@@ -1095,6 +1109,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        },
                        "type": {"value": "cm:content", "annotation": "type"},
                        "cm:content" : {
+                         "type": "object",
                          "file" : {
                            "content-metadata" : {
                              "size" : 531152,
@@ -1351,6 +1366,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                      "sourceTimestamp": 1611656982995,
                      "properties" : {
                        "cm:title" : {
+                         "type": "string",
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
@@ -1366,9 +1382,11 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "annotation" : "createdBy"
                        },
                        "ALLOW_ACCESS" : {
+                         "type": "object",
                          "value" : [ "GROUP_EVERYONE" ]
                        },
                        "DENY_ACCESS" : {
+                         "type": "object",
                          "value" : [ ]
                        },
                        "cm:name" : {
@@ -1385,6 +1403,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        },
                        "type": {"value": "cm:content", "annotation": "type"},
                        "cm:content" : {
+                         "type": "object",
                          "file" : {
                            "content-metadata" : {
                              "size" : 531152,

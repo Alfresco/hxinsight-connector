@@ -94,9 +94,10 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                         "value": "dashboard.xml",
                         "annotation" : "name"
                       },
-                      "cm:isContentIndexed": {"value": true},
-                      "cm:isIndexed": {"value": false},
+                      "cm:isContentIndexed": {"type": "boolean", "value": true},
+                      "cm:isIndexed": {"type": "boolean", "value": false},
                       "cm:content": {
+                        "type": "object",
                         "file": {
                           "content-metadata": {
                             "name": "dashboard.xml",
@@ -182,9 +183,10 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                         "value": "dashboard.xml",
                         "annotation" : "name"
                       },
-                      "cm:isContentIndexed": {"value": true},
-                      "cm:isIndexed": {"value": false},
+                      "cm:isContentIndexed": {"type": "boolean", "value": true},
+                      "cm:isIndexed": {"type": "boolean", "value": false},
                       "cm:content": {
+                        "type": "object",
                         "file": {
                           "content-metadata": {
                             "name": "dashboard.xml",

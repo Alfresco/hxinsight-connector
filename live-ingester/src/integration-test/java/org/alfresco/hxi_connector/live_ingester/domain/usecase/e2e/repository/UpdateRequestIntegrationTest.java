@@ -193,6 +193,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "name"
                               },
                               "ALLOW_ACCESS" : {
+                                "type" : "object",
                                 "value" : [ "GROUP_EVERYONE" ]
                               },
                               "aspectsNames" : {
@@ -208,9 +209,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "type"
                               },
                               "DENY_ACCESS" : {
+                                "type" : "object",
                                 "value" : [ ]
                               },
                               "cm:content" : {
+                                "type" : "object",
                                 "file" : {
                                   "content-metadata" : {
                                     "size" : 123,
@@ -256,7 +259,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {
+                        "type" : "string",
+                        "value": "Purchase Order"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -274,6 +280,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "object",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -289,9 +296,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "object",
                         "value" : [ ]
                       },
                       "cm:content" : {
+                        "type" : "object",
                         "file" : {
                           "content-metadata" : {
                             "size" : 531152,
@@ -338,7 +347,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Summary for year 2024"},
+                      "cm:title": {
+                        "type" : "string",
+                        "value": "Summary for year 2024"
+                      },
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -356,6 +368,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "object",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -371,9 +384,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "object",
                         "value" : [ ]
                       },
                       "cm:content" : {
+                        "type" : "object",
                         "file" : {
                           "content-metadata" : {
                             "size" : 531152,
@@ -438,8 +453,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
-                      "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
+                      "cm:taggable": {"type" : "object", "value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
+                      "cm:categories": {"type" : "object", "value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -457,6 +472,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "object",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -472,9 +488,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "object",
                         "value" : [ ]
                       },
                       "cm:content" : {
+                        "type" : "object",
                         "file" : {
                           "content-metadata" : {
                             "size" : 531152,
@@ -597,9 +615,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "aspectsNames": {"value": ["cm:preferences", "cm:ownable"], "annotation": "aspects"},
                       "cm:homeFolderProvider" : {
+                        "type" : "string",
                         "value" : "bootstrapHomeFolderProvider"
                       },
                       "cm:homeFolder" : {
+                        "type" : "object",
                         "value" : {
                           "storeRef" : {
                             "protocol" : "workspace",
@@ -609,9 +629,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         }
                       },
                       "sys:cascadeCRC" : {
+                        "type" : "integer",
                         "value" : 1040368885
                       },
                       "cm:lastName" : {
+                        "type" : "string",
                         "value" : ""
                       },
                       "cm:name" : {
@@ -619,6 +641,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type" : "object",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "type" : {
@@ -626,6 +649,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type" : "object",
                         "value" : [ ]
                       }
                     }
@@ -698,6 +722,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "object",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -713,6 +738,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
+                        "type": "object",
                         "value" : [ ]
                       }
                     }
@@ -809,21 +835,26 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
                     "ALLOW_ACCESS" : {
+                      "type": "object",
                       "value" : [ "GROUP_EVERYONE", "abeecher" ]
                     },
                     "DENY_ACCESS" : {
+                      "type": "object",
                       "value" : [ ]
                     },
                     "cm:title" : {
+                      "type": "string",
                       "value" : ""
                     },
                     "app:editInline" : {
+                      "type" : "boolean",
                       "value" : true
                     },
                     "aspectsNames" : {
                       "value" : [ "cm:generalclassifiable", "app:inlineeditable", "cm:author", "cm:titled", "cm:auditable", "cm:taggable" ], "annotation" : "aspects"
                     },
                     "cm:categories" : {
+                      "type" : "object",
                       "value" : [ ]
                     },
                     "type" : {
@@ -831,6 +862,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "annotation" : "type"
                     },
                     "cm:description" : {
+                      "type" : "string",
                       "value" : ""
                     },
                     "createdAt" : {
@@ -850,6 +882,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "annotation" : "name"
                     },
                     "cm:author" : {
+                      "type" : "string",
                       "value" : ""
                     },
                     "modifiedBy" : {
@@ -857,6 +890,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "annotation" : "modifiedBy"
                     },
                     "cm:content" : {
+                      "type" : "object",
                       "file" : {
                         "content-metadata" : {
                           "size" : 0,

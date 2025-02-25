@@ -101,37 +101,73 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             jgen.writeObjectFieldStart(name);
             jgen.writeObjectField(getLowerCase(fieldType), value);
-            switch (name)
+
+            boolean annotationAdded = writeAnnotation(jgen, name);
+
+            if (!annotationAdded)
             {
-            case CREATED_AT:
-                jgen.writeObjectField("annotation", "dateCreated");
-                break;
-            case MODIFIED_AT:
-                jgen.writeObjectField("annotation", "dateModified");
-                break;
-            case ASPECTS_NAMES:
-                jgen.writeObjectField("annotation", "aspects");
-                break;
-            case NAME:
-                jgen.writeObjectField("annotation", "name");
-                break;
-            case TYPE:
-                jgen.writeObjectField("annotation", "type");
-                break;
-            case CREATED_BY:
-                jgen.writeObjectField("annotation", "createdBy");
-                break;
-            case MODIFIED_BY:
-                jgen.writeObjectField("annotation", "modifiedBy");
-                break;
-            default:
-                break;
+                writeType(jgen, value);
             }
+
             jgen.writeEndObject();
         }
         catch (IOException e)
         {
             throw new JsonSerializationException("UpdateNodeEvent serialization failed", e);
+        }
+    }
+
+    private boolean writeAnnotation(JsonGenerator jgen, String name) throws IOException
+    {
+        switch (name)
+        {
+        case CREATED_AT:
+            jgen.writeObjectField("annotation", "dateCreated");
+            return true;
+        case MODIFIED_AT:
+            jgen.writeObjectField("annotation", "dateModified");
+            return true;
+        case ASPECTS_NAMES:
+            jgen.writeObjectField("annotation", "aspects");
+            return true;
+        case NAME:
+            jgen.writeObjectField("annotation", "name");
+            return true;
+        case TYPE:
+            jgen.writeObjectField("annotation", "type");
+            return true;
+        case CREATED_BY:
+            jgen.writeObjectField("annotation", "createdBy");
+            return true;
+        case MODIFIED_BY:
+            jgen.writeObjectField("annotation", "modifiedBy");
+            return true;
+        default:
+            return false;
+        }
+    }
+
+    private void writeType(JsonGenerator jgen, Object value) throws IOException
+    {
+        if (value instanceof Boolean)
+        {
+            jgen.writeObjectField("type", "boolean");
+        }
+        else if (value instanceof Integer)
+        {
+            jgen.writeObjectField("type", "integer");
+        }
+        else if (value instanceof Float)
+        {
+            jgen.writeObjectField("type", "float");
+        }
+        else if (value instanceof String)
+        {
+            jgen.writeObjectField("type", "string");
+        }
+        else
+        {
+            jgen.writeObjectField("type", "string");
         }
     }
 

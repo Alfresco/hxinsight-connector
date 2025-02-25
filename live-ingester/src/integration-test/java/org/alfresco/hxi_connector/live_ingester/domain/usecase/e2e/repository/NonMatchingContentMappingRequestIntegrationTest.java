@@ -99,10 +99,10 @@ class NonMatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611227656423,
                     "properties": {
-                      "cm:autoVersion": {"value": true},
+                      "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": 1611227655695, "annotation": "dateCreated"},
                       "modifiedAt": {"value" : 1611227655695, "annotation": "dateModified"},
-                      "cm:versionType": {"value": "MAJOR"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.bmp",
@@ -112,6 +112,7 @@ class NonMatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "cm:content": {
+                        "type" : "object",
                         "file": {
                           "content-metadata": {
                             "size": 531152,
@@ -120,8 +121,8 @@ class NonMatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
+                      "ALLOW_ACCESS": {"type": "object", "value": ["GROUP_EVERYONE"]},
+                      "DENY_ACCESS": {"type": "object", "value": []}
                     }
                   }
                 ]""".formatted(sourceMimeType);
