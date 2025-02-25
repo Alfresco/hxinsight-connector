@@ -165,10 +165,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             jgen.writeObjectField("type", "string");
         }
-        else if (value instanceof Object)
-        {
-            jgen.writeObjectField("type", "object");
-        }
         else
         {
             jgen.writeObjectField("type", "string");
