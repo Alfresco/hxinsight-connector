@@ -1,4 +1,4 @@
-url: /v1/check-digest/{{sourceId}}/{{rootId}}/{{digest}}
+url: /v1/check-digest/{{sourceId}}/{{objectId}}/{{digest}}
 headers:
   authorization: string
   content-type: application/json

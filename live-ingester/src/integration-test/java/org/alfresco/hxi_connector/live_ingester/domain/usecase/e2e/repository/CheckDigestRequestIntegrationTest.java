@@ -42,19 +42,19 @@ public class CheckDigestRequestIntegrationTest extends E2ETestBase
 
         // when
         String sourceId = "alfresco-dummy-source-id-0a63de491876";
-        String rootId = "368818d9-dddd-4b8b-8eab-e050253d7f61";
+        String objectId = "368818d9-dddd-4b8b-8eab-e050253d7f61";
         String digest = "fake-digest-identifier";
-        String url = String.format("/v1/check-digest/%s/%s/%s", sourceId, rootId, digest);
+        String url = String.format("/v1/check-digest/%s/%s/%s", sourceId, objectId, digest);
 
         HxInsightRequest request = new HxInsightRequest(url, null, null);
 
         String repoEvent = """
                 {
                     "sourceId": "%s",
-                    "rootId": "%s",
+                    "objectId": "%s",
                     "digest": "%s"
                 }
-                """.formatted(sourceId, rootId, digest);
+                """.formatted(sourceId, objectId, digest);
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
