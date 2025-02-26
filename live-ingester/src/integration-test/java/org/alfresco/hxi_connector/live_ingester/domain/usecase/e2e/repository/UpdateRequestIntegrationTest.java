@@ -193,6 +193,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "name"
                               },
                               "ALLOW_ACCESS" : {
+                                "type": "string",
                                 "value" : [ "GROUP_EVERYONE" ]
                               },
                               "aspectsNames" : {
@@ -208,7 +209,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "annotation" : "type"
                               },
                               "DENY_ACCESS" : {
-                                "value" : [ ]
+                                "type": "string",
+                                "value" : [""]
                               },
                               "cm:content" : {
                                 "file" : {
@@ -256,7 +258,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {"type": "string", "value": "Purchase Order"},
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -274,6 +276,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -289,7 +292,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
-                        "value" : [ ]
+                        "type": "string",
+                        "value" : [""]
                       },
                       "cm:content" : {
                         "file" : {
@@ -338,7 +342,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:title": {"value": "Summary for year 2024"},
+                      "cm:title": {"type": "string", "value": "Summary for year 2024"},
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -356,6 +360,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -371,7 +376,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
-                        "value" : [ ]
+                        "type": "string",
+                        "value" : [""]
                       },
                       "cm:content" : {
                         "file" : {
@@ -438,8 +444,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
-                      "cm:taggable": {"value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
-                      "cm:categories": {"value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
+                      "cm:taggable": {"type": "string", "value": ["51d0b636-3c3b-4e33-ba1f-098474f53e8c"]},
+                      "cm:categories": {"type": "string", "value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
                       "createdAt" : {
                         "value" : 1611227655695,
                         "annotation" : "dateCreated"
@@ -457,6 +463,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -472,7 +479,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
-                        "value" : [ ]
+                        "type": "string",
+                        "value" : [""]
                       },
                       "cm:content" : {
                         "file" : {
@@ -597,9 +605,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "properties": {
                       "aspectsNames": {"value": ["cm:preferences", "cm:ownable"], "annotation": "aspects"},
                       "cm:homeFolderProvider" : {
+                        "type": "string",
                         "value" : "bootstrapHomeFolderProvider"
                       },
                       "cm:homeFolder" : {
+                        "type": "string",
                         "value" : {
                           "storeRef" : {
                             "protocol" : "workspace",
@@ -609,9 +619,11 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         }
                       },
                       "sys:cascadeCRC" : {
+                        "type": "integer",
                         "value" : 1040368885
                       },
                       "cm:lastName" : {
+                        "type": "string",
                         "value" : ""
                       },
                       "cm:name" : {
@@ -619,6 +631,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "name"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "type" : {
@@ -626,7 +639,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
-                        "value" : [ ]
+                        "type": "string",
+                        "value" : [""]
                       }
                     }
                   }
@@ -698,6 +712,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "createdBy"
                       },
                       "ALLOW_ACCESS" : {
+                        "type": "string",
                         "value" : [ "GROUP_EVERYONE" ]
                       },
                       "aspectsNames" : {
@@ -713,7 +728,8 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "type"
                       },
                       "DENY_ACCESS" : {
-                        "value" : [ ]
+                        "type": "string",
+                        "value" : [""]
                       }
                     }
                   }
@@ -794,7 +810,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "GROUP_EVERYONE",
                       "abeecher"
                     ],
-                    "resourceDeniedAuthorities": []
+                    "resourceDeniedAuthorities": [ "" ]
                   }
                 }""";
         // when
@@ -809,21 +825,26 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
                     "ALLOW_ACCESS" : {
+                      "type": "string",
                       "value" : [ "GROUP_EVERYONE", "abeecher" ]
                     },
                     "DENY_ACCESS" : {
-                      "value" : [ ]
+                      "type": "string",
+                      "value" : [""]
                     },
                     "cm:title" : {
+                      "type": "string",
                       "value" : ""
                     },
                     "app:editInline" : {
+                      "type": "boolean",
                       "value" : true
                     },
                     "aspectsNames" : {
                       "value" : [ "cm:generalclassifiable", "app:inlineeditable", "cm:author", "cm:titled", "cm:auditable", "cm:taggable" ], "annotation" : "aspects"
                     },
                     "cm:categories" : {
+                      "type": "string",
                       "value" : [ ]
                     },
                     "type" : {
@@ -831,6 +852,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "annotation" : "type"
                     },
                     "cm:description" : {
+                      "type": "string",
                       "value" : ""
                     },
                     "createdAt" : {
@@ -850,6 +872,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "annotation" : "name"
                     },
                     "cm:author" : {
+                      "type": "string",
                       "value" : ""
                     },
                     "modifiedBy" : {

@@ -60,6 +60,7 @@ import org.alfresco.repo.event.v1.model.UserInfo;
 public class PropertyMappingHelper
 {
     private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
+    private static final String EMPTY_STRING = "";
 
     public static Optional<PropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
             String propertyKey, Function<NodeResource, ?> fieldGetter)
@@ -122,7 +123,7 @@ public class PropertyMappingHelper
 
         if (eventData.getResourceDeniedAuthorities() == null)
         {
-            return Optional.of(PropertyDelta.updated(DENY_ACCESS, Set.of()));
+            return Optional.of(PropertyDelta.updated(DENY_ACCESS, Set.of(EMPTY_STRING)));
         }
 
         return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));

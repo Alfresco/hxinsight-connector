@@ -317,7 +317,7 @@ class PropertiesMapperTest
     {
         // given
         String groupEveryone = "GROUP_EVERYONE";
-        String bob = "bob";
+        String emptyString = "";
 
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
@@ -328,14 +328,14 @@ class PropertiesMapperTest
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(emptyString));
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                updated(DENY_ACCESS, Set.of(bob)));
+                updated(DENY_ACCESS, Set.of(emptyString)));
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
@@ -345,6 +345,7 @@ class PropertiesMapperTest
     {
         // given
         String groupEveryone = "GROUP_EVERYONE";
+        String emptyString = "";
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
         setType(event, NODE_CREATED);
@@ -354,13 +355,14 @@ class PropertiesMapperTest
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
-        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(emptyString));
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(ALLOW_ACCESS, Set.of(groupEveryone)));
+                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
+                updated(DENY_ACCESS, Set.of(emptyString)));
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
@@ -370,7 +372,7 @@ class PropertiesMapperTest
     {
         // given
         String groupEveryone = "GROUP_EVERYONE";
-        String bob = "bob";
+        String emptyString = "";
 
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
@@ -381,14 +383,14 @@ class PropertiesMapperTest
         given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(emptyString));
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                updated(DENY_ACCESS, Set.of(bob)));
+                updated(DENY_ACCESS, Set.of(emptyString)));
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
