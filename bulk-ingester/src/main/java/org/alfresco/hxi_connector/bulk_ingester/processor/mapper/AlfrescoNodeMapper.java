@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -89,9 +89,17 @@ public class AlfrescoNodeMapper
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
 
-        allProperties.put(ALLOW_ACCESS, getResourceReaderAuthorities(alfrescoNode));
-        allProperties.put(DENY_ACCESS, getResourceDeniedAuthorities(alfrescoNode));
+        Set<String> allowAccess = (Set<String>) getResourceReaderAuthorities(alfrescoNode);
+        if (!allowAccess.isEmpty())
+        {
+            allProperties.put(ALLOW_ACCESS, (Serializable) allowAccess);
+        }
 
+        Set<String> denyAccess = (Set<String>) getResourceDeniedAuthorities(alfrescoNode);
+        if (!denyAccess.isEmpty())
+        {
+            allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
+        }
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
 
         Map<String, Serializable> properties = getProperties(allProperties);

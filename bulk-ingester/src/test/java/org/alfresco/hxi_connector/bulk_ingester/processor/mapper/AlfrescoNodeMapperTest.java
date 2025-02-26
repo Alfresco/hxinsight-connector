@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -145,9 +145,7 @@ class AlfrescoNodeMapperTest
                 TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP,
-                ALLOW_ACCESS, Set.of(),
-                DENY_ACCESS, Set.of()), ingestEvent.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
     }
 
     @Test
@@ -172,9 +170,7 @@ class AlfrescoNodeMapperTest
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP,
-                ALLOW_ACCESS, Set.of(),
-                DENY_ACCESS, Set.of()), ingestEvent.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
     }
 
     @Test
@@ -194,9 +190,7 @@ class AlfrescoNodeMapperTest
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
-                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP,
-                ALLOW_ACCESS, Set.of(),
-                DENY_ACCESS, Set.of()), ingestEvent.properties());
+                CREATED_AT_PROPERTY, CREATED_AT_TIMESTAMP), ingestEvent.properties());
     }
 
     private NodeProperty mockProperty(String propertyName)

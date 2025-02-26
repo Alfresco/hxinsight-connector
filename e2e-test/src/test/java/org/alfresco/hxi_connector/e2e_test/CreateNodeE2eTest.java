@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -224,8 +224,7 @@ public class CreateNodeE2eTest
             assertTrue(properties.has(ALLOW_ACCESS_PROPERTY));
             assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(ALLOW_ACCESS_PROPERTY).get("value")));
 
-            assertTrue(properties.has(DENY_ACCESS_PROPERTY));
-            assertEquals(Set.of(), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
+            assertFalse(properties.has(DENY_ACCESS_PROPERTY));
         }, DELAY_MS);
     }
 

@@ -91,9 +91,7 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated("cm:name", "some name"),
                 updated("cm:title", "some title"),
-                updated("cm:description", "some description"),
-                allowAccessUpdated(),
-                denyAccessUpdated());
+                updated("cm:description", "some description"));
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
@@ -119,9 +117,7 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(TYPE_PROPERTY, type),
-                allowAccessUpdated(),
-                denyAccessUpdated());
+                updated(TYPE_PROPERTY, type));
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
@@ -261,9 +257,7 @@ class PropertiesMapperTest
 
         // then
         Set<PropertyDelta<?>> expected = Set.of(
-                contentMetadataUpdated(CONTENT_PROPERTY, "application/msword", 123L, "some name"),
-                allowAccessUpdated(),
-                denyAccessUpdated());
+                contentMetadataUpdated(CONTENT_PROPERTY, "application/msword", 123L, "some name"));
         assertEquals(mergeWithDefaultProperties(expected), propertyDeltas);
     }
 
@@ -426,16 +420,6 @@ class PropertiesMapperTest
         return data;
     }
 
-    private static PropertyDelta<Set<String>> allowAccessUpdated()
-    {
-        return updated(ALLOW_ACCESS, Set.of());
-    }
-
-    private static PropertyDelta<Set<String>> denyAccessUpdated()
-    {
-        return updated(DENY_ACCESS, Set.of());
-    }
-
     private static NodeResource.Builder nodeResourceWithRequiredFields()
     {
         return NodeResource.builder()
@@ -456,9 +440,7 @@ class PropertiesMapperTest
                 updated(CREATED_BY_PROPERTY, "admin"),
                 updated(MODIFIED_AT_PROPERTY, 1_672_531_200_000L),
                 updated(MODIFIED_BY_PROPERTY, "admin"),
-                updated(ASPECT_NAMES_PROPERTY, Set.of("cm:auditable")),
-                updated(ALLOW_ACCESS, Set.of()),
-                updated(DENY_ACCESS, Set.of()));
+                updated(ASPECT_NAMES_PROPERTY, Set.of("cm:auditable")));
 
         Set<PropertyDelta<?>> mergedProperties = new HashSet<>(propertyDeltas);
 
