@@ -75,7 +75,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                       "primaryAssocQName": "cm:description"
                     },
                     "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
-                    "resourceDeniedAuthorities": []
+                    "resourceDeniedAuthorities": [ ""]
                   }
                 }""";
 
@@ -307,6 +307,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation": "dateModified"
                        },
                        "cm:versionLabel" : {
+                         "type": "string",
                          "value" : "1.0"
                        },
                        "createdBy" : {
@@ -314,6 +315,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation": "createdBy"
                        },
                        "ALLOW_ACCESS" : {
+                         "type": "string",
                          "value" : [ "GROUP_EVERYONE" ]
                        },
                        "cm:name" : {
@@ -321,6 +323,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation" : "name"
                        },
                        "hxi:latestPredictionDateTime" : {
+                         "type": "string",
                          "value" : "2024-05-08T17:00:42.529Z"
                        },
                        "type" : {
@@ -328,7 +331,8 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation" : "type"
                        },
                        "DENY_ACCESS" : {
-                         "value" : [ ]
+                         "type": "string",
+                         "value" : [""]
                        },
                        "cm:content" : {
                          "file" : {
@@ -339,7 +343,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                            }
                          }
                        },
-                      "cm:title": {"value": "Purchase Order"},
+                      "cm:title": {"type": "string", "value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"], "annotation": "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"}
                     }
@@ -403,7 +407,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                       }
                     },
                     "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
-                    "resourceDeniedAuthorities": []
+                    "resourceDeniedAuthorities": [ "" ]
                   }
                 }""";
 
@@ -419,7 +423,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": %s,
                     "properties": {
-                      "cm:description": {"value": "predicted value"}
+                      "cm:description": {"type": "string", "value": "predicted value"}
                     }
                   }
                 ]""".formatted(TIMESTAMP);
