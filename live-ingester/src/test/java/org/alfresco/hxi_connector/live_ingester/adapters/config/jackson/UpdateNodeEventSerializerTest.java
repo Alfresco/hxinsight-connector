@@ -126,7 +126,7 @@ class UpdateNodeEventSerializerTest
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf",
-                        "application/msword", 123L, "something.doc"));
+                        "application/msword", 123L, "something.doc", "fake-digest-identifier"));
 
         String expectedJson = """
                 [
@@ -143,6 +143,7 @@ class UpdateNodeEventSerializerTest
                           "content-metadata": {
                             "size": 123,
                             "name": "something.doc",
+                            "digestIdentifier": "fake-digest-identifier",
                             "content-type": "application/msword"
                           }
                         }
@@ -160,7 +161,7 @@ class UpdateNodeEventSerializerTest
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, null, null,
-                        "application/msword", null, null));
+                        "application/msword", null, null, "fake-digest-identifier"));
 
         String expectedJson = """
                 [
@@ -173,6 +174,7 @@ class UpdateNodeEventSerializerTest
                       "cm:content": {
                         "file": {
                           "content-metadata": {
+                            "digestIdentifier": "fake-digest-identifier",
                             "content-type": "application/msword"
                           }
                         }
