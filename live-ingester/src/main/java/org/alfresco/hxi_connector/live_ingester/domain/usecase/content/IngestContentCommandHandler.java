@@ -66,7 +66,7 @@ public class IngestContentCommandHandler
 
     public void handle(TriggerContentIngestionCommand command)
     {
-        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(command.nodeId(), UPDATE, Set.of(), command.timestamp());
+        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(command.nodeId(), CREATE_OR_UPDATE, Set.of(), command.timestamp());
         ingestNodeCommandHandler.handle(ingestNodeCommand);
 
         String digestIdentifier;
