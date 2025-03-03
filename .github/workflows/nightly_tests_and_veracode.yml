@@ -29,9 +29,9 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.12.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.12.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v8.12.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v8.14.1
         continue-on-error: true
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
@@ -45,8 +45,8 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.12.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v8.12.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v8.14.1
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           repository: "Alfresco/veracode-baseline-archive"
@@ -79,14 +79,14 @@ jobs:
       - name: "Checkout repository"
         uses: actions/checkout@v4
       - name: "Set up JDK"
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.12.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - name: "Build application"
         run: mvn clean install -DskipTests -pl live-ingester
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
       - name: "Notify on failure"
         if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.12.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           message: "Nightly tests failed"
