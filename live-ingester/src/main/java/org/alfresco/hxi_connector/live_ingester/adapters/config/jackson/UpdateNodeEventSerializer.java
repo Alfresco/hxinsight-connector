@@ -101,31 +101,10 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             jgen.writeObjectFieldStart(name);
             jgen.writeObjectField(getLowerCase(fieldType), value);
-            switch (name)
+            boolean hasAnnotation = writeAnnotation(jgen, name);
+            if (!hasAnnotation)
             {
-            case CREATED_AT:
-                jgen.writeObjectField("annotation", "dateCreated");
-                break;
-            case MODIFIED_AT:
-                jgen.writeObjectField("annotation", "dateModified");
-                break;
-            case ASPECTS_NAMES:
-                jgen.writeObjectField("annotation", "aspects");
-                break;
-            case NAME:
-                jgen.writeObjectField("annotation", "name");
-                break;
-            case TYPE:
-                jgen.writeObjectField("annotation", "type");
-                break;
-            case CREATED_BY:
-                jgen.writeObjectField("annotation", "createdBy");
-                break;
-            case MODIFIED_BY:
-                jgen.writeObjectField("annotation", "modifiedBy");
-                break;
-            default:
-                break;
+                writeType(jgen, value);
             }
             jgen.writeEndObject();
         }
@@ -133,6 +112,65 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             throw new JsonSerializationException("UpdateNodeEvent serialization failed", e);
         }
+    }
+
+    private boolean writeAnnotation(JsonGenerator jgen, String name) throws IOException
+    {
+        boolean hasAnnotation = true;
+        switch (name)
+        {
+        case CREATED_AT:
+            jgen.writeObjectField("annotation", "dateCreated");
+            break;
+        case MODIFIED_AT:
+            jgen.writeObjectField("annotation", "dateModified");
+            break;
+        case ASPECTS_NAMES:
+            jgen.writeObjectField("annotation", "aspects");
+            break;
+        case NAME:
+            jgen.writeObjectField("annotation", "name");
+            break;
+        case TYPE:
+            jgen.writeObjectField("annotation", "type");
+            break;
+        case CREATED_BY:
+            jgen.writeObjectField("annotation", "createdBy");
+            break;
+        case MODIFIED_BY:
+            jgen.writeObjectField("annotation", "modifiedBy");
+            break;
+        default:
+            hasAnnotation = false;
+            break;
+        }
+        return hasAnnotation;
+    }
+
+    private void writeType(JsonGenerator jgen, Object value) throws IOException
+    {
+        if (value instanceof FileMetadata)
+        {
+            return;
+        }
+        String type;
+        if (value instanceof Boolean)
+        {
+            type = "boolean";
+        }
+        else if (value instanceof Integer)
+        {
+            type = "integer";
+        }
+        else if (value instanceof Float)
+        {
+            type = "float";
+        }
+        else
+        {
+            type = "string";
+        }
+        jgen.writeObjectField("type", type);
     }
 
     private String getLowerCase(Object object)
