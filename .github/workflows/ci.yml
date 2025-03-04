@@ -50,9 +50,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - pre_commit
-    if: >
-      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || github.event_name == 'pull_request') &&
-      !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
