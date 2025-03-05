@@ -80,16 +80,10 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
-      - name: "Free up hosted runner disk space"
-        uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
-      - name: "Login to Quay.io"
-        uses: docker/login-action@v3
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+      - name: "Build SNAPSHOT dependencies"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -U -DskipTests -pl alfresco-hxinsight-connector-common-authentication,alfresco-hxinsight-connector-common-test
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -U -DskipTests
       - name: "Run OpenApi Specification tests"
