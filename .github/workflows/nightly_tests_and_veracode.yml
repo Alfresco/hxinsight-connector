@@ -80,20 +80,12 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
+      - name: "Free up hosted runner disk space"
+        uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
-      - name: "Clear local Maven repository cache for specific dependencies"
-        run: |
-            rm -rf ~/.m2/repository/org/alfresco/alfresco-hxinsight-connector-common-authentication
-            rm -rf ~/.m2/repository/org/alfresco/alfresco-hxinsight-connector-common-test
-            rm -rf ~/.m2/repository/org/alfresco/alfresco-hxinsight-connector-common-authentication/tests
-      - name: "Check availability of dependencies"
-        run: |
-          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-authentication:2.0.1-SNAPSHOT -U
-          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-test:2.0.1-SNAPSHOT -U 
-          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-authentication:tests:2.0.1-SNAPSHOT -U
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
 #      - name: "Notify on failure"
