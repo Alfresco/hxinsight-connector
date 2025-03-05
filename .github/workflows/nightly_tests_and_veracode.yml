@@ -3,11 +3,13 @@ name: Veracode and Nightly Tests run
 on:
   pull_request:
     branches:
+      - feature/**
       - master
       - release/**
 
   push:
     branches:
+      - feature/**
       - master
       - release/**
   schedule:
@@ -74,14 +76,14 @@ jobs:
   nightly_tests:
     name: "Run nightly tests"
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'pull_request'
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - name: "Build application"
-        run: mvn clean install -DskipTests -pl live-ingester
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
       - name: "Notify on failure"
