@@ -88,9 +88,9 @@ jobs:
         run: bash ./scripts/ci/cleanup_cache.sh
       - name: "Check availability of dependencies"
         run: |
-          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-authentication:2.0.1-SNAPSHOT
-          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-test:2.0.1-SNAPSHOT
-          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-authentication:tests:2.0.1-SNAPSHOT
+          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-authentication:2.0.1-SNAPSHOT -U
+          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-test:2.0.1-SNAPSHOT -U 
+          mvn dependency:get -Dartifact=org.alfresco:alfresco-hxinsight-connector-common-authentication:tests:2.0.1-SNAPSHOT -U
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
 #      - name: "Notify on failure"
