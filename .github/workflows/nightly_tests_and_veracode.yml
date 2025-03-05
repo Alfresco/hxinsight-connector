@@ -82,13 +82,15 @@ jobs:
         uses: actions/checkout@v4
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+      - name: "Clean Maven cache"
+        run: bash ./scripts/ci/cleanup_cache.sh
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -U
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
-      - name: "Notify on failure"
-        if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
-        with:
-          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
-          message: "Nightly tests failed"
+#      - name: "Notify on failure"
+#        if: failure()
+#        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
+#        with:
+#          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+#          message: "Nightly tests failed"
