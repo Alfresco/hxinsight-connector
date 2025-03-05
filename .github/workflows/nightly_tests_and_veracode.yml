@@ -82,10 +82,8 @@ jobs:
         uses: actions/checkout@v4
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
-      - name: "Clean Maven cache"
-        run: bash ./scripts/ci/cleanup_cache.sh
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -U
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
 #      - name: "Notify on failure"
