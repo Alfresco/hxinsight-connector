@@ -83,9 +83,9 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
-#      - name: "Notify on failure"
-#        if: failure()
-#        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
-#        with:
-#          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
-#          message: "Nightly tests failed"
+      - name: "Notify on failure"
+        if: failure()
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          message: "Nightly tests failed"
