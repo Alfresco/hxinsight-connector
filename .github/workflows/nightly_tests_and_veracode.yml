@@ -15,10 +15,6 @@ on:
 
 env:
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
-  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-  JAVA_VERSION: "17"
-  JAVA_VERSION_SUPPORTED_BY_REPO: "11"
 
 jobs:
   veracode_sca:
@@ -81,7 +77,7 @@ jobs:
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - name: "Build application"
-        run: mvn clean install -DskipTests -pl live-ingester
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -pl live-ingester -am
       - name: "Run OpenApi Specification tests"
         run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
       - name: "Notify on failure"
