@@ -83,7 +83,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       "isFile": true
                     },
                     "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
-                    "resourceDeniedAuthorities": []
+                    "resourceDeniedAuthorities": [ ]
                   }
                 }""";
 

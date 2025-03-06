@@ -89,7 +89,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "isFile": true
                     },
                     "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
-                    "resourceDeniedAuthorities": []
+                    "resourceDeniedAuthorities": [ ]
                   }
                 }""".formatted(sourceMimeType);
         containerSupport.raiseRepoEvent(repoEvent);
@@ -103,10 +103,10 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611227656423,
                     "properties": {
-                      "cm:autoVersion": {"value": true},
+                      "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": 1611227655695, "annotation": "dateCreated"},
                       "modifiedAt": {"value" : 1611227655695, "annotation": "dateModified"},
-                      "cm:versionType": {"value": "MAJOR"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.bmp",
@@ -124,8 +124,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
                     }
                   }
                 ]""".formatted(sourceMimeType);
@@ -200,7 +199,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "isFile": true
                     },
                     "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
-                    "resourceDeniedAuthorities": []
+                    "resourceDeniedAuthorities": [ ]
                   }
                 }""".formatted(sourceMimeType);
         containerSupport.raiseRepoEvent(repoEvent);
@@ -214,10 +213,10 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611227656423,
                     "properties": {
-                      "cm:autoVersion": {"value": true},
+                      "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": 1611227655695, "annotation": "dateCreated"},
                       "modifiedAt": {"value": 1611227655695, "annotation": "dateModified"},
-                      "cm:versionType": {"value": "MAJOR"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
                         "value": "purchase-order-scan.bmp",
@@ -235,8 +234,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"value": ["GROUP_EVERYONE"]},
-                      "DENY_ACCESS": {"value": []}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
                     }
                   }
                 ]""".formatted(sourceMimeType);

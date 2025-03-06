@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -97,7 +97,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         IngestEvent textFile = IngestEvent.builder()
                 .nodeId("44545a62-0f64-4d3e-838a-9f8ba23df0c7")
                 .contentInfo(new IngestEvent.ContentInfo(28, "UTF-8", "text/plain"))
-                .properties(parseProperties("cm:name=Animals list", "cm:title=List of animals", "type=cm:content", "createdAt=1708329628", "app:editInline=true", "aspectsNames=[cm:generalclassifiable, app:inlineeditable, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]", "cm:categories=25805c3b-dc41-4a3d-9b03-a44ac7963c70", "createdBy=admin", "cm:lastThumbnailModification=[doclib:1708329633941, pdf:1708329629285]", "cm:description=List of animals in our zoo", "modifiedBy=admin", "ALLOW_ACCESS=[GROUP_EVERYONE]", "DENY_ACCESS=[]"))
+                .properties(parseProperties("cm:name=Animals list", "cm:title=List of animals", "type=cm:content", "createdAt=1708329628", "app:editInline=true", "aspectsNames=[cm:generalclassifiable, app:inlineeditable, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]", "cm:categories=25805c3b-dc41-4a3d-9b03-a44ac7963c70", "createdBy=admin", "cm:lastThumbnailModification=[doclib:1708329633941, pdf:1708329629285]", "cm:description=List of animals in our zoo", "modifiedBy=admin", "ALLOW_ACCESS=[GROUP_EVERYONE]"))
                 .timestamp(TIMESTAMP)
                 .build();
         IngestEvent pdfFile = IngestEvent.builder()

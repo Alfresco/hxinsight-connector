@@ -32,6 +32,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
 
 import java.io.IOException;
+import java.util.Collection;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -99,33 +100,17 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     {
         try
         {
+            if (value instanceof Collection collection && collection.isEmpty())
+            {
+                return;
+            }
+
             jgen.writeObjectFieldStart(name);
             jgen.writeObjectField(getLowerCase(fieldType), value);
-            switch (name)
+            boolean hasAnnotation = writeAnnotation(jgen, name);
+            if (!hasAnnotation)
             {
-            case CREATED_AT:
-                jgen.writeObjectField("annotation", "dateCreated");
-                break;
-            case MODIFIED_AT:
-                jgen.writeObjectField("annotation", "dateModified");
-                break;
-            case ASPECTS_NAMES:
-                jgen.writeObjectField("annotation", "aspects");
-                break;
-            case NAME:
-                jgen.writeObjectField("annotation", "name");
-                break;
-            case TYPE:
-                jgen.writeObjectField("annotation", "type");
-                break;
-            case CREATED_BY:
-                jgen.writeObjectField("annotation", "createdBy");
-                break;
-            case MODIFIED_BY:
-                jgen.writeObjectField("annotation", "modifiedBy");
-                break;
-            default:
-                break;
+                writeType(jgen, value);
             }
             jgen.writeEndObject();
         }
@@ -133,6 +118,75 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             throw new JsonSerializationException("UpdateNodeEvent serialization failed", e);
         }
+    }
+
+    private boolean writeAnnotation(JsonGenerator jgen, String name) throws IOException
+    {
+        boolean hasAnnotation = true;
+        switch (name)
+        {
+        case CREATED_AT:
+            jgen.writeObjectField("annotation", "dateCreated");
+            break;
+        case MODIFIED_AT:
+            jgen.writeObjectField("annotation", "dateModified");
+            break;
+        case ASPECTS_NAMES:
+            jgen.writeObjectField("annotation", "aspects");
+            break;
+        case NAME:
+            jgen.writeObjectField("annotation", "name");
+            break;
+        case TYPE:
+            jgen.writeObjectField("annotation", "type");
+            break;
+        case CREATED_BY:
+            jgen.writeObjectField("annotation", "createdBy");
+            break;
+        case MODIFIED_BY:
+            jgen.writeObjectField("annotation", "modifiedBy");
+            break;
+        default:
+            hasAnnotation = false;
+            break;
+        }
+        return hasAnnotation;
+    }
+
+    private void writeType(JsonGenerator jgen, Object value) throws IOException
+    {
+        if (value instanceof FileMetadata)
+        {
+            return;
+        }
+
+        String type = selectTypeByValue(value);
+        jgen.writeObjectField("type", type);
+    }
+
+    private String selectTypeByValue(Object value)
+    {
+        if (value instanceof Boolean)
+        {
+            return "boolean";
+        }
+        else if (value instanceof Integer)
+        {
+            return "integer";
+        }
+        else if (value instanceof Float)
+        {
+            return "float";
+        }
+        else if (value instanceof Collection collection)
+        {
+            if (collection.isEmpty())
+            {
+                throw new IllegalArgumentException("Empty collections should not be passed to selectTypeByValue.");
+            }
+            return selectTypeByValue(collection.stream().findAny());
+        }
+        return "string";
     }
 
     private String getLowerCase(Object object)

@@ -112,6 +112,10 @@ public class PropertyMappingHelper
         {
             return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, Set.of(GROUP_EVERYONE)));
         }
+        else if (eventData.getResourceReaderAuthorities().isEmpty())
+        {
+            return Optional.empty();
+        }
 
         return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, eventData.getResourceReaderAuthorities()));
     }
@@ -120,9 +124,9 @@ public class PropertyMappingHelper
     {
         EventData eventData = (EventData) event.getData();
 
-        if (eventData.getResourceDeniedAuthorities() == null)
+        if (eventData.getResourceDeniedAuthorities() == null || eventData.getResourceDeniedAuthorities().isEmpty())
         {
-            return Optional.of(PropertyDelta.updated(DENY_ACCESS, Set.of()));
+            return Optional.empty();
         }
 
         return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));
