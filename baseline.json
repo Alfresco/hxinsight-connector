@@ -1,0 +1,12 @@
+{
+  "scan_status": "SUCCESS",
+  "findings": [
+    {
+      "issue_id": "1234",
+      "cwe_id": "80",
+      "file_path": "org/springframework/security/spring-security-webauthn.js",
+      "false_positive": true,
+      "justification": "External library dependency with no direct usage in project"
+    }
+  ]
+}
