@@ -3,6 +3,7 @@ name: Veracode and Nightly Tests run
 on:
   pull_request:
     branches:
+      - feature/**
       - master
       - release/**
 
@@ -36,7 +37,7 @@ jobs:
     name: "Pipeline SAST Scan"
     runs-on: ubuntu-latest
     if: >
-      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || github.event_name == 'schedule') &&
+      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/') || github.event_name == 'pull_request') &&
       github.actor != 'dependabot[bot]' &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
