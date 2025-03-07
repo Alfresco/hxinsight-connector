@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
+import org.owasp.encoder.Encode;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -72,7 +73,8 @@ public class DefaultAuthenticationClient implements AuthenticationClient
 
             if (isErrorCode(response.statusCode()))
             {
-                log.error(AUTH_ERROR_LOG_MESSAGE, providerId, response.body());
+                String sanitizedResponseBody = Encode.forHtml(response.body());
+                log.error(AUTH_ERROR_LOG_MESSAGE, providerId, sanitizedResponseBody);
             }
             ErrorUtils.throwExceptionOnUnexpectedStatusCode(response.statusCode(), EXPECTED_STATUS_CODE);
 
