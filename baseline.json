@@ -7,6 +7,13 @@
       "file_path": "org/springframework/security/spring-security-webauthn.js",
       "false_positive": true,
       "justification": "External library dependency with no direct usage in project"
+    },
+    {
+      "issue_id": "1235",
+      "cwe_id": "601",
+      "file_path": "org/springframework/security/spring-security-webauthn.js",
+      "false_positive": true,
+      "justification": "External library dependency with no direct usage in project"
     }
   ]
 }
