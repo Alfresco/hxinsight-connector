@@ -50,7 +50,7 @@ jobs:
           file-path: "hxinsight-connector/hxinsight-connector-baseline.json"
           target: "baseline.json"
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -am
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.18
         with:
