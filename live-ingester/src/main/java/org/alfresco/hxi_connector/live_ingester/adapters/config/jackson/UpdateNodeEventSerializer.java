@@ -96,7 +96,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    private void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value)
+    void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value)
     {
         try
         {
@@ -164,7 +164,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         jgen.writeObjectField("type", type);
     }
 
-    private String selectTypeByValue(Object value)
+    String selectTypeByValue(Object value)
     {
         if (value instanceof Boolean)
         {
