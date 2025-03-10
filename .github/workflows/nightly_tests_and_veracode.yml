@@ -67,7 +67,11 @@ jobs:
           summary_output_file: results.json
           summary_display: true
           baseline_file: baseline.json
-          include: "alfresco-hxinsight-connector-bulk-ingester-*,alfresco-hxinsight-connector-hxinsight-extension-*,alfresco-hxinsight-connector-live-ingester-*,alfresco-hxinsight-connector-prediction-applier-*"
+          include: "alfresco-hxinsight-connector-bulk-ingester-*,
+          alfresco-hxinsight-connector-hxinsight-extension-*,
+          alfresco-hxinsight-connector-live-ingester-*,
+          alfresco-hxinsight-connector-prediction-applier-*,
+          alfresco-hxinsight-connector-distribution-*"
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
