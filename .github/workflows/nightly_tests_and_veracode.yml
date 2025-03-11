@@ -68,7 +68,7 @@ jobs:
           baseline_file: baseline.json
           include: "alfresco-hxinsight-connector*"
       - name: "Notify on Veracode SAST scan failure"
-        if: failure()
+        if: github.event_name == 'schedule' && failure()
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
