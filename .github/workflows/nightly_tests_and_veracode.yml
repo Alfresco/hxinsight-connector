@@ -16,8 +16,6 @@ on:
 
 env:
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
-  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
 
 jobs:
   veracode_sca:
@@ -53,6 +51,9 @@ jobs:
           target: "baseline.json"
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+        env:
+          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.18
         with:
@@ -67,11 +68,7 @@ jobs:
           summary_output_file: results.json
           summary_display: true
           baseline_file: baseline.json
-          include: "alfresco-hxinsight-connector-bulk-ingester-*,
-          alfresco-hxinsight-connector-hxinsight-extension-*,
-          alfresco-hxinsight-connector-live-ingester-*,
-          alfresco-hxinsight-connector-prediction-applier-*,
-          alfresco-hxinsight-connector-distribution-*"
+          include: "alfresco-hxinsight-connector*"
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
