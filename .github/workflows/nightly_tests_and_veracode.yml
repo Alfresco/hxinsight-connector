@@ -59,7 +59,6 @@ jobs:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
           file: "distribution/target/alfresco-hxinsight-connector-distribution-*.zip"
-          fail_build: false
           project_name: hxinsight-connector
           issue_details: true
           veracode_policy_name: Alfresco Default
@@ -68,6 +67,12 @@ jobs:
           summary_display: true
           baseline_file: baseline.json
           include: "alfresco-hxinsight-connector*"
+      - name: "Notify on Veracode SAST scan failure"
+        if: failure()
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          message: "Nightly Veracode SAST scan failed"
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
