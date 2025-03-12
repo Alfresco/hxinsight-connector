@@ -72,6 +72,7 @@ jobs:
           summary_output: false
           summary_display: false
           include: "alfresco-hxinsight-connector*"
+          token: ""
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
