@@ -26,7 +26,12 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
@@ -34,12 +39,25 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
+import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
@@ -50,7 +68,20 @@ class UpdateNodeEventSerializerTest
     private static final String SOURCE_ID = "dummy-source-id";
     private static final long TIMESTAMP = 1_724_225_729_830L;
 
-    private final UpdateNodeEventSerializer serializer = new UpdateNodeEventSerializer();
+    @Mock
+    private JsonGenerator jsonGenerator;
+
+    @InjectMocks
+    private UpdateNodeEventSerializer serializer;
+
+    @Captor
+    private ArgumentCaptor<String> stringCaptor;
+
+    @BeforeEach
+    void setUp()
+    {
+        MockitoAnnotations.openMocks(this);
+    }
 
     @Test
     public void shouldSerializeEmptyEvent()
@@ -183,6 +214,69 @@ class UpdateNodeEventSerializerTest
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    void shouldNotWriteEmptyCollection() throws IOException
+    {
+        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", Collections.emptyList());
+
+        verify(jsonGenerator, never()).writeObjectFieldStart(anyString());
+    }
+
+    @Test
+    void shouldWriteNonEmptyCollection() throws IOException
+    {
+        List<String> nonEmptyList = List.of("value1", "value2");
+
+        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", nonEmptyList);
+
+        verify(jsonGenerator).writeObjectFieldStart("testProperty");
+        verify(jsonGenerator).writeObjectField("value", nonEmptyList);
+        verify(jsonGenerator).writeEndObject();
+    }
+
+    @Test
+    void shouldWriteSingleValue() throws IOException
+    {
+        String value = "singleTestValue";
+
+        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", value);
+
+        verify(jsonGenerator).writeObjectFieldStart("testProperty");
+        verify(jsonGenerator).writeObjectField("value", value);
+        verify(jsonGenerator).writeEndObject();
+    }
+
+    @Test
+    public void shouldReturnCorrectTypeForVariousValues()
+    {
+        assertAll(
+                () -> assertEquals("boolean", serializer.selectTypeByValue(true)),
+                () -> assertEquals("integer", serializer.selectTypeByValue(123)),
+                () -> assertEquals("float", serializer.selectTypeByValue(123.45f)),
+                () -> assertEquals("string", serializer.selectTypeByValue("testTypeValue")));
+    }
+
+    @Test
+    public void shouldThrowExceptionForEmptyCollection()
+    {
+        Exception exception = assertThrows(IllegalArgumentException.class, () -> {
+            serializer.selectTypeByValue(Collections.emptyList());
+        });
+        assertEquals("Empty collections should not be passed to selectTypeByValue.", exception.getMessage());
+    }
+
+    @Test
+    public void shouldReturnStringForMixedTypeCollection()
+    {
+        assertEquals("string", serializer.selectTypeByValue(Arrays.asList(1, "test", 3.14)));
+    }
+
+    @Test
+    public void shouldReturnStringForNullValue()
+    {
+        assertEquals("string", serializer.selectTypeByValue(null));
     }
 
     @SneakyThrows
