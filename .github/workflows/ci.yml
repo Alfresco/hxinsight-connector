@@ -70,6 +70,7 @@ jobs:
           issue_details: true
           veracode_policy_name: Alfresco Default
           summary_display: true
+          include: "alfresco-hxinsight-connector*"
           token: ""
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
