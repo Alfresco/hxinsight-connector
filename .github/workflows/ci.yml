@@ -69,7 +69,7 @@ jobs:
           project_name: hxinsight-connector
           issue_details: true
           veracode_policy_name: Alfresco Default
-          summary_output: true
+          summary_output: false
           summary_display: false
           include: "alfresco-hxinsight-connector*"
       - name: "Clean Maven cache"
