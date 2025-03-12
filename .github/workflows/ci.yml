@@ -61,15 +61,15 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.18
+        continue-on-error: false
         with:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
           file: "distribution/target/alfresco-hxinsight-connector-distribution-*.zip"
           fail_build: true
           project_name: hxinsight-connector
-          issue_details: false
+          issue_details: true
           veracode_policy_name: Alfresco Default
-          summary_output: false
           summary_display: false
           token: ""
       - name: "Clean Maven cache"
