@@ -67,7 +67,7 @@ jobs:
           file: "distribution/target/alfresco-hxinsight-connector-distribution-*.zip"
           fail_build: true
           project_name: hxinsight-connector
-          issue_details: true
+          issue_details: false
           veracode_policy_name: Alfresco Default
           summary_output: false
           summary_display: false
