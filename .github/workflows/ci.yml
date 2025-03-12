@@ -71,6 +71,7 @@ jobs:
           vid: ${{ secrets.VERACODE_API_ID }}
           vkey: ${{ secrets.VERACODE_API_KEY }}
           file: "distribution/target/alfresco-hxinsight-connector-distribution-*.zip"
+          fail_build: true
           project_name: hxinsight-connector
           issue_details: true
           veracode_policy_name: Alfresco Default
