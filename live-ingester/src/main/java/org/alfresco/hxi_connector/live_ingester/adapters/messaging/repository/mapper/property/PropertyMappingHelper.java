@@ -42,6 +42,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PRO
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -60,6 +61,7 @@ import org.alfresco.repo.event.v1.model.UserInfo;
 public class PropertyMappingHelper
 {
     private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
 
     public static Optional<PropertyDelta<?>> calculatePropertyDelta(RepoEvent<DataAttributes<NodeResource>> event,
             String propertyKey, Function<NodeResource, ?> fieldGetter)
@@ -96,12 +98,12 @@ public class PropertyMappingHelper
 
     public static Optional<PropertyDelta<?>> calculateCreatedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        return calculatePropertyDelta(event, CREATED_AT_PROPERTY, nodeResource -> toMilliseconds(nodeResource.getCreatedAt()));
+        return calculatePropertyDelta(event, CREATED_AT_PROPERTY, nodeResource -> formatDateTime(nodeResource.getCreatedAt()));
     }
 
     public static Optional<PropertyDelta<?>> calculateModifiedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        return calculatePropertyDelta(event, MODIFIED_AT_PROPERTY, nodeResource -> toMilliseconds(nodeResource.getCreatedAt()));
+        return calculatePropertyDelta(event, MODIFIED_AT_PROPERTY, nodeResource -> formatDateTime(nodeResource.getCreatedAt()));
     }
 
     public static Optional<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
@@ -132,9 +134,9 @@ public class PropertyMappingHelper
         return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));
     }
 
-    private static Long toMilliseconds(ZonedDateTime time)
+    private static String formatDateTime(ZonedDateTime time)
     {
-        return time == null ? null : time.toInstant().toEpochMilli();
+        return time == null ? null : DATE_TIME_FORMATTER.format(time);
     }
 
     public static Optional<PropertyDelta<?>> calculateContentPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)

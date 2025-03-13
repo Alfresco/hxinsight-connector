@@ -108,8 +108,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"type": "boolean", "value": true},
-                      "createdAt": {"value": 1709378055695, "annotation": "dateCreated"},
-                      "modifiedAt" : {"value" : 1709378055695, "annotation" : "dateModified"},
+                      "createdAt": {"value": "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation": "dateCreated"},
+                      "modifiedAt" : {"value" : "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation" : "dateModified"},
                       "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
@@ -267,8 +267,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"type": "boolean", "value": true},
-                      "createdAt": {"value": 1709378055695, "annotation": "dateCreated"},
-                      "modifiedAt": {"value": 1709378055695, "annotation": "dateModified"},
+                      "createdAt": {"value": "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation": "dateModified"},
                       "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"], "annotation": "aspects"},
                       "cm:name": {
@@ -434,11 +434,13 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:auditable" ], "annotation" : "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
                       "createdAt" : {
-                        "value" : 1709378055695,
+                        "value" : "2024-03-02T11:14:15.695Z",
+                        "type" : "datetime",
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1709378055695,
+                        "value" : "2024-03-02T11:14:15.695Z",
+                        "type" : "datetime",
                         "annotation" : "dateModified"
                       },
                       "cm:versionLabel" : {
@@ -626,11 +628,13 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "aspectsNames": {"value" : [ "cm:versionable", "cm:author", "cm:titled", "cm:classifiable" ], "annotation": "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
                       "createdAt" : {
-                        "value" : 1709378055695,
+                        "value" : "2024-03-02T11:14:15.695Z",
+                        "type" : "datetime",
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : 1709378055695,
+                        "value" : "2024-03-02T11:14:15.695Z",
+                        "type" : "datetime",
                         "annotation" : "dateModified"
                       },
                       "cm:versionLabel" : {
@@ -1058,11 +1062,13 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : 1709378055695,
+                         "value" : "2024-03-02T11:14:15.695Z",
+                         "type" : "datetime",
                          "annotation" : "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : 1709378055695,
+                         "value" : "2024-03-02T11:14:15.695Z",
+                         "type" : "datetime",
                          "annotation" : "dateModified"
                        },
                        "cm:versionLabel" : {
@@ -1351,11 +1357,13 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "Purchase Order"
                        },
                        "createdAt" : {
-                         "value" : 1709378055695,
+                         "value" : "2024-03-02T11:14:15.695Z",
+                         "type" : "datetime",
                          "annotation" : "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : 1709378055695,
+                         "value" : "2024-03-02T11:14:15.695Z",
+                         "type" : "datetime",
                          "annotation" : "dateModified"
                        },
                        "createdBy" : {

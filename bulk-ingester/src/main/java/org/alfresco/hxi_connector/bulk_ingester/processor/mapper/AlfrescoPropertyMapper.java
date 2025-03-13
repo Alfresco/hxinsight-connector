@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -143,15 +143,16 @@ public class AlfrescoPropertyMapper
 
     }
 
-    private Optional<Long> getDateValue(Serializable propertyValue)
+    private Optional<Serializable> getDateValue(Serializable propertyValue)
     {
         try
         {
-            return of(ZonedDateTime.parse((String) propertyValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME).toInstant().toEpochMilli());
+            return of(ZonedDateTime.parse((String) propertyValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
+                    .format(DateTimeFormatter.ISO_INSTANT));
         }
         catch (Exception e)
         {
-            log.error("Cannot get epoch value from property {} with value {} for node {}", propertyName, propertyValue, alfrescoNode.getId());
+            log.error("Cannot get ISO date value from property {} with value {} for node {}", propertyName, propertyValue, alfrescoNode.getId());
 
             return empty();
         }
@@ -169,8 +170,7 @@ public class AlfrescoPropertyMapper
         case DOUBLE -> of(propertyValue.getDoubleValue());
         case STRING -> of(propertyValue.getStringValue());
         case SERIALIZABLE -> deserializeObject(propertyValue);
-        default ->
-        {
+        default -> {
             log.error("Property {} type not recognized. Cannot extract value {}. Node: {}", propertyName, propertyValue, alfrescoNode.getId());
 
             yield empty();

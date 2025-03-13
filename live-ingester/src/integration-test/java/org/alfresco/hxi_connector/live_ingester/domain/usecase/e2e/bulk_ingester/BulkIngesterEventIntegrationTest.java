@@ -52,7 +52,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                   "properties": {
                     "cm:name": "Mexican Spanish",
                     "type": "cm:category",
-                    "createdAt": 1707153552,
+                    "createdAt": "2024-02-05T05:19:00.000Z",
                     "createdBy": "System",
                     "modifiedBy": "admin",
                     "aspectsNames": [
@@ -72,7 +72,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1707153500,
                     "properties" : {
                       "type": {"value": "cm:category", "annotation": "type"},
-                      "createdAt": {"value": 1707153552, "annotation": "dateCreated"},
+                      "createdAt": {"value": "2024-02-05T05:19:00.000Z", "type": "datetime", "annotation": "dateCreated"},
                       "createdBy": {"value": "System", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:auditable"], "annotation": "aspects"},
@@ -106,7 +106,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "cm:name": "dashboard.xml",
                     "cm:isContentIndexed": true,
                     "cm:isIndexed": false,
-                    "createdAt": 1308061016,
+                    "createdAt": "2011-06-14T02:16:56.000Z",
                     "type": "cm:content",
                     "createdBy": "admin",
                     "modifiedBy": "hr_user",
@@ -131,7 +131,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
-                      "createdAt": {"value": 1308061016, "annotation": "dateCreated"},
+                      "createdAt": {"value": "2011-06-14T02:16:56.000Z", "type": "datetime", "annotation": "dateCreated"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"

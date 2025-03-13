@@ -106,7 +106,7 @@ class UpdateNodeEventSerializerTest
     public void shouldSerializePropertiesToSet()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
-                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, 10000L))
+                .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, "2024-02-19T07:56:50.034Z"))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
 
         String expectedJson = """
@@ -117,7 +117,7 @@ class UpdateNodeEventSerializerTest
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
-                      "createdAt": {"value": 10000, "annotation": "dateCreated"},
+                      "createdAt": {"value": "2024-02-19T07:56:50.034Z", "type": "datetime", "annotation": "dateCreated"},
                       "modifiedBy": {"value": "000-000-000", "annotation": "modifiedBy"}
                     }
                   }
