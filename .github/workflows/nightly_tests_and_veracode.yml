@@ -3,7 +3,6 @@ name: Veracode and Nightly Tests run
 on:
   pull_request:
     branches:
-      - feature/**
       - master
       - release/**
 
@@ -22,7 +21,7 @@ jobs:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
     if: >
-      (github.event_name == 'pull_request' || github.actor == 'dependabot[bot]') &&
+      (github.event_name == 'schedule' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
