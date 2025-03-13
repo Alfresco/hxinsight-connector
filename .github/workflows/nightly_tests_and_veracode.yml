@@ -3,6 +3,7 @@ name: Veracode and Nightly Tests run
 on:
   pull_request:
     branches:
+      - feature/**
       - master
       - release/**
 
@@ -21,14 +22,14 @@ jobs:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
     if: >
-      (github.event_name == 'schedule' || github.actor == 'dependabot[bot]') &&
+      (github.event_name == 'pull_request' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v8.14.1
-        continue-on-error: true
+        continue-on-error: false
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
 
