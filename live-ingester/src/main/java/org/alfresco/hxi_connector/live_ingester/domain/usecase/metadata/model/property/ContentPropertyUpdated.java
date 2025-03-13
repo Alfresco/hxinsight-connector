@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -45,8 +45,9 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
     private String sourceMimeType;
     private Long sourceSizeInBytes;
     private String sourceFileName;
+    private String digestIdentifier;
 
-    public ContentPropertyUpdated(String propertyName, String id, String mimeType, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName)
+    public ContentPropertyUpdated(String propertyName, String id, String mimeType, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName, String digestIdentifier)
     {
         super(propertyName);
         this.id = id;
@@ -54,12 +55,13 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
         this.sourceMimeType = sourceMimeType;
         this.sourceSizeInBytes = sourceSizeInBytes;
         this.sourceFileName = sourceFileName;
+        this.digestIdentifier = digestIdentifier;
     }
 
     @Override
     public void applyOn(UpdateNodeEvent event)
     {
-        ContentProperty contentProperty = new ContentProperty(getPropertyName(), id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName);
+        ContentProperty contentProperty = new ContentProperty(getPropertyName(), id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName, digestIdentifier);
         event.addContentInstruction(contentProperty);
     }
 
@@ -83,6 +85,7 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
         private String sourceMimeType;
         private Long sourceSizeInBytes;
         private String sourceFileName;
+        private String digestIdentifier;
 
         public ContentPropertyUpdatedBuilder id(String id)
         {
@@ -114,9 +117,15 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
             return this;
         }
 
+        public ContentPropertyUpdatedBuilder digestIdentifier(String digestIdentifier)
+        {
+            this.digestIdentifier = digestIdentifier;
+            return this;
+        }
+
         public ContentPropertyUpdated build()
         {
-            return new ContentPropertyUpdated(propertyName, id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName);
+            return new ContentPropertyUpdated(propertyName, id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName, digestIdentifier);
         }
     }
 }

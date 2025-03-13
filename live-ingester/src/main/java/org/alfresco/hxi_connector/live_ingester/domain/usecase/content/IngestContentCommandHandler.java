@@ -35,8 +35,11 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.ContentUtils;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.DigestIdentifierParams;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
@@ -58,10 +61,33 @@ public class IngestContentCommandHandler
     private final TransformEngineFileStorage transformEngineFileStorage;
     private final IngestionEngineStorageClient ingestionEngineStorageClient;
 
+    @Value("${hyland-experience.storage.digest-algorithm:SHA-256}")
+    private String digestAlgorithm;
+
     public void handle(TriggerContentIngestionCommand command)
     {
-        TransformRequest transformRequest = new TransformRequest(command.nodeId(), command.mimeType(), command.timestamp());
-        transformRequester.requestTransform(transformRequest);
+        IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(command.nodeId(), CREATE_OR_UPDATE, Set.of(), command.timestamp());
+        ingestNodeCommandHandler.handle(ingestNodeCommand);
+
+        String digestIdentifier;
+        try
+        {
+            digestIdentifier = ContentUtils.generateDigestIdentifier(new DigestIdentifierParams(digestAlgorithm, command.nodeId(), CONTENT_PROPERTY, "1.0"));
+        }
+        catch (IllegalArgumentException e)
+        {
+            log.atError().log("Error generating digest identifier for node: {}", command.nodeId());
+            return;
+        }
+
+        boolean isContentSeenBefore = ContentUtils.isContentSeenBefore(digestIdentifier);
+
+        if (!isContentSeenBefore)
+        {
+            ContentUtils.markContentAsSeen(digestIdentifier);
+            TransformRequest transformRequest = new TransformRequest(command.nodeId(), command.mimeType(), command.timestamp());
+            transformRequester.requestTransform(transformRequest);
+        }
     }
 
     public void handle(IngestContentCommand command)
@@ -75,7 +101,6 @@ public class IngestContentCommandHandler
         log.atDebug().log("Transform :: Rendition download complete for node: {} as file with ID: {}", nodeId, fileId);
 
         IngestContentResponse ingestContentResponse = ingestionEngineStorageClient.upload(downloadedFile, command.mimeType(), nodeId);
-
         Set<PropertyDelta<?>> properties = Set.of(
                 contentPropertyUpdated(CONTENT_PROPERTY, ingestContentResponse.transferId(), ingestContentResponse.mimeType()));
         IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(nodeId, CREATE_OR_UPDATE, properties, command.timestamp());

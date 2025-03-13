@@ -59,7 +59,18 @@ public class OpenApiRequestValidationTest
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/get-presigned-urls.yml");
 
-        Request request = makeRequest(hxInsightRequest);
+        Request request = makeRequest(hxInsightRequest, "POST");
+
+        assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
+    }
+
+    @SneakyThrows
+    @Test
+    void testCheckDigestEvent()
+    {
+        HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/check-digest.yml");
+
+        Request request = makeRequest(hxInsightRequest, "GET");
 
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
@@ -70,7 +81,7 @@ public class OpenApiRequestValidationTest
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/upload-references-document.yml");
 
-        Request request = makeRequest(hxInsightRequest);
+        Request request = makeRequest(hxInsightRequest, "POST");
 
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
@@ -81,7 +92,7 @@ public class OpenApiRequestValidationTest
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/create-or-update-document.yml");
 
-        Request request = makeRequest(hxInsightRequest);
+        Request request = makeRequest(hxInsightRequest, "POST");
 
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
@@ -91,14 +102,22 @@ public class OpenApiRequestValidationTest
     {
         HxInsightRequest hxInsightRequest = RequestLoader.load("/rest/hxinsight/requests/delete-document.yml");
 
-        Request request = makeRequest(hxInsightRequest);
+        Request request = makeRequest(hxInsightRequest, "POST");
 
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
 
-    private static Request makeRequest(HxInsightRequest hxInsightRequest)
+    private static Request makeRequest(HxInsightRequest hxInsightRequest, String method)
     {
-        SimpleRequest.Builder builder = SimpleRequest.Builder.post(hxInsightRequest.url());
+        SimpleRequest.Builder builder;
+        if ("GET".equalsIgnoreCase(method))
+        {
+            builder = SimpleRequest.Builder.get(hxInsightRequest.url());
+        }
+        else
+        {
+            builder = SimpleRequest.Builder.post(hxInsightRequest.url());
+        }
         hxInsightRequest.headers().forEach(builder::withHeader);
         return builder.withBody(hxInsightRequest.body()).build();
     }
