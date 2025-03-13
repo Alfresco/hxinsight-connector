@@ -1,4 +1,4 @@
-name: Nightly Veracode SCA and OpenApi tests CI
+name: Veracode and Nightly Tests run
 
 on:
   pull_request:
