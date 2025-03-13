@@ -35,6 +35,12 @@ jobs:
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
+      - name: "Notify on failure"
+        if: failure()
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          message: "Veracode SCA scan failed"
 
   nightly_tests:
     name: "Run nightly tests"
