@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -69,7 +69,7 @@ public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegratio
                 new IngestEvent.ContentInfo(1000, "UTF-8", "application/pdf"),
                 Map.of(TYPE_PROPERTY, "file",
                         "cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
-                        CREATED_AT_PROPERTY, 2000),
+                        CREATED_AT_PROPERTY, "2024-02-19T07:56:50.034Z"),
                 1_308_061_016L);
 
         // when
@@ -87,7 +87,7 @@ public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegratio
                   "properties" : {
                     "type" : "file",
                     "cm:categories" : [ "33cd7d4c-ba12-4006-9642-f9fb2d3bd406" ],
-                    "createdAt" : 2000
+                    "createdAt" : "2024-02-19T07:56:50.034Z"
                   },
                   "timestamp": 1308061016
                 }""";

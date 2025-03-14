@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -45,6 +45,7 @@ import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.ST
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -320,7 +321,7 @@ class AlfrescoPropertyMapperTest
         String propertyName = "createdAt";
         String prefixedPropertyName = "test:createdAt";
         String createdAtString = "2024-01-31T10:15:30+00:00";
-        long createdAtValue = ZonedDateTime.parse(createdAtString).toInstant().toEpochMilli();
+        String createdAtValue = ZonedDateTime.parse(createdAtString).format(DateTimeFormatter.ISO_INSTANT);
 
         alfrescoNode.setNodeProperties(
                 Set.of(

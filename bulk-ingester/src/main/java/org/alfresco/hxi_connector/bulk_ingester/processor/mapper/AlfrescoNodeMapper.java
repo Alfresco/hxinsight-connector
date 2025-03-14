@@ -39,8 +39,8 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
 import java.io.Serializable;
-import java.time.Instant;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Map;
@@ -77,7 +77,7 @@ public class AlfrescoNodeMapper
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
         HashSet<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toCollection(HashSet::new));
-        long createdAt = getCreatedAt(alfrescoNode);
+        String createdAt = getCreatedAt(alfrescoNode);
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
         allProperties.put(TYPE_PROPERTY, type);
@@ -111,12 +111,12 @@ public class AlfrescoNodeMapper
                 timeProvider.getCurrentTimestamp());
     }
 
-    private long getCreatedAt(AlfrescoNode alfrescoNode)
+    private String getCreatedAt(AlfrescoNode alfrescoNode)
     {
         return ofNullable(alfrescoNode.getCreatedAt())
                 .map(ZonedDateTime::toInstant)
-                .map(Instant::getEpochSecond)
-                .orElse(0L);
+                .map(DateTimeFormatter.ISO_INSTANT::format)
+                .orElse(null);
     }
 
     private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)
