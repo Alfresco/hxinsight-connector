@@ -299,11 +299,13 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "sourceTimestamp" : %s,
                     "properties": {
                        "createdAt" : {
-                         "value" : 1611227655695,
+                         "value" : "2021-01-21T11:14:15.695Z",
+                         "type": "datetime",
                          "annotation": "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : 1611227655695,
+                         "value" : "2021-01-21T11:14:15.695Z",
+                         "type": "datetime",
                          "annotation": "dateModified"
                        },
                        "cm:versionLabel" : {

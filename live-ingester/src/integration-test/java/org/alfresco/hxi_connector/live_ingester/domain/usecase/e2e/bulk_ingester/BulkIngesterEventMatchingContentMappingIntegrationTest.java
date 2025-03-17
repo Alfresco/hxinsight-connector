@@ -64,7 +64,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "cm:name": "dashboard.xml",
                     "cm:isContentIndexed": true,
                     "cm:isIndexed": false,
-                    "createdAt": 1308061016,
+                    "createdAt": "2011-06-14T02:16:56.000Z",
                     "type": "cm:content",
                     "createdBy": "admin",
                     "modifiedBy": "hr_user",
@@ -89,7 +89,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
-                      "createdAt": {"value": 1308061016, "annotation": "dateCreated"},
+                      "createdAt": {"value": "2011-06-14T02:16:56.000Z", "type": "datetime", "annotation": "dateCreated"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"
@@ -152,7 +152,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "cm:name": "dashboard.xml",
                     "cm:isContentIndexed": true,
                     "cm:isIndexed": false,
-                    "createdAt": 1308061016,
+                    "createdAt": "2011-06-14T02:16:56.000Z",
                     "type": "cm:content",
                     "createdBy": "admin",
                     "modifiedBy": "hr_user",
@@ -177,7 +177,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
-                      "createdAt": {"value": 1308061016, "annotation": "dateCreated"},
+                      "createdAt": {"value": "2011-06-14T02:16:56.000Z", "type": "datetime", "annotation": "dateCreated"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"
