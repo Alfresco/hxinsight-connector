@@ -35,6 +35,7 @@ import com.atlassian.oai.validator.report.LevelResolver;
 import com.atlassian.oai.validator.report.ValidationReport;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
@@ -64,6 +65,7 @@ public class OpenApiRequestValidationTest
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
 
+    @Disabled("This test is disabled because swagger-request-validator-core does not support OpenApi Specification 3.1.1")
     @SneakyThrows
     @Test
     void testUploadReferencesRequestToIngestionEvents()
@@ -75,6 +77,7 @@ public class OpenApiRequestValidationTest
         assertThat(openApiInteractionValidator.validateRequest(request).getMessages()).isEmpty();
     }
 
+    @Disabled("This test is disabled because swagger-request-validator-core does not support OpenApi Specification 3.1.1")
     @SneakyThrows
     @Test
     void testCreateOrUpdateRequestToIngestionEvents()
