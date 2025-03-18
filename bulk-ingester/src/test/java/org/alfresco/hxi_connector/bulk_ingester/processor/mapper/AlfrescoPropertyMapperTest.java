@@ -313,25 +313,47 @@ class AlfrescoPropertyMapperTest
     }
 
     @Test
-    void shouldProcessDateComplexProperty()
+    void shouldProcessCreatedAtProperty()
     {
         // given
         AlfrescoNode alfrescoNode = new AlfrescoNode();
 
-        String propertyName = "createdAt";
-        String prefixedPropertyName = "test:createdAt";
+        String createdAtPropertyName = "createdAt";
+        String prefixedCreatedAtPropertyName = "test:createdAt";
         String createdAtString = "2024-01-31T10:15:30+00:00";
         String createdAtValue = ZonedDateTime.parse(createdAtString).format(DateTimeFormatter.ISO_INSTANT);
 
         alfrescoNode.setNodeProperties(
                 Set.of(
-                        createNodeProperty(propertyName, dateValue(createdAtString))));
+                        createNodeProperty(createdAtPropertyName, dateValue(createdAtString))));
 
         // when
-        var property = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedPropertyName).performMapping();
+        var createdAtProperty = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedCreatedAtPropertyName).performMapping();
 
         // then
-        assertEquals(expectedProperty(prefixedPropertyName, createdAtValue), property);
+        assertEquals(expectedProperty(prefixedCreatedAtPropertyName, createdAtValue), createdAtProperty);
+    }
+
+    @Test
+    void shouldProcessModifiedAtProperty()
+    {
+        // given
+        AlfrescoNode alfrescoNode = new AlfrescoNode();
+
+        String modifiedAtPropertyName = "modifiedAt";
+        String prefixedModifiedAtPropertyName = "test:modifiedAt";
+        String modifiedAtString = "2025-01-31T10:15:30+00:00";
+        String modifiedAtValue = ZonedDateTime.parse(modifiedAtString).format(DateTimeFormatter.ISO_INSTANT);
+
+        alfrescoNode.setNodeProperties(
+                Set.of(
+                        createNodeProperty(modifiedAtPropertyName, dateValue(modifiedAtString))));
+
+        // when
+        var modifiedAtProperty = new AlfrescoPropertyMapper(namespacePrefixMapper, alfrescoNode, prefixedModifiedAtPropertyName).performMapping();
+
+        // then
+        assertEquals(expectedProperty(prefixedModifiedAtPropertyName, modifiedAtValue), modifiedAtProperty);
     }
 
     @Test

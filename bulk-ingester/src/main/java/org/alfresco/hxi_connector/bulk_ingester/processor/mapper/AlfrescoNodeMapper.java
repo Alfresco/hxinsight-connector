@@ -35,6 +35,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
@@ -78,6 +79,7 @@ public class AlfrescoNodeMapper
         String modifierId = alfrescoNode.getModifier();
         HashSet<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toCollection(HashSet::new));
         String createdAt = getCreatedAt(alfrescoNode);
+        String modifiedAt = getModifiedAt(alfrescoNode);
         Map<String, Serializable> allProperties = calculateAllProperties(alfrescoNode);
 
         allProperties.put(TYPE_PROPERTY, type);
@@ -88,6 +90,7 @@ public class AlfrescoNodeMapper
             allProperties.put(ASPECT_NAMES_PROPERTY, aspectNames);
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
+        allProperties.put(MODIFIED_AT_PROPERTY, modifiedAt);
 
         Set<String> allowAccess = (Set<String>) getResourceReaderAuthorities(alfrescoNode);
         if (!allowAccess.isEmpty())
@@ -113,7 +116,17 @@ public class AlfrescoNodeMapper
 
     private String getCreatedAt(AlfrescoNode alfrescoNode)
     {
-        return ofNullable(alfrescoNode.getCreatedAt())
+        return formatZonedDateTime(alfrescoNode.getCreatedAt());
+    }
+
+    private String getModifiedAt(AlfrescoNode alfrescoNode)
+    {
+        return formatZonedDateTime(alfrescoNode.getModifiedAt());
+    }
+
+    private String formatZonedDateTime(ZonedDateTime zonedDateTime)
+    {
+        return ofNullable(zonedDateTime)
                 .map(ZonedDateTime::toInstant)
                 .map(DateTimeFormatter.ISO_INSTANT::format)
                 .orElse(null);
