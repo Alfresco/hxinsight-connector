@@ -15,9 +15,6 @@ on:
     - cron: "0 0 * * *"  # Runs every night at midnight
 
 env:
-  GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
-  GHCR_USERNAME: ${{ github.actor }}
-  GHCR_PAT_RO: ${{ secrets.GH_PACKAGES_RO_PAT }}
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
 
 jobs:
@@ -58,7 +55,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GH_PACKAGES_RO_PAT }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       - name: "Clone TCK repository"
         run: bash ./scripts/ci/cloneTCK.sh
       - name: "Set up Docker Buildx"
