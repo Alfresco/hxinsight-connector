@@ -132,6 +132,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "displayName": "Administrator"
                       },
                       "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedAt": "2021-01-21T11:14:15.695Z",
                       "modifiedByUser": {
                         "id": "abeecher",
                         "displayName": "Alice Beecher"
@@ -263,7 +264,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : "2021-01-21T11:14:15.695Z",
+                        "value" : "2021-01-26T10:29:42.529Z",
                         "type" : "datetime",
                         "annotation" : "dateModified"
                       },
@@ -345,7 +346,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : "2021-01-21T11:14:15.695Z",
+                        "value" : "2021-01-26T10:29:42.529Z",
                         "type" : "datetime",
                         "annotation" : "dateModified"
                       },
@@ -446,7 +447,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : "2021-01-21T11:14:15.695Z",
+                        "value" : "2021-01-26T10:29:42.529Z",
                         "type" : "datetime",
                         "annotation" : "dateModified"
                       },
@@ -659,6 +660,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "displayName": "Administrator"
                       },
                       "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedAt": "2021-01-21T11:14:15.695Z",
                       "modifiedByUser": {
                         "id": "abeecher",
                         "displayName": "Alice Beecher"
@@ -839,7 +841,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "annotation" : "dateCreated"
                     },
                     "modifiedAt" : {
-                      "value" : "2024-07-30T11:37:39.182Z",
+                      "value" : "2024-07-31T10:31:48.541Z",
                       "type" : "datetime",
                       "annotation" : "dateModified"
                     },

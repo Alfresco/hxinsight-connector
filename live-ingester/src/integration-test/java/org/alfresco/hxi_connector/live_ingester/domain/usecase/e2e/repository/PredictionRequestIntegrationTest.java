@@ -304,7 +304,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "annotation": "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : "2021-01-21T11:14:15.695Z",
+                         "value" : "2021-01-26T10:29:42.529Z",
                          "type": "datetime",
                          "annotation": "dateModified"
                        },

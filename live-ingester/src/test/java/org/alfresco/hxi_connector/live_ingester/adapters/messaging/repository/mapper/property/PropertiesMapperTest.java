@@ -428,6 +428,7 @@ class PropertiesMapperTest
                 .setName("some name")
                 .setNodeType("cm:folder")
                 .setCreatedAt(ZonedDateTime.of(2023, 1, 1, 0, 0, 0, 0, UTC))
+                .setModifiedAt(ZonedDateTime.of(2023, 1, 1, 0, 0, 0, 0, UTC))
                 .setCreatedByUser(new UserInfo("admin", "admin", "admin"))
                 .setModifiedByUser(new UserInfo("admin", "admin", "admin"))
                 .setAspectNames(Set.of("cm:auditable"));

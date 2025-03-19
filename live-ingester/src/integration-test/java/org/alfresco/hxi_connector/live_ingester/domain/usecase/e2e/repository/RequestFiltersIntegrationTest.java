@@ -109,7 +109,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation": "dateCreated"},
-                      "modifiedAt" : {"value" : "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation" : "dateModified"},
+                      "modifiedAt" : {"value" : "2024-03-06T11:14:15.695Z", "type" : "datetime", "annotation" : "dateModified"},
                       "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {
@@ -268,7 +268,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                     "properties": {
                       "cm:autoVersion": {"type": "boolean", "value": true},
                       "createdAt": {"value": "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation": "dateCreated"},
-                      "modifiedAt": {"value": "2024-03-02T11:14:15.695Z", "type" : "datetime", "annotation": "dateModified"},
+                      "modifiedAt": {"value": "2024-03-06T11:14:15.695Z", "type" : "datetime", "annotation": "dateModified"},
                       "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable", "cm:classifiable"], "annotation": "aspects"},
                       "cm:name": {
@@ -439,7 +439,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : "2024-03-02T11:14:15.695Z",
+                        "value" : "2024-03-06T10:29:42.529Z",
                         "type" : "datetime",
                         "annotation" : "dateModified"
                       },
@@ -633,7 +633,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
-                        "value" : "2024-03-02T11:14:15.695Z",
+                        "value" : "2024-03-06T10:29:42.529Z",
                         "type" : "datetime",
                         "annotation" : "dateModified"
                       },
@@ -1067,7 +1067,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "annotation" : "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : "2024-03-02T11:14:15.695Z",
+                         "value" : "2024-03-06T10:29:42.529Z",
                          "type" : "datetime",
                          "annotation" : "dateModified"
                        },
@@ -1362,7 +1362,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "annotation" : "dateCreated"
                        },
                        "modifiedAt" : {
-                         "value" : "2024-03-02T11:14:15.695Z",
+                         "value" : "2024-03-06T10:29:42.529Z",
                          "type" : "datetime",
                          "annotation" : "dateModified"
                        },

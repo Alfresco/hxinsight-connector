@@ -103,7 +103,7 @@ public class PropertyMappingHelper
 
     public static Optional<PropertyDelta<?>> calculateModifiedAtDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
-        return calculatePropertyDelta(event, MODIFIED_AT_PROPERTY, nodeResource -> formatDateTime(nodeResource.getCreatedAt()));
+        return calculatePropertyDelta(event, MODIFIED_AT_PROPERTY, nodeResource -> formatDateTime(nodeResource.getModifiedAt()));
     }
 
     public static Optional<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)

@@ -59,6 +59,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
                     "cm:isContentIndexed": true,
                     "cm:isIndexed": false,
                     "createdAt": "2011-06-14T02:16:56.000Z",
+                    "modifiedAt": "2011-06-15T02:16:56.000Z",
                     "type": "cm:content",
                     "createdBy": "admin",
                     "modifiedBy": "hr_user",
@@ -84,6 +85,7 @@ public class BulkIngesterEventNonMatchingContentMappingIntegrationTest extends E
                       "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
                       "createdAt": {"value": "2011-06-14T02:16:56.000Z", "type": "datetime", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2011-06-15T02:16:56.000Z", "type": "datetime", "annotation": "dateModified"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"

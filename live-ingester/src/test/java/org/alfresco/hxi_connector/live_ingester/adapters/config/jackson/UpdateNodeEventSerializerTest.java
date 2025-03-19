@@ -36,6 +36,7 @@ import static org.mockito.Mockito.verify;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
@@ -107,7 +108,8 @@ class UpdateNodeEventSerializerTest
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_AT_PROPERTY, "2024-02-19T07:56:50.034Z"))
-                .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"));
+                .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "000-000-000"))
+                .addMetadataInstruction(new NodeProperty<>(MODIFIED_AT_PROPERTY, "2025-02-19T07:56:50.034Z"));
 
         String expectedJson = """
                 [
@@ -118,6 +120,7 @@ class UpdateNodeEventSerializerTest
                     "sourceTimestamp": 1724225729830,
                     "properties": {
                       "createdAt": {"value": "2024-02-19T07:56:50.034Z", "type": "datetime", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2025-02-19T07:56:50.034Z", "type": "datetime", "annotation": "dateModified"},
                       "modifiedBy": {"value": "000-000-000", "annotation": "modifiedBy"}
                     }
                   }

@@ -53,6 +53,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "cm:name": "Mexican Spanish",
                     "type": "cm:category",
                     "createdAt": "2024-02-05T05:19:00.000Z",
+                    "modifiedAt": "2025-02-05T05:19:00.000Z",
                     "createdBy": "System",
                     "modifiedBy": "admin",
                     "aspectsNames": [
@@ -73,6 +74,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "properties" : {
                       "type": {"value": "cm:category", "annotation": "type"},
                       "createdAt": {"value": "2024-02-05T05:19:00.000Z", "type": "datetime", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2025-02-05T05:19:00.000Z", "type": "datetime", "annotation": "dateModified"},
                       "createdBy": {"value": "System", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:auditable"], "annotation": "aspects"},
@@ -107,6 +109,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "cm:isContentIndexed": true,
                     "cm:isIndexed": false,
                     "createdAt": "2011-06-14T02:16:56.000Z",
+                    "modifiedAt": "2011-06-15T02:16:56.000Z",
                     "type": "cm:content",
                     "createdBy": "admin",
                     "modifiedBy": "hr_user",
@@ -132,6 +135,7 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
                       "createdAt": {"value": "2011-06-14T02:16:56.000Z", "type": "datetime", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2011-06-15T02:16:56.000Z", "type": "datetime", "annotation": "dateModified"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"
