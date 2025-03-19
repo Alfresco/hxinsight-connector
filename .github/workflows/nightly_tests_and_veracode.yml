@@ -49,6 +49,13 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+      - name: Login to ghcr.io
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GH_PACKAGES_RO_PAT }}
       - name: "Clone TCK repository"
         run: bash ./scripts/ci/cloneTCK.sh
       - name: "Set up Docker Buildx"
