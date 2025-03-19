@@ -3,6 +3,7 @@ name: Veracode and Nightly Tests run
 on:
   pull_request:
     branches:
+      - feature/**
       - master
       - release/**
 
@@ -44,19 +45,40 @@ jobs:
   nightly_tests:
     name: "Run nightly tests"
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
+    if: github.event_name == 'pull_request'
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
+      - name: "Clone TCK repository"
+        run: bash ./scripts/ci/cloneTCK.sh
+      - name: "Set up Docker Buildx"
+        uses: docker/setup-buildx-action@v3
+      - name: "Build JSON service image"
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ingestion-connector-tck/app
+          target: builder
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: "Build API service image"
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ingestion-connector-tck
+          file: ./ingestion-connector-tck/DockerfilePrism
+          target: builder
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -pl live-ingester -am
       - name: "Run OpenApi Specification tests"
-        run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
-      - name: "Notify on failure"
-        if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
-        with:
-          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
-          message: "Nightly tests failed"
+        run: mvn test -Dtest=OpenApiTckRequestValidationTest -pl live-ingester
+#      - name: "Notify on failure"
+#        if: failure()
+#        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
+#        with:
+#          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+#          message: "Nightly tests failed"

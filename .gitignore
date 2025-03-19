@@ -41,3 +41,8 @@ distribution/src/main/resources/docker-compose/.env
 distribution/src/main/resources/docker-compose/volume
 # This is produced by the maven-shade-plugin
 dependency-reduced-pom.xml
+
+# This is cloned from the ingestion-connector-tck for testing only
+ingestion-connector-tck
+#this was updated inside the ingestion-connector-tck - module that was cloned for testing only
+ingestion-connector-tck/app/hxai-insight-integrations-ingestion-api
