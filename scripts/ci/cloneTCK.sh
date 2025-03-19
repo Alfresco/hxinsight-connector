@@ -3,20 +3,31 @@ set -e
 
 usage() {
     echo "Clone and update Ingest Connector Technology Compatibility Kit." 1>&2;
-    echo "Usage: $0 [-h]" 1>&2;
+    echo "Usage: $0 [-h] [-t TOKEN]" 1>&2;
     echo "  -h: Display this help" 1>&2;
+    echo "  -t: GitHub token for authentication" 1>&2;
     exit 1;
 }
 
-while getopts ":h" arg; do
+GITHUB_TOKEN=""
+
+while getopts ":ht:" arg; do
   case $arg in
+    t)
+      GITHUB_TOKEN=$OPTARG
+      ;;
     h | *) # Display help.
       usage
       ;;
   esac
 done
 
-REPO_URL="https://github.com/HylandSoftware/ingestion-connector-tck"
+if [ -z "$GITHUB_TOKEN" ]; then
+    echo "GitHub token is required" 1>&2
+    usage
+fi
+
+REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/HylandSoftware/ingestion-connector-tck"
 REPO_DIR="ingestion-connector-tck"
 
 # Clone the repository
