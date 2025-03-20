@@ -30,23 +30,22 @@ fi
 REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/HylandSoftware/ingestion-connector-tck.git"
 REPO_DIR="ingestion-connector-tck"
 
-# Clone the repository
+# Configure git for submodules
+git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+
+# Clone or update repository
 if [ ! -d "$REPO_DIR" ]; then
-  git clone "$REPO_URL"
-  cd "$REPO_DIR"
-  git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+    echo "Cloning repository..."
+    git clone "$REPO_URL" || exit 1
+    cd "$REPO_DIR" || exit 1
+    git submodule update --init --recursive || exit 1
 else
-  echo "Repository already cloned. Pulling latest changes."
-  cd "$REPO_DIR"
-  git pull
-  git submodule update --init --recursive
-  cd -
+    echo "Repository exists, updating..."
+    cd "$REPO_DIR" || exit 1
+    git pull
+    git submodule update --init --recursive
 fi
 
-cd "$REPO_DIR"
-
-# Update the repository to the latest version
+# Ensure we're up to date
 git pull
 git submodule update --remote
-
-cd -
