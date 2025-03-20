@@ -16,7 +16,13 @@ while getopts ":h" arg; do
   esac
 done
 
-REPO_URL="https://github.com/HylandSoftware/ingestion-connector-tck"
+# Use GITHUB_TOKEN if available, otherwise fallback to HTTPS
+if [ -n "$GITHUB_TOKEN" ]; then
+    REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/HylandSoftware/ingestion-connector-tck.git"
+else
+    REPO_URL="https://github.com/HylandSoftware/ingestion-connector-tck.git"
+fi
+
 REPO_DIR="ingestion-connector-tck"
 
 # Clone or update repository
