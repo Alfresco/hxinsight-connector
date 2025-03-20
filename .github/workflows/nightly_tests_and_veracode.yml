@@ -53,7 +53,7 @@ jobs:
       - name: "Clone TCK repository"
         run: bash ./scripts/ci/cloneTCK.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.HYLAND_TCK_PAT }}
       - name: "Build and start TCK services"
         run: bash ./scripts/ci/buildTckImages.sh
       - name: "Set up JDK"
