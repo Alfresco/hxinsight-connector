@@ -300,12 +300,10 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                     "properties": {
                        "createdAt" : {
                          "value" : "2021-01-21T11:14:15.695Z",
-                         "type": "datetime",
                          "annotation": "dateCreated"
                        },
                        "modifiedAt" : {
                          "value" : "2021-01-26T10:29:42.529Z",
-                         "type": "datetime",
                          "annotation": "dateModified"
                        },
                        "cm:versionLabel" : {
