@@ -27,7 +27,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
     usage
 fi
 
-REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/Hyland-Software/ingestion-connector-tck.git"
+REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/HylandSoftware/ingestion-connector-tck.git"
 REPO_DIR="ingestion-connector-tck"
 
 # Clone the repository
