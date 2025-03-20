@@ -57,9 +57,9 @@ jobs:
 #          username: ${{ github.actor }}
 #          password: ${{ secrets.GITHUB_TOKEN }}
       - name: "Clone TCK repository"
-        run: bash ./scripts/ci/cloneTCK.sh -t ${{ secrets.HYLAND_TCK_TOKEN }}
+        run: bash ./scripts/ci/cloneTCK.sh -t ${{ secrets.HYLAND_TCK_PAT }}
         env:
-          GHCR_PAT_RO: ${{ secrets.HYLAND_TCK_TOKEN }}
+          GHCR_PAT_RO: ${{ secrets.HYLAND_TCK_PAT }}
       - name: "Set up Docker Buildx"
         uses: docker/setup-buildx-action@v3
       - name: "Build JSON service image"
