@@ -100,8 +100,8 @@ class NonMatchingContentMappingRequestIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1611227656423,
                     "properties": {
                       "cm:autoVersion": {"type": "boolean", "value": true},
-                      "createdAt": {"value": "2021-01-21T11:14:15.695Z", "type" : "datetime", "annotation": "dateCreated"},
-                      "modifiedAt": {"value" : "2021-01-21T11:14:15.695Z", "type" : "datetime", "annotation": "dateModified"},
+                      "createdAt": {"value": "2021-01-21T11:14:15.695Z", "annotation": "dateCreated"},
+                      "modifiedAt": {"value" : "2021-01-21T11:14:15.695Z", "annotation": "dateModified"},
                       "cm:versionType": {"type": "string", "value": "MAJOR"},
                       "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
                       "cm:name": {

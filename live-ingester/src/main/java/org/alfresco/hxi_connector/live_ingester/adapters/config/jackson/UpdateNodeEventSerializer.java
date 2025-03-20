@@ -126,11 +126,9 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         switch (name)
         {
         case CREATED_AT:
-            jgen.writeObjectField("type", "datetime");
             jgen.writeObjectField("annotation", "dateCreated");
             break;
         case MODIFIED_AT:
-            jgen.writeObjectField("type", "datetime");
             jgen.writeObjectField("annotation", "dateModified");
             break;
         case ASPECTS_NAMES:
