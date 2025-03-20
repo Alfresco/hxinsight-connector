@@ -38,7 +38,9 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class OpenApiTckRequestValidationTest
 {
 
@@ -54,28 +56,33 @@ public class OpenApiTckRequestValidationTest
     @Test
     void testRequestToPresignedUrls()
     {
-        validateRequest("/rest/hxinsight/requests/get-presigned-urls.yml", SC_OK);
+        int actualStatusCode = validateRequest("/rest/hxinsight/requests/get-presigned-urls.yml");
+        assertThat(actualStatusCode).isEqualTo(SC_OK);
     }
 
     @Test
     void testUploadReferencesRequestToIngestionEvents()
     {
-        validateRequest("/rest/hxinsight/requests/upload-references-document.yml", SC_ACCEPTED);
+        int actualStatusCode = validateRequest("/rest/hxinsight/requests/upload-references-document.yml");
+        assertThat(actualStatusCode).isEqualTo(SC_ACCEPTED);
     }
 
     @Test
     void testCreateOrUpdateRequestToIngestionEvents()
     {
-        validateRequest("/rest/hxinsight/requests/create-or-update-document.yml", SC_ACCEPTED);
+        int actualStatusCode = validateRequest("/rest/hxinsight/requests/create-or-update-document.yml");
+        assertThat(actualStatusCode).isEqualTo(SC_ACCEPTED);
     }
 
     @Test
     void testDeleteRequestToIngestionEvents()
     {
-        validateRequest("/rest/hxinsight/requests/delete-document.yml", SC_ACCEPTED);
+        int actualStatusCode = validateRequest("/rest/hxinsight/requests/delete-document.yml");
+
+        assertThat(actualStatusCode).isEqualTo(SC_ACCEPTED);
     }
 
-    private void validateRequest(String yamlPath, int expectedStatusCode)
+    private int validateRequest(String yamlPath)
     {
         // given
         HxInsightRequest request = RequestLoader.load(yamlPath);
@@ -93,13 +100,13 @@ public class OpenApiTckRequestValidationTest
                 .post(request.url());
 
         // then
-        if (response.getStatusCode() != expectedStatusCode)
+        if (response.getStatusCode() != SC_OK || response.getStatusCode() != SC_ACCEPTED)
         {
-            System.out.println("Response Status Code: " + response.getStatusCode());
-            System.out.println("Response Body: " + response.getBody().asPrettyString());
-            System.out.println("Response Headers: " + response.getHeaders().asList());
+            log.info("Response Status Code: " + response.getStatusCode());
+            log.info("Response Headers: " + response.getHeaders().asList());
+            log.info("Response Body: " + response.getBody().asPrettyString());
         }
 
-        assertThat(response.getStatusCode()).isEqualTo(expectedStatusCode);
+        return response.getStatusCode();
     }
 }
