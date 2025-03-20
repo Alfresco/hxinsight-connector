@@ -23,7 +23,7 @@ while getopts ":ht:" arg; do
 done
 
 if [ -z "$GITHUB_TOKEN" ]; then
-    echo "GitHub token is required" 1>&2
+    echo "Error: GitHub token is required" 1>&2
     usage
 fi
 
@@ -32,7 +32,9 @@ REPO_DIR="ingestion-connector-tck"
 
 # Clone the repository
 if [ ! -d "$REPO_DIR" ]; then
-  git clone "$REPO_URL" "$REPO_DIR" --recursive
+  git clone "$REPO_URL"
+  cd "$REPO_DIR"
+  git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 else
   echo "Repository already cloned. Pulling latest changes."
   cd "$REPO_DIR"
