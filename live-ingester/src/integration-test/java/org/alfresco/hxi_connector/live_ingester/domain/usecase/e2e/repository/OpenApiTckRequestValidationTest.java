@@ -33,12 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
-import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class OpenApiTckRequestValidationTest
