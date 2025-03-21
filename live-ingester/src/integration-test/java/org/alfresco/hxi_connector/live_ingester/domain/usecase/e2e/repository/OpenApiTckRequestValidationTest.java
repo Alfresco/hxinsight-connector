@@ -50,7 +50,6 @@ public class OpenApiTckRequestValidationTest
     void setUp()
     {
         RestAssured.baseURI = BASE_URL;
-        RestAssured.enableLoggingOfRequestAndResponseIfValidationFails();
     }
 
     @Test
@@ -100,12 +99,9 @@ public class OpenApiTckRequestValidationTest
                 .post(request.url());
 
         // then
-        if (response.getStatusCode() != SC_OK || response.getStatusCode() != SC_ACCEPTED)
-        {
-            log.info("Response Status Code: " + response.getStatusCode());
-            log.info("Response Headers: " + response.getHeaders().asList());
-            log.info("Response Body: " + response.getBody().asPrettyString());
-        }
+        log.info("Response Status Code: " + response.getStatusCode());
+        log.info("Response Headers: " + response.getHeaders().asList());
+        log.info("Response Body: " + response.getBody().asPrettyString());
 
         return response.getStatusCode();
     }

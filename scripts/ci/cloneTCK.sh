@@ -18,11 +18,11 @@ done
 
 # Use GITHUB_TOKEN if available, otherwise fallback to HTTPS
 if [ -n "$GITHUB_TOKEN" ]; then
-    REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/HylandSoftware/ingestion-connector-tck.git"
-# Configure git to use token for submodules
-git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+    REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/HylandSoftware/ingestion-connector-tck"
+    # Configure git to use token for submodules
+    git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 else
-    REPO_URL="https://github.com/HylandSoftware/ingestion-connector-tck.git"
+    REPO_URL="https://github.com/HylandSoftware/ingestion-connector-tck"
 fi
 
 REPO_DIR="ingestion-connector-tck"
