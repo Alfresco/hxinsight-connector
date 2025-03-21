@@ -48,12 +48,19 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+      - name: "Clone TCK repository"
+        run: bash ./scripts/ci/cloneTCK.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.HYLAND_TCK_PAT }}
+      - name: "Build and start TCK services"
+        run: bash ./scripts/ci/buildTckImages.sh
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -pl live-ingester -am
       - name: "Run OpenApi Specification tests"
-        run: mvn test -Dtest=OpenApiRequestValidationTest -pl live-ingester
+        run: mvn test -Dtest=OpenApiTckRequestValidationTest -pl live-ingester
       - name: "Notify on failure"
         if: failure()
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
