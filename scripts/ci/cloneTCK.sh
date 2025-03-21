@@ -27,7 +27,7 @@ fi
 
 REPO_DIR="ingestion-connector-tck"
 
-    echo "Cloning repository..."
-    git clone "$REPO_URL"
-    cd "$REPO_DIR"
-    git submodule update --init --recursive
+echo "Cloning repository..."
+git clone "$REPO_URL"
+cd "$REPO_DIR"
+git submodule update --init --recursive
