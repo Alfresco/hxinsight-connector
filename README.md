@@ -28,6 +28,17 @@ cd distribution/src/main/resources/docker-compose && \
 docker compose --file docker-compose-ingesterless.yml --project-name dev up
 ```
 
+In order to run tests for Alfresco event requests against OpenApi specification of Insight Ingestion stored in OpenApiTckRequestValidationTest.java class, we need to clone and build docker images of private Ingestion Connector Technology Compatibility Kit repository from HylandSoftware organisation. For that we can set up PAT token (authorised for HylandSoftware organisation) as environment variable locally as per instruction from the link below:
+https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry#authenticating-with-a-personal-access-token-classic
+Having a token we can clone and build TCK images by running following commands:
+```bash
+./scripts/ci/cloneTCK.sh && \
+cd ingestion-connector-tck && \
+docker compose up -d
+````
+
+```bash
+
 ### Code Quality
 This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.
 
