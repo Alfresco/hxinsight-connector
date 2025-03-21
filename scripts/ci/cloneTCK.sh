@@ -27,8 +27,19 @@ fi
 
 REPO_DIR="ingestion-connector-tck"
 
-echo "Cloning repository..."
-git clone "$REPO_URL"
-cd "$REPO_DIR"
+# Clone or update repository
+if [ ! -d "$REPO_DIR" ]; then
+    echo "Cloning repository..."
+    git clone "$REPO_URL"
+    cd "$REPO_DIR"
+    git submodule update --init --recursive
+else
+    echo "Repository exists, updating..."
+    cd "$REPO_DIR"
+    git pull
+    git submodule update --init --recursive
+fi
+
+# Ensure we're up to date
 git pull
-git submodule update --init --recursive
+git submodule update --remote
