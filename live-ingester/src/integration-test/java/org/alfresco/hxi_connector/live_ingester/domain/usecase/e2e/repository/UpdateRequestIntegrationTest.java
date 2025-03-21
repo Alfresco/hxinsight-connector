@@ -179,12 +179,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "properties": {
                               "createdAt" : {
                                 "value" : "2021-01-21T11:14:15.695Z",
-                                "type" : "datetime",
                                 "annotation" : "dateCreated"
                               },
                               "modifiedAt" : {
                                 "value" : "2021-01-21T11:14:15.695Z",
-                                "type" : "datetime",
                                 "annotation" : "dateModified"
                               },
                               "createdBy" : {
@@ -260,12 +258,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "cm:title": {"type": "string", "value": "Purchase Order"},
                       "createdAt" : {
                         "value" : "2021-01-21T11:14:15.695Z",
-                        "type" : "datetime",
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
                         "value" : "2021-01-26T10:29:42.529Z",
-                        "type" : "datetime",
                         "annotation" : "dateModified"
                       },
                       "createdBy" : {
@@ -342,12 +338,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "cm:title": {"type": "string", "value": "Summary for year 2024"},
                       "createdAt" : {
                         "value" : "2021-01-21T11:14:15.695Z",
-                        "type" : "datetime",
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
                         "value" : "2021-01-26T10:29:42.529Z",
-                        "type" : "datetime",
                         "annotation" : "dateModified"
                       },
                       "createdBy" : {
@@ -443,12 +437,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "cm:categories": {"type": "string", "value": ["a9f57ef6-2acf-4b2a-ae85-82cf552bec58"]},
                       "createdAt" : {
                         "value" : "2021-01-21T11:14:15.695Z",
-                        "type" : "datetime",
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
                         "value" : "2021-01-26T10:29:42.529Z",
-                        "type" : "datetime",
                         "annotation" : "dateModified"
                       },
                       "createdBy" : {
@@ -691,12 +683,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       },
                       "createdAt" : {
                         "value" : "2021-01-21T11:14:15.695Z",
-                        "type" : "datetime",
                         "annotation" : "dateCreated"
                       },
                       "modifiedAt" : {
                         "value" : "2021-01-21T11:14:15.695Z",
-                        "type" : "datetime",
                         "annotation" : "dateModified"
                       },
                       "createdBy" : {
@@ -837,12 +827,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     },
                     "createdAt" : {
                       "value" : "2024-07-30T11:37:39.182Z",
-                      "type" : "datetime",
                       "annotation" : "dateCreated"
                     },
                     "modifiedAt" : {
                       "value" : "2024-07-31T10:31:48.541Z",
-                      "type" : "datetime",
                       "annotation" : "dateModified"
                     },
                     "createdBy" : {

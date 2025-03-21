@@ -73,8 +73,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                     "sourceTimestamp": 1707153500,
                     "properties" : {
                       "type": {"value": "cm:category", "annotation": "type"},
-                      "createdAt": {"value": "2024-02-05T05:19:00.000Z", "type": "datetime", "annotation": "dateCreated"},
-                      "modifiedAt": {"value": "2025-02-05T05:19:00.000Z", "type": "datetime", "annotation": "dateModified"},
+                      "createdAt": {"value": "2024-02-05T05:19:00.000Z", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2025-02-05T05:19:00.000Z", "annotation": "dateModified"},
                       "createdBy": {"value": "System", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:auditable"], "annotation": "aspects"},
@@ -134,8 +134,8 @@ public class BulkIngesterEventIntegrationTest extends E2ETestBase
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
                       "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
-                      "createdAt": {"value": "2011-06-14T02:16:56.000Z", "type": "datetime", "annotation": "dateCreated"},
-                      "modifiedAt": {"value": "2011-06-15T02:16:56.000Z", "type": "datetime", "annotation": "dateModified"},
+                      "createdAt": {"value": "2011-06-14T02:16:56.000Z", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2011-06-15T02:16:56.000Z", "annotation": "dateModified"},
                       "cm:name": {
                         "value": "dashboard.xml",
                         "annotation" : "name"

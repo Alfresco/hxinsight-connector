@@ -119,8 +119,8 @@ class UpdateNodeEventSerializerTest
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1724225729830,
                     "properties": {
-                      "createdAt": {"value": "2024-02-19T07:56:50.034Z", "type": "datetime", "annotation": "dateCreated"},
-                      "modifiedAt": {"value": "2025-02-19T07:56:50.034Z", "type": "datetime", "annotation": "dateModified"},
+                      "createdAt": {"value": "2024-02-19T07:56:50.034Z", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2025-02-19T07:56:50.034Z", "annotation": "dateModified"},
                       "modifiedBy": {"value": "000-000-000", "annotation": "modifiedBy"}
                     }
                   }
