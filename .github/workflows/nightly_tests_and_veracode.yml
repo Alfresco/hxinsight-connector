@@ -1,8 +1,5 @@
 name: Veracode and Nightly Tests run
 
-permissions:
-  contents: read
-
 on:
   pull_request:
     branches:
