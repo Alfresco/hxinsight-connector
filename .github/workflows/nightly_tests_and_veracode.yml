@@ -20,6 +20,9 @@ jobs:
   veracode_sca:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     if: >
       (github.event_name == 'schedule' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip build]')
