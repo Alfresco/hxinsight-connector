@@ -33,6 +33,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -106,11 +107,19 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             }
 
             jgen.writeObjectFieldStart(name);
-            jgen.writeObjectField(getLowerCase(fieldType), value);
-            boolean hasAnnotation = writeAnnotation(jgen, name);
-            if (!hasAnnotation)
+
+            if (value instanceof Map<?, ?> nestedMap)
             {
-                writeType(jgen, value);
+                writeNestedProperties(jgen, nestedMap);
+            }
+            else
+            {
+                jgen.writeObjectField(getLowerCase(fieldType), value);
+                boolean hasAnnotation = writeAnnotation(jgen, name);
+                if (!hasAnnotation)
+                {
+                    writeType(jgen, value);
+                }
             }
             jgen.writeEndObject();
         }
@@ -166,6 +175,24 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 
     String selectTypeByValue(Object value)
     {
+        if (value instanceof Collection collection)
+        {
+            if (collection.isEmpty())
+            {
+                throw new IllegalArgumentException("Empty collections should not be passed to selectTypeByValue.");
+            }
+            return selectTypeByValue(collection.stream().findAny());
+        }
+        return determineType(value);
+    }
+
+    private String getLowerCase(Object object)
+    {
+        return object.toString().toLowerCase(ENGLISH);
+    }
+
+    private String determineType(Object value)
+    {
         if (value instanceof Boolean)
         {
             return "boolean";
@@ -174,23 +201,69 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             return "integer";
         }
-        else if (value instanceof Float)
+        else if (value instanceof Float || value instanceof Double)
         {
             return "float";
         }
-        else if (value instanceof Collection collection)
+        else if (value instanceof Collection<?>)
         {
-            if (collection.isEmpty())
-            {
-                throw new IllegalArgumentException("Empty collections should not be passed to selectTypeByValue.");
-            }
-            return selectTypeByValue(collection.stream().findAny());
+            return "array";
+        }
+        else if (value instanceof Map<?, ?>)
+        {
+            return "object";
         }
         return "string";
     }
 
-    private String getLowerCase(Object object)
+    private void writeNestedProperties(JsonGenerator jgen, Map<?, ?> nestedMap) throws IOException
     {
-        return object.toString().toLowerCase(ENGLISH);
+        jgen.writeObjectFieldStart("value");
+
+        for (Map.Entry<?, ?> entry : nestedMap.entrySet())
+        {
+            String key = entry.getKey().toString();
+            Object nestedValue = entry.getValue();
+
+            jgen.writeObjectFieldStart(key);
+
+            String type = determineType(nestedValue);
+            jgen.writeStringField("type", type);
+
+            if ("object".equals(type))
+            {
+                writeNestedProperties(jgen, (Map<?, ?>) nestedValue);
+            }
+            else if ("array".equals(type) && nestedValue instanceof Collection<?> collection)
+            {
+                jgen.writeArrayFieldStart("value");
+                for (Object item : collection)
+                {
+                    jgen.writeObject(item);
+                }
+                jgen.writeEndArray();
+            }
+            else if ("boolean".equals(type))
+            {
+                jgen.writeBooleanField("value", (Boolean) nestedValue);
+            }
+            else if ("integer".equals(type))
+            {
+                jgen.writeNumberField("value", (Integer) nestedValue);
+            }
+            else if ("float".equals(type))
+            {
+                jgen.writeNumberField("value", ((Number) nestedValue).doubleValue());
+            }
+            else
+            {
+                jgen.writeStringField("value", nestedValue.toString());
+            }
+
+            jgen.writeEndObject();
+        }
+
+        jgen.writeEndObject();
+        jgen.writeStringField("type", "object");
     }
 }

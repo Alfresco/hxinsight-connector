@@ -594,14 +594,26 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "bootstrapHomeFolderProvider"
                       },
                       "cm:homeFolder" : {
-                        "type": "string",
                         "value" : {
                           "storeRef" : {
-                            "protocol" : "workspace",
-                            "identifier" : "SpacesStore"
+                            "type" : "object",
+                            "value" : {
+                              "protocol" : {
+                                "type" : "string",
+                                "value" : "workspace"
+                              },
+                              "identifier" : {
+                                "type" : "string",
+                                "value" : "SpacesStore"
+                              }
+                            }
                           },
-                          "id" : "7f1fa040-e840-40c6-a8a0-da457aca2473"
-                        }
+                          "id" : {
+                            "type" : "string",
+                            "value" : "7f1fa040-e840-40c6-a8a0-da457aca2473"
+                          }
+                        },
+                        "type" : "object"
                       },
                       "sys:cascadeCRC" : {
                         "type": "integer",
