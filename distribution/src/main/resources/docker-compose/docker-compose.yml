@@ -299,7 +299,7 @@ services:
         condition: service_healthy
     environment:
       JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5007,server=y,suspend=n
-      LOGGING_LEVEL_ORG_ALFRESCO: INFO
+      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
       SPRING_ACTIVEMQ_BROKERURL: nio://activemq:61616
       ALFRESCO_REPOSITORY_BASEURL: http://alfresco:8080/alfresco
       ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL: http://shared-file-store:8099
