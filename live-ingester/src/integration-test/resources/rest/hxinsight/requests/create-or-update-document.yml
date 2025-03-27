@@ -48,7 +48,7 @@ body: [
           "namespaceURI": "http://www.alfresco.org/model/content/1.0",
           "localName": "content",
           "prefixString": "content"
-        },
+         },
         "type": "string"
       },
       "createdBy": {
