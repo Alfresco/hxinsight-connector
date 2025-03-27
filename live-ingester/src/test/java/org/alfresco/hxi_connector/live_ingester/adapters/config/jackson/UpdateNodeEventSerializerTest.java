@@ -44,6 +44,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -52,8 +53,6 @@ import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -74,9 +73,6 @@ class UpdateNodeEventSerializerTest
 
     @InjectMocks
     private UpdateNodeEventSerializer serializer;
-
-    @Captor
-    private ArgumentCaptor<String> stringCaptor;
 
     @BeforeEach
     void setUp()
@@ -122,6 +118,103 @@ class UpdateNodeEventSerializerTest
                       "createdAt": {"value": "2024-02-19T07:56:50.034Z", "annotation": "dateCreated"},
                       "modifiedAt": {"value": "2025-02-19T07:56:50.034Z", "annotation": "dateModified"},
                       "modifiedBy": {"value": "000-000-000", "annotation": "modifiedBy"}
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void canSerializeObjectProperties()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("grandparent", Map.of("parent", Map.of("child", "some-data"))));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "grandparent": {
+                        "value": {
+                          "parent": {
+                            "value": {
+                              "child": "some-data",
+                              "type": "string"
+                            },
+                            "type": "object"
+                          }
+                        },
+                        "type": "object"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void arraysSerializeWithTypeOfMembers()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("colours", List.of("red", "yellow", "green", "blue")));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "colours": {
+                        "value": ["red", "yellow", "green", "blue"],
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void checkObjectContainingArrays()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("primalityData", Map.of(
+                        "numbers", List.of(1, 2, 3),
+                        "isPrime", List.of(false, true, true))));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "primalityData": {
+                        "value": {
+                            "numbers": {
+                                "value": [1, 2, 3],
+                                "type": "integer"
+                            },
+                            "isPrime": {
+                                "value": [false, true, true],
+                                "type": "boolean"
+                            }
+                        },
+                        "type": "object"
+                      }
                     }
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
