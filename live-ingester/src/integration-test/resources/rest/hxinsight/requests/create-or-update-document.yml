@@ -43,6 +43,14 @@ body: [
         "type": "string",
         "value": "1.0"
       },
+      "cm:contentPropertyName": {
+        "value": {
+          "namespaceURI": "http://www.alfresco.org/model/content/1.0",
+          "localName": "content",
+          "prefixString": "content"
+        },
+        "type": "string"
+      },
       "createdBy": {
         "value": "admin",
         "annotation": "createdBy"
