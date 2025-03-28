@@ -212,6 +212,20 @@ jobs:
       - name: "Run e2e tests"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} verify -pl 'hxinsight-extension,e2e-test' -am -DskipUnitTests -DskipIntegrationTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
 
+  tck_tests:
+    name: "Run TCK tests before release"
+    runs-on: ubuntu-latest
+    needs:
+      - pre_commit
+    if: >
+      !(failure() || cancelled()) &&
+      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
+      github.event_name != 'pull_request' &&
+      contains(github.event.head_commit.message, '[release]')
+    steps:
+      - name: "Run TCK Tests"
+        uses: ./.github/workflows/_tck_tests.yml
+
   push_docker_images:
     name: "Push docker images"
     runs-on: ubuntu-latest
@@ -219,6 +233,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - tck_tests
     if: >
       github.event_name == 'push' &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -252,6 +267,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - tck_tests
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -275,6 +291,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - tck_tests
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -321,6 +338,7 @@ jobs:
       - test_application
       - test_distribution
       - run_e2e_test
+      - tck_tests
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
