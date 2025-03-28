@@ -1,10 +1,6 @@
 name: Veracode and Nightly Tests run
 
 on:
-  push:
-    branches:
-      - feature/**
-
   schedule:
     - cron: "0 0 * * *"  # Runs every night at midnight
 
@@ -15,7 +11,6 @@ jobs:
   veracode_sca:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule' || github.event_name == 'push'
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
@@ -37,7 +32,6 @@ jobs:
   nightly_tests:
     name: "Run nightly tests"
     runs-on: ubuntu-latest
-    if: github.event_name == 'schedule'
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
