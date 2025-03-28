@@ -379,6 +379,43 @@ class UpdateNodeEventSerializerTest
     }
 
     @Test
+    public void checkArrayContainingObjects()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("coordinates", List.of(
+                        Map.of("x", 1, "y", 2),
+                        Map.of("x", 3, "y", 4))));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "coordinates": {
+                        "value": [
+                            {
+                                "x": 1,
+                                "y": 2
+                            },
+                            {
+                                "x": 3,
+                                "y": 4
+                            }
+                        ],
+                        "type": "object"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
     public void canCopeWithNullUsers()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
@@ -470,7 +507,7 @@ class UpdateNodeEventSerializerTest
     @Test
     void shouldNotWriteEmptyCollection() throws IOException
     {
-        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", Collections.emptyList());
+        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", Collections.emptyList(), true);
 
         verify(jsonGenerator, never()).writeObjectFieldStart(anyString());
     }
@@ -480,7 +517,7 @@ class UpdateNodeEventSerializerTest
     {
         List<String> nonEmptyList = List.of("value1", "value2");
 
-        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", nonEmptyList);
+        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", nonEmptyList, true);
 
         verify(jsonGenerator).writeObjectFieldStart("testProperty");
         verify(jsonGenerator).writeObjectField("value", nonEmptyList);
@@ -492,7 +529,7 @@ class UpdateNodeEventSerializerTest
     {
         String value = "singleTestValue";
 
-        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", value);
+        serializer.writeProperty(jsonGenerator, FieldType.VALUE, "testProperty", value, true);
 
         verify(jsonGenerator).writeObjectFieldStart("testProperty");
         verify(jsonGenerator).writeObjectField("value", value);
@@ -503,17 +540,17 @@ class UpdateNodeEventSerializerTest
     public void shouldReturnCorrectTypeForVariousValues()
     {
         assertAll(
-                () -> assertEquals("boolean", serializer.selectTypeByValue(true)),
-                () -> assertEquals("integer", serializer.selectTypeByValue(123)),
-                () -> assertEquals("float", serializer.selectTypeByValue(123.45f)),
-                () -> assertEquals("string", serializer.selectTypeByValue("testTypeValue")));
+                () -> assertEquals("boolean", serializer.determineType(true)),
+                () -> assertEquals("integer", serializer.determineType(123)),
+                () -> assertEquals("float", serializer.determineType(123.45f)),
+                () -> assertEquals("string", serializer.determineType("testTypeValue")));
     }
 
     @Test
     public void shouldThrowExceptionForEmptyCollection()
     {
         Exception exception = assertThrows(IllegalArgumentException.class, () -> {
-            serializer.selectTypeByValue(Collections.emptyList());
+            serializer.determineType(Collections.emptyList());
         });
         assertEquals("Empty collections should not be passed to selectTypeByValue.", exception.getMessage());
     }
@@ -521,13 +558,13 @@ class UpdateNodeEventSerializerTest
     @Test
     public void shouldReturnStringForMixedTypeCollection()
     {
-        assertEquals("string", serializer.selectTypeByValue(Arrays.asList(1, "test", 3.14)));
+        assertEquals("string", serializer.determineType(Arrays.asList(1, "test", 3.14)));
     }
 
     @Test
     public void shouldReturnStringForNullValue()
     {
-        assertEquals("string", serializer.selectTypeByValue(null));
+        assertEquals("string", serializer.determineType(null));
     }
 
     @SneakyThrows

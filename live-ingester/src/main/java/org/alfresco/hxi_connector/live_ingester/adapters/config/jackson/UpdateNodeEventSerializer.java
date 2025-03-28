@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static java.util.Locale.ENGLISH;
+import static java.util.stream.Collectors.toSet;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.FILE;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
@@ -34,6 +35,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_ins
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -83,8 +85,8 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
             {
                 jgen.writeObjectFieldStart("properties");
-                event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
-                event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
+                event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value(), true));
+                event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property), true));
                 jgen.writeEndObject();
             }
 
@@ -97,7 +99,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value)
+    void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value, boolean shouldCheckForAnnotation)
     {
         try
         {
@@ -115,7 +117,11 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             else
             {
                 jgen.writeObjectField(getLowerCase(fieldType), value);
-                boolean hasAnnotation = writeAnnotation(jgen, name);
+                boolean hasAnnotation = false;
+                if (shouldCheckForAnnotation)
+                {
+                    hasAnnotation = writeAnnotation(jgen, name);
+                }
                 if (!hasAnnotation)
                 {
                     writeType(jgen, value);
@@ -169,21 +175,8 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             return;
         }
 
-        String type = selectTypeByValue(value);
+        String type = determineType(value);
         jgen.writeObjectField("type", type);
-    }
-
-    String selectTypeByValue(Object value)
-    {
-        if (value instanceof Collection collection)
-        {
-            if (collection.isEmpty())
-            {
-                throw new IllegalArgumentException("Empty collections should not be passed to selectTypeByValue.");
-            }
-            return selectTypeByValue(collection.stream().findAny());
-        }
-        return determineType(value);
     }
 
     private String getLowerCase(Object object)
@@ -191,7 +184,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         return object.toString().toLowerCase(ENGLISH);
     }
 
-    private String determineType(Object value)
+    protected String determineType(Object value)
     {
         if (value instanceof Boolean)
         {
@@ -207,10 +200,19 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
         else if (value instanceof Collection<?> collection)
         {
-            return collection.stream()
-                    .findFirst()
+            if (collection.isEmpty())
+            {
+                throw new IllegalArgumentException("Empty collections should not be passed to selectTypeByValue.");
+            }
+            Set<String> types = collection.stream()
                     .map(this::determineType)
-                    .orElse("string");
+                    .collect(toSet());
+            // If there is a mixture of types then return "string" as a fallback.
+            if (types.size() == 1)
+            {
+                return types.iterator().next();
+            }
+            return "string";
         }
         else if (value instanceof Map<?, ?>)
         {
