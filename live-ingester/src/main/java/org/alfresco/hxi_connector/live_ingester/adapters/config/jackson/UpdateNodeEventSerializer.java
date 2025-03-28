@@ -112,21 +112,23 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 
             if (value instanceof Map<?, ?> nestedMap)
             {
-                writeNestedMap(jgen, nestedMap);
+                writeNestedMap(jgen, fieldType, nestedMap);
             }
             else
             {
                 jgen.writeObjectField(getLowerCase(fieldType), value);
-                boolean hasAnnotation = false;
-                if (shouldCheckForAnnotation)
-                {
-                    hasAnnotation = writeAnnotation(jgen, name);
-                }
-                if (!hasAnnotation)
-                {
-                    writeType(jgen, value);
-                }
             }
+
+            boolean hasAnnotation = false;
+            if (shouldCheckForAnnotation)
+            {
+                hasAnnotation = writeAnnotation(jgen, name);
+            }
+            if (!hasAnnotation)
+            {
+                writeType(jgen, value);
+            }
+
             jgen.writeEndObject();
         }
         catch (IOException e)
@@ -221,32 +223,16 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         return "string";
     }
 
-    private void writeNestedMap(JsonGenerator jgen, Map<?, ?> map) throws IOException
+    private void writeNestedMap(JsonGenerator jgen, FieldType fieldType, Map<?, ?> map) throws IOException
     {
-        jgen.writeObjectFieldStart("value");
+        jgen.writeObjectFieldStart(getLowerCase(fieldType));
         for (Map.Entry<?, ?> entry : map.entrySet())
         {
             String key = entry.getKey().toString();
             Object value = entry.getValue();
 
-            if (value instanceof Collection<?> collection && collection.isEmpty())
-            {
-                continue;
-            }
-
-            jgen.writeObjectFieldStart(key);
-            if (value instanceof Map<?, ?> nestedMap)
-            {
-                writeNestedMap(jgen, nestedMap);
-            }
-            else
-            {
-                jgen.writeObjectField("value", value);
-                jgen.writeStringField("type", determineType(value));
-            }
-            jgen.writeEndObject();
+            writeProperty(jgen, VALUE, key, value, false);
         }
         jgen.writeEndObject();
-        jgen.writeStringField("type", "object");
     }
 }
