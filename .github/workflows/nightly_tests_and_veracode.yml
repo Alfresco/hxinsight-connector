@@ -16,7 +16,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v8.14.1
-        continue-on-error: false
         env:
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -33,21 +32,8 @@ jobs:
     name: "Run nightly tests"
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout repository"
-        uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
-      - name: "Clone TCK repository"
-        run: bash ./scripts/ci/cloneTCK.sh
-        env:
-          GITHUB_TOKEN: ${{ secrets.HYLAND_TCK_PAT }}
-      - name: "Build and start TCK services"
-        run: bash ./scripts/ci/buildTckImages.sh
-      - name: "Set up JDK"
-        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
-      - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -pl live-ingester -am
-      - name: "Run OpenApi Specification tests"
-        run: mvn test -Dtest=OpenApiTckRequestValidationTest -pl live-ingester
+      - name: "Run TCK Tests"
+        uses: ./.github/workflows/_tck_tests.yml
       - name: "Notify on failure"
         if: failure()
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
