@@ -231,6 +231,30 @@ class UpdateNodeEventSerializerTest
     }
 
     @Test
+    public void shouldIgnoreEmptyCollection()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("emptyList", List.of()))
+                .addMetadataInstruction(new NodeProperty<>("nonEmptyList", List.of("something")));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "nonEmptyList": {"value": ["something"], "type": "string"}
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
     public void shouldIgnoreEmptyCollectionInMap()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
@@ -248,7 +272,6 @@ class UpdateNodeEventSerializerTest
                     "properties": {
                       "mapWithEmptyCollection": {
                         "value": {
-                          "emptyList": {"value": [], "type": "string"},
                           "nonEmptyList": {"value": ["value1", "value2"], "type": "string"}
                         },
                         "type": "object"
