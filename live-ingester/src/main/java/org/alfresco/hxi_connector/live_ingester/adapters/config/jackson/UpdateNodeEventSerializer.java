@@ -27,12 +27,15 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config.jackson;
 
 import static java.util.Locale.ENGLISH;
+import static java.util.stream.Collectors.toSet;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.FILE;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType.VALUE;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Map;
+import java.util.Set;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -82,8 +85,8 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
             {
                 jgen.writeObjectFieldStart("properties");
-                event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value()));
-                event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property)));
+                event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value(), true));
+                event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property), true));
                 jgen.writeEndObject();
             }
 
@@ -96,7 +99,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         }
     }
 
-    void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value)
+    void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value, boolean shouldCheckForAnnotation)
     {
         try
         {
@@ -106,12 +109,26 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             }
 
             jgen.writeObjectFieldStart(name);
-            jgen.writeObjectField(getLowerCase(fieldType), value);
-            boolean hasAnnotation = writeAnnotation(jgen, name);
+
+            if (value instanceof Map<?, ?> nestedMap)
+            {
+                writeNestedMap(jgen, fieldType, nestedMap);
+            }
+            else
+            {
+                jgen.writeObjectField(getLowerCase(fieldType), value);
+            }
+
+            boolean hasAnnotation = false;
+            if (shouldCheckForAnnotation)
+            {
+                hasAnnotation = writeAnnotation(jgen, name);
+            }
             if (!hasAnnotation)
             {
                 writeType(jgen, value);
             }
+
             jgen.writeEndObject();
         }
         catch (IOException e)
@@ -160,11 +177,16 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             return;
         }
 
-        String type = selectTypeByValue(value);
+        String type = determineType(value);
         jgen.writeObjectField("type", type);
     }
 
-    String selectTypeByValue(Object value)
+    private String getLowerCase(Object object)
+    {
+        return object.toString().toLowerCase(ENGLISH);
+    }
+
+    protected String determineType(Object value)
     {
         if (value instanceof Boolean)
         {
@@ -174,23 +196,43 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             return "integer";
         }
-        else if (value instanceof Float)
+        else if (value instanceof Float || value instanceof Double)
         {
             return "float";
         }
-        else if (value instanceof Collection collection)
+        else if (value instanceof Collection<?> collection)
         {
             if (collection.isEmpty())
             {
                 throw new IllegalArgumentException("Empty collections should not be passed to selectTypeByValue.");
             }
-            return selectTypeByValue(collection.stream().findAny());
+            Set<String> types = collection.stream()
+                    .map(this::determineType)
+                    .collect(toSet());
+            // If there is a mixture of types then return "string" as a fallback.
+            if (types.size() == 1)
+            {
+                return types.iterator().next();
+            }
+            return "string";
+        }
+        else if (value instanceof Map<?, ?>)
+        {
+            return "object";
         }
         return "string";
     }
 
-    private String getLowerCase(Object object)
+    private void writeNestedMap(JsonGenerator jgen, FieldType fieldType, Map<?, ?> map) throws IOException
     {
-        return object.toString().toLowerCase(ENGLISH);
+        jgen.writeObjectFieldStart(getLowerCase(fieldType));
+        for (Map.Entry<?, ?> entry : map.entrySet())
+        {
+            String key = entry.getKey().toString();
+            Object value = entry.getValue();
+
+            writeProperty(jgen, VALUE, key, value, false);
+        }
+        jgen.writeEndObject();
     }
 }

@@ -105,4 +105,87 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
+
+    @Test
+    void testCreateThumbnail()
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Created",
+                  "id": "b1f04bf2-f670-44d6-be11-4aaa6b94ce6f",
+                  "source": "/dc1273e0-9b1c-4309-9273-e09b1c330935",
+                  "time": "2025-03-27T11:27:59.28Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeCreated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "5866c934-f6ca-4403-a6c9-34f6cad403f4",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "2f794000-7b44-4bd7-b940-007b44ebd755",
+                      "primaryHierarchy": [ "9cde9dd0-e9b3-4cf1-9e9d-d0e9b33cf1fc","8f2105b4-daaf-4874-9e8a-2152569d109b","b4cff62a-664d-4d45-9302-98723eac1319","1536141f-5b48-499d-b614-1f5b48499dca","a0f105b8-8f5a-45e1-b105-b88f5ac5e179","5a796cd6-5522-4ec9-b96c-d655227ec9a5" ],
+                      "name": "doclib",
+                      "nodeType": "cm:thumbnail",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2025-03-27T11:27:59.232Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "modifiedAt": "2025-03-27T11:27:59.232Z",
+                      "content": {
+                        "mimeType": "image/png",
+                        "sizeInBytes": 218,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "rn:contentHashCode": 1993082629,
+                        "cm:contentPropertyName": {
+                          "namespaceURI": "http://www.alfresco.org/model/content/1.0",
+                          "localName": "content",
+                          "prefixString": "content"
+                        },
+                        "cm:isContentIndexed": true,
+                        "cm:thumbnailName": "doclib",
+                        "cm:isIndexed": false
+                      },
+                      "aspectNames": [ "cm:indexControl","rn:hiddenRendition","cm:auditable","rn:rendition2" ],
+                      "primaryAssocQName": "cm:doclib",
+                      "secondaryParents": [ ],
+                      "isFile": true,
+                      "isFolder": false
+                    },
+                    "resourceReaderAuthorities": [ "GROUP_EVERYONE","GROUP_site_swsdp_SiteContributor","GROUP_site_swsdp_SiteCollaborator","GROUP_site_swsdp_SiteManager","GROUP_site_swsdp_SiteConsumer" ],
+                    "resourceDeniedAuthorities": [ ]
+                  },
+                  "extensionAttributes": {
+                    "path": "/Company Home/Sites/swsdp/documentLibrary/quick95.doc/doclib",
+                    "clientId": null
+                  }
+                }""";
+
+        // when
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-thumbnail.yml");
+        containerSupport.expectHxIngestMessageReceived(request.body());
+
+        String expectedATSRequest = """
+                {
+                    "requestId": "%s",
+                    "nodeRef": "workspace://SpacesStore/2f794000-7b44-4bd7-b940-007b44ebd755",
+                    "targetMediaType": "image/png",
+                    "clientData": "{\\"nodeRef\\":\\"2f794000-7b44-4bd7-b940-007b44ebd755\\",\\"targetMimeType\\":\\"image/png\\",\\"retryAttempt\\":0,\\"timestamp\\":1743074879280}",
+                    "transformOptions": { "resizeWidth": "3840", "resizeHeight": "3840", "allowEnlargement": "false", "timeout": "20000" },
+                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
+                }""".formatted(REQUEST_ID_PLACEHOLDER);
+        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+    }
 }

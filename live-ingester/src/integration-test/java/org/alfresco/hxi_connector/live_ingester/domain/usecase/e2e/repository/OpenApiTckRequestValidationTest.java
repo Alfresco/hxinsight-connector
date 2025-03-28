@@ -74,6 +74,13 @@ public class OpenApiTckRequestValidationTest
     }
 
     @Test
+    void testCreateThumbnailEvents()
+    {
+        int actualStatusCode = validateRequest("/rest/hxinsight/requests/create-thumbnail.yml");
+        assertThat(actualStatusCode).isEqualTo(SC_ACCEPTED);
+    }
+
+    @Test
     void testDeleteRequestToIngestionEvents()
     {
         int actualStatusCode = validateRequest("/rest/hxinsight/requests/delete-document.yml");
