@@ -144,8 +144,10 @@ class UpdateNodeEventSerializerTest
                         "value": {
                           "parent": {
                             "value": {
-                              "child": "some-data",
-                              "type": "string"
+                              "child": {
+                                "value": "some-data",
+                                "type": "string"
+                              }
                             },
                             "type": "object"
                           }
@@ -155,6 +157,136 @@ class UpdateNodeEventSerializerTest
                     }
                   }
                 ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeNestedMapWithMixedTypes()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("nestedMap", Map.of(
+                        "stringKey", "stringValue",
+                        "intKey", 42,
+                        "booleanKey", true,
+                        "nestedObject", Map.of("innerKey", "innerValue"))));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "nestedMap": {
+                        "value": {
+                          "nestedObject": {
+                            "value": {
+                              "innerKey": {"value": "innerValue", "type": "string"}
+                            },
+                            "type": "object"
+                          },
+                          "intKey": {"value": "42", "type": "integer"},
+                          "booleanKey": {"value": "true", "type": "boolean"},
+                          "stringKey": {"value": "stringValue", "type": "string"}
+                        },
+                        "type": "object"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeEmptyMap()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("emptyMap", Map.of()));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "emptyMap": {
+                        "value": {},
+                        "type": "object"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldIgnoreEmptyCollectionInMap()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("mapWithEmptyCollection", Map.of(
+                        "emptyList", List.of(),
+                        "nonEmptyList", List.of("value1", "value2"))));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "mapWithEmptyCollection": {
+                        "value": {
+                          "emptyList": {"value": [], "type": "string"},
+                          "nonEmptyList": {"value": ["value1", "value2"], "type": "string"}
+                        },
+                        "type": "object"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeNestedCollections()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("nestedCollections", Map.of(
+                        "listOfLists", List.of(List.of(1, 2), List.of(3, 4)))));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "nestedCollections": {
+                        "value": {
+                          "listOfLists": {"value": [[1, 2], [3, 4]], "type": "integer"}
+                        },
+                        "type": "object"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
