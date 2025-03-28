@@ -188,8 +188,8 @@ class UpdateNodeEventSerializerTest
                             },
                             "type": "object"
                           },
-                          "intKey": {"value": "42", "type": "integer"},
-                          "booleanKey": {"value": "true", "type": "boolean"},
+                          "intKey": {"value": 42, "type": "integer"},
+                          "booleanKey": {"value": true, "type": "boolean"},
                           "stringKey": {"value": "stringValue", "type": "string"}
                         },
                         "type": "object"

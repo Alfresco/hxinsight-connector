@@ -239,14 +239,9 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             {
                 writeNestedMap(jgen, nestedMap);
             }
-            else if (value instanceof Collection<?> collection)
-            {
-                jgen.writeObjectField("value", collection);
-                jgen.writeStringField("type", determineType(collection));
-            }
             else
             {
-                jgen.writeStringField("value", value.toString());
+                jgen.writeObjectField("value", value);
                 jgen.writeStringField("type", determineType(value));
             }
             jgen.writeEndObject();
