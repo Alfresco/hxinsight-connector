@@ -205,9 +205,12 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         {
             return "float";
         }
-        else if (value instanceof Collection<?>)
+        else if (value instanceof Collection<?> collection)
         {
-            return "array";
+            return collection.stream()
+                    .findFirst()
+                    .map(this::determineType)
+                    .orElse("string");
         }
         else if (value instanceof Map<?, ?>)
         {
@@ -218,52 +221,39 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 
     private void writeNestedProperties(JsonGenerator jgen, Map<?, ?> nestedMap) throws IOException
     {
-        jgen.writeObjectFieldStart("value");
+        writeMap(jgen, nestedMap, "object");
+    }
 
-        for (Map.Entry<?, ?> entry : nestedMap.entrySet())
+    private void writeValue(JsonGenerator jgen, String key, Object value) throws IOException
+    {
+        jgen.writeObjectFieldStart(key);
+
+        if (value instanceof Map<?, ?> nestedMap)
         {
-            String key = entry.getKey().toString();
-            Object nestedValue = entry.getValue();
-
-            jgen.writeObjectFieldStart(key);
-
-            String type = determineType(nestedValue);
-            jgen.writeStringField("type", type);
-
-            if ("object".equals(type))
-            {
-                writeNestedProperties(jgen, (Map<?, ?>) nestedValue);
-            }
-            else if ("array".equals(type) && nestedValue instanceof Collection<?> collection)
-            {
-                jgen.writeArrayFieldStart("value");
-                for (Object item : collection)
-                {
-                    jgen.writeObject(item);
-                }
-                jgen.writeEndArray();
-            }
-            else if ("boolean".equals(type))
-            {
-                jgen.writeBooleanField("value", (Boolean) nestedValue);
-            }
-            else if ("integer".equals(type))
-            {
-                jgen.writeNumberField("value", (Integer) nestedValue);
-            }
-            else if ("float".equals(type))
-            {
-                jgen.writeNumberField("value", ((Number) nestedValue).doubleValue());
-            }
-            else
-            {
-                jgen.writeStringField("value", nestedValue.toString());
-            }
-
-            jgen.writeEndObject();
+            writeMap(jgen, nestedMap, "object");
+        }
+        else if (value instanceof Collection<?> collection)
+        {
+            jgen.writeObjectField("value", collection);
+            jgen.writeStringField("type", determineType(collection));
+        }
+        else
+        {
+            jgen.writeStringField("value", value.toString());
+            jgen.writeStringField("type", determineType(value));
         }
 
         jgen.writeEndObject();
-        jgen.writeStringField("type", "object");
+    }
+
+    private void writeMap(JsonGenerator jgen, Map<?, ?> map, String type) throws IOException
+    {
+        jgen.writeObjectFieldStart("value");
+        for (Map.Entry<?, ?> entry : map.entrySet())
+        {
+            writeValue(jgen, entry.getKey().toString(), entry.getValue());
+        }
+        jgen.writeEndObject();
+        jgen.writeStringField("type", type);
     }
 }
