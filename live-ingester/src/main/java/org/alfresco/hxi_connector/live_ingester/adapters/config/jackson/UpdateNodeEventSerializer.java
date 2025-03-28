@@ -110,7 +110,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
 
             if (value instanceof Map<?, ?> nestedMap)
             {
-                writeNestedProperties(jgen, nestedMap);
+                writeNestedMap(jgen, nestedMap);
             }
             else
             {
@@ -219,41 +219,37 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
         return "string";
     }
 
-    private void writeNestedProperties(JsonGenerator jgen, Map<?, ?> nestedMap) throws IOException
-    {
-        writeMap(jgen, nestedMap, "object");
-    }
-
-    private void writeValue(JsonGenerator jgen, String key, Object value) throws IOException
-    {
-        jgen.writeObjectFieldStart(key);
-
-        if (value instanceof Map<?, ?> nestedMap)
-        {
-            writeMap(jgen, nestedMap, "object");
-        }
-        else if (value instanceof Collection<?> collection)
-        {
-            jgen.writeObjectField("value", collection);
-            jgen.writeStringField("type", determineType(collection));
-        }
-        else
-        {
-            jgen.writeStringField("value", value.toString());
-            jgen.writeStringField("type", determineType(value));
-        }
-
-        jgen.writeEndObject();
-    }
-
-    private void writeMap(JsonGenerator jgen, Map<?, ?> map, String type) throws IOException
+    private void writeNestedMap(JsonGenerator jgen, Map<?, ?> map) throws IOException
     {
         jgen.writeObjectFieldStart("value");
         for (Map.Entry<?, ?> entry : map.entrySet())
         {
-            writeValue(jgen, entry.getKey().toString(), entry.getValue());
+            String key = entry.getKey().toString();
+            Object value = entry.getValue();
+
+            if (value instanceof Collection<?> collection && collection.isEmpty())
+            {
+                continue;
+            }
+
+            jgen.writeObjectFieldStart(key);
+            if (value instanceof Map<?, ?> nestedMap)
+            {
+                writeNestedMap(jgen, nestedMap);
+            }
+            else if (value instanceof Collection<?> collection)
+            {
+                jgen.writeObjectField("value", collection);
+                jgen.writeStringField("type", determineType(collection));
+            }
+            else
+            {
+                jgen.writeStringField("value", value.toString());
+                jgen.writeStringField("type", determineType(value));
+            }
+            jgen.writeEndObject();
         }
         jgen.writeEndObject();
-        jgen.writeStringField("type", type);
+        jgen.writeStringField("type", "object");
     }
 }
