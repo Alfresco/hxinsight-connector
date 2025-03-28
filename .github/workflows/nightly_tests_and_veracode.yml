@@ -3,13 +3,8 @@ name: Veracode and Nightly Tests run
 on:
   pull_request:
     branches:
-      - master
-      - release/**
+      - feature/**
 
-  push:
-    branches:
-      - master
-      - release/**
   schedule:
     - cron: "0 0 * * *"  # Runs every night at midnight
 
@@ -20,12 +15,8 @@ jobs:
   veracode_sca:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
-      id-token: write
     if: >
-      (github.event_name == 'schedule' || github.actor == 'dependabot[bot]') &&
+      github.event_name == 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
@@ -39,7 +30,7 @@ jobs:
         with:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
       - name: "Notify on failure"
-        if: failure() && github.event_name == 'schedule'
+        if: failure()
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
