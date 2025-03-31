@@ -1,0 +1,29 @@
+name: TCK Test Run
+description: "Run TCK tests"
+inputs:
+  hyland-tck-pat:
+    description: PAT for accessing TCK
+    required: true
+  maven-cli-opts:
+    description: Maven options string
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+    - name: "Clone TCK repository"
+      shell: bash
+      run: ./scripts/ci/cloneTCK.sh
+      env:
+        GITHUB_TOKEN: ${{ inputs.hyland-tck-pat }}
+    - name: "Build and start TCK services"
+      shell: bash
+      run: ./scripts/ci/buildTckImages.sh
+    - name: "Set up JDK"
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+    - name: "Build application"
+      shell: bash
+      run: mvn ${{ inputs.maven-cli-opts }} clean install -DskipTests -pl live-ingester -am
+    - name: "Run OpenApi Specification tests"
+      shell: bash
+      run: mvn test -Dtest=OpenApiTckRequestValidationTest -pl live-ingester

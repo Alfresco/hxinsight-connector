@@ -32,8 +32,13 @@ jobs:
     name: "Run nightly tests"
     runs-on: ubuntu-latest
     steps:
+      - name: "Checkout repository"
+        uses: actions/checkout@v4
       - name: "Run TCK Tests"
-        uses: ./.github/workflows/_tck_tests.yml
+        uses: ./.github/actions/tck-tests
+        with:
+          hyland-tck-pat: ${{ secrets.HYLAND_TCK_PAT }}
+          maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
       - name: "Notify on failure"
         if: failure()
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
