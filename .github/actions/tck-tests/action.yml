@@ -27,3 +27,7 @@ runs:
     - name: "Run OpenApi Specification tests"
       shell: bash
       run: mvn test -Dtest=OpenApiTckRequestValidationTest -pl live-ingester
+    - name: "Output TCK logs"
+      if: success() || failure()
+      shell: bash
+      run: docker logs ingestion-connector-tck-api-1
