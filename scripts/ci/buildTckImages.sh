@@ -8,7 +8,7 @@ docker buildx build \
   --load \
   --cache-from type=gha \
   --cache-to type=gha,mode=max \
-  -t json-service:latest \
+  -t ghcr.io/hylandsoftware/ingestion-connector-tck-flask:latest \
   ./ingestion-connector-tck/app
 
 # Build API service
@@ -18,7 +18,7 @@ docker buildx build \
   --load \
   --cache-from type=gha \
   --cache-to type=gha,mode=max \
-  -t api-service:latest \
+  -t ghcr.io/hylandsoftware/ingestion-connector-tck-prism:latest \
   -f ./ingestion-connector-tck/DockerfilePrism \
   ./ingestion-connector-tck
 
