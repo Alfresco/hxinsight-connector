@@ -43,3 +43,7 @@ fi
 # Ensure we're up to date
 git pull
 git submodule update --remote
+
+# Output information about the commits being used.
+git log -1
+git submodule status --recursive
