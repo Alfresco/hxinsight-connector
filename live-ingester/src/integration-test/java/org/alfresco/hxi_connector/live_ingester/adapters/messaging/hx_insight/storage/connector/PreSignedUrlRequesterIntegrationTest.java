@@ -342,7 +342,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
         @Bean
         public Application application()
         {
-            return new Application("alfresco-dummy-source-id-0a63de491876", DockerTags.getHxiConnectorTag());
+            return new Application("a1f3e7c0-d193-7023-ce1d-0a63de491876", DockerTags.getHxiConnectorTag());
         }
 
         @Bean

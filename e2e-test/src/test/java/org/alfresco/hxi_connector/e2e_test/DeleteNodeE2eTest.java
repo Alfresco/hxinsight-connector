@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -114,7 +114,7 @@ public class DeleteNodeE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing("\"objectId\":\"%s\"".formatted(createdNode.id())))
-                .withRequestBody(containing("\"sourceId\":\"alfresco-dummy-source-id-0a63de491876\""))
+                .withRequestBody(containing("\"sourceId\":\"a1f3e7c0-d193-7023-ce1d-0a63de491876\""))
                 .withRequestBody(containing("\"sourceTimestamp\""))
                 .withRequestBody(containing("\"eventType\":\"delete\""))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))), DELAY_MS);

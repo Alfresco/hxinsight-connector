@@ -95,7 +95,7 @@ class NonMatchingContentMappingRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611227656423,
                     "properties": {

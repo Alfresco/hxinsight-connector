@@ -7,7 +7,7 @@ headers:
 body: [
   {
     "objectId": "2f794000-7b44-4bd7-b940-007b44ebd755",
-    "sourceId": "alfresco-dummy-source-id-0a63de491876",
+    "sourceId": "a1f3e7c0-d193-7023-ce1d-0a63de491876",
     "eventType": "createOrUpdate",
     "sourceTimestamp": 1743074879280,
     "properties": {

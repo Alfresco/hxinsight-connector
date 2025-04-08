@@ -90,7 +90,7 @@ public class BulkIngesterE2eTest
     {
         // given
         String nodeId = "02acf462-533d-4e1b-9825-05fa934140da";
-        String sourceId = "alfresco-dummy-source-id-0a63de491876";
+        String sourceId = "a1f3e7c0-d193-7023-ce1d-0a63de491876";
         String eventType = "createOrUpdate";
 
         // when

@@ -14,7 +14,7 @@ camel:
     auto-startup: false
 
 application:
-  source-id: alfresco-dummy-source-id-0a63de491876
+  source-id: a1f3e7c0-d193-7023-ce1d-0a63de491876
   version: "@project.version@"
 
 hyland-experience:
