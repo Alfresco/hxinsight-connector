@@ -82,7 +82,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                 [
                   {
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType" : "createOrUpdate",
                     "sourceTimestamp": %s,
                     "properties" : {
@@ -172,7 +172,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                 [
                   {
                     "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType" : "createOrUpdate",
                     "sourceTimestamp": %s,
                     "properties" : {

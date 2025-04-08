@@ -295,7 +295,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                   {
                     "objectId": "34563456-3456-3456-3456-345634563456",
                     "eventType": "createOrUpdate",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "sourceTimestamp" : %s,
                     "properties": {
                        "createdAt" : {
@@ -415,7 +415,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "5f355d16-f824-4173-bf4b-b1ec37ef5549",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": %s,
                     "properties": {

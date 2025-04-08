@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -77,7 +77,7 @@ class HxInsightClientTest
     private static final String AGENT_ID = "agent-id";
     private static final Set<String> OBJECT_IDS = Set.of("dummy-node-id");
     private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
-    private static final String SOURCE_ID = "alfresco-dummy-source-id-0a63de491876";
+    private static final String SOURCE_ID = "a1f3e7c0-d193-7023-ce1d-0a63de491876";
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight", "http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
     private final ObjectMapper objectMapper = new ObjectMapper();

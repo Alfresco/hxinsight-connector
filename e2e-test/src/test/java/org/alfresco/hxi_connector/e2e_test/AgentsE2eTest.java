@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -93,7 +93,7 @@ public class AgentsE2eTest
         LoggedRequest loggedRequest = WireMock.findAll(WireMock.getRequestedFor(WireMock.anyUrl())).get(0);
 
         assertNotNull(loggedRequest);
-        assertEquals("/agents?sourceId=alfresco-dummy-source-id-0a63de491876", loggedRequest.getUrl());
+        assertEquals("/agents?sourceId=a1f3e7c0-d193-7023-ce1d-0a63de491876", loggedRequest.getUrl());
 
         assertEquals(SC_OK, response.statusCode());
         Map<String, String> expected0 = Map.of("name", "HR Policy Agent", "description", "This agent is responsible for HR policy predictions", "id", "61254576-62a3-453f-8cd8-19e2f6554f29", "avatarUrl", "https://s3.amazonaws.com/avatars/ecf13dd4-c061-462b-8122-e3203cc40a0d.jpg");

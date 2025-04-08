@@ -173,7 +173,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         [
                           {
                             "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                            "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                            "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                             "eventType": "createOrUpdate",
                             "sourceTimestamp": 1611656982995,
                             "properties": {
@@ -251,7 +251,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
@@ -331,7 +331,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
@@ -429,7 +429,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1611656982995,
                     "properties": {
@@ -584,7 +584,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType": "createOrUpdate",
                     "sourceTimestamp": 1704798873615,
                     "properties": {
@@ -685,7 +685,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                 [
                   {
                     "objectId": "82c7d723-1dd8-477c-8490-04cb0e826e65",
-                    "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                     "eventType": "createOrUpdate",
                     "sourceTimestamp" : 1611656982995,
                     "properties": {
@@ -810,7 +810,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         String expectedBody = """
                 [{
                   "objectId" : "9f3380e3-b9b1-4b01-b1c6-ef1f717a9abb",
-                  "sourceId" : "alfresco-dummy-source-id-0a63de491876",
+                  "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                   "eventType" : "createOrUpdate",
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
