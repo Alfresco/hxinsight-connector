@@ -41,6 +41,8 @@ jobs:
           build-mode: none
     steps:
     - uses: actions/checkout@v4
+    - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
 
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
@@ -48,10 +50,6 @@ jobs:
       with:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
-
-    - name: Setup Java Build
-      if: matrix.build-mode == 'manual'
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
 
     - name: Build with Maven
       if: matrix.build-mode == 'manual'
