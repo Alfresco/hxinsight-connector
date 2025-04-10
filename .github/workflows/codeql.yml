@@ -17,6 +17,8 @@ on:
 
 env:
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
+  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
 
 jobs:
   analyze:
@@ -50,9 +52,6 @@ jobs:
     - name: Setup Java Build
       if: matrix.build-mode == 'manual'
       uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
-      env:
-        MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-        MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
 
     - name: Build with Maven
       if: matrix.build-mode == 'manual'
