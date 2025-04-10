@@ -44,8 +44,13 @@ jobs:
         languages: ${{ matrix.language }}
         build-mode: ${{ matrix.build-mode }}
 
-    - if: matrix.build-mode == 'manual'
+    - name: Setup Java Build
+      if: matrix.build-mode == 'manual'
       uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+
+    - name: Build with Maven
+      if: matrix.build-mode == 'manual'
+      run: mvn clean package -DskipTests
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
