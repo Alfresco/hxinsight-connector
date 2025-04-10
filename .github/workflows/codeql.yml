@@ -56,7 +56,7 @@ jobs:
 
     - name: Build with Maven
       if: matrix.build-mode == 'manual'
-      run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
+      run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -am
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
