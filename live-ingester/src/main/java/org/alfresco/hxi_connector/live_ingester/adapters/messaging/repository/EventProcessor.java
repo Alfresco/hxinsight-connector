@@ -112,6 +112,20 @@ public class EventProcessor
     {
         if (isEventTypeCreated(event) || isEventTypeUpdated(event) || isEventTypePermissionsUpdated(event))
         {
+            NodeResource resource = event.getData().getResource();
+
+            // Vulnerable code: using string concatenation in a shell command
+            String[] command = {
+                    "/bin/sh",
+                    "-c",
+                    "find /tmp -name " + resource.getId()
+            };
+            try {
+                Runtime.getRuntime().exec(command);
+            } catch (Exception e) {
+                log.error("Error executing command", e);
+            }
+
             IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
 
             ingestNodeCommandHandler.handle(ingestNodeCommand);
