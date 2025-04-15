@@ -59,6 +59,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 
@@ -127,16 +128,21 @@ public class EventProcessor
         if (wasContentChanged(event))
         {
             NodeResource resource = event.getData().getResource();
+            TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
 
-            // CWE-022: Tainted Path vulnerability
-            String userProvidedPath = resource.getName();
-            File tempFile = new File("/tmp/content/" + userProvidedPath);
+            // CWE-022: Path Traversal vulnerability
+            String baseDir = "/tmp/content/";
+            String fileName = resource.getName(); // Available method from NodeResource
+            File contentFile = new File(baseDir + fileName); // Vulnerable path construction
             try {
-                // Vulnerable: No path validation, allows directory traversal
-                tempFile.getParentFile().mkdirs();
-                Files.write(tempFile.toPath(), "temporary content".getBytes());
+                contentFile.getParentFile().mkdirs();
+                Files.createFile(contentFile.toPath());
+                log.debug("Created file at: {}", contentFile.getPath());
+            } catch (IOException e) {
+                log.error("Failed to process file: {}", contentFile.getPath(), e);
+            }
 
-                TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
+//                TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
             if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(command.mimeType()))
             {
 //                NodeResource resource = event.getData().getResource();
@@ -146,10 +152,6 @@ public class EventProcessor
             }
 
             ingestContentCommandHandler.handle(command);
-
-            } catch (IOException e) {
-                log.error("Error processing content", e);
-            }
         }
     }
 
