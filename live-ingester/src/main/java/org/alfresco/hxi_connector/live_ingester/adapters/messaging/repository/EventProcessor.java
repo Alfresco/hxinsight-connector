@@ -58,6 +58,9 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
+import java.io.ByteArrayInputStream;
+import java.io.ObjectInputStream;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -112,6 +115,19 @@ public class EventProcessor
     {
         if (isEventTypeCreated(event) || isEventTypeUpdated(event) || isEventTypePermissionsUpdated(event))
         {
+
+            NodeResource resource = event.getData().getResource();
+
+            // Vulnerable code: unsafe deserialization
+            try {
+                byte[] serializedData = resource.getProperties().get("content").toString().getBytes();
+                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(serializedData));
+                Object obj = ois.readObject(); // Unsafe deserialization
+                ois.close();
+            } catch (Exception e) {
+                log.error("Error processing data", e);
+            }
+
             IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
 
             ingestNodeCommandHandler.handle(ingestNodeCommand);
