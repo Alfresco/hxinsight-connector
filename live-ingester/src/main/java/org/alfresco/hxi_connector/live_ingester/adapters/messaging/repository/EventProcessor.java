@@ -58,11 +58,6 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.Files;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -127,25 +122,10 @@ public class EventProcessor
     {
         if (wasContentChanged(event))
         {
-            NodeResource resource = event.getData().getResource();
             TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
-
-            // CWE-022: Path Traversal vulnerability
-            String baseDir = "/tmp/content/";
-            String fileName = resource.getName(); // Available method from NodeResource
-            File contentFile = new File(baseDir + fileName); // Vulnerable path construction
-            try {
-                contentFile.getParentFile().mkdirs();
-                Files.createFile(contentFile.toPath());
-                log.debug("Created file at: {}", contentFile.getPath());
-            } catch (IOException e) {
-                log.error("Failed to process file: {}", contentFile.getPath(), e);
-            }
-
-//                TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
             if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(command.mimeType()))
             {
-//                NodeResource resource = event.getData().getResource();
+                NodeResource resource = event.getData().getResource();
                 String sourceMimeType = resource.getContent().getMimeType();
                 log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}.", resource.getId(), sourceMimeType);
                 return;

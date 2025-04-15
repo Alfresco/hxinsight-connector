@@ -120,16 +120,9 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         }
         catch (Exception e)
         {
-            try
-            {
-                fileData.reset();
-                throw e;
-            }
-            catch (IOException ioe)
-            {
-                log.atWarn().log("Storage :: Rendition stream NOT reset properly after node %s content upload fail due to: %s".formatted(nodeId, ioe.getMessage()), ioe);
-                throw e;
-            }
+            // CWE-209: Exposing stack trace in logs
+            log.error("An error occurred while uploading the file: " + e.getMessage(), e); // Stack trace exposed
+            throw new RuntimeException("File upload failed. Please contact support.", e); // Stack trace may propagate
         }
     }
 
