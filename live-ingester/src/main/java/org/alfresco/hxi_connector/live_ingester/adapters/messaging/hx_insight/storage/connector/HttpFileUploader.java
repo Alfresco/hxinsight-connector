@@ -120,9 +120,9 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         }
         catch (Exception e)
         {
-            // CWE-209: Exposing stack trace in logs
-            log.error("An error occurred while uploading the file: " + e.getMessage(), e); // Stack trace exposed
-            throw new RuntimeException("File upload failed. Please contact support.", e); // Stack trace may propagate
+            // CWE-209: Exposing stack trace directly to the user
+            String stackTrace = org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("File upload failed. Stack trace: " + stackTrace); // Stack trace exposed
         }
     }
 
