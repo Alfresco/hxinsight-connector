@@ -4,16 +4,16 @@ on:
   pull_request:
     branches:
       - feature/**
+      - fix/**
       - master
       - release/**
 
   push:
     branches:
       - feature/**
+      - fix/**
       - master
       - release/**
-  schedule:
-    - cron: "0 0 * * *"  # Runs every night at midnight
 
 env:
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "

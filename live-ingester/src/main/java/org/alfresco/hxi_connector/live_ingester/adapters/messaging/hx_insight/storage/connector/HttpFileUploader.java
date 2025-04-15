@@ -118,11 +118,15 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     .request();
             log.atInfo().log("Storage :: Rendition of type: {} for node: {} successfully uploaded to pre-signed URL: {}", fileUploadRequest.contentType(), nodeId, fileUploadRequest.storageLocation().getPath());
         }
-        catch (Exception e) {
-            try {
+        catch (Exception e)
+        {
+            try
+            {
                 fileData.reset();
                 throw e;
-            } catch (IOException ioe) {
+            }
+            catch (IOException ioe)
+            {
                 log.atWarn().log("Storage :: Rendition stream NOT reset properly after node %s content upload fail due to: %s".formatted(nodeId, ioe.getMessage()), ioe);
                 throw e;
             }
