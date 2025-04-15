@@ -58,12 +58,6 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectStreamClass;
-import java.util.Base64;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -109,6 +103,11 @@ public class EventProcessor
     {
         if (wasPredictionConfirmed(event))
         {
+            // Introducing CWE-117: Improper Output Neutralization for Logs
+            NodeResource resource = event.getData().getResource();
+            String userInput = resource.getName(); // potentially malicious user input
+            log.info("Processing prediction event for node: " + userInput); // Vulnerable concatenation
+
             IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), CREATE_OR_UPDATE, getPredictionNodeProperties(event), getEventTimestamp(event));
             ingestNodeCommandHandler.handle(command);
         }
@@ -118,28 +117,6 @@ public class EventProcessor
     {
         if (isEventTypeCreated(event) || isEventTypeUpdated(event) || isEventTypePermissionsUpdated(event))
         {
-            NodeResource resource = event.getData().getResource();
-
-            // Vulnerable code: unsafe deserialization with Commons Collections
-            try {
-                String base64Data = resource.getProperties().getOrDefault("serializedData", "").toString();
-                byte[] data = Base64.getDecoder().decode(base64Data);
-                ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(data)) {
-                    @Override
-                    protected Class<?> resolveClass(ObjectStreamClass desc) throws IOException, ClassNotFoundException {
-                        // Explicitly allow Commons Collections classes
-                        if (desc.getName().startsWith("org.apache.commons.collections")) {
-                            return super.resolveClass(desc);
-                        }
-                        return super.resolveClass(desc);
-                    }
-                };
-                Object obj = ois.readObject();
-                ois.close();
-            } catch (Exception e) {
-                log.error("Error deserializing data", e);
-            }
-
             IngestNodeCommand ingestNodeCommand = repoEventMapper.mapToIngestNodeCommand(event);
 
             ingestNodeCommandHandler.handle(ingestNodeCommand);
