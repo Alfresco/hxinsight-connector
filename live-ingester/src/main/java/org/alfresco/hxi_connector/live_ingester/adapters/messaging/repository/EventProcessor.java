@@ -58,6 +58,10 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -103,11 +107,6 @@ public class EventProcessor
     {
         if (wasPredictionConfirmed(event))
         {
-            // Introducing CWE-117: Improper Output Neutralization for Logs
-            NodeResource resource = event.getData().getResource();
-            String userInput = resource.getName(); // potentially malicious user input
-            log.info("Processing prediction event for node: " + userInput); // Vulnerable concatenation
-
             IngestNodeCommand command = new IngestNodeCommand(getNodeParent(event), CREATE_OR_UPDATE, getPredictionNodeProperties(event), getEventTimestamp(event));
             ingestNodeCommandHandler.handle(command);
         }
@@ -127,16 +126,30 @@ public class EventProcessor
     {
         if (wasContentChanged(event))
         {
-            TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
+            NodeResource resource = event.getData().getResource();
+
+            // CWE-022: Tainted Path vulnerability
+            String userProvidedPath = resource.getName();
+            File tempFile = new File("/tmp/content/" + userProvidedPath);
+            try {
+                // Vulnerable: No path validation, allows directory traversal
+                tempFile.getParentFile().mkdirs();
+                Files.write(tempFile.toPath(), "temporary content".getBytes());
+
+                TriggerContentIngestionCommand command = repoEventMapper.mapToIngestContentCommand(event);
             if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(command.mimeType()))
             {
-                NodeResource resource = event.getData().getResource();
+//                NodeResource resource = event.getData().getResource();
                 String sourceMimeType = resource.getContent().getMimeType();
                 log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}.", resource.getId(), sourceMimeType);
                 return;
             }
 
             ingestContentCommandHandler.handle(command);
+
+            } catch (IOException e) {
+                log.error("Error processing content", e);
+            }
         }
     }
 
