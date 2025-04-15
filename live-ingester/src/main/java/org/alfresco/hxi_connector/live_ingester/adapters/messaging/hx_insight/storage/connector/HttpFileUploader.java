@@ -118,11 +118,14 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     .request();
             log.atInfo().log("Storage :: Rendition of type: {} for node: {} successfully uploaded to pre-signed URL: {}", fileUploadRequest.contentType(), nodeId, fileUploadRequest.storageLocation().getPath());
         }
-        catch (Exception e)
-        {
-            // CWE-209: Exposing stack trace directly to the user
-            String stackTrace = org.apache.commons.lang3.exception.ExceptionUtils.getStackTrace(e);
-            throw new RuntimeException("File upload failed. Stack trace: " + stackTrace); // Stack trace exposed
+        catch (Exception e) {
+            try {
+                fileData.reset();
+                throw e;
+            } catch (IOException ioe) {
+                log.atWarn().log("Storage :: Rendition stream NOT reset properly after node %s content upload fail due to: %s".formatted(nodeId, ioe.getMessage()), ioe);
+                throw e;
+            }
         }
     }
 
