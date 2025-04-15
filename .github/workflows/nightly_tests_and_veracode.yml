@@ -3,10 +3,10 @@ name: Veracode and Nightly Tests run
 on:
   pull_request:
     branches:
-      - feature/**
+      - /**
   push:
     branches:
-      - feature/**
+      - /**
   schedule:
     - cron: "0 0 * * *"  # Runs every night at midnight
 
