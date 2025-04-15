@@ -1,0 +1,59 @@
+name: "CodeQL Advanced"
+
+on:
+  pull_request:
+    branches:
+      - feature/**
+      - master
+
+  push:
+    branches:
+      - feature/**
+      - master
+  schedule:
+    - cron: "0 0 * * *"  # Runs every night at midnight
+
+env:
+  MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
+  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      # required for all workflows
+      security-events: write
+
+      # required to fetch internal or private CodeQL packs
+      packages: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+        - language: java-kotlin
+          build-mode: manual
+        - language: python
+          build-mode: none
+    steps:
+    - uses: actions/checkout@v4
+    - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+
+    # Initializes the CodeQL tools for scanning.
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v3
+      with:
+        languages: ${{ matrix.language }}
+        build-mode: ${{ matrix.build-mode }}
+
+    - name: Build with Maven
+      if: matrix.build-mode == 'manual'
+      run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -am
+
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v3
+      with:
+        category: "/language:${{matrix.language}}"
