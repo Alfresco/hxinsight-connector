@@ -40,6 +40,9 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
+      - name: Configure GitHub token
+        run: |
+          echo "token=${{ secrets.HYLAND_TCK_PAT }}" >> $GITHUB_ENV
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
       - name: "Clone TCK repository"
         shell: bash
@@ -49,7 +52,7 @@ jobs:
       - name: GHCR Login
         uses: docker/login-action@v3.4.0
         with:
-          registry: ${{ env.REGISTRY }}
+          registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker Compose Up
