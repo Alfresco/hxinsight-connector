@@ -7,6 +7,9 @@ inputs:
   maven-cli-opts:
     description: Maven options string
     default: ''
+  github-token:
+    description: GitHub token for GHCR login
+    required: true
 runs:
   using: "composite"
   steps:
@@ -21,7 +24,7 @@ runs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ inputs.github-token }}
     - name: Docker Compose Up
       uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-up@main
       with:
