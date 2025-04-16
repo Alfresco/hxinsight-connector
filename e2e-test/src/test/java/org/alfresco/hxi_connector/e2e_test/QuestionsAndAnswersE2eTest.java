@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -48,6 +48,7 @@ import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainer
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.util.List;
+import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
@@ -234,8 +235,19 @@ public class QuestionsAndAnswersE2eTest
         assertThat(response.jsonPath()).satisfies(jsonPath -> {
             assertThat(jsonPath.<String> get("entry.question")).isEqualTo("This is some question");
             assertThat(jsonPath.<String> get("entry.answer")).isEqualTo("This is the answer to the question");
-            assertThat(jsonPath.<String> get("entry.references[0].referenceId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
+            assertThat(jsonPath.<List<Map<String, Object>>> get("entry.objectReferences")).satisfies(refs -> {
+                assertThat(refs).hasSize(1);
+                Map<String, Object> firstRef = refs.get(0);
+                assertThat(firstRef.get("objectId")).isEqualTo("276718b0-c3ab-4e11-81d5-96dbbb540269");
+                List<Map<String, Object>> references = (List<Map<String, Object>>) firstRef.get("references");
+                assertThat(references).hasSize(1);
+                assertThat(references.get(0))
+                        .containsEntry("referenceId", "276718b0-c3ab-4e11-81d5-96dbbb540269")
+                        .containsKey("rankScore")
+                        .containsKey("rank");
+            });
         });
+
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> loggedRequests = WireMock.findAll(getRequestedFor(urlPathTemplate("/questions/{questionId}/answer"))
                     .withPathParam("questionId", equalTo(questionId))
