@@ -55,7 +55,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.HYLAND_TCK_PAT }}
       - name: Docker Compose Up
-        uses: github.com/HylandSoftware/ingestion-connector-tck-actions/docker-compose-up@main
+        uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-up@main
         with:
           github-token: ${{ secrets.HYLAND_TCK_PAT }}
           working-directory: ${{ env.tck }}
@@ -72,7 +72,7 @@ jobs:
         shell: bash
         run: docker logs ingestion-connector-tck-api-1
       - name: Docker Compose Down
-        uses: github.com/HylandSoftware/ingestion-connector-tck-actions/docker-compose-down@main
+        uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-down@main
         with:
           working-directory: ${{ env.tck }}
 #      - name: "Notify on failure"
