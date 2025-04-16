@@ -1,5 +1,10 @@
 name: Veracode and Nightly Tests run
 
+permissions:
+  actions: read
+  contents: read
+  packages: read
+
 on:
   pull_request:
     branches:
@@ -40,25 +45,18 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
-      - name: Configure GitHub token
-        run: |
-          echo "token=${{ secrets.HYLAND_TCK_PAT }}" >> $GITHUB_ENV
+        with:
+          token: ${{ secrets.HYLAND_TCK_PAT }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
       - name: "Clone TCK repository"
         shell: bash
         run: ./scripts/ci/cloneTCK.sh
         env:
           GITHUB_TOKEN: ${{ secrets.HYLAND_TCK_PAT }}
-      - name: GHCR Login
-        uses: docker/login-action@v3.4.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: Docker Compose Up
         uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-up@main
         with:
-          token: ${{ secrets.HYLAND_TCK_PAT }}
+          github-token: ${{ secrets.HYLAND_TCK_PAT }}
           working-directory: ${{ env.tck }}
       - name: "Set up JDK"
         uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
