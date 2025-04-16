@@ -19,13 +19,13 @@ runs:
       run: ./scripts/ci/cloneTCK.sh
       env:
         GITHUB_TOKEN: ${{ inputs.hyland-tck-pat }}
-    - name: GHCR Login
+    - name: "GHCR Login"
       uses: docker/login-action@v3.4.0
       with:
         registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ inputs.github-token }}
-    - name: Docker Compose Up
+    - name: "Docker Compose Up"
       shell: bash
       run: docker compose -f ./ingestion-connector-tck/compose.yaml up -d
     - name: "Set up JDK"
@@ -40,6 +40,6 @@ runs:
       if: success() || failure()
       shell: bash
       run: docker logs ingestion-connector-tck-api-1
-    - name: Docker Compose Down
+    - name: "Docker Compose Down"
       shell: bash
       run: docker compose -f ./ingestion-connector-tck/compose.yaml down
