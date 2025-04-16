@@ -16,9 +16,17 @@ runs:
       run: ./scripts/ci/cloneTCK.sh
       env:
         GITHUB_TOKEN: ${{ inputs.hyland-tck-pat }}
-    - name: "Build and start TCK services"
-      shell: bash
-      run: ./scripts/ci/buildTckImages.sh
+    - name: GHCR Login
+      uses: docker/login-action@v3.4.0
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    - name: Docker Compose Up
+      uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-up@main
+      with:
+        token: ${{ inputs.hyland-tck-pat }}
+        working-directory: ${{ env.tck }}
     - name: "Set up JDK"
       uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
     - name: "Build application"
@@ -31,3 +39,7 @@ runs:
       if: success() || failure()
       shell: bash
       run: docker logs ingestion-connector-tck-api-1
+    - name: Docker Compose Down
+      uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-down@main
+      with:
+        working-directory: ${{ env.tck }}
