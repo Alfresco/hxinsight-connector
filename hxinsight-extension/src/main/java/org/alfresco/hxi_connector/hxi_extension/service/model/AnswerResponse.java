@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -43,7 +43,17 @@ public class AnswerResponse
     private String agentId;
     private String agentVersion;
     private String answer;
-    private Set<Reference> references;
+    private Set<ObjectReference> objectReferences;
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class ObjectReference
+    {
+        private String objectId;
+        private Set<Reference> references;
+    }
 
     @Data
     @AllArgsConstructor
@@ -52,7 +62,7 @@ public class AnswerResponse
     public static class Reference
     {
         private String referenceId;
-        private String referenceName;
-        private String textReference;
+        private double rankScore;
+        private int rank;
     }
 }

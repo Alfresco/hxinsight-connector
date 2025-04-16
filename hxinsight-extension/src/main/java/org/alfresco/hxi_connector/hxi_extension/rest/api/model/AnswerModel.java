@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,19 +25,21 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
-import static java.util.stream.Collectors.toSet;
-
 import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import org.apache.commons.collections4.SetUtils;
 
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
@@ -47,6 +49,7 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonInclude(NON_NULL)
+@Builder
 public class AnswerModel
 {
     private static final String RESPONSE_STATUS_COMPLETE = "complete";
@@ -54,20 +57,46 @@ public class AnswerModel
     private String answer;
     private String question;
     private boolean isComplete;
-    private Set<ReferenceModel> references;
+    private Set<ObjectReferenceModel> objectReferences;
 
-    public static AnswerModel fromServiceModel(AnswerResponse answer)
+    public static AnswerModel fromServiceModel(AnswerResponse response)
     {
-        Set<ReferenceModel> references = SetUtils.emptyIfNull(answer.getReferences())
-                .stream()
-                .map(ReferenceModel::fromServiceModel)
-                .collect(toSet());
+        Set<ObjectReferenceModel> objectReferences = Optional.ofNullable(response.getObjectReferences())
+                .map(refs -> refs.stream()
+                        .map(ObjectReferenceModel::fromServiceModel)
+                        .collect(Collectors.toSet()))
+                .orElse(Collections.emptySet());
 
-        return new AnswerModel(
-                answer.getAnswer(),
-                answer.getQuestion(),
-                RESPONSE_STATUS_COMPLETE.equalsIgnoreCase(answer.getResponseCompleteness()),
-                references);
+        return AnswerModel.builder()
+                .question(response.getQuestion())
+                .answer(response.getAnswer())
+                .isComplete(RESPONSE_STATUS_COMPLETE.equalsIgnoreCase(response.getResponseCompleteness()))
+                .objectReferences(objectReferences)
+                .build();
+    }
+
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public static class ObjectReferenceModel
+    {
+        private String objectId;
+        private Set<ReferenceModel> references;
+
+        public static ObjectReferenceModel fromServiceModel(AnswerResponse.ObjectReference reference)
+        {
+            Set<ReferenceModel> references = Optional.ofNullable(reference.getReferences())
+                    .map(refs -> refs.stream()
+                            .map(ReferenceModel::fromServiceModel)
+                            .collect(Collectors.toSet()))
+                    .orElse(Collections.emptySet());
+
+            return ObjectReferenceModel.builder()
+                    .objectId(reference.getObjectId())
+                    .references(references)
+                    .build();
+        }
     }
 
     @ToString
@@ -76,14 +105,20 @@ public class AnswerModel
     @AllArgsConstructor
     @NoArgsConstructor
     @JsonInclude(NON_NULL)
+    @Builder
     public static class ReferenceModel
     {
         private String referenceId;
-        private String referenceText;
+        private double rankScore;
+        private int rank;
 
         public static ReferenceModel fromServiceModel(AnswerResponse.Reference reference)
         {
-            return new ReferenceModel(reference.getReferenceId(), reference.getTextReference());
+            return ReferenceModel.builder()
+                    .referenceId(reference.getReferenceId())
+                    .rankScore(reference.getRankScore())
+                    .rank(reference.getRank())
+                    .build();
         }
     }
 
