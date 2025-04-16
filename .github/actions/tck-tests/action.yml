@@ -26,10 +26,10 @@ runs:
         username: ${{ github.actor }}
         password: ${{ inputs.github-token }}
     - name: Docker Compose Up
-      uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-up@main
-      with:
-        token: ${{ inputs.hyland-tck-pat }}
-        working-directory: ${{ env.tck }}
+      shell: bash
+      run: |
+        cd ${{ env.tck }}
+        docker compose up -d
     - name: "Set up JDK"
       uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
     - name: "Build application"
@@ -43,6 +43,7 @@ runs:
       shell: bash
       run: docker logs ingestion-connector-tck-api-1
     - name: Docker Compose Down
-      uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-down@main
-      with:
-        working-directory: ${{ env.tck }}
+      shell: bash
+      run: |
+        cd ${{ env.tck }}
+        docker compose down
