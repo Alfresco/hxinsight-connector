@@ -40,12 +40,39 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@v4
-      - name: "Run TCK Tests"
-        uses: ./.github/actions/tck-tests
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+      - name: "Clone TCK repository"
+        shell: bash
+        run: ./scripts/ci/cloneTCK.sh
+        env:
+          GITHUB_TOKEN: ${{ secrets.HYLAND_TCK_PAT }}
+      - name: GHCR Login
+        uses: docker/login-action@v3.4.0
         with:
-          hyland-tck-pat: ${{ secrets.HYLAND_TCK_PAT }}
-          maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
-          github-token: ${{ secrets.GITHUB_TOKEN }}
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Docker Compose Up
+        uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-up@main
+        with:
+          token: ${{ secrets.HYLAND_TCK_PAT }}
+          working-directory: ${{ env.tck }}
+      - name: "Set up JDK"
+        uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+      - name: "Build application"
+        shell: bash
+        run: mvn ${{ inputs.maven-cli-opts }} clean install -DskipTests -pl live-ingester -am
+      - name: "Run OpenApi Specification tests"
+        shell: bash
+        run: mvn test -Dtest=OpenApiTckRequestValidationTest -pl live-ingester
+      - name: "Output TCK logs"
+        if: success() || failure()
+        shell: bash
+        run: docker logs ingestion-connector-tck-api-1
+      - name: Docker Compose Down
+        uses: HylandSoftware/ingestion-connector-tck-actions/docker-compose-down@main
+        with:
+          working-directory: ${{ env.tck }}
 #      - name: "Notify on failure"
 #        if: failure()
 #        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
