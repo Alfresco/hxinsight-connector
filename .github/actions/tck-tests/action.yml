@@ -7,6 +7,9 @@ inputs:
   maven-cli-opts:
     description: Maven options string
     default: ''
+  github-token:
+    description: GitHub token for GHCR login
+    required: true
 runs:
   using: "composite"
   steps:
@@ -16,9 +19,15 @@ runs:
       run: ./scripts/ci/cloneTCK.sh
       env:
         GITHUB_TOKEN: ${{ inputs.hyland-tck-pat }}
-    - name: "Build and start TCK services"
+    - name: "GHCR Login"
+      uses: docker/login-action@v3.4.0
+      with:
+        registry: ghcr.io
+        username: ${{ github.actor }}
+        password: ${{ inputs.github-token }}
+    - name: "Docker Compose Up"
       shell: bash
-      run: ./scripts/ci/buildTckImages.sh
+      run: docker compose -f ./ingestion-connector-tck/compose.yaml up -d
     - name: "Set up JDK"
       uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
     - name: "Build application"
@@ -31,3 +40,6 @@ runs:
       if: success() || failure()
       shell: bash
       run: docker logs ingestion-connector-tck-api-1
+    - name: "Docker Compose Down"
+      shell: bash
+      run: docker compose -f ./ingestion-connector-tck/compose.yaml down

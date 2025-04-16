@@ -39,6 +39,7 @@ jobs:
         with:
           hyland-tck-pat: ${{ secrets.HYLAND_TCK_PAT }}
           maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: "Notify on failure"
         if: failure()
         uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
