@@ -7,8 +7,10 @@
     "status": 200,
     "jsonBody": {
       "question": "This is some question",
+      "responseCompleteness": "Complete",
       "answer": "This is the answer to the question",
-      "responseCompleteness": "COMPLETE",
+      "agentId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
+      "agentVersion": "1",
       "objectReferences": [{
         "objectId": "276718b0-c3ab-4e11-81d5-96dbbb540269",
         "references": [{
