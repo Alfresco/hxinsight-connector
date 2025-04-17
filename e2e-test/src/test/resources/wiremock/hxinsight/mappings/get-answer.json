@@ -11,12 +11,17 @@
       "answer": "This is the answer to the question",
       "agentId": "5fca2c77-cdc0-4118-9373-e75f53177ff8",
       "agentVersion": "1",
-      "references": [
-        {
+      "objectReferences": [{
+        "objectId": "276718b0-c3ab-4e11-81d5-96dbbb540269",
+        "references": [{
           "referenceId": "276718b0-c3ab-4e11-81d5-96dbbb540269",
-          "textReference": "This is the text reference which led to generating the answer"
-        }
-      ]
+          "rankScore": 95.5,
+          "rank": 1
+        }]
+      }]
+    },
+    "headers": {
+      "Content-Type": "application/json"
     }
   }
 }

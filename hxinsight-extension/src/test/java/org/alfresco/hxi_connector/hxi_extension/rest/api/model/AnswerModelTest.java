@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.hxi_extension.rest.api.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Collections;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
@@ -37,32 +38,53 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
 class AnswerModelTest
 {
-
     @ParameterizedTest
     @CsvSource({"COMPLETE,true", "INCOMPLETE,false", "SUBMITTED,false"})
-    void testFromServiceModel(String responseCompleteness, boolean isComplete)
+    void testFromServiceModel(String responseCompleteness, boolean expectedComplete)
     {
         String answerText = "answer";
         String question = "Some question";
         String referenceId = "referenceId";
-        String referenceText = "referenceText";
+        double rankScore = 95.5;
+        int rank = 1;
 
-        AnswerResponse answer = AnswerResponse
-                .builder()
+        AnswerResponse.Reference reference = AnswerResponse.Reference.builder()
+                .referenceId(referenceId)
+                .rankScore(rankScore)
+                .rank(rank)
+                .build();
+
+        AnswerResponse.ObjectReference objectReference = AnswerResponse.ObjectReference.builder()
+                .objectId("objectId")
+                .references(Set.of(reference))
+                .build();
+
+        AnswerResponse answer = AnswerResponse.builder()
                 .answer(answerText)
                 .question(question)
                 .responseCompleteness(responseCompleteness)
-                .references(
-                        Set.of(new AnswerResponse.Reference(referenceId, null, referenceText)))
+                .objectReferences(Set.of(objectReference))
                 .build();
 
-        AnswerModel expected = new AnswerModel(
-                answerText,
-                question,
-                isComplete,
-                Set.of(new AnswerModel.ReferenceModel(referenceId, referenceText)));
+        AnswerModel.ReferenceModel expectedReference = AnswerModel.ReferenceModel.builder()
+                .referenceId(referenceId)
+                .rankScore(rankScore)
+                .rank(rank)
+                .build();
 
-        assertEquals(expected, AnswerModel.fromServiceModel(answer));
+        AnswerModel.ObjectReferenceModel expectedObjectReference = AnswerModel.ObjectReferenceModel.builder()
+                .objectId("objectId")
+                .references(Set.of(expectedReference))
+                .build();
+
+        AnswerModel expectedModel = AnswerModel.builder()
+                .answer(answerText)
+                .question(question)
+                .isComplete(expectedComplete)
+                .objectReferences(Set.of(expectedObjectReference))
+                .build();
+
+        assertEquals(expectedModel, AnswerModel.fromServiceModel(answer));
     }
 
     @Test
@@ -74,22 +96,38 @@ class AnswerModelTest
         AnswerResponse answer = AnswerResponse.builder()
                 .answer(answerText)
                 .question(question)
-                .references(null)
+                .objectReferences(null)
                 .build();
 
-        AnswerModel expected = new AnswerModel(answerText, question, false, Set.of());
+        AnswerModel expectedModel = AnswerModel.builder()
+                .answer(answerText)
+                .question(question)
+                .isComplete(false)
+                .objectReferences(Collections.emptySet())
+                .build();
 
-        assertEquals(expected, AnswerModel.fromServiceModel(answer));
+        assertEquals(expectedModel, AnswerModel.fromServiceModel(answer));
     }
 
     @Test
     void testFromServiceModelReference()
     {
         String referenceId = "referenceId";
-        String referenceText = "referenceText";
-        AnswerResponse.Reference reference = new AnswerResponse.Reference(referenceId, null, referenceText);
-        AnswerModel.ReferenceModel expected = new AnswerModel.ReferenceModel(referenceId, referenceText);
+        double rankScore = 95.5;
+        int rank = 1;
+
+        AnswerResponse.Reference reference = AnswerResponse.Reference.builder()
+                .referenceId(referenceId)
+                .rankScore(rankScore)
+                .rank(rank)
+                .build();
+
+        AnswerModel.ReferenceModel expected = AnswerModel.ReferenceModel.builder()
+                .referenceId(referenceId)
+                .rankScore(rankScore)
+                .rank(rank)
+                .build();
+
         assertEquals(expected, AnswerModel.ReferenceModel.fromServiceModel(reference));
     }
-
 }
