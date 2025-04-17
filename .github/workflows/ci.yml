@@ -230,6 +230,7 @@ jobs:
         with:
           hyland-tck-pat: ${{ secrets.HYLAND_TCK_PAT }}
           maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   push_docker_images:
     name: "Push docker images"
