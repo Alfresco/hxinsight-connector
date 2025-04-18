@@ -1,13 +1,6 @@
 name: Veracode and Nightly Tests run
 
 on:
-  pull_request:
-    branches:
-      - feature/**
-  push:
-    branches:
-      - feature/**
-
   schedule:
     - cron: "0 0 * * *"  # Runs every night at midnight
 
@@ -47,9 +40,9 @@ jobs:
           hyland-tck-pat: ${{ secrets.HYLAND_TCK_PAT }}
           maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
-#      - name: "Notify on failure"
-#        if: failure()
-#        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
-#        with:
-#          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
-#          message: "Nightly tests failed"
+      - name: "Notify on failure"
+        if: failure()
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v8.14.1
+        with:
+          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
+          message: "Nightly tests failed"
