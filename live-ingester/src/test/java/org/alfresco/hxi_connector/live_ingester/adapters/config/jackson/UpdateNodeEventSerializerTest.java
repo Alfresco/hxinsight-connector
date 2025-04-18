@@ -143,13 +143,7 @@ class UpdateNodeEventSerializerTest
                       "grandparent": {
                         "value": {
                           "parent": {
-                            "value": {
-                              "child": {
-                                "value": "some-data",
-                                "type": "string"
-                              }
-                            },
-                            "type": "object"
+                            "child": "some-data"
                           }
                         },
                         "type": "object"
@@ -183,14 +177,11 @@ class UpdateNodeEventSerializerTest
                       "nestedMap": {
                         "value": {
                           "nestedObject": {
-                            "value": {
-                              "innerKey": {"value": "innerValue", "type": "string"}
-                            },
-                            "type": "object"
+                            "innerKey": "innerValue"
                           },
-                          "intKey": {"value": 42, "type": "integer"},
-                          "booleanKey": {"value": true, "type": "boolean"},
-                          "stringKey": {"value": "stringValue", "type": "string"}
+                          "intKey": 42,
+                          "booleanKey": true,
+                          "stringKey": "stringValue"
                         },
                         "type": "object"
                       }
@@ -272,7 +263,8 @@ class UpdateNodeEventSerializerTest
                     "properties": {
                       "mapWithEmptyCollection": {
                         "value": {
-                          "nonEmptyList": {"value": ["value1", "value2"], "type": "string"}
+                          "emptyList": [],
+                          "nonEmptyList": ["value1", "value2"]
                         },
                         "type": "object"
                       }
@@ -302,7 +294,7 @@ class UpdateNodeEventSerializerTest
                     "properties": {
                       "nestedCollections": {
                         "value": {
-                          "listOfLists": {"value": [[1, 2], [3, 4]], "type": "integer"}
+                          "listOfLists": [[1, 2], [3, 4]]
                         },
                         "type": "object"
                       }
@@ -359,14 +351,8 @@ class UpdateNodeEventSerializerTest
                     "properties": {
                       "primalityData": {
                         "value": {
-                            "numbers": {
-                                "value": [1, 2, 3],
-                                "type": "integer"
-                            },
-                            "isPrime": {
-                                "value": [false, true, true],
-                                "type": "boolean"
-                            }
+                            "numbers": [1, 2, 3],
+                            "isPrime": [false, true, true]
                         },
                         "type": "object"
                       }

@@ -231,7 +231,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             String key = entry.getKey().toString();
             Object value = entry.getValue();
 
-            writeProperty(jgen, VALUE, key, value, false);
+            jgen.writeObjectField(key, value);
         }
         jgen.writeEndObject();
     }

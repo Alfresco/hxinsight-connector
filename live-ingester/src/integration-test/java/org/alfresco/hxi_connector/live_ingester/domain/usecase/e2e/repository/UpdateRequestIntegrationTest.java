@@ -596,22 +596,10 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "cm:homeFolder" : {
                         "value" : {
                           "storeRef" : {
-                            "type" : "object",
-                            "value" : {
-                              "protocol" : {
-                                "type" : "string",
-                                "value" : "workspace"
-                              },
-                              "identifier" : {
-                                "type" : "string",
-                                "value" : "SpacesStore"
-                              }
-                            }
+                            "protocol" : "workspace",
+                             "identifier" : "SpacesStore"
                           },
-                          "id" : {
-                            "type" : "string",
-                            "value" : "7f1fa040-e840-40c6-a8a0-da457aca2473"
-                          }
+                          "id" : "7f1fa040-e840-40c6-a8a0-da457aca2473"
                         },
                         "type" : "object"
                       },

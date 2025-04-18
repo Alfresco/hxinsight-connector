@@ -40,18 +40,9 @@ body: [
       },
       "cm:contentPropertyName": {
         "value": {
-          "namespaceURI": {
-            "type": "string",
-            "value": "http://www.alfresco.org/model/content/1.0"
-          },
-          "localName": {
-            "type": "string",
-            "value": "content"
-          },
-          "prefixString": {
-            "type": "string",
-            "value": "content"
-          }
+          "namespaceURI": "http://www.alfresco.org/model/content/1.0",
+          "localName": "content",
+          "prefixString": "content"
         },
         "type": "object"
       },
