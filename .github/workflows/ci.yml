@@ -120,7 +120,86 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
       - name: "Test application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am
+        run: |
+          mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am \
+            -Djacoco.destFile=target/jacoco-${{ matrix.subproject }}.exec \
+            -Djacoco.propertyName=argLine
+      - name: "Upload coverage data"
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-exec-${{ matrix.subproject }}
+          path: |
+            ${{ github.workspace }}/**/target/jacoco-${{ matrix.subproject }}.exec
+          retention-days: 1
+          if-no-files-found: warn
+
+  aggregate_coverage:
+    name: "Aggregate Code Coverage"
+    runs-on: ubuntu-latest
+    needs: test_application
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
+
+      - name: "Download all coverage data"
+        uses: actions/download-artifact@v4
+        with:
+          pattern: jacoco-exec-*
+          path: ${{ github.workspace }}/coverage-data
+          merge-multiple: true
+
+      - name: "Prepare for report generation"
+        run: |
+          mkdir -p ${{ github.workspace }}/target
+          find ${{ github.workspace }}/coverage-data -name "*.exec" -exec cp {} ${{ github.workspace }}/target/ \;
+
+      - name: "Merge coverage data"
+        run: |
+          cd ${{ github.workspace }}/target
+          java -jar $(find $HOME/.m2 -name jacoco-cli.jar | head -n 1) merge $(find . -name "jacoco-*.exec") --destfile jacoco.exec
+
+      - name: "Generate coverage report"
+        run: |
+          mvn jacoco:report \
+            -Djacoco.dataFile=${{ github.workspace }}/target/jacoco.exec \
+            -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco
+
+      - name: "Upload aggregated coverage report"
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jacoco coverage report - Aggregated
+          path: |
+            ${{ github.workspace }}/target/site/jacoco/index.html
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: "Add Aggregated Coverage Report to PR"
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.7.2
+        with:
+          paths: |
+            ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 80
+          title: Code Coverage - Aggregated Report
+          pass-emoji: ':green_circle:'
+          fail-emoji: ':red_circle:'
+
+      - name: "Enforce minimum code coverage threshold on changed files"
+        if: steps.jacoco.outputs.coverage-changed-files < 80.0
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Files changed coverage is less than 80%!')
+
 
   test_distribution:
     name: "Build application with distribution profile"
