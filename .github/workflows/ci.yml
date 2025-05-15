@@ -120,8 +120,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
       - name: "Build and test code coverage"
         run: |
-          mvn ${{ env.MAVEN_CLI_OPTS }} clean verify \
-            -DskipE2eTests \
+          mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -DskipE2eTests=true \
             -Djacoco.destFile=target/jacoco.exec \
             -Djacoco.propertyName=argLine
 
