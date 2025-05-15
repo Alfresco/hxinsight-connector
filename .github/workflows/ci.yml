@@ -136,7 +136,7 @@ jobs:
         with:
           name: Jacoco coverage report
           path: |
-            ${{ github.workspace }}/**/target/site/jacoco/jacoco.html
+            ${{ github.workspace }}/**/target/site/jacoco/index.html
           retention-days: 7
           if-no-files-found: warn
 
