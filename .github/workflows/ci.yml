@@ -95,6 +95,72 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
       - uses: Alfresco/ya-pmd-scan@v4.3.0
 
+  code_coverage_report:
+    name: "Generate Code Coverage Report"
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+
+    if: >
+      github.event_name == 'pull_request' &&
+      !contains(github.event.head_commit.message, '[skip tests]') &&
+      !contains(github.event.head_commit.message, '[skip coverage]')
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.19.1
+      - name: "Login to Quay.io"
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
+      - name: "Build and test code coverage"
+        run: |
+          mvn ${{ env.MAVEN_CLI_OPTS }} clean verify \
+            -DskipE2eTests \
+            -Djacoco.destFile=target/jacoco.exec \
+            -Djacoco.propertyName=argLine
+
+      - name: "Generate coverage report"
+        run: |
+          mvn jacoco:report \
+          -Djacoco.dataFile=target/jacoco.exec \
+          -Djacoco.outputDirectory=target/site/jacoco \
+
+      - name: "Upload coverage report"
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jacoco coverage report
+          path: |
+            ${{ github.workspace }}/**/target/site/jacoco/index.html
+          retention-days: 7
+          if-no-files-found: warn
+
+      - name: "Add Coverage Report to PR"
+        id: jacoco
+        uses: madrapps/jacoco-report@v1.7.2
+        with:
+          paths: |
+            ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
+            ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
+            ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
+          token: ${{ secrets.GITHUB_TOKEN }}
+          min-coverage-overall: 70
+          min-coverage-changed-files: 80
+          title: Code Coverage
+          pass-emoji: ':green_circle:'
+          fail-emoji: ':red_circle:'
+      - name: "Enforce minimum code coverage threshold on changed files"
+        if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
+        uses: actions/github-script@v6
+        with:
+          script: |
+            core.setFailed('Files changed coverage is less than 80%!')
+
   test_application:
     name: "Build and test application"
     runs-on: ubuntu-latest
