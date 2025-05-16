@@ -101,7 +101,7 @@ jobs:
     needs:
       - pre_commit
     if: >
-      (github.event_name == 'push' || github.actor == 'dependabot[bot]') &&
+      (github.event_name == 'push' || github.event_name == 'pull_request' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
