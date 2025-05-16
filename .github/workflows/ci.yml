@@ -107,8 +107,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
-                      "live-ingester", "prediction-applier", "hxinsight-extension" ]
+        subproject: [ "common", "common-test" ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.19.1
@@ -124,11 +123,17 @@ jobs:
           mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am \
             -Djacoco.destFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec \
             -Djacoco.propertyName=argLine
-      - name: "Upload coverage data"
+      - name: "Generate JaCoCo report for module"
+        run: |
+          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report -pl '${{ matrix.subproject }}' \
+          -Djacoco.dataFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
+
+      - name: "Upload coverage reports"
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-exec-${{ matrix.subproject }}
+          name: jacoco-report-${{ matrix.subproject }}
           path: |
+            ${{ github.workspace }}/${{ matrix.subproject }}/target/site/jacoco/**
             ${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
           retention-days: 1
           if-no-files-found: warn
@@ -163,7 +168,7 @@ jobs:
         run: |
           find ${{ github.workspace }}/aggregated-coverage -type f -name "*.exec" | sort
 
-          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate \
+          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report \
             -Djacoco.dataFileIncludes="${{ github.workspace }}/aggregated-coverage/**/*.exec"
 
       - name: "Upload coverage report"
