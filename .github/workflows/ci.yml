@@ -188,15 +188,14 @@ jobs:
       - name: "Test application"
         run: |
           mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am \
-            -Djacoco.destFile=target/jacoco-${{ matrix.subproject }}.exec \
+            -Djacoco.destFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec \
             -Djacoco.propertyName=argLine
       - name: "Upload coverage data"
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-exec-${{ matrix.subproject }}
           path: |
-            ${{ github.workspace }}/**/target/jacoco-${{ matrix.subproject }}.exec
-            ${{ github.workspace }}/**/target/site/jacoco/**
+            ${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
           retention-days: 1
           if-no-files-found: warn
 
@@ -233,29 +232,29 @@ jobs:
             find ${{ github.workspace }}/coverage-data -name "jacoco-${module}.exec" -exec cp {} ${{ github.workspace }}/$module/target/ \;
           done
 
-      - name: "Generate aggregate coverage report"
+      - name: "Generate coverage report"
         run: |
-          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate -pl distribution -am
-
-          # mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate
-
-          ls -la ${{ github.workspace }}/distribution/target/site/jacoco-aggregate/
+          mvn jacoco:report-aggregate \
+          -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco-aggregate
 
       - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
         with:
           name: Jacoco coverage report
           path: |
-            ${{ github.workspace }}/distribution/target/site/jacoco-aggregate/**
+            ${{ github.workspace }}/target/site/jacoco-aggregate/**
           retention-days: 7
           if-no-files-found: warn
 
       - name: "Add Coverage Report to PR"
         id: jacoco
+        if: github.event_name == 'pull_request'
         uses: madrapps/jacoco-report@v1.7.2
         with:
           paths: |
-            ${{ github.workspace }}/distribution/target/site/jacoco-aggregate/jacoco.xml
+            ${{ github.workspace }}/**/target/site/jacoco-aggregate/jacoco.xml
+            ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
+            ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 80
@@ -264,7 +263,7 @@ jobs:
           fail-emoji: ':red_circle:'
 
       - name: "Enforce minimum code coverage threshold on changed files"
-        if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
+        if: ${{ github.event_name == 'pull_request' && steps.jacoco.outputs.coverage-changed-files < 80.0 }}
         uses: actions/github-script@v6
         with:
           script: |
