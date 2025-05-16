@@ -222,7 +222,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: jacoco-exec-*
-          path: ${{ github.workspace }}
+          path: ${{ github.workspace }}/aggregated-coverage
           merge-multiple: true
 
       - name: "Prepare coverage data"
@@ -234,11 +234,15 @@ jobs:
 
       - name: "Generate coverage report"
         run: |
-          java -jar $(find ~/.m2 -name "org.jacoco.cli-*.jar" | head -n 1) merge \
-            $(find ${{ github.workspace }} -name "*.exec" -type f) \
-            --destfile ${{ github.workspace }}/target/jacoco-merged.exec
+          mkdir -p ${{ github.workspace }}/target
 
-          mvn jacoco:report-aggregate -Djacoco.dataFile=${{ github.workspace }}/target/jacoco-merged.exec
+          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:merge \
+            -Djacoco.destFile=${{ github.workspace }}/target/jacoco-merged.exec \
+            -Djacoco.fileSets.fileSet.directory=${{ github.workspace }}/aggregated-coverage \
+            -Djacoco.fileSets.fileSet.includes=**/jacoco-exec-*.exec
+
+          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate \
+            -Djacoco.dataFile=${{ github.workspace }}/target/jacoco-merged.exec
 
       - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
