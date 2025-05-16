@@ -425,6 +425,23 @@
                             </goals>
                         </execution>
                         <execution>
+                            <id>merge-results</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>merge</goal>
+                            </goals>
+                            <configuration>
+                                <fileSets>
+                                    <fileSet>
+                                        <directory>${project.build.directory}</directory>
+                                        <includes>
+                                            <include>*.exec</include>
+                                        </includes>
+                                    </fileSet>
+                                </fileSets>
+                            </configuration>
+                        </execution>
+                        <execution>
                             <id>report</id>
                             <phase>verify</phase>
                             <goals>
@@ -433,7 +450,14 @@
                         </execution>
                     </executions>
                 </plugin>
-
+<fileSets>
+  <fileSet>
+    <directory>${project.build.directory}</directory>
+    <includes>
+      <include>*.exec</include>
+    </includes>
+  </fileSet>
+</fileSets>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>

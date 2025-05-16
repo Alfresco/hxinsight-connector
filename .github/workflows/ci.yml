@@ -165,9 +165,9 @@ jobs:
       - name: "Merge JaCoCo .exec files"
         run: |
           mkdir -p target
-          mvn jacoco:merge -Djacoco.destFile=target/jacoco.exec \
-            -Djacoco.fileSets.fileSet.directory=${{ github.workspace }} \
-            -Djacoco.fileSets.fileSet.includes=**/*.exec \
+          find ${{ github.workspace }} -name "*.exec" -type f -exec echo {} \;
+          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:merge \
+            -Djacoco.destFile=target/jacoco.exec
       - name: "Generate coverage report"
         run: |
           mvn jacoco:report \
