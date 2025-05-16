@@ -199,7 +199,6 @@ jobs:
         with:
           name: jacoco-report-${{ matrix.subproject }}
           path: |
-            ${{ github.workspace }}/${{ matrix.subproject }}/target/site/jacoco/**
             ${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
           retention-days: 1
           if-no-files-found: warn
@@ -229,31 +228,24 @@ jobs:
           pattern: jacoco-report-*
           path: ${{ github.workspace }}
           merge-multiple: true
-
-      - name: "Copy exec files to their original locations"
+      - name: "Merge JaCoCo .exec files"
         run: |
-            for module in common common-test; do
-              mkdir -p "${{ github.workspace }}/$module/target"
-              if [ -f "${{ github.workspace }}/jacoco-$module.exec" ]; then
-                cp "${{ github.workspace }}/jacoco-$module.exec" "${{ github.workspace }}/$module/target/"
-                echo "Copied exec file for $module"
-              else
-                echo "No exec file found for $module"
-              fi
-            done
-
+          mkdir -p target
+          mvn jacoco:merge -Djacoco.destFile=target/jacoco.exec \
+            -Djacoco.fileSets.fileSet.directory=${{ github.workspace }} \
+            -Djacoco.fileSets.fileSet.includes=**/*.exec \
       - name: "Generate coverage report"
         run: |
-          mvn jacoco:report-aggregate \
-            -Djacoco.includes=${{ github.workspace }}/jacoco-report-*/ \
-            -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco-aggregate \
+          mvn jacoco:report \
+          -Djacoco.dataFile=target/jacoco.exec \
+          -Djacoco.outputDirectory=target/site/jacoco \
 
       - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
         with:
           name: Jacoco coverage report
           path: |
-            ${{ github.workspace }}/target/site/jacoco-aggregate/**
+            ${{ github.workspace }}/**/target/site/jacoco/index.html
           retention-days: 7
           if-no-files-found: warn
 
@@ -262,7 +254,7 @@ jobs:
         uses: madrapps/jacoco-report@v1.7.2
         with:
           paths: |
-            ${{ github.workspace }}/**/target/site/jacoco-aggregate/jacoco.xml
+            ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
             ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
             ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
