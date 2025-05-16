@@ -167,7 +167,7 @@ jobs:
     needs:
       - pre_commit
     if: >
-      (github.event_name == 'push' || github.event_name == 'pull_request' || github.actor == 'dependabot[bot]') &&
+      (github.event_name == 'push' || github.actor == 'dependabot[bot]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip build]')
     strategy:
@@ -191,12 +191,12 @@ jobs:
             -Djacoco.destFile=target/jacoco-${{ matrix.subproject }}.exec \
             -Djacoco.propertyName=argLine
       - name: "Upload coverage data"
-        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-exec-${{ matrix.subproject }}
           path: |
             ${{ github.workspace }}/**/target/jacoco-${{ matrix.subproject }}.exec
+            ${{ github.workspace }}/**/target/site/jacoco/**
           retention-days: 1
           if-no-files-found: warn
 
@@ -208,7 +208,7 @@ jobs:
       pull-requests: write
 
     if: >
-      github.event_name == 'pull_request' &&
+      github.event_name == 'push' &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip coverage]')
     steps:
@@ -226,41 +226,27 @@ jobs:
           path: ${{ github.workspace }}/coverage-data
           merge-multiple: true
 
-      - name: "Prepare for coverage data merge"
+      - name: "Prepare coverage data"
         run: |
-          mkdir -p ${{ github.workspace }}/target
-          find ${{ github.workspace }}/coverage-data -name "*.exec" -exec cp {} ${{ github.workspace }}/target/ \;
-          echo "Found coverage files:"
-          find ${{ github.workspace }}/target -name "jacoco-*.exec" | wc -l
+          for module in bulk-ingester common common-authentication common-test live-ingester prediction-applier hxinsight-extension; do
+            mkdir -p ${{ github.workspace }}/$module/target
+            find ${{ github.workspace }}/coverage-data -name "jacoco-${module}.exec" -exec cp {} ${{ github.workspace }}/$module/target/ \;
+          done
 
-      - name: "Merge coverage data"
+      - name: "Generate aggregate coverage report"
         run: |
-          cd ${{ github.workspace }}/target
-          JACOCO_CLI_JAR=$(find $HOME/.m2 -name jacoco-cli.jar | head -n 1)
-          if [ -z "$JACOCO_CLI_JAR" ]; then
-            echo "JaCoCo CLI not found in Maven repository, downloading..."
-            wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.8/org.jacoco.cli-0.8.8.jar -O /tmp/jacoco-cli.jar
-            JACOCO_CLI_JAR=/tmp/jacoco-cli.jar
-          fi
+          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate -pl distribution -am
 
-          echo "Found the following exec files for merging:"
-          find . -name "jacoco-*.exec" -ls
+          # mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate
 
-          # Merge all exec files into one
-          java -jar $JACOCO_CLI_JAR merge $(find . -name "jacoco-*.exec") --destfile jacoco.exec
-
-      - name: "Generate coverage report"
-        run: |
-          mvn jacoco:report \
-          -Djacoco.dataFile=${{ github.workspace }}/target/jacoco.exec \
-          -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco
+          ls -la ${{ github.workspace }}/distribution/target/site/jacoco-aggregate/
 
       - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
         with:
           name: Jacoco coverage report
           path: |
-            ${{ github.workspace }}/target/site/jacoco/index.html
+            ${{ github.workspace }}/distribution/target/site/jacoco-aggregate/**
           retention-days: 7
           if-no-files-found: warn
 
@@ -269,7 +255,7 @@ jobs:
         uses: madrapps/jacoco-report@v1.7.2
         with:
           paths: |
-            ${{ github.workspace }}/target/site/jacoco/jacoco.xml
+            ${{ github.workspace }}/distribution/target/site/jacoco-aggregate/jacoco.xml
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 80
