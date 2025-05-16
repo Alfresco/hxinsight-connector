@@ -123,11 +123,17 @@ jobs:
           mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am \
             -Djacoco.destFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec \
             -Djacoco.propertyName=argLine
+
+      - name: "Generate JaCoCo report for module"
+        run: |
+          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report -pl '${{ matrix.subproject }}' \
+          -Djacoco.dataFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
       - name: "Upload coverage data"
         uses: actions/upload-artifact@v4
         with:
-          name: jacoco-exec-${{ matrix.subproject }}
+          name: jacoco-report-${{ matrix.subproject }}
           path: |
+            ${{ github.workspace }}/${{ matrix.subproject }}/target/site/jacoco/**
             ${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
           retention-days: 1
           if-no-files-found: warn
@@ -154,16 +160,27 @@ jobs:
       - name: "Download all coverage data"
         uses: actions/download-artifact@v4
         with:
-          pattern: jacoco-exec-*
+          pattern: jacoco-report-*
           path: ${{ github.workspace }}
           merge-multiple: true
+
+      - name: "Copy exec files to their original locations"
+        run: |
+            for module in common common-test; do
+              mkdir -p "${{ github.workspace }}/$module/target"
+              if [ -f "${{ github.workspace }}/jacoco-$module.exec" ]; then
+                cp "${{ github.workspace }}/jacoco-$module.exec" "${{ github.workspace }}/$module/target/"
+                echo "Copied exec file for $module"
+              else
+                echo "No exec file found for $module"
+              fi
+            done
 
       - name: "Generate coverage report"
         run: |
           find ${{ github.workspace }} -type f -name "*.exec" | sort
 
-          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate \
-            -Djacoco.dataFileIncludes="${{ github.workspace }}/*.exec"
+          mvn jacoco:report-aggregate
 
       - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
