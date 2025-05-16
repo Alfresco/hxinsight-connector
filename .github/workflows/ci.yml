@@ -125,6 +125,7 @@ jobs:
             -Djacoco.destFile=target/jacoco-${{ matrix.subproject }}.exec \
             -Djacoco.propertyName=argLine
       - name: "Upload coverage data"
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-exec-${{ matrix.subproject }}
@@ -133,21 +134,23 @@ jobs:
           retention-days: 1
           if-no-files-found: warn
 
-  aggregate_coverage:
-    name: "Aggregate Code Coverage"
+  code_coverage_report:
+    name: "Generate Code Coverage Report"
     runs-on: ubuntu-latest
     needs: test_application
+    permissions:
+      pull-requests: write
+
     if: >
       github.event_name == 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip coverage]')
-    permissions:
-      pull-requests: write
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.19.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
 
       - name: "Download all coverage data"
@@ -157,32 +160,45 @@ jobs:
           path: ${{ github.workspace }}/coverage-data
           merge-multiple: true
 
-      - name: "Prepare for report generation"
+      - name: "Prepare for coverage data merge"
         run: |
           mkdir -p ${{ github.workspace }}/target
           find ${{ github.workspace }}/coverage-data -name "*.exec" -exec cp {} ${{ github.workspace }}/target/ \;
+          echo "Found coverage files:"
+          find ${{ github.workspace }}/target -name "jacoco-*.exec" | wc -l
 
       - name: "Merge coverage data"
         run: |
           cd ${{ github.workspace }}/target
-          java -jar $(find $HOME/.m2 -name jacoco-cli.jar | head -n 1) merge $(find . -name "jacoco-*.exec") --destfile jacoco.exec
+          JACOCO_CLI_JAR=$(find $HOME/.m2 -name jacoco-cli.jar | head -n 1)
+          if [ -z "$JACOCO_CLI_JAR" ]; then
+            echo "JaCoCo CLI not found in Maven repository, downloading..."
+            wget https://repo1.maven.org/maven2/org/jacoco/org.jacoco.cli/0.8.8/org.jacoco.cli-0.8.8.jar -O /tmp/jacoco-cli.jar
+            JACOCO_CLI_JAR=/tmp/jacoco-cli.jar
+          fi
+
+          echo "Found the following exec files for merging:"
+          find . -name "jacoco-*.exec" -ls
+
+          # Merge all exec files into one
+          java -jar $JACOCO_CLI_JAR merge $(find . -name "jacoco-*.exec") --destfile jacoco.exec
 
       - name: "Generate coverage report"
         run: |
           mvn jacoco:report \
-            -Djacoco.dataFile=${{ github.workspace }}/target/jacoco.exec \
-            -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco
+          -Djacoco.dataFile=${{ github.workspace }}/target/jacoco.exec \
+          -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco
 
-      - name: "Upload aggregated coverage report"
+      - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
         with:
-          name: Jacoco coverage report - Aggregated
+          name: Jacoco coverage report
           path: |
             ${{ github.workspace }}/target/site/jacoco/index.html
           retention-days: 7
           if-no-files-found: warn
 
-      - name: "Add Aggregated Coverage Report to PR"
+      - name: "Add Coverage Report to PR"
         id: jacoco
         uses: madrapps/jacoco-report@v1.7.2
         with:
@@ -191,12 +207,12 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           min-coverage-overall: 70
           min-coverage-changed-files: 80
-          title: Code Coverage - Aggregated Report
+          title: Code Coverage
           pass-emoji: ':green_circle:'
           fail-emoji: ':red_circle:'
 
       - name: "Enforce minimum code coverage threshold on changed files"
-        if: steps.jacoco.outputs.coverage-changed-files < 80.0
+        if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
         uses: actions/github-script@v6
         with:
           script: |
