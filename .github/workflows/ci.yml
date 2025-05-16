@@ -222,20 +222,23 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           pattern: jacoco-exec-*
-          path: ${{ github.workspace }}/coverage-data
+          path: ${{ github.workspace }}
           merge-multiple: true
 
       - name: "Prepare coverage data"
         run: |
           for module in bulk-ingester common common-authentication common-test live-ingester prediction-applier hxinsight-extension; do
             mkdir -p ${{ github.workspace }}/$module/target
-            find ${{ github.workspace }}/coverage-data -name "jacoco-${module}.exec" -exec cp {} ${{ github.workspace }}/$module/target/ \;
+            find ${{ github.workspace }} -name "jacoco-${module}.exec" -exec cp {} ${{ github.workspace }}/$module/target/ \;
           done
 
       - name: "Generate coverage report"
         run: |
-          mvn jacoco:report-aggregate \
-          -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco-aggregate
+          java -jar $(find ~/.m2 -name "org.jacoco.cli-*.jar" | head -n 1) merge \
+            $(find ${{ github.workspace }} -name "*.exec" -type f) \
+            --destfile ${{ github.workspace }}/target/jacoco-merged.exec
+
+          mvn jacoco:report-aggregate -Djacoco.dataFile=${{ github.workspace }}/target/jacoco-merged.exec
 
       - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
@@ -248,7 +251,6 @@ jobs:
 
       - name: "Add Coverage Report to PR"
         id: jacoco
-        if: github.event_name == 'pull_request'
         uses: madrapps/jacoco-report@v1.7.2
         with:
           paths: |
@@ -261,6 +263,7 @@ jobs:
           title: Code Coverage
           pass-emoji: ':green_circle:'
           fail-emoji: ':red_circle:'
+          debug-mode: true
 
       - name: "Enforce minimum code coverage threshold on changed files"
         if: ${{ github.event_name == 'pull_request' && steps.jacoco.outputs.coverage-changed-files < 80.0 }}
