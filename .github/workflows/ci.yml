@@ -178,8 +178,6 @@ jobs:
 
       - name: "Generate coverage report"
         run: |
-          mvn compile -DskipTests
-
           mvn jacoco:report-aggregate \
             -Djacoco.includes="${{ github.workspace }}/jacoco-report-*/ \
             -Djacoco.outputDirectory=${{ github.workspace }}/target/site/jacoco-aggregate \
