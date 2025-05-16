@@ -160,18 +160,12 @@ jobs:
           uses: actions/download-artifact@v4
           with:
             pattern: jacoco-report-*
-            path: ${{ github.workspace }}
+            path: ${{ github.workspace }}/target
             merge-multiple: true
-        - name: "Merge JaCoCo .exec files"
-          run: |
-            mvn jacoco:merge \
-            -Djacoco.destFile=target/jacoco.exec \
-            -Djacoco.fileSets[0].directory=${{ github.workspace }} \
-            -Djacoco.fileSets[0].includes[0]="jacoco-*.exec"
         - name: "Generate coverage report"
           run: |
             mvn jacoco:report \
-            -Djacoco.dataFile=target/jacoco.exec \
+            -Djacoco.dataFile=${{ github.workspace }}/target/jacoco.exec \
             -Djacoco.outputDirectory=target/site/jacoco \
 
         - name: "Upload coverage report"
