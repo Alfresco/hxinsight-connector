@@ -120,74 +120,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.23.0
       - uses: Alfresco/ya-pmd-scan@v4.3.0
 
-  code_coverage_report:
-    name: "Generate Code Coverage Report"
-    runs-on: ubuntu-latest
-    permissions:
-      pull-requests: write
-
-    if: >
-      github.event_name == 'pull_request' &&
-      github.actor != 'dependabot[bot]' &&
-      !contains(github.event.head_commit.message, '[release]') &&
-      !contains(github.event.head_commit.message, '[skip tests]') &&
-      !contains(github.event.head_commit.message, '[skip coverage]')
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.23.0
-      - name: "Login to Quay.io"
-        uses: docker/login-action@v3
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.23.0
-      - name: "Build and test code coverage"
-        run: |
-          mvn ${{ env.MAVEN_CLI_OPTS }} clean verify \
-            -DskipE2eTests \
-            -Djacoco.destFile=target/jacoco.exec \
-            -Djacoco.propertyName=argLine
-
-      - name: "Generate coverage report"
-        run: |
-          mvn jacoco:report \
-          -Djacoco.dataFile=target/jacoco.exec \
-          -Djacoco.outputDirectory=target/site/jacoco \
-
-      - name: "Upload coverage report"
-        uses: actions/upload-artifact@v4
-        with:
-          name: Jacoco coverage report
-          path: |
-            ${{ github.workspace }}/**/target/site/jacoco/index.html
-          retention-days: 7
-          if-no-files-found: warn
-
-      - name: "Add Coverage Report to PR"
-        id: jacoco
-        uses: madrapps/jacoco-report@v1.7.2
-        with:
-          paths: |
-            ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
-            ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
-            ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
-          token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 80
-          min-coverage-changed-files: 80
-          title: Code Coverage
-          pass-emoji: ':green_circle:'
-          fail-emoji: ':red_circle:'
-      - name: "Enforce minimum code coverage threshold on changed files"
-        if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
-        uses: actions/github-script@v7
-        with:
-          script: |
-            core.setFailed('Files changed coverage is less than 80%!')
-
   test_application:
     name: "Build and test application"
     runs-on: ubuntu-latest
@@ -213,7 +145,139 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.23.0
       - name: "Test application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am
+        run: |
+          mvn ${{ env.MAVEN_CLI_OPTS }} clean jacoco:prepare-agent verify -pl '${{ matrix.subproject }}' -am  \
+            jacoco:report \
+            -Djacoco.destFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec \
+      - name: "Upload coverage data"
+        uses: actions/upload-artifact@v4
+        with:
+          name: jacoco-report-${{ matrix.subproject }}
+          path: |
+            ${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
+            ${{ github.workspace }}/${{ matrix.subproject }}/target/classes/
+            ${{ github.workspace }}/${{ matrix.subproject }}/src/main/java/
+          retention-days: 1
+          if-no-files-found: warn
+
+  code_coverage_report:
+      name: "Generate Code Coverage Report"
+      runs-on: ubuntu-latest
+      needs: test_application
+      permissions:
+        pull-requests: write
+
+      if: >
+        (github.event_name == 'push' || github.event_name == 'pull_request') &&
+        github.actor != 'dependabot[bot]' &&
+        !contains(github.event.head_commit.message, '[release]') &&
+        !contains(github.event.head_commit.message, '[skip tests]') &&
+        !contains(github.event.head_commit.message, '[skip coverage]')
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+
+        - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.23.0
+        - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.23.0
+
+        - name: "Download all coverage data"
+          uses: actions/download-artifact@v4
+          with:
+            pattern: jacoco-report-*
+            path: ${{ github.workspace }}/jacoco-data
+            merge-multiple: false
+        - name: "List downloaded artifacts"
+          run: |
+            find ${{ github.workspace }}/jacoco-data -type f -name "*.exec" | sort
+
+        - name: "Generate aggregated coverage report"
+          run: |
+            EXEC_FILES=$(find ${{ github.workspace }}/jacoco-data -name "*.exec" -type f | tr '\n' ',')
+            EXEC_FILES=${EXEC_FILES%,}
+
+            echo "Using exec files:"
+            echo "$EXEC_FILES"
+
+            MODULES=$(find ${{ github.workspace }}/jacoco-data -mindepth 1 -maxdepth 1 -type d | xargs -n1 basename | sed 's/jacoco-report-//' | tr '\n' ',')
+            MODULES=${MODULES%,}
+
+            echo "Processing modules: $MODULES"
+
+            for module in $(echo $MODULES | tr ',' ' '); do
+              echo "Setting up module: $module"
+              mkdir -p ${{ github.workspace }}/$module/target/classes/
+              mkdir -p ${{ github.workspace }}/$module/src/main/java/
+
+              if [ -d "${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/classes/" ]; then
+                cp -rv ${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/classes/* ${{ github.workspace }}/$module/target/classes/ || true
+              fi
+
+              if [ -d "${{ github.workspace }}/jacoco-data/jacoco-report-$module/src/main/java/" ]; then
+                cp -rv ${{ github.workspace }}/jacoco-data/jacoco-report-$module/src/main/java/* ${{ github.workspace }}/$module/src/main/java/ || true
+              fi
+
+              echo "Looking for exec file for module $module"
+              find ${{ github.workspace }}/jacoco-data -name "*$module*.exec" -type f
+
+              if [ -f "${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/jacoco-$module.exec" ]; then
+                mkdir -p ${{ github.workspace }}/$module/target/
+                cp -v "${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/jacoco-$module.exec" "${{ github.workspace }}/$module/target/" || true
+                echo "Copied exec file from target directory"
+              elif [ -f "${{ github.workspace }}/jacoco-data/jacoco-report-$module/jacoco-$module.exec" ]; then
+                mkdir -p ${{ github.workspace }}/$module/target/
+                cp -v "${{ github.workspace }}/jacoco-data/jacoco-report-$module/jacoco-$module.exec" "${{ github.workspace }}/$module/target/" || true
+                echo "Copied exec file from root artifact directory"
+              else
+                echo "No exec file found for module $module"
+                find ${{ github.workspace }}/jacoco-data -name "*.exec" -type f | grep -i $module || echo "No exec files with $module in name found"
+              fi
+            done
+
+            echo "Checking if exec files were copied:"
+            find ${{ github.workspace }} -name "jacoco-*.exec" -type f
+
+            for module in $(echo $MODULES | tr ',' ' '); do
+              echo "Generating report for module: $module"
+              if [ -f "${{ github.workspace }}/$module/target/jacoco-$module.exec" ]; then
+                echo "Found exec file for $module, generating report"
+                mvn -f ${{ github.workspace }}/$module/pom.xml jacoco:report -Djacoco.dataFile=${{ github.workspace }}/$module/target/jacoco-$module.exec || true
+              else
+                echo "No exec file found for module $module"
+              fi
+            done
+
+            echo "Checking for generated reports:"
+            find ${{ github.workspace }} -name "jacoco.xml" -type f
+        - name: "Upload coverage report"
+          uses: actions/upload-artifact@v4
+          with:
+            name: jacoco-coverage-report
+            path: |
+              ${{ github.workspace }}/*/target/site/jacoco/
+            retention-days: 7
+            if-no-files-found: warn
+        - name: "Add Coverage Report to PR"
+          id: jacoco
+          uses: madrapps/jacoco-report@v1.7.2
+          with:
+            paths: |
+              ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
+              ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
+              ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
+            token: ${{ secrets.GITHUB_TOKEN }}
+            min-coverage-overall: 80
+            min-coverage-changed-files: 80
+            title: Code Coverage
+            pass-emoji: ':green_circle:'
+            fail-emoji: ':red_circle:'
+
+        - name: "Enforce minimum code coverage threshold on changed files"
+          if: ${{ github.event_name == 'pull_request' && steps.jacoco.outputs.coverage-changed-files < 80.0 }}
+          uses: actions/github-script@v7
+          with:
+            script: |
+              core.setFailed('Files changed coverage is less than 80%!')
 
   test_distribution:
     name: "Build application with distribution profile"
