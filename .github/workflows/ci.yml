@@ -191,10 +191,6 @@ jobs:
             -Djacoco.destFile=target/jacoco-${{ matrix.subproject }}.exec \
             -Djacoco.propertyName=argLine
       - name: "Upload coverage data"
-        if: >
-          github.event_name == 'pull_request' &&
-          !contains(github.event.head_commit.message, '[skip tests]') &&
-          !contains(github.event.head_commit.message, '[skip coverage]')
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-exec-${{ matrix.subproject }}
