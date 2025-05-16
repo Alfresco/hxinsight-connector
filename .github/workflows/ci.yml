@@ -159,24 +159,12 @@ jobs:
           path: ${{ github.workspace }}/aggregated-coverage
           merge-multiple: true
 
-      - name: "Prepare coverage data"
-        run: |
-          for module in bulk-ingester common common-authentication common-test live-ingester prediction-applier hxinsight-extension; do
-            mkdir -p ${{ github.workspace }}/$module/target
-            find ${{ github.workspace }} -name "jacoco-${module}.exec" -exec cp {} ${{ github.workspace }}/$module/target/ \;
-          done
-
       - name: "Generate coverage report"
         run: |
-          mkdir -p ${{ github.workspace }}/target
-
-          mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:merge \
-            -Djacoco.destFile=${{ github.workspace }}/target/jacoco-merged.exec \
-            -Djacoco.fileSets.fileSet.directory=${{ github.workspace }}/aggregated-coverage \
-            -Djacoco.fileSets.fileSet.includes=**/jacoco-exec-*.exec
+          find ${{ github.workspace }}/aggregated-coverage -type f -name "*.exec" | sort
 
           mvn ${{ env.MAVEN_CLI_OPTS }} jacoco:report-aggregate \
-            -Djacoco.dataFile=${{ github.workspace }}/target/jacoco-merged.exec
+            -Djacoco.dataFileIncludes="${{ github.workspace }}/aggregated-coverage/**/*.exec"
 
       - name: "Upload coverage report"
         uses: actions/upload-artifact@v4
