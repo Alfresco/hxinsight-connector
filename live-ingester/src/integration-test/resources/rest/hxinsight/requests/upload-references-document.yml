@@ -1,4 +1,4 @@
-url: /v1/ingestion-events
+url: /v2/ingestion-events
 headers:
   authorization: string
   content-type: application/json
