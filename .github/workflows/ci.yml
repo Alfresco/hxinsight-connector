@@ -67,6 +67,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
       - name: "Run SAST Scan"
         uses: veracode/Veracode-pipeline-scan-action@v1.0.18
         with:
@@ -128,6 +130,8 @@ jobs:
             -Djacoco.propertyName=argLine
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
 
       - name: "Generate coverage report"
         run: |
@@ -193,6 +197,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
 
   test_distribution:
     name: "Build application with distribution profile"
@@ -221,6 +227,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
 
   run_e2e_test:
     name: "Run e2e tests using ACS ${{ matrix.repoVersion }}"
@@ -250,6 +258,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
       - name: "Build docker images"
         run: bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
@@ -285,6 +295,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
       - name: "Build docker images"
         run: JAVA_VERSION=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }} && bash ./scripts/ci/buildDockerImages.sh
       - name: "Run e2e tests"
@@ -339,6 +351,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
       - name: "Push docker images"
         run: bash ./scripts/ci/buildDockerImages.sh -p
         env:
@@ -397,6 +411,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
       - name: "Make release and deploy to Nexus"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}" release:prepare release:perform
@@ -448,6 +464,8 @@ jobs:
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
       - name: "Deploy release version to quay.io"
         run: bash ./scripts/ci/releaseDockerImage.sh -v ${{ env.RELEASE_VERSION }}
         env:
