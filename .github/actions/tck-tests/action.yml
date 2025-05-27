@@ -33,6 +33,8 @@ runs:
     - name: "Build application"
       shell: bash
       run: mvn ${{ inputs.maven-cli-opts }} clean install -DskipTests -pl live-ingester -am
+    - name: "Submit dependency graph"
+      uses: advanced-security/maven-dependency-submission-action@v4
     - name: "Run OpenApi Specification tests"
       shell: bash
       run: mvn test -Dtest=OpenApiTckRequestValidationTest -pl live-ingester

@@ -54,6 +54,8 @@ jobs:
     - name: Build with Maven
       if: matrix.build-mode == 'manual'
       run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -am
+    - name: "Submit dependency graph"
+      uses: advanced-security/maven-dependency-submission-action@v4
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
