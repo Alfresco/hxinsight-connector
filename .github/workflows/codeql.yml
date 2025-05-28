@@ -27,7 +27,6 @@ jobs:
     permissions:
       # required for all workflows
       security-events: write
-      contents: write
 
       # required to fetch internal or private CodeQL packs
       packages: read
@@ -55,13 +54,6 @@ jobs:
     - name: Build with Maven
       if: matrix.build-mode == 'manual'
       run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -am
-
-    - name: "Submit dependency graph"
-      uses: advanced-security/maven-dependency-submission-action@v4
-      with:
-        ignore-maven-wrapper: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
