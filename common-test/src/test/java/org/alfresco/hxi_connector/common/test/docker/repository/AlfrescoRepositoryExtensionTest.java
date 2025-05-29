@@ -53,6 +53,8 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 class AlfrescoRepositoryExtensionTest
 {
 
+    private static final String HXI_CONNECTOR_TAG = "1.0.0";
+
     @TempDir
     Path tempDir;
 
@@ -68,7 +70,7 @@ class AlfrescoRepositoryExtensionTest
         Path targetDir = tempDir.resolve("target");
         Files.createDirectories(targetDir);
 
-        mockJarFile = targetDir.resolve(extensionName + "-1.0.0.jar");
+        mockJarFile = targetDir.resolve(extensionName + "-" + HXI_CONNECTOR_TAG + ".jar");
         Files.createFile(mockJarFile);
     }
 
@@ -79,8 +81,7 @@ class AlfrescoRepositoryExtensionTest
                 MockedStatic<Files> filesMock = mockStatic(Files.class))
         {
 
-            String hxiConnectorTag = "1.0.0";
-            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(hxiConnectorTag);
+            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(HXI_CONNECTOR_TAG);
             dockerTagsMock.when(() -> DockerTags.getOrDefault(anyString(), anyString())).thenReturn("17");
             dockerTagsMock.when(DockerTags::getRepositoryTag).thenReturn("latest");
 
@@ -101,9 +102,8 @@ class AlfrescoRepositoryExtensionTest
                 MockedStatic<Files> filesMock = mockStatic(Files.class))
         {
 
-            String hxiConnectorTag = "1.0.0";
             String customImageName = "custom/image";
-            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(hxiConnectorTag);
+            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(HXI_CONNECTOR_TAG);
             dockerTagsMock.when(() -> DockerTags.getOrDefault(anyString(), anyString())).thenReturn("17");
 
             Stream<Path> mockPathStream = Stream.of(mockJarFile);
@@ -123,9 +123,8 @@ class AlfrescoRepositoryExtensionTest
                 MockedStatic<Files> filesMock = mockStatic(Files.class))
         {
 
-            String hxiConnectorTag = "1.0.0";
             String customImageName = "custom/enterprise/image";
-            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(hxiConnectorTag);
+            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(HXI_CONNECTOR_TAG);
             dockerTagsMock.when(() -> DockerTags.getOrDefault(anyString(), anyString())).thenReturn("17");
             dockerTagsMock.when(DockerTags::getRepositoryTag).thenReturn("latest");
 
@@ -146,11 +145,10 @@ class AlfrescoRepositoryExtensionTest
                 MockedStatic<Files> filesMock = mockStatic(Files.class))
         {
 
-            String hxiConnectorTag = "1.0.0";
             String customImageName = "custom/specific/image";
             DockerImageName dockerImageName = DockerImageName.parse("alfresco/test").withTag("2.0");
 
-            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(hxiConnectorTag);
+            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(HXI_CONNECTOR_TAG);
 
             Stream<Path> mockPathStream = Stream.of(mockJarFile);
             filesMock.when(() -> Files.list(any(Path.class))).thenReturn(mockPathStream);
@@ -169,8 +167,7 @@ class AlfrescoRepositoryExtensionTest
                 MockedStatic<Files> filesMock = mockStatic(Files.class))
         {
 
-            String hxiConnectorTag = "1.0.0";
-            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(hxiConnectorTag);
+            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(HXI_CONNECTOR_TAG);
 
             Stream<Path> emptyPathStream = Stream.empty();
             filesMock.when(() -> Files.list(any(Path.class))).thenReturn(emptyPathStream);
@@ -180,7 +177,7 @@ class AlfrescoRepositoryExtensionTest
                     () -> new AlfrescoRepositoryExtension(extensionName));
 
             assertTrue(exception.getMessage().contains("not found"));
-            assertTrue(exception.getMessage().contains(extensionName + "-" + hxiConnectorTag + ".jar"));
+            assertTrue(exception.getMessage().contains(extensionName + "-" + HXI_CONNECTOR_TAG + ".jar"));
         }
     }
 }
