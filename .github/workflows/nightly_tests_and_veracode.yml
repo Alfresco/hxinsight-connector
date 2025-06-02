@@ -1,9 +1,6 @@
 name: Veracode and Nightly Tests run
 
 on:
-  push:
-    branches:
-      - feature/**
   schedule:
     - cron: "0 0 * * *"  # Runs every night at midnight
 
