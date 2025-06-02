@@ -86,7 +86,6 @@
         <wiremock-testcontainers-module.version>1.0-alpha-14</wiremock-testcontainers-module.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
-        <httpclient5.version>5.4.3</httpclient5.version>
 
         <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
