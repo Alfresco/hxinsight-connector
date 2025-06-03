@@ -45,6 +45,34 @@ jobs:
           write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v8.19.1
 
+  dependency_graph_submission:
+    name: "Build app and submit dependency graph"
+    runs-on: ubuntu-latest
+    if: >
+      (github.event_name == 'push' || github.ref_name == 'master') &&
+      !contains(github.event.head_commit.message, '[skip build]')
+    strategy:
+      fail-fast: false
+      matrix:
+        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
+                      "live-ingester", "prediction-applier", "hxinsight-extension" ]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.19.1
+      - name: "Login to Quay.io"
+        uses: docker/login-action@v3
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAY_USERNAME }}
+          password: ${{ secrets.QUAY_PASSWORD }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
+      - name: "Build application"
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -pl '${{ matrix.subproject }}' -am
+      - name: "Submit dependency graph"
+        uses: advanced-security/maven-dependency-submission-action@v4
+        with:
+          ignore-maven-wrapper: true
+
   veracode_sast:
     name: "Pipeline SAST Scan"
     runs-on: ubuntu-latest
@@ -187,10 +215,6 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
       - name: "Test application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean verify -pl '${{ matrix.subproject }}' -am
-      - name: "Submit dependency graph"
-        uses: advanced-security/maven-dependency-submission-action@v4
-        with:
-          ignore-maven-wrapper: true
 
   test_distribution:
     name: "Build application with distribution profile"
