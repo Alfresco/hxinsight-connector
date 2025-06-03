@@ -103,6 +103,8 @@ jobs:
 
     if: >
       github.event_name == 'pull_request' &&
+      github.actor != 'dependabot[bot]' &&
+      !contains(github.event.head_commit.message, '[release]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip coverage]')
     steps:
@@ -149,7 +151,7 @@ jobs:
             ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
             ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
           token: ${{ secrets.GITHUB_TOKEN }}
-          min-coverage-overall: 70
+          min-coverage-overall: 80
           min-coverage-changed-files: 80
           title: Code Coverage
           pass-emoji: ':green_circle:'
