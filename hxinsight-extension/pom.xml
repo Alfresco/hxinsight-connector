@@ -42,10 +42,32 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-hxinsight-connector-common</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
