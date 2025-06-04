@@ -1,15 +1,15 @@
 version: 2
 registries:
-  maven-alfresco-internal:
+  hylandsoftware-releases:
     type: maven-repository
-    url: https://artifacts.alfresco.com/nexus/content/groups/internal
+    url: https://artifacts.alfresco.com/nexus/content/repositories/hylandsoftware-releases
     username: ${{secrets.NEXUS_USERNAME}}
     password: ${{secrets.NEXUS_PASSWORD}}
 updates:
   - package-ecosystem: "maven"
     directory: "/"
     registries:
-      - maven-alfresco-internal
+      - hylandsoftware-releases
     schedule:
       interval: "daily"
       time: "22:00"
