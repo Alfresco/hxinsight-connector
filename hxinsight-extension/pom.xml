@@ -16,7 +16,6 @@
     <properties>
         <maven.build.sourceVersion>${alfresco-platform.java.version}</maven.build.sourceVersion>
         <maven.build.targetVersion>${alfresco-platform.java.version}</maven.build.targetVersion>
-        <httpclient5.version>5.4.3</httpclient5.version>
     </properties>
 
     <dependencyManagement>
@@ -27,11 +26,6 @@
                 <version>${alfresco-platform.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.httpcomponents.client5</groupId>
-                <artifactId>httpclient5</artifactId>
-                <version>${httpclient5.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -48,10 +42,28 @@
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
             <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>*</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>jakarta.validation</groupId>
+            <artifactId>jakarta.validation-api</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
