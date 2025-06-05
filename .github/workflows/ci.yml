@@ -51,11 +51,6 @@ jobs:
     if: >
       (github.event_name == 'push' || github.ref_name == 'master') &&
       !contains(github.event.head_commit.message, '[skip build]')
-    strategy:
-      fail-fast: false
-      matrix:
-        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
-                      "live-ingester", "prediction-applier", "hxinsight-extension" ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.19.1
@@ -67,7 +62,7 @@ jobs:
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
       - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -pl '${{ matrix.subproject }}' -am
+        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
       - name: "Submit dependency graph"
         uses: advanced-security/maven-dependency-submission-action@v4
         with:
