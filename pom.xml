@@ -83,7 +83,7 @@
         <system-stubs.version>2.1.8</system-stubs.version>
 
         <testcontainers.version>1.21.1</testcontainers.version>
-        <wiremock-testcontainers-module.version>1.0-alpha-14</wiremock-testcontainers-module.version>
+        <wiremock-testcontainers-module.version>1.0-alpha-15</wiremock-testcontainers-module.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
 
