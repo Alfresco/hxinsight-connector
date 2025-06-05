@@ -158,7 +158,7 @@ jobs:
           fail-emoji: ':red_circle:'
       - name: "Enforce minimum code coverage threshold on changed files"
         if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             core.setFailed('Files changed coverage is less than 80%!')
