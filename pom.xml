@@ -73,19 +73,19 @@
         <alfresco-db-connector.version>5.1.0-A.4</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.2</alfresco-event-model.version>
         <spring-boot.version>3.5.0</spring-boot.version>
-        <spring-camel.version>4.10.2</spring-camel.version>
+        <spring-camel.version>4.12.0</spring-camel.version>
         <commons-lang.version>3.17.0</commons-lang.version>
-        <commons-collections.version>4.4</commons-collections.version>
-        <commons-io.version>2.18.0</commons-io.version>
-        <pdfbox.version>3.0.4</pdfbox.version>
-        <aws-sdk-s3.version>2.31.6</aws-sdk-s3.version>
-        <wiremock.version>3.12.1</wiremock.version>
-        <system-stubs.version>2.1.7</system-stubs.version>
+        <commons-collections.version>4.5.0</commons-collections.version>
+        <commons-io.version>2.19.0</commons-io.version>
+        <pdfbox.version>3.0.5</pdfbox.version>
+        <aws-sdk-s3.version>2.31.57</aws-sdk-s3.version>
+        <wiremock.version>3.13.0</wiremock.version>
+        <system-stubs.version>2.1.8</system-stubs.version>
 
         <junit-platform.version>1.12.2</junit-platform.version>
 
-        <testcontainers.version>1.20.6</testcontainers.version>
-        <wiremock-testcontainers-module.version>1.0-alpha-14</wiremock-testcontainers-module.version>
+        <testcontainers.version>1.21.1</testcontainers.version>
+        <wiremock-testcontainers-module.version>1.0-alpha-15</wiremock-testcontainers-module.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
 
@@ -94,8 +94,8 @@
         <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
         <license-maven-plugin.version>2.5.0</license-maven-plugin.version>
-        <jacoco-maven-plugin.version>0.8.12</jacoco-maven-plugin.version>
-        <spotless-plugin.version>2.44.3</spotless-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <spotless-plugin.version>2.44.5</spotless-plugin.version>
         <jrebel-maven-plugin.version>1.2.1</jrebel-maven-plugin.version>
 
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->
