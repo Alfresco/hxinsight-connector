@@ -82,8 +82,6 @@
         <wiremock.version>3.13.0</wiremock.version>
         <system-stubs.version>2.1.8</system-stubs.version>
 
-        <junit-platform.version>1.12.2</junit-platform.version>
-
         <testcontainers.version>1.21.1</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-15</wiremock-testcontainers-module.version>
 
@@ -178,12 +176,6 @@
                 <version>${spring-camel.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
-            </dependency>
-
-            <dependency>
-                <groupId>org.junit.platform</groupId>
-                <artifactId>junit-platform-launcher</artifactId>
-                <version>${junit-platform.version}</version>
             </dependency>
 
             <dependency>
