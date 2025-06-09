@@ -198,8 +198,15 @@ public class UpdateNodeE2eTest
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
-            WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
         }, DELAY_MS);
+
+        try {
+            Thread.sleep(DELAY_MS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+        }
+
+        WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     @Test
