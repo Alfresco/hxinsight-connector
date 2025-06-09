@@ -185,21 +185,22 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
-        WireMock.reset();
+
         prepareHxInsightMockToReturnPredictionFor(updatedNode.id(), PREDICTED_VALUE_2);
 
         WireMock.setScenarioState(LIST_PREDICTIONS_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
         WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
+        WireMock.reset();
 
         // then
-        Node actualNode2 = repositoryClient.getNode(updatedNode.id());
-        assertThat(actualNode2.aspects()).contains(PREDICTION_APPLIED_ASPECT);
         RetryUtils.retryWithBackoff(() -> {
+            Node actualNode2 = repositoryClient.getNode(updatedNode.id());
+            assertThat(actualNode2.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
-            WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
         }, DELAY_MS);
+        WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
     @Test
