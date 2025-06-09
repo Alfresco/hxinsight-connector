@@ -167,6 +167,7 @@ public class UpdateNodeE2eTest
     }
 
     @Test
+    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
     void testApplyPredictionToUpdatedNode()
     {
         // given
@@ -198,8 +199,7 @@ public class UpdateNodeE2eTest
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
-            List<LoggedRequest> requests = WireMock.findAll(anyRequestedFor(urlEqualTo("/ingestion-events")));
-            assertThat(requests).isEmpty();
+            WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
         }, DELAY_MS);
 
     }
