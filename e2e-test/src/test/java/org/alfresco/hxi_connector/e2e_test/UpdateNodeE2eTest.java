@@ -200,7 +200,8 @@ public class UpdateNodeE2eTest
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
         }, DELAY_MS);
 
-        try {
+        try
+        {
             Thread.sleep(DELAY_MS);
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
