@@ -192,17 +192,14 @@ public class UpdateNodeE2eTest
         WireMock.setScenarioState(LIST_PREDICTION_BATCHES_SCENARIO, PREDICTIONS_AVAILABLE_STATE);
 
         // then
+        Node actualNode2 = repositoryClient.getNode(updatedNode.id());
+        assertThat(actualNode2.aspects()).contains(PREDICTION_APPLIED_ASPECT);
         RetryUtils.retryWithBackoff(() -> {
-            Node actualNode2 = repositoryClient.getNode(updatedNode.id());
-            assertThat(actualNode2.aspects()).contains(PREDICTION_APPLIED_ASPECT);
             assertThat(actualNode2.properties())
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
             WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
         }, DELAY_MS);
-
-        assertTrue(true); // dummy assertion to satisfy PMD
-
     }
 
     @Test
