@@ -191,62 +191,9 @@ jobs:
             find ${{ github.workspace }}/jacoco-data -type f -name "*.exec" | sort
         - name: "Generate aggregated coverage report"
           run: |
-            EXEC_FILES=$(find ${{ github.workspace }}/jacoco-data -name "*.exec" -type f | tr '\n' ',')
-            EXEC_FILES=${EXEC_FILES%,}
-
-            echo "Using exec files:"
-            echo "$EXEC_FILES"
-
-            MODULES=$(find ${{ github.workspace }}/jacoco-data -mindepth 1 -maxdepth 1 -type d | xargs -n1 basename | sed 's/jacoco-report-//' | tr '\n' ',')
-            MODULES=${MODULES%,}
-
-            echo "Processing modules: $MODULES"
-
-            for module in $(echo $MODULES | tr ',' ' '); do
-              echo "Setting up module: $module"
-              mkdir -p ${{ github.workspace }}/$module/target/classes/
-              mkdir -p ${{ github.workspace }}/$module/src/main/java/
-
-              if [ -d "${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/classes/" ]; then
-                cp -rv ${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/classes/* ${{ github.workspace }}/$module/target/classes/ || true
-              fi
-
-              if [ -d "${{ github.workspace }}/jacoco-data/jacoco-report-$module/src/main/java/" ]; then
-                cp -rv ${{ github.workspace }}/jacoco-data/jacoco-report-$module/src/main/java/* ${{ github.workspace }}/$module/src/main/java/ || true
-              fi
-
-              echo "Looking for exec file for module $module"
-              find ${{ github.workspace }}/jacoco-data -name "*$module*.exec" -type f
-
-              if [ -f "${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/jacoco-$module.exec" ]; then
-                mkdir -p ${{ github.workspace }}/$module/target/
-                cp -v "${{ github.workspace }}/jacoco-data/jacoco-report-$module/target/jacoco-$module.exec" "${{ github.workspace }}/$module/target/" || true
-                echo "Copied exec file from target directory"
-              elif [ -f "${{ github.workspace }}/jacoco-data/jacoco-report-$module/jacoco-$module.exec" ]; then
-                mkdir -p ${{ github.workspace }}/$module/target/
-                cp -v "${{ github.workspace }}/jacoco-data/jacoco-report-$module/jacoco-$module.exec" "${{ github.workspace }}/$module/target/" || true
-                echo "Copied exec file from root artifact directory"
-              else
-                echo "No exec file found for module $module"
-                find ${{ github.workspace }}/jacoco-data -name "*.exec" -type f | grep -i $module || echo "No exec files with $module in name found"
-              fi
-            done
-
-            echo "Checking if exec files were copied:"
-            find ${{ github.workspace }} -name "jacoco-*.exec" -type f
-
-            for module in $(echo $MODULES | tr ',' ' '); do
-              echo "Generating report for module: $module"
-              if [ -f "${{ github.workspace }}/$module/target/jacoco-$module.exec" ]; then
-                echo "Found exec file for $module, generating report"
-                mvn -f ${{ github.workspace }}/$module/pom.xml jacoco:report -Djacoco.dataFile=${{ github.workspace }}/$module/target/jacoco-$module.exec || true
-              else
-                echo "No exec file found for module $module"
-              fi
-            done
-
-            echo "Checking for generated reports:"
-            find ${{ github.workspace }} -name "jacoco.xml" -type f
+            bash ./scripts/ci/generateCoverageReport.sh
+          env:
+            WORKSPACE: ${{ github.workspace }}
         - name: "Upload coverage report"
           uses: actions/upload-artifact@v4
           with:
