@@ -202,7 +202,7 @@ public class UpdateNodeE2eTest
         }, DELAY_MS);
         List<LoggedRequest> requests = WireMock.findAll(anyRequestedFor(urlEqualTo("/ingestion-events")));
         System.out.println("Requests after reset: " + requests.size());
-        requests.forEach(req -> System.out.println(req.getBodyAsString()));
+        requests.forEach(req -> System.out.println("This is the request: " + req.getBodyAsString()));
         WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
