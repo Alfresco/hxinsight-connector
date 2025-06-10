@@ -13,28 +13,20 @@ MODULES=${MODULES%,}
 
 echo "Processing modules: $MODULES"
 
+echo "Building modules for coverage report generation"
+mvn clean compile -DskipTests
+
 for module in $(echo $MODULES | tr ',' ' '); do
-    echo "Setting up module: $module"
-    mkdir -p ${WORKSPACE}/$module/target/classes/
-    mkdir -p ${WORKSPACE}/$module/src/main/java/
-
-    if [ -d "${WORKSPACE}/jacoco-data/jacoco-report-$module/target/classes/" ]; then
-        cp -rv ${WORKSPACE}/jacoco-data/jacoco-report-$module/target/classes/* ${WORKSPACE}/$module/target/classes/ || true
-    fi
-
-    if [ -d "${WORKSPACE}/jacoco-data/jacoco-report-$module/src/main/java/" ]; then
-        cp -rv ${WORKSPACE}/jacoco-data/jacoco-report-$module/src/main/java/* ${WORKSPACE}/$module/src/main/java/ || true
-    fi
+    echo "Processing module: $module"
+    mkdir -p ${WORKSPACE}/$module/target/
 
     echo "Looking for exec file for module $module"
     find ${WORKSPACE}/jacoco-data -name "*$module*.exec" -type f
 
     if [ -f "${WORKSPACE}/jacoco-data/jacoco-report-$module/target/jacoco-$module.exec" ]; then
-        mkdir -p ${WORKSPACE}/$module/target/
         cp -v "${WORKSPACE}/jacoco-data/jacoco-report-$module/target/jacoco-$module.exec" "${WORKSPACE}/$module/target/" || true
         echo "Copied exec file from target directory"
     elif [ -f "${WORKSPACE}/jacoco-data/jacoco-report-$module/jacoco-$module.exec" ]; then
-        mkdir -p ${WORKSPACE}/$module/target/
         cp -v "${WORKSPACE}/jacoco-data/jacoco-report-$module/jacoco-$module.exec" "${WORKSPACE}/$module/target/" || true
         echo "Copied exec file from root artifact directory"
     else
