@@ -166,9 +166,8 @@ jobs:
       needs: test_application
       permissions:
         pull-requests: write
-
       if: >
-        (github.event_name == 'push' || github.event_name == 'pull_request') &&
+        github.event_name == 'pull_request' &&
         github.actor != 'dependabot[bot]' &&
         !contains(github.event.head_commit.message, '[release]') &&
         !contains(github.event.head_commit.message, '[skip tests]') &&
@@ -190,7 +189,6 @@ jobs:
         - name: "List downloaded artifacts"
           run: |
             find ${{ github.workspace }}/jacoco-data -type f -name "*.exec" | sort
-
         - name: "Generate aggregated coverage report"
           run: |
             EXEC_FILES=$(find ${{ github.workspace }}/jacoco-data -name "*.exec" -type f | tr '\n' ',')
@@ -271,7 +269,6 @@ jobs:
             title: Code Coverage
             pass-emoji: ':green_circle:'
             fail-emoji: ':red_circle:'
-
         - name: "Enforce minimum code coverage threshold on changed files"
           if: ${{ github.event_name == 'pull_request' && steps.jacoco.outputs.coverage-changed-files < 80.0 }}
           uses: actions/github-script@v7
