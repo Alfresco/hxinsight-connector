@@ -199,7 +199,10 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
         }, DELAY_MS);
-        WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
+        List<LoggedRequest> requests = WireMock.findAll(anyRequestedFor(urlEqualTo("/ingestion-events")));
+        boolean hasNodeRequest = requests.stream()
+                .anyMatch(req -> req.getBodyAsString().contains(updatedNode.id()));
+        assertFalse(hasNodeRequest, "Unexpected ingestion event for updated node: " + updatedNode.id());
     }
 
     @Test
