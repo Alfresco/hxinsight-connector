@@ -200,6 +200,9 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
         }, DELAY_MS);
+        List<LoggedRequest> requests = WireMock.findAll(anyRequestedFor(urlEqualTo("/ingestion-events")));
+        System.out.println("Requests after reset: " + requests.size());
+        requests.forEach(req -> System.out.println(req.getBodyAsString()));
         WireMock.verify(exactly(0), anyRequestedFor(urlEqualTo("/ingestion-events")));
     }
 
