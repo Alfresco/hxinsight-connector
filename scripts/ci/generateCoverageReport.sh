@@ -14,7 +14,7 @@ MODULES=${MODULES%,}
 echo "Processing modules: $MODULES"
 
 echo "Building modules for coverage report generation"
-mvn clean compile -DskipTests
+mvn package -DskipTests
 
 for module in $(echo $MODULES | tr ',' ' '); do
     echo "Processing module: $module"
