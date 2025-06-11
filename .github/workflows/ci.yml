@@ -209,7 +209,7 @@ jobs:
             GITHUB_REPOSITORY: ${{ github.repository }}
             PR_NUMBER: ${{ github.event.pull_request.number }}
         - name: "Enforce minimum code coverage threshold on changed files"
-          if: ${{ github.event_name == 'pull_request' && steps.jacoco.outputs.coverage-changed-files < 80.0 }}
+          if: ${{ steps.jacoco.outputs.coverage-changed-files < 80.0 }}
           uses: actions/github-script@v7
           with:
             script: |

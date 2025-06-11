@@ -198,9 +198,9 @@ def create_pr_comment(overall_coverage, changed_files_coverage, matched_files):
 def post_coverage_comment(comment_text):
     """Post a coverage report comment to the PR."""
     try:
-        token = os.environ.get('GITHUB_TOKEN')
-        repo = os.environ.get('GITHUB_REPOSITORY')
-        pr_number = os.environ.get('PR_NUMBER')
+        token = os.getenv('GITHUB_TOKEN')
+        repo = os.getenv('GITHUB_REPOSITORY')
+        pr_number = os.getenv('PR_NUMBER')
 
         if not all([token, repo, pr_number]):
             print("Missing required environment variables for posting PR comment")
@@ -248,24 +248,13 @@ def main():
     changed_files_coverage = 0
     matched_files = []
 
-    token = os.environ.get('GITHUB_TOKEN')
-    repo = os.environ.get('GITHUB_REPOSITORY')
-    pr_number = os.environ.get('PR_NUMBER')
+    changed_files = get_changed_files()
+    matched_files = match_changed_files_to_coverage(changed_files, coverage_data)
+    changed_files_coverage = calculate_changed_files_coverage(matched_files)
+    print(f"Changed files coverage: {format_coverage_value(changed_files_coverage)}")
 
-    if all([token, repo, pr_number]):
-        try:
-            changed_files = get_changed_files()
-            matched_files = match_changed_files_to_coverage(changed_files, coverage_data)
-            changed_files_coverage = calculate_changed_files_coverage(matched_files)
-            print(f"Changed files coverage: {format_coverage_value(changed_files_coverage)}")
-
-            comment = create_pr_comment(overall_coverage, changed_files_coverage, matched_files)
-            post_coverage_comment(comment)
-        except Exception as e:
-            print(f"Error processing PR data: {e}")
-            changed_files_coverage = 0
-    else:
-        print("Skipping PR processing - not a pull request context or missing environment variables")
+    comment = create_pr_comment(overall_coverage, changed_files_coverage, matched_files)
+    post_coverage_comment(comment)
 
     with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
         f.write(f"coverage-overall={overall_coverage}\n")
