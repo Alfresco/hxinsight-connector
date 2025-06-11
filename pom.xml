@@ -79,7 +79,7 @@
         <commons-io.version>2.19.0</commons-io.version>
         <pdfbox.version>3.0.5</pdfbox.version>
         <aws-sdk-s3.version>2.31.60</aws-sdk-s3.version>
-        <wiremock.version>3.13.0</wiremock.version>
+        <wiremock.version>3.13.1</wiremock.version>
         <system-stubs.version>2.1.8</system-stubs.version>
 
         <testcontainers.version>1.21.1</testcontainers.version>
