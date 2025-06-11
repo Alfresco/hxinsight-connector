@@ -79,13 +79,9 @@ def parse_jacoco_xml(xml_path):
 def get_changed_files():
     """Get the list of changed files in the PR."""
     try:
-        token = os.environ.get('GITHUB_TOKEN')
-        repo = os.environ.get('GITHUB_REPOSITORY')
-        pr_number = os.environ.get('PR_NUMBER')
-
-        if not all([token, repo, pr_number]):
-            print("Missing required environment variables for getting changed files")
-            return []
+        token = os.getenv('GITHUB_TOKEN')
+        repo = os.getenv('GITHUB_REPOSITORY')
+        pr_number = os.getenv('PR_NUMBER')
 
         g = Github(token)
         repo = g.get_repo(repo)
@@ -202,9 +198,7 @@ def post_coverage_comment(comment_text):
         repo = os.getenv('GITHUB_REPOSITORY')
         pr_number = os.getenv('PR_NUMBER')
 
-        if not all([token, repo, pr_number]):
-            print("Missing required environment variables for posting PR comment")
-            return False
+        print(f"Posting coverage comment to PR #{pr_number} in {repo}")
 
         g = Github(token)
         repo = g.get_repo(repo)
@@ -225,7 +219,7 @@ def post_coverage_comment(comment_text):
         return False
 
 def main():
-    workspace = os.environ.get('GITHUB_WORKSPACE', '.')
+    workspace = os.environ.get('GITHUB_WORKSPACE', 'hxinsight-connector')
 
     reports = glob.glob(f"{workspace}/**/target/site/jacoco/jacoco.xml", recursive=True)
 
@@ -256,7 +250,7 @@ def main():
     comment = create_pr_comment(overall_coverage, changed_files_coverage, matched_files)
     post_coverage_comment(comment)
 
-    with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
+    with open(os.getenv('GITHUB_OUTPUT'), 'a') as f:
         f.write(f"coverage-overall={overall_coverage}\n")
         f.write(f"coverage-changed-files={changed_files_coverage}\n")
 

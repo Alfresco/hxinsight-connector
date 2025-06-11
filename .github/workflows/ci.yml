@@ -196,7 +196,6 @@ jobs:
             name: jacoco-coverage-report
             path: |
               ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
-              ${{ github.workspace }}/**/target/site/jacoco/index.html
             retention-days: 7
             if-no-files-found: warn
         - name: "Add Coverage Report to PR"
