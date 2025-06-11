@@ -248,15 +248,14 @@ def main():
     changed_files_coverage = 0
     matched_files = []
 
-    if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request':
-        changed_files = get_changed_files()
-        matched_files = match_changed_files_to_coverage(changed_files, coverage_data)
-        changed_files_coverage = calculate_changed_files_coverage(matched_files)
-        print(f"Changed files coverage: {format_coverage_value(changed_files_coverage)}")
 
-    if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request':
-        comment = create_pr_comment(overall_coverage, changed_files_coverage, matched_files)
-        post_coverage_comment(comment)
+    changed_files = get_changed_files()
+    matched_files = match_changed_files_to_coverage(changed_files, coverage_data)
+    changed_files_coverage = calculate_changed_files_coverage(matched_files)
+    print(f"Changed files coverage: {format_coverage_value(changed_files_coverage)}")
+
+    comment = create_pr_comment(overall_coverage, changed_files_coverage, matched_files)
+    post_coverage_comment(comment)
 
     with open(os.environ.get('GITHUB_OUTPUT', '/dev/null'), 'a') as f:
         f.write(f"coverage-overall={overall_coverage}\n")
@@ -266,7 +265,7 @@ def main():
         print(f"Overall coverage {overall_coverage:.2f}% is below threshold {MIN_COVERAGE_OVERALL}%")
         return 1
 
-    if os.environ.get('GITHUB_EVENT_NAME') == 'pull_request' and changed_files_coverage < MIN_COVERAGE_CHANGED_FILES:
+    if changed_files_coverage < MIN_COVERAGE_CHANGED_FILES:
         print(f"Changed files coverage {changed_files_coverage:.2f}% is below threshold {MIN_COVERAGE_CHANGED_FILES}%")
         return 1
 
