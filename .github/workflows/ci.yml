@@ -132,7 +132,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        subproject: [ "common", "common-test" ]
+        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
+                      "live-ingester", "prediction-applier", "hxinsight-extension" ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.23.0
