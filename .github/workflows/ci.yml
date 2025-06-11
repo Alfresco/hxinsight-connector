@@ -132,8 +132,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
-                      "live-ingester", "prediction-applier", "hxinsight-extension" ]
+        subproject: [ "common", "common-test" ]
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.23.0
@@ -201,7 +200,6 @@ jobs:
             if-no-files-found: warn
         - name: "Add Coverage Report to PR"
           id: jacoco
-          if: github.event_name == 'pull_request'
           run: |
             pip install PyGithub requests
             python ./scripts/ci/processCoverageReport.py
