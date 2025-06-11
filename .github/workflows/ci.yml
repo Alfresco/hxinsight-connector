@@ -201,18 +201,13 @@ jobs:
             if-no-files-found: warn
         - name: "Add Coverage Report to PR"
           id: jacoco
-          uses: madrapps/jacoco-report@v1.7.2
-          with:
-            paths: |
-              ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
-              ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
-              ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
-            token: ${{ secrets.GITHUB_TOKEN }}
-            min-coverage-overall: 80
-            min-coverage-changed-files: 80
-            title: Code Coverage
-            pass-emoji: ':green_circle:'
-            fail-emoji: ':red_circle:'
+          if: github.event_name == 'pull_request'
+          run: |
+            pip install PyGithub requests
+            python ./scripts/ci/processCoverageReport.py
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            PR_NUMBER: ${{ github.event.pull_request.number }}
         - name: "Enforce minimum code coverage threshold on changed files"
           if: ${{ github.event_name == 'pull_request' && steps.jacoco.outputs.coverage-changed-files < 80.0 }}
           uses: actions/github-script@v7
