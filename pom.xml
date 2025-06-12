@@ -414,13 +414,18 @@
                     <version>${jacoco-maven-plugin.version}</version>
                     <executions>
                         <execution>
+                            <id>prepare-agent</id>
                             <goals>
                                 <goal>prepare-agent</goal>
                             </goals>
+                            <configuration>
+                                <propertyName>jacoco.propertyName</propertyName>
+                                <destFile>${project.build.directory}/jacoco-${project.artifactId}.exec</destFile>
+                            </configuration>
                         </execution>
                         <execution>
                             <id>report</id>
-                            <phase>test</phase>
+                            <phase>verify</phase>
                             <goals>
                                 <goal>report</goal>
                             </goals>
