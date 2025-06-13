@@ -34,6 +34,7 @@ jobs:
     outputs:
       java_version: ${{ env.JAVA_VERSION }}
       java_version_supported_by_repo: ${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
+      pr_number: ${{ github.event.pull_request.number }}
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.23.0
       - uses: actions/checkout@v4
@@ -135,6 +136,8 @@ jobs:
       matrix:
         subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
                       "live-ingester", "prediction-applier", "hxinsight-extension" ]
+    outputs:
+      pr_number: ${{ needs.pre_commit.outputs.pr_number }}
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.23.0
@@ -152,6 +155,12 @@ jobs:
             -Djacoco.destFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec \
       - name: "Upload coverage data"
         uses: actions/upload-artifact@v4
+        if: >
+          github.actor != 'dependabot[bot]' &&
+          github.ref_name != 'master' &&
+          !contains(github.event.head_commit.message, '[release]') &&
+          !contains(github.event.head_commit.message, '[skip tests]') &&
+          !contains(github.event.head_commit.message, '[skip coverage]')
         with:
           name: jacoco-report-${{ matrix.subproject }}
           path: |
@@ -162,7 +171,9 @@ jobs:
   code_coverage_report:
       name: "Generate Code Coverage Report"
       runs-on: ubuntu-latest
-      needs: test_application
+      needs:
+        - test_application
+        - pre_commit
       permissions:
         pull-requests: write
       if: >
@@ -173,7 +184,14 @@ jobs:
         !contains(github.event.head_commit.message, '[skip coverage]')
       steps:
         - uses: actions/checkout@v4
-
+          with:
+            fetch-depth: 0
+        - name: Get PR number
+          id: pr
+          run: echo "pull_request_number=$(gh pr view --json number -q .number || echo "")" >> $GITHUB_OUTPUT
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        - run: echo ${{ steps.pr.outputs.pull_request_number }}
         - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.23.0
         - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.23.0
 
@@ -183,9 +201,6 @@ jobs:
             pattern: jacoco-report-*
             path: ${{ github.workspace }}/jacoco-data
             merge-multiple: false
-        - name: "List downloaded artifacts"
-          run: |
-            find ${{ github.workspace }}/jacoco-data -type f -name "*.exec" | sort
         - name: "Generate aggregated coverage report"
           run: |
             bash ./scripts/ci/generateCoverageReport.sh
@@ -200,23 +215,17 @@ jobs:
             retention-days: 7
             if-no-files-found: warn
         - name: "Add Coverage Report to PR"
-          id: jacoco
-          uses: madrapps/jacoco-report@50d3aff4548aa991e6753342d9ba291084e63848 # v1.7.2
-          with:
-            paths: |
-              ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
-              ${{ github.workspace }}/**/build/reports/jacoco/**/prodNormalDebugCoverage.xml,
-              ${{ github.workspace }}/**/build/reports/jacoco/**/debugCoverage.xml
-            token: ${{ secrets.GITHUB_TOKEN }}
-            min-coverage-overall: 80
-            min-coverage-changed-files: 80
-            title: Code Coverage
-            pass-emoji: ':green_circle:'
-            fail-emoji: ':red_circle:'
-            update-comment: true
-
+          id: process_coverage
+          run: |
+            pip install PyGithub
+            python ./scripts/ci/processCoverageReport.py
+          env:
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+            PR_NUMBER: ${{ steps.pr.outputs.pull_request_number }}
+            GITHUB_REPOSITORY: ${{ github.repository }}
+            WORKSPACE: ${{ github.workspace }}
         - name: "Enforce minimum code coverage threshold on changed files"
-          if: ${{ github.event_name == 'pull_request' && steps.jacoco.outputs.coverage-changed-files < 80.0 }}
+          if: ${{ steps.process_coverage.outputs.coverage-changed-files < 80.0 }}
           uses: actions/github-script@v7
           with:
             script: |
