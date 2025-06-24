@@ -45,32 +45,6 @@ jobs:
           write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v8.23.0
 
-  dependency_graph:
-    name: "Submit dependency graph"
-    runs-on: ubuntu-latest
-    needs:
-      - pre_commit
-    if: >
-      github.ref_name == 'master' &&
-      !contains(github.event.head_commit.message, '[skip build]')
-    steps:
-      - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.19.1
-      - name: "Login to Quay.io"
-        uses: docker/login-action@v3
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAY_USERNAME }}
-          password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.19.1
-      - name: "Build application"
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests
-      - name: "Submit dependency graph"
-        uses: advanced-security/maven-dependency-submission-action@b275d12641ac2d2108b2cbb7598b154ad2f2cee8 # v5.0.0
-        with:
-          ignore-maven-wrapper: true
-          maven-args: -Dscope=compile,runtime,system
-
   veracode_sast:
     name: "Pipeline SAST Scan"
     runs-on: ubuntu-latest
