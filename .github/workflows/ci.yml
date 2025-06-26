@@ -34,7 +34,6 @@ jobs:
     outputs:
       java_version: ${{ env.JAVA_VERSION }}
       java_version_supported_by_repo: ${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
-      pr_number: ${{ github.event.pull_request.number }}
     steps:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.23.0
       - uses: actions/checkout@v4
@@ -136,8 +135,6 @@ jobs:
       matrix:
         subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
                       "live-ingester", "prediction-applier", "hxinsight-extension" ]
-    outputs:
-      pr_number: ${{ needs.pre_commit.outputs.pr_number }}
     steps:
       - uses: actions/checkout@v4
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.23.0
@@ -173,7 +170,6 @@ jobs:
       runs-on: ubuntu-latest
       needs:
         - test_application
-        - pre_commit
       permissions:
         pull-requests: write
       if: >
@@ -234,6 +230,7 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             PR_NUMBER: ${{ steps.pr.outputs.pull_request_number }}
             GITHUB_REPOSITORY: ${{ github.repository }}
+            GITHUB_BASE_REF: ${{ github.base_ref }}
             WORKSPACE: ${{ github.workspace }}
         - name: "Enforce minimum code coverage threshold on changed files"
           if: ${{ steps.pr.outputs.pr_found == 'true' && steps.process_coverage.outputs.coverage-changed-files < 80.0 }}
