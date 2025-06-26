@@ -230,7 +230,6 @@ jobs:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
             PR_NUMBER: ${{ steps.pr.outputs.pull_request_number }}
             GITHUB_REPOSITORY: ${{ github.repository }}
-            GITHUB_BASE_REF: ${{ github.base_ref }}
             WORKSPACE: ${{ github.workspace }}
         - name: "Enforce minimum code coverage threshold on changed files"
           if: ${{ steps.pr.outputs.pr_found == 'true' && steps.process_coverage.outputs.coverage-changed-files < 80.0 }}

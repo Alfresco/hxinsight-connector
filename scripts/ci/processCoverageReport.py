@@ -136,12 +136,11 @@ def get_git_changed_files():
     try:
         print("Getting changed files using git...")
 
-        base_branch = get_env_variable('GITHUB_BASE_REF', None)
         pr_number = get_env_variable('PR_NUMBER', None)
 
-        if pr_number and base_branch:
-            print(f"PR detected (#{pr_number}). Getting files changed between {base_branch} and current branch")
-            cmd = ['git', 'diff', '--name-only', f'origin/{base_branch}...HEAD']
+        if pr_number:
+            print(f"PR detected (#{pr_number}). Getting files changed between master and current branch")
+            cmd = ['git', 'diff', '--name-only', 'origin/master...HEAD']
         else:
             print("Push event: Getting files changed in the last commit")
             cmd = ['git', 'diff', '--name-only', 'HEAD^', 'HEAD']
