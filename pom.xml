@@ -76,7 +76,7 @@
         <spring-camel.version>4.13.0</spring-camel.version>
         <commons-lang.version>3.18.0</commons-lang.version>
         <commons-collections.version>4.5.0</commons-collections.version>
-        <commons-io.version>2.19.0</commons-io.version>
+        <commons-io.version>2.20.0</commons-io.version>
         <pdfbox.version>3.0.5</pdfbox.version>
         <aws-sdk-s3.version>2.32.2</aws-sdk-s3.version>
         <wiremock.version>3.13.1</wiremock.version>
