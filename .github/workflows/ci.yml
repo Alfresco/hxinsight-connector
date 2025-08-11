@@ -35,15 +35,15 @@ jobs:
       java_version: ${{ env.JAVA_VERSION }}
       java_version_supported_by_repo: ${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - id: changed-files
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v8.24.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v8.28.1
         with:
           write-list-to-env: true
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v8.28.1
 
   veracode_sast:
     name: "Pipeline SAST Scan"
@@ -56,8 +56,8 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/github-download-file@v8.28.1
         with:
           token: ${{ secrets.BOT_GITHUB_TOKEN }}
           repository: "Alfresco/veracode-baseline-archive"
@@ -91,8 +91,8 @@ jobs:
       !contains(github.event.head_commit.message, '[skip tests]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - uses: Alfresco/ya-pmd-scan@v4.3.0
 
   test_application:
@@ -111,14 +111,14 @@ jobs:
                       "live-ingester", "prediction-applier", "hxinsight-extension" ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
       - name: "Login to Quay.io"
         uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - name: "Test application"
         run: |
           mvn ${{ env.MAVEN_CLI_OPTS }} clean jacoco:prepare-agent verify -pl '${{ matrix.subproject }}' -am  \
@@ -172,8 +172,8 @@ jobs:
             fi
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
-        - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+        - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
+        - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
 
         - name: "Download all coverage data"
           uses: actions/download-artifact@v4
@@ -227,14 +227,14 @@ jobs:
         repoVersion: [ 7.3.2, 7.4.2, 23.3.0 ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
       - name: "Login to Quay.io"
         uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - name: "Build application with distribution profile"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
 
@@ -254,14 +254,14 @@ jobs:
         repoVersion: [ 7.3.2, 7.4.2, 23.4.1, 25.1.0-M1 ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
       - name: "Login to Quay.io"
         uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }}
       - name: "Build docker images"
@@ -287,14 +287,14 @@ jobs:
         repoVersion: [ 7.3.2, 7.4.2 ]
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
       - name: "Login to Quay.io"
         uses: docker/login-action@v3
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.version=${{ matrix.repoVersion }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Build docker images"
@@ -345,8 +345,8 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Push docker images"
@@ -371,9 +371,9 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
       - uses: actions/checkout@v4
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - name: "Publish SNAPSHOT artifacts"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
         run: mvn ${{ env.MAVEN_CLI_OPTS }} deploy -DskipTests -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
@@ -397,9 +397,9 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v8.28.1
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
@@ -450,8 +450,8 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.24.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.24.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }} -Dalfresco-platform.java.version=${{ env.JAVA_VERSION_SUPPORTED_BY_REPO }}
       - name: "Deploy release version to quay.io"
