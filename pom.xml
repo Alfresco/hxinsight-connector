@@ -71,7 +71,7 @@
         <alfresco-platform.version>25.2.0-A.17</alfresco-platform.version>
         <alfresco-sdk.version>4.11.0</alfresco-sdk.version>
         <alfresco-db-connector.version>5.1.1-A.2</alfresco-db-connector.version>
-        <alfresco-event-model.version>1.0.7</alfresco-event-model.version>
+        <alfresco-event-model.version>1.0.8</alfresco-event-model.version>
         <spring-boot.version>3.5.4</spring-boot.version>
         <spring-camel.version>4.13.0</spring-camel.version>
         <commons-lang.version>3.18.0</commons-lang.version>
