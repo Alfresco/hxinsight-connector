@@ -68,7 +68,7 @@
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
         <skipE2eTests>${skipTests}</skipE2eTests>
 
-        <alfresco-platform.version>25.3.0-A.2</alfresco-platform.version>
+        <alfresco-platform.version>25.3.0-A.3</alfresco-platform.version>
         <alfresco-sdk.version>4.11.0</alfresco-sdk.version>
         <alfresco-db-connector.version>5.1.1-A.2</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.8</alfresco-event-model.version>
