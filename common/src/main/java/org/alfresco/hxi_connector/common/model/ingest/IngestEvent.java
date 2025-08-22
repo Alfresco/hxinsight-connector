@@ -48,6 +48,7 @@ public class IngestEvent
     @NotBlank
     private String nodeId;
     private ContentInfo contentInfo;
+    private AncestorsInfo ancestorsInfo;
     @NotNull private Map<String, Serializable> properties;
     private long timestamp;
 
@@ -61,5 +62,14 @@ public class IngestEvent
         private long contentSize;
         private String encoding;
         private String mimetype;
+    }
+    @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
+    @Data
+    @Accessors(fluent = true)
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class AncestorsInfo implements Serializable
+    {
+        private String parentId;
     }
 }

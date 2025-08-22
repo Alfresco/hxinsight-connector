@@ -38,6 +38,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.elasticsearch.db.connector.model.ChildAssocMetaData;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
@@ -77,6 +79,7 @@ public class AlfrescoNodeMapper
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
+
         HashSet<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toCollection(HashSet::new));
         String createdAt = getCreatedAt(alfrescoNode);
         String modifiedAt = getModifiedAt(alfrescoNode);
@@ -103,13 +106,18 @@ public class AlfrescoNodeMapper
         {
             allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
         }
-        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        String parentId = ofNullable(alfrescoNode.getPrimaryParentAssociation())
+                .map(ChildAssocMetaData::getParentUuid)
+                .orElse(null);
 
+        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        IngestEvent.AncestorsInfo ancestors = new IngestEvent.AncestorsInfo().parentId(parentId);
         Map<String, Serializable> properties = getProperties(allProperties);
 
         return new IngestEvent(
                 nodeId,
                 content,
+                ancestors,
                 properties,
                 timeProvider.getCurrentTimestamp());
     }

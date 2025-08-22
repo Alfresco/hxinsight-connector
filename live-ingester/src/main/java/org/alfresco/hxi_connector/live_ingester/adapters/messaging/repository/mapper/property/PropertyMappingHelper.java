@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
+
 import static java.util.Optional.ofNullable;
 
 import static lombok.AccessLevel.PRIVATE;
@@ -39,10 +40,14 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import  static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.ancestorsMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -152,7 +157,20 @@ public class PropertyMappingHelper
         }
         return Optional.of(contentMetadataUpdated(CONTENT_PROPERTY, sourceMimeType, sourceSizeInBytes, sourceFileName));
     }
-
+    public static Optional<PropertyDelta<?>> calculateAncestorsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        List<String> primaryHierarchy = event.getData().getResource().getPrimaryHierarchy();
+        if (primaryHierarchy == null || primaryHierarchy.isEmpty())
+        {
+            return Optional.empty();
+        }
+        String primaryParentId = primaryHierarchy.get(0);
+        Collections.reverse(primaryHierarchy);
+        if (!primaryHierarchy.isEmpty()) {
+            primaryHierarchy.remove(primaryHierarchy.size() - 1);
+        }
+        return Optional.of(ancestorsMetadataUpdated(ANCESTORS_PROPERTY,primaryParentId, primaryHierarchy));
+    }
     private static String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)
     {
         return ofNullable(node)

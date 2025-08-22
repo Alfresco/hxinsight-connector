@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
@@ -35,6 +36,7 @@ import lombok.Getter;
 import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.AncestorsPropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
@@ -63,7 +65,12 @@ public abstract class PropertyDelta<T>
                 .sourceSizeInBytes(sourceSizeInBytes)
                 .sourceFileName(sourceFileName).build();
     }
-
+    public static AncestorsPropertyUpdated ancestorsMetadataUpdated(String key, String parentId, List<String> ancestorIds) {
+        return AncestorsPropertyUpdated.builder(key)
+                .parentId(parentId)
+                .ancestorIds(ancestorIds)
+                .build();
+    }
     protected PropertyDelta(String propertyName)
     {
         ensureNonNull(propertyName, "Property key cannot be null");
