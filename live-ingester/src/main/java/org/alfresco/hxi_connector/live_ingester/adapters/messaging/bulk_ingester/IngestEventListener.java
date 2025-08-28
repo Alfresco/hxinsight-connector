@@ -41,8 +41,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRun
 
 @Component
 @RequiredArgsConstructor
-public class IngestEventListener extends RouteBuilder
-{
+public class IngestEventListener extends RouteBuilder {
     private static final String ROUTE_ID = "bulk-ingester-events-consumer";
 
     private final ObjectMapper objectMapper;
@@ -50,8 +49,7 @@ public class IngestEventListener extends RouteBuilder
     private final IntegrationProperties integrationProperties;
 
     @Override
-    public void configure()
-    {
+    public void configure() {
         from(integrationProperties.alfresco().bulkIngester().endpoint())
                 .transacted()
                 .routeId(ROUTE_ID)
@@ -60,14 +58,11 @@ public class IngestEventListener extends RouteBuilder
                 .end();
     }
 
-    private IngestEvent mapToIngestEvent(Exchange exchange)
-    {
-        try
-        {
-            return objectMapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
-        }
-        catch (JsonProcessingException e)
-        {
+    private IngestEvent mapToIngestEvent(Exchange exchange) {
+        try {
+            return objectMapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {
+            });
+        } catch (JsonProcessingException e) {
             throw new LiveIngesterRuntimeException("Event deserialization failed", e);
         }
     }

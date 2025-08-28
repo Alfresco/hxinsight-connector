@@ -61,33 +61,6 @@ public class ParentNodeService {
     @Value("${auth.providers.alfresco.password:admin}")
     private String alfrescoPassword;
 
-    /*public List<String> getParentNodeId(String nodeId) {
-        try {
-            String url = alfrescoBaseUrl + "/api/-default-/public/alfresco/versions/1/nodes/" + nodeId + "/parents";
-
-            HttpHeaders headers = createAuthHeaders();
-            HttpEntity<String> entity = new HttpEntity<>(headers);
-
-            ResponseEntity<ParentsResponse> response = restTemplate.exchange(
-                    url,
-                    HttpMethod.GET,
-                    entity,
-                    ParentsResponse.class
-            );
-
-            if (response.getBody() != null && response.getBody().getList() != null) {
-                return response.getBody().getList().getEntries().stream()
-                        .map(entry -> entry.getEntry().getId())
-                        .collect(Collectors.toList());
-            }
-
-            return Collections.emptyList();
-
-        } catch (RestClientException e) {
-            log.warn("Failed to get parent nodes for nodeId: {}. Error: {}", nodeId, e.getMessage());
-            return Collections.emptyList();
-        }
-    }*/
     public List<String> getParentNodeId(String nodeId) {
         List<String> parentPath = new ArrayList<>();
         String currentNodeId = nodeId;

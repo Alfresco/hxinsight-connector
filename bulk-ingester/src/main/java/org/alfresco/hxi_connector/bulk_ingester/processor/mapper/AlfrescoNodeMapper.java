@@ -64,8 +64,7 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AlfrescoNodeMapper
-{
+public class AlfrescoNodeMapper {
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
@@ -73,8 +72,7 @@ public class AlfrescoNodeMapper
     private final TimeProvider timeProvider;
 
     @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.
-    public IngestEvent map(AlfrescoNode alfrescoNode)
-    {
+    public IngestEvent map(AlfrescoNode alfrescoNode) {
         String nodeId = alfrescoNode.getNodeRef();
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
         String creatorId = alfrescoNode.getCreator();
@@ -88,22 +86,19 @@ public class AlfrescoNodeMapper
         allProperties.put(TYPE_PROPERTY, type);
         allProperties.put(CREATED_BY_PROPERTY, creatorId);
         allProperties.put(MODIFIED_BY_PROPERTY, modifierId);
-        if (!aspectNames.isEmpty())
-        {
+        if (!aspectNames.isEmpty()) {
             allProperties.put(ASPECT_NAMES_PROPERTY, aspectNames);
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
         allProperties.put(MODIFIED_AT_PROPERTY, modifiedAt);
 
         Set<String> allowAccess = (Set<String>) getResourceReaderAuthorities(alfrescoNode);
-        if (!allowAccess.isEmpty())
-        {
+        if (!allowAccess.isEmpty()) {
             allProperties.put(ALLOW_ACCESS, (Serializable) allowAccess);
         }
 
         Set<String> denyAccess = (Set<String>) getResourceDeniedAuthorities(alfrescoNode);
-        if (!denyAccess.isEmpty())
-        {
+        if (!denyAccess.isEmpty()) {
             allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
         }
         String parentId = ofNullable(alfrescoNode.getPrimaryParentAssociation())
@@ -122,26 +117,22 @@ public class AlfrescoNodeMapper
                 timeProvider.getCurrentTimestamp());
     }
 
-    private String getCreatedAt(AlfrescoNode alfrescoNode)
-    {
+    private String getCreatedAt(AlfrescoNode alfrescoNode) {
         return formatZonedDateTime(alfrescoNode.getCreatedAt());
     }
 
-    private String getModifiedAt(AlfrescoNode alfrescoNode)
-    {
+    private String getModifiedAt(AlfrescoNode alfrescoNode) {
         return formatZonedDateTime(alfrescoNode.getModifiedAt());
     }
 
-    private String formatZonedDateTime(ZonedDateTime zonedDateTime)
-    {
+    private String formatZonedDateTime(ZonedDateTime zonedDateTime) {
         return ofNullable(zonedDateTime)
                 .map(ZonedDateTime::toInstant)
                 .map(DateTimeFormatter.ISO_INSTANT::format)
                 .orElse(null);
     }
 
-    private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)
-    {
+    private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode) {
         return alfrescoNode.getNodeProperties()
                 .stream()
                 .filter(Objects::nonNull)
@@ -152,8 +143,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<String, Serializable> getProperties(Map<String, Serializable> allProperties)
-    {
+    private Map<String, Serializable> getProperties(Map<String, Serializable> allProperties) {
         return allProperties.entrySet()
                 .stream()
                 .filter(property -> Objects.nonNull(property.getValue()))
@@ -161,8 +151,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Serializable getResourceReaderAuthorities(AlfrescoNode node)
-    {
+    private Serializable getResourceReaderAuthorities(AlfrescoNode node) {
         return (Serializable) ofNullable(node.getAccessControlList())
                 .stream()
                 .flatMap(Collection::stream)
@@ -172,8 +161,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toSet());
     }
 
-    private Serializable getResourceDeniedAuthorities(AlfrescoNode node)
-    {
+    private Serializable getResourceDeniedAuthorities(AlfrescoNode node) {
         return (Serializable) ofNullable(node.getAccessControlList())
                 .stream()
                 .flatMap(Collection::stream)

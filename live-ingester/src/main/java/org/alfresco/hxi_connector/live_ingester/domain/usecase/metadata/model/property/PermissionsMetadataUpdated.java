@@ -31,36 +31,36 @@ import lombok.ToString;
 import java.util.List;
 import java.util.Optional;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.AncestorsProperty;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.PermissionsProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class AncestorsPropertyUpdated extends PropertyDelta<List<String>> {
+public class PermissionsMetadataUpdated extends PropertyDelta<List<AuthorityInfo>> {
 
-    private final String parentId;
-    private final List<String> ancestorIds;
+    private final List<AuthorityInfo> allowAccess;
+    private final List<AuthorityInfo> denyAccess;
 
-    public AncestorsPropertyUpdated(String propertyName, String parentId, List<String> ancestorIds) {
+    public PermissionsMetadataUpdated(String propertyName, List<AuthorityInfo> allowAccess, List<AuthorityInfo> denyAccess) {
         super(propertyName);
-        this.parentId = parentId;
-        this.ancestorIds = ancestorIds;
+        this.allowAccess = allowAccess;
+        this.denyAccess = denyAccess;
     }
 
-    public String getParentId() {
-        return parentId;
+    public List<AuthorityInfo> getAllowAccess() {
+        return allowAccess;
     }
 
-    public List<String> getAncestorIds() {
-        return ancestorIds;
+    public List<AuthorityInfo> getDenyAccess() {
+        return denyAccess;
     }
 
     @Override
     public void applyOn(UpdateNodeEvent event) {
-        event.addAncestorInstruction(new AncestorsProperty(getPropertyName(), parentId, ancestorIds));
-
+        event.addPermissionsInstruction(new PermissionsProperty(getPropertyName(), allowAccess, denyAccess));
     }
 
     @Override
@@ -68,31 +68,31 @@ public class AncestorsPropertyUpdated extends PropertyDelta<List<String>> {
         return Optional.empty();
     }
 
-    public static AncestorsPropertyUpdatedBuilder builder(String propertyName) {
-        return new AncestorsPropertyUpdatedBuilder(propertyName);
+    public static PermissionsMetadataUpdatedBuilder builder(String propertyName) {
+        return new PermissionsMetadataUpdatedBuilder(propertyName);
     }
 
-    public static class AncestorsPropertyUpdatedBuilder {
+    public static class PermissionsMetadataUpdatedBuilder {
         private final String propertyName;
-        private String parentId;
-        private List<String> ancestorIds;
+        private List<AuthorityInfo> allowAccess;
+        private List<AuthorityInfo> denyAccess;
 
-        public AncestorsPropertyUpdatedBuilder(String propertyName) {
+        public PermissionsMetadataUpdatedBuilder(String propertyName) {
             this.propertyName = propertyName;
         }
 
-        public AncestorsPropertyUpdatedBuilder parentId(String parentId) {
-            this.parentId = parentId;
+        public PermissionsMetadataUpdatedBuilder read(List<AuthorityInfo> allowAccess) {
+            this.allowAccess = allowAccess;
             return this;
         }
 
-        public AncestorsPropertyUpdatedBuilder ancestorIds(List<String> ancestorIds) {
-            this.ancestorIds = ancestorIds;
+        public PermissionsMetadataUpdatedBuilder deny(List<AuthorityInfo> denyAccess) {
+            this.denyAccess = denyAccess;
             return this;
         }
 
-        public AncestorsPropertyUpdated build() {
-            return new AncestorsPropertyUpdated(propertyName, parentId, ancestorIds);
+        public PermissionsMetadataUpdated build() {
+            return new PermissionsMetadataUpdated(propertyName, allowAccess, denyAccess);
         }
     }
 }

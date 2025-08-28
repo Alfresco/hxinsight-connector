@@ -38,16 +38,14 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class ContentPropertyUpdated extends PropertyDelta<String>
-{
+public class ContentPropertyUpdated extends PropertyDelta<String> {
     private String id;
     private String mimeType;
     private String sourceMimeType;
     private Long sourceSizeInBytes;
     private String sourceFileName;
 
-    public ContentPropertyUpdated(String propertyName, String id, String mimeType, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName)
-    {
+    public ContentPropertyUpdated(String propertyName, String id, String mimeType, String sourceMimeType, Long sourceSizeInBytes, String sourceFileName) {
         super(propertyName);
         this.id = id;
         this.mimeType = mimeType;
@@ -57,26 +55,22 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
     }
 
     @Override
-    public void applyOn(UpdateNodeEvent event)
-    {
+    public void applyOn(UpdateNodeEvent event) {
         ContentProperty contentProperty = new ContentProperty(getPropertyName(), id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName);
         event.addContentInstruction(contentProperty);
     }
 
     @Override
-    public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver)
-    {
+    public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver) {
         return Optional.empty();
     }
 
-    public static ContentPropertyUpdatedBuilder builder(String propertyName)
-    {
+    public static ContentPropertyUpdatedBuilder builder(String propertyName) {
         return new ContentPropertyUpdatedBuilder(propertyName);
     }
 
     @RequiredArgsConstructor
-    public static class ContentPropertyUpdatedBuilder
-    {
+    public static class ContentPropertyUpdatedBuilder {
         private final String propertyName;
         private String id;
         private String mimeType;
@@ -84,38 +78,32 @@ public class ContentPropertyUpdated extends PropertyDelta<String>
         private Long sourceSizeInBytes;
         private String sourceFileName;
 
-        public ContentPropertyUpdatedBuilder id(String id)
-        {
+        public ContentPropertyUpdatedBuilder id(String id) {
             this.id = id;
             return this;
         }
 
-        public ContentPropertyUpdatedBuilder mimeType(String mimeType)
-        {
+        public ContentPropertyUpdatedBuilder mimeType(String mimeType) {
             this.mimeType = mimeType;
             return this;
         }
 
-        public ContentPropertyUpdatedBuilder sourceMimeType(String sourceMimeType)
-        {
+        public ContentPropertyUpdatedBuilder sourceMimeType(String sourceMimeType) {
             this.sourceMimeType = sourceMimeType;
             return this;
         }
 
-        public ContentPropertyUpdatedBuilder sourceSizeInBytes(Long sourceSizeInBytes)
-        {
+        public ContentPropertyUpdatedBuilder sourceSizeInBytes(Long sourceSizeInBytes) {
             this.sourceSizeInBytes = sourceSizeInBytes;
             return this;
         }
 
-        public ContentPropertyUpdatedBuilder sourceFileName(String sourceFileName)
-        {
+        public ContentPropertyUpdatedBuilder sourceFileName(String sourceFileName) {
             this.sourceFileName = sourceFileName;
             return this;
         }
 
-        public ContentPropertyUpdated build()
-        {
+        public ContentPropertyUpdated build() {
             return new ContentPropertyUpdated(propertyName, id, mimeType, sourceMimeType, sourceSizeInBytes, sourceFileName);
         }
     }

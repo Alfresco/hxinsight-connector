@@ -42,6 +42,8 @@ import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.HierarchyMetadata;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.PrincipalsMetadata;
+
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
@@ -50,8 +52,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.mo
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 
 @Component
-public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
-{
+public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent> {
     private static final String NAME = "cm:name";
     private static final String CREATED_AT = "createdAt";
     private static final String MODIFIED_AT = "modifiedAt";
@@ -59,23 +60,20 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String TYPE = "type";
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
-    private static final String ANCESTORS="ancestors";
+    private static final String ANCESTORS = "ancestors";
+    private static final String PERMISSIONS = "permissions";
 
-    public UpdateNodeEventSerializer()
-    {
+    public UpdateNodeEventSerializer() {
         this(null);
     }
 
-    public UpdateNodeEventSerializer(Class<UpdateNodeEvent> t)
-    {
+    public UpdateNodeEventSerializer(Class<UpdateNodeEvent> t) {
         super(t);
     }
 
     @Override
-    public void serialize(UpdateNodeEvent event, JsonGenerator jgen, SerializerProvider provider)
-    {
-        try
-        {
+    public void serialize(UpdateNodeEvent event, JsonGenerator jgen, SerializerProvider provider) {
+        try {
             jgen.writeStartArray();
             jgen.writeStartObject();
 
@@ -85,160 +83,128 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             jgen.writeStringField("eventType", event.getEventType().getValue());
             jgen.writeNumberField("sourceTimestamp", event.getTimestamp());
 
-            if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty())
-            {
+            if (!event.getMetadataPropertiesToSet().isEmpty() || !event.getContentPropertiesToSet().isEmpty()) {
                 jgen.writeObjectFieldStart("properties");
                 event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value(), true));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property), true));
-                event.getAncestorsPropertiesToSet().values().forEach(property -> writeProperty(jgen,VALUE,property.propertyName(),new HierarchyMetadata(property),true));
+                event.getPermissionsPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.propertyName(), new PrincipalsMetadata(property), true));
+                event.getAncestorsPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.propertyName(), new HierarchyMetadata(property), true));
                 jgen.writeEndObject();
             }
 
             jgen.writeEndObject();
             jgen.writeEndArray();
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             throw new JsonSerializationException("Property serialization failed", e);
         }
     }
 
-    void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value, boolean shouldCheckForAnnotation)
-    {
-        try
-        {
-            if (value instanceof Collection collection && collection.isEmpty())
-            {
+    void writeProperty(JsonGenerator jgen, FieldType fieldType, String name, Object value, boolean shouldCheckForAnnotation) {
+        try {
+            if (value instanceof Collection collection && collection.isEmpty()) {
                 return;
             }
 
             jgen.writeObjectFieldStart(name);
 
-            if (value instanceof Map<?, ?> nestedMap)
-            {
+            if (value instanceof Map<?, ?> nestedMap) {
                 writeNestedMap(jgen, fieldType, nestedMap);
-            }
-            else
-            {
+            } else {
                 jgen.writeObjectField(getLowerCase(fieldType), value);
             }
 
             boolean hasAnnotation = false;
-            if (shouldCheckForAnnotation)
-            {
+            if (shouldCheckForAnnotation) {
                 hasAnnotation = writeAnnotation(jgen, name);
             }
-            if (!hasAnnotation)
-            {
-                writeType(jgen, value,name);
+            if (!hasAnnotation) {
+                writeType(jgen, value, name);
             }
 
             jgen.writeEndObject();
-        }
-        catch (IOException e)
-        {
+        } catch (IOException e) {
             throw new JsonSerializationException("UpdateNodeEvent serialization failed", e);
         }
     }
 
-    private boolean writeAnnotation(JsonGenerator jgen, String name) throws IOException
-    {
+    private boolean writeAnnotation(JsonGenerator jgen, String name) throws IOException {
         boolean hasAnnotation = true;
-        switch (name)
-        {
-        case CREATED_AT:
-            jgen.writeObjectField("annotation", "dateCreated");
-            break;
-        case MODIFIED_AT:
-            jgen.writeObjectField("annotation", "dateModified");
-            break;
-        case ASPECTS_NAMES:
-            jgen.writeObjectField("annotation", "aspects");
-            break;
-        case NAME:
-            jgen.writeObjectField("annotation", "name");
-            break;
-        case TYPE:
-            jgen.writeObjectField("annotation", "type");
-            break;
-        case CREATED_BY:
-            jgen.writeObjectField("annotation", "createdBy");
-            break;
-        case MODIFIED_BY:
-            jgen.writeObjectField("annotation", "modifiedBy");
-            break;
-        case ANCESTORS:
-            jgen.writeObjectField("annotation", "hierarchy");
-            break;
-        default:
-            hasAnnotation = false;
-            break;
+        switch (name) {
+            case CREATED_AT:
+                jgen.writeObjectField("annotation", "dateCreated");
+                break;
+            case MODIFIED_AT:
+                jgen.writeObjectField("annotation", "dateModified");
+                break;
+            case ASPECTS_NAMES:
+                jgen.writeObjectField("annotation", "aspects");
+                break;
+            case NAME:
+                jgen.writeObjectField("annotation", "name");
+                break;
+            case TYPE:
+                jgen.writeObjectField("annotation", "type");
+                break;
+            case CREATED_BY:
+                jgen.writeObjectField("annotation", "createdBy");
+                break;
+            case MODIFIED_BY:
+                jgen.writeObjectField("annotation", "modifiedBy");
+                break;
+            case ANCESTORS:
+                jgen.writeObjectField("annotation", "hierarchy");
+                break;
+            case PERMISSIONS:
+                jgen.writeObjectField("annotation", "principals");
+                break;
+            default:
+                hasAnnotation = false;
+                break;
         }
         return hasAnnotation;
     }
 
-    private void writeType(JsonGenerator jgen, Object value,String propertyName) throws IOException
-    {
-        if (value instanceof FileMetadata)
-        {
+    private void writeType(JsonGenerator jgen, Object value, String propertyName) throws IOException {
+        if (value instanceof FileMetadata) {
             return;
         }
 
         String type = determineType(value);
-        if(Objects.equals(propertyName, "ancestors"))
-        {
-            type="object";
-        }
         jgen.writeObjectField("type", type);
     }
 
-    private String getLowerCase(Object object)
-    {
+    private String getLowerCase(Object object) {
         return object.toString().toLowerCase(ENGLISH);
     }
 
-    protected String determineType(Object value)
-    {
-        if (value instanceof Boolean)
-        {
+    protected String determineType(Object value) {
+        if (value instanceof Boolean) {
             return "boolean";
-        }
-        else if (value instanceof Integer)
-        {
+        } else if (value instanceof Integer) {
             return "integer";
-        }
-        else if (value instanceof Float || value instanceof Double)
-        {
+        } else if (value instanceof Float || value instanceof Double) {
             return "float";
-        }
-        else if (value instanceof Collection<?> collection)
-        {
-            if (collection.isEmpty())
-            {
+        } else if (value instanceof Collection<?> collection) {
+            if (collection.isEmpty()) {
                 throw new IllegalArgumentException("Empty collections should not be passed to selectTypeByValue.");
             }
             Set<String> types = collection.stream()
                     .map(this::determineType)
                     .collect(toSet());
             // If there is a mixture of types then return "string" as a fallback.
-            if (types.size() == 1)
-            {
+            if (types.size() == 1) {
                 return types.iterator().next();
             }
             return "string";
-        }
-        else if (value instanceof Map<?, ?>)
-        {
+        } else if (value instanceof Map<?, ?>) {
             return "object";
         }
         return "string";
     }
 
-    private void writeNestedMap(JsonGenerator jgen, FieldType fieldType, Map<?, ?> map) throws IOException
-    {
+    private void writeNestedMap(JsonGenerator jgen, FieldType fieldType, Map<?, ?> map) throws IOException {
         jgen.writeObjectFieldStart(getLowerCase(fieldType));
-        for (Map.Entry<?, ?> entry : map.entrySet())
-        {
+        for (Map.Entry<?, ?> entry : map.entrySet()) {
             String key = entry.getKey().toString();
             Object value = entry.getValue();
 

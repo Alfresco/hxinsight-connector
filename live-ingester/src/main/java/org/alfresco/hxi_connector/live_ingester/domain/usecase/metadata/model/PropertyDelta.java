@@ -35,9 +35,11 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.AncestorsPropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PermissionsMetadataUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
@@ -69,6 +71,12 @@ public abstract class PropertyDelta<T>
         return AncestorsPropertyUpdated.builder(key)
                 .parentId(parentId)
                 .ancestorIds(ancestorIds)
+                .build();
+    }
+    public static PermissionsMetadataUpdated permissionsMetadataUpdated(String key, List<AuthorityInfo> allowAccess, List<AuthorityInfo> denyAccess) {
+        return PermissionsMetadataUpdated.builder(key)
+                .read(allowAccess)
+                .deny(denyAccess)
                 .build();
     }
     protected PropertyDelta(String propertyName)

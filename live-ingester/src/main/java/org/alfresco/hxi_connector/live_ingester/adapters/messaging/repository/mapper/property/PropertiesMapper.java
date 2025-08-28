@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
@@ -47,10 +48,10 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @Component
 @RequiredArgsConstructor
-public class PropertiesMapper
-{
-    public Set<PropertyDelta<?>> mapToPropertyDeltas(RepoEvent<DataAttributes<NodeResource>> event)
-    {
+public class PropertiesMapper {
+    private final AuthorityTypeResolver authorityTypeResolver;
+
+    public Set<PropertyDelta<?>> mapToPropertyDeltas(RepoEvent<DataAttributes<NodeResource>> event) {
         Stream<PropertyDelta<?>> customProperties = calculateCustomPropertiesDelta(event);
 
         List<Optional<PropertyDelta<?>>> knownProperties = List.of(
@@ -63,27 +64,25 @@ public class PropertiesMapper
                 calculateCreatedAtDelta(event),
                 calculateAllowAccessDelta(event),
                 calculateDenyAccessDelta(event),
+                calculatePermissionsPropertyDelta(event, authorityTypeResolver),
                 calculateAncestorsPropertyDelta(event));
 
 
-
         return Stream.of(customProperties,
-                knownProperties.stream().flatMap(Optional::stream),
-                calculateContentPropertyDelta(event).stream())
+                        knownProperties.stream().flatMap(Optional::stream),
+                        calculateContentPropertyDelta(event).stream())
                 .flatMap(identity())
                 .collect(Collectors.toSet());
     }
 
-    private Stream<PropertyDelta<?>> calculateCustomPropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event)
-    {
+    private Stream<PropertyDelta<?>> calculateCustomPropertiesDelta(RepoEvent<DataAttributes<NodeResource>> event) {
 
         return streamProperties(event.getData().getResource())
                 .filter(property -> property.getValue() != null)
                 .map(property -> PropertyDelta.updated(property.getKey(), property.getValue()));
     }
 
-    private Stream<Map.Entry<String, ?>> streamProperties(NodeResource node)
-    {
+    private Stream<Map.Entry<String, ?>> streamProperties(NodeResource node) {
         return ofNullable(node)
                 .map(NodeResource::getProperties)
                 .stream()

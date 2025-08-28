@@ -39,10 +39,8 @@ public record IngestNodeCommand(
         String nodeId,
         EventType eventType,
         Set<PropertyDelta<?>> properties,
-        long sourceTimestamp)
-{
-    public IngestNodeCommand
-    {
+        long sourceTimestamp) {
+    public IngestNodeCommand {
         ensureNotBlank(nodeId, "Node id cannot be blank");
         ensureNonNull(eventType, "Node %s event type cannot be null", nodeId);
         ensureNonNull(properties, "Node %s properties delta cannot be null", nodeId);
