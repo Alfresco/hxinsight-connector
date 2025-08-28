@@ -15,15 +15,6 @@ application:
   source-id: a1f3e7c0-d193-7023-ce1d-0a63de491876
   version: "@project.version@"
 
-### db-connector config
-spring:
-  datasource:
-    url: jdbc:postgresql://localhost:5432/alfresco
-    username:
-    password:
-    hikari:
-      maximumPoolSize: 20
-
 alfresco:
   repository:
     events-endpoint: activemq:topic:alfresco.repo.event2
@@ -91,8 +82,8 @@ auth:
       client-name: acs-insight-connector
     alfresco:
       type: basic
-      username: admin
-      password: admin
+      username:
+      password:
   retry:
     attempts: 10
     initial-delay: 500
