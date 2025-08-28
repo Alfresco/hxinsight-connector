@@ -115,7 +115,7 @@ class IngestEventProcessorTest
                 100L,
                 "UTF-8",
                 mimeType);
-        IngestEvent.AncestorsInfo ancestorsInfo=new IngestEvent.AncestorsInfo(
+        IngestEvent.AncestorsInfo ancestorsInfo = new IngestEvent.AncestorsInfo(
                 ""
         );
 
@@ -155,7 +155,7 @@ class IngestEventProcessorTest
                 100L,
                 "UTF-8",
                 mimeType);
-        IngestEvent.AncestorsInfo ancestorsInfo=new IngestEvent.AncestorsInfo(
+        IngestEvent.AncestorsInfo ancestorsInfo = new IngestEvent.AncestorsInfo(
                 ""
         );
         IngestEvent ingestEvent = new IngestEvent(

@@ -45,7 +45,7 @@ public class HierarchyMetadata {
     private final List<String> ancestorIds;
     public HierarchyMetadata(AncestorsProperty ancestorsProperty)
     {
-            parentId=ancestorsProperty.parentId();
-            ancestorIds=ancestorsProperty.ancestorIds();
+            parentId = ancestorsProperty.parentId();
+            ancestorIds = ancestorsProperty.ancestorIds();
     }
 }

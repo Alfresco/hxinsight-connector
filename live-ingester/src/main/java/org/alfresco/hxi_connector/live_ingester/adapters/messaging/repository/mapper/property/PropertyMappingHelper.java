@@ -173,16 +173,6 @@ public class PropertyMappingHelper {
                 ? Collections.emptySet()
                 : eventData.getResourceDeniedAuthorities();
 
-
-        /*List<AuthorityInfo> allowAccessWithTypes = allowAccess.stream()
-                .map(authorityId -> new AuthorityInfo(authorityId, authorityTypeResolver.resolveAuthorityType(authorityId)))
-                .collect(Collectors.toList());
-
-
-        List<AuthorityInfo> denyAccessWithTypes = denyAccess.stream()
-                .map(authorityId -> new AuthorityInfo(authorityId, authorityTypeResolver.resolveAuthorityType(authorityId)))
-                .collect(Collectors.toList());*/
-
         List<AuthorityInfo> allowAccessWithTypes = convertToAuthorityInfoList(allowAccess, authorityTypeResolver);
         List<AuthorityInfo> denyAccessWithTypes = convertToAuthorityInfoList(denyAccess, authorityTypeResolver);
 

@@ -70,6 +70,8 @@ import org.mockito.Mock;
 class PropertiesMapperTest
 {
     private static final String EXPECTED_DATE_STRING = "2023-01-01T00:00:00.000Z";
+
+    @Mock
     private AuthorityTypeResolver authorityTypeResolver;
 
     PropertiesMapper propertiesMapper = new PropertiesMapper(authorityTypeResolver);
