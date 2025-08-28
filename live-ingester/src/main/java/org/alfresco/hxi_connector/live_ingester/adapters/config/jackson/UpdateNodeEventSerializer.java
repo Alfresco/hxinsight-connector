@@ -118,7 +118,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent> {
                 hasAnnotation = writeAnnotation(jgen, name);
             }
             if (!hasAnnotation) {
-                writeType(jgen, value, name);
+                writeType(jgen, value);
             }
 
             jgen.writeEndObject();
@@ -164,7 +164,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent> {
         return hasAnnotation;
     }
 
-    private void writeType(JsonGenerator jgen, Object value, String propertyName) throws IOException {
+    private void writeType(JsonGenerator jgen, Object value) throws IOException {
         if (value instanceof FileMetadata) {
             return;
         }
