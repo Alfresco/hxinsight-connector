@@ -183,9 +183,9 @@ public class PropertyMappingHelper {
         if (authorities == null || authorities.isEmpty()) {
             return Collections.emptyList();
         }
-
         return authorities.stream()
                 .map(authorityId -> new AuthorityInfo(authorityId, authorityTypeResolver.resolveAuthorityType(authorityId)))
+                .filter(authorityInfo -> !AuthorityTypeResolver.AuthorityType.ANY.equals(authorityInfo.getType()))
                 .collect(Collectors.toList());
     }
 

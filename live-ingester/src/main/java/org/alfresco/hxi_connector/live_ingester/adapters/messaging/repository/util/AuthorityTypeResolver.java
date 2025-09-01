@@ -71,8 +71,13 @@ public class AuthorityTypeResolver {
         }
 
         try {
-            return isUser(authorityId) ? AuthorityType.USER :
+            AuthorityType authorityType = isUser(authorityId) ? AuthorityType.USER :
                     isGroup(authorityId) ? AuthorityType.GROUP : AuthorityType.ANY;
+
+            if (authorityType == AuthorityType.ANY) {
+                log.debug("Authority type resolved to ANY for authorityId: {}", authorityId);
+            }
+            return authorityType;
         } catch (RestClientException e) {
             log.warn("Failed to get authority type for authorityId: {}. Error: {}", authorityId, e.getMessage());
             return AuthorityType.ANY;
