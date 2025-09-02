@@ -1,0 +1,52 @@
+server:
+  port: 8081
+
+sync:
+  enabled: false
+  cron.expression: '0 */2 * * * ?'
+
+auth:
+  providers:
+    alfresco:
+      type: basic
+      username:
+      password:
+    hyland-experience:
+      type: oauth2
+      client-id:
+      client-secret:
+      token-uri:
+      grant-type: client_credentials
+      scope:
+        - hxp.integrations
+        - iam.user-data.account
+        - system-integrations-config
+        - system-integrations-runtime
+        - environment_authorization
+      environment-key:
+
+alfresco:
+  base-url: http://localhost:8080/alfresco/api/-default-/public/alfresco/versions/1
+
+nucleus:
+  idp-base-url:
+  base-url:
+  system-id:
+
+spring:
+  application.name: Nucleus Sync
+  datasource:
+    url: jdbc:sqlite:/data/nucleus-sync.db
+    driver-class-name: org.sqlite.JDBC
+    username:
+    password:
+  jpa:
+    database-platform: org.hibernate.community.dialect.SQLiteDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+logging:
+  level:
+    org.alfresco.hxi_connector: TRACE
+    org.springframework.web.reactive.function.client: DEBUG
