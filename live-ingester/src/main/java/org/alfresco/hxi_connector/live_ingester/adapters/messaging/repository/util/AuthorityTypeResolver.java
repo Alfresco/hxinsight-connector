@@ -31,6 +31,7 @@ import java.util.HashMap;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
@@ -43,15 +44,9 @@ import org.springframework.web.client.RestClientException;
 public class AuthorityTypeResolver {
 
     private final RestTemplate restTemplate;
-
-    @Value("${alfresco.repository.baseurl:http://localhost:8080/alfresco}")
+    private final AuthService authService;
+    @Value("${alfresco.repository.baseurl}")
     private String alfrescoBaseUrl;
-
-    @Value("${auth.providers.alfresco.username:admin}")
-    private String alfrescoUsername;
-
-    @Value("${auth.providers.alfresco.password:admin}")
-    private String alfrescoPassword;
 
     public enum AuthorityType {
         USER, GROUP, ANY
@@ -96,8 +91,8 @@ public class AuthorityTypeResolver {
         try {
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBasicAuth(alfrescoUsername, alfrescoPassword);
-
+            Map<String, String> authHeaders = authService.getAlfrescoAuthHeaders();
+            authHeaders.forEach(headers::set);
             restTemplate.exchange(
                     alfrescoBaseUrl + endpoint,
                     HttpMethod.GET,

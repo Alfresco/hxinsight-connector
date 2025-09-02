@@ -28,10 +28,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.util;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -51,15 +53,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 public class ParentNodeService {
 
     private final RestTemplate restTemplate;
+    private final AuthService authService;
 
-    @Value("${alfresco.repository.baseurl:http://localhost:8080/alfresco}")
+    @Value("${alfresco.repository.baseurl}")
     private String alfrescoBaseUrl;
-
-    @Value("${auth.providers.alfresco.username:admin}")
-    private String alfrescoUsername;
-
-    @Value("${auth.providers.alfresco.password:admin}")
-    private String alfrescoPassword;
 
     public List<String> getParentNodeId(String nodeId) {
         List<String> parentPath = new ArrayList<>();
@@ -110,7 +107,8 @@ public class ParentNodeService {
     private HttpHeaders createAuthHeaders() {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBasicAuth(alfrescoUsername, alfrescoPassword);
+        Map<String, String> authHeaders = authService.getAlfrescoAuthHeaders();
+        authHeaders.forEach(headers::set);
         return headers;
     }
 
