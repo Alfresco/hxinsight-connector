@@ -46,6 +46,8 @@ public class UpdateNodeEvent implements NodeEvent
     private final EventType eventType;
     private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
     private final Map<String, ContentProperty> contentPropertiesToSet = new HashMap<>();
+    private final Map<String, AncestorsProperty> ancestorsPropertiesToSet = new HashMap<>();
+    private final Map<String, PermissionsProperty> permissionsPropertiesToSet = new HashMap<>();
     private final String sourceId;
     private final long timestamp;
 
@@ -59,6 +61,18 @@ public class UpdateNodeEvent implements NodeEvent
     {
         metadataPropertiesToSet.put(metadataProperty.name(), metadataProperty);
 
+        return this;
+    }
+
+    public UpdateNodeEvent addAncestorInstruction(AncestorsProperty ancestorsProperty)
+    {
+        ancestorsPropertiesToSet.put(ancestorsProperty.propertyName(), ancestorsProperty);
+        return this;
+    }
+
+    public UpdateNodeEvent addPermissionsInstruction(PermissionsProperty permissionsProperty)
+    {
+        permissionsPropertiesToSet.put(permissionsProperty.propertyName(), permissionsProperty);
         return this;
     }
 }

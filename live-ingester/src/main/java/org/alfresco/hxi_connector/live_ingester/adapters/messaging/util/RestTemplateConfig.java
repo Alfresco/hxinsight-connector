@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,29 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.util;
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
-
-import java.util.Set;
-
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-
-public record IngestNodeCommand(
-        String nodeId,
-        EventType eventType,
-        Set<PropertyDelta<?>> properties,
-        long sourceTimestamp)
+@Configuration
+public class RestTemplateConfig
 {
-    public IngestNodeCommand
+
+    @Bean
+    public RestTemplate restTemplate()
     {
-        ensureNotBlank(nodeId, "Node id cannot be blank");
-        ensureNonNull(eventType, "Node %s event type cannot be null", nodeId);
-        ensureNonNull(properties, "Node %s properties delta cannot be null", nodeId);
-        ensureThat(sourceTimestamp > 0, "Source sourceTimestamp cannot be negative or zero.");
+        return new RestTemplate();
     }
 }

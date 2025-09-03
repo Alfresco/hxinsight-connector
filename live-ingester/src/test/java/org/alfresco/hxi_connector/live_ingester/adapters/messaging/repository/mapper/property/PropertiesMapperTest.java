@@ -55,7 +55,9 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -69,7 +71,10 @@ class PropertiesMapperTest
 {
     private static final String EXPECTED_DATE_STRING = "2023-01-01T00:00:00.000Z";
 
-    PropertiesMapper propertiesMapper = new PropertiesMapper();
+    @Mock
+    private AuthorityTypeResolver authorityTypeResolver;
+
+    PropertiesMapper propertiesMapper = new PropertiesMapper(authorityTypeResolver);
 
     @Test
     void shouldHandleAllPropertiesUpdated_NodeCreated()

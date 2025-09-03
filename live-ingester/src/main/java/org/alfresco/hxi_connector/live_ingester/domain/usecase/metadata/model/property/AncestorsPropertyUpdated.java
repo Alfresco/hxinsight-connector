@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,46 +23,88 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
-
+import java.util.List;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
 import lombok.ToString;
 
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.AncestorsProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
-@Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PropertyUpdated<T> extends PropertyDelta<T>
+public class AncestorsPropertyUpdated extends PropertyDelta<List<String>>
 {
-    private final T propertyValue;
 
-    public PropertyUpdated(String propertyName, T propertyValue)
+    private final String parentId;
+    private final List<String> ancestorIds;
+
+    public AncestorsPropertyUpdated(String propertyName, String parentId, List<String> ancestorIds)
     {
         super(propertyName);
+        this.parentId = parentId;
+        this.ancestorIds = ancestorIds;
+    }
 
-        ensureNonNull(propertyValue, "Property value cannot be null. Property name: %s", propertyName);
-        this.propertyValue = propertyValue;
+    public String getParentId()
+    {
+        return parentId;
+    }
+
+    public List<String> getAncestorIds()
+    {
+        return ancestorIds;
     }
 
     @Override
     public void applyOn(UpdateNodeEvent event)
     {
-        event.addMetadataInstruction(new NodeProperty<>(getPropertyName(), propertyValue));
+        event.addAncestorInstruction(new AncestorsProperty(getPropertyName(), parentId, ancestorIds));
+
     }
 
     @Override
     public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver)
     {
-        return resolver.resolveUpdated(this);
+        return Optional.empty();
+    }
+
+    public static AncestorsPropertyUpdatedBuilder builder(String propertyName)
+    {
+        return new AncestorsPropertyUpdatedBuilder(propertyName);
+    }
+
+    public static class AncestorsPropertyUpdatedBuilder
+    {
+        private final String propertyName;
+        private String parentId;
+        private List<String> ancestorIds;
+
+        public AncestorsPropertyUpdatedBuilder(String propertyName)
+        {
+            this.propertyName = propertyName;
+        }
+
+        public AncestorsPropertyUpdatedBuilder parentId(String parentId)
+        {
+            this.parentId = parentId;
+            return this;
+        }
+
+        public AncestorsPropertyUpdatedBuilder ancestorIds(List<String> ancestorIds)
+        {
+            this.ancestorIds = ancestorIds;
+            return this;
+        }
+
+        public AncestorsPropertyUpdated build()
+        {
+            return new AncestorsPropertyUpdated(propertyName, parentId, ancestorIds);
+        }
     }
 }
