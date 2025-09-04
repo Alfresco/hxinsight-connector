@@ -12,7 +12,7 @@ jobs:
     name: "Veracode - Source Clear Scan (SCA)"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.28.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.28.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v8.28.1
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Run TCK Tests"
         uses: ./.github/actions/tck-tests
         with:
