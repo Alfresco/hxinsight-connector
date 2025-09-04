@@ -176,7 +176,7 @@ jobs:
         - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.33.0
 
         - name: "Download all coverage data"
-          uses: actions/download-artifact@v4
+          uses: actions/download-artifact@v5
           with:
             pattern: jacoco-report-*
             path: ${{ github.workspace }}/jacoco-data
