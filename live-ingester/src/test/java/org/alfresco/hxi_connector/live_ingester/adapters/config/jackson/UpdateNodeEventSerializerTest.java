@@ -58,6 +58,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.AncestorsProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
@@ -551,6 +552,153 @@ class UpdateNodeEventSerializerTest
     public void shouldReturnStringForNullValue()
     {
         assertEquals("string", serializer.determineType(null));
+    }
+
+    @Test
+    public void shouldSerializeAncestorsProperty()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addAncestorInstruction(new AncestorsProperty("ancestors", "parent-id", List.of("grandparent-id", "root-id")));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeAncestorsPropertyWithEmptyAncestorIds()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addAncestorInstruction(new AncestorsProperty("ancestors", "parent-id", List.of()));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeMultipleAncestorsProperties()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addAncestorInstruction(new AncestorsProperty("ancestors", "parent-id", List.of("grandparent-id")))
+                .addAncestorInstruction(new AncestorsProperty("secondaryAncestors", "secondary-parent-id", List.of("secondary-grandparent-id")));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeAncestorsPropertyAlongsideOtherProperties()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, "admin"))
+                .addAncestorInstruction(new AncestorsProperty("ancestors", "parent-id", List.of("grandparent-id")))
+                .addContentInstruction(new ContentProperty(CONTENT_PROPERTY, "content-id", "application/pdf", "application/pdf", 123L, "test.pdf"));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "createdBy": {
+                        "value": "admin",
+                        "annotation": "createdBy"
+                      },
+                      "cm:content": {
+                        "file": {
+                          "id": "content-id",
+                          "content-type": "application/pdf",
+                          "content-metadata": {
+                            "size": 123,
+                            "name": "test.pdf",
+                            "content-type": "application/pdf"
+                          }
+                        }
+                      },
+                      "ancestors": {
+                        "value": {
+                          "primaryParentId": "parent-id",
+                          "primaryAncestorIds": ["grandparent-id"]
+                        },
+                        "annotation": "hierarchy"
+                      }
+                    }
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeAncestorsPropertyWithSingleAncestor()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addAncestorInstruction(new AncestorsProperty("ancestors", "parent-id", List.of("single-ancestor-id")));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
+
+    @Test
+    public void shouldSerializeAncestorsPropertyWithNullParentId()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addAncestorInstruction(new AncestorsProperty("ancestors", null, List.of("grandparent-id")));
+
+        String expectedJson = """
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830
+                  }
+                ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
     }
 
     @SneakyThrows
