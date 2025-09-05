@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,29 +23,19 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata;
-
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureThat;
 
-import java.util.Set;
+import java.util.List;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 
-public record IngestNodeCommand(
-        String nodeId,
-        EventType eventType,
-        Set<PropertyDelta<?>> properties,
-        long sourceTimestamp)
+public record PermissionsProperty(String propertyName, List<AuthorityInfo> allowAccess,
+        List<AuthorityInfo> denyAccess)
 {
-    public IngestNodeCommand
+    public PermissionsProperty
     {
-        ensureNotBlank(nodeId, "Node id cannot be blank");
-        ensureNonNull(eventType, "Node %s event type cannot be null", nodeId);
-        ensureNonNull(properties, "Node %s properties delta cannot be null", nodeId);
-        ensureThat(sourceTimestamp > 0, "Source sourceTimestamp cannot be negative or zero.");
+        ensureNotBlank(propertyName, "File property name cannot be blank");
     }
 }

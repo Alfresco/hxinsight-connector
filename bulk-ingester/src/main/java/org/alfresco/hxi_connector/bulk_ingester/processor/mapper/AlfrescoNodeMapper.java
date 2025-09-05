@@ -57,6 +57,7 @@ import org.springframework.stereotype.Component;
 import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
 import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
 import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.elasticsearch.db.connector.model.ChildAssocMetaData;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
@@ -77,6 +78,7 @@ public class AlfrescoNodeMapper
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
+
         HashSet<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toCollection(HashSet::new));
         String createdAt = getCreatedAt(alfrescoNode);
         String modifiedAt = getModifiedAt(alfrescoNode);
@@ -103,13 +105,18 @@ public class AlfrescoNodeMapper
         {
             allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
         }
-        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        String parentId = ofNullable(alfrescoNode.getPrimaryParentAssociation())
+                .map(ChildAssocMetaData::getParentUuid)
+                .orElse(null);
 
+        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        IngestEvent.AncestorsInfo ancestors = new IngestEvent.AncestorsInfo().parentId(parentId);
         Map<String, Serializable> properties = getProperties(allProperties);
 
         return new IngestEvent(
                 nodeId,
                 content,
+                ancestors,
                 properties,
                 timeProvider.getCurrentTimestamp());
     }

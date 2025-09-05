@@ -45,6 +45,8 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FileMetadata;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.HierarchyMetadata;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.PrincipalsMetadata;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 
 @Component
@@ -57,6 +59,8 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String TYPE = "type";
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
+    private static final String ANCESTORS = "ancestors";
+    private static final String PERMISSIONS = "permissions";
 
     public UpdateNodeEventSerializer()
     {
@@ -87,6 +91,8 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                 jgen.writeObjectFieldStart("properties");
                 event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value(), true));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property), true));
+                event.getPermissionsPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.propertyName(), new PrincipalsMetadata(property), true));
+                event.getAncestorsPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.propertyName(), new HierarchyMetadata(property), true));
                 jgen.writeEndObject();
             }
 
@@ -162,6 +168,12 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             break;
         case MODIFIED_BY:
             jgen.writeObjectField("annotation", "modifiedBy");
+            break;
+        case ANCESTORS:
+            jgen.writeObjectField("annotation", "hierarchy");
+            break;
+        case PERMISSIONS:
+            jgen.writeObjectField("annotation", "principals");
             break;
         default:
             hasAnnotation = false;

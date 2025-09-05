@@ -84,6 +84,7 @@ class IngestEventProcessorTest
         IngestEvent bulkIngesterEvent = new IngestEvent(
                 NODE_ID,
                 null,
+                null,
                 properties,
                 TIMESTAMP);
 
@@ -114,10 +115,13 @@ class IngestEventProcessorTest
                 100L,
                 "UTF-8",
                 mimeType);
+        IngestEvent.AncestorsInfo ancestorsInfo = new IngestEvent.AncestorsInfo(
+                "");
 
         IngestEvent ingestEvent = new IngestEvent(
                 NODE_ID,
                 contentInfo,
+                ancestorsInfo,
                 Map.of(TYPE_PROPERTY, NODE_TYPE,
                         CREATED_AT_PROPERTY, CREATED_AT),
                 TIMESTAMP);
@@ -150,10 +154,12 @@ class IngestEventProcessorTest
                 100L,
                 "UTF-8",
                 mimeType);
-
+        IngestEvent.AncestorsInfo ancestorsInfo = new IngestEvent.AncestorsInfo(
+                "");
         IngestEvent ingestEvent = new IngestEvent(
                 NODE_ID,
                 contentInfo,
+                ancestorsInfo,
                 Map.of(TYPE_PROPERTY, NODE_TYPE,
                         CREATED_AT_PROPERTY, CREATED_AT),
                 TIMESTAMP);
