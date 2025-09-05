@@ -27,12 +27,14 @@
 package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
 import java.time.Instant;
+import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
@@ -58,5 +60,68 @@ class UpdateNodeEventTest
         // then
         assertFalse(updateNodeEvent.getMetadataPropertiesToSet().containsValue(name1));
         assertTrue(updateNodeEvent.getMetadataPropertiesToSet().containsValue(name2));
+    }
+
+    @Test
+    void shouldAddAncestorInstruction()
+    {
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
+        AncestorsProperty ancestorsProperty = new AncestorsProperty("ancestors", "parent-id", List.of("grandparent-id"));
+
+        updateNodeEvent.addAncestorInstruction(ancestorsProperty);
+
+        assertTrue(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestorsProperty));
+    }
+
+    @Test
+    void shouldOverwriteAlreadySetAncestorProperty()
+    {
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
+
+        AncestorsProperty ancestors1 = new AncestorsProperty("ancestors", "parent-id-1", List.of("grandparent-id-1"));
+        AncestorsProperty ancestors2 = new AncestorsProperty("ancestors", "parent-id-2", List.of("grandparent-id-2"));
+
+        updateNodeEvent.addAncestorInstruction(ancestors1);
+        updateNodeEvent.addAncestorInstruction(ancestors2);
+
+        assertFalse(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestors1));
+        assertTrue(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestors2));
+    }
+
+    @Test
+    void shouldReturnSameInstanceAfterAddingAncestorInstruction()
+    {
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
+        AncestorsProperty ancestorsProperty = new AncestorsProperty("ancestors", "parent-id", List.of());
+
+        UpdateNodeEvent result = updateNodeEvent.addAncestorInstruction(ancestorsProperty);
+
+        assertSame(updateNodeEvent, result);
+    }
+
+    @Test
+    void shouldAddMultipleAncestorInstructionsWithDifferentPropertyNames()
+    {
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
+
+        AncestorsProperty ancestors1 = new AncestorsProperty("ancestors", "parent-id", List.of("grandparent-id"));
+        AncestorsProperty ancestors2 = new AncestorsProperty("secondaryAncestors", "secondary-parent-id", List.of("secondary-grandparent-id"));
+
+        updateNodeEvent.addAncestorInstruction(ancestors1);
+        updateNodeEvent.addAncestorInstruction(ancestors2);
+
+        assertTrue(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestors1));
+        assertTrue(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestors2));
+    }
+
+    @Test
+    void shouldAddAncestorInstructionWithEmptyAncestorsList()
+    {
+        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
+        AncestorsProperty ancestorsProperty = new AncestorsProperty("ancestors", "parent-id", List.of());
+
+        updateNodeEvent.addAncestorInstruction(ancestorsProperty);
+
+        assertTrue(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestorsProperty));
     }
 }

@@ -23,19 +23,32 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.constant;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model;
 
-public class NodeProperties
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.AncestorsProperty;
+
+@Getter
+@JsonInclude(NON_NULL)
+@RequiredArgsConstructor
+public class HierarchyMetadata
 {
-    public static final String NAME_PROPERTY = "cm:name";
-    public static final String CONTENT_PROPERTY = "cm:content";
-    public static final String TYPE_PROPERTY = "type";
-    public static final String CREATED_BY_PROPERTY = "createdBy";
-    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
-    public static final String CREATED_AT_PROPERTY = "createdAt";
-    public static final String MODIFIED_AT_PROPERTY = "modifiedAt";
-    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
-    public static final String ALLOW_ACCESS = "ALLOW_ACCESS";
-    public static final String DENY_ACCESS = "DENY_ACCESS";
-    public static final String ANCESTORS_PROPERTY = "ancestors";
+    @JsonProperty("primaryParentId")
+    private final String parentId;
+    @JsonProperty("primaryAncestorIds")
+    private final List<String> ancestorIds;
+
+    public HierarchyMetadata(AncestorsProperty ancestorsProperty)
+    {
+        parentId = ancestorsProperty.parentId();
+        ancestorIds = ancestorsProperty.ancestorIds();
+    }
 }

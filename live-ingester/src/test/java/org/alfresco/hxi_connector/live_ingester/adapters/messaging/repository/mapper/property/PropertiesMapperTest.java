@@ -42,6 +42,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.ancestorsMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
@@ -50,7 +51,9 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -385,6 +388,151 @@ class PropertiesMapperTest
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)),
                 updated(DENY_ACCESS, Set.of(bob)));
+
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
+    }
+
+    @Test
+    void shouldHandleAncestorsProperty_NodeCreated()
+    {
+        // given
+        List<String> primaryHierarchy = new ArrayList<>(List.of("parent-id", "grandparent-id", "root-id", "current-node-id"));
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_CREATED);
+
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
+                .setPrimaryHierarchy(primaryHierarchy)
+                .build();
+
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                ancestorsMetadataUpdated("ancestors", "parent-id", List.of("current-node-id", "root-id", "grandparent-id")));
+
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
+    }
+
+    @Test
+    void shouldHandleAncestorsPropertyUpdate_NodeUpdated()
+    {
+        // given
+        List<String> oldHierarchy = new ArrayList<>(List.of("old-parent-id", "old-grandparent-id", "old-node-id"));
+        List<String> newHierarchy = new ArrayList<>(List.of("new-parent-id", "new-grandparent-id", "root-id", "current-node-id"));
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_UPDATED);
+
+        NodeResource nodeResourceBefore = nodeResourceWithRequiredFields()
+                .setPrimaryHierarchy(oldHierarchy)
+                .build();
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
+                .setPrimaryHierarchy(newHierarchy)
+                .build();
+
+        setNodeResourceBefore(event, nodeResourceBefore);
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                ancestorsMetadataUpdated("ancestors", "new-parent-id", List.of("current-node-id", "root-id", "new-grandparent-id")));
+
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
+    }
+
+    @Test
+    void shouldHandleEmptyAncestorsProperty_NodeCreated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_CREATED);
+
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
+                .setPrimaryHierarchy(List.of())
+                .build();
+
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        assertEquals(mergeWithDefaultProperties(Set.of()), propertyDeltas);
+    }
+
+    @Test
+    void shouldHandleNullAncestorsProperty_NodeCreated()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_CREATED);
+
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
+                .setPrimaryHierarchy(null)
+                .build();
+
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        assertEquals(mergeWithDefaultProperties(Set.of()), propertyDeltas);
+    }
+
+    @Test
+    void shouldHandleSingleNodeAncestorsProperty_NodeCreated()
+    {
+        // given
+        List<String> primaryHierarchy = new ArrayList<>(List.of("current-node-id"));
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_CREATED);
+
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
+                .setPrimaryHierarchy(primaryHierarchy)
+                .build();
+
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                ancestorsMetadataUpdated("ancestors", "current-node-id", List.of()));
+
+        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
+    }
+
+    @Test
+    void shouldHandleTwoLevelAncestorsProperty_NodeCreated()
+    {
+        // given
+        List<String> primaryHierarchy = new ArrayList<>(List.of("parent-id", "current-node-id"));
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        setType(event, NODE_CREATED);
+
+        NodeResource nodeResource = nodeResourceWithRequiredFields()
+                .setPrimaryHierarchy(primaryHierarchy)
+                .build();
+
+        setNodeResource(event, nodeResource);
+
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+
+        // then
+        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
+                ancestorsMetadataUpdated("ancestors", "parent-id", List.of("current-node-id")));
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
