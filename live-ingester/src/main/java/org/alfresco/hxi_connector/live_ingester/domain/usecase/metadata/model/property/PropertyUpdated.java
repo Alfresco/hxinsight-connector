@@ -42,12 +42,10 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property
 @Getter
 @ToString(callSuper = true)
 @EqualsAndHashCode(callSuper = true)
-public class PropertyUpdated<T> extends PropertyDelta<T>
-{
+public class PropertyUpdated<T> extends PropertyDelta<T> {
     private final T propertyValue;
 
-    public PropertyUpdated(String propertyName, T propertyValue)
-    {
+    public PropertyUpdated(String propertyName, T propertyValue) {
         super(propertyName);
 
         ensureNonNull(propertyValue, "Property value cannot be null. Property name: %s", propertyName);
@@ -55,14 +53,12 @@ public class PropertyUpdated<T> extends PropertyDelta<T>
     }
 
     @Override
-    public void applyOn(UpdateNodeEvent event)
-    {
+    public void applyOn(UpdateNodeEvent event) {
         event.addMetadataInstruction(new NodeProperty<>(getPropertyName(), propertyValue));
     }
 
     @Override
-    public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver)
-    {
+    public <R> Optional<PropertyDelta<R>> resolveWith(PropertyResolver<R> resolver) {
         return resolver.resolveUpdated(this);
     }
 }

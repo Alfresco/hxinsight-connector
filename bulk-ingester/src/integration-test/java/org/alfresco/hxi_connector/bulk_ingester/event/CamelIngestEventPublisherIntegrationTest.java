@@ -67,6 +67,7 @@ public class CamelIngestEventPublisherIntegrationTest extends ActiveMqIntegratio
         IngestEvent ingestEvent = new IngestEvent(
                 "66326096-3bd6-412e-abbe-a07fbabf2fcc",
                 new IngestEvent.ContentInfo(1000, "UTF-8", "application/pdf"),
+                new IngestEvent.AncestorsInfo(""),
                 Map.of(TYPE_PROPERTY, "file",
                         "cm:categories", (Serializable) List.of("33cd7d4c-ba12-4006-9642-f9fb2d3bd406"),
                         CREATED_AT_PROPERTY, "2024-02-19T07:56:50.034Z"),

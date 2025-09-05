@@ -38,6 +38,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -52,6 +53,7 @@ import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.elasticsearch.db.connector.model.ChildAssocMetaData;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
@@ -62,8 +64,7 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class AlfrescoNodeMapper
-{
+public class AlfrescoNodeMapper {
     private static final Set<String> PREDEFINED_PROPERTIES = Set.of(CONTENT_PROPERTY);
 
     private final AlfrescoPropertyMapperFactory propertyMapperFactory;
@@ -71,12 +72,12 @@ public class AlfrescoNodeMapper
     private final TimeProvider timeProvider;
 
     @SuppressWarnings("PMD.LooseCoupling") // HashSet implements both Set and Serializable.
-    public IngestEvent map(AlfrescoNode alfrescoNode)
-    {
+    public IngestEvent map(AlfrescoNode alfrescoNode) {
         String nodeId = alfrescoNode.getNodeRef();
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
+
         HashSet<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toCollection(HashSet::new));
         String createdAt = getCreatedAt(alfrescoNode);
         String modifiedAt = getModifiedAt(alfrescoNode);
@@ -85,55 +86,53 @@ public class AlfrescoNodeMapper
         allProperties.put(TYPE_PROPERTY, type);
         allProperties.put(CREATED_BY_PROPERTY, creatorId);
         allProperties.put(MODIFIED_BY_PROPERTY, modifierId);
-        if (!aspectNames.isEmpty())
-        {
+        if (!aspectNames.isEmpty()) {
             allProperties.put(ASPECT_NAMES_PROPERTY, aspectNames);
         }
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
         allProperties.put(MODIFIED_AT_PROPERTY, modifiedAt);
 
         Set<String> allowAccess = (Set<String>) getResourceReaderAuthorities(alfrescoNode);
-        if (!allowAccess.isEmpty())
-        {
+        if (!allowAccess.isEmpty()) {
             allProperties.put(ALLOW_ACCESS, (Serializable) allowAccess);
         }
 
         Set<String> denyAccess = (Set<String>) getResourceDeniedAuthorities(alfrescoNode);
-        if (!denyAccess.isEmpty())
-        {
+        if (!denyAccess.isEmpty()) {
             allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
         }
-        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        String parentId = ofNullable(alfrescoNode.getPrimaryParentAssociation())
+                .map(ChildAssocMetaData::getParentUuid)
+                .orElse(null);
 
+        IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+        IngestEvent.AncestorsInfo ancestors = new IngestEvent.AncestorsInfo().parentId(parentId);
         Map<String, Serializable> properties = getProperties(allProperties);
 
         return new IngestEvent(
                 nodeId,
                 content,
+                ancestors,
                 properties,
                 timeProvider.getCurrentTimestamp());
     }
 
-    private String getCreatedAt(AlfrescoNode alfrescoNode)
-    {
+    private String getCreatedAt(AlfrescoNode alfrescoNode) {
         return formatZonedDateTime(alfrescoNode.getCreatedAt());
     }
 
-    private String getModifiedAt(AlfrescoNode alfrescoNode)
-    {
+    private String getModifiedAt(AlfrescoNode alfrescoNode) {
         return formatZonedDateTime(alfrescoNode.getModifiedAt());
     }
 
-    private String formatZonedDateTime(ZonedDateTime zonedDateTime)
-    {
+    private String formatZonedDateTime(ZonedDateTime zonedDateTime) {
         return ofNullable(zonedDateTime)
                 .map(ZonedDateTime::toInstant)
                 .map(DateTimeFormatter.ISO_INSTANT::format)
                 .orElse(null);
     }
 
-    private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode)
-    {
+    private Map<String, Serializable> calculateAllProperties(AlfrescoNode alfrescoNode) {
         return alfrescoNode.getNodeProperties()
                 .stream()
                 .filter(Objects::nonNull)
@@ -144,8 +143,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Map<String, Serializable> getProperties(Map<String, Serializable> allProperties)
-    {
+    private Map<String, Serializable> getProperties(Map<String, Serializable> allProperties) {
         return allProperties.entrySet()
                 .stream()
                 .filter(property -> Objects.nonNull(property.getValue()))
@@ -153,8 +151,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 
-    private Serializable getResourceReaderAuthorities(AlfrescoNode node)
-    {
+    private Serializable getResourceReaderAuthorities(AlfrescoNode node) {
         return (Serializable) ofNullable(node.getAccessControlList())
                 .stream()
                 .flatMap(Collection::stream)
@@ -164,8 +161,7 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toSet());
     }
 
-    private Serializable getResourceDeniedAuthorities(AlfrescoNode node)
-    {
+    private Serializable getResourceDeniedAuthorities(AlfrescoNode node) {
         return (Serializable) ofNullable(node.getAccessControlList())
                 .stream()
                 .flatMap(Collection::stream)

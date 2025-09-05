@@ -41,28 +41,24 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.Pr
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 
 @Component
-public class CategoryPropertyResolver implements PropertyResolver<Set<String>>
-{
+public class CategoryPropertyResolver implements PropertyResolver<Set<String>> {
     private static final String CATEGORIES_PROPERTY_NAME = "cm:categories";
     private static final String TAGS_PROPERTY_NAME = "cm:taggable";
 
     @Override
-    public boolean canResolve(PropertyDelta<?> propertyDelta)
-    {
+    public boolean canResolve(PropertyDelta<?> propertyDelta) {
         String propertyName = propertyDelta.getPropertyName();
 
         return propertyName.equals(CATEGORIES_PROPERTY_NAME) || propertyName.equals(TAGS_PROPERTY_NAME);
     }
 
     @Override
-    public Optional<PropertyDelta<Set<String>>> resolveUpdated(PropertyUpdated<?> updatedProperty)
-    {
+    public Optional<PropertyDelta<Set<String>>> resolveUpdated(PropertyUpdated<?> updatedProperty) {
         ensureThat(canResolve(updatedProperty), "Unsupported property: %s", updatedProperty);
 
         Object propertyValue = updatedProperty.getPropertyValue();
 
-        if (propertyValue instanceof String)
-        {
+        if (propertyValue instanceof String) {
             return Optional.of(updated(updatedProperty.getPropertyName(), Set.of((String) propertyValue)));
         }
 
@@ -74,8 +70,7 @@ public class CategoryPropertyResolver implements PropertyResolver<Set<String>>
         return Optional.of(updated(updatedProperty.getPropertyName(), ids));
     }
 
-    private String getId(Map<String, Object> entry)
-    {
+    private String getId(Map<String, Object> entry) {
         return (String) entry.get("id");
     }
 }
