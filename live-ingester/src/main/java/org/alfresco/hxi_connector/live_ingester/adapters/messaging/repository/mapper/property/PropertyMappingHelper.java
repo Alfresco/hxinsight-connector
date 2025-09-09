@@ -45,6 +45,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -165,12 +166,9 @@ public class PropertyMappingHelper
             return Optional.empty();
         }
         String primaryParentId = primaryHierarchy.get(0);
-        Collections.reverse(primaryHierarchy);
-        if (!primaryHierarchy.isEmpty())
-        {
-            primaryHierarchy.remove(primaryHierarchy.size() - 1);
-        }
-        return Optional.of(ancestorsMetadataUpdated(ANCESTORS_PROPERTY, primaryParentId, primaryHierarchy));
+        List<String> reversedAncestors = new ArrayList<>(primaryHierarchy.subList(0, primaryHierarchy.size() - 1));
+        Collections.reverse(reversedAncestors);
+        return Optional.of(ancestorsMetadataUpdated(ANCESTORS_PROPERTY, primaryParentId, reversedAncestors));
     }
 
     private static String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)

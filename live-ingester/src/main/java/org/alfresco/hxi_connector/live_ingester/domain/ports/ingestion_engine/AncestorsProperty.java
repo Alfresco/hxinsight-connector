@@ -33,6 +33,6 @@ public record AncestorsProperty(String propertyName, String parentId, List<Strin
 {
     public AncestorsProperty
     {
-        ensureNotBlank(propertyName, "File property name cannot be blank");
+        ensureNotBlank(propertyName, "Ancestors property name cannot be blank");
     }
 }

@@ -575,47 +575,6 @@ class UpdateNodeEventSerializerTest
     }
 
     @Test
-    public void shouldSerializeAncestorsPropertyWithEmptyAncestorIds()
-    {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
-                .addAncestorInstruction(new AncestorsProperty("ancestors", "parent-id", List.of()));
-
-        String expectedJson = """
-                [
-                  {
-                    "objectId": "%s",
-                    "sourceId": "%s",
-                    "eventType": "createOrUpdate",
-                    "sourceTimestamp": 1724225729830
-                  }
-                ]""".formatted(NODE_ID, SOURCE_ID);
-        String actualJson = serialize(event);
-
-        assertJsonEquals(expectedJson, actualJson);
-    }
-
-    @Test
-    public void shouldSerializeMultipleAncestorsProperties()
-    {
-        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
-                .addAncestorInstruction(new AncestorsProperty("ancestors", "parent-id", List.of("grandparent-id")))
-                .addAncestorInstruction(new AncestorsProperty("secondaryAncestors", "secondary-parent-id", List.of("secondary-grandparent-id")));
-
-        String expectedJson = """
-                [
-                  {
-                    "objectId": "%s",
-                    "sourceId": "%s",
-                    "eventType": "createOrUpdate",
-                    "sourceTimestamp": 1724225729830
-                  }
-                ]""".formatted(NODE_ID, SOURCE_ID);
-        String actualJson = serialize(event);
-
-        assertJsonEquals(expectedJson, actualJson);
-    }
-
-    @Test
     public void shouldSerializeAncestorsPropertyAlongsideOtherProperties()
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)

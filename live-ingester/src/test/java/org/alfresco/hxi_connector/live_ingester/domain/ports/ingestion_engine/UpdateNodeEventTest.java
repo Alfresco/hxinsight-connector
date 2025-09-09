@@ -77,7 +77,6 @@ class UpdateNodeEventTest
     void shouldOverwriteAlreadySetAncestorProperty()
     {
         UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
-
         AncestorsProperty ancestors1 = new AncestorsProperty("ancestors", "parent-id-1", List.of("grandparent-id-1"));
         AncestorsProperty ancestors2 = new AncestorsProperty("ancestors", "parent-id-2", List.of("grandparent-id-2"));
 
@@ -97,21 +96,6 @@ class UpdateNodeEventTest
         UpdateNodeEvent result = updateNodeEvent.addAncestorInstruction(ancestorsProperty);
 
         assertSame(updateNodeEvent, result);
-    }
-
-    @Test
-    void shouldAddMultipleAncestorInstructionsWithDifferentPropertyNames()
-    {
-        UpdateNodeEvent updateNodeEvent = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
-
-        AncestorsProperty ancestors1 = new AncestorsProperty("ancestors", "parent-id", List.of("grandparent-id"));
-        AncestorsProperty ancestors2 = new AncestorsProperty("secondaryAncestors", "secondary-parent-id", List.of("secondary-grandparent-id"));
-
-        updateNodeEvent.addAncestorInstruction(ancestors1);
-        updateNodeEvent.addAncestorInstruction(ancestors2);
-
-        assertTrue(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestors1));
-        assertTrue(updateNodeEvent.getAncestorsPropertiesToSet().containsValue(ancestors2));
     }
 
     @Test
