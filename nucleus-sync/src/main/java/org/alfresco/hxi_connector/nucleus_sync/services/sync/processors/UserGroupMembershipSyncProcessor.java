@@ -328,13 +328,13 @@ public class UserGroupMembershipSyncProcessor
         if (!membershipsToCreate.isEmpty())
         {
             userGroupMembershipService.createMemberships(membershipsToCreate);
-            logger.trace("Created {} local memberships.", membershipsToCreate.size());
+            logger.debug("Created {} local memberships.", membershipsToCreate.size());
         }
 
         if (!membershipsToDeactivate.isEmpty())
         {
             userGroupMembershipService.deactivateMemberships(membershipsToDeactivate);
-            logger.trace("Deactivated {} local memberships.", membershipsToDeactivate.size());
+            logger.debug("Deactivated {} local memberships.", membershipsToDeactivate.size());
         }
 
         if (!membershipsToCreate.isEmpty() || !membershipsToDeactivate.isEmpty())
@@ -342,7 +342,7 @@ public class UserGroupMembershipSyncProcessor
             Map<String, Integer> groupUserCounts = groupMemberShips.entrySet().stream()
                     .collect(Collectors.toMap(Map.Entry::getKey, e -> e.getValue().size()));
             userGroupMembershipService.updateGroupUserCounts(groupUserCounts);
-            logger.trace("Updated user counts for {} groups.", groupUserCounts.size());
+            logger.debug("Updated user counts for {} groups.", groupUserCounts.size());
         }
     }
 
@@ -354,9 +354,9 @@ public class UserGroupMembershipSyncProcessor
         if (!nucleusMembershipsToCreate.isEmpty())
         {
             nucleusClient.assignGroupMembers(nucleusMembershipsToCreate);
-            logger.trace(
-                    "Assigned {} members to groups in Nucleus.", nucleusMembershipsToCreate.size());
         }
+        logger.debug(
+                "Assigned {} members to groups in Nucleus.", nucleusMembershipsToCreate.size());
 
         for (Map.Entry<String, List<String>> entry : nucleusMembershipsToRemove.entrySet())
         {
@@ -366,5 +366,6 @@ public class UserGroupMembershipSyncProcessor
                     entry.getValue().size(),
                     entry.getKey());
         }
+        logger.debug("{} memberships deleted.", nucleusMembershipsToRemove.size());
     }
 }

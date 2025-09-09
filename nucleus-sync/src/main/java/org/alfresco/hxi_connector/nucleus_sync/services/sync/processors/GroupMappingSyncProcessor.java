@@ -210,29 +210,27 @@ public class GroupMappingSyncProcessor
         for (String alfrescoGroupId : nucleusGroupsToDelete)
         {
             nucleusClient.deleteGroup(alfrescoGroupId);
-            logger.trace("Deleted group {} in Nucleus.", alfrescoGroupId);
         }
+        logger.trace("Deleted {} groups from Nucleus.", nucleusGroupsToCreate.size());
 
         if (!localGroupsToDelete.isEmpty())
         {
             groupSyncService.deactivateGroupMappings(localGroupsToDelete);
-            logger.trace("Deactivated {} local group mappings.", localGroupsToDelete.size());
         }
+        logger.trace("Deactivated {} local group mappings.", localGroupsToDelete.size());
 
         if (!nucleusGroupsToCreate.isEmpty())
         {
             nucleusClient.createGroups(nucleusGroupsToCreate);
-            logger.trace(
-                    "Created groups {} in Nucleus.",
-                    nucleusGroupsToCreate.stream()
-                            .map(NucleusGroupInput::getExternalGroupId)
-                            .toList());
         }
+        logger.debug(
+                "Created {} groups in Nucleus.",
+                nucleusGroupsToCreate.size());
 
         if (!localGroupsToCreate.isEmpty())
         {
             groupSyncService.findOrCreateGroupMappings(localGroupsToCreate);
-            logger.trace("Created {} local group mappings.", localGroupsToCreate.size());
         }
+        logger.debug("Created {} local group mappings.", localGroupsToCreate.size());
     }
 }

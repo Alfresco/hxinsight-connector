@@ -209,29 +209,25 @@ public class UserMappingSyncProcessor
         for (String alfrescoUserId : nucleusMappingsToDelete)
         {
             nucleusClient.deleteUserMapping(alfrescoUserId);
-            logger.trace("Deleted user mapping with user Id: {} from Nucleus.", alfrescoUserId);
         }
+        logger.debug("Deleted {} user mapping in Nucleus.", nucleusMappingsToDelete.size());
 
         if (!localMappingsToDelete.isEmpty())
         {
             userSyncService.deactivateUserMappings(localMappingsToDelete);
-            logger.trace("Deactivated {} local user mappings.", localMappingsToDelete.size());
         }
+        logger.debug("Deactivated {} local user mappings.", localMappingsToDelete.size());
 
         if (!nucleusMappingsToCreate.isEmpty())
         {
             nucleusClient.createUserMappings(nucleusMappingsToCreate);
-            logger.trace(
-                    "Created user mappings with userIds: {} in Nucleus.",
-                    nucleusMappingsToCreate.stream()
-                            .map(NucleusUserMappingInput::getExternalUserId)
-                            .toList());
         }
+        logger.debug("Created {} user mappings in nucleus", nucleusMappingsToCreate.size());
 
         if (!localMappingsToCreate.isEmpty())
         {
             userSyncService.findOrCreateUserMappings(localMappingsToCreate);
-            logger.trace("Created {} local user mappings.", localMappingsToCreate.size());
         }
+        logger.debug("Created {} local user mappings.", localMappingsToCreate.size());
     }
 }
