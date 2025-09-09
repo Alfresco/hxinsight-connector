@@ -1,21 +1,21 @@
 server:
-  port: 8081
+  port: ${SERVER_PORT:8081}
 
 sync:
-  enabled: false
-  cron.expression: '0 */2 * * * ?'
+  enabled: ${SYNC_ENABLED:true}
+  cron.expression: ${SYNC_CRON_EXPRESSION:"0 0 * * *"}
 
 auth:
   providers:
     alfresco:
-      type: basic
-      username:
-      password:
+      type: ${AUTH_ALFRESCO_TYPE}
+      username: ${ALFRESCO_USER_NAME}
+      password: ${ALFRESCO_PASSWORD}
     hyland-experience:
-      type: oauth2
-      client-id:
-      client-secret:
-      token-uri:
+      type: ${AUTH_HX_TYPE}
+      client-id: ${HX_CLIENT_ID}
+      client-secret: ${HX_CLIENT_SECRET}
+      token-uri: ${HX_TOKEN_URI}
       grant-type: client_credentials
       scope:
         - hxp.integrations
@@ -23,23 +23,23 @@ auth:
         - system-integrations-config
         - system-integrations-runtime
         - environment_authorization
-      environment-key:
+      environment-key: ${HX_ENV_KEY}
 
 alfresco:
-  base-url: http://localhost:8080/alfresco/api/-default-/public/alfresco/versions/1
+  base-url: ${ALFRESCO_BASE_URL}
 
 nucleus:
-  idp-base-url:
-  base-url:
-  system-id:
+  idp-base-url: ${NUCLEUS_IDP_BASE_URL}
+  base-url: ${NUCLEUS_BASE_URL}
+  system-id: ${NUCLEUS_SYSTEM_ID}
 
 spring:
   application.name: Nucleus Sync
   datasource:
-    url: jdbc:sqlite:/data/nucleus-sync.db
+    url: ${SPRING_DATASOURCE_URL:jdbc:sqlite:/data/nucleus-sync.db}
     driver-class-name: org.sqlite.JDBC
-    username:
-    password:
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
   jpa:
     database-platform: org.hibernate.community.dialect.SQLiteDialect
     hibernate:
@@ -48,5 +48,5 @@ spring:
 
 logging:
   level:
-    org.alfresco.hxi_connector: TRACE
+    org.alfresco.hxi_connector: ${LOGGING_LEVEL_ORG_ALFRESCO:INFO}
     org.springframework.web.reactive.function.client: DEBUG

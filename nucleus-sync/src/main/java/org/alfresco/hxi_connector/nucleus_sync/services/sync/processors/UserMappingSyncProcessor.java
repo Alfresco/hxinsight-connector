@@ -55,6 +55,20 @@ public class UserMappingSyncProcessor
     private final UserSyncService userSyncService;
     private static final Logger logger = LoggerFactory.getLogger(UserMappingSyncProcessor.class);
 
+    /**
+     * Sync alfresco and nucleus user mappings with nucleus and local db
+     *
+     * @param alfrescoUsers
+     *            list of alfresco users
+     * @param nucleusIamUsers
+     *            list of IAM users of nucleus
+     * @param currentUserMappings
+     *            current nucleus user mappings
+     * @param localUserMappings
+     *            current mappings stored in db
+     *
+     * @return list of updated user mappings
+     */
     public List<UserMapping> syncUserMappings(
             List<AlfrescoUser> alfrescoUsers,
             List<IamUser> nucleusIamUsers,
@@ -132,7 +146,7 @@ public class UserMappingSyncProcessor
                 nucleusMappingsToCreate,
                 localMappingsToCreate);
 
-        List<UserMapping> updatedUserMappings = userSyncService.getAllUserMappings();
+        List<UserMapping> updatedUserMappings = userSyncService.getAllActiveUserMappings();
         logger.debug("Updated mappings count: {}", updatedUserMappings.size());
         return updatedUserMappings;
     }

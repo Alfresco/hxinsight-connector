@@ -129,7 +129,7 @@ public class SyncOrchestrationService
         }
 
         // Local Database - always available
-        List<UserMapping> localUserMappings = userSyncService.getAllUserMappings();
+        List<UserMapping> localUserMappings = userSyncService.getAllActiveUserMappings();
         List<GroupMapping> localGroupMappings = groupSyncService.getAllActiveGroups();
         logger.debug("{} local user mappings found.", localUserMappings.size());
         logger.debug("{} local group mappings found.", localGroupMappings.size());
@@ -198,7 +198,8 @@ public class SyncOrchestrationService
                                 ? systemData.currentNucleusGroups
                                 : new ArrayList<>(),
                         localGroupMappings,
-                        userGroupMembershipCache);
+                        userGroupMembershipCache,
+                        systemData.nucleusAvailable);
                 result.append("Group sync: SUCCESS. ");
                 logger.info("Group sync completed successfully.");
             }
@@ -239,7 +240,6 @@ public class SyncOrchestrationService
                 try
                 {
                     userGroupMembershipSyncProcessor.syncUserGroupMemberships(
-                            systemData.alfrescoUsers,
                             updatedUserMappings,
                             updatedGroupMappings,
                             systemData.currentMemberships,
@@ -257,7 +257,7 @@ public class SyncOrchestrationService
             {
                 try
                 {
-                    userGroupMembershipSyncProcessor.performLocalOnlyMembershipOperations(
+                    userGroupMembershipSyncProcessor.syncLocalUserGroupMemberships(
                             updatedUserMappings, updatedGroupMappings, userGroupMembershipCache);
                     result.append("Local membership update: SUCCESS. ");
                     logger.debug("Local-only membership operations complete.");

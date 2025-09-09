@@ -53,7 +53,10 @@ public class UserSyncService
                 .collect(Collectors.toMap(UserMapping::getEmail, Function.identity()));
 
         LocalDateTime now = LocalDateTime.now();
-        existingMappings.forEach(mapping -> mapping.setLastSynced(now));
+        existingMappings.forEach(mapping -> {
+            mapping.setLastSynced(now);
+            mapping.setIsActive(true);
+        });
 
         List<UserMapping> newMappings = mappingsToCreate.stream()
                 .filter(mapping -> !existingMappingMap.containsKey(mapping.getEmail()))
@@ -71,7 +74,7 @@ public class UserSyncService
         return userMappingRepository.saveAll(allMappings);
     }
 
-    public List<UserMapping> getAllUserMappings()
+    public List<UserMapping> getAllActiveUserMappings()
     {
         return userMappingRepository.findByIsActiveTrue();
     }

@@ -51,6 +51,15 @@ public class UserGroupMembershipCacheBuilderService
     private final UserGroupMembershipService userGroupMembershipService;
     private static final Logger logger = LoggerFactory.getLogger(UserGroupMembershipCacheBuilderService.class);
 
+    /**
+     * Creates a 'cache' of users and their corresponding groups from alfresco.
+     *
+     * @param localUserMappings
+     *            the List of user mappings
+     * @return a map of alfresco user id and it's corresponding group ids
+     * @throws Exception
+     *             on timeout or if it's not able to fetch from alfresco
+     */
     public Map<String, List<String>> buildCacheFromAlfresco(List<UserMapping> localUserMappings)
     {
 
@@ -92,6 +101,13 @@ public class UserGroupMembershipCacheBuilderService
         return cache;
     }
 
+    /**
+     * Creates a 'cache' of users and their corresponding groups from local db.
+     *
+     * @param userMappings
+     *            the List of user mappings
+     * @return a map of alfresco user id and it's corresponding group ids
+     */
     public Map<String, List<String>> buildCacheFromLocalState(List<UserMapping> userMappings)
     {
         logger.debug("Building user-group membership cache from local state.");

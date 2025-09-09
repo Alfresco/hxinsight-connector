@@ -54,6 +54,16 @@ public class GroupMappingSyncProcessor
     private final GroupSyncService groupSyncService;
     private static final Logger logger = LoggerFactory.getLogger(GroupMappingSyncProcessor.class);
 
+    /**
+     * Deactivates local groups based on nucleus information. We can't add local groups from nucleus as we dont have group name there.
+     *
+     * @param localGroupMappings
+     *            all local group mappings
+     * @param currentNucleusGroups
+     *            list of groups from nucleus
+     *
+     * @return list of updated group mappings
+     */
     public List<GroupMapping> performNucleusOnlyGroupCleanup(
             List<GroupMapping> localGroupMappings, List<NucleusGroupOutput> currentNucleusGroups)
     {
@@ -82,11 +92,30 @@ public class GroupMappingSyncProcessor
         return groupSyncService.getAllActiveGroups();
     }
 
+    /**
+     * Performs group sync operation with nucleus and local db. If nucleus is not available only local db is synced.
+     *
+     * Only those groups are synced whose users have been synced. Groups with no users or all users who could not be synced are not synced with nucleus.
+     *
+     * @param alfrescoGroups
+     *            list of all alfresco groups
+     * @param currentNucleusGroups
+     *            list of groups from nucleus
+     * @param localGroupMappings
+     *            list of all local group mappings
+     * @param userGroupMembershipsCache
+     *            cache of user and their groups
+     * @param nucleusAvailable
+     *            is nucleus available
+     *
+     * @return list of updated group mappings
+     */
     public List<GroupMapping> syncGroupMappings(
             List<AlfrescoGroup> alfrescoGroups,
             List<NucleusGroupOutput> currentNucleusGroups,
             List<GroupMapping> localGroupMappings,
-            Map<String, List<String>> userGroupMembershipsCache)
+            Map<String, List<String>> userGroupMembershipsCache,
+            boolean nucleusAvailable)
     {
 
         Set<String> relevantAlfrescoGroupIds = userGroupMembershipsCache.values().stream()
@@ -130,7 +159,7 @@ public class GroupMappingSyncProcessor
 
             if (hasAlfrescoGroup)
             {
-                if (!hasNucleusGroup)
+                if (nucleusAvailable && !hasNucleusGroup)
                 {
                     nucleusGroupsToCreate.add(new NucleusGroupInput(alfrescoGroup.getId()));
                 }
@@ -148,7 +177,7 @@ public class GroupMappingSyncProcessor
             }
             else
             {
-                if (hasNucleusGroup)
+                if (nucleusAvailable && hasNucleusGroup)
                 {
                     nucleusGroupsToDelete.add(groupId);
                 }
