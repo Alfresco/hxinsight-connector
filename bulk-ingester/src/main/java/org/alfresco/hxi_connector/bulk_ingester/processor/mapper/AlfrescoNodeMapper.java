@@ -54,9 +54,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.AccessControlEntry;
+import org.alfresco.database.connector.model.AccessControlEntryKey;
+import org.alfresco.database.connector.model.AlfrescoNode;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j

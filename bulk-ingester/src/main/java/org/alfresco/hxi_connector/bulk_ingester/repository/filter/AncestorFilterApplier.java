@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.bulk_ingester.repository.filter;
 import static java.time.Instant.ofEpochMilli;
 import static java.time.ZonedDateTime.ofInstant;
 
-import static org.alfresco.elasticsearch.db.connector.ParentChildAssociationOrdinality.PRIMARY;
+import static org.alfresco.database.connector.ParentChildAssociationOrdinality.PRIMARY;
 
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
@@ -43,11 +43,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.elasticsearch.db.connector.AlfrescoMetadataRepository;
-import org.alfresco.elasticsearch.db.connector.ChildAssocParams;
-import org.alfresco.elasticsearch.db.connector.ParentChildAssociationOrdinality;
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.ChildAssocMetaData;
+import org.alfresco.database.connector.AlfrescoMetadataRepository;
+import org.alfresco.database.connector.ChildAssocParams;
+import org.alfresco.database.connector.ParentChildAssociationOrdinality;
+import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.ChildAssocMetaData;
 import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
 
 @Component

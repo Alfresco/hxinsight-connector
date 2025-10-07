@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -34,8 +34,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.SetUtils;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.QName;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
 import org.alfresco.hxi_connector.common.repository.filter.CollectionFilter;
 

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,12 +31,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.alfresco.elasticsearch.db.connector.AlfrescoMetadataRepository;
-import org.alfresco.elasticsearch.db.connector.ChildAssocParams;
-import org.alfresco.elasticsearch.db.connector.NodeParams;
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.ChildAssocMetaData;
-import org.alfresco.elasticsearch.db.connector.model.TagData;
+import org.alfresco.database.connector.AlfrescoMetadataRepository;
+import org.alfresco.database.connector.ChildAssocParams;
+import org.alfresco.database.connector.NodeParams;
+import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.ChildAssocMetaData;
+import org.alfresco.database.connector.model.TagData;
 
 class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
 {
