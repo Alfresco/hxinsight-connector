@@ -47,12 +47,12 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntry;
-import org.alfresco.elasticsearch.db.connector.model.AccessControlEntryKey;
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
-import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
-import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.database.connector.model.AccessControlEntry;
+import org.alfresco.database.connector.model.AccessControlEntryKey;
+import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.NodeProperty;
+import org.alfresco.database.connector.model.PropertyKey;
+import org.alfresco.database.connector.model.QName;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 class AlfrescoNodeMapperTest

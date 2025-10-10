@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -34,8 +34,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
-import org.alfresco.elasticsearch.db.connector.model.QName;
+import org.alfresco.database.connector.model.PropertyKey;
+import org.alfresco.database.connector.model.QName;
 import org.alfresco.hxi_connector.bulk_ingester.exception.BulkIngesterRuntimeException;
 
 @EnableAutoConfiguration

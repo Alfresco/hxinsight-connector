@@ -31,17 +31,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.BOOLEAN;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.CONTENT_DATA_ID;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.DATE;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.DOUBLE;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.FLOAT;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.LONG;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.NODEREF;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.NULL;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.PATH;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.SERIALIZABLE;
-import static org.alfresco.elasticsearch.db.connector.model.PropertyValueType.STRING;
+import static org.alfresco.database.connector.model.PropertyValueType.BOOLEAN;
+import static org.alfresco.database.connector.model.PropertyValueType.CONTENT_DATA_ID;
+import static org.alfresco.database.connector.model.PropertyValueType.DATE;
+import static org.alfresco.database.connector.model.PropertyValueType.DOUBLE;
+import static org.alfresco.database.connector.model.PropertyValueType.FLOAT;
+import static org.alfresco.database.connector.model.PropertyValueType.LONG;
+import static org.alfresco.database.connector.model.PropertyValueType.NODEREF;
+import static org.alfresco.database.connector.model.PropertyValueType.NULL;
+import static org.alfresco.database.connector.model.PropertyValueType.PATH;
+import static org.alfresco.database.connector.model.PropertyValueType.SERIALIZABLE;
+import static org.alfresco.database.connector.model.PropertyValueType.STRING;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -54,12 +54,12 @@ import java.util.Set;
 import org.junit.jupiter.api.Test;
 import org.springframework.util.SerializationUtils;
 
-import org.alfresco.elasticsearch.db.connector.model.AlfrescoNode;
-import org.alfresco.elasticsearch.db.connector.model.ContentMetadata;
-import org.alfresco.elasticsearch.db.connector.model.NodeProperty;
-import org.alfresco.elasticsearch.db.connector.model.PropertyKey;
-import org.alfresco.elasticsearch.db.connector.model.PropertyValue;
-import org.alfresco.elasticsearch.db.connector.model.PropertyValueType;
+import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.ContentMetadata;
+import org.alfresco.database.connector.model.NodeProperty;
+import org.alfresco.database.connector.model.PropertyKey;
+import org.alfresco.database.connector.model.PropertyValue;
+import org.alfresco.database.connector.model.PropertyValueType;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @SuppressWarnings({"PMD.TooManyMethods"})

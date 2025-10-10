@@ -37,11 +37,11 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-elasticsearch-database-connector</artifactId>
+            <artifactId>alfresco-database-connector</artifactId>
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-elasticsearch-database-connector-api</artifactId>
+            <artifactId>alfresco-database-connector-api</artifactId>
         </dependency>
 
         <dependency>
