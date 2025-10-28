@@ -30,6 +30,7 @@ import static java.util.Optional.ofNullable;
 import static lombok.AccessLevel.PRIVATE;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
@@ -39,10 +40,14 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.ancestorsMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -151,6 +156,19 @@ public class PropertyMappingHelper
             return Optional.empty();
         }
         return Optional.of(contentMetadataUpdated(CONTENT_PROPERTY, sourceMimeType, sourceSizeInBytes, sourceFileName));
+    }
+
+    public static Optional<PropertyDelta<?>> calculateAncestorsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        List<String> primaryHierarchy = event.getData().getResource().getPrimaryHierarchy();
+        if (primaryHierarchy == null || primaryHierarchy.isEmpty())
+        {
+            return Optional.empty();
+        }
+        String primaryParentId = primaryHierarchy.get(0);
+        List<String> reversedAncestors = new ArrayList<>(primaryHierarchy.subList(0, primaryHierarchy.size() - 1));
+        Collections.reverse(reversedAncestors);
+        return Optional.of(ancestorsMetadataUpdated(ANCESTORS_PROPERTY, primaryParentId, reversedAncestors));
     }
 
     private static String getUserId(NodeResource node, Function<NodeResource, UserInfo> userInfoGetter)
