@@ -4,6 +4,7 @@ Connector for sending ACS events to Hx Insight and updating the Repository with 
 
 ## Additional Documentation
 
+* [Main components overview](docs/README.md)
 * [ACS Private API Documentation](docs/acs-private-apis.md)
 
 ### Development Environment
