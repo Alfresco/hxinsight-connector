@@ -211,6 +211,207 @@ export HXI_ENVIRONMENT_KEY="your-env-key"
 # hxi.auth.providers.hyland-experience.environment-key=${HXI_ENVIRONMENT_KEY}
 ```
 
+## Docker Compose Configuration
+
+The HxInsight Extension is deployed as an AMP within the Alfresco Repository container. Configuration is provided via Java system properties in the `JAVA_OPTS` environment variable.
+
+### Example Docker Compose Service
+
+```yaml
+alfresco:
+  image: quay.io/alfresco/alfresco-content-repository-hxinsight-extension:${HXINSIGHT_CONNECTOR_TAG}
+  deploy:
+    resources:
+      limits:
+        memory: 1700m
+  depends_on:
+    - postgres
+    - activemq
+  environment:
+    JAVA_OPTS: "
+      -Ddb.driver=org.postgresql.Driver
+      -Ddb.username=alfresco
+      -Ddb.password=alfresco
+      -Ddb.url=jdbc:postgresql://postgres:5432/alfresco
+      -Dmessaging.broker.url=\"failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true\"
+      -Dhxi.discovery.base-url=https://insight.hyland.com
+      -Dhxi.auth.providers.hyland-experience.token-uri=https://auth.hyland.com/token
+      -Dhxi.auth.providers.hyland-experience.client-id=${HXI_CLIENT_ID}
+      -Dhxi.auth.providers.hyland-experience.client-secret=${HXI_CLIENT_SECRET}
+      -Dhxi.auth.providers.hyland-experience.environment-key=${HXI_ENV_KEY}
+      -Dhxi.question.max-context-size-for-question=100
+      -Xms1500m -Xmx1500m
+      "
+  ports:
+    - "8080:8080"
+  healthcheck:
+    test: curl --fail http://localhost:8080/alfresco || exit 1
+    start_period: 45s
+    interval: 10s
+    timeout: 3s
+    retries: 30
+```
+
+### Key Configuration Points for Docker Compose
+
+1. **Java System Properties**: Configuration is passed via `-D` flags in `JAVA_OPTS`
+   - Use `-Dhxi.property.name=value` format
+
+2. **Service Discovery**: Use Docker service names for internal services
+   - External HxI endpoints use production URLs
+
+3. **Environment Variables**: Sensitive values should be externalized
+   - Reference with `${VARIABLE_NAME}` syntax
+   - Define in `.env` file or Docker secrets
+
+4. **Memory Configuration**: Set appropriate heap size
+   - Recommended: `-Xms1500m -Xmx1500m` for production
+
+5. **Health Checks**: Configure startup and health probes
+   - Repository may take time to initialize the extension
+
+### Production Configuration Example
+
+For production deployments with enhanced security:
+
+```yaml
+alfresco:
+  image: quay.io/alfresco/alfresco-content-repository-hxinsight-extension:${HXINSIGHT_CONNECTOR_TAG}
+  deploy:
+    resources:
+      limits:
+        memory: 3g
+      reservations:
+        memory: 2g
+    restart_policy:
+      condition: on-failure
+      delay: 10s
+      max_attempts: 3
+  environment:
+    JAVA_OPTS: "
+      -Ddb.driver=org.postgresql.Driver
+      -Ddb.username=${DB_USERNAME}
+      -Ddb.password=${DB_PASSWORD}
+      -Ddb.url=jdbc:postgresql://postgres:5432/alfresco
+      -Dmessaging.broker.url=\"failover:(nio://activemq:61616)?timeout=3000&jms.useCompression=true\"
+      -Dhxi.discovery.base-url=${HXI_DISCOVERY_URL}
+      -Dhxi.auth.providers.hyland-experience.token-uri=${HXI_TOKEN_URI}
+      -Dhxi.auth.providers.hyland-experience.client-id=${HXI_CLIENT_ID}
+      -Dhxi.auth.providers.hyland-experience.client-secret=${HXI_CLIENT_SECRET}
+      -Dhxi.auth.providers.hyland-experience.environment-key=${HXI_ENV_KEY}
+      -Dhxi.auth.retry.attempts=5
+      -Dhxi.question.max-context-size-for-question=150
+      -Dserviceaccount.role.service-account-hxi-connector=ROLE_HXI_CONNECTOR
+      -Xms2g -Xmx2g
+      "
+  secrets:
+    - hxi_client_secret
+    - db_password
+  healthcheck:
+    test: curl --fail http://localhost:8080/alfresco/api/-default-/public/alfresco/versions/1/probes/-ready- || exit 1
+    start_period: 120s
+    interval: 30s
+    timeout: 10s
+    retries: 3
+```
+
+### Environment File
+
+Use a `.env` file to manage configuration:
+
+```dotenv
+# Version Tags
+HXINSIGHT_CONNECTOR_TAG=2.0.3-SNAPSHOT
+ALFRESCO_TAG=25.2.0-A.12
+
+# HxI Configuration
+HXI_DISCOVERY_URL=https://insight.hyland.com
+HXI_TOKEN_URI=https://auth.hyland.com/token
+HXI_CLIENT_ID=your-client-id
+HXI_ENV_KEY=your-env-key
+
+# Sensitive values in Docker secrets instead:
+# HXI_CLIENT_SECRET - use Docker secrets
+# DB_PASSWORD - use Docker secrets
+```
+
+### Alternative: Using Mounted Configuration Files
+
+You can also mount an `alfresco-global.properties` file:
+
+```yaml
+alfresco:
+  image: quay.io/alfresco/alfresco-content-repository-hxinsight-extension:${HXINSIGHT_CONNECTOR_TAG}
+  volumes:
+    - ./alfresco-global.properties:/usr/local/tomcat/shared/classes/alfresco-global.properties:ro
+  # ... rest of configuration
+```
+
+**Example `alfresco-global.properties`:**
+
+```properties
+# HxI Extension Configuration
+hxi.discovery.base-url=https://insight.hyland.com
+hxi.auth.providers.hyland-experience.type=oauth2
+hxi.auth.providers.hyland-experience.client-id=${env.HXI_CLIENT_ID}
+hxi.auth.providers.hyland-experience.client-secret=${env.HXI_CLIENT_SECRET}
+hxi.auth.providers.hyland-experience.token-uri=https://auth.hyland.com/token
+hxi.auth.providers.hyland-experience.environment-key=${env.HXI_ENV_KEY}
+```
+
+### Complete Example Files
+
+Complete Docker Compose examples with HxInsight Extension are available in the project repository:
+
+- **Full Stack**: `distribution/src/main/resources/docker-compose/docker-compose.yml`
+  - Includes Alfresco with HxInsight Extension (for local development, uses WireMock for HxI services)
+  - Update HxI endpoints to point to your actual HxI environment
+
+- **With Keycloak**: `distribution/src/main/resources/docker-compose/docker-compose-w-keycloak.yml`
+  - Includes Keycloak for OAuth2/OIDC authentication
+
+**Note:** The example files include mock services for local development. For production deployments, configure the HxI endpoints to point to your actual Hyland Experience Insight environment.
+
+### Running with Docker Compose
+
+```bash
+# Navigate to docker-compose directory
+cd distribution/src/main/resources/docker-compose
+
+# Start the full stack
+docker compose up -d
+
+# View Alfresco logs (includes extension logs)
+docker compose logs -f alfresco
+
+# Check extension initialization
+docker compose logs alfresco | grep hxi_connector
+
+# Access Alfresco
+# Repository: http://localhost:8080/alfresco
+# Share: http://localhost:8080/share
+
+# Stop services
+docker compose down
+```
+
+### Verifying Extension Deployment
+
+After starting the Alfresco container, verify the extension is deployed:
+
+```bash
+# Check module installation
+docker compose exec alfresco \
+  curl -u admin:admin \
+  http://localhost:8080/alfresco/service/modules/deployed
+
+# Test HxI extension REST API
+docker compose exec alfresco \
+  curl -u admin:admin \
+  http://localhost:8080/alfresco/api/-default-/private/hxi/versions/1/predictions
+```
+
+
 ## Property Override Locations
 
 Configuration properties can be placed in:
