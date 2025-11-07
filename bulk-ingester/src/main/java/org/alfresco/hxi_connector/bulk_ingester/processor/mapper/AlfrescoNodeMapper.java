@@ -105,7 +105,7 @@ public class AlfrescoNodeMapper
         allProperties.put(TYPE_PROPERTY, type);
         allProperties.put(CREATED_BY_PROPERTY, creatorId);
         allProperties.put(MODIFIED_BY_PROPERTY, modifierId);
-        
+
         if (!aspectNames.isEmpty())
         {
             allProperties.put(ASPECT_NAMES_PROPERTY, aspectNames);
