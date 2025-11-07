@@ -41,6 +41,8 @@ import org.alfresco.database.connector.model.TagData;
 class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
 {
     private final List<AlfrescoNode> nodes = new ArrayList<>();
+    private boolean primaryHierarchyEnabled = false;
+    private int primaryHierarchyRequestCount = 0;
 
     public void setNodes(List<AlfrescoNode> nodes)
     {
@@ -48,9 +50,29 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
         this.nodes.addAll(nodes);
     }
 
+    public void setPrimaryHierarchyEnabled(boolean enabled)
+    {
+        this.primaryHierarchyEnabled = enabled;
+    }
+
+    public boolean wasPrimaryHierarchyRequested()
+    {
+        return primaryHierarchyEnabled && primaryHierarchyRequestCount > 0;
+    }
+
+    public int getPrimaryHierarchyRequestCount()
+    {
+        return primaryHierarchyRequestCount;
+    }
+
     @Override
     public List<AlfrescoNode> getAlfrescoNodes(NodeParams nodeParams)
     {
+        if (primaryHierarchyEnabled)
+        {
+            primaryHierarchyRequestCount++;
+        }
+
         if (nodeParams.getTimestampRange().isPresent())
         {
             throw new UnsupportedOperationException("Not implemented");

@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import static java.time.ZoneOffset.UTC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
@@ -50,7 +51,9 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -388,6 +391,8 @@ class PropertiesMapperTest
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
+
+
 
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {

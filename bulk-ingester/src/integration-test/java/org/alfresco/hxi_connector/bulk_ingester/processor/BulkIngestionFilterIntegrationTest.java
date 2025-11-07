@@ -44,6 +44,11 @@ import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.TimeProvider;
 import org.alfresco.hxi_connector.bulk_ingester.util.integration.PostgresIntegrationTestBase;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 @EnableAutoConfiguration
 @SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG",
         "alfresco.filter.aspect.allow[0]=cm:titled",
@@ -84,33 +89,109 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
     void shouldFilterOutNodesWithoutAllowedAspectOrWithDeniedAspect()
     {
         // given
+        Map<String, Serializable> categoryProperties = new HashMap<>();
+        categoryProperties.put("type", "cm:category");
+        categoryProperties.put("cm:name", "Animal Species");
+        categoryProperties.put("createdAt", "2024-02-19T08:00:28.040Z");
+        categoryProperties.put("modifiedAt", "2024-02-19T09:31:46.154Z");
+        categoryProperties.put("aspectsNames", (Serializable) List.of("cm:auditable"));
+        categoryProperties.put("createdBy", "admin");
+        categoryProperties.put("modifiedBy", "admin");
+        categoryProperties.put("ancestors", (Serializable) Map.of(
+                "primaryParentId", "",
+                "primaryAncestorIds", (Serializable) List.of()));
+
         IngestEvent category = IngestEvent.builder()
                 .nodeId("94e0b276-6447-4dbc-b32a-1d37836a8066")
-                .properties(parseProperties("type=cm:category", "cm:name=Animal Species", "createdAt=2024-02-19T08:00:28.040Z", "modifiedAt=2024-02-19T09:31:46.154Z", "aspectsNames=[cm:auditable]", "createdBy=admin", "modifiedBy=admin"))
+                .properties(categoryProperties)
                 .timestamp(TIMESTAMP)
                 .build();
+
+        Map<String, Serializable> folderProperties = new HashMap<>();
+        folderProperties.put("type", "cm:folder");
+        folderProperties.put("cm:name", "Animals");
+        folderProperties.put("cm:title", "Animals overview");
+        folderProperties.put("createdAt", "2024-02-19T08:00:28.040Z");
+        folderProperties.put("modifiedAt", "2024-02-19T09:31:46.154Z");
+        folderProperties.put("aspectsNames", (Serializable) List.of("cm:titled", "cm:auditable"));
+        folderProperties.put("createdBy", "admin");
+        folderProperties.put("cm:description", "This folder contains overview of the animals in our zoo");
+        folderProperties.put("modifiedBy", "admin");
+        folderProperties.put("ancestors", (Serializable) Map.of(
+                "primaryParentId", "",
+                "primaryAncestorIds", (Serializable) List.of()));
+
         IngestEvent folder = IngestEvent.builder()
                 .nodeId("dad275aa-affc-487d-a7ed-92cf8e6ce351")
-                .properties(parseProperties("type=cm:folder", "cm:name=Animals", "cm:title=Animals overview", "createdAt=2024-02-19T08:00:28.040Z", "modifiedAt=2024-02-19T09:31:46.154Z", "aspectsNames=[cm:titled, cm:auditable]", "createdBy=admin", "cm:description=This folder contains overview of the animals in our zoo", "modifiedBy=admin"))
+                .properties(folderProperties)
                 .timestamp(TIMESTAMP)
                 .build();
+
+        Map<String, Serializable> textFileProperties = new HashMap<>();
+        textFileProperties.put("cm:name", "Animals list");
+        textFileProperties.put("cm:title", "List of animals");
+        textFileProperties.put("type", "cm:content");
+        textFileProperties.put("createdAt", "2024-02-19T08:00:28.040Z");
+        textFileProperties.put("modifiedAt", "2024-02-19T09:31:46.154Z");
+        textFileProperties.put("app:editInline", true);
+        textFileProperties.put("aspectsNames", (Serializable) List.of("cm:generalclassifiable", "app:inlineeditable", "cm:thumbnailModification", "cm:titled", "cm:taggable", "rn:renditioned", "cm:auditable"));
+        textFileProperties.put("cm:categories", "25805c3b-dc41-4a3d-9b03-a44ac7963c70");
+        textFileProperties.put("createdBy", "admin");
+        textFileProperties.put("cm:lastThumbnailModification", (Serializable) List.of("doclib:1708329633941", "pdf:1708329629285"));
+        textFileProperties.put("cm:description", "List of animals in our zoo");
+        textFileProperties.put("modifiedBy", "admin");
+        textFileProperties.put("ALLOW_ACCESS", (Serializable) List.of("GROUP_EVERYONE"));
+        textFileProperties.put("ancestors", (Serializable) Map.of(
+                "primaryParentId", "dad275aa-affc-487d-a7ed-92cf8e6ce351",
+                "primaryAncestorIds", (Serializable) List.of("6d7c466b-efd0-4b88-b77f-a941f3a2f025", "e7a273da-2974-4581-a219-5e897342844a","dad275aa-affc-487d-a7ed-92cf8e6ce351")));
+
         IngestEvent textFile = IngestEvent.builder()
                 .nodeId("44545a62-0f64-4d3e-838a-9f8ba23df0c7")
                 .contentInfo(new IngestEvent.ContentInfo(28, "UTF-8", "text/plain"))
-                .properties(parseProperties("cm:name=Animals list", "cm:title=List of animals", "type=cm:content", "createdAt=2024-02-19T08:00:28.040Z", "modifiedAt=2024-02-19T09:31:46.154Z", "app:editInline=true", "aspectsNames=[cm:generalclassifiable, app:inlineeditable, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]", "cm:categories=25805c3b-dc41-4a3d-9b03-a44ac7963c70", "createdBy=admin", "cm:lastThumbnailModification=[doclib:1708329633941, pdf:1708329629285]", "cm:description=List of animals in our zoo", "modifiedBy=admin", "ALLOW_ACCESS=[GROUP_EVERYONE]"))
+                .properties(textFileProperties)
                 .timestamp(TIMESTAMP)
                 .build();
+
+        Map<String, Serializable> pdfFileProperties = new HashMap<>();
+        pdfFileProperties.put("cm:name", "carp.pdf");
+        pdfFileProperties.put("type", "cm:content");
+        pdfFileProperties.put("cm:autoVersion", true);
+        pdfFileProperties.put("cm:title", "");
+        pdfFileProperties.put("cm:versionType", "MAJOR");
+        pdfFileProperties.put("cm:versionLabel", "1.0");
+        pdfFileProperties.put("cm:autoVersionOnUpdateProps", false);
+        pdfFileProperties.put("aspectsNames", (Serializable) List.of("cm:generalclassifiable", "cm:versionable", "cm:author", "cm:thumbnailModification", "cm:titled", "cm:taggable", "rn:renditioned", "cm:auditable"));
+        pdfFileProperties.put("cm:categories", "fa6b38cd-442a-4f77-9d3e-dc212a6b809e");
+        pdfFileProperties.put("cm:lastThumbnailModification", "doclib:1708330172467");
+        pdfFileProperties.put("cm:description", "");
+        pdfFileProperties.put("createdAt", "2024-02-19T08:00:28.040Z");
+        pdfFileProperties.put("modifiedAt", "2024-02-19T09:31:46.154Z");
+        pdfFileProperties.put("cm:initialVersion", true);
+        pdfFileProperties.put("createdBy", "admin");
+        pdfFileProperties.put("modifiedBy", "admin");
+        pdfFileProperties.put("ancestors", (Serializable) Map.of(
+                "primaryParentId", "",
+                "primaryAncestorIds", (Serializable) List.of()));
+
         IngestEvent pdfFile = IngestEvent.builder()
                 .nodeId("02acf462-533d-4e1b-9825-05fa934140da")
                 .contentInfo(new IngestEvent.ContentInfo(119625, "UTF-8", "application/pdf"))
-                .properties(parseProperties("cm:name=carp.pdf", "type=cm:content", "cm:autoVersion=true", "cm:title=", "cm:versionType=MAJOR", "cm:versionLabel=1.0", "cm:autoVersionOnUpdateProps=false", "aspectsNames=[cm:generalclassifiable, cm:versionable, cm:author, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]", "cm:categories=fa6b38cd-442a-4f77-9d3e-dc212a6b809e", "cm:lastThumbnailModification=doclib:1708330172467", "cm:description=", "createdAt=2024-02-19T08:00:28.040Z", "modifiedAt=2024-02-19T09:31:46.154Z", "cm:initialVersion=true", "createdBy=admin", "modifiedBy=admin"))
+                .properties(pdfFileProperties)
                 .timestamp(TIMESTAMP)
                 .build();
-        // below node is located in Data dictionary which is in denied ancestors filter (in BulkIngestionProcessorIntegrationTest this node gets processed as it uses empty filters)
+
         IngestEvent emailTemplate = IngestEvent.builder()
                 .nodeId("3d022f89-1ee0-49af-ac54-55c16702b188")
                 .contentInfo(new IngestEvent.ContentInfo(6156, "UTF-8", "text/plain"))
-                .properties(parseProperties("cm:title=invite-email_it.html.ftl", "createdAt=2024-02-19T08:00:28.040Z", "modifiedAt=2024-02-19T09:31:46.154Z", "createdBy=System", "cm:name=invite-email_it.html.ftl", "app:editInline=true", "aspectsNames=[app:inlineeditable, cm:titled, cm:auditable]", "modifiedBy=System", "type=cm:content", "cm:description=Email template used to generate the invite email for Alfresco Share - Italian version"))
+                .properties(parsePropertiesWithAncestors(
+                        createAncestorsMap("d37ab7e8-f181-41ed-822a-8f22f6626429",
+                                List.of("811e21ac-7d5a-469b-ab6e-ec3c8cd8a864", "e7a273da-2974-4581-a219-5e897342844a",
+                                        "832b097a-c6ab-4e37-a0e3-a1c52d0e79bf", "6d7c466b-efd0-4b88-b77f-a941f3a2f025")),
+                        "cm:title=invite-email_it.html.ftl", "createdAt=2024-02-19T07:51:13.391Z", "modifiedAt=2024-02-19T07:51:13.391Z",
+                        "createdBy=System", "cm:name=invite-email_it.html.ftl", "app:editInline=true",
+                        "aspectsNames=[app:inlineeditable, cm:titled, cm:auditable]", "modifiedBy=System", "type=cm:content",
+                        "cm:description=Email template used to generate the invite email for Alfresco Share - Italian version",
+                        "ALLOW_ACCESS=[GROUP_EVERYONE]"))
                 .timestamp(TIMESTAMP)
                 .build();
 
@@ -124,5 +205,16 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         ingestEventPublisher.assertNodeNotPublished(pdfFile);
         ingestEventPublisher.assertNodeNotPublished(emailTemplate);
     }
+    private Map<String, Serializable> parsePropertiesWithAncestors(Map<String, Serializable> ancestors, String... properties) {
+        Map<String, Serializable> props = parseProperties(properties);
+        props.put("ancestors", (Serializable) ancestors);
+        return props;
+    }
 
+    private Map<String, Serializable> createAncestorsMap(String primaryParentId, List<String> primaryAncestorIds) {
+        Map<String, Serializable> ancestors = new HashMap<>();
+        ancestors.put("primaryParentId", primaryParentId);
+        ancestors.put("primaryAncestorIds", (Serializable) primaryAncestorIds);
+        return ancestors;
+    }
 }

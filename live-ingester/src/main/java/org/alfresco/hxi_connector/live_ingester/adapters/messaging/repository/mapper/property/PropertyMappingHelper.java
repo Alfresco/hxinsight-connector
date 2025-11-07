@@ -39,10 +39,17 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -133,7 +140,26 @@ public class PropertyMappingHelper
 
         return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));
     }
+    public static Optional<PropertyDelta<?>> calculateAncestorsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        List<String> primaryHierarchy = event.getData().getResource().getPrimaryHierarchy();
 
+        if (primaryHierarchy == null || primaryHierarchy.isEmpty())
+        {
+            return Optional.empty();
+        }
+        String primaryParentId = primaryHierarchy.get(0);
+        Collections.reverse(primaryHierarchy);
+//        if (!primaryHierarchy.isEmpty())
+//        {
+//            primaryHierarchy.remove(primaryHierarchy.size() - 1);
+//        }
+        Map<String, Serializable> ancestorsData = new HashMap<>();
+        ancestorsData.put("primaryParentId", primaryParentId);
+        ancestorsData.put("primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));
+
+        return Optional.of(PropertyDelta.updated(ANCESTORS_PROPERTY, ancestorsData));
+    }
     private static String formatDateTime(ZonedDateTime time)
     {
         return time == null ? null : DATE_TIME_FORMATTER.format(time);
