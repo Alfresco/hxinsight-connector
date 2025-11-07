@@ -66,13 +66,6 @@ body: [
         "value": "admin",
         "annotation": "modifiedBy"
       },
-      "ancestors" : {
-        "value" : {
-          "primaryParentId" : "9cde9dd0-e9b3-4cf1-9e9d-d0e9b33cf1fc",
-          "primaryAncestorIds" : [ "5a796cd6-5522-4ec9-b96c-d655227ec9a5", "a0f105b8-8f5a-45e1-b105-b88f5ac5e179", "1536141f-5b48-499d-b614-1f5b48499dca", "b4cff62a-664d-4d45-9302-98723eac1319", "8f2105b4-daaf-4874-9e8a-2152569d109b","9cde9dd0-e9b3-4cf1-9e9d-d0e9b33cf1fc" ]
-        },
-        "annotation" : "hierarchy"
-      },
       "cm:content": {
         "file": {
           "content-metadata": {

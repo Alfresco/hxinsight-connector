@@ -38,17 +38,12 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
-// Add this constant at the top with other imports
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -62,7 +57,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.database.connector.model.AccessControlEntry;
 import org.alfresco.database.connector.model.AccessControlEntryKey;
 import org.alfresco.database.connector.model.AlfrescoNode;
-import org.alfresco.database.connector.model.ChildAssocMetaData;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
@@ -81,20 +75,6 @@ public class AlfrescoNodeMapper
     {
         String nodeId = alfrescoNode.getNodeRef();
         String type = namespacePrefixMapper.toPrefixedName(alfrescoNode.getType());
-        String parentId = ofNullable(alfrescoNode.getPrimaryParentAssociation())
-                .map(ChildAssocMetaData::getParentUuid)
-                .orElse(null);
-//        List<String> primaryHierarchy = ofNullable(alfrescoNode.primaryHierarchy())
-//                .orElse(List.of())
-//                .stream()
-//                .collect(Collectors.toList());
-        List<String> primaryHierarchy = ofNullable(alfrescoNode.primaryHierarchy())
-                .orElse(List.of())
-                .stream()
-                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
-                    Collections.reverse(list);
-                    return list;
-                }));
         String creatorId = alfrescoNode.getCreator();
         String modifierId = alfrescoNode.getModifier();
         HashSet<String> aspectNames = alfrescoNode.getAspects().stream().map(namespacePrefixMapper::toPrefixedName).collect(Collectors.toCollection(HashSet::new));
@@ -105,7 +85,6 @@ public class AlfrescoNodeMapper
         allProperties.put(TYPE_PROPERTY, type);
         allProperties.put(CREATED_BY_PROPERTY, creatorId);
         allProperties.put(MODIFIED_BY_PROPERTY, modifierId);
-        
         if (!aspectNames.isEmpty())
         {
             allProperties.put(ASPECT_NAMES_PROPERTY, aspectNames);
@@ -113,25 +92,19 @@ public class AlfrescoNodeMapper
         allProperties.put(CREATED_AT_PROPERTY, createdAt);
         allProperties.put(MODIFIED_AT_PROPERTY, modifiedAt);
 
-        @SuppressWarnings("unchecked")
         Set<String> allowAccess = (Set<String>) getResourceReaderAuthorities(alfrescoNode);
         if (!allowAccess.isEmpty())
         {
             allProperties.put(ALLOW_ACCESS, (Serializable) allowAccess);
         }
 
-        @SuppressWarnings("unchecked")
         Set<String> denyAccess = (Set<String>) getResourceDeniedAuthorities(alfrescoNode);
         if (!denyAccess.isEmpty())
         {
             allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
         }
-        Map<String, Serializable> ancestorsMap = Map.of(
-                "primaryParentId", parentId != null ? parentId : "",
-                "primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy)
-        );
-        allProperties.put(ANCESTORS_PROPERTY, (Serializable) ancestorsMap);
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
+
         Map<String, Serializable> properties = getProperties(allProperties);
 
         return new IngestEvent(
