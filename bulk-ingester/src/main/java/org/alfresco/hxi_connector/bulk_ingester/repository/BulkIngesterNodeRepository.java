@@ -46,7 +46,7 @@ import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFi
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class BulkIngesterNodeRepository
+public class  BulkIngesterNodeRepository
 {
     private final AlfrescoMetadataRepository metadataRepository;
 
@@ -56,7 +56,7 @@ public class BulkIngesterNodeRepository
 
     public Stream<AlfrescoNode> find(IdRange idRange)
     {
-        NodeParams nodeParams = NodeParams.searchByIdRange(idRange.from(), idRange.to());
+        NodeParams nodeParams = NodeParams.searchByIdRange(idRange.from(), idRange.to()).withPrimaryHierarchy(true);
 
         return IntStream.iterate(0, page -> page + 1)
                 .mapToObj(page -> nodeParams.withPaging(page, bulkIngesterRepositoryConfig.pageSize()))

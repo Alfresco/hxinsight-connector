@@ -122,7 +122,51 @@ class BulkIngesterNodeRepositoryTest
         assertTrue(logs.get(3).contains("Found node 1"));
         assertTrue(logs.get(4).contains("Looking for nodes"));
     }
+    @Test
+    void shouldFindAllNodesWithPrimaryHierarchy()
+    {
+        IdRange idRange = new IdRange(0, 4);
+        List<AlfrescoNode> nodes = List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3));
 
+        metadataRepository.setNodes(nodes);
+        metadataRepository.setPrimaryHierarchyEnabled(true);
+
+        List<AlfrescoNode> foundNodes = nodeRepository.find(idRange)
+                .toList();
+
+        assertEquals(nodes, foundNodes);
+        assertTrue(metadataRepository.wasPrimaryHierarchyRequested());
+    }
+
+    @Test
+    void shouldReturnEmptyListIfNoNodesWithPrimaryHierarchy()
+    {
+        IdRange idRange = new IdRange(0, 5);
+        List<AlfrescoNode> nodes = List.of();
+
+        metadataRepository.setNodes(nodes);
+        metadataRepository.setPrimaryHierarchyEnabled(true);
+
+        List<AlfrescoNode> foundNodes = nodeRepository.find(idRange)
+                .toList();
+
+        assertEquals(nodes, foundNodes);
+        assertTrue(metadataRepository.wasPrimaryHierarchyRequested());
+    }
+
+    @Test
+    void shouldRequestPrimaryHierarchyForEachPage()
+    {
+        ListAppender<ILoggingEvent> testLogsAppender = createLogsListAppender(BulkIngesterNodeRepository.class, BulkIngesterNodeRepositoryTest.class);
+
+        metadataRepository.setNodes(List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3)));
+        metadataRepository.setPrimaryHierarchyEnabled(true);
+
+        nodeRepository.find(new IdRange(0, 4))
+                .forEach(node -> log.debug("Found node {}", node.getId()));
+
+        assertEquals(3, metadataRepository.getPrimaryHierarchyRequestCount());
+    }
     private AlfrescoNode mockNode(long id)
     {
         AlfrescoNode node = mock();
