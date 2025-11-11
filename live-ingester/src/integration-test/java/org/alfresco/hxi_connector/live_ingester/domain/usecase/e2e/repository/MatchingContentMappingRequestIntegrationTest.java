@@ -124,7 +124,18 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
+                      "permissions" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""".formatted(sourceMimeType);
@@ -234,7 +245,18 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
+                      "permissions" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""".formatted(sourceMimeType);

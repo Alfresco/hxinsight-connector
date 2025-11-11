@@ -38,17 +38,25 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.permissionsMetadataUpdated;
 
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import lombok.NoArgsConstructor;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -133,7 +141,40 @@ public class PropertyMappingHelper
 
         return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));
     }
+    public static Optional<PropertyDelta<?>> calculatePermissionsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, AuthorityTypeResolver authorityTypeResolver)
+    {
+        EventData eventData = (EventData) event.getData();
+        if ((eventData.getResourceReaderAuthorities() == null || eventData.getResourceReaderAuthorities().isEmpty())
+                && (eventData.getResourceDeniedAuthorities() == null || eventData.getResourceDeniedAuthorities().isEmpty()))
+        {
+            return Optional.empty();
+        }
+        // We store permissions as a map with two entries: allowAccess and denyAccess
+        // This way we can update both properties in a single PropertyDelta
+        // If either of the lists is null, we treat it as "everyone" for allowAccess and empty for denyAccess
+        Set<String> allowAccess = eventData.getResourceReaderAuthorities() == null
+                ? Set.of(GROUP_EVERYONE)
+                : eventData.getResourceReaderAuthorities();
+        Set<String> denyAccess = eventData.getResourceDeniedAuthorities() == null
+                ? Collections.emptySet()
+                : eventData.getResourceDeniedAuthorities();
 
+        List<AuthorityInfo> allowAccessWithTypes = convertToAuthorityInfoList(allowAccess, authorityTypeResolver);
+        List<AuthorityInfo> denyAccessWithTypes = convertToAuthorityInfoList(denyAccess, authorityTypeResolver);
+
+        return Optional.of(permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes));
+    }
+    public static List<AuthorityInfo> convertToAuthorityInfoList(Collection<String> authorities, AuthorityTypeResolver authorityTypeResolver)
+    {
+        if (authorities == null || authorities.isEmpty())
+        {
+            return Collections.emptyList();
+        }
+        return authorities.stream()
+                .map(authorityId -> new AuthorityInfo(authorityId, authorityTypeResolver.resolveAuthorityType(authorityId)))
+                .filter(authorityInfo -> !AuthorityTypeResolver.AuthorityType.ANY.equals(authorityInfo.getType()))
+                .collect(Collectors.toList());
+    }
     private static String formatDateTime(ZonedDateTime time)
     {
         return time == null ? null : DATE_TIME_FORMATTER.format(time);

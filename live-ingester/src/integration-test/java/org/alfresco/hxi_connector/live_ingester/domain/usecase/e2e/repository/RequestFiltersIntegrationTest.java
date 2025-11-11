@@ -128,7 +128,18 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
+                      "permissions" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""";
@@ -287,7 +298,18 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
+                      "permissions" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""";
@@ -605,7 +627,9 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "cm:taggable": null,
                         "cm:description": "Old Description"
                       },
-                      "aspectNames": [ "cm:versionable" ]
+                      "aspectNames": [ "cm:versionable" ],
+                      "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
+                      "resourceDeniedAuthorities": []
                     }
                   }
                 }""";
@@ -658,6 +682,17 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
+                      },
+                      "permissions" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
                       }
                     }
                   }
