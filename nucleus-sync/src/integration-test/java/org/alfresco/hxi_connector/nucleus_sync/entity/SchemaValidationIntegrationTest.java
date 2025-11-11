@@ -30,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.Test;
@@ -45,25 +46,25 @@ public class SchemaValidationIntegrationTest
     private DataSource dataSource;
 
     @Test
-    public void userMappingsTableExists() throws Exception
+    public void userMappingsTableExists() throws SQLException
     {
         assertTableExists("USER_MAPPINGS");
     }
 
     @Test
-    public void groupMappingsTableExists() throws Exception
+    public void groupMappingsTableExists() throws SQLException
     {
         assertTableExists("GROUP_MAPPINGS");
     }
 
     @Test
-    public void userGroupMembershipsTableExists() throws Exception
+    public void userGroupMembershipsTableExists() throws SQLException
     {
         assertTableExists("USER_GROUP_MEMBERSHIPS");
     }
 
     @Test
-    public void userMappingsHasUniqueEmailConstraint() throws Exception
+    public void userMappingsHasUniqueEmailConstraint() throws SQLException
     {
         try (Connection conn = dataSource.getConnection())
         {
@@ -85,7 +86,7 @@ public class SchemaValidationIntegrationTest
         }
     }
 
-    private void assertTableExists(String tableName) throws Exception
+    private void assertTableExists(String tableName) throws SQLException
     {
         try (Connection conn = dataSource.getConnection())
         {
