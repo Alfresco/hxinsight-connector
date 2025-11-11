@@ -388,43 +388,8 @@ services:
       - "${LOCALSTACK_VOLUME_DIR:-./volume}:/var/lib/localstack"
       - "/var/run/docker.sock:/var/run/docker.sock"
 
-  nucleus-sync:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-nucleus-sync:${HXINSIGHT_CONNECTOR_TAG}
-    deploy:
-      resources:
-        limits:
-          memory: 512m
-    depends_on:
-      alfresco:
-        condition: service_healthy
-    environment:
-      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5010,server=y,suspend=n
-      SERVER_PORT: 8081
-      SYNC_ENABLED: true
-      SYNC_CRON_EXPRESSION: "0 */2 * * * ?"
-      AUTH_ALFRESCO_TYPE: basic
-      ALFRESCO_USER_NAME:
-      ALFRESCO_PASSWORD:
-      AUTH_HX_TYPE: oauth2
-      HX_CLIENT_ID:
-      HX_CLIENT_SECRET:
-      HX_TOKEN_URI: https://auth.iam.dev.experience.hyland.com/idp/connect/token
-      HX_ENV_KEY:
-      NUCLEUS_IDP_BASE_URL: https://auth.iam.dev.experience.hyland.com
-      NUCLEUS_BASE_URL: https://api.nucleus.dev.experience.hyland.com
-      NUCLEUS_SYSTEM_ID:
-      ALFRESCO_BASE_URL: http://alfresco:8080/alfresco/api/-default-/public/alfresco/versions/1
-      SPRING_DATASOURCE_URL: jdbc:sqlite:/data/nucleus-sync.db
-      LOGGING_LEVEL_ORG_ALFRESCO: TRACE
-    ports:
-      - "8081:8081"
-    volumes:
-      - nucleus-sync-data:/data
-
 volumes:
   shared-file-store-volume:
     driver_opts:
       type: tmpfs
       device: tmpfs
-  nucleus-sync-data:
-    driver: local
