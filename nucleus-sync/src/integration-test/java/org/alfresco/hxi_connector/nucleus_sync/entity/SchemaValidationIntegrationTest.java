@@ -52,7 +52,8 @@ public class SchemaValidationIntegrationTest
             DatabaseMetaData metaData = conn.getMetaData();
             try (ResultSet tables = metaData.getTables(null, null, "USER_MAPPINGS", null))
             {
-                assertThat(tables.next()).isTrue();
+                boolean tableExists = tables.next();
+                assertThat(tableExists).isTrue();
             }
         }
     }
@@ -65,7 +66,8 @@ public class SchemaValidationIntegrationTest
             DatabaseMetaData metaData = conn.getMetaData();
             try (ResultSet tables = metaData.getTables(null, null, "GROUP_MAPPINGS", null))
             {
-                assertThat(tables.next()).isTrue();
+                boolean tableExists = tables.next();
+                assertThat(tableExists).isTrue();
             }
         }
     }
@@ -78,7 +80,8 @@ public class SchemaValidationIntegrationTest
             DatabaseMetaData metaData = conn.getMetaData();
             try (ResultSet tables = metaData.getTables(null, null, "USER_GROUP_MEMBERSHIPS", null))
             {
-                assertThat(tables.next()).isTrue();
+                boolean tableExists = tables.next();
+                assertThat(tableExists).isTrue();
             }
         }
     }
