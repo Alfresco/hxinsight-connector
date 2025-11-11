@@ -47,43 +47,19 @@ public class SchemaValidationIntegrationTest
     @Test
     public void userMappingsTableExists() throws Exception
     {
-        try (Connection conn = dataSource.getConnection())
-        {
-            DatabaseMetaData metaData = conn.getMetaData();
-            try (ResultSet tables = metaData.getTables(null, null, "USER_MAPPINGS", null))
-            {
-                boolean tableExists = tables.next();
-                assertThat(tableExists).isTrue();
-            }
-        }
+        assertTableExists("USER_MAPPINGS");
     }
 
     @Test
     public void groupMappingsTableExists() throws Exception
     {
-        try (Connection conn = dataSource.getConnection())
-        {
-            DatabaseMetaData metaData = conn.getMetaData();
-            try (ResultSet tables = metaData.getTables(null, null, "GROUP_MAPPINGS", null))
-            {
-                boolean tableExists = tables.next();
-                assertThat(tableExists).isTrue();
-            }
-        }
+        assertTableExists("GROUP_MAPPINGS");
     }
 
     @Test
     public void userGroupMembershipsTableExists() throws Exception
     {
-        try (Connection conn = dataSource.getConnection())
-        {
-            DatabaseMetaData metaData = conn.getMetaData();
-            try (ResultSet tables = metaData.getTables(null, null, "USER_GROUP_MEMBERSHIPS", null))
-            {
-                boolean tableExists = tables.next();
-                assertThat(tableExists).isTrue();
-            }
-        }
+        assertTableExists("USER_GROUP_MEMBERSHIPS");
     }
 
     @Test
@@ -105,6 +81,23 @@ public class SchemaValidationIntegrationTest
                     }
                 }
                 assertThat(hasUniqueConstraint).isTrue();
+            }
+        }
+    }
+
+    private void assertTableExists(String tableName) throws Exception
+    {
+        try (Connection conn = dataSource.getConnection())
+        {
+            DatabaseMetaData metaData = conn.getMetaData();
+            try (ResultSet tables = metaData.getTables(null, null, tableName, null))
+            {
+                if (!tables.next())
+                {
+                    assertThat(false)
+                            .as("Table %s should exist", tableName)
+                            .isTrue();
+                }
             }
         }
     }
