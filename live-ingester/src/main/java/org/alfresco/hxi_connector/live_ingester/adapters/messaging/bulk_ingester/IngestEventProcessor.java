@@ -28,15 +28,11 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingeste
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.permissionsMetadataUpdated;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
@@ -46,9 +42,6 @@ import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -69,7 +62,6 @@ public class IngestEventProcessor
     private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final MimeTypeMapper mimeTypeMapper;
-    private final AuthorityTypeResolver authorityTypeResolver;
 
     public void process(@Validated IngestEvent ingestEvent)
     {
@@ -111,17 +103,6 @@ public class IngestEventProcessor
         {
             PropertyDelta<?> contentDelta = contentMetadataUpdated(CONTENT_PROPERTY, contentInfo.mimetype(), contentInfo.contentSize(), (String) properties.get(NAME_PROPERTY));
             metadataDelta = Stream.concat(metadataDelta, Stream.of(contentDelta));
-        }
-        // Handle permissions
-        List<String> allowAccess = (List<String>) properties.get("ALLOW_ACCESS");
-        List<String> denyAccess = (List<String>) properties.get("DENY_ACCESS");
-        if (allowAccess != null || denyAccess != null)
-        {
-            List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(allowAccess != null ? allowAccess : Collections.emptyList(), authorityTypeResolver);
-            List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(denyAccess != null ? denyAccess : Collections.emptyList(), authorityTypeResolver);
-
-            PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes);
-            metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));
         }
         return metadataDelta.collect(Collectors.toSet());
     }

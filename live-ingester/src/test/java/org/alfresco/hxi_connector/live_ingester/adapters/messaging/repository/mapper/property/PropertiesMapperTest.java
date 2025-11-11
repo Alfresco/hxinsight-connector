@@ -1,38 +1,33 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
  * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
- * This file is part of the Alfresco software. 
- * If the software was purchased under a paid Alfresco license, the terms of 
- * the paid license agreement will prevail.  Otherwise, the software is 
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
  * provided under the following open source license terms:
- * 
+ *
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- * 
+ *
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- * 
+ *
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property;
 
 import static java.time.ZoneOffset.UTC;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
-import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.permissionsMetadataUpdated;
-
-import java.util.List;
-
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -60,12 +55,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -75,16 +65,11 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
 
-@ExtendWith(MockitoExtension.class)
 class PropertiesMapperTest
 {
     private static final String EXPECTED_DATE_STRING = "2023-01-01T00:00:00.000Z";
 
-    @Mock
-    private AuthorityTypeResolver authorityTypeResolver;
-
-    @InjectMocks
-    private PropertiesMapper propertiesMapper;
+    PropertiesMapper propertiesMapper = new PropertiesMapper();
 
     @Test
     void shouldHandleAllPropertiesUpdated_NodeCreated()
@@ -340,19 +325,13 @@ class PropertiesMapperTest
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
-        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
-
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
         // then
         Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
                 updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                updated(DENY_ACCESS, Set.of(bob)),
-                permissionsMetadataUpdated(PERMISSIONS_PROPERTY,
-                        List.of(new AuthorityInfo(groupEveryone, AuthorityTypeResolver.AuthorityType.GROUP)),
-                        List.of(new AuthorityInfo(bob, AuthorityTypeResolver.AuthorityType.USER))));
+                updated(DENY_ACCESS, Set.of(bob)));
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
@@ -372,8 +351,6 @@ class PropertiesMapperTest
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
-        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
@@ -401,9 +378,6 @@ class PropertiesMapperTest
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
-        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
-
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 

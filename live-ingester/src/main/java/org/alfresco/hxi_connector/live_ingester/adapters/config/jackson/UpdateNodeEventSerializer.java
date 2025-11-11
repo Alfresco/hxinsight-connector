@@ -40,7 +40,6 @@ import java.util.Set;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.PrincipalsMetadata;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
@@ -58,7 +57,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String TYPE = "type";
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
-    private static final String PERMISSIONS = "permissions";
 
     public UpdateNodeEventSerializer()
     {
@@ -89,7 +87,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
                 jgen.writeObjectFieldStart("properties");
                 event.getMetadataPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.name(), property.value(), true));
                 event.getContentPropertiesToSet().values().forEach(property -> writeProperty(jgen, FILE, property.propertyName(), new FileMetadata(property), true));
-                event.getPermissionsPropertiesToSet().values().forEach(property -> writeProperty(jgen, VALUE, property.propertyName(), new PrincipalsMetadata(property), true));
                 jgen.writeEndObject();
             }
 
@@ -165,9 +162,6 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             break;
         case MODIFIED_BY:
             jgen.writeObjectField("annotation", "modifiedBy");
-            break;
-        case PERMISSIONS:
-            jgen.writeObjectField("annotation", "principals");
             break;
         default:
             hasAnnotation = false;

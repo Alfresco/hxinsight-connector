@@ -97,9 +97,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "cm:description": "Old Description"
                       },
                       "aspectNames": [ "cm:versionable", "cm:thumbnailModification", "cm:author" ]
-                    },
-                    "resourceReaderAuthorities": ["GROUP_EVERYONE"],
-                    "resourceDeniedAuthorities": []
+                    }
                   }
                 }""";
         // when
@@ -153,9 +151,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "sizeInBytes": 123,
                         "encoding": "UTF-8"
                       }
-                    },
-                    "resourceReaderAuthorities": ["GROUP_EVERYONE"],
-                    "resourceDeniedAuthorities": []
+                    }
                   }
                 }""";
         // when
@@ -221,17 +217,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                     "content-type" : "application/pdf"
                                   }
                                 }
-                              },
-                              "permissions" : {
-                                "value" : {
-                                  "read" : [ {
-                                    "id" : "GROUP_EVERYONE",
-                                    "type" : "GROUP"
-                                  } ],
-                                  "deny" : [ ],
-                                  "principalsType" : "effective"
-                                },
-                                "annotation" : "principals"
                               }
                             }
                           }
@@ -311,17 +296,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
-                      },
-                      "permissions" : {
-                        "value" : {
-                          "read" : [ {
-                            "id" : "GROUP_EVERYONE",
-                            "type" : "GROUP"
-                          } ],
-                          "deny" : [ ],
-                          "principalsType" : "effective"
-                        },
-                        "annotation" : "principals"
                       }
                     }
                   }
@@ -402,17 +376,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
-                      },
-                      "permissions" : {
-                        "value" : {
-                          "read" : [ {
-                            "id" : "GROUP_EVERYONE",
-                            "type" : "GROUP"
-                          } ],
-                          "deny" : [ ],
-                          "principalsType" : "effective"
-                        },
-                        "annotation" : "principals"
                       }
                     }
                   }
@@ -512,17 +475,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
-                      },
-                      "permissions" : {
-                        "value" : {
-                          "read" : [ {
-                            "id" : "GROUP_EVERYONE",
-                            "type" : "GROUP"
-                          } ],
-                          "deny" : [ ],
-                          "principalsType" : "effective"
-                        },
-                        "annotation" : "principals"
                       }
                     }
                   }
@@ -571,9 +523,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "resourceBefore": {
                       "@type": "NodeResource",
                       "properties": %s
-                    },
-                    "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
-                    "resourceDeniedAuthorities": [ ]
+                    }
                   }
                 }""";
 
@@ -587,117 +537,95 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.prepareHxInsightToReturnSuccess();
 
         String repoEvent = """
-            {
-              "specversion": "1.0",
-              "type": "org.alfresco.event.node.Created",
-              "id": "8da74dd6-766e-4286-b215-ecb5e0d62ba4",
-              "source": "/a1f3e7c0-d193-7023-ce1d-0a63de491876",
-              "time": "2024-01-09T09:41:13.615Z",
-              "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeCreated",
-              "datacontenttype": "application/json",
-              "data": {
-                "eventGroupId": "b5b1ebfe-45fc-4f86-b71b-421996482881",
-                "resource": {
-                  "id": "321d84e3-a5fe-431e-92f5-f8e09480305e",
-                  "name": "321d84e3-a5fe-431e-92f5-f8e09480305e",
-                  "nodeType": "cm:person",
-                  "createdByUser": {"id": "admin"},
-                  "createdAt": "2024-01-09T09:41:13.615Z",
-                  "modifiedByUser": {"id": "admin"},
-                  "modifiedAt": "2024-01-09T09:41:13.615Z",
-                  "properties": {
-                    "cm:lastName": "",
-                    "sys:cascadeCRC": 1040368885,
-                    "cm:homeFolder": {"storeRef": {"protocol": "workspace", "identifier": "SpacesStore"}, "id": "7f1fa040-e840-40c6-a8a0-da457aca2473"},
-                    "cm:homeFolderProvider": "bootstrapHomeFolderProvider"
-                  },
-                  "aspectNames": ["cm:preferences", "cm:ownable"]
-                },
-                "resourceReaderAuthorities": ["GROUP_EVERYONE"],
-                "resourceDeniedAuthorities": []
-              }
-            }""";
-
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Updated",
+                  "id": "621573f5-0fb4-46dd-ab1a-88f83c0e1f2b",
+                  "source": "/6cac945d-0919-47cc-ade7-8645e65c4371",
+                  "time": "2024-01-09T11:14:33.615Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeUpdated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "a7a1ef25-2398-4fb9-8178-f3a6ff6d5ed0",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                      "name": "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                      "nodeType": "cm:person",
+                      "createdByUser": null,
+                      "createdAt": null,
+                      "modifiedByUser": null,
+                      "modifiedAt": null,
+                      "content": null,
+                      "properties": {
+                        "cm:homeFolderProvider": "bootstrapHomeFolderProvider",
+                        "cm:homeFolder": {"storeRef": {"protocol": "workspace", "identifier": "SpacesStore"}, "id": "7f1fa040-e840-40c6-a8a0-da457aca2473"},
+                        "sys:cascadeCRC": 1040368885,
+                        "cm:lastName": ""
+                      },
+                      "aspectNames": [ "cm:preferences", "cm:ownable" ],
+                      "isFolder": false,
+                      "isFile": false
+                    },
+                    "resourceBefore": {
+                      "@type": "NodeResource",
+                      "properties": {
+                        "cm:preferenceValues": null
+                      },
+                      "aspectNames": [ "cm:ownable" ]
+                    }
+                  }
+                }""";
         // when
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
         String expectedBody = """
-            [
-              {
-                "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
-                "sourceId": "a1f3e7c0-d193-7023-ce1d-0a63de491876",
-                "eventType": "createOrUpdate",
-                "sourceTimestamp": 1704793273615,
-                "properties": {
-                  "aspectsNames": {
-                    "value": ["cm:preferences", "cm:ownable"],
-                    "annotation": "aspects"
-                  },
-                  "cm:homeFolderProvider": {
-                    "type": "string",
-                    "value": "bootstrapHomeFolderProvider"
-                  },
-                  "createdAt": {
-                    "value": "2024-01-09T09:41:13.615Z",
-                    "annotation": "dateCreated"
-                  },
-                  "cm:homeFolder": {
-                    "value": {
-                      "storeRef": {
-                        "protocol": "workspace",
-                        "identifier": "SpacesStore"
+                [
+                  {
+                    "objectId": "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1704798873615,
+                    "properties": {
+                      "aspectsNames": {"value": ["cm:preferences", "cm:ownable"], "annotation": "aspects"},
+                      "cm:homeFolderProvider" : {
+                        "type": "string",
+                        "value" : "bootstrapHomeFolderProvider"
                       },
-                      "id": "7f1fa040-e840-40c6-a8a0-da457aca2473"
-                    },
-                    "type": "object"
-                  },
-                  "createdBy": {
-                    "value": "admin",
-                    "annotation": "createdBy"
-                  },
-                  "modifiedAt": {
-                    "value": "2024-01-09T09:41:13.615Z",
-                    "annotation": "dateModified"
-                  },
-                  "sys:cascadeCRC": {
-                    "type": "integer",
-                    "value": 1040368885
-                  },
-                  "cm:lastName": {
-                    "type": "string",
-                    "value": ""
-                  },
-                  "cm:name": {
-                    "value": "321d84e3-a5fe-431e-92f5-f8e09480305e",
-                    "annotation": "name"
-                  },
-                  "ALLOW_ACCESS": {
-                    "type": "string",
-                    "value": ["GROUP_EVERYONE"]
-                  },
-                  "modifiedBy": {
-                    "value": "admin",
-                    "annotation": "modifiedBy"
-                  },
-                  "type": {
-                    "value": "cm:person",
-                    "annotation": "type"
-                  },
-                  "permissions": {
-                    "value": {
-                      "read": [{
-                        "id": "GROUP_EVERYONE",
-                        "type": "GROUP"
-                      }],
-                      "deny": [],
-                      "principalsType": "effective"
-                    },
-                    "annotation": "principals"
+                      "cm:homeFolder" : {
+                        "value" : {
+                          "storeRef" : {
+                            "protocol" : "workspace",
+                             "identifier" : "SpacesStore"
+                          },
+                          "id" : "7f1fa040-e840-40c6-a8a0-da457aca2473"
+                        },
+                        "type" : "object"
+                      },
+                      "sys:cascadeCRC" : {
+                        "type": "integer",
+                        "value" : 1040368885
+                      },
+                      "cm:lastName" : {
+                        "type": "string",
+                        "value" : ""
+                      },
+                      "cm:name" : {
+                        "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e",
+                        "annotation" : "name"
+                      },
+                      "ALLOW_ACCESS" : {
+                        "type": "string",
+                        "value" : [ "GROUP_EVERYONE" ]
+                      },
+                      "type" : {
+                        "value" : "cm:person",
+                        "annotation" : "type"
+                      }
+                    }
                   }
-                }
-              }
-            ]""";
+                ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
     }
 
@@ -734,9 +662,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "resourceBefore": {
                       "@type": "NodeResource",
                       "name": "Old Folder"
-                    },
-                    "resourceReaderAuthorities": ["GROUP_EVERYONE"],
-                    "resourceDeniedAuthorities": []
+                    }
                   }
                 }""";
         // when
@@ -782,17 +708,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "type" : {
                         "value" : "cm:folder",
                         "annotation" : "type"
-                      },
-                      "permissions" : {
-                        "value" : {
-                          "read" : [ {
-                            "id" : "GROUP_EVERYONE",
-                            "type" : "GROUP"
-                          } ],
-                          "deny" : [ ],
-                          "principalsType" : "effective"
-                        },
-                        "annotation" : "principals"
                       }
                     }
                   }
@@ -942,24 +857,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           "content-type" : "text/plain"
                         }
                       }
-                    },
-                    "permissions" : {
-                          "value" : {
-                            "read" : [
-                                {
-                                  "id" : "GROUP_EVERYONE",
-                                  "type" : "GROUP"
-                                },
-                                {
-                                  "id": "abeecher",
-                                  "type": "USER"
-                                }
-                            ],
-                            "deny" : [ ],
-                            "principalsType" : "effective"
-                          },
-                          "annotation" : "principals"
-                        }
+                    }
                   }
                 }]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
