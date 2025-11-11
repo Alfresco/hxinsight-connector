@@ -60,6 +60,7 @@ public class GroupMapping
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean isActive;
 
+    @SuppressWarnings("PMD.UnusedAssignment")
     @Column
     private Integer userCount = 0;
 
