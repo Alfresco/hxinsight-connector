@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,18 +23,26 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.constant;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util;
 
-public class NodeProperties
+public class AuthorityInfo
 {
-    public static final String NAME_PROPERTY = "cm:name";
-    public static final String CONTENT_PROPERTY = "cm:content";
-    public static final String TYPE_PROPERTY = "type";
-    public static final String CREATED_BY_PROPERTY = "createdBy";
-    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
-    public static final String CREATED_AT_PROPERTY = "createdAt";
-    public static final String MODIFIED_AT_PROPERTY = "modifiedAt";
-    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
-    public static final String ALLOW_ACCESS = "ALLOW_ACCESS";
-    public static final String DENY_ACCESS = "DENY_ACCESS";
+    private final String id;
+    private final AuthorityTypeResolver.AuthorityType type;
+
+    public AuthorityInfo(String id, AuthorityTypeResolver.AuthorityType type)
+    {
+        this.id = id;
+        this.type = type;
+    }
+
+    public String getId()
+    {
+        return id;
+    }
+
+    public AuthorityTypeResolver.AuthorityType getType()
+    {
+        return type;
+    }
 }

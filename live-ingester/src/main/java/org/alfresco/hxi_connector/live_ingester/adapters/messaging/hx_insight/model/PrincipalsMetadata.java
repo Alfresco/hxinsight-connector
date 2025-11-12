@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,42 +23,35 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model;
 
-package org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine;
+import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
-import lombok.EqualsAndHashCode;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import lombok.ToString;
 
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.PermissionsProperty;
 
 @Getter
-@ToString
-@EqualsAndHashCode
+@JsonInclude(NON_NULL)
 @RequiredArgsConstructor
-public class UpdateNodeEvent implements NodeEvent
+public class PrincipalsMetadata
 {
-    private final String objectId;
-    private final EventType eventType;
-    private final Map<String, NodeProperty<?>> metadataPropertiesToSet = new HashMap<>();
-    private final Map<String, ContentProperty> contentPropertiesToSet = new HashMap<>();
-    private final String sourceId;
-    private final long timestamp;
+    @JsonProperty("read")
+    private final List<AuthorityInfo> allowAccess;
+    @JsonProperty("deny")
+    private final List<AuthorityInfo> denyAccess;
+    @JsonProperty("principalsType")
+    private final String principalsType = "effective";
 
-    public UpdateNodeEvent addContentInstruction(ContentProperty contentProperty)
+    public PrincipalsMetadata(PermissionsProperty permissionsProperty)
     {
-        contentPropertiesToSet.put(contentProperty.propertyName(), contentProperty);
-        return this;
-    }
-
-    public UpdateNodeEvent addMetadataInstruction(NodeProperty<?> metadataProperty)
-    {
-        metadataPropertiesToSet.put(metadataProperty.name(), metadataProperty);
-
-        return this;
+        allowAccess = permissionsProperty.allowAccess();
+        denyAccess = permissionsProperty.denyAccess();
     }
 }

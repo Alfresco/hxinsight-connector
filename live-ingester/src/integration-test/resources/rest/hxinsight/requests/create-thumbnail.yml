@@ -74,29 +74,6 @@ body: [
             "content-type": "image/png"
           }
         }
-      },
-      "permissions": {
-        "value": {
-          "read": [ {
-            "id": "GROUP_EVERYONE",
-            "type": "GROUP"
-          }, {
-            "id": "GROUP_site_swsdp_SiteContributor",
-            "type": "GROUP"
-          }, {
-            "id": "GROUP_site_swsdp_SiteCollaborator",
-            "type": "GROUP"
-          }, {
-            "id": "GROUP_site_swsdp_SiteManager",
-            "type": "GROUP"
-          }, {
-            "id": "GROUP_site_swsdp_SiteConsumer",
-            "type": "GROUP"
-          } ],
-          "deny": [ ],
-          "principalsType": "effective"
-        },
-        "annotation": "principals"
       }
     }
   }

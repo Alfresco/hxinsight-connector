@@ -120,18 +120,7 @@ class NonMatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
-                      "permissions" : {
-                        "value" : {
-                          "read" : [ {
-                            "id" : "GROUP_EVERYONE",
-                            "type" : "GROUP"
-                          } ],
-                          "deny" : [ ],
-                          "principalsType" : "effective"
-                        },
-                        "annotation" : "principals"
-                      }
+                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
                     }
                   }
                 ]""".formatted(sourceMimeType);
