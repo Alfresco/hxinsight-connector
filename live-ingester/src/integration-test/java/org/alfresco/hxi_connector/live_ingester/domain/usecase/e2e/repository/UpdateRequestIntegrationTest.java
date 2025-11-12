@@ -533,7 +533,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     @Test
     void testLogInEvent()
     {
-        // given
         containerSupport.prepareHxInsightToReturnSuccess();
 
         String repoEvent = """

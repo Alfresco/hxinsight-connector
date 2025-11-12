@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
@@ -39,7 +40,6 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -48,12 +48,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import org.alfresco.database.connector.model.ChildAssocMetaData;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.database.connector.model.AccessControlEntry;
 import org.alfresco.database.connector.model.AccessControlEntryKey;
 import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.ChildAssocMetaData;
 import org.alfresco.database.connector.model.NodeProperty;
 import org.alfresco.database.connector.model.PropertyKey;
 import org.alfresco.database.connector.model.QName;

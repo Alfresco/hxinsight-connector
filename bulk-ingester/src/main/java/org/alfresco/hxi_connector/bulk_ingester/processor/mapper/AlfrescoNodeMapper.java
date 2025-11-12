@@ -30,6 +30,7 @@ import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
@@ -38,8 +39,6 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
-// Add this constant at the top with other imports
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -84,10 +83,6 @@ public class AlfrescoNodeMapper
         String parentId = ofNullable(alfrescoNode.getPrimaryParentAssociation())
                 .map(ChildAssocMetaData::getParentUuid)
                 .orElse(null);
-//        List<String> primaryHierarchy = ofNullable(alfrescoNode.primaryHierarchy())
-//                .orElse(List.of())
-//                .stream()
-//                .collect(Collectors.toList());
         List<String> primaryHierarchy = ofNullable(alfrescoNode.primaryHierarchy())
                 .orElse(List.of())
                 .stream()
@@ -128,8 +123,7 @@ public class AlfrescoNodeMapper
         }
         Map<String, Serializable> ancestorsMap = Map.of(
                 "primaryParentId", parentId != null ? parentId : "",
-                "primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy)
-        );
+                "primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));
         allProperties.put(ANCESTORS_PROPERTY, (Serializable) ancestorsMap);
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
         Map<String, Serializable> properties = getProperties(allProperties);

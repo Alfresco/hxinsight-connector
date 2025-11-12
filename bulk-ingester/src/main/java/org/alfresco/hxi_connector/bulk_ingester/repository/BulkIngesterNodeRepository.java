@@ -46,7 +46,7 @@ import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFi
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class  BulkIngesterNodeRepository
+public class BulkIngesterNodeRepository
 {
     private final AlfrescoMetadataRepository metadataRepository;
 

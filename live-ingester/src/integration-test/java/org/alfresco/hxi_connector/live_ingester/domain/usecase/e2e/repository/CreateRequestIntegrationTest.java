@@ -383,7 +383,6 @@ public class CreateRequestIntegrationTest extends E2ETestBase
 
         // when
         containerSupport.raiseRepoEvent(repoEvent);
-
         // then
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/ancestors/create-request-without-ancestors.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());

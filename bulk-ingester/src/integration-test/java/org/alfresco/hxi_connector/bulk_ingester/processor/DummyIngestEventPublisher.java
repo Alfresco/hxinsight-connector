@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.bulk_ingester.processor;
 
 import static java.lang.String.format;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -61,7 +60,8 @@ public class DummyIngestEventPublisher implements IngestEventPublisher
         ingestEvents.forEach(this::assertPublishedNode);
     }
 
-    public void assertPublishedNode(IngestEvent expected) {
+    public void assertPublishedNode(IngestEvent expected)
+    {
         IngestEvent actual = ingestEvents.values().stream()
                 .filter(event -> event.nodeId().equals(expected.nodeId()))
                 .findFirst()
@@ -84,29 +84,38 @@ public class DummyIngestEventPublisher implements IngestEventPublisher
             Object expectedVal = expectedValue;
 
             // Deep comparison for nested structures
-            if (expectedVal instanceof Map && actualValue instanceof Map) {
+            if (expectedVal instanceof Map && actualValue instanceof Map)
+            {
                 assertMapsEqual((Map<?, ?>) expectedVal, (Map<?, ?>) actualValue, "Property mismatch for key: " + key);
-            } else if (expectedVal instanceof Collection && actualValue instanceof Collection) {
+            }
+            else if (expectedVal instanceof Collection && actualValue instanceof Collection)
+            {
                 // Compare collections by converting to sets to ignore order and type differences
                 assertEquals(new HashSet<>((Collection<?>) expectedVal), new HashSet<>((Collection<?>) actualValue),
                         "Property mismatch for key: " + key);
-            } else {
+            }
+            else
+            {
                 assertEquals(expectedVal, actualValue, "Property mismatch for key: " + key);
             }
         });
     }
 
-    private void assertMapsEqual(Map<?, ?> expected, Map<?, ?> actual, String message) {
+    private void assertMapsEqual(Map<?, ?> expected, Map<?, ?> actual, String message)
+    {
         assertEquals(expected.size(), actual.size(), message + " - size mismatch");
         expected.forEach((key, expectedValue) -> {
             assertTrue(actual.containsKey(key), message + " - missing key: " + key);
             Object actualValue = actual.get(key);
 
             // Deep comparison for nested structures
-            if (expectedValue instanceof Collection && actualValue instanceof Collection) {
+            if (expectedValue instanceof Collection && actualValue instanceof Collection)
+            {
                 assertEquals(new HashSet<>((Collection<?>) expectedValue), new HashSet<>((Collection<?>) actualValue),
                         message + " - value mismatch for key: " + key);
-            } else {
+            }
+            else
+            {
                 assertEquals(expectedValue, actualValue, message + " - value mismatch for key: " + key);
             }
         });

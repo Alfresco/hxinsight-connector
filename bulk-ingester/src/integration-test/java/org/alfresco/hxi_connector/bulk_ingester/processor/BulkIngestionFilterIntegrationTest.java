@@ -27,8 +27,12 @@
 package org.alfresco.hxi_connector.bulk_ingester.processor;
 
 import static org.mockito.BDDMockito.given;
-
 import static org.alfresco.hxi_connector.bulk_ingester.util.IngestEventPropertyParser.parseProperties;
+
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -43,11 +47,6 @@ import org.alfresco.hxi_connector.bulk_ingester.BulkIngesterApplication;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.TimeProvider;
 import org.alfresco.hxi_connector.bulk_ingester.util.integration.PostgresIntegrationTestBase;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
-
-import java.io.Serializable;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 @EnableAutoConfiguration
 @SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG",
@@ -143,7 +142,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         textFileProperties.put("ALLOW_ACCESS", (Serializable) List.of("GROUP_EVERYONE"));
         textFileProperties.put("ancestors", (Serializable) Map.of(
                 "primaryParentId", "dad275aa-affc-487d-a7ed-92cf8e6ce351",
-                "primaryAncestorIds", (Serializable) List.of("6d7c466b-efd0-4b88-b77f-a941f3a2f025", "e7a273da-2974-4581-a219-5e897342844a","dad275aa-affc-487d-a7ed-92cf8e6ce351")));
+                "primaryAncestorIds", (Serializable) List.of("6d7c466b-efd0-4b88-b77f-a941f3a2f025", "e7a273da-2974-4581-a219-5e897342844a", "dad275aa-affc-487d-a7ed-92cf8e6ce351")));
 
         IngestEvent textFile = IngestEvent.builder()
                 .nodeId("44545a62-0f64-4d3e-838a-9f8ba23df0c7")
@@ -205,13 +204,15 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         ingestEventPublisher.assertNodeNotPublished(pdfFile);
         ingestEventPublisher.assertNodeNotPublished(emailTemplate);
     }
-    private Map<String, Serializable> parsePropertiesWithAncestors(Map<String, Serializable> ancestors, String... properties) {
+    private Map<String, Serializable> parsePropertiesWithAncestors(Map<String, Serializable> ancestors, String... properties)
+    {
         Map<String, Serializable> props = parseProperties(properties);
         props.put("ancestors", (Serializable) ancestors);
         return props;
     }
 
-    private Map<String, Serializable> createAncestorsMap(String primaryParentId, List<String> primaryAncestorIds) {
+    private Map<String, Serializable> createAncestorsMap(String primaryParentId, List<String> primaryAncestorIds)
+    {
         Map<String, Serializable> ancestors = new HashMap<>();
         ancestors.put("primaryParentId", primaryParentId);
         ancestors.put("primaryAncestorIds", (Serializable) primaryAncestorIds);
