@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.bulk_ingester.processor;
 
 import static java.lang.String.format;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;

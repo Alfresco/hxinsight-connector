@@ -103,12 +103,11 @@ class HxInsightAuthClientTest
         // then
         assertThat(actualException).isInstanceOf(EndpointServerErrorException.class);
         assertThat(testAppender.getEvents())
-            .hasSize(3)
-            .extracting(events -> events.getMessage().getFormattedMessage())
-            .containsExactlyInAnyOrder(
-                "Attempt 1 of 3 failed, retrying after 500ms",
-                "Attempt 2 of 3 failed, retrying after 1000ms",
-                "Attempt 3 of 3 failed"
-            );
+                .hasSize(3)
+                .extracting(events -> events.getMessage().getFormattedMessage())
+                .containsExactlyInAnyOrder(
+                        "Attempt 1 of 3 failed, retrying after 500ms",
+                        "Attempt 2 of 3 failed, retrying after 1000ms",
+                        "Attempt 3 of 3 failed");
     }
 }

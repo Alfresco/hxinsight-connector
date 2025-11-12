@@ -122,6 +122,7 @@ class BulkIngesterNodeRepositoryTest
         assertTrue(logs.get(3).contains("Found node 1"));
         assertTrue(logs.get(4).contains("Looking for nodes"));
     }
+
     @Test
     void shouldFindAllNodesWithPrimaryHierarchy()
     {
@@ -166,6 +167,7 @@ class BulkIngesterNodeRepositoryTest
 
         assertEquals(3, metadataRepository.getPrimaryHierarchyRequestCount());
     }
+
     private AlfrescoNode mockNode(long id)
     {
         AlfrescoNode node = mock();

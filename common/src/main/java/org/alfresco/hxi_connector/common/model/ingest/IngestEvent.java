@@ -45,8 +45,7 @@ import lombok.experimental.Accessors;
 @Builder
 public class IngestEvent
 {
-    @NotBlank
-    private String nodeId;
+    @NotBlank private String nodeId;
     private ContentInfo contentInfo;
     @NotNull private Map<String, Serializable> properties;
     private long timestamp;

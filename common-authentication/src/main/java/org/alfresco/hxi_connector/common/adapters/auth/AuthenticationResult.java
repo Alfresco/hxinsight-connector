@@ -47,16 +47,13 @@ import org.springframework.validation.annotation.Validated;
 @AllArgsConstructor
 public class AuthenticationResult
 {
-    @NotBlank
-    @JsonProperty("access_token")
+    @NotBlank @JsonProperty("access_token")
     String accessToken;
     @Positive @JsonProperty("expires_in")
     int expiresIn;
     TemporalUnit temporalUnit = ChronoUnit.SECONDS;
-    @NotBlank
-    @JsonProperty("token_type")
+    @NotBlank @JsonProperty("token_type")
     String tokenType;
-    @NotBlank
-    String scope;
+    @NotBlank String scope;
     Integer statusCode = EXPECTED_STATUS_CODE;
 }

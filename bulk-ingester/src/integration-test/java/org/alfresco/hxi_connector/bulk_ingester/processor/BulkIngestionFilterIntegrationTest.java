@@ -27,6 +27,7 @@
 package org.alfresco.hxi_connector.bulk_ingester.processor;
 
 import static org.mockito.BDDMockito.given;
+
 import static org.alfresco.hxi_connector.bulk_ingester.util.IngestEventPropertyParser.parseProperties;
 
 import java.io.Serializable;
@@ -204,12 +205,14 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         ingestEventPublisher.assertNodeNotPublished(pdfFile);
         ingestEventPublisher.assertNodeNotPublished(emailTemplate);
     }
+
     private Map<String, Serializable> parsePropertiesWithAncestors(Map<String, Serializable> ancestors, String... properties)
     {
         Map<String, Serializable> props = parseProperties(properties);
         props.put("ancestors", (Serializable) ancestors);
         return props;
     }
+
     private Map<String, Serializable> createAncestorsMap(String primaryParentId, List<String> primaryAncestorIds)
     {
         Map<String, Serializable> ancestors = new HashMap<>();

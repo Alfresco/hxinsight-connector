@@ -139,6 +139,7 @@ class AlfrescoNodeMapperTest
                 DENY_ACCESS, Set.of(BOB),
                 ANCESTORS_PROPERTY, expectedAncestorsMap), ingestEvent.properties());
     }
+
     @Test
     void shouldMapNodeWithParentIdAndPrimaryHierarchy()
     {
@@ -254,7 +255,6 @@ class AlfrescoNodeMapperTest
         assertEquals(parentId, ancestorsMap.get("primaryParentId"));
         assertEquals(List.of(), ancestorsMap.get("primaryAncestorIds"));
     }
-
 
     @Test
     void shouldMapNodeWithProperties()
