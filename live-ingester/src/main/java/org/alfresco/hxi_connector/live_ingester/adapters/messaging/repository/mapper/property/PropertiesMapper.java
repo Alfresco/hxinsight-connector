@@ -38,6 +38,7 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateModifiedAtDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateModifiedByDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateNamePropertyDelta;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculatePermissionsPropertyDelta;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper.calculateTypeDelta;
 
 import java.util.List;
@@ -48,6 +49,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import lombok.RequiredArgsConstructor;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
@@ -59,6 +61,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class PropertiesMapper
 {
+    private final AuthorityTypeResolver authorityTypeResolver;
     public Set<PropertyDelta<?>> mapToPropertyDeltas(RepoEvent<DataAttributes<NodeResource>> event)
     {
         Stream<PropertyDelta<?>> customProperties = calculateCustomPropertiesDelta(event);
@@ -72,7 +75,8 @@ public class PropertiesMapper
                 calculateAspectsDelta(event),
                 calculateCreatedAtDelta(event),
                 calculateAllowAccessDelta(event),
-                calculateDenyAccessDelta(event));
+                calculateDenyAccessDelta(event),
+                calculatePermissionsPropertyDelta(event, authorityTypeResolver));
 
         return Stream.of(customProperties,
                 knownProperties.stream().flatMap(Optional::stream),

@@ -282,7 +282,9 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                         "cm:description": "Old Description"
                       },
                       "aspectNames": [ "cm:versionable", "cm:thumbnailModification", "cm:author", "hxi:predictionApplied" ]
-                    }
+                    },
+                    "resourceReaderAuthorities": ["GROUP_EVERYONE"],
+                    "resourceDeniedAuthorities": []
                   }
                 }""";
 
@@ -341,7 +343,18 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                        },
                       "cm:title": {"type": "string", "value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"], "annotation": "aspects"},
-                      "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"}
+                      "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
+                       "permissions" : {
+                         "value" : {
+                           "read" : [ {
+                             "id" : "GROUP_EVERYONE",
+                             "type" : "GROUP"
+                           } ],
+                           "deny" : [ ],
+                           "principalsType" : "effective"
+                         },
+                         "annotation" : "principals"
+                       }
                     }
                   }
                 ]""".formatted(TIMESTAMP);

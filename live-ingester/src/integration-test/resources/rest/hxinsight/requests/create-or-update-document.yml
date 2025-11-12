@@ -69,6 +69,19 @@ body: [
             "content-type": "application/pdf"
           }
         }
+      },
+      "permissions": {
+        "value": {
+          "read": [
+            {
+              "id": "GROUP_EVERYONE",
+              "type": "GROUP"
+            }
+          ],
+          "deny": [ ],
+          "principalsType": "effective"
+        },
+        "annotation": "principals"
       }
     }
   }
