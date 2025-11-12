@@ -34,7 +34,6 @@ nucleus:
   system-id: ${NUCLEUS_SYSTEM_ID}
 
 spring:
-  application.name: Nucleus Sync
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:sqlite:/data/nucleus-sync.db}
     driver-class-name: org.sqlite.JDBC

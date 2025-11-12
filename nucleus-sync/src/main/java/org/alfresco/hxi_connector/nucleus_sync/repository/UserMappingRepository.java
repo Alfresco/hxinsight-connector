@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.nucleus_sync.repository;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -36,17 +35,7 @@ import org.alfresco.hxi_connector.nucleus_sync.entity.UserMapping;
 @Repository
 public interface UserMappingRepository extends JpaRepository<UserMapping, Long>
 {
-    Optional<UserMapping> findByEmail(String email);
-
     List<UserMapping> findByEmailIn(List<String> emails);
 
-    Optional<UserMapping> findByAlfrescoUserId(String alfrescoUserId);
-
     List<UserMapping> findByIsActiveTrue();
-
-    List<UserMapping> findByIsActiveFalse();
-
-    boolean existsByEmail(String email);
-
-    boolean existsByAlfrescoUserId(String alfrescoUserId);
 }

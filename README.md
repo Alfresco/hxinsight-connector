@@ -157,3 +157,16 @@ you can automatically generate `namespace-prefixes.json` with all types in your 
 ```bash
 python3 scripts/utils/namespaces-to-namespace-prefixes-file-generator.py --help
 ```
+
+### User Group Mapping (WIP)
+
+This module (`nucleus-sync`) would map -
+
+* Alfresco users with Users of Nucleus (obtained from IAM) based on user's email.
+
+* Alfresco Groups
+
+* Alfresco Group memberships for those users who have been mapped.
+
+A sqlite database would be used to store the mapped state locally. This is so
+that we can do some usefull work if one of Alfresco or nucleus is down.

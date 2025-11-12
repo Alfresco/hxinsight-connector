@@ -39,14 +39,7 @@ public interface UserGroupMembershipRepository extends JpaRepository<UserGroupMe
     Optional<UserGroupMembership> findByAlfrescoGroupIdAndAlfrescoUserId(
             String alfrescoGroupId, String alfrescoUserId);
 
-    List<UserGroupMembership> findByEmailAndIsActiveTrue(String email);
-
-    List<UserGroupMembership> findByAlfrescoUserIdAndIsActiveTrue(String alfrescoUserId);
-
     List<UserGroupMembership> findByAlfrescoGroupIdAndIsActiveTrue(String alfrescoGroupId);
-
-    List<UserGroupMembership> findByAlfrescoGroupIdAndAlfrescoUserIdIn(
-            String alfrescoGroupId, List<String> alfrescoUserIds);
 
     List<UserGroupMembership> findByEmailInAndIsActiveTrue(List<String> emails);
 }

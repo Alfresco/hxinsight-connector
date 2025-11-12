@@ -75,37 +75,31 @@ public class UserGroupMembershipRepositoryIntegrationTest
         repository.save(membership2);
         repository.flush();
 
-        assertThat(repository.findAll()).hasSize(2);
-    }
-
-    @Test
-    void findByEmailAndIsActiveTrue_shouldOnlyReturnActiveMemberships()
-    {
-        repository.save(new UserGroupMembership(
-                "GROUP_1", "USER_1", "user@test.com", LocalDateTime.now(), true));
-        repository.save(new UserGroupMembership(
-                "GROUP_2", "USER_1", "user@test.com", LocalDateTime.now(), false));
-
-        List<UserGroupMembership> activeMemberships = repository.findByEmailAndIsActiveTrue("user@test.com");
-
-        assertThat(activeMemberships).hasSize(1);
-        assertThat(activeMemberships.get(0).getAlfrescoGroupId()).isEqualTo("GROUP_1");
+        assertThat(repository.findAll())
+                .hasSize(2)
+                .extracting(UserGroupMembership::getAlfrescoGroupId)
+                .containsExactlyInAnyOrder("GROUP_1", "GROUP_2");
     }
 
     @Test
     void findByEmailInAndIsActiveTrue_shouldReturnActiveMembershipsForMultipleEmails()
     {
-        repository.save(new UserGroupMembership(
-                "GROUP_1", "USER_1", "user1@test.com", LocalDateTime.now(), true));
-        repository.save(new UserGroupMembership(
-                "GROUP_1", "USER_2", "user2@test.com", LocalDateTime.now(), true));
-        repository.save(new UserGroupMembership(
-                "GROUP_1", "USER_3", "user3@test.com", LocalDateTime.now(), false));
+        repository.save(
+                new UserGroupMembership(
+                        "GROUP_1", "USER_1", "user1@test.com", LocalDateTime.now(), true));
+        repository.save(
+                new UserGroupMembership(
+                        "GROUP_1", "USER_2", "user2@test.com", LocalDateTime.now(), true));
+        repository.save(
+                new UserGroupMembership(
+                        "GROUP_1", "USER_3", "user3@test.com", LocalDateTime.now(), false));
 
         List<UserGroupMembership> result = repository.findByEmailInAndIsActiveTrue(
                 List.of("user1@test.com", "user3@test.com"));
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getEmail()).isEqualTo("user1@test.com");
+        assertThat(result)
+                .hasSize(1)
+                .extracting(UserGroupMembership::getEmail)
+                .containsExactly("user1@test.com");
     }
 }

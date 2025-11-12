@@ -41,12 +41,4 @@ public interface GroupMappingRepository extends JpaRepository<GroupMapping, Long
     List<GroupMapping> findByAlfrescoGroupIdIn(List<String> alfrescoGroupIds);
 
     List<GroupMapping> findByIsActiveTrue();
-
-    List<GroupMapping> findByIsActiveFalse();
-
-    boolean existsByAlfrescoGroupId(String alfrescoGroupId);
-
-    List<GroupMapping> findByUserCountAndIsActiveTrue(Integer userCount);
-
-    List<GroupMapping> findByUserCountGreaterThanAndIsActiveTrue(Integer userCount);
 }

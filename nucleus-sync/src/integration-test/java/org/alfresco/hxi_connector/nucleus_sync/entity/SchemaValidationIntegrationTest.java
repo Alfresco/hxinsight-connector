@@ -69,6 +69,8 @@ public class SchemaValidationIntegrationTest
         try (Connection conn = dataSource.getConnection())
         {
             DatabaseMetaData metaData = conn.getMetaData();
+            // Param 4 of `getIndexInfo` is set to `true` so that it returns
+            // only unique constraints, since we are looking for that only
             try (ResultSet indexes = metaData.getIndexInfo(null, null, "USER_MAPPINGS", true, false))
             {
                 boolean hasUniqueConstraint = false;

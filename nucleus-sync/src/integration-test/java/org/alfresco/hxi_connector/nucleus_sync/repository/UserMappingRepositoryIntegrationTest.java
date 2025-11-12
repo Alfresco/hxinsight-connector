@@ -70,16 +70,9 @@ public class UserMappingRepositoryIntegrationTest
 
         List<UserMapping> activeUsers = repository.findByIsActiveTrue();
 
-        assertThat(activeUsers).hasSize(1);
-        assertThat(activeUsers.get(0).getEmail()).isEqualTo("active@test.com");
-    }
-
-    @Test
-    public void existsByEmail_shouldReturnTrueWhenEmailExists()
-    {
-        repository.save(new UserMapping("exists@test.com", "alf1", "nuc1", LocalDateTime.now(), true));
-
-        assertThat(repository.existsByEmail("exists@test.com")).isTrue();
-        assertThat(repository.existsByEmail("notexists@test.com")).isFalse();
+        assertThat(activeUsers)
+                .hasSize(1)
+                .extracting(UserMapping::getEmail)
+                .containsExactly("active@test.com");
     }
 }

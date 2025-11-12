@@ -25,11 +25,9 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,33 +57,5 @@ public class GroupMappingRepositoryIntegrationTest
 
         assertThatThrownBy(() -> repository.saveAndFlush(group2))
                 .isInstanceOf(DataIntegrityViolationException.class);
-    }
-
-    @Test
-    void findByUserCountAndIsActiveTrue_shouldFilterByUserCountAndActive()
-    {
-        repository.save(new GroupMapping("GROUP_1", "Empty Group", LocalDateTime.now(), true, 0));
-        repository.save(new GroupMapping("GROUP_2", "Empty Inactive", LocalDateTime.now(), false, 0));
-        repository.save(new GroupMapping("GROUP_3", "Has Users", LocalDateTime.now(), true, 5));
-
-        List<GroupMapping> emptyGroups = repository.findByUserCountAndIsActiveTrue(0);
-
-        assertThat(emptyGroups).hasSize(1);
-        assertThat(emptyGroups.get(0).getAlfrescoGroupId()).isEqualTo("GROUP_1");
-    }
-
-    @Test
-    void findByUserCountGreaterThanAndIsActiveTrue_shouldReturnGroupsAboveThreshold()
-    {
-        repository.save(new GroupMapping("GROUP_1", "Small", LocalDateTime.now(), true, 2));
-        repository.save(new GroupMapping("GROUP_2", "Medium", LocalDateTime.now(), true, 10));
-        repository.save(new GroupMapping("GROUP_3", "Large", LocalDateTime.now(), true, 50));
-        repository.save(new GroupMapping("GROUP_4", "Inactive Large", LocalDateTime.now(), false, 100));
-
-        List<GroupMapping> largeGroups = repository.findByUserCountGreaterThanAndIsActiveTrue(5);
-
-        assertThat(largeGroups).hasSize(2);
-        assertThat(largeGroups).extracting(GroupMapping::getUserCount)
-                .containsExactlyInAnyOrder(10, 50);
     }
 }
