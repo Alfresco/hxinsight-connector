@@ -98,7 +98,8 @@ class BulkIngesterNodeRepositoryTest
     }
 
     @Test
-    void ensureNodeStreamIsLazyEvaluated(){
+    void ensureNodeStreamIsLazyEvaluated()
+    {
         // given
         ListAppender<ILoggingEvent> testLogsAppender = createLogsListAppender(BulkIngesterNodeRepository.class, BulkIngesterNodeRepositoryTest.class);
 

@@ -242,7 +242,6 @@ public class CreateRequestIntegrationTest extends E2ETestBase
 
         // when
         containerSupport.raiseRepoEvent(repoEvent);
-
         // then
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/ancestors/create-request-with-ancestors.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
@@ -258,7 +257,6 @@ public class CreateRequestIntegrationTest extends E2ETestBase
             }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
-
     @Test
     void testCreateRequestWithEmptyAncestorsProperty()
     {
@@ -320,13 +318,13 @@ public class CreateRequestIntegrationTest extends E2ETestBase
 
         String expectedATSRequest = """
             {
-                "requestId": "%s",
-                "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                "targetMediaType": "application/pdf",
-                "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                "transformOptions": { "timeout":"20000" },
-                "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-            }""".formatted(REQUEST_ID_PLACEHOLDER);
+                    "requestId": "%s",
+                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
+                    "targetMediaType": "application/pdf",
+                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
+                    "transformOptions": { "timeout":"20000" },
+                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
+                }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
 

@@ -529,7 +529,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
 
         return repoEvent.formatted(properties, propertiesBefore);
     }
-
     @Test
     void testLogInEvent()
     {

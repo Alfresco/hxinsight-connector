@@ -210,7 +210,6 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         props.put("ancestors", (Serializable) ancestors);
         return props;
     }
-
     private Map<String, Serializable> createAncestorsMap(String primaryParentId, List<String> primaryAncestorIds)
     {
         Map<String, Serializable> ancestors = new HashMap<>();
