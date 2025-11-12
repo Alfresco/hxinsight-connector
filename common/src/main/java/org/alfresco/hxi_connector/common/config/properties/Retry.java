@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -60,8 +60,10 @@ public class Retry
             JsonEOFException.class,
             MismatchedInputException.class);
 
-    @Min(-1) private int attempts;
-    @PositiveOrZero private int initialDelay;
+    @Min(-1)
+    private int attempts;
+    @PositiveOrZero
+    private int initialDelay;
     @Positive private double delayMultiplier;
     @NotNull private Set<Class<? extends Throwable>> reasons;
 

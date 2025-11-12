@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -103,11 +103,12 @@ class HxInsightAuthClientTest
         // then
         assertThat(actualException).isInstanceOf(EndpointServerErrorException.class);
         assertThat(testAppender.getEvents())
-                .hasSize(3)
-                .extracting(events -> events.getMessage().getFormattedMessage())
-                .containsExactlyInAnyOrder(
-                        "Attempt 1 of 3 failed, retrying after 500ms",
-                        "Attempt 2 of 3 failed, retrying after 1000ms",
-                        "Attempt 3 of 3 failed");
+            .hasSize(3)
+            .extracting(events -> events.getMessage().getFormattedMessage())
+            .containsExactlyInAnyOrder(
+                "Attempt 1 of 3 failed, retrying after 500ms",
+                "Attempt 2 of 3 failed, retrying after 1000ms",
+                "Attempt 3 of 3 failed"
+            );
     }
 }

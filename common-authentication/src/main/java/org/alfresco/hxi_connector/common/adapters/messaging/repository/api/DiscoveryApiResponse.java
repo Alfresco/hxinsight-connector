@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -37,7 +37,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class DiscoveryApiResponse
 {
-    @NotBlank private RepositoryInfoEntry entry;
+    @NotBlank
+    private RepositoryInfoEntry entry;
 
     public String getFullVersion()
     {
@@ -50,7 +51,8 @@ public class DiscoveryApiResponse
     @NoArgsConstructor
     public static class RepositoryInfoEntry
     {
-        @NotBlank private RepositoryInfo repository;
+        @NotBlank
+        private RepositoryInfo repository;
 
     }
 
@@ -60,8 +62,10 @@ public class DiscoveryApiResponse
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RepositoryInfo
     {
-        @NotBlank private String id;
-        @NotBlank private RepositoryVersion version;
+        @NotBlank
+        private String id;
+        @NotBlank
+        private RepositoryVersion version;
 
     }
 
@@ -71,9 +75,12 @@ public class DiscoveryApiResponse
     @JsonIgnoreProperties(ignoreUnknown = true)
     public static class RepositoryVersion
     {
-        @NotBlank private String major;
-        @NotBlank private String minor;
-        @NotBlank private String patch;
+        @NotBlank
+        private String major;
+        @NotBlank
+        private String minor;
+        @NotBlank
+        private String patch;
 
     }
 

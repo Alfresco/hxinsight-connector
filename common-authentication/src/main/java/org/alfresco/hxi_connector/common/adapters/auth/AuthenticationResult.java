@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -47,13 +47,16 @@ import org.springframework.validation.annotation.Validated;
 @AllArgsConstructor
 public class AuthenticationResult
 {
-    @NotBlank @JsonProperty("access_token")
+    @NotBlank
+    @JsonProperty("access_token")
     String accessToken;
     @Positive @JsonProperty("expires_in")
     int expiresIn;
     TemporalUnit temporalUnit = ChronoUnit.SECONDS;
-    @NotBlank @JsonProperty("token_type")
+    @NotBlank
+    @JsonProperty("token_type")
     String tokenType;
-    @NotBlank String scope;
+    @NotBlank
+    String scope;
     Integer statusCode = EXPECTED_STATUS_CODE;
 }
