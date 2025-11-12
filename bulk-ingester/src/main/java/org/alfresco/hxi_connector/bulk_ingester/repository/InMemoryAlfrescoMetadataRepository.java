@@ -41,8 +41,8 @@ import org.alfresco.database.connector.model.TagData;
 class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
 {
     private final List<AlfrescoNode> nodes = new ArrayList<>();
-    private boolean primaryHierarchyEnabled = false;
-    private int primaryHierarchyRequestCount = 0;
+    private boolean primaryHierarchyEnabled;
+    private int primaryHierarchyRequestCount;
 
     public void setNodes(List<AlfrescoNode> nodes)
     {

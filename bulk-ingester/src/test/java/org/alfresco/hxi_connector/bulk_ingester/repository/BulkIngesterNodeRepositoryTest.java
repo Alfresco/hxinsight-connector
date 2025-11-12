@@ -157,7 +157,6 @@ class BulkIngesterNodeRepositoryTest
     @Test
     void shouldRequestPrimaryHierarchyForEachPage()
     {
-        ListAppender<ILoggingEvent> testLogsAppender = createLogsListAppender(BulkIngesterNodeRepository.class, BulkIngesterNodeRepositoryTest.class);
 
         metadataRepository.setNodes(List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3)));
         metadataRepository.setPrimaryHierarchyEnabled(true);
