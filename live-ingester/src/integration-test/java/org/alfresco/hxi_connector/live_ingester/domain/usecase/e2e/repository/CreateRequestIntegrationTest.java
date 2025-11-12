@@ -239,13 +239,13 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                         "resourceDeniedAuthorities": []
                       }
                     }""\";
-    
+
         // when
         containerSupport.raiseRepoEvent(repoEvent);
         // then
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/ancestors/create-request-with-ancestors.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
-    
+
         String expectedATSRequest = ""\"
                 {
                     "requestId": "%s",
@@ -257,13 +257,13 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                 }""\".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
-    
+
     @Test
     void testCreateRequestWithEmptyAncestorsProperty()
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
-    
+
         String repoEvent = ""\"
             {
               "specversion": "1.0",
