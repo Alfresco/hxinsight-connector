@@ -16,11 +16,7 @@ body: [
         "value": "Purchase Order"
       },
       "aspectsNames": {
-        "value": [
-          "cm:versionable",
-          "cm:author",
-          "cm:titled"
-        ],
+        "value": [ "cm:versionable", "cm:author", "cm:titled" ],
         "annotation": "aspects"
       },
       "modifiedBy": {
@@ -49,9 +45,7 @@ body: [
       },
       "ALLOW_ACCESS": {
         "type": "string",
-        "value": [
-          "GROUP_EVERYONE"
-        ]
+        "value": [ "GROUP_EVERYONE" ]
       },
       "cm:name": {
         "value": "purchase-order-scan.pdf",
@@ -60,7 +54,10 @@ body: [
       "ancestors": {
         "value": {
           "primaryParentId": "5f355d16-f824-4173-bf4b-b1ec37ef5549",
-          "primaryAncestorIds": [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549" ]
+          "primaryAncestorIds": [
+            "93f7edf5-e4d8-4749-9b4c-e45097e2e19d",
+            "5f355d16-f824-4173-bf4b-b1ec37ef5549"
+          ]
         },
         "annotation": "hierarchy"
       },
