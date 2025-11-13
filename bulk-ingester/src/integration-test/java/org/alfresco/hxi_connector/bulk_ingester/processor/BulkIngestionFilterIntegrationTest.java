@@ -38,8 +38,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.bulk_ingester.BulkIngesterApplication;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.TimeProvider;
@@ -88,7 +88,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         // given
         IngestEvent category = IngestEvent.builder()
                 .nodeId("94e0b276-6447-4dbc-b32a-1d37836a8066")
-                .properties(parseProperties("", List.<String>of(),
+                .properties(parseProperties("", List.<String> of(),
                         "type=cm:category",
                         "cm:name=Animal Species",
                         "createdAt=2024-02-19T08:00:28.040Z",
@@ -101,7 +101,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
 
         IngestEvent folder = IngestEvent.builder()
                 .nodeId("dad275aa-affc-487d-a7ed-92cf8e6ce351")
-                .properties(parseProperties("", List.<String>of(),
+                .properties(parseProperties("", List.<String> of(),
                         "type=cm:folder",
                         "cm:name=Animals",
                         "cm:title=Animals overview",
@@ -138,7 +138,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
         IngestEvent pdfFile = IngestEvent.builder()
                 .nodeId("02acf462-533d-4e1b-9825-05fa934140da")
                 .contentInfo(new IngestEvent.ContentInfo(119625, "UTF-8", "application/pdf"))
-                .properties(parseProperties("", List.<String>of(),
+                .properties(parseProperties("", List.<String> of(),
                         "cm:name=carp.pdf",
                         "type=cm:content",
                         "cm:autoVersion=true",
