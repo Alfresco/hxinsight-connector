@@ -151,10 +151,6 @@ public class PropertyMappingHelper
         }
         String primaryParentId = primaryHierarchy.get(0);
         Collections.reverse(primaryHierarchy);
-        // if (!primaryHierarchy.isEmpty())
-        // {
-        // primaryHierarchy.remove(primaryHierarchy.size() - 1);
-        // }
         Map<String, Serializable> ancestorsData = new HashMap<>();
         ancestorsData.put("primaryParentId", primaryParentId);
         ancestorsData.put("primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));

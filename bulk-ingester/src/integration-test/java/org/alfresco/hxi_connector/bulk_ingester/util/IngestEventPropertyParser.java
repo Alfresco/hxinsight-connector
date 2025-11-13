@@ -28,7 +28,10 @@ package org.alfresco.hxi_connector.bulk_ingester.util;
 import static java.util.stream.Collectors.toSet;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -46,6 +49,21 @@ public final class IngestEventPropertyParser
         return Arrays.stream(properties)
                 .map(IngestEventPropertyParser::parseProperty)
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    }
+
+    public static Map<String, Serializable> parseProperties(
+            String primaryParentId,
+            List<String> primaryAncestorIds,
+            String... properties)
+    {
+        Map<String, Serializable> props = parseProperties(properties);
+
+        Map<String, Serializable> ancestorsMap = new HashMap<>();
+        ancestorsMap.put("primaryParentId", primaryParentId != null ? primaryParentId : "");
+        ancestorsMap.put("primaryAncestorIds", (Serializable) new ArrayList<>(primaryAncestorIds));
+        props.put("ancestors", (Serializable) ancestorsMap);
+
+        return props;
     }
 
     private static Map.Entry<String, Serializable> parseProperty(String property)
