@@ -32,6 +32,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
@@ -40,7 +41,9 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 
+import java.io.Serializable;
 import java.time.ZonedDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -50,6 +53,7 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.database.connector.model.AccessControlEntry;
 import org.alfresco.database.connector.model.AccessControlEntryKey;
 import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.ChildAssocMetaData;
 import org.alfresco.database.connector.model.NodeProperty;
 import org.alfresco.database.connector.model.PropertyKey;
 import org.alfresco.database.connector.model.QName;
@@ -69,6 +73,10 @@ class AlfrescoNodeMapperTest
     private static final String CREATED_AT_ISO = "2024-01-31T10:15:30Z";
     private static final ZonedDateTime MODIFIED_AT = ZonedDateTime.parse("2025-01-31T10:15:30+00:00");
     private static final String MODIFIED_AT_ISO = "2025-01-31T10:15:30Z";
+
+    private static final Map<String, Serializable> EMPTY_ANCESTORS_MAP = Map.of(
+            "primaryParentId", "",
+            "primaryAncestorIds", (Serializable) List.of());
 
     private static final String GROUP_EVERYONE = "GROUP_EVERYONE";
     private static final String BOB = "bob";
@@ -117,6 +125,10 @@ class AlfrescoNodeMapperTest
         // then
         assertEquals(NODE_UUID, ingestEvent.nodeId());
         assertNull(ingestEvent.contentInfo());
+
+        Map<String, Serializable> expectedAncestorsMap = Map.of(
+                "primaryParentId", "",
+                "primaryAncestorIds", (Serializable) List.of());
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
@@ -124,7 +136,124 @@ class AlfrescoNodeMapperTest
                 CREATED_AT_PROPERTY, CREATED_AT_ISO,
                 MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO,
                 ALLOW_ACCESS, Set.of(GROUP_EVERYONE),
-                DENY_ACCESS, Set.of(BOB)), ingestEvent.properties());
+                DENY_ACCESS, Set.of(BOB),
+                ANCESTORS_PROPERTY, expectedAncestorsMap), ingestEvent.properties());
+    }
+
+    @Test
+    void shouldMapNodeWithParentIdAndPrimaryHierarchy()
+    {
+        AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
+
+        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
+        given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
+        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
+        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
+        given(alfrescoNode.getAspects()).willReturn(Set.of());
+        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
+        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
+        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
+        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
+
+        String parentId = "parent-uuid";
+        ChildAssocMetaData primaryParentAssoc = mock();
+        given(primaryParentAssoc.getParentUuid()).willReturn(parentId);
+        given(alfrescoNode.getPrimaryParentAssociation()).willReturn(primaryParentAssoc);
+
+        List<String> hierarchy = List.of("great-grandparent-uuid", "grandparent-uuid", parentId);
+        given(alfrescoNode.primaryHierarchy()).willReturn(hierarchy);
+
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
+
+        Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
+        assertEquals(parentId, ancestorsMap.get("primaryParentId"));
+        assertEquals(List.of(parentId, "grandparent-uuid", "great-grandparent-uuid"), ancestorsMap.get("primaryAncestorIds"));
+    }
+
+    @Test
+    void shouldMapNodeWithSingleElementInHierarchy()
+    {
+        AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
+
+        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
+        given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
+        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
+        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
+        given(alfrescoNode.getAspects()).willReturn(Set.of());
+        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
+        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
+        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
+        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
+
+        String parentId = "parent-uuid";
+        ChildAssocMetaData primaryParentAssoc = mock();
+        given(primaryParentAssoc.getParentUuid()).willReturn(parentId);
+        given(alfrescoNode.getPrimaryParentAssociation()).willReturn(primaryParentAssoc);
+        given(alfrescoNode.primaryHierarchy()).willReturn(List.of(parentId));
+
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
+
+        Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
+        assertEquals(parentId, ancestorsMap.get("primaryParentId"));
+        assertEquals(List.of(parentId), ancestorsMap.get("primaryAncestorIds"));
+    }
+
+    @Test
+    void shouldMapNodeWithNullParentIdAndEmptyHierarchy()
+    {
+        // given
+        AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
+
+        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
+        given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
+        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
+        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
+        given(alfrescoNode.getAspects()).willReturn(Set.of());
+        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
+        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
+        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
+        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
+        given(alfrescoNode.getPrimaryParentAssociation()).willReturn(null);
+        given(alfrescoNode.primaryHierarchy()).willReturn(null);
+
+        // when
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
+
+        // then
+        Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
+        assertEquals("", ancestorsMap.get("primaryParentId"));
+        assertEquals(List.of(), ancestorsMap.get("primaryAncestorIds"));
+    }
+
+    @Test
+    void shouldMapNodeWithParentIdButEmptyHierarchy()
+    {
+        // given
+        AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
+
+        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
+        given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
+        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
+        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
+        given(alfrescoNode.getAspects()).willReturn(Set.of());
+        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
+        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
+        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
+        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
+
+        String parentId = "parent-uuid";
+        ChildAssocMetaData primaryParentAssoc = mock();
+        given(primaryParentAssoc.getParentUuid()).willReturn(parentId);
+        given(alfrescoNode.getPrimaryParentAssociation()).willReturn(primaryParentAssoc);
+        given(alfrescoNode.primaryHierarchy()).willReturn(List.of());
+
+        // when
+        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
+
+        // then
+        Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
+        assertEquals(parentId, ancestorsMap.get("primaryParentId"));
+        assertEquals(List.of(), ancestorsMap.get("primaryAncestorIds"));
     }
 
     @Test
@@ -151,7 +280,8 @@ class AlfrescoNodeMapperTest
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
                 CREATED_AT_PROPERTY, CREATED_AT_ISO,
-                MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO), ingestEvent.properties());
+                MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO,
+                ANCESTORS_PROPERTY, EMPTY_ANCESTORS_MAP), ingestEvent.properties());
     }
 
     @Test
@@ -177,7 +307,8 @@ class AlfrescoNodeMapperTest
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
                 CREATED_AT_PROPERTY, CREATED_AT_ISO,
-                MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO), ingestEvent.properties());
+                MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO,
+                ANCESTORS_PROPERTY, EMPTY_ANCESTORS_MAP), ingestEvent.properties());
     }
 
     @Test
@@ -198,7 +329,8 @@ class AlfrescoNodeMapperTest
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
                 CREATED_AT_PROPERTY, CREATED_AT_ISO,
-                MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO), ingestEvent.properties());
+                MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO,
+                ANCESTORS_PROPERTY, EMPTY_ANCESTORS_MAP), ingestEvent.properties());
     }
 
     private NodeProperty mockProperty(String propertyName)

@@ -57,6 +57,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String TYPE = "type";
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
+    private static final String ANCESTORS = "ancestors";
 
     public UpdateNodeEventSerializer()
     {
@@ -162,6 +163,9 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
             break;
         case MODIFIED_BY:
             jgen.writeObjectField("annotation", "modifiedBy");
+            break;
+        case ANCESTORS:
+            jgen.writeObjectField("annotation", "hierarchy");
             break;
         default:
             hasAnnotation = false;
