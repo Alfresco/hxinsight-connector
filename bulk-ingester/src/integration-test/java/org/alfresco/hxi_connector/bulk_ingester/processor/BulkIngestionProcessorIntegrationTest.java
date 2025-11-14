@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -79,6 +80,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
     @Test
     void shouldPublishAllNodesFromDb()
     {
+        // given
         List<IngestEvent> categories = List.of(
                 IngestEvent.builder().nodeId("94e0b276-6447-4dbc-b32a-1d37836a8066")
                         .properties(parsePropertiesWithAncestors(
@@ -182,8 +184,10 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
                 .timestamp(TIMESTAMP)
                 .build();
 
+        // when
         bulkIngestionProcessor.process();
 
+        // then
         ingestEventPublisher.assertPublishedNodes(categories);
         ingestEventPublisher.assertPublishedNode(folder);
         ingestEventPublisher.assertPublishedNode(textFile);
