@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -69,11 +69,10 @@ public class DummyIngestEventPublisher implements IngestEventPublisher
                 .orElseThrow(() -> new AssertionError("Node not published: " + expected.nodeId()));
 
         // Compare individual fields
-        assertEquals(expected.nodeId(), actual.nodeId(), "Node ID mismatch");
         assertEquals(expected.contentInfo(), actual.contentInfo(), "Content info mismatch");
         assertEquals(expected.timestamp(), actual.timestamp(), "Timestamp mismatch");
 
-        // Compare properties map with order-independent comparison
+        // Compare properties map with deep comparison
         Map<String, Serializable> expectedProps = expected.properties();
         Map<String, Serializable> actualProps = actual.properties();
 
@@ -81,44 +80,32 @@ public class DummyIngestEventPublisher implements IngestEventPublisher
 
         expectedProps.forEach((key, expectedValue) -> {
             assertTrue(actualProps.containsKey(key), "Missing property key: " + key);
-            Object actualValue = actualProps.get(key);
-            Object expectedVal = expectedValue;
-
-            // Deep comparison for nested structures
-            if (expectedVal instanceof Map && actualValue instanceof Map)
-            {
-                assertMapsEqual((Map<?, ?>) expectedVal, (Map<?, ?>) actualValue, "Property mismatch for key: " + key);
-            }
-            else if (expectedVal instanceof Collection && actualValue instanceof Collection)
-            {
-                // Compare collections by converting to sets to ignore order and type differences
-                assertEquals(new HashSet<>((Collection<?>) expectedVal), new HashSet<>((Collection<?>) actualValue),
-                        "Property mismatch for key: " + key);
-            }
-            else
-            {
-                assertEquals(expectedVal, actualValue, "Property mismatch for key: " + key);
-            }
+            assertValuesEqual(expectedValue, actualProps.get(key), "Property mismatch for key: " + key);
         });
     }
 
+    private void assertValuesEqual(Object expected, Object actual, String contextMessage)
+    {
+        if (expected instanceof Map && actual instanceof Map)
+        {
+            assertMapsEqual((Map<?, ?>) expected, (Map<?, ?>) actual, contextMessage);
+        }
+        else if (expected instanceof Collection && actual instanceof Collection)
+        {
+            // Compare collections by converting to sets to ignore order and type differences
+            assertEquals(new HashSet<>((Collection<?>) expected), new HashSet<>((Collection<?>) actual), contextMessage);
+        }
+        else
+        {
+            assertEquals(expected, actual, contextMessage);
+        }
+    }
     private void assertMapsEqual(Map<?, ?> expected, Map<?, ?> actual, String message)
     {
         assertEquals(expected.size(), actual.size(), message + " - size mismatch");
         expected.forEach((key, expectedValue) -> {
             assertTrue(actual.containsKey(key), message + " - missing key: " + key);
-            Object actualValue = actual.get(key);
-
-            // Deep comparison for nested structures
-            if (expectedValue instanceof Collection && actualValue instanceof Collection)
-            {
-                assertEquals(new HashSet<>((Collection<?>) expectedValue), new HashSet<>((Collection<?>) actualValue),
-                        message + " - value mismatch for key: " + key);
-            }
-            else
-            {
-                assertEquals(expectedValue, actualValue, message + " - value mismatch for key: " + key);
-            }
+            assertValuesEqual(expectedValue, actual.get(key), message + " - value mismatch for key: " + key);
         });
     }
 
