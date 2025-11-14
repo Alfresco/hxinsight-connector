@@ -201,7 +201,7 @@ public class AlfrescoClientIntegrationTest
     void testGetUserGroups_Success()
     {
         // Arrange
-        String userId = "user1";
+        String userId = "jdoe";
         String responseBody = """
                 {
                   "list": {
