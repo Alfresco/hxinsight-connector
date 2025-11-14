@@ -386,44 +386,46 @@ class PropertiesMapperTest
         assertFalse(hasPermissionsProperty);
     }
 
-//    @Test
-//    void shouldAddACLInfo_NodePermissionsUpdated()
-//    {
-//        // given
-//        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
-//        PropertiesMapper mapper = new PropertiesMapper(mockAuthorityTypeResolver);
-//
-//        String groupEveryone = "GROUP_EVERYONE";
-//        String bob = "bob";
-//
-//        RepoEvent<DataAttributes<NodeResource>> event = mock();
-//
-//        setType(event, PERMISSION_UPDATED);
-//
-//        given(event.getData()).willReturn(mock(EventData.class));
-//        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
-//        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
-//
-//        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-//        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
-//
-//        given(mockAuthorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-//        given(mockAuthorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
-//
-//        // when
-//        Set<PropertyDelta<?>> propertyDeltas = mapper.mapToPropertyDeltas(event);
-//
-//        // then
-//        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-//                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-//                updated(DENY_ACCESS, Set.of(bob)));
-//
-//        boolean hasPermissionsProperty = propertyDeltas.stream()
-//                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
-//
-//        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
-//        assertTrue(hasPermissionsProperty);
-//    }
+    @Test
+    void shouldAddACLInfo_NodePermissionsUpdated()
+    {
+        // given
+        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
+        PropertiesMapper mapper = new PropertiesMapper(mockAuthorityTypeResolver);
+
+        String groupEveryone = "GROUP_EVERYONE";
+        String bob = "bob";
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setType(event, PERMISSION_UPDATED);
+
+        given(event.getData()).willReturn(mock(EventData.class));
+        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
+        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
+
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+
+        given(mockAuthorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
+        given(mockAuthorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+
+        // when
+        Set<PropertyDelta<?>> propertyDeltas = mapper.mapToPropertyDeltas(event);
+
+        // then
+        boolean hasAllowAccess = propertyDeltas.stream()
+                .anyMatch(delta -> ALLOW_ACCESS.equals(delta.getPropertyName()));
+        boolean hasDenyAccess = propertyDeltas.stream()
+                .anyMatch(delta -> DENY_ACCESS.equals(delta.getPropertyName()));
+        boolean hasPermissionsProperty = propertyDeltas.stream()
+                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
+
+        assertTrue(hasAllowAccess);
+        assertTrue(hasDenyAccess);
+        assertTrue(hasPermissionsProperty);
+    }
+
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
         given(event.getType()).willReturn(type.getType());
