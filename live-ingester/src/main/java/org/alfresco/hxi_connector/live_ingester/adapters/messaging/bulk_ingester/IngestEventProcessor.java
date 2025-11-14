@@ -27,26 +27,37 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.ancestorsMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 
 import java.io.Serializable;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Objects;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
+
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.permissionsMetadataUpdated;
+
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.ParentNodeService;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent.ContentInfo;
+import org.alfresco.hxi_connector.common.model.ingest.IngestEvent.AncestorsInfo;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
@@ -54,34 +65,33 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNo
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class IngestEventProcessor
-{
+public class IngestEventProcessor {
     private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final MimeTypeMapper mimeTypeMapper;
+    private final ParentNodeService parentNodeService;
+    private final AuthorityTypeResolver authorityTypeResolver;
 
-    public void process(@Validated IngestEvent ingestEvent)
-    {
+    public void process(@Validated IngestEvent ingestEvent) {
         Map<String, Serializable> properties = ingestEvent.properties().entrySet().stream()
                 .collect(Collectors.toMap(Entry::getKey, Entry::getValue));
 
         IngestNodeCommand ingestNodeCommand = new IngestNodeCommand(
                 ingestEvent.nodeId(),
                 CREATE_OR_UPDATE,
-                mapToPropertiesDelta(ingestEvent.contentInfo(), properties),
+                mapToPropertiesDelta(ingestEvent.contentInfo(), ingestEvent.ancestorsInfo(), properties),
                 ingestEvent.timestamp());
 
         ingestNodeCommandHandler.handle(ingestNodeCommand);
 
-        if (ingestEvent.contentInfo() != null)
-        {
+        if (ingestEvent.contentInfo() != null) {
             String sourceMimeType = ingestEvent.contentInfo().mimetype();
             String targetMimeType = mimeTypeMapper.mapMimeType(sourceMimeType);
-            if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(targetMimeType))
-            {
+            if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(targetMimeType)) {
                 log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}", ingestEvent.nodeId(), sourceMimeType);
                 return;
             }
@@ -94,15 +104,28 @@ public class IngestEventProcessor
         }
     }
 
-    private Set<PropertyDelta<?>> mapToPropertiesDelta(ContentInfo contentInfo, Map<String, Serializable> properties)
-    {
+    private Set<PropertyDelta<?>> mapToPropertiesDelta(ContentInfo contentInfo, AncestorsInfo ancestorsInfo, Map<String, Serializable> properties) {
         Stream<PropertyDelta<?>> metadataDelta = properties.entrySet()
                 .stream()
                 .map(property -> updated(property.getKey(), property.getValue()));
-        if (contentInfo != null && (contentInfo.mimetype() != null || !Objects.equals(contentInfo.contentSize(), 0L)))
-        {
+        if (contentInfo != null && (contentInfo.mimetype() != null || !Objects.equals(contentInfo.contentSize(), 0L))) {
             PropertyDelta<?> contentDelta = contentMetadataUpdated(CONTENT_PROPERTY, contentInfo.mimetype(), contentInfo.contentSize(), (String) properties.get(NAME_PROPERTY));
             metadataDelta = Stream.concat(metadataDelta, Stream.of(contentDelta));
+        }
+        if (ancestorsInfo != null && ancestorsInfo.parentId() != null) {
+            List<String> ancestorIds = parentNodeService.getParentNodeId(ancestorsInfo.parentId());
+            PropertyDelta<?> ancestorIdsDelta = ancestorsMetadataUpdated(ANCESTORS_PROPERTY, ancestorsInfo.parentId(), ancestorIds);
+            metadataDelta = Stream.concat(metadataDelta, Stream.of(ancestorIdsDelta));
+        }
+        // Handle permissions
+        List<String> allowAccess = (List<String>) properties.get("ALLOW_ACCESS");
+        List<String> denyAccess = (List<String>) properties.get("DENY_ACCESS");
+        if (allowAccess != null || denyAccess != null) {
+            List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(allowAccess != null ? allowAccess : Collections.emptyList(), authorityTypeResolver);
+            List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(denyAccess != null ? denyAccess : Collections.emptyList(), authorityTypeResolver);
+
+            PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes);
+            metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));
         }
         return metadataDelta.collect(Collectors.toSet());
     }

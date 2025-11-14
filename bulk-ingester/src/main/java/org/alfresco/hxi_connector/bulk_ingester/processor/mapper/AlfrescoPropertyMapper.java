@@ -54,14 +54,12 @@ import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 
 @Slf4j
 @RequiredArgsConstructor
-public class AlfrescoPropertyMapper
-{
+public class AlfrescoPropertyMapper {
     private final NamespacePrefixMapper namespacePrefixMapper;
     private final AlfrescoNode alfrescoNode;
     private final String propertyName;
 
-    public Optional<Map.Entry<String, Serializable>> performMapping()
-    {
+    public Optional<Map.Entry<String, Serializable>> performMapping() {
         /* Properties might be duplicated - for example they can have different locale (we can have two descriptions with "en_US_" and "en_UK_" locale) and in this case we want to process them together */
         Set<Serializable> propertyValues = alfrescoNode.getNodeProperties().stream()
                 .filter(nodeProperty -> namespacePrefixMapper.toPrefixedName(nodeProperty.getPropertyKey()).equals(propertyName))
@@ -69,62 +67,46 @@ public class AlfrescoPropertyMapper
                 .flatMap(Optional::stream)
                 .collect(toSet());
 
-        if (propertyValues.isEmpty())
-        {
+        if (propertyValues.isEmpty()) {
             return empty();
-        }
-        else if (propertyValues.size() == 1)
-        {
+        } else if (propertyValues.size() == 1) {
             return of(Map.entry(propertyName, propertyValues.iterator().next()));
-        }
-        else
-        {
+        } else {
             return of(Map.entry(propertyName, (Serializable) propertyValues));
         }
     }
 
-    private Optional<Serializable> mapPropertyValue(PropertyValue propertyValue)
-    {
-        try
-        {
-            return getPersistedValue(propertyValue).flatMap(persistedValue -> switch (PropertyValueType.getPropertyValueType(propertyValue.getActualType()))
-            {
-            case CONTENT_DATA_ID -> getContentValue(persistedValue);
-            case DATE -> getDateValue(persistedValue);
-            case NODEREF -> getNodeRefValue(persistedValue);
-            default -> of(persistedValue);
+    private Optional<Serializable> mapPropertyValue(PropertyValue propertyValue) {
+        try {
+            return getPersistedValue(propertyValue).flatMap(persistedValue -> switch (PropertyValueType.getPropertyValueType(propertyValue.getActualType())) {
+                case CONTENT_DATA_ID -> getContentValue(persistedValue);
+                case DATE -> getDateValue(persistedValue);
+                case NODEREF -> getNodeRefValue(persistedValue);
+                default -> of(persistedValue);
             });
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             log.warn("Error occurred while trying to map property {} value {} of node {}", propertyName, propertyValue, alfrescoNode.getId(), e);
 
             return empty();
         }
     }
 
-    private Optional<String> getNodeRefValue(Serializable persistedValue)
-    {
-        try
-        {
+    private Optional<String> getNodeRefValue(Serializable persistedValue) {
+        try {
             String[] nodeRefSplit = ((String) persistedValue).split("/");
 
             String id = nodeRefSplit[nodeRefSplit.length - 1];
 
             return of(id);
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             log.error("Cannot deserialize noderef property {} with value {} for node {}", propertyName, persistedValue, alfrescoNode.getId(), e);
 
             return empty();
         }
     }
 
-    private Optional<IngestEvent.ContentInfo> getContentValue(Serializable propertyValue)
-    {
-        if (!propertyName.equals(CONTENT_PROPERTY))
-        {
+    private Optional<IngestEvent.ContentInfo> getContentValue(Serializable propertyValue) {
+        if (!propertyName.equals(CONTENT_PROPERTY)) {
             log.info("Found content under property with name {} for node {}. Content different from cm:content won't be ingested.", propertyName, alfrescoNode.getId());
 
             return empty();
@@ -143,15 +125,11 @@ public class AlfrescoPropertyMapper
 
     }
 
-    private Optional<Serializable> getDateValue(Serializable propertyValue)
-    {
-        try
-        {
+    private Optional<Serializable> getDateValue(Serializable propertyValue) {
+        try {
             return of(ZonedDateTime.parse((String) propertyValue, DateTimeFormatter.ISO_OFFSET_DATE_TIME)
                     .format(DateTimeFormatter.ISO_INSTANT));
-        }
-        catch (Exception e)
-        {
+        } catch (Exception e) {
             log.error("Cannot get ISO date value from property {} with value {} for node {}", propertyName, propertyValue, alfrescoNode.getId());
 
             return empty();
@@ -159,35 +137,29 @@ public class AlfrescoPropertyMapper
 
     }
 
-    private Optional<Serializable> getPersistedValue(PropertyValue propertyValue)
-    {
-        return switch (PropertyValueType.getPropertyValueType(propertyValue.getPersistedType()))
-        {
-        case NULL -> empty();
-        case BOOLEAN -> of(propertyValue.getBooleanValue());
-        case LONG -> of(propertyValue.getLongValue());
-        case FLOAT -> of(propertyValue.getFloatValue());
-        case DOUBLE -> of(propertyValue.getDoubleValue());
-        case STRING -> of(propertyValue.getStringValue());
-        case SERIALIZABLE -> deserializeObject(propertyValue);
-        default -> {
-            log.error("Property {} type not recognized. Cannot extract value {}. Node: {}", propertyName, propertyValue, alfrescoNode.getId());
+    private Optional<Serializable> getPersistedValue(PropertyValue propertyValue) {
+        return switch (PropertyValueType.getPropertyValueType(propertyValue.getPersistedType())) {
+            case NULL -> empty();
+            case BOOLEAN -> of(propertyValue.getBooleanValue());
+            case LONG -> of(propertyValue.getLongValue());
+            case FLOAT -> of(propertyValue.getFloatValue());
+            case DOUBLE -> of(propertyValue.getDoubleValue());
+            case STRING -> of(propertyValue.getStringValue());
+            case SERIALIZABLE -> deserializeObject(propertyValue);
+            default -> {
+                log.error("Property {} type not recognized. Cannot extract value {}. Node: {}", propertyName, propertyValue, alfrescoNode.getId());
 
-            yield empty();
-        }
+                yield empty();
+            }
         };
     }
 
-    private Optional<Serializable> deserializeObject(PropertyValue propertyValue)
-    {
-        try
-        {
+    private Optional<Serializable> deserializeObject(PropertyValue propertyValue) {
+        try {
             ObjectInput in = new ObjectInputStream(new ByteArrayInputStream(propertyValue.getSerializableValue()));
 
             return of((Serializable) in.readObject());
-        }
-        catch (ClassNotFoundException | IOException e)
-        {
+        } catch (ClassNotFoundException | IOException e) {
             log.error("Cannot deserialize property {} value {}. Node: {} with reference: {}", propertyName, propertyValue, alfrescoNode.getId(), alfrescoNode.getNodeRef(), e);
 
             return empty();
