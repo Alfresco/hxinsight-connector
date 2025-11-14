@@ -21,6 +21,7 @@
         <module>live-ingester</module>
         <module>prediction-applier</module>
         <module>hxinsight-extension</module>
+        <module>nucleus-sync</module>
         <module>distribution</module>
         <module>e2e-test</module>
     </modules>
