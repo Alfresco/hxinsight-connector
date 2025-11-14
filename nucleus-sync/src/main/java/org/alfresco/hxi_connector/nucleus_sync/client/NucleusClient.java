@@ -67,7 +67,7 @@ public class NucleusClient
     private final String nucleusBaseUrl;
     private final String idpBaseUrl;
 
-    private static final Logger logger = LoggerFactory.getLogger(NucleusClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(NucleusClient.class);
 
     private int timeoutInMin = 5;
 
@@ -118,8 +118,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in retrieving iam users: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to retrieve iam users", e);
+            LOGGER.error("Error in retrieving iam users: {}", e.getMessage(), e);
+            throw new ClientException("Failed to retrieve iam users", e);
         }
     }
 
@@ -137,8 +137,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in retrieving groups: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to retrieve groups", e);
+            LOGGER.error("Error in retrieving groups: {}", e.getMessage(), e);
+            throw new ClientException("Failed to retrieve groups", e);
         }
     }
 
@@ -155,8 +155,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in creating groups in nucleus: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to create groups in nucleus", e);
+            LOGGER.error("Error in creating groups in nucleus: {}", e.getMessage(), e);
+            throw new ClientException("Failed to create groups in nucleus", e);
         }
     }
 
@@ -177,8 +177,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in retrieving user mappings: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to retrieve user mappings", e);
+            LOGGER.error("Error in retrieving user mappings: {}", e.getMessage(), e);
+            throw new ClientException("Failed to retrieve user mappings", e);
         }
     }
 
@@ -195,8 +195,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in creating user mappings: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to create user mappings", e);
+            LOGGER.error("Error in creating user mappings: {}", e.getMessage(), e);
+            throw new ClientException("Failed to create user mappings", e);
         }
     }
 
@@ -217,8 +217,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in retrieving group memberships: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to retrieve group memberships", e);
+            LOGGER.error("Error in retrieving group memberships: {}", e.getMessage(), e);
+            throw new ClientException("Failed to retrieve group memberships", e);
         }
     }
 
@@ -235,8 +235,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in creating member assignments to group: {}", e.getMessage(), e);
-            throw new RuntimeException("Error in creating member assignments to group", e);
+            LOGGER.error("Error in creating member assignments to group: {}", e.getMessage(), e);
+            throw new ClientException("Error in creating member assignments to group", e);
         }
     }
 
@@ -255,8 +255,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in deleting group: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to delete group", e);
+            LOGGER.error("Error in deleting group: {}", e.getMessage(), e);
+            throw new ClientException("Failed to delete group", e);
         }
     }
 
@@ -274,8 +274,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error in deleting user mappings: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to delete user mappings", e);
+            LOGGER.error("Error in deleting user mappings: {}", e.getMessage(), e);
+            throw new ClientException("Failed to delete user mappings", e);
         }
     }
 
@@ -303,8 +303,8 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            logger.error("Error removing group members: {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to remove group members", e);
+            LOGGER.error("Error removing group members: {}", e.getMessage(), e);
+            throw new ClientException("Failed to remove group members", e);
         }
     }
 

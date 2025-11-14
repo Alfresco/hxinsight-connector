@@ -47,7 +47,6 @@ public class AlfrescoClientIntegrationTest
 {
     private WireMockServer wireMockServer;
     private AlfrescoClient alfrescoClient;
-    private AuthService authService;
 
     @BeforeEach
     void setUp()
@@ -57,7 +56,7 @@ public class AlfrescoClientIntegrationTest
         wireMockServer.start();
 
         // Create mock AuthService
-        authService = new AuthService(null, null) {
+        AuthService authService = new AuthService(null, null) {
             @Override
             public Map<String, String> getAlfrescoAuthHeaders()
             {
@@ -260,8 +259,8 @@ public class AlfrescoClientIntegrationTest
                         .withBody("Internal Server Error")));
 
         // Act & Assert
-        assertThatThrownBy(() -> alfrescoClient.getAllUsers())
-                .isInstanceOf(RuntimeException.class)
+        assertThatThrownBy(alfrescoClient::getAllUsers)
+                .isInstanceOf(ClientException.class)
                 .hasMessageContaining("Failed to fetch users");
     }
 
@@ -303,28 +302,30 @@ public class AlfrescoClientIntegrationTest
     private String createPagedResponse(int skipCount, int count, boolean hasMoreItems, int totalItems)
     {
         StringBuilder sb = new StringBuilder();
-        sb.append("{\"list\":{");
-        sb.append("\"pagination\":{");
-        sb.append("\"count\":").append(count).append(",");
-        sb.append("\"hasMoreItems\":").append(hasMoreItems).append(",");
-        sb.append("\"totalItems\":").append(totalItems).append(",");
-        sb.append("\"skipCount\":").append(skipCount).append(",");
-        sb.append("\"maxItems\":100");
-        sb.append("},");
-        sb.append("\"entries\":[");
+        sb.append("{\"list\":{")
+                .append("\"pagination\":{")
+                .append("\"count\":").append(count).append(",")
+                .append("\"hasMoreItems\":").append(hasMoreItems).append(",")
+                .append("\"totalItems\":").append(totalItems).append(",")
+                .append("\"skipCount\":").append(skipCount).append(",")
+                .append("\"maxItems\":100")
+                .append("},")
+                .append("\"entries\":[");
 
         for (int i = 0; i < count; i++)
         {
             int userId = skipCount + i;
             if (i > 0)
+            {
                 sb.append(",");
-            sb.append("{\"entry\":{");
-            sb.append("\"id\":\"user").append(userId).append("\",");
-            sb.append("\"firstName\":\"User\",");
-            sb.append("\"lastName\":\"").append(userId).append("\",");
-            sb.append("\"email\":\"user").append(userId).append("@example.com\",");
-            sb.append("\"enabled\":true");
-            sb.append("}}");
+            }
+            sb.append("{\"entry\":{")
+                    .append("\"id\":\"user").append(userId).append("\",")
+                    .append("\"firstName\":\"User\",")
+                    .append("\"lastName\":\"").append(userId).append("\",")
+                    .append("\"email\":\"user").append(userId).append("@example.com\",")
+                    .append("\"enabled\":true")
+                    .append("}}");
         }
 
         sb.append("]}}");

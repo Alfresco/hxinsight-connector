@@ -53,7 +53,6 @@ public class NucleusClientIntegrationTest
 {
     private WireMockServer wireMockServer;
     private NucleusClient nucleusClient;
-    private AuthService authService;
 
     private static final String SYSTEM_ID = "test-system-id";
 
@@ -65,7 +64,7 @@ public class NucleusClientIntegrationTest
         wireMockServer.start();
 
         // Create mock AuthService
-        authService = new AuthService(null, null) {
+        AuthService authService = new AuthService(null, null) {
             @Override
             public Map<String, String> getHxpAuthHeaders()
             {
@@ -339,7 +338,7 @@ public class NucleusClientIntegrationTest
 
         // Act & Assert
         assertThatThrownBy(() -> nucleusClient.createGroups(groups))
-                .isInstanceOf(RuntimeException.class)
+                .isInstanceOf(ClientException.class)
                 .hasMessageContaining("Failed to create groups in nucleus");
     }
 }

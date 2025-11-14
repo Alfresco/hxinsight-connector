@@ -57,7 +57,7 @@ public class AlfrescoClient
     private final String alfrescoBaseUrl;
     private int timeoutInMins = 5;
 
-    private static final Logger logger = LoggerFactory.getLogger(AlfrescoClient.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoClient.class);
 
     @Autowired
     public AlfrescoClient(
@@ -148,8 +148,8 @@ public class AlfrescoClient
         }
         catch (Exception e)
         {
-            logger.error("Error fetching " + errorContext + ": {}", e.getMessage(), e);
-            throw new RuntimeException("Failed to fetch " + errorContext, e);
+            LOGGER.error("Error fetching " + errorContext + ": {}", e.getMessage(), e);
+            throw new ClientException("Failed to fetch " + errorContext, e);
         }
     }
 
