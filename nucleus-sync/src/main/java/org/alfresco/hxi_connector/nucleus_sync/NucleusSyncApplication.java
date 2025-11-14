@@ -33,6 +33,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @SpringBootApplication
 @EnableScheduling
 @EnableRetry
+@SuppressWarnings("PMD.UseUtilityClass")
 public class NucleusSyncApplication
 {
     public static void main(String[] args)
