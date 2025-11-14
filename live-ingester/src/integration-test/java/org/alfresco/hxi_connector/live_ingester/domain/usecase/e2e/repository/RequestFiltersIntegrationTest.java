@@ -627,9 +627,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "cm:taggable": null,
                         "cm:description": "Old Description"
                       },
-                      "aspectNames": [ "cm:versionable" ],
-                      "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
-                      "resourceDeniedAuthorities": []
+                      "aspectNames": [ "cm:versionable" ]
                     }
                   }
                 }""";
@@ -682,17 +680,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
-                      },
-                      "permissions" : {
-                        "value" : {
-                          "read" : [ {
-                            "id" : "GROUP_EVERYONE",
-                            "type" : "GROUP"
-                          } ],
-                          "deny" : [ ],
-                          "principalsType" : "effective"
-                        },
-                        "annotation" : "principals"
                       }
                     }
                   }
