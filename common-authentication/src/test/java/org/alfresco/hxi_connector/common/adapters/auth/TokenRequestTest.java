@@ -56,7 +56,7 @@ class TokenRequestTest
         assertThat(body).contains("username=testuser");
         assertThat(body).contains("password=testpass");
         assertThat(body).contains("scope=");
-        assertThat(body).containsAnyOf("read", "write");
+        assertThat(body).contains("read", "write");
     }
 
     @Test
