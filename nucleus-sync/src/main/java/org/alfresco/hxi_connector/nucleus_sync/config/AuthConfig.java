@@ -34,7 +34,6 @@ import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 
 @Configuration
@@ -46,12 +45,6 @@ public class AuthConfig
     public AuthProperties authProperties()
     {
         return new AuthProperties();
-    }
-
-    @Bean
-    public AuthenticationClient authenticationClient(AuthProperties authProperties)
-    {
-        return new DefaultAuthenticationClient(authProperties);
     }
 
     @Bean
