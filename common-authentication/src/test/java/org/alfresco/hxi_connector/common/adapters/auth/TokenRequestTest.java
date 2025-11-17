@@ -145,7 +145,6 @@ class TokenRequestTest
         String body = request.getTokenRequestBody();
 
         // then
-        assertThat(body).containsPattern("scope=[^&]*openid[^&]*");
-        assertThat(body).containsPattern("scope=[^&]*evolution[^&]*");
+        assertThat(body).containsPattern("scope=(openid\\+evolution|evolution\\+openid)");
     }
 }
