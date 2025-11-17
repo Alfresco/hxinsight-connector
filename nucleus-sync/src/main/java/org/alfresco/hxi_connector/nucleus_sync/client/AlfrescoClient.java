@@ -40,10 +40,9 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoPagedResponse;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
@@ -167,11 +166,8 @@ public class AlfrescoClient
         }
     }
 
-    @Retryable(retryFor = {
-            RuntimeException.class,
-            WebClientRequestException.class,
-            WebClientResponseException.class
-    }, maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
             backoff = @Backoff(
                     delayExpression = "#{${http-client.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.multiplier:2}}",
