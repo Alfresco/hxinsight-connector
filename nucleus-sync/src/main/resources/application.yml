@@ -5,6 +5,14 @@ sync:
   enabled: ${SYNC_ENABLED:true}
   cron.expression: ${SYNC_CRON_EXPRESSION:"0 0 * * *"}
 
+http-client:
+  timeout-minutes: ${HTTP_CLIENT_TIMEOUT_MINUTES:5}
+  retry:
+    max-attempts: ${HTTP_RETRY_MAX_ATTEMPTS:3}
+    initial-delay-ms: ${HTTP_RETRY_INITIAL_DELAY_MS:2000}
+    multiplier: ${HTTP_RETRY_MULTIPLIER:2}
+    max-delay-ms: ${HTTP_RETRY_MAX_DELAY_MS:10000}
+
 auth:
   providers:
     alfresco:
@@ -27,6 +35,7 @@ auth:
 
 alfresco:
   base-url: ${ALFRESCO_BASE_URL}
+  page-size: 100
 
 nucleus:
   idp-base-url: ${NUCLEUS_IDP_BASE_URL}

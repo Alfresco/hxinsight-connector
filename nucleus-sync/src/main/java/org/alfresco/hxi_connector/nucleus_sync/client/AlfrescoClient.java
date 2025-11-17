@@ -55,27 +55,40 @@ public class AlfrescoClient
     private final ObjectMapper objectMapper;
     private final AuthService authService;
     private final String alfrescoBaseUrl;
-    private int timeoutInMins = 5;
+    private final int timeoutInMins;
+    private final int pageSize;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoClient.class);
 
     @Autowired
     public AlfrescoClient(
-            AuthService authService, @Value("${alfresco.base-url}") String alfrescoBaseUrl)
+            AuthService authService,
+            @Value("${alfresco.base-url}") String alfrescoBaseUrl,
+            @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
+            @Value("${alfresco.page-size:100}") int pageSize)
     {
-        this(WebClient.builder().build(), new ObjectMapper(), authService, alfrescoBaseUrl);
+        this(WebClient.builder().build(),
+                new ObjectMapper(),
+                authService,
+                timeoutInMins,
+                alfrescoBaseUrl,
+                pageSize);
     }
 
     AlfrescoClient(
             WebClient webClient,
             ObjectMapper objectMapper,
             AuthService authService,
-            String alfrescoBaseUrl)
+            int timeoutInMins,
+            String alfrescoBaseUrl,
+            int pageSize)
     {
         this.webClient = webClient;
         this.objectMapper = objectMapper;
         this.authService = authService;
+        this.timeoutInMins = timeoutInMins;
         this.alfrescoBaseUrl = alfrescoBaseUrl;
+        this.pageSize = pageSize;
     }
 
     public List<AlfrescoUser> getAllUsers()
@@ -111,9 +124,10 @@ public class AlfrescoClient
 
             while (hasMoreItems)
             {
-                String response = makeAuthenticatedRequest(basePath + "?maxItems=100&skipCount=" + skipCount)
-                        .bodyToMono(String.class)
-                        .block(Duration.ofMinutes(timeoutInMins));
+                String response = makeAuthenticatedRequest(
+                        basePath + "?maxItems=" + pageSize + "&skipCount=" + skipCount)
+                                .bodyToMono(String.class)
+                                .block(Duration.ofMinutes(timeoutInMins));
 
                 AlfrescoPagedResponse<T> pagedResponse = objectMapper.readValue(response, typeRef);
 
@@ -153,14 +167,15 @@ public class AlfrescoClient
         }
     }
 
-    @Retryable(
-            retryFor = {
-                    RuntimeException.class,
-                    WebClientRequestException.class,
-                    WebClientResponseException.class
-            },
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 2000, multiplier = 3, maxDelay = 10000))
+    @Retryable(retryFor = {
+            RuntimeException.class,
+            WebClientRequestException.class,
+            WebClientResponseException.class
+    }, maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+            backoff = @Backoff(
+                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
     private WebClient.ResponseSpec makeAuthenticatedRequest(String path)
     {
         Map<String, String> headers = authService.getAlfrescoAuthHeaders();

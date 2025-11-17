@@ -70,7 +70,9 @@ public class AlfrescoClientIntegrationTest
                 WebClient.builder().build(),
                 new ObjectMapper(),
                 authService,
-                baseUrl);
+                5,
+                baseUrl,
+                100);
     }
 
     @AfterEach

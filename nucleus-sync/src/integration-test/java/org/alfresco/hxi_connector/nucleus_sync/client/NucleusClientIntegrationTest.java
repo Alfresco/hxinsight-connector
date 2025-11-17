@@ -82,7 +82,8 @@ public class NucleusClientIntegrationTest
                 authService,
                 SYSTEM_ID,
                 nucleusBaseUrl,
-                idpBaseUrl);
+                idpBaseUrl,
+                5);
     }
 
     @AfterEach
@@ -126,7 +127,8 @@ public class NucleusClientIntegrationTest
 
         // Assert
         assertThat(users).extracting(IamUser::getUserId)
-                .containsExactlyInAnyOrder("714e1cbd-d88a-4fd1-a491-be438f7a2233", "34f8e319-6a8f-4359-a5b1-d26a04a4abc0");
+                .containsExactlyInAnyOrder("714e1cbd-d88a-4fd1-a491-be438f7a2233",
+                        "34f8e319-6a8f-4359-a5b1-d26a04a4abc0");
         assertThat(users).extracting(IamUser::getUserName)
                 .containsExactlyInAnyOrder("Jane.Doe+cin@hyland.com", "moliver");
         assertThat(users).extracting(IamUser::getEmail)
@@ -202,7 +204,8 @@ public class NucleusClientIntegrationTest
         assertThat(mappings).extracting(NucleusUserMappingOutput::getExternalUserId)
                 .containsExactlyInAnyOrder("jdoe", "moliver");
         assertThat(mappings).extracting(NucleusUserMappingOutput::getUserId)
-                .containsExactlyInAnyOrder("18a17e9d-dbb1-4643-a2e7-3e1859961f5b", "24bd547d-58b3-4722-889a-84e68c41615b");
+                .containsExactlyInAnyOrder("18a17e9d-dbb1-4643-a2e7-3e1859961f5b",
+                        "24bd547d-58b3-4722-889a-84e68c41615b");
     }
 
     @Test
@@ -242,7 +245,8 @@ public class NucleusClientIntegrationTest
         assertThat(memberships).extracting(NucleusGroupMembershipOutput::getMemberExternalUserId)
                 .containsExactlyInAnyOrder("jdoe", "moliver", "aturing");
         assertThat(memberships).extracting(NucleusGroupMembershipOutput::getExternalGroupId)
-                .containsExactlyInAnyOrder("GROUP_Frontend_Team", "GROUP_Frontend_Team", "GROUP_Backend_Team");
+                .containsExactlyInAnyOrder("GROUP_Frontend_Team", "GROUP_Frontend_Team",
+                        "GROUP_Backend_Team");
     }
 
     @Test
@@ -251,16 +255,18 @@ public class NucleusClientIntegrationTest
         // Arrange
         String externalGroupId = "GROUP_ADMINS";
 
-        wireMockServer.stubFor(delete(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/groups/" + externalGroupId))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(204)));
+        wireMockServer.stubFor(delete(
+                urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/groups/" + externalGroupId))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(204)));
 
         // Act
         assertDoesNotThrow(() -> nucleusClient.deleteGroup(externalGroupId));
 
         // Assert
-        wireMockServer.verify(1, deleteRequestedFor(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/groups/" + externalGroupId)));
+        wireMockServer.verify(1, deleteRequestedFor(urlEqualTo(
+                "/system-integrations/systems/" + SYSTEM_ID + "/groups/" + externalGroupId)));
     }
 
     @Test
@@ -269,16 +275,18 @@ public class NucleusClientIntegrationTest
         // Arrange
         String externalUserId = "aturing";
 
-        wireMockServer.stubFor(delete(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings/" + externalUserId))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(204)));
+        wireMockServer.stubFor(delete(urlEqualTo(
+                "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings/" + externalUserId))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(204)));
 
         // Act
         assertDoesNotThrow(() -> nucleusClient.deleteUserMapping(externalUserId));
 
         // Assert
-        wireMockServer.verify(1, deleteRequestedFor(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings/" + externalUserId)));
+        wireMockServer.verify(1, deleteRequestedFor(urlEqualTo(
+                "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings/" + externalUserId)));
     }
 
     @Test
@@ -287,16 +295,18 @@ public class NucleusClientIntegrationTest
         // Arrange
         String externalUserId = "user+cin@example.com";
 
-        wireMockServer.stubFor(delete(urlMatching("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings/.*"))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(204)));
+        wireMockServer.stubFor(
+                delete(urlMatching("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings/.*"))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(204)));
 
         // Act
         assertDoesNotThrow(() -> nucleusClient.deleteUserMapping(externalUserId));
 
         // Assert
-        wireMockServer.verify(1, deleteRequestedFor(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings/user%252Bcin%2540example.com")));
+        wireMockServer.verify(1, deleteRequestedFor(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID
+                + "/user-mappings/user%252Bcin%2540example.com")));
     }
 
     @Test
@@ -306,20 +316,23 @@ public class NucleusClientIntegrationTest
         String parentGroupId = "GROUP_HR";
         List<String> memberUserIds = List.of("jdoe", "moliver", "aturing");
 
-        wireMockServer.stubFor(delete(urlMatching("/system-integrations/systems/" + SYSTEM_ID + "/group-members\\?.*"))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(204)));
+        wireMockServer.stubFor(
+                delete(urlMatching("/system-integrations/systems/" + SYSTEM_ID + "/group-members\\?.*"))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(204)));
 
         // Act
         assertDoesNotThrow(() -> nucleusClient.removeGroupMembers(parentGroupId, memberUserIds));
 
         // Assert
-        wireMockServer.verify(1, deleteRequestedFor(urlPathMatching("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
-                .withQueryParam("parentExternalGroupId", equalTo("GROUP_HR"))
-                .withQueryParam("memberExternalUserIds", equalTo("jdoe"))
-                .withQueryParam("memberExternalUserIds", equalTo("moliver"))
-                .withQueryParam("memberExternalUserIds", equalTo("aturing")));
+        wireMockServer.verify(1,
+                deleteRequestedFor(urlPathMatching(
+                        "/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
+                                .withQueryParam("parentExternalGroupId", equalTo("GROUP_HR"))
+                                .withQueryParam("memberExternalUserIds", equalTo("jdoe"))
+                                .withQueryParam("memberExternalUserIds", equalTo("moliver"))
+                                .withQueryParam("memberExternalUserIds", equalTo("aturing")));
     }
 
     @Test

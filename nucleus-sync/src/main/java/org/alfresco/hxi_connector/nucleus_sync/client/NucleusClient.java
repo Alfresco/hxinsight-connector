@@ -66,17 +66,17 @@ public class NucleusClient
     private final String systemId;
     private final String nucleusBaseUrl;
     private final String idpBaseUrl;
+    private final int timeoutInMin;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NucleusClient.class);
-
-    private int timeoutInMin = 5;
 
     @Autowired
     public NucleusClient(
             AuthService authService,
             @Value("${nucleus.system-id}") String systemId,
             @Value("${nucleus.base-url}") String nucleusBaseUrl,
-            @Value("${nucleus.idp-base-url}") String idpBaseUrl)
+            @Value("${nucleus.idp-base-url}") String idpBaseUrl,
+            @Value("${http-client.timeout-minutes:5}") int timeoutInMins)
     {
 
         this(
@@ -85,7 +85,8 @@ public class NucleusClient
                 authService,
                 systemId,
                 nucleusBaseUrl,
-                idpBaseUrl);
+                idpBaseUrl,
+                timeoutInMins);
     }
 
     NucleusClient(
@@ -94,7 +95,8 @@ public class NucleusClient
             AuthService authService,
             String systemId,
             String nucleusBaseUrl,
-            String idpBaseUrl)
+            String idpBaseUrl,
+            int timeoutInMin)
     {
         this.webClient = webClient;
         this.objectMapper = objectMapper;
@@ -102,6 +104,7 @@ public class NucleusClient
         this.systemId = systemId;
         this.nucleusBaseUrl = nucleusBaseUrl;
         this.idpBaseUrl = idpBaseUrl;
+        this.timeoutInMin = timeoutInMin;
     }
 
     public List<IamUser> getAllIamUsers()
@@ -308,14 +311,15 @@ public class NucleusClient
         }
     }
 
-    @Retryable(
-            retryFor = {
-                    RuntimeException.class,
-                    WebClientRequestException.class,
-                    WebClientResponseException.class
-            },
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 10000))
+    @Retryable(retryFor = {
+            RuntimeException.class,
+            WebClientRequestException.class,
+            WebClientResponseException.class
+    }, maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+            backoff = @Backoff(
+                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
     private String executeGetRequest(String fullUrl)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
@@ -333,14 +337,15 @@ public class NucleusClient
                 .block(Duration.ofMinutes(timeoutInMin));
     }
 
-    @Retryable(
-            retryFor = {
-                    RuntimeException.class,
-                    WebClientRequestException.class,
-                    WebClientResponseException.class
-            },
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 10000))
+    @Retryable(retryFor = {
+            RuntimeException.class,
+            WebClientRequestException.class,
+            WebClientResponseException.class
+    }, maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+            backoff = @Backoff(
+                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
     private String executePostRequest(String fullUrl, String jsonBody)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
@@ -356,14 +361,15 @@ public class NucleusClient
                 .block(Duration.ofMinutes(timeoutInMin));
     }
 
-    @Retryable(
-            retryFor = {
-                    RuntimeException.class,
-                    WebClientRequestException.class,
-                    WebClientResponseException.class
-            },
-            maxAttempts = 3,
-            backoff = @Backoff(delay = 2000, multiplier = 2, maxDelay = 10000))
+    @Retryable(retryFor = {
+            RuntimeException.class,
+            WebClientRequestException.class,
+            WebClientResponseException.class
+    }, maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+            backoff = @Backoff(
+                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
     private String executeDeleteRequest(String fullUrl)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
