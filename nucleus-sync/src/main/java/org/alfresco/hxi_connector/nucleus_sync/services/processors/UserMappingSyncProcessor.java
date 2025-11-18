@@ -53,7 +53,7 @@ public class UserMappingSyncProcessor
     private static final Logger logger = LoggerFactory.getLogger(UserMappingSyncProcessor.class);
 
     /**
-     * Sync alfresco and nucleus user mappings with nucleus and local db
+     * Sync alfresco and nucleus user mappings
      *
      * @param alfrescoUsers
      *            list of alfresco users

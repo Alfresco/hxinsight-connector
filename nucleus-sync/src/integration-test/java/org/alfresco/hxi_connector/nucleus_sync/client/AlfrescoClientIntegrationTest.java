@@ -82,7 +82,7 @@ public class AlfrescoClientIntegrationTest
     }
 
     @Test
-    public void testGetAllUsers_SinglePage_Success()
+    void testGetAllUsers_SinglePage_Success()
     {
         // Arrange
         String responseBody = """

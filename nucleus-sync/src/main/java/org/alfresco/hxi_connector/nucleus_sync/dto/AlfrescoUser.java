@@ -40,7 +40,9 @@ import lombok.Setter;
 public class AlfrescoUser
 {
     private String id;
+
     private String email;
+
     private boolean enabled;
 
     @JsonProperty("firstName")
