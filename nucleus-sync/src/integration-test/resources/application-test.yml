@@ -1,0 +1,8 @@
+alfresco:
+  base-url: test-alfresco-base-url
+  page-size: 100
+
+nucleus:
+  idp-base-url: test-nucleus-idp-base-url
+  base-url: test-nucleus-base-url
+  system-id: test-nucleus-system-id
