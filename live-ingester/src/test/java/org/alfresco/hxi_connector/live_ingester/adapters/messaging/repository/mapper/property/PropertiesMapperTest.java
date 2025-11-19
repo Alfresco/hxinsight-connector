@@ -29,10 +29,13 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import static java.time.ZoneOffset.UTC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
@@ -48,10 +51,7 @@ import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -416,8 +416,7 @@ class PropertiesMapperTest
 
         Map<String, Serializable> expectedAncestorsData = Map.of(
                 "primaryParentId", (Serializable) "parent-id",
-                "primaryAncestorIds", (Serializable) List.of("root-id", "grandparent-id", "parent-id")
-        );
+                "primaryAncestorIds", (Serializable) List.of("root-id", "grandparent-id", "parent-id"));
 
         PropertyDelta<?> expectedDelta = updated(ANCESTORS_PROPERTY, expectedAncestorsData);
         assertEquals(expectedDelta, result.get());

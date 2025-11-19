@@ -118,7 +118,7 @@ class BulkIngestionFilterIntegrationTest extends PostgresIntegrationTestBase
                 .nodeId("44545a62-0f64-4d3e-838a-9f8ba23df0c7")
                 .contentInfo(new IngestEvent.ContentInfo(28, "UTF-8", "text/plain"))
                 .properties(parseProperties("dad275aa-affc-487d-a7ed-92cf8e6ce351",
-                        List.of("e7a273da-2974-4581-a219-5e897342844a","6d7c466b-efd0-4b88-b77f-a941f3a2f025", "dad275aa-affc-487d-a7ed-92cf8e6ce351"),
+                        List.of("e7a273da-2974-4581-a219-5e897342844a", "6d7c466b-efd0-4b88-b77f-a941f3a2f025", "dad275aa-affc-487d-a7ed-92cf8e6ce351"),
                         "cm:name=Animals list",
                         "cm:title=List of animals",
                         "type=cm:content",
