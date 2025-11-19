@@ -1,0 +1,7 @@
+server:
+  port: ${SERVER_PORT:8081}
+
+logging:
+  level:
+    org.alfresco.hxi_connector: ${LOGGING_LEVEL_ORG_ALFRESCO:INFO}
+    org.springframework.web.reactive.function.client: DEBUG
