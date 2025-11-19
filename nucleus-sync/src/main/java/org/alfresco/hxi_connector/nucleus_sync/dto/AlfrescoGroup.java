@@ -23,21 +23,24 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync;
+package org.alfresco.hxi_connector.nucleus_sync.dto;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@SpringBootApplication
-@EnableScheduling
-@EnableRetry
-@SuppressWarnings("PMD.UseUtilityClass")
-public class NucleusSyncApplication
+@Setter
+@Getter
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
+public class AlfrescoGroup
 {
-    public static void main(String[] args)
-    {
-        SpringApplication.run(NucleusSyncApplication.class, args);
-    }
+    private String id;
+
+    @JsonProperty("displayName")
+    private String displayName;
 }

@@ -23,21 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync;
+package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.annotation.EnableScheduling;
-
-@SpringBootApplication
-@EnableScheduling
-@EnableRetry
-@SuppressWarnings("PMD.UseUtilityClass")
-public class NucleusSyncApplication
+public class ClientException extends RuntimeException
 {
-    public static void main(String[] args)
+    public ClientException(String message)
     {
-        SpringApplication.run(NucleusSyncApplication.class, args);
+        super(message);
+    }
+
+    public ClientException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public ClientException(Throwable cause)
+    {
+        super(cause);
     }
 }
