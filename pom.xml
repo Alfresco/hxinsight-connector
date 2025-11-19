@@ -94,7 +94,7 @@
         <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
         <license-maven-plugin.version>2.7.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <spotless-plugin.version>3.0.0</spotless-plugin.version>
+        <spotless-plugin.version>3.1.0</spotless-plugin.version>
         <jrebel-maven-plugin.version>1.2.1</jrebel-maven-plugin.version>
 
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->
