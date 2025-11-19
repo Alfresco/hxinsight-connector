@@ -29,8 +29,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import static java.time.ZoneOffset.UTC;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
