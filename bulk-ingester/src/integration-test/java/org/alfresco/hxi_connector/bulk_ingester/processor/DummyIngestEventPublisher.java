@@ -76,7 +76,7 @@ public class DummyIngestEventPublisher implements IngestEventPublisher
         Map<String, Serializable> expectedProps = expected.properties();
         Map<String, Serializable> actualProps = actual.properties();
 
-        assertEquals(expectedProps.size(), actualProps.size(), "Properties map size mismatch");
+        assertEquals(expectedProps, actualProps, "Properties size mismatch");
 
         expectedProps.forEach((key, expectedValue) -> {
             assertTrue(actualProps.containsKey(key), "Missing property key: " + key);
