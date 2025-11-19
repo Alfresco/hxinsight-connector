@@ -150,10 +150,11 @@ public class PropertyMappingHelper
             return Optional.empty();
         }
         String primaryParentId = primaryHierarchy.get(0);
-        Collections.reverse(primaryHierarchy);
+        List<String> reversedHierarchy = new ArrayList<>(primaryHierarchy);
+        Collections.reverse(reversedHierarchy);
         Map<String, Serializable> ancestorsData = new HashMap<>();
         ancestorsData.put("primaryParentId", primaryParentId);
-        ancestorsData.put("primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));
+        ancestorsData.put("primaryAncestorIds", (Serializable) reversedHierarchy); // ✅ Use reversed list
 
         return Optional.of(PropertyDelta.updated(ANCESTORS_PROPERTY, ancestorsData));
     }

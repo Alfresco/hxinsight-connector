@@ -48,9 +48,17 @@ import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
+
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -388,7 +396,49 @@ class PropertiesMapperTest
 
         assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
     }
+    @Test
+    void shouldCalculateAncestorsPropertyDelta()
+    {
+        // given
+        List<String> primaryHierarchy = List.of("parent-id", "grandparent-id", "root-id");
 
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        NodeResource nodeResource = NodeResource.builder()
+                .setPrimaryHierarchy(primaryHierarchy)
+                .build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculateAncestorsPropertyDelta(event);
+
+        // then
+        assertTrue(result.isPresent());
+
+        Map<String, Serializable> expectedAncestorsData = Map.of(
+                "primaryParentId", (Serializable) "parent-id",
+                "primaryAncestorIds", (Serializable) List.of("root-id", "grandparent-id", "parent-id")
+        );
+
+        PropertyDelta<?> expectedDelta = updated(ANCESTORS_PROPERTY, expectedAncestorsData);
+        assertEquals(expectedDelta, result.get());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenPrimaryHierarchyIsNull()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        NodeResource nodeResource = NodeResource.builder()
+                .setPrimaryHierarchy(null)
+                .build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculateAncestorsPropertyDelta(event);
+
+        // then
+        assertFalse(result.isPresent());
+    }
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
         given(event.getType()).willReturn(type.getType());
