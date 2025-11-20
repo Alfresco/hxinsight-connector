@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.bulk_ingester.processor;
 import static java.lang.String.format;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.util.HashMap;
@@ -57,17 +58,12 @@ public class DummyIngestEventPublisher implements IngestEventPublisher
         ingestEvents.forEach(this::assertPublishedNode);
     }
 
-    public void assertPublishedNode(IngestEvent expected)
+    public void assertPublishedNode(IngestEvent ingestEvent)
     {
-        IngestEvent actual = ingestEvents.values().stream()
-                .filter(event -> event.nodeId().equals(expected.nodeId()))
-                .findFirst()
-                .orElseThrow(() -> new AssertionError("Node not published: " + expected.nodeId()));
+        IngestEvent publishedIngestEvent = ingestEvents.get(ingestEvent.nodeId());
 
-        // Compare individual fields
-        assertEquals(expected.contentInfo(), actual.contentInfo(), "Content info mismatch");
-        assertEquals(expected.timestamp(), actual.timestamp(), "Timestamp mismatch");
-        assertEquals(expected.properties(), actual.properties(), "Properties mismatch");
+        assertNotNull(publishedIngestEvent, format("Node %s not published", ingestEvent.nodeId()));
+        assertEquals(ingestEvent, publishedIngestEvent);
     }
 
     public void assertNodeNotPublished(IngestEvent ingestEvent)
