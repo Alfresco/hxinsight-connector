@@ -130,18 +130,13 @@ public class AlfrescoClient
 
                 AlfrescoPagedResponse<T> pagedResponse = objectMapper.readValue(response, typeRef);
 
-                int itemsProcessed = 0;
                 if (pagedResponse.getList() != null
                         && pagedResponse.getList().getEntries() != null)
                 {
-                    for (AlfrescoPagedResponse.EntryWrapper<T> entry : pagedResponse.getList().getEntries())
-                    {
-                        if (entry.getEntry() != null)
-                        {
-                            results.add(entry.getEntry());
-                            itemsProcessed++;
-                        }
-                    }
+                    pagedResponse.getList().getEntries().stream()
+                            .map(AlfrescoPagedResponse.EntryWrapper::getEntry)
+                            .filter(entry -> entry != null)
+                            .forEach(results::add);
                 }
 
                 AlfrescoPagedResponse.Pagination pagination = pagedResponse.getList().getPagination();
@@ -149,7 +144,7 @@ public class AlfrescoClient
                 if (pagination != null)
                 {
                     hasMoreItems = pagination.isHasMoreItems();
-                    skipCount += itemsProcessed;
+                    skipCount += pagination.getCount();
                 }
                 else
                 {
