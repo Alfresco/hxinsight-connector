@@ -143,17 +143,9 @@ class AlfrescoNodeMapperTest
     @Test
     void shouldMapNodeWithParentIdAndPrimaryHierarchy()
     {
+        // given
         AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
-
-        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
         given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
-        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
-        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
-        given(alfrescoNode.getAspects()).willReturn(Set.of());
-        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
-        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
-        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
-        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
 
         String parentId = "parent-uuid";
         ChildAssocMetaData primaryParentAssoc = mock();
@@ -163,56 +155,23 @@ class AlfrescoNodeMapperTest
         List<String> hierarchy = List.of("great-grandparent-uuid", "grandparent-uuid", parentId);
         given(alfrescoNode.primaryHierarchy()).willReturn(hierarchy);
 
+        // when
         IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
 
+        // then
         Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
         assertEquals(parentId, ancestorsMap.get("primaryParentId"));
+        // The hierarchy from Alfresco should be reversed.
         assertEquals(List.of(parentId, "grandparent-uuid", "great-grandparent-uuid"), ancestorsMap.get("primaryAncestorIds"));
     }
 
     @Test
-    void shouldMapNodeWithSingleElementInHierarchy()
-    {
-        AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
-
-        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
-        given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
-        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
-        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
-        given(alfrescoNode.getAspects()).willReturn(Set.of());
-        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
-        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
-        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
-        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
-
-        String parentId = "parent-uuid";
-        ChildAssocMetaData primaryParentAssoc = mock();
-        given(primaryParentAssoc.getParentUuid()).willReturn(parentId);
-        given(alfrescoNode.getPrimaryParentAssociation()).willReturn(primaryParentAssoc);
-        given(alfrescoNode.primaryHierarchy()).willReturn(List.of(parentId));
-
-        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
-
-        Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
-        assertEquals(parentId, ancestorsMap.get("primaryParentId"));
-        assertEquals(List.of(parentId), ancestorsMap.get("primaryAncestorIds"));
-    }
-
-    @Test
-    void shouldMapNodeWithNullParentIdAndEmptyHierarchy()
+    void shouldMapRootNodeWithNullParentIdAndEmptyHierarchy()
     {
         // given
         AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
 
-        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
         given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
-        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
-        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
-        given(alfrescoNode.getAspects()).willReturn(Set.of());
-        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
-        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
-        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
-        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
         given(alfrescoNode.getPrimaryParentAssociation()).willReturn(null);
         given(alfrescoNode.primaryHierarchy()).willReturn(null);
 
@@ -222,37 +181,6 @@ class AlfrescoNodeMapperTest
         // then
         Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
         assertEquals("", ancestorsMap.get("primaryParentId"));
-        assertEquals(List.of(), ancestorsMap.get("primaryAncestorIds"));
-    }
-
-    @Test
-    void shouldMapNodeWithParentIdButEmptyHierarchy()
-    {
-        // given
-        AlfrescoNode alfrescoNode = mock(AlfrescoNode.class);
-
-        given(alfrescoNode.getNodeRef()).willReturn(NODE_UUID);
-        given(alfrescoNode.getType()).willReturn(QName.newTransientInstance("", TYPE_FOLDER));
-        given(alfrescoNode.getCreator()).willReturn(CREATOR_ID);
-        given(alfrescoNode.getModifier()).willReturn(MODIFIER_ID);
-        given(alfrescoNode.getAspects()).willReturn(Set.of());
-        given(alfrescoNode.getCreatedAt()).willReturn(CREATED_AT);
-        given(alfrescoNode.getModifiedAt()).willReturn(MODIFIED_AT);
-        given(alfrescoNode.getNodeProperties()).willReturn(Set.of());
-        given(alfrescoNode.getAccessControlList()).willReturn(Set.of());
-
-        String parentId = "parent-uuid";
-        ChildAssocMetaData primaryParentAssoc = mock();
-        given(primaryParentAssoc.getParentUuid()).willReturn(parentId);
-        given(alfrescoNode.getPrimaryParentAssociation()).willReturn(primaryParentAssoc);
-        given(alfrescoNode.primaryHierarchy()).willReturn(List.of());
-
-        // when
-        IngestEvent ingestEvent = alfrescoNodeMapper.map(alfrescoNode);
-
-        // then
-        Map<String, Serializable> ancestorsMap = (Map<String, Serializable>) ingestEvent.properties().get(ANCESTORS_PROPERTY);
-        assertEquals(parentId, ancestorsMap.get("primaryParentId"));
         assertEquals(List.of(), ancestorsMap.get("primaryAncestorIds"));
     }
 
