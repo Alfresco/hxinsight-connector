@@ -126,9 +126,6 @@ class AlfrescoNodeMapperTest
         assertEquals(NODE_UUID, ingestEvent.nodeId());
         assertNull(ingestEvent.contentInfo());
 
-        Map<String, Serializable> expectedAncestorsMap = Map.of(
-                "primaryParentId", "",
-                "primaryAncestorIds", (Serializable) List.of());
         assertEquals(Map.of(TYPE_PROPERTY, PREFIXED_TYPE_FOLDER,
                 CREATED_BY_PROPERTY, CREATOR_ID,
                 MODIFIED_BY_PROPERTY, MODIFIER_ID,
@@ -137,7 +134,7 @@ class AlfrescoNodeMapperTest
                 MODIFIED_AT_PROPERTY, MODIFIED_AT_ISO,
                 ALLOW_ACCESS, Set.of(GROUP_EVERYONE),
                 DENY_ACCESS, Set.of(BOB),
-                ANCESTORS_PROPERTY, expectedAncestorsMap), ingestEvent.properties());
+                ANCESTORS_PROPERTY, EMPTY_ANCESTORS_MAP), ingestEvent.properties());
     }
 
     @Test
