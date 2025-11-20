@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 
 import static java.time.ZoneOffset.UTC;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -44,6 +43,7 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACC
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
@@ -57,9 +57,10 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -68,7 +69,6 @@ import org.alfresco.repo.event.v1.model.EventType;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
-import org.mockito.Mock;
 
 class PropertiesMapperTest
 {
@@ -313,45 +313,6 @@ class PropertiesMapperTest
                 updated(NAME_PROPERTY, "newName.bmp"));
         assertEquals(mergeWithDefaultProperties(expected), propertyDeltas);
     }
-
-//    @Test
-//    void shouldAddACLInfo_NodeCreated()
-//    {
-//        // given
-//        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
-//        PropertiesMapper mapper = new PropertiesMapper(mockAuthorityTypeResolver);
-//
-//        String groupEveryone = "GROUP_EVERYONE";
-//        String bob = "bob";
-//
-//        RepoEvent<DataAttributes<NodeResource>> event = mock();
-//
-//        setType(event, NODE_CREATED);
-//
-//        given(event.getData()).willReturn(mock(EventData.class));
-//        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
-//        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
-//
-//        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
-//        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
-//
-//        given(mockAuthorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-//        given(mockAuthorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
-//
-//        // when
-//        Set<PropertyDelta<?>> propertyDeltas = mapper.mapToPropertyDeltas(event);
-//
-//        // then
-//        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-//                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-//                updated(DENY_ACCESS, Set.of(bob)));
-//
-//        boolean hasPermissionsProperty = propertyDeltas.stream()
-//                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
-//
-//        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
-//        assertTrue(hasPermissionsProperty);
-//    }
 
     @Test
     void shouldAddDefaultACLInfoIfNotPresent_NodeCreated()

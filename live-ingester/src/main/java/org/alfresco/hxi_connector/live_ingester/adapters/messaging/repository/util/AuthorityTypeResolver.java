@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
