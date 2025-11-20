@@ -412,7 +412,7 @@ class PropertiesMapperTest
         Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculateAncestorsPropertyDelta(event);
 
         // then
-        assertTrue(result.isPresent());
+        assertTrue(result.isPresent(), "Ancestors property delta should be present when primary hierarchy exists");
 
         Map<String, Serializable> expectedAncestorsData = Map.of(
                 "primaryParentId", (Serializable) "parent-id",
@@ -436,7 +436,7 @@ class PropertiesMapperTest
         Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculateAncestorsPropertyDelta(event);
 
         // then
-        assertFalse(result.isPresent());
+        assertFalse(result.isPresent(), "Ancestors property delta should not be present when primary hierarchy is null");
     }
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
