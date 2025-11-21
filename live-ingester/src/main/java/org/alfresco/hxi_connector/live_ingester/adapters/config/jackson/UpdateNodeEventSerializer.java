@@ -40,12 +40,12 @@ import java.util.Set;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.std.StdSerializer;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.PrincipalsMetadata;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.exception.JsonSerializationException;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FileMetadata;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.PrincipalsMetadata;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 
 @Component
