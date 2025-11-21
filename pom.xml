@@ -21,6 +21,7 @@
         <module>live-ingester</module>
         <module>prediction-applier</module>
         <module>hxinsight-extension</module>
+        <module>nucleus-sync</module>
         <module>distribution</module>
         <module>e2e-test</module>
     </modules>
@@ -277,6 +278,11 @@
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock</artifactId>
+                <version>${wiremock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock-standalone</artifactId>
                 <version>${wiremock.version}</version>
             </dependency>
             <dependency>

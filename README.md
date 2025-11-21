@@ -157,3 +157,13 @@ you can automatically generate `namespace-prefixes.json` with all types in your 
 ```bash
 python3 scripts/utils/namespaces-to-namespace-prefixes-file-generator.py --help
 ```
+
+### User Group Mapping (WIP)
+
+The (`nucleus-sync`) application is a long-lived Spring Boot app which will periodically
+load data from a running Alfresco instance via the REST API and publish it to Nucleus.
+The following information is published:
+
+* Alfresco users with users of Nucleus (obtained from IAM) based on user's email.
+* Alfresco Groups if their member users are mapped.
+* Alfresco Group memberships for those users and groups which have been mapped.
