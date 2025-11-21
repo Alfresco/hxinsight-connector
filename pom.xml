@@ -21,6 +21,7 @@
         <module>live-ingester</module>
         <module>prediction-applier</module>
         <module>hxinsight-extension</module>
+        <module>nucleus-sync</module>
         <module>distribution</module>
         <module>e2e-test</module>
     </modules>
@@ -70,7 +71,7 @@
 
         <alfresco-platform.version>25.3.0-A.15</alfresco-platform.version>
         <alfresco-sdk.version>4.12.0</alfresco-sdk.version>
-        <alfresco-db-connector.version>1.1.0-A.1</alfresco-db-connector.version>
+        <alfresco-db-connector.version>1.2.0</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.11</alfresco-event-model.version>
         <spring-boot.version>3.5.7</spring-boot.version>
         <spring-camel.version>4.14.0</spring-camel.version>
@@ -277,6 +278,11 @@
             <dependency>
                 <groupId>org.wiremock</groupId>
                 <artifactId>wiremock</artifactId>
+                <version>${wiremock.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.wiremock</groupId>
+                <artifactId>wiremock-standalone</artifactId>
                 <version>${wiremock.version}</version>
             </dependency>
             <dependency>
