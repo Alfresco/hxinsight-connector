@@ -41,8 +41,7 @@ import org.alfresco.database.connector.model.TagData;
 class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
 {
     private final List<AlfrescoNode> nodes = new ArrayList<>();
-    private boolean primaryHierarchyEnabled;
-    private int primaryHierarchyRequestCount;
+    private List<NodeParams> requestList = new ArrayList<>();
 
     public void setNodes(List<AlfrescoNode> nodes)
     {
@@ -50,29 +49,9 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
         this.nodes.addAll(nodes);
     }
 
-    public void setPrimaryHierarchyEnabled(boolean enabled)
-    {
-        this.primaryHierarchyEnabled = enabled;
-    }
-
-    public boolean wasPrimaryHierarchyRequested()
-    {
-        return primaryHierarchyEnabled && primaryHierarchyRequestCount > 0;
-    }
-
-    public int getPrimaryHierarchyRequestCount()
-    {
-        return primaryHierarchyRequestCount;
-    }
-
     @Override
     public List<AlfrescoNode> getAlfrescoNodes(NodeParams nodeParams)
     {
-        if (primaryHierarchyEnabled)
-        {
-            primaryHierarchyRequestCount++;
-        }
-
         if (nodeParams.getTimestampRange().isPresent())
         {
             throw new UnsupportedOperationException("Not implemented");
@@ -87,6 +66,8 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
         {
             throw new IllegalArgumentException("NodeParams paging parameter is required");
         }
+
+        requestList.add(nodeParams);
 
         NodeParams.Range idRange = nodeParams.getIdRange().get();
         NodeParams.Paging paging = nodeParams.getPaging().get();
@@ -114,5 +95,15 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
     public Long getDBIdFromNodeRef(String s)
     {
         throw new UnsupportedOperationException("Not implemented");
+    }
+
+    public List<NodeParams> getRequestList()
+    {
+        return requestList;
+    }
+
+    public void resetRequestList(List<NodeParams> requestList)
+    {
+        this.requestList = new ArrayList<>();
     }
 }
