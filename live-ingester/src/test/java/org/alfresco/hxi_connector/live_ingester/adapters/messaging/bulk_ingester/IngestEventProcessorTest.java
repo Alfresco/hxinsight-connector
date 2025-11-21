@@ -114,7 +114,6 @@ class IngestEventProcessorTest
                 100L,
                 "UTF-8",
                 mimeType);
-
         IngestEvent ingestEvent = new IngestEvent(
                 NODE_ID,
                 contentInfo,

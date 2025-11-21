@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.repository;
 
+import static java.util.stream.Collectors.toList;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,6 +38,7 @@ import static org.mockito.Mockito.when;
 import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLogsListAppender;
 
 import java.util.List;
+import java.util.stream.IntStream;
 
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.read.ListAppender;
@@ -45,6 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.database.connector.NodeParams;
 import org.alfresco.database.connector.model.AlfrescoNode;
 import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFilterHandler;
 
@@ -121,6 +125,54 @@ class BulkIngesterNodeRepositoryTest
         assertTrue(logs.get(2).contains("Found node 0"));
         assertTrue(logs.get(3).contains("Found node 1"));
         assertTrue(logs.get(4).contains("Looking for nodes"));
+    }
+
+    @Test
+    void shouldFindAllNodesWithPrimaryHierarchy()
+    {
+        IdRange idRange = new IdRange(0, 4);
+        List<AlfrescoNode> nodes = List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3));
+
+        metadataRepository.setNodes(nodes);
+
+        List<AlfrescoNode> foundNodes = nodeRepository.find(idRange)
+                .toList();
+
+        assertEquals(nodes, foundNodes);
+        List<NodeParams> expected = IntStream.range(0, 3)
+                .mapToObj(page -> NodeParams.searchByIdRange(0, 4).withPaging(page, 2).withPrimaryHierarchy(true))
+                .collect(toList());
+        assertEquals(expected, metadataRepository.getRequestList());
+    }
+
+    @Test
+    void shouldReturnEmptyListIfNoNodesWithPrimaryHierarchy()
+    {
+        IdRange idRange = new IdRange(0, 5);
+        List<AlfrescoNode> nodes = List.of();
+
+        metadataRepository.setNodes(nodes);
+
+        List<AlfrescoNode> foundNodes = nodeRepository.find(idRange)
+                .toList();
+
+        assertEquals(nodes, foundNodes);
+        NodeParams nodeParams = NodeParams.searchByIdRange(0, 5).withPaging(0, 2).withPrimaryHierarchy(true);
+        assertEquals(List.of(nodeParams), metadataRepository.getRequestList());
+    }
+
+    @Test
+    void shouldRequestPrimaryHierarchyForEachPage()
+    {
+        metadataRepository.setNodes(List.of(mockNode(0), mockNode(1), mockNode(2), mockNode(3)));
+
+        nodeRepository.find(new IdRange(0, 4))
+                .forEach(node -> log.debug("Found node {}", node.getId()));
+
+        List<NodeParams> expected = IntStream.range(0, 3)
+                .mapToObj(page -> NodeParams.searchByIdRange(0, 4).withPaging(page, 2).withPrimaryHierarchy(true))
+                .collect(toList());
+        assertEquals(expected, metadataRepository.getRequestList());
     }
 
     private AlfrescoNode mockNode(long id)

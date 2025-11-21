@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -37,4 +37,5 @@ public class NodeProperties
     public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
     public static final String ALLOW_ACCESS = "ALLOW_ACCESS";
     public static final String DENY_ACCESS = "DENY_ACCESS";
+    public static final String ANCESTORS_PROPERTY = "ancestors";
 }
