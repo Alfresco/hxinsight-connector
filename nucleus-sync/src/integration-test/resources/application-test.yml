@@ -1,0 +1,3 @@
+alfresco:
+  base-url: test-alfresco-base-url
+  page-size: 100

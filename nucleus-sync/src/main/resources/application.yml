@@ -1,6 +1,38 @@
 server:
   port: ${SERVER_PORT:8081}
 
+http-client:
+  timeout-minutes: ${HTTP_CLIENT_TIMEOUT_MINUTES:5}
+  retry:
+    max-attempts: ${HTTP_RETRY_MAX_ATTEMPTS:3}
+    initial-delay-ms: ${HTTP_RETRY_INITIAL_DELAY_MS:2000}
+    multiplier: ${HTTP_RETRY_MULTIPLIER:2}
+    max-delay-ms: ${HTTP_RETRY_MAX_DELAY_MS:10000}
+
+auth:
+  providers:
+    alfresco:
+      type: ${AUTH_ALFRESCO_TYPE}
+      username: ${ALFRESCO_USER_NAME}
+      password: ${ALFRESCO_PASSWORD}
+    hyland-experience:
+      type: ${AUTH_HX_TYPE}
+      client-id: ${HX_CLIENT_ID}
+      client-secret: ${HX_CLIENT_SECRET}
+      token-uri: ${HX_TOKEN_URI}
+      grant-type: client_credentials
+      scope:
+        - hxp.integrations
+        - iam.user-data.account
+        - system-integrations-config
+        - system-integrations-runtime
+        - environment_authorization
+      environment-key: ${HX_ENV_KEY}
+
+alfresco:
+  base-url: ${ALFRESCO_BASE_URL}
+  page-size: 100
+
 logging:
   level:
     org.alfresco.hxi_connector: ${LOGGING_LEVEL_ORG_ALFRESCO:INFO}
