@@ -35,6 +35,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
@@ -52,8 +53,13 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
+
+import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -386,7 +392,48 @@ class PropertiesMapperTest
         assertTrue(hasDenyAccess);
         assertTrue(hasPermissionsProperty);
     }
+    @Test
+    void shouldCalculateAncestorsPropertyDelta()
+    {
+        // given
+        List<String> primaryHierarchy = List.of("parent-id", "grandparent-id", "root-id");
 
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        NodeResource nodeResource = NodeResource.builder()
+                .setPrimaryHierarchy(primaryHierarchy)
+                .build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculateAncestorsPropertyDelta(event);
+
+        // then
+        assertTrue(result.isPresent(), "Ancestors property delta should be present when primary hierarchy exists");
+
+        Map<String, Serializable> expectedAncestorsData = Map.of(
+                "primaryParentId", (Serializable) "parent-id",
+                "primaryAncestorIds", (Serializable) List.of("root-id", "grandparent-id", "parent-id"));
+
+        PropertyDelta<?> expectedDelta = updated(ANCESTORS_PROPERTY, expectedAncestorsData);
+        assertEquals(expectedDelta, result.get());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenPrimaryHierarchyIsNull()
+    {
+        // given
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+        NodeResource nodeResource = NodeResource.builder()
+                .setPrimaryHierarchy(null)
+                .build();
+        setNodeResource(event, nodeResource);
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculateAncestorsPropertyDelta(event);
+
+        // then
+        assertFalse(result.isPresent(), "Ancestors property delta should not be present when primary hierarchy is null");
+    }
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
         given(event.getType()).willReturn(type.getType());

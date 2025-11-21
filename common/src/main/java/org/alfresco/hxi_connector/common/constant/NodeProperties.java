@@ -37,5 +37,6 @@ public class NodeProperties
     public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
     public static final String ALLOW_ACCESS = "ALLOW_ACCESS";
     public static final String DENY_ACCESS = "DENY_ACCESS";
+    public static final String ANCESTORS_PROPERTY = "ancestors";
     public static final String PERMISSIONS_PROPERTY = "permissions";
 }

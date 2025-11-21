@@ -115,6 +115,13 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "type": {"value": "cm:content", "annotation": "type"},
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
+                      "ancestors" : {
+                            "value" : {
+                              "primaryParentId" : "5f355d16-f824-4173-bf4b-b1ec37ef5549",
+                              "primaryAncestorIds" : [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549" ]
+                            },
+                            "annotation" : "hierarchy"
+                      },
                       "cm:content": {
                         "file": {
                           "content-metadata": {
@@ -236,6 +243,13 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                       "type": {"value": "cm:content", "annotation": "type"},
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
+                      "ancestors" : {
+                            "value" : {
+                              "primaryParentId" : "5f355d16-f824-4173-bf4b-b1ec37ef5549",
+                              "primaryAncestorIds" : [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549" ]
+                            },
+                            "annotation" : "hierarchy"
+                      },
                       "cm:content": {
                         "file": {
                           "content-metadata": {
