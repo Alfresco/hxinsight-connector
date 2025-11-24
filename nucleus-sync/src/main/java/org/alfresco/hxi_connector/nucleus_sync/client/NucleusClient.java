@@ -77,7 +77,6 @@ public class NucleusClient
             @Value("${nucleus.idp-base-url}") String idpBaseUrl,
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins)
     {
-
         this(
                 WebClient.builder().build(),
                 new ObjectMapper(),
@@ -153,7 +152,6 @@ public class NucleusClient
             String jsonBody = objectMapper.writeValueAsString(groups);
 
             executePostRequest(url, jsonBody);
-
         }
         catch (Exception e)
         {
@@ -175,7 +173,6 @@ public class NucleusClient
             return userMappingsOutput.getItems() != null
                     ? userMappingsOutput.getItems()
                     : List.of();
-
         }
         catch (Exception e)
         {
@@ -193,7 +190,6 @@ public class NucleusClient
             String jsonBody = objectMapper.writeValueAsString(userMappings);
 
             executePostRequest(url, jsonBody);
-
         }
         catch (Exception e)
         {
@@ -215,7 +211,6 @@ public class NucleusClient
             return groupMembershipOutput.getItems() != null
                     ? groupMembershipOutput.getItems()
                     : List.of();
-
         }
         catch (Exception e)
         {
@@ -233,7 +228,6 @@ public class NucleusClient
             String jsonBody = objectMapper.writeValueAsString(assignments);
 
             executePostRequest(url, jsonBody);
-
         }
         catch (Exception e)
         {
@@ -253,7 +247,6 @@ public class NucleusClient
                     + URLEncoder.encode(externalGroupId, StandardCharsets.UTF_8);
 
             executeDeleteRequest(fullUrl);
-
         }
         catch (Exception e)
         {
@@ -301,7 +294,6 @@ public class NucleusClient
             }
 
             executeDeleteRequest(urlBuilder.toString());
-
         }
         catch (Exception e)
         {
