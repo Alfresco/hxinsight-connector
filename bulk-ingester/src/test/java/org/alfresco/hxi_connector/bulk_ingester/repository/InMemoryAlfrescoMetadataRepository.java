@@ -41,6 +41,7 @@ import org.alfresco.database.connector.model.TagData;
 class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
 {
     private final List<AlfrescoNode> nodes = new ArrayList<>();
+    private List<NodeParams> requestList = new ArrayList<>();
 
     public void setNodes(List<AlfrescoNode> nodes)
     {
@@ -65,6 +66,8 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
         {
             throw new IllegalArgumentException("NodeParams paging parameter is required");
         }
+
+        requestList.add(nodeParams);
 
         NodeParams.Range idRange = nodeParams.getIdRange().get();
         NodeParams.Paging paging = nodeParams.getPaging().get();
@@ -92,5 +95,15 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
     public Long getDBIdFromNodeRef(String s)
     {
         throw new UnsupportedOperationException("Not implemented");
+    }
+
+    public List<NodeParams> getRequestList()
+    {
+        return requestList;
+    }
+
+    public void resetRequestList(List<NodeParams> requestList)
+    {
+        this.requestList = new ArrayList<>();
     }
 }

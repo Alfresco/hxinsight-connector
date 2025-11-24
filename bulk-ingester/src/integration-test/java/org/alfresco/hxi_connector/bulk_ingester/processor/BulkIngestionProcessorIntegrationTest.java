@@ -23,14 +23,16 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.bulk_ingester.processor;
 
 import static org.mockito.BDDMockito.given;
 
 import static org.alfresco.hxi_connector.bulk_ingester.util.IngestEventPropertyParser.parseProperties;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,8 +40,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.bulk_ingester.BulkIngesterApplication;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.TimeProvider;
@@ -53,7 +55,7 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
 {
     private static final long TIMESTAMP = 1_708_329_410L;
 
-    @MockBean
+    @MockitoBean
     private TimeProvider timeProvider;
 
     @Autowired
@@ -80,26 +82,34 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
         // given
         List<IngestEvent> categories = List.of(
                 IngestEvent.builder().nodeId("94e0b276-6447-4dbc-b32a-1d37836a8066")
-                        .properties(parseProperties(
+                        .properties(parsePropertiesWithAncestors(
+                                createAncestorsMap("02b5a54d-3a5d-4efd-99c4-c5dd87f0bb0a",
+                                        List.of("e7a273da-2974-4581-a219-5e897342844a", "88b473b0-bcb3-4c5a-8b43-6d8cf9d5cccc", "02b5a54d-3a5d-4efd-99c4-c5dd87f0bb0a")),
                                 "type=cm:category", "cm:name=Animal Species", "createdAt=2024-02-19T07:56:50.034Z",
                                 "modifiedAt=2024-02-19T07:56:50.034Z", "aspectsNames=[cm:auditable]", "createdBy=admin",
                                 "modifiedBy=admin", "ALLOW_ACCESS=[GROUP_EVERYONE, guest]"))
                         .timestamp(TIMESTAMP).build(),
                 IngestEvent.builder().nodeId("11dedf84-4ebb-431e-adbf-7e92b2792674")
-                        .properties(parseProperties(
+                        .properties(parsePropertiesWithAncestors(
+                                createAncestorsMap("94e0b276-6447-4dbc-b32a-1d37836a8066",
+                                        List.of("e7a273da-2974-4581-a219-5e897342844a", "88b473b0-bcb3-4c5a-8b43-6d8cf9d5cccc", "02b5a54d-3a5d-4efd-99c4-c5dd87f0bb0a", "94e0b276-6447-4dbc-b32a-1d37836a8066")),
                                 "type=cm:category", "cm:name=Mammal", "createdAt=2024-02-19T07:57:10.868Z",
                                 "modifiedAt=2024-02-19T07:57:10.868Z", "aspectsNames=[cm:auditable]", "createdBy=admin",
                                 "modifiedBy=admin", "ALLOW_ACCESS=[GROUP_EVERYONE, guest]"))
                         .timestamp(TIMESTAMP).build(),
                 IngestEvent.builder().nodeId("fa6b38cd-442a-4f77-9d3e-dc212a6b809e")
-                        .properties(parseProperties(
+                        .properties(parsePropertiesWithAncestors(
+                                createAncestorsMap("94e0b276-6447-4dbc-b32a-1d37836a8066",
+                                        List.of("e7a273da-2974-4581-a219-5e897342844a", "88b473b0-bcb3-4c5a-8b43-6d8cf9d5cccc", "02b5a54d-3a5d-4efd-99c4-c5dd87f0bb0a", "94e0b276-6447-4dbc-b32a-1d37836a8066")),
                                 "type=cm:category", "cm:name=Fish", "createdAt=2024-02-19T07:57:44.072Z",
                                 "modifiedAt=2024-02-19T07:57:44.072Z", "aspectsNames=[cm:auditable]", "createdBy=admin",
                                 "modifiedBy=admin", "ALLOW_ACCESS=[GROUP_EVERYONE, guest]"))
                         .timestamp(TIMESTAMP).build());
 
         IngestEvent folder = IngestEvent.builder().nodeId("dad275aa-affc-487d-a7ed-92cf8e6ce351")
-                .properties(parseProperties(
+                .properties(parsePropertiesWithAncestors(
+                        createAncestorsMap("6d7c466b-efd0-4b88-b77f-a941f3a2f025",
+                                List.of("e7a273da-2974-4581-a219-5e897342844a", "6d7c466b-efd0-4b88-b77f-a941f3a2f025")),
                         "type=cm:folder", "cm:name=Animals", "cm:title=Animals overview", "createdAt=2024-02-19T07:55:23.195Z",
                         "modifiedAt=2024-02-19T08:09:40.888Z", "aspectsNames=[cm:titled, cm:auditable]", "createdBy=admin",
                         "cm:description=This folder contains overview of the animals in our zoo", "modifiedBy=admin",
@@ -108,7 +118,9 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
 
         IngestEvent textFile = IngestEvent.builder().nodeId("44545a62-0f64-4d3e-838a-9f8ba23df0c7")
                 .contentInfo(new IngestEvent.ContentInfo(28, "UTF-8", "text/plain"))
-                .properties(parseProperties(
+                .properties(parsePropertiesWithAncestors(
+                        createAncestorsMap("dad275aa-affc-487d-a7ed-92cf8e6ce351",
+                                List.of("e7a273da-2974-4581-a219-5e897342844a", "6d7c466b-efd0-4b88-b77f-a941f3a2f025", "dad275aa-affc-487d-a7ed-92cf8e6ce351")),
                         "cm:name=Animals list", "cm:title=List of animals", "type=cm:content", "createdAt=2024-02-19T08:00:28.040Z",
                         "modifiedAt=2024-02-19T09:31:46.154Z", "app:editInline=true",
                         "aspectsNames=[cm:generalclassifiable, app:inlineeditable, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]",
@@ -120,7 +132,9 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
         List<IngestEvent> pdfFiles = List.of(
                 IngestEvent.builder().nodeId("02acf462-533d-4e1b-9825-05fa934140da")
                         .contentInfo(new IngestEvent.ContentInfo(119625, "UTF-8", "application/pdf"))
-                        .properties(parseProperties(
+                        .properties(parsePropertiesWithAncestors(
+                                createAncestorsMap("dad275aa-affc-487d-a7ed-92cf8e6ce351",
+                                        List.of("e7a273da-2974-4581-a219-5e897342844a", "6d7c466b-efd0-4b88-b77f-a941f3a2f025", "dad275aa-affc-487d-a7ed-92cf8e6ce351")),
                                 "cm:name=carp.pdf", "type=cm:content", "cm:autoVersion=true", "cm:title=", "cm:versionType=MAJOR",
                                 "cm:versionLabel=1.0", "cm:autoVersionOnUpdateProps=false",
                                 "aspectsNames=[cm:generalclassifiable, cm:versionable, cm:author, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]",
@@ -130,7 +144,9 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
                         .timestamp(TIMESTAMP).build(),
                 IngestEvent.builder().nodeId("f9d6264e-426b-41cd-9f4b-b660dc582311")
                         .contentInfo(new IngestEvent.ContentInfo(2431571, "UTF-8", "application/pdf"))
-                        .properties(parseProperties(
+                        .properties(parsePropertiesWithAncestors(
+                                createAncestorsMap("dad275aa-affc-487d-a7ed-92cf8e6ce351",
+                                        List.of("e7a273da-2974-4581-a219-5e897342844a", "6d7c466b-efd0-4b88-b77f-a941f3a2f025", "dad275aa-affc-487d-a7ed-92cf8e6ce351")),
                                 "cm:name=giraffe.pdf", "cm:autoVersion=true", "cm:title=", "cm:versionType=MAJOR",
                                 "cm:autoVersionOnUpdateProps=false", "cm:versionLabel=1.0",
                                 "aspectsNames=[cm:generalclassifiable, cm:versionable, cm:author, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]",
@@ -141,7 +157,9 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
                         .timestamp(TIMESTAMP).build(),
                 IngestEvent.builder().nodeId("71b5b65b-d92a-4944-9403-48b7ebf8664c")
                         .contentInfo(new IngestEvent.ContentInfo(1496650, "UTF-8", "application/pdf"))
-                        .properties(parseProperties(
+                        .properties(parsePropertiesWithAncestors(
+                                createAncestorsMap("dad275aa-affc-487d-a7ed-92cf8e6ce351",
+                                        List.of("e7a273da-2974-4581-a219-5e897342844a", "6d7c466b-efd0-4b88-b77f-a941f3a2f025", "dad275aa-affc-487d-a7ed-92cf8e6ce351")),
                                 "cm:name=porcupine.pdf", "cm:title=", "cm:autoVersion=true", "cm:versionType=MAJOR", "cm:versionLabel=1.0",
                                 "cm:autoVersionOnUpdateProps=false",
                                 "aspectsNames=[cm:generalclassifiable, cm:versionable, cm:author, cm:thumbnailModification, cm:titled, cm:taggable, rn:renditioned, cm:auditable]",
@@ -154,7 +172,9 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
         IngestEvent emailTemplate = IngestEvent.builder()
                 .nodeId("3d022f89-1ee0-49af-ac54-55c16702b188")
                 .contentInfo(new IngestEvent.ContentInfo(6156, "UTF-8", "text/plain"))
-                .properties(parseProperties(
+                .properties(parsePropertiesWithAncestors(
+                        createAncestorsMap("d37ab7e8-f181-41ed-822a-8f22f6626429",
+                                List.of("e7a273da-2974-4581-a219-5e897342844a", "6d7c466b-efd0-4b88-b77f-a941f3a2f025", "811e21ac-7d5a-469b-ab6e-ec3c8cd8a864", "832b097a-c6ab-4e37-a0e3-a1c52d0e79bf", "d37ab7e8-f181-41ed-822a-8f22f6626429")),
                         "cm:title=invite-email_it.html.ftl", "createdAt=2024-02-19T07:51:13.391Z", "modifiedAt=2024-02-19T07:51:13.391Z",
                         "createdBy=System", "cm:name=invite-email_it.html.ftl", "app:editInline=true",
                         "aspectsNames=[app:inlineeditable, cm:titled, cm:auditable]", "modifiedBy=System", "type=cm:content",
@@ -172,5 +192,20 @@ class BulkIngestionProcessorIntegrationTest extends PostgresIntegrationTestBase
         ingestEventPublisher.assertPublishedNode(textFile);
         ingestEventPublisher.assertPublishedNodes(pdfFiles);
         ingestEventPublisher.assertPublishedNode(emailTemplate);
+    }
+
+    private Map<String, Serializable> parsePropertiesWithAncestors(Map<String, Serializable> ancestors, String... properties)
+    {
+        Map<String, Serializable> props = parseProperties(properties);
+        props.put("ancestors", (Serializable) ancestors);
+        return props;
+    }
+
+    private Map<String, Serializable> createAncestorsMap(String primaryParentId, List<String> primaryAncestorIds)
+    {
+        Map<String, Serializable> ancestors = new HashMap<>();
+        ancestors.put("primaryParentId", primaryParentId);
+        ancestors.put("primaryAncestorIds", (Serializable) primaryAncestorIds);
+        return ancestors;
     }
 }
