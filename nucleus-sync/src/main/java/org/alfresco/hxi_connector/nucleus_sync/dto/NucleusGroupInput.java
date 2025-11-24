@@ -25,16 +25,5 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class NucleusGroupInput
-{
-    private String externalGroupId;
-}
+public record NucleusGroupInput(String externalGroupId)
+{}

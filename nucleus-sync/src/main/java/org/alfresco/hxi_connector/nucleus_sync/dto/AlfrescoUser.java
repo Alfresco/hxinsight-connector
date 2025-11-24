@@ -26,27 +26,7 @@
 package org.alfresco.hxi_connector.nucleus_sync.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AlfrescoUser
-{
-    private String id;
-
-    private String email;
-
-    private boolean enabled;
-
-    private String firstName;
-
-    private String lastName;
-
-    private String displayName;
-}
+public record AlfrescoUser(String id, String email, boolean enabled, String firstName, String lastName, String displayName)
+{}

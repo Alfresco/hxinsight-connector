@@ -26,19 +26,7 @@
 package org.alfresco.hxi_connector.nucleus_sync.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Getter
-@Setter
-@AllArgsConstructor
-@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class NucleusUserMappingOutput
-{
-    private String userId;
-
-    private String externalUserId;
-}
+public record NucleusUserMappingOutput(String userId, String externalUserId)
+{}

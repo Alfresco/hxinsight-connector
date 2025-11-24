@@ -27,16 +27,5 @@ package org.alfresco.hxi_connector.nucleus_sync.dto;
 
 import java.util.List;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class IamUsersOutput
-{
-    private List<IamUser> users;
-}
+public record IamUsersOutput(List<IamUser> users)
+{}

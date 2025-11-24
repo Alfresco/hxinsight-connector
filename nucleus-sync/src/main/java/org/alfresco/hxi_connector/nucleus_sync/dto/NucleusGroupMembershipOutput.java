@@ -25,18 +25,5 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-public class NucleusGroupMembershipOutput
-{
-    private String externalGroupId;
-
-    private String memberExternalUserId;
-}
+public record NucleusGroupMembershipOutput(String externalGroupId, String memberExternalUserId)
+{}

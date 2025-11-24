@@ -25,12 +25,20 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.delete;
+import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlMatching;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -126,12 +134,12 @@ public class NucleusClientIntegrationTest
         List<IamUser> users = nucleusClient.getAllIamUsers();
 
         // Assert
-        assertThat(users).extracting(IamUser::getUserId)
+        assertThat(users).extracting(IamUser::userId)
                 .containsExactlyInAnyOrder("714e1cbd-d88a-4fd1-a491-be438f7a2233",
                         "34f8e319-6a8f-4359-a5b1-d26a04a4abc0");
-        assertThat(users).extracting(IamUser::getUserName)
+        assertThat(users).extracting(IamUser::userName)
                 .containsExactlyInAnyOrder("Jane.Doe+cin@hyland.com", "moliver");
-        assertThat(users).extracting(IamUser::getEmail)
+        assertThat(users).extracting(IamUser::email)
                 .containsExactlyInAnyOrder("Jane.Doe+cin@hyland.com", "Michale.Oliver+cin@hyland.com");
     }
 
@@ -165,7 +173,7 @@ public class NucleusClientIntegrationTest
         List<NucleusGroupOutput> groups = nucleusClient.getAllExternalGroups();
 
         // Assert
-        assertThat(groups).extracting(NucleusGroupOutput::getExternalGroupId)
+        assertThat(groups).extracting(NucleusGroupOutput::externalGroupId)
                 .containsExactlyInAnyOrder("GROUP_HR", "GROUP_MARKETING");
     }
 
@@ -201,9 +209,9 @@ public class NucleusClientIntegrationTest
         List<NucleusUserMappingOutput> mappings = nucleusClient.getCurrentUserMappings();
 
         // Assert
-        assertThat(mappings).extracting(NucleusUserMappingOutput::getExternalUserId)
+        assertThat(mappings).extracting(NucleusUserMappingOutput::externalUserId)
                 .containsExactlyInAnyOrder("jdoe", "moliver");
-        assertThat(mappings).extracting(NucleusUserMappingOutput::getUserId)
+        assertThat(mappings).extracting(NucleusUserMappingOutput::userId)
                 .containsExactlyInAnyOrder("18a17e9d-dbb1-4643-a2e7-3e1859961f5b",
                         "24bd547d-58b3-4722-889a-84e68c41615b");
     }
@@ -242,9 +250,9 @@ public class NucleusClientIntegrationTest
         List<NucleusGroupMembershipOutput> memberships = nucleusClient.getCurrentGroupMemberships();
 
         // Assert
-        assertThat(memberships).extracting(NucleusGroupMembershipOutput::getMemberExternalUserId)
+        assertThat(memberships).extracting(NucleusGroupMembershipOutput::memberExternalUserId)
                 .containsExactlyInAnyOrder("jdoe", "moliver", "aturing");
-        assertThat(memberships).extracting(NucleusGroupMembershipOutput::getExternalGroupId)
+        assertThat(memberships).extracting(NucleusGroupMembershipOutput::externalGroupId)
                 .containsExactlyInAnyOrder("GROUP_Frontend_Team", "GROUP_Frontend_Team",
                         "GROUP_Backend_Team");
     }
@@ -339,10 +347,8 @@ public class NucleusClientIntegrationTest
     void testCreateGroups_Error_ThrowsException()
     {
         // Arrange
-        List<NucleusGroupInput> groups = new ArrayList<>();
-        NucleusGroupInput group = new NucleusGroupInput();
-        group.setExternalGroupId("GROUP_HR");
-        groups.add(group);
+        NucleusGroupInput group = new NucleusGroupInput("GROUP_HR");
+        List<NucleusGroupInput> groups = List.of(group);
 
         wireMockServer.stubFor(post(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/groups"))
                 .willReturn(aResponse()

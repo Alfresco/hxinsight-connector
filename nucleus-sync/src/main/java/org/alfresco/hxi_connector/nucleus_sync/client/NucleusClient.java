@@ -115,7 +115,7 @@ public class NucleusClient
 
             IamUsersOutput iamUsersOutput = objectMapper.readValue(response, IamUsersOutput.class);
 
-            return iamUsersOutput.getUsers();
+            return iamUsersOutput.users();
         }
         catch (Exception e)
         {
@@ -134,7 +134,7 @@ public class NucleusClient
 
             NucleusGroupListOutput groupsOutput = objectMapper.readValue(response, NucleusGroupListOutput.class);
 
-            return groupsOutput.getItems() != null ? groupsOutput.getItems() : List.of();
+            return groupsOutput.items() != null ? groupsOutput.items() : List.of();
         }
         catch (Exception e)
         {
@@ -170,8 +170,8 @@ public class NucleusClient
 
             NucleusUserMappingListOutput userMappingsOutput = objectMapper.readValue(response, NucleusUserMappingListOutput.class);
 
-            return userMappingsOutput.getItems() != null
-                    ? userMappingsOutput.getItems()
+            return userMappingsOutput.items() != null
+                    ? userMappingsOutput.items()
                     : List.of();
         }
         catch (Exception e)
@@ -208,8 +208,8 @@ public class NucleusClient
 
             NucleusGroupMembershipListOutput groupMembershipOutput = objectMapper.readValue(response, NucleusGroupMembershipListOutput.class);
 
-            return groupMembershipOutput.getItems() != null
-                    ? groupMembershipOutput.getItems()
+            return groupMembershipOutput.items() != null
+                    ? groupMembershipOutput.items()
                     : List.of();
         }
         catch (Exception e)

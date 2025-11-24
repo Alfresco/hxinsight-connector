@@ -25,8 +25,14 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.assertj.core.api.Assertions.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.util.List;
 import java.util.Map;
@@ -134,7 +140,7 @@ public class AlfrescoClientIntegrationTest
         // Assert
         assertThat(users)
                 .hasSize(2)
-                .extracting(AlfrescoUser::getId, AlfrescoUser::getFirstName, AlfrescoUser::getEmail)
+                .extracting(AlfrescoUser::id, AlfrescoUser::firstName, AlfrescoUser::email)
                 .containsExactly(
                         tuple("jdoe", "John", "john.doe@example.com"),
                         tuple("jsmith", "Jane", "jane.smith@example.com"));
@@ -193,7 +199,7 @@ public class AlfrescoClientIntegrationTest
         // Assert
         assertThat(groups)
                 .hasSize(2)
-                .extracting(AlfrescoGroup::getId, AlfrescoGroup::getDisplayName)
+                .extracting(AlfrescoGroup::id, AlfrescoGroup::displayName)
                 .containsExactly(
                         tuple("GROUP_ADMINS", "Administrators"),
                         tuple("GROUP_DEVS", "Developers"));
