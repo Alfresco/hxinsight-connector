@@ -64,6 +64,7 @@ public class UserGroupMembershipSyncProcessor
      *            current nucleus memberships
      * @param userGroupMembershipsCache
      *            cache of all user and their groups
+     * @return list of user group mapping
      */
     public List<UserGroupMembership> syncUserGroupMemberships(
             List<UserMapping> localUserMappings,

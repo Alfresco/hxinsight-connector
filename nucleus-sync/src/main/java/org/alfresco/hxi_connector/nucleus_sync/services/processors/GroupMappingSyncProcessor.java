@@ -52,20 +52,16 @@ public class GroupMappingSyncProcessor
     private static final Logger logger = LoggerFactory.getLogger(GroupMappingSyncProcessor.class);
 
     /**
-     * Performs group sync operation with nucleus and local db. If nucleus is not available only local db is synced.
+     * Performs group sync operation with nucleus.
      *
-     * Only those groups are synced whose users have been synced. Groups with no users or all users who could not be synced are not synced with nucleus.
+     * Only those groups are synced whose users have been synced. Groups with no users or groups with all users who could not be synced are not synced with nucleus.
      *
      * @param alfrescoGroups
      *            list of all alfresco groups
      * @param currentNucleusGroups
      *            list of groups from nucleus
-     * @param localGroupMappings
-     *            list of all local group mappings
      * @param userGroupMembershipsCache
      *            cache of user and their groups
-     * @param nucleusAvailable
-     *            is nucleus available
      * @return list of updated group mappings
      */
     public List<GroupMapping> syncGroupMappings(
