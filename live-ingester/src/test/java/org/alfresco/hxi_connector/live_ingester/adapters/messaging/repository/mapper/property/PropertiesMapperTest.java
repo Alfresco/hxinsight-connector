@@ -53,7 +53,6 @@ import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
 import static org.alfresco.repo.event.v1.model.EventType.PERMISSION_UPDATED;
 
-
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 import java.util.HashSet;
@@ -392,6 +391,7 @@ class PropertiesMapperTest
         assertTrue(hasDenyAccess);
         assertTrue(hasPermissionsProperty);
     }
+
     @Test
     void shouldCalculateAncestorsPropertyDelta()
     {
@@ -434,6 +434,7 @@ class PropertiesMapperTest
         // then
         assertFalse(result.isPresent(), "Ancestors property delta should not be present when primary hierarchy is null");
     }
+
     public static void setType(RepoEvent<DataAttributes<NodeResource>> event, EventType type)
     {
         given(event.getType()).willReturn(type.getType());
