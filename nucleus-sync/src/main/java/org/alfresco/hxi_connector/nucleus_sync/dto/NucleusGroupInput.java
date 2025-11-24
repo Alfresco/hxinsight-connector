@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +36,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class NucleusGroupInput
 {
-    @JsonProperty("externalGroupId")
     private String externalGroupId;
 }
