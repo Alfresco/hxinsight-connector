@@ -32,7 +32,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.assertj.core.api.Assertions.tuple;
 
 import java.util.List;
 import java.util.Map;
@@ -108,7 +107,8 @@ public class AlfrescoClientIntegrationTest
                           "firstName": "John",
                           "lastName": "Doe",
                           "email": "john.doe@example.com",
-                          "enabled": true
+                          "enabled": true,
+                          "displayName": "John Doe"
                         }
                       },
                       {
@@ -117,7 +117,8 @@ public class AlfrescoClientIntegrationTest
                           "firstName": "Jane",
                           "lastName": "Smith",
                           "email": "jane.smith@example.com",
-                          "enabled": true
+                          "enabled": true,
+                          "displayName": "Jane Smith"
                         }
                       }
                     ]
@@ -140,10 +141,9 @@ public class AlfrescoClientIntegrationTest
         // Assert
         assertThat(users)
                 .hasSize(2)
-                .extracting(AlfrescoUser::id, AlfrescoUser::firstName, AlfrescoUser::email)
-                .containsExactly(
-                        tuple("jdoe", "John", "john.doe@example.com"),
-                        tuple("jsmith", "Jane", "jane.smith@example.com"));
+                .containsExactlyInAnyOrder(
+                        new AlfrescoUser("jdoe", "john.doe@example.com", true, "John", "Doe", "John Doe"),
+                        new AlfrescoUser("jsmith", "jane.smith@example.com", true, "Jane", "Smith", "Jane Smith"));
 
         // Verify the request was made
         wireMockServer.verify(1, getRequestedFor(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people"))
@@ -199,10 +199,9 @@ public class AlfrescoClientIntegrationTest
         // Assert
         assertThat(groups)
                 .hasSize(2)
-                .extracting(AlfrescoGroup::id, AlfrescoGroup::displayName)
-                .containsExactly(
-                        tuple("GROUP_ADMINS", "Administrators"),
-                        tuple("GROUP_DEVS", "Developers"));
+                .containsExactlyInAnyOrder(
+                        new AlfrescoGroup("GROUP_ADMINS", "Administrators"),
+                        new AlfrescoGroup("GROUP_DEVS", "Developers"));
     }
 
     @Test

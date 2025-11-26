@@ -134,13 +134,11 @@ public class NucleusClientIntegrationTest
         List<IamUser> users = nucleusClient.getAllIamUsers();
 
         // Assert
-        assertThat(users).extracting(IamUser::userId)
-                .containsExactlyInAnyOrder("714e1cbd-d88a-4fd1-a491-be438f7a2233",
-                        "34f8e319-6a8f-4359-a5b1-d26a04a4abc0");
-        assertThat(users).extracting(IamUser::userName)
-                .containsExactlyInAnyOrder("Jane.Doe+cin@hyland.com", "moliver");
-        assertThat(users).extracting(IamUser::email)
-                .containsExactlyInAnyOrder("Jane.Doe+cin@hyland.com", "Michale.Oliver+cin@hyland.com");
+        assertThat(users).containsExactlyInAnyOrder(
+                new IamUser("Jane.Doe+cin@hyland.com", "714e1cbd-d88a-4fd1-a491-be438f7a2233",
+                        "Jane.Doe+cin@hyland.com"),
+                new IamUser("moliver", "34f8e319-6a8f-4359-a5b1-d26a04a4abc0",
+                        "Michale.Oliver+cin@hyland.com"));
     }
 
     @Test
@@ -173,8 +171,9 @@ public class NucleusClientIntegrationTest
         List<NucleusGroupOutput> groups = nucleusClient.getAllExternalGroups();
 
         // Assert
-        assertThat(groups).extracting(NucleusGroupOutput::externalGroupId)
-                .containsExactlyInAnyOrder("GROUP_HR", "GROUP_MARKETING");
+        assertThat(groups).containsExactlyInAnyOrder(
+                new NucleusGroupOutput("GROUP_HR"),
+                new NucleusGroupOutput("GROUP_MARKETING"));
     }
 
     @Test
@@ -209,11 +208,9 @@ public class NucleusClientIntegrationTest
         List<NucleusUserMappingOutput> mappings = nucleusClient.getCurrentUserMappings();
 
         // Assert
-        assertThat(mappings).extracting(NucleusUserMappingOutput::externalUserId)
-                .containsExactlyInAnyOrder("jdoe", "moliver");
-        assertThat(mappings).extracting(NucleusUserMappingOutput::userId)
-                .containsExactlyInAnyOrder("18a17e9d-dbb1-4643-a2e7-3e1859961f5b",
-                        "24bd547d-58b3-4722-889a-84e68c41615b");
+        assertThat(mappings).containsExactlyInAnyOrder(
+                new NucleusUserMappingOutput("18a17e9d-dbb1-4643-a2e7-3e1859961f5b", "jdoe"),
+                new NucleusUserMappingOutput("24bd547d-58b3-4722-889a-84e68c41615b", "moliver"));
     }
 
     @Test
@@ -255,6 +252,11 @@ public class NucleusClientIntegrationTest
         assertThat(memberships).extracting(NucleusGroupMembershipOutput::externalGroupId)
                 .containsExactlyInAnyOrder("GROUP_Frontend_Team", "GROUP_Frontend_Team",
                         "GROUP_Backend_Team");
+
+        assertThat(memberships).containsExactlyInAnyOrder(
+                new NucleusGroupMembershipOutput("GROUP_Frontend_Team", "jdoe"),
+                new NucleusGroupMembershipOutput("GROUP_Frontend_Team", "moliver"),
+                new NucleusGroupMembershipOutput("GROUP_Backend_Team", "aturing"));
     }
 
     @Test
