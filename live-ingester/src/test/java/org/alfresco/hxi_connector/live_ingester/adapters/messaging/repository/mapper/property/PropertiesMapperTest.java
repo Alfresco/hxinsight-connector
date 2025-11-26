@@ -76,6 +76,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
 
+@SuppressWarnings("PMD.TooManyMethods")
 class PropertiesMapperTest
 {
     private static final String EXPECTED_DATE_STRING = "2023-01-01T00:00:00.000Z";

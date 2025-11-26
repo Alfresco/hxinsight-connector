@@ -36,9 +36,9 @@ import lombok.Getter;
 import lombok.ToString;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PermissionsMetadataUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PermissionsMetadataUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 

@@ -33,7 +33,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestsShouldIncludeAssert")
 public class UpdateRequestIntegrationTest extends E2ETestBase
 {
     @Test
@@ -580,6 +580,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         return repoEvent.formatted(properties, propertiesBefore);
     }
 
+    @Test
     void testLogInEvent()
     {
         containerSupport.prepareHxInsightToReturnSuccess();

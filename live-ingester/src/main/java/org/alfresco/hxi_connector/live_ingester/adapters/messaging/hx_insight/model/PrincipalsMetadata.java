@@ -46,6 +46,7 @@ public class PrincipalsMetadata
     private final List<AuthorityInfo> allowAccess;
     @JsonProperty("deny")
     private final List<AuthorityInfo> denyAccess;
+    @SuppressWarnings("PMD.FinalFieldCouldBeStatic")
     @JsonProperty("principalsType")
     private final String principalsType = "effective";
 

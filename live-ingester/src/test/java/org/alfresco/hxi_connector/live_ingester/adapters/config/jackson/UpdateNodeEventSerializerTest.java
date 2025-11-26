@@ -473,26 +473,26 @@ class UpdateNodeEventSerializerTest
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "user2"));
 
         String expectedJson = """
-            [
-              {
-                "objectId": "%s",
-                "sourceId": "%s",
-                "eventType": "createOrUpdate",
-                "sourceTimestamp": 1724225729830,
-                "properties": {
-                  "createdBy": {"value": "admin", "annotation": "createdBy"},
-                  "modifiedBy": {"value": "user2", "annotation": "modifiedBy"},
-                  "permissions": {
-                    "value": {
-                      "read": [{"id": "user1", "type": "USER"}],
-                      "deny": [{"id": "group1", "type": "GROUP"}],
-                      "principalsType": "effective"
-                    },
-                    "annotation": "principals"
+                [
+                  {
+                    "objectId": "%s",
+                    "sourceId": "%s",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp": 1724225729830,
+                    "properties": {
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "user2", "annotation": "modifiedBy"},
+                      "permissions": {
+                        "value": {
+                          "read": [{"id": "user1", "type": "USER"}],
+                          "deny": [{"id": "group1", "type": "GROUP"}],
+                          "principalsType": "effective"
+                        },
+                        "annotation": "principals"
+                      }
+                    }
                   }
-                }
-              }
-            ]""".formatted(NODE_ID, SOURCE_ID);
+                ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);

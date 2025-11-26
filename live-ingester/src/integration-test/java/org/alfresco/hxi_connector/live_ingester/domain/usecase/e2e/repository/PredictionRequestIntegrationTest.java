@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.UnitTestShouldIncludeAssert"})
 public class PredictionRequestIntegrationTest extends E2ETestBase
 {
     private static final long TIMESTAMP = 1_611_656_982_995L;
