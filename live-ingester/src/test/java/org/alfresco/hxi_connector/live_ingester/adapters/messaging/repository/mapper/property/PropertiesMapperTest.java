@@ -62,11 +62,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
@@ -84,7 +83,8 @@ class PropertiesMapperTest
     private PropertiesMapper propertiesMapper;
 
     @BeforeEach
-    void setUp() {
+    void setUp()
+    {
         authorityTypeResolver = mock(AuthorityTypeResolver.class);
         propertiesMapper = new PropertiesMapper(authorityTypeResolver);
     }

@@ -51,8 +51,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -60,6 +58,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model.FieldType;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.ContentProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
@@ -473,26 +473,26 @@ class UpdateNodeEventSerializerTest
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "user2"));
 
         String expectedJson = """
-        [
-          {
-            "objectId": "%s",
-            "sourceId": "%s",
-            "eventType": "createOrUpdate",
-            "sourceTimestamp": 1724225729830,
-            "properties": {
-              "createdBy": {"value": "admin", "annotation": "createdBy"},
-              "modifiedBy": {"value": "user2", "annotation": "modifiedBy"},
-              "permissions": {
-                "value": {
-                  "read": [{"id": "user1", "type": "USER"}],
-                  "deny": [{"id": "group1", "type": "GROUP"}],
-                  "principalsType": "effective"
-                },
-                "annotation": "principals"
+            [
+              {
+                "objectId": "%s",
+                "sourceId": "%s",
+                "eventType": "createOrUpdate",
+                "sourceTimestamp": 1724225729830,
+                "properties": {
+                  "createdBy": {"value": "admin", "annotation": "createdBy"},
+                  "modifiedBy": {"value": "user2", "annotation": "modifiedBy"},
+                  "permissions": {
+                    "value": {
+                      "read": [{"id": "user1", "type": "USER"}],
+                      "deny": [{"id": "group1", "type": "GROUP"}],
+                      "principalsType": "effective"
+                    },
+                    "annotation": "principals"
+                  }
+                }
               }
-            }
-          }
-        ]""".formatted(NODE_ID, SOURCE_ID);
+            ]""".formatted(NODE_ID, SOURCE_ID);
         String actualJson = serialize(event);
 
         assertJsonEquals(expectedJson, actualJson);
