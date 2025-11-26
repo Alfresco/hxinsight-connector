@@ -4,28 +4,30 @@
  * %%
  * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
- * This file is part of the Alfresco software.
- * If the software was purchased under a paid Alfresco license, the terms of
- * the paid license agreement will prevail.  Otherwise, the software is
+ * This file is part of the Alfresco software. 
+ * If the software was purchased under a paid Alfresco license, the terms of 
+ * the paid license agreement will prevail.  Otherwise, the software is 
  * provided under the following open source license terms:
- *
+ * 
  * Alfresco is free software: you can redistribute it and/or modify
  * it under the terms of the GNU Lesser General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
- *
+ * 
  * Alfresco is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU Lesser General Public License for more details.
- *
+ * 
  * You should have received a copy of the GNU Lesser General Public License
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.permissionsMetadataUpdated;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -39,11 +41,17 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver.AuthorityType;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -69,6 +77,8 @@ class IngestEventProcessorTest
     private IngestContentCommandHandler ingestContentCommandHandler;
     @Mock
     private MimeTypeMapper mimeTypeMapper;
+    @Mock
+    private AuthorityTypeResolver authorityTypeResolver;
     @InjectMocks
     private IngestEventProcessor ingestEventProcessor;
 

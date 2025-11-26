@@ -51,6 +51,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import lombok.SneakyThrows;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -459,7 +461,42 @@ class UpdateNodeEventSerializerTest
 
         assertJsonEquals(expectedJson, actualJson);
     }
+    @Test
+    public void shouldSerializeMultiplePropertiesIncludingPermissions()
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, "admin"))
+                .addPermissionsInstruction(new org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.PermissionsProperty(
+                        "permissions",
+                        List.of(new AuthorityInfo("user1", AuthorityTypeResolver.AuthorityType.USER)),
+                        List.of(new AuthorityInfo("group1", AuthorityTypeResolver.AuthorityType.GROUP))))
+                .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "user2"));
 
+        String expectedJson = """
+        [
+          {
+            "objectId": "%s",
+            "sourceId": "%s",
+            "eventType": "createOrUpdate",
+            "sourceTimestamp": 1724225729830,
+            "properties": {
+              "createdBy": {"value": "admin", "annotation": "createdBy"},
+              "modifiedBy": {"value": "user2", "annotation": "modifiedBy"},
+              "permissions": {
+                "value": {
+                  "read": [{"id": "user1", "type": "USER"}],
+                  "deny": [{"id": "group1", "type": "GROUP"}],
+                  "principalsType": "effective"
+                },
+                "annotation": "principals"
+              }
+            }
+          }
+        ]""".formatted(NODE_ID, SOURCE_ID);
+        String actualJson = serialize(event);
+
+        assertJsonEquals(expectedJson, actualJson);
+    }
     @Test
     public void shouldOnlySendUpdatedContentMetadata()
     {
