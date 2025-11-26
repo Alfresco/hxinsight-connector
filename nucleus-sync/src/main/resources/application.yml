@@ -37,6 +37,7 @@ nucleus:
   idp-base-url: ${NUCLEUS_IDP_BASE_URL}
   base-url: ${NUCLEUS_BASE_URL}
   system-id: ${NUCLEUS_SYSTEM_ID}
+  delete-group-member-batch-size: ${DELETE_BATCH_SIZE}
 
 logging:
   level:

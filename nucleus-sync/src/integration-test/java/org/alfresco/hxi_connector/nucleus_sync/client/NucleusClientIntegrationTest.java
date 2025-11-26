@@ -41,6 +41,8 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
@@ -91,6 +93,7 @@ public class NucleusClientIntegrationTest
                 SYSTEM_ID,
                 nucleusBaseUrl,
                 idpBaseUrl,
+                50,
                 5);
     }
 
@@ -343,6 +346,31 @@ public class NucleusClientIntegrationTest
                                 .withQueryParam("memberExternalUserIds", equalTo("jdoe"))
                                 .withQueryParam("memberExternalUserIds", equalTo("moliver"))
                                 .withQueryParam("memberExternalUserIds", equalTo("aturing")));
+    }
+
+    @Test
+    void testRemoveGroupMembers_ExceedsBatchSize_MakesMultipleRequests()
+    {
+        // Arrange
+        String parentGroupId = "GROUP_HR";
+        // Since deleteBatchSize = 50, create 75 users to trigger 2 batches
+        List<String> memberUserIds = IntStream.range(0, 75)
+                .mapToObj(i -> "user" + i)
+                .collect(Collectors.toList());
+
+        wireMockServer.stubFor(
+                delete(urlMatching("/system-integrations/systems/" + SYSTEM_ID + "/group-members\\?.*"))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(204)));
+
+        // Act
+        assertDoesNotThrow(() -> nucleusClient.removeGroupMembers(parentGroupId, memberUserIds));
+
+        // Assert - Should make 2 requests (50 + 25)
+        wireMockServer.verify(2,
+                deleteRequestedFor(urlPathMatching(
+                        "/system-integrations/systems/" + SYSTEM_ID + "/group-members")));
     }
 
     @Test

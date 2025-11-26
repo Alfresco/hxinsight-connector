@@ -6,3 +6,4 @@ nucleus:
   idp-base-url: test-nucleus-idp-base-url
   base-url: test-nucleus-base-url
   system-id: test-nucleus-system-id
+  delete-group-member-batch-size: 50

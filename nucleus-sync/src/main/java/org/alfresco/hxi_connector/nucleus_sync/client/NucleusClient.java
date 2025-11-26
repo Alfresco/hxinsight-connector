@@ -66,6 +66,7 @@ public class NucleusClient
     private final String nucleusBaseUrl;
     private final String idpBaseUrl;
     private final int timeoutInMin;
+    private final int deleteBatchSize;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NucleusClient.class);
 
@@ -75,6 +76,7 @@ public class NucleusClient
             @Value("${nucleus.system-id}") String systemId,
             @Value("${nucleus.base-url}") String nucleusBaseUrl,
             @Value("${nucleus.idp-base-url}") String idpBaseUrl,
+            @Value("${nucleus.delete-group-member-batch-size:50}") int deleteBatchSize,
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins)
     {
         this(
@@ -84,6 +86,7 @@ public class NucleusClient
                 systemId,
                 nucleusBaseUrl,
                 idpBaseUrl,
+                deleteBatchSize,
                 timeoutInMins);
     }
 
@@ -94,6 +97,7 @@ public class NucleusClient
             String systemId,
             String nucleusBaseUrl,
             String idpBaseUrl,
+            int deleteBatchSize,
             int timeoutInMin)
     {
         this.webClient = webClient;
@@ -103,6 +107,7 @@ public class NucleusClient
         this.nucleusBaseUrl = nucleusBaseUrl;
         this.idpBaseUrl = idpBaseUrl;
         this.timeoutInMin = timeoutInMin;
+        this.deleteBatchSize = deleteBatchSize;
     }
 
     public List<IamUser> getAllIamUsers()
@@ -279,27 +284,37 @@ public class NucleusClient
     {
         try
         {
-            StringBuilder urlBuilder = new StringBuilder(nucleusBaseUrl)
-                    .append("/system-integrations/systems/")
-                    .append(systemId)
-                    .append("/group-members")
-                    .append("?parentExternalGroupId=")
-                    .append(URLEncoder.encode(parentExternalGroupId, StandardCharsets.UTF_8));
-
-            // Add user IDs as query parameters
-            for (String userId : memberExternalUserIds)
+            for (int i = 0; i < memberExternalUserIds.size(); i += deleteBatchSize)
             {
-                urlBuilder.append("&memberExternalUserIds=")
-                        .append(URLEncoder.encode(userId, StandardCharsets.UTF_8));
+                List<String> batch = memberExternalUserIds.subList(
+                        i, Math.min(i + deleteBatchSize, memberExternalUserIds.size()));
+                removeGroupMembersBatch(parentExternalGroupId, batch);
             }
-
-            executeDeleteRequest(urlBuilder.toString());
         }
         catch (Exception e)
         {
             LOGGER.error("Error removing group members: {}", e.getMessage(), e);
             throw new ClientException("Failed to remove group members", e);
         }
+    }
+
+    private void removeGroupMembersBatch(String parentExternalGroupId, List<String> batch)
+    {
+        StringBuilder urlBuilder = new StringBuilder(nucleusBaseUrl)
+                .append("/system-integrations/systems/")
+                .append(systemId)
+                .append("/group-members")
+                .append("?parentExternalGroupId=")
+                .append(URLEncoder.encode(parentExternalGroupId, StandardCharsets.UTF_8));
+
+        // Add user IDs as query parameters
+        for (String userId : batch)
+        {
+            urlBuilder.append("&memberExternalUserIds=")
+                    .append(URLEncoder.encode(userId, StandardCharsets.UTF_8));
+        }
+
+        executeDeleteRequest(urlBuilder.toString());
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
