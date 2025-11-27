@@ -108,7 +108,7 @@ public class AlfrescoClient
                 "/people/" + userId + "/groups",
                 new TypeReference<AlfrescoPagedResponse<AlfrescoGroup>>() {},
                 "groups for user " + userId);
-        return groups.stream().map(AlfrescoGroup::getId).toList();
+        return groups.stream().map(AlfrescoGroup::id).toList();
     }
 
     private <T> List<T> fetchAllPagedData(
@@ -130,26 +130,21 @@ public class AlfrescoClient
 
                 AlfrescoPagedResponse<T> pagedResponse = objectMapper.readValue(response, typeRef);
 
-                int itemsProcessed = 0;
                 if (pagedResponse.getList() != null
-                        && pagedResponse.getList().getEntries() != null)
+                        && pagedResponse.getList().entries() != null)
                 {
-                    for (AlfrescoPagedResponse.EntryWrapper<T> entry : pagedResponse.getList().getEntries())
-                    {
-                        if (entry.getEntry() != null)
-                        {
-                            results.add(entry.getEntry());
-                            itemsProcessed++;
-                        }
-                    }
+                    pagedResponse.getList().entries().stream()
+                            .map(AlfrescoPagedResponse.EntryWrapper::entry)
+                            .filter(entry -> entry != null)
+                            .forEach(results::add);
                 }
 
-                AlfrescoPagedResponse.Pagination pagination = pagedResponse.getList().getPagination();
+                AlfrescoPagedResponse.Pagination pagination = pagedResponse.getList().pagination();
 
                 if (pagination != null)
                 {
-                    hasMoreItems = pagination.isHasMoreItems();
-                    skipCount += itemsProcessed;
+                    hasMoreItems = pagination.hasMoreItems();
+                    skipCount += pagination.count();
                 }
                 else
                 {
