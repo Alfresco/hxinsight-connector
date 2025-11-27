@@ -33,6 +33,12 @@ alfresco:
   base-url: ${ALFRESCO_BASE_URL}
   page-size: 100
 
+nucleus:
+  idp-base-url: ${NUCLEUS_IDP_BASE_URL}
+  base-url: ${NUCLEUS_BASE_URL}
+  system-id: ${NUCLEUS_SYSTEM_ID}
+  delete-group-member-batch-size: ${DELETE_BATCH_SIZE}
+
 logging:
   level:
     org.alfresco.hxi_connector: ${LOGGING_LEVEL_ORG_ALFRESCO:INFO}

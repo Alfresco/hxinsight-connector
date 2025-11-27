@@ -28,5 +28,5 @@ package org.alfresco.hxi_connector.nucleus_sync.dto;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AlfrescoUser(String id, String email, boolean enabled, String firstName, String lastName, String displayName)
+public record NucleusGroupOutput(String externalGroupId)
 {}

@@ -28,47 +28,31 @@ package org.alfresco.hxi_connector.nucleus_sync.dto;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-@Setter
-@Getter
-@NoArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AlfrescoPagedResponse<T>
 {
     private ListWrapper<T> list;
 
-    @Setter
-    @Getter
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class ListWrapper<T>
+    public ListWrapper<T> getList()
     {
-        private List<EntryWrapper<T>> entries;
-        private Pagination pagination;
+        return list;
     }
 
-    @Setter
-    @Getter
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class EntryWrapper<T>
+    public void setList(ListWrapper<T> list)
     {
-        private T entry;
+        this.list = list;
     }
 
-    @Setter
-    @Getter
-    @NoArgsConstructor
     @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Pagination
-    {
-        private int count;
-        private boolean hasMoreItems;
-        private int totalItems;
-        private int skipCount;
-        private int maxItems;
-    }
+    public record ListWrapper<T>(List<EntryWrapper<T>> entries, Pagination pagination)
+    {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record EntryWrapper<T>(T entry)
+    {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Pagination(int count, boolean hasMoreItems, int totalItems, int skipCount, int maxItems)
+    {}
 }
