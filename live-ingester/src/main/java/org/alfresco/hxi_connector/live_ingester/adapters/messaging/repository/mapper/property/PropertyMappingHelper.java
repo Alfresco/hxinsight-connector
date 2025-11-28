@@ -29,13 +29,11 @@ import static java.util.Optional.ofNullable;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
@@ -118,34 +116,6 @@ public class PropertyMappingHelper
     {
         return calculatePropertyDelta(event, MODIFIED_AT_PROPERTY, nodeResource -> formatDateTime(nodeResource.getModifiedAt()));
     }
-
-    public static Optional<PropertyDelta<?>> calculateAllowAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        EventData eventData = (EventData) event.getData();
-
-        if (eventData.getResourceReaderAuthorities() == null)
-        {
-            return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, Set.of(GROUP_EVERYONE)));
-        }
-        else if (eventData.getResourceReaderAuthorities().isEmpty())
-        {
-            return Optional.empty();
-        }
-
-        return Optional.of(PropertyDelta.updated(ALLOW_ACCESS, eventData.getResourceReaderAuthorities()));
-    }
-
-    public static Optional<PropertyDelta<?>> calculateDenyAccessDelta(RepoEvent<DataAttributes<NodeResource>> event)
-    {
-        EventData eventData = (EventData) event.getData();
-
-        if (eventData.getResourceDeniedAuthorities() == null || eventData.getResourceDeniedAuthorities().isEmpty())
-        {
-            return Optional.empty();
-        }
-
-        return Optional.of(PropertyDelta.updated(DENY_ACCESS, eventData.getResourceDeniedAuthorities()));
-    }
     public static Optional<PropertyDelta<?>> calculateAncestorsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         List<String> primaryHierarchy = event.getData().getResource().getPrimaryHierarchy();
@@ -186,6 +156,7 @@ public class PropertyMappingHelper
 
         return Optional.of(permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes));
     }
+
     public static List<AuthorityInfo> convertToAuthorityInfoList(Collection<String> authorities, AuthorityTypeResolver authorityTypeResolver)
     {
         if (authorities == null || authorities.isEmpty())
@@ -194,7 +165,6 @@ public class PropertyMappingHelper
         }
         return authorities.stream()
                 .map(authorityId -> new AuthorityInfo(authorityId, authorityTypeResolver.resolveAuthorityType(authorityId)))
-                .filter(authorityInfo -> !AuthorityTypeResolver.AuthorityType.ANY.equals(authorityInfo.getType()))
                 .collect(Collectors.toList());
     }
     private static String formatDateTime(ZonedDateTime time)

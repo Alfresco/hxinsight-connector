@@ -203,7 +203,7 @@ public class RepositoryClient
                 .accept("application/json")
                 .body("""
                         {
-                          "permissions":
+                          "PERMISSIONS":
                             {
                               "locallySet":
                                 [

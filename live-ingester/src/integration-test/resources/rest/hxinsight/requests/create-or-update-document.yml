@@ -47,12 +47,6 @@ body: [
         "value": "admin",
         "annotation": "createdBy"
       },
-      "ALLOW_ACCESS": {
-        "type": "string",
-        "value": [
-          "GROUP_EVERYONE"
-        ]
-      },
       "cm:name": {
         "value": "purchase-order-scan.pdf",
         "annotation": "name"
@@ -70,7 +64,7 @@ body: [
           }
         }
       },
-      "permissions": {
+      "PERMISSIONS": {
         "value": {
           "read": [
             {

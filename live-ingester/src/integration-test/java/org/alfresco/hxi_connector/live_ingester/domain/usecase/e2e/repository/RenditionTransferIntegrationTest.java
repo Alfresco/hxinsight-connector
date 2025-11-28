@@ -35,7 +35,7 @@ public class RenditionTransferIntegrationTest extends E2ETestBase
 {
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void testTransferRendition()
     {
         // given

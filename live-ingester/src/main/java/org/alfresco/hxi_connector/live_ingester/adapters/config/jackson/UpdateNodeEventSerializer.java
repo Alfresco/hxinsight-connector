@@ -59,7 +59,7 @@ public class UpdateNodeEventSerializer extends StdSerializer<UpdateNodeEvent>
     private static final String CREATED_BY = "createdBy";
     private static final String MODIFIED_BY = "modifiedBy";
     private static final String ANCESTORS = "ancestors";
-    private static final String PERMISSIONS = "permissions";
+    private static final String PERMISSIONS = "PERMISSIONS";
 
     public UpdateNodeEventSerializer()
     {

@@ -40,7 +40,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.alfresco.hxi_connector.common.exception.HxInsightConnectorRuntimeException;
 import org.alfresco.hxi_connector.common.exception.ValidationException;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 class EnsureUtilsTest
 {
 

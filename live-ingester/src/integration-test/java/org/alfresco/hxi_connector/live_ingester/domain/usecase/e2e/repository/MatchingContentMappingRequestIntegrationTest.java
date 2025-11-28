@@ -131,8 +131,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",
@@ -259,8 +258,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",

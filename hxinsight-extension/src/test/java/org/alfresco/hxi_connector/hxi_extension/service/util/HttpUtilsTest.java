@@ -58,7 +58,7 @@ class HttpUtilsTest
     }
 
     @Test
-    @SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void shouldDoNothingIfStatusCodeMatchesExpected()
     {
         // given

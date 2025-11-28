@@ -197,10 +197,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "value" : "purchase-order-scan.pdf",
                                 "annotation" : "name"
                               },
-                              "ALLOW_ACCESS" : {
-                                "type": "string",
-                                "value" : [ "GROUP_EVERYONE" ]
-                              },
                               "aspectsNames" : {
                                 "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                                 "annotation" : "aspects"
@@ -222,7 +218,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                   }
                                 }
                               },
-                              "permissions" : {
+                              "PERMISSIONS" : {
                                 "value" : {
                                   "read" : [ {
                                     "id" : "GROUP_EVERYONE",
@@ -287,10 +283,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -312,7 +304,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",
@@ -378,10 +370,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -403,7 +391,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",
@@ -488,10 +476,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -513,7 +497,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",
@@ -664,10 +648,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "type" : {
                         "value" : "cm:person",
                         "annotation" : "type"
@@ -744,10 +724,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin",
                         "annotation" : "createdBy"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -760,7 +736,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "cm:folder",
                         "annotation" : "type"
                       },
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",
@@ -864,10 +840,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "eventType" : "createOrUpdate",
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
-                    "ALLOW_ACCESS" : {
-                      "type": "string",
-                      "value" : [ "GROUP_EVERYONE", "abeecher" ]
-                    },
                     "cm:title" : {
                       "type": "string",
                       "value" : ""
@@ -927,7 +899,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         }
                       }
                     },
-                    "permissions" : {
+                    "PERMISSIONS" : {
                           "value" : {
                             "read" : [
                                 {

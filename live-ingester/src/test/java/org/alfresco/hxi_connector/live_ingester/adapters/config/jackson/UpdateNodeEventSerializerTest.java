@@ -467,7 +467,7 @@ class UpdateNodeEventSerializerTest
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
                 .addMetadataInstruction(new NodeProperty<>(CREATED_BY_PROPERTY, "admin"))
                 .addPermissionsInstruction(new org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.PermissionsProperty(
-                        "permissions",
+                        "PERMISSIONS",
                         List.of(new AuthorityInfo("user1", AuthorityTypeResolver.AuthorityType.USER)),
                         List.of(new AuthorityInfo("group1", AuthorityTypeResolver.AuthorityType.GROUP))))
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "user2"));
@@ -482,7 +482,7 @@ class UpdateNodeEventSerializerTest
                     "properties": {
                       "createdBy": {"value": "admin", "annotation": "createdBy"},
                       "modifiedBy": {"value": "user2", "annotation": "modifiedBy"},
-                      "permissions": {
+                      "PERMISSIONS": {
                         "value": {
                           "read": [{"id": "user1", "type": "USER"}],
                           "deny": [{"id": "group1", "type": "GROUP"}],

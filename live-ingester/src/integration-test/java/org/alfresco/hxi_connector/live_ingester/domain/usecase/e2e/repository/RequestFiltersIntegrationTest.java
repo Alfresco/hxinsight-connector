@@ -135,8 +135,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",
@@ -312,8 +311,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]},
-                      "permissions" : {
+                      "PERMISSIONS" : {
                         "value" : {
                           "read" : [ {
                             "id" : "GROUP_EVERYONE",
@@ -484,10 +482,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "createdBy" : {
                         "value" : "admin",
                         "annotation" : "createdBy"
-                      },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
                       },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
@@ -683,10 +677,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "createdBy" : {
                         "value" : "admin",
                         "annotation" : "createdBy"
-                      },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
                       },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
@@ -1123,10 +1113,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "admin",
                          "annotation" : "createdBy"
                        },
-                       "ALLOW_ACCESS" : {
-                         "type": "string",
-                         "value" : [ "GROUP_EVERYONE" ]
-                       },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf",
                          "annotation" : "name"
@@ -1418,10 +1404,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        "createdBy" : {
                          "value" : "admin",
                          "annotation" : "createdBy"
-                       },
-                       "ALLOW_ACCESS" : {
-                         "type": "string",
-                         "value" : [ "GROUP_EVERYONE" ]
                        },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf",

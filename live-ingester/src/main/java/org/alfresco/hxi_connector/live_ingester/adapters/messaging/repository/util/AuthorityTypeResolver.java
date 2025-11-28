@@ -37,7 +37,7 @@ public class AuthorityTypeResolver
 {
     public enum AuthorityType
     {
-        USER, GROUP, ANY
+        USER, GROUP
     }
 
     public AuthorityType resolveAuthorityType(String authorityId)

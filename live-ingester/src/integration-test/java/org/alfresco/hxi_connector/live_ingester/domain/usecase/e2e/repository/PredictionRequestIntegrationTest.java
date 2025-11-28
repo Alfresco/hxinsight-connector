@@ -29,7 +29,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
-@SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert", "PMD.UnitTestShouldIncludeAssert"})
+@SuppressWarnings({"PMD.UnitTestShouldIncludeAssert"})
 public class PredictionRequestIntegrationTest extends E2ETestBase
 {
     private static final long TIMESTAMP = 1_611_656_982_995L;
@@ -316,10 +316,6 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                          "value" : "admin",
                          "annotation": "createdBy"
                        },
-                       "ALLOW_ACCESS" : {
-                         "type": "string",
-                         "value" : [ "GROUP_EVERYONE" ]
-                       },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf",
                          "annotation" : "name"
@@ -344,7 +340,7 @@ public class PredictionRequestIntegrationTest extends E2ETestBase
                       "cm:title": {"type": "string", "value": "Purchase Order"},
                       "aspectsNames": {"value": ["cm:versionable", "hxi:predictionApplied", "cm:author", "cm:titled"], "annotation": "aspects"},
                       "modifiedBy": {"value": "abeecher", "annotation": "modifiedBy"},
-                       "permissions" : {
+                       "PERMISSIONS" : {
                          "value" : {
                            "read" : [ {
                              "id" : "GROUP_EVERYONE",

@@ -31,7 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e.util.PredictionApplierE2ETestBase;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETestBase
 {

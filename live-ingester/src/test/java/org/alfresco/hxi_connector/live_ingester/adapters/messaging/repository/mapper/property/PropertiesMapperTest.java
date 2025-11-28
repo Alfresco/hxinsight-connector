@@ -34,13 +34,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
@@ -348,15 +346,9 @@ class PropertiesMapperTest
 
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        boolean hasAllowAccess = propertyDeltas.stream()
-                .anyMatch(delta -> ALLOW_ACCESS.equals(delta.getPropertyName()));
-        boolean hasDenyAccess = propertyDeltas.stream()
-                .anyMatch(delta -> DENY_ACCESS.equals(delta.getPropertyName()));
         boolean hasPermissionsProperty = propertyDeltas.stream()
                 .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
 
-        assertTrue(hasAllowAccess);
-        assertTrue(hasDenyAccess);
         assertTrue(hasPermissionsProperty);
     }
     @Test
@@ -380,16 +372,8 @@ class PropertiesMapperTest
         given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
 
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-
-        boolean hasAllowAccess = propertyDeltas.stream()
-                .anyMatch(delta -> ALLOW_ACCESS.equals(delta.getPropertyName()));
-        boolean hasDenyAccess = propertyDeltas.stream()
-                .anyMatch(delta -> DENY_ACCESS.equals(delta.getPropertyName()));
         boolean hasPermissionsProperty = propertyDeltas.stream()
                 .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
-
-        assertTrue(hasAllowAccess);
-        assertTrue(hasDenyAccess);
         assertTrue(hasPermissionsProperty);
     }
 
@@ -411,14 +395,9 @@ class PropertiesMapperTest
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(ALLOW_ACCESS, Set.of(groupEveryone)));
 
         boolean hasPermissionsProperty = propertyDeltas.stream()
                 .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
-
-        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
         assertFalse(hasPermissionsProperty);
     }
 
@@ -618,30 +597,6 @@ class PropertiesMapperTest
         assertTrue(result.isPresent());
     }
 
-    @Test
-    void shouldFilterOutAnyAuthorityType()
-    {
-        // given
-        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
-
-        String alice = "alice";
-        String unknownAuthority = "unknown";
-
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        given(event.getData()).willReturn(mock(EventData.class));
-        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(alice, unknownAuthority));
-        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of());
-
-        given(mockAuthorityTypeResolver.resolveAuthorityType(alice)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
-        given(mockAuthorityTypeResolver.resolveAuthorityType(unknownAuthority)).willReturn(AuthorityTypeResolver.AuthorityType.ANY);
-
-        // when
-        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
-
-        // then
-        assertTrue(result.isPresent());
-    }
 
     @Test
     void shouldReturnEmptyListWhenAuthoritiesCollectionIsNull()
