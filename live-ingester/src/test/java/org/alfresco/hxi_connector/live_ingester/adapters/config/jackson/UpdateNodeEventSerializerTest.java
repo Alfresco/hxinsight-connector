@@ -461,6 +461,7 @@ class UpdateNodeEventSerializerTest
 
         assertJsonEquals(expectedJson, actualJson);
     }
+
     @Test
     public void shouldSerializeMultiplePropertiesIncludingPermissions()
     {
@@ -497,6 +498,7 @@ class UpdateNodeEventSerializerTest
 
         assertJsonEquals(expectedJson, actualJson);
     }
+
     @Test
     public void shouldOnlySendUpdatedContentMetadata()
     {

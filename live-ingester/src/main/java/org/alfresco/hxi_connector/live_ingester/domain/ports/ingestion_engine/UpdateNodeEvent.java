@@ -62,6 +62,7 @@ public class UpdateNodeEvent implements NodeEvent
 
         return this;
     }
+
     public UpdateNodeEvent addPermissionsInstruction(PermissionsProperty permissionsProperty)
     {
         permissionsPropertiesToSet.put(permissionsProperty.propertyName(), permissionsProperty);

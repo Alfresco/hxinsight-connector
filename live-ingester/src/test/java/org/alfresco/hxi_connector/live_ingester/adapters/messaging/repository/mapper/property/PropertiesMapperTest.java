@@ -324,6 +324,7 @@ class PropertiesMapperTest
                 updated(NAME_PROPERTY, "newName.bmp"));
         assertEquals(mergeWithDefaultProperties(expected), propertyDeltas);
     }
+
     @Test
     void shouldAddACLInfo_NodeCreated()
     {
@@ -351,6 +352,7 @@ class PropertiesMapperTest
 
         assertTrue(hasPermissionsProperty);
     }
+
     @Test
     void shouldAddACLInfo_NodePermissionsUpdated()
     {
@@ -512,6 +514,7 @@ class PropertiesMapperTest
 
         return mergedProperties;
     }
+
     @Test
     void shouldReturnEmptyWhenBothAuthoritiesAreNull()
     {
@@ -596,7 +599,6 @@ class PropertiesMapperTest
         // then
         assertTrue(result.isPresent());
     }
-
 
     @Test
     void shouldReturnEmptyListWhenAuthoritiesCollectionIsNull()

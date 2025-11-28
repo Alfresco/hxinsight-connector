@@ -116,6 +116,7 @@ public class PropertyMappingHelper
     {
         return calculatePropertyDelta(event, MODIFIED_AT_PROPERTY, nodeResource -> formatDateTime(nodeResource.getModifiedAt()));
     }
+
     public static Optional<PropertyDelta<?>> calculateAncestorsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event)
     {
         List<String> primaryHierarchy = event.getData().getResource().getPrimaryHierarchy();
@@ -133,6 +134,7 @@ public class PropertyMappingHelper
 
         return Optional.of(PropertyDelta.updated(ANCESTORS_PROPERTY, ancestorsData));
     }
+
     public static Optional<PropertyDelta<?>> calculatePermissionsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, AuthorityTypeResolver authorityTypeResolver)
     {
         EventData eventData = (EventData) event.getData();
@@ -167,6 +169,7 @@ public class PropertyMappingHelper
                 .map(authorityId -> new AuthorityInfo(authorityId, authorityTypeResolver.resolveAuthorityType(authorityId)))
                 .collect(Collectors.toList());
     }
+
     private static String formatDateTime(ZonedDateTime time)
     {
         return time == null ? null : DATE_TIME_FORMATTER.format(time);

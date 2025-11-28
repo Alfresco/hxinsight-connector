@@ -61,6 +61,7 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class PropertiesMapper
 {
     private final AuthorityTypeResolver authorityTypeResolver;
+
     public Set<PropertyDelta<?>> mapToPropertyDeltas(RepoEvent<DataAttributes<NodeResource>> event)
     {
         Stream<PropertyDelta<?>> customProperties = calculateCustomPropertiesDelta(event);

@@ -66,6 +66,7 @@ public abstract class PropertyDelta<T>
                 .sourceSizeInBytes(sourceSizeInBytes)
                 .sourceFileName(sourceFileName).build();
     }
+
     public static PermissionsMetadataUpdated permissionsMetadataUpdated(String key, List<AuthorityInfo> allowAccess, List<AuthorityInfo> denyAccess)
     {
         return PermissionsMetadataUpdated.builder(key)
