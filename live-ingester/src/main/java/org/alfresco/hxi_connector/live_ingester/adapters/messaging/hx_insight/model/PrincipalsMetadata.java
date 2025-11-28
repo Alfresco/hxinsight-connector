@@ -47,9 +47,7 @@ public class PrincipalsMetadata
     @JsonProperty("deny")
     private final List<AuthorityInfo> denyAccess;
     /**
-     * This field is intentionally non-static to ensure it's serialized by Jackson for each instance.
-     * Static fields are not serialized by Jackson's default behavior, and we need this field
-     * to appear in every JSON output with the constant value "effective".
+     * This field is intentionally non-static to ensure it's serialized by Jackson for each instance. Static fields are not serialized by Jackson's default behavior, and we need this field to appear in every JSON output with the constant value "effective".
      */
     @SuppressWarnings("PMD.FinalFieldCouldBeStatic")
     @JsonProperty("principalsType")
