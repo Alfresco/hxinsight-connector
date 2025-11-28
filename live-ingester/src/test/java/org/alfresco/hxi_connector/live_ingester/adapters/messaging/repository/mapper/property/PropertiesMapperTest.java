@@ -397,7 +397,6 @@ class PropertiesMapperTest
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-
         boolean hasPermissionsProperty = propertyDeltas.stream()
                 .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
         assertFalse(hasPermissionsProperty);
