@@ -128,7 +128,10 @@ public class UserMappingSyncProcessor
 
         executeUserBatchOperations(nucleusMappingsToDelete, nucleusMappingsToCreate);
 
-        LOGGER.debug("Final user mappings count: {}", cachedMappings.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Final user mappings count: {}", cachedMappings.size());
+        }
         return cachedMappings;
     }
 
@@ -140,12 +143,18 @@ public class UserMappingSyncProcessor
         {
             nucleusClient.deleteUserMapping(alfrescoUserId);
         }
-        LOGGER.debug("Deleted {} user mapping in Nucleus.", nucleusMappingsToDelete.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Deleted {} user mapping in Nucleus.", nucleusMappingsToDelete.size());
+        }
 
         if (!nucleusMappingsToCreate.isEmpty())
         {
             nucleusClient.createUserMappings(nucleusMappingsToCreate);
         }
-        LOGGER.debug("Created {} user mappings in nucleus", nucleusMappingsToCreate.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Created {} user mappings in nucleus", nucleusMappingsToCreate.size());
+        }
     }
 }
