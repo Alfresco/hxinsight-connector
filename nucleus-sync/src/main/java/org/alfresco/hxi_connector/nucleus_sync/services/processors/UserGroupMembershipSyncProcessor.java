@@ -72,7 +72,6 @@ public class UserGroupMembershipSyncProcessor
             List<NucleusGroupMembershipOutput> currentNucleusMemberships,
             Map<String, List<String>> userGroupMembershipsCache)
     {
-
         Map<String, GroupMapping> groupMappingByAlfrescoGroupId = localGroupMappings.stream()
                 .collect(
                         Collectors.toMap(
@@ -133,7 +132,6 @@ public class UserGroupMembershipSyncProcessor
     private Map<String, Set<String>> buildCurrentNucleusState(
             List<NucleusGroupMembershipOutput> currentNucleusMemberships)
     {
-
         Map<String, Set<String>> nucleusState = new HashMap<>();
 
         for (NucleusGroupMembershipOutput memberShip : currentNucleusMemberships)
@@ -175,7 +173,6 @@ public class UserGroupMembershipSyncProcessor
             List<NucleusGroupMemberAssignmentInput> nucleusMembershipsToCreate,
             Map<String, List<String>> nucleusMembershipsToRemove)
     {
-
         if (!nucleusMembershipsToCreate.isEmpty())
         {
             nucleusClient.assignGroupMembers(nucleusMembershipsToCreate);
