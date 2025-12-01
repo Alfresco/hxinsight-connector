@@ -43,6 +43,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
+import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
 
@@ -89,15 +90,15 @@ public class GroupMappingSyncProcessorIntegrationTest
 
         Map<String, List<String>> userGroupMemberships = new HashMap<>();
         // Users in new groups to create
-        userGroupMemberships.put("user1", List.of("GROUP_ENGINEERING", "GROUP_ADMINISTRATORS"));
-        userGroupMemberships.put("user2", List.of("GROUP_ENGINEERING", "GROUP_DESIGN"));
-        userGroupMemberships.put("user3", List.of("GROUP_PRODUCT", "GROUP_HR"));
-        userGroupMemberships.put("user4", List.of("GROUP_DESIGN"));
+        userGroupMemberships.put("jdoe", List.of("GROUP_ENGINEERING", "GROUP_ADMINISTRATORS"));
+        userGroupMemberships.put("bsmith", List.of("GROUP_ENGINEERING", "GROUP_DESIGN"));
+        userGroupMemberships.put("mjohnson", List.of("GROUP_PRODUCT", "GROUP_HR"));
+        userGroupMemberships.put("awilliams", List.of("GROUP_DESIGN"));
         // Users in existing groups to keep
-        userGroupMemberships.put("user5", List.of("GROUP_ADMINISTRATORS"));
-        userGroupMemberships.put("user6", List.of("GROUP_HR", "GROUP_PRODUCT"));
+        userGroupMemberships.put("rbrown", List.of("GROUP_ADMINISTRATORS"));
+        userGroupMemberships.put("sjones", List.of("GROUP_HR", "GROUP_PRODUCT"));
         // User with null groups
-        userGroupMemberships.put("user7", null);
+        userGroupMemberships.put("tgarcia", null);
 
         // When
         List<GroupMapping> result = processor.syncGroupMappings(alfrescoGroups, nucleusGroups, userGroupMemberships);
@@ -109,33 +110,19 @@ public class GroupMappingSyncProcessorIntegrationTest
 
         // Then - Verify creations with correct payload (3 new groups)
         verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 3 &&
-                groups.stream().anyMatch(g -> g.externalGroupId().equals("GROUP_ENGINEERING")) &&
-                groups.stream().anyMatch(g -> g.externalGroupId().equals("GROUP_DESIGN")) &&
-                groups.stream().anyMatch(g -> g.externalGroupId().equals("GROUP_PRODUCT"))));
+                groups.contains(new NucleusGroupInput("GROUP_ENGINEERING")) &&
+                groups.contains(new NucleusGroupInput("GROUP_DESIGN")) &&
+                groups.contains(new NucleusGroupInput("GROUP_PRODUCT"))));
 
         // Then - Verify returned mappings are correct (5 total: 3 new + 2 existing)
         assertThat(result)
                 .hasSize(5)
-                .anySatisfy(m -> {
-                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_ENGINEERING");
-                    assertThat(m.alfrescoGroupName()).isEqualTo("Engineering Team");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_DESIGN");
-                    assertThat(m.alfrescoGroupName()).isEqualTo("Design Team");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_PRODUCT");
-                    assertThat(m.alfrescoGroupName()).isEqualTo("Product Team");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_ADMINISTRATORS");
-                    assertThat(m.alfrescoGroupName()).isEqualTo("Administrators");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_HR");
-                    assertThat(m.alfrescoGroupName()).isEqualTo("Human Resources");
-                });
+                .containsExactlyInAnyOrder(
+                        new GroupMapping("GROUP_ENGINEERING", "Engineering Team"),
+                        new GroupMapping("GROUP_DESIGN", "Design Team"),
+                        new GroupMapping("GROUP_PRODUCT", "Product Team"),
+                        new GroupMapping("GROUP_ADMINISTRATORS", "Administrators"),
+                        new GroupMapping("GROUP_HR", "Human Resources"));
 
         // Then - Verify exactly 4 interactions (3 deletes, 1 create batch)
         verify(nucleusClient, times(3)).deleteGroup(anyString());
