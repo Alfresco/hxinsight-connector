@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 public class UserGroupMembershipSyncProcessor
 {
     private final NucleusClient nucleusClient;
-    private static final Logger logger = LoggerFactory.getLogger(UserGroupMembershipSyncProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupMembershipSyncProcessor.class);
 
     /**
      * Performs user group mappings with nucleus.
@@ -123,7 +123,10 @@ public class UserGroupMembershipSyncProcessor
         executeNucleusMembershipBatchOperations(
                 nucleusMembershipsToCreate, nucleusMembershipsToDelete);
 
-        logger.debug("Final user and group membership count: {}", cachedMemberships.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Final user and group membership count: {}", cachedMemberships.size());
+        }
         return cachedMemberships;
     }
 
@@ -177,17 +180,26 @@ public class UserGroupMembershipSyncProcessor
         {
             nucleusClient.assignGroupMembers(nucleusMembershipsToCreate);
         }
-        logger.debug(
-                "Assigned {} members to groups in Nucleus.", nucleusMembershipsToCreate.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug(
+                    "Assigned {} members to groups in Nucleus.", nucleusMembershipsToCreate.size());
+        }
 
         for (Map.Entry<String, List<String>> entry : nucleusMembershipsToRemove.entrySet())
         {
             nucleusClient.removeGroupMembers(entry.getKey(), entry.getValue());
-            logger.trace(
-                    "Removed {} members from group {} in Nucleus.",
-                    entry.getValue().size(),
-                    entry.getKey());
+            if (LOGGER.isTraceEnabled())
+            {
+                LOGGER.trace(
+                        "Removed {} members from group {} in Nucleus.",
+                        entry.getValue().size(),
+                        entry.getKey());
+            }
         }
-        logger.debug("{} memberships deleted.", nucleusMembershipsToRemove.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("{} memberships deleted.", nucleusMembershipsToRemove.size());
+        }
     }
 }

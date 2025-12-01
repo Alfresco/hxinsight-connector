@@ -42,7 +42,7 @@ import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 public class UserGroupMembershipCacheBuilderService
 {
     private final AlfrescoClient alfrescoClient;
-    private static final Logger logger = LoggerFactory.getLogger(UserGroupMembershipCacheBuilderService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupMembershipCacheBuilderService.class);
 
     /**
      * Creates a 'cache' of users and their corresponding groups from alfresco.
@@ -55,7 +55,7 @@ public class UserGroupMembershipCacheBuilderService
      */
     public Map<String, List<String>> buildCacheFromAlfresco(List<UserMapping> localUserMappings)
     {
-        logger.info("Building user-group membership cache for {} users", localUserMappings.size());
+        LOGGER.info("Building user-group membership cache for {} users", localUserMappings.size());
 
         Map<String, List<String>> cache = new HashMap<>();
 
@@ -68,7 +68,7 @@ public class UserGroupMembershipCacheBuilderService
             }
             catch (Exception e)
             {
-                logger.error(
+                LOGGER.error(
                         "Failed to get groups for user: {} - {}",
                         userMapping.alfrescoUserId(),
                         e.getMessage(),
@@ -78,7 +78,7 @@ public class UserGroupMembershipCacheBuilderService
             }
         }
 
-        logger.info("Successfully built cache for {} users", cache.size());
+        LOGGER.info("Successfully built cache for {} users", cache.size());
         return cache;
     }
 }

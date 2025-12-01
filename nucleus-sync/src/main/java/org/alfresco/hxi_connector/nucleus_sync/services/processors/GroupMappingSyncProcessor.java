@@ -49,7 +49,7 @@ import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
 public class GroupMappingSyncProcessor
 {
     private final NucleusClient nucleusClient;
-    private static final Logger logger = LoggerFactory.getLogger(GroupMappingSyncProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(GroupMappingSyncProcessor.class);
 
     /**
      * Performs group sync operation with nucleus.
@@ -123,7 +123,10 @@ public class GroupMappingSyncProcessor
 
         executeGroupBatchOperations(nucleusGroupsToCreate, nucleusGroupsToDelete);
 
-        logger.debug("Updated group count: {}", cachedGroupMappings.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Updated group count: {}", cachedGroupMappings.size());
+        }
         return cachedGroupMappings;
     }
 
@@ -135,12 +138,18 @@ public class GroupMappingSyncProcessor
         {
             nucleusClient.deleteGroup(alfrescoGroupId);
         }
-        logger.debug("Deleted {} groups from Nucleus.", nucleusGroupsToDelete.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Deleted {} groups from Nucleus.", nucleusGroupsToDelete.size());
+        }
 
         if (!nucleusGroupsToCreate.isEmpty())
         {
             nucleusClient.createGroups(nucleusGroupsToCreate);
         }
-        logger.debug("Created {} groups in Nucleus.", nucleusGroupsToCreate.size());
+        if (LOGGER.isDebugEnabled())
+        {
+            LOGGER.debug("Created {} groups in Nucleus.", nucleusGroupsToCreate.size());
+        }
     }
 }
