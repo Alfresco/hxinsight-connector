@@ -76,7 +76,7 @@ public class UserGroupMembershipSyncProcessor
         Map<String, GroupMapping> groupMappingByAlfrescoGroupId = localGroupMappings.stream()
                 .collect(
                         Collectors.toMap(
-                                GroupMapping::getAlfrescoGroupId, Function.identity()));
+                                GroupMapping::alfrescoGroupId, Function.identity()));
 
         List<UserGroupMembership> cachedMemberships = new ArrayList<>();
 
@@ -92,7 +92,7 @@ public class UserGroupMembershipSyncProcessor
 
         for (UserMapping userMapping : localUserMappings)
         {
-            String alfrescoUserId = userMapping.getAlfrescoUserId();
+            String alfrescoUserId = userMapping.alfrescoUserId();
 
             Set<String> desiredGroupsForUser = desiredState.getOrDefault(alfrescoUserId, Set.of());
 
@@ -101,7 +101,7 @@ public class UserGroupMembershipSyncProcessor
             for (String groupId : desiredGroupsForUser)
             {
                 cachedMemberships.add(
-                        new UserGroupMembership(alfrescoUserId, groupId, userMapping.getEmail()));
+                        new UserGroupMembership(alfrescoUserId, groupId, userMapping.email()));
                 if (!currentNucleusGroupsForUser.contains(groupId))
                 {
                     nucleusMembershipsToCreate.add(
@@ -152,7 +152,7 @@ public class UserGroupMembershipSyncProcessor
 
         for (UserMapping userMapping : localUserMappings)
         {
-            String alfrescoUserId = userMapping.getAlfrescoUserId();
+            String alfrescoUserId = userMapping.alfrescoUserId();
             List<String> alfrescoGroupIds = userGroupMembershipsCache.getOrDefault(alfrescoUserId, List.of());
 
             Set<String> trackedGroupIds = alfrescoGroupIds.stream()

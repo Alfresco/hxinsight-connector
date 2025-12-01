@@ -25,16 +25,7 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-@AllArgsConstructor
-public class GroupMapping
-{
-    private String alfrescoGroupId;
-
-    private String alfrescoGroupName;
-}
+public record GroupMapping(
+        String alfrescoGroupId,
+        String alfrescoGroupName)
+{}

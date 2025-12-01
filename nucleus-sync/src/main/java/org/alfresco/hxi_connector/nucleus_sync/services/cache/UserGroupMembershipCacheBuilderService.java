@@ -63,18 +63,18 @@ public class UserGroupMembershipCacheBuilderService
         {
             try
             {
-                List<String> groups = alfrescoClient.getUserGroups(userMapping.getAlfrescoUserId());
-                cache.put(userMapping.getAlfrescoUserId(), groups);
+                List<String> groups = alfrescoClient.getUserGroups(userMapping.alfrescoUserId());
+                cache.put(userMapping.alfrescoUserId(), groups);
             }
             catch (Exception e)
             {
                 logger.error(
                         "Failed to get groups for user: {} - {}",
-                        userMapping.getAlfrescoUserId(),
+                        userMapping.alfrescoUserId(),
                         e.getMessage(),
                         e);
                 throw new RuntimeException(
-                        "Failed to fetch groups for user: " + userMapping.getAlfrescoUserId(), e);
+                        "Failed to fetch groups for user: " + userMapping.alfrescoUserId(), e);
             }
         }
 

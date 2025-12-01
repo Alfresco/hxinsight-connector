@@ -25,8 +25,12 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -72,7 +76,7 @@ public class GroupMappingSyncProcessorTest
         // Then
         assertThat(result)
                 .hasSize(2)
-                .extracting(GroupMapping::getAlfrescoGroupId)
+                .extracting(GroupMapping::alfrescoGroupId)
                 .containsExactlyInAnyOrder("GROUP_ADMINISTRATORS", "GROUP_DEVELOPERS");
         verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 2));
     }
@@ -94,7 +98,7 @@ public class GroupMappingSyncProcessorTest
         // Then
         assertThat(result)
                 .hasSize(1)
-                .extracting(GroupMapping::getAlfrescoGroupId)
+                .extracting(GroupMapping::alfrescoGroupId)
                 .containsExactly("GROUP_ADMINISTRATORS");
         verify(nucleusClient).deleteGroup("GROUP_OLD");
         verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 1));
@@ -117,7 +121,7 @@ public class GroupMappingSyncProcessorTest
         // Then
         assertThat(result)
                 .hasSize(1)
-                .extracting(GroupMapping::getAlfrescoGroupId)
+                .extracting(GroupMapping::alfrescoGroupId)
                 .containsExactly("GROUP_ADMINISTRATORS");
         verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 1));
     }
@@ -139,7 +143,7 @@ public class GroupMappingSyncProcessorTest
         // Then
         assertThat(result)
                 .hasSize(1)
-                .extracting(GroupMapping::getAlfrescoGroupId)
+                .extracting(GroupMapping::alfrescoGroupId)
                 .containsExactly("GROUP_ADMINISTRATORS");
         verify(nucleusClient, never()).deleteGroup(any());
         verify(nucleusClient, never()).createGroups(anyList());

@@ -25,9 +25,12 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.HashMap;
 import java.util.List;
@@ -114,24 +117,24 @@ public class GroupMappingSyncProcessorIntegrationTest
         assertThat(result)
                 .hasSize(5)
                 .anySatisfy(m -> {
-                    assertThat(m.getAlfrescoGroupId()).isEqualTo("GROUP_ENGINEERING");
-                    assertThat(m.getAlfrescoGroupName()).isEqualTo("Engineering Team");
+                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_ENGINEERING");
+                    assertThat(m.alfrescoGroupName()).isEqualTo("Engineering Team");
                 })
                 .anySatisfy(m -> {
-                    assertThat(m.getAlfrescoGroupId()).isEqualTo("GROUP_DESIGN");
-                    assertThat(m.getAlfrescoGroupName()).isEqualTo("Design Team");
+                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_DESIGN");
+                    assertThat(m.alfrescoGroupName()).isEqualTo("Design Team");
                 })
                 .anySatisfy(m -> {
-                    assertThat(m.getAlfrescoGroupId()).isEqualTo("GROUP_PRODUCT");
-                    assertThat(m.getAlfrescoGroupName()).isEqualTo("Product Team");
+                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_PRODUCT");
+                    assertThat(m.alfrescoGroupName()).isEqualTo("Product Team");
                 })
                 .anySatisfy(m -> {
-                    assertThat(m.getAlfrescoGroupId()).isEqualTo("GROUP_ADMINISTRATORS");
-                    assertThat(m.getAlfrescoGroupName()).isEqualTo("Administrators");
+                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_ADMINISTRATORS");
+                    assertThat(m.alfrescoGroupName()).isEqualTo("Administrators");
                 })
                 .anySatisfy(m -> {
-                    assertThat(m.getAlfrescoGroupId()).isEqualTo("GROUP_HR");
-                    assertThat(m.getAlfrescoGroupName()).isEqualTo("Human Resources");
+                    assertThat(m.alfrescoGroupId()).isEqualTo("GROUP_HR");
+                    assertThat(m.alfrescoGroupName()).isEqualTo("Human Resources");
                 });
 
         // Then - Verify exactly 4 interactions (3 deletes, 1 create batch)

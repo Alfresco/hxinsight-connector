@@ -25,18 +25,8 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-@AllArgsConstructor
-public class UserGroupMembership
-{
-    private String alfrescoUserId;
-
-    private String alfrescoGroupId;
-
-    private String email;
-}
+public record UserGroupMembership(
+        String alfrescoUserId,
+        String alfrescoGroupId,
+        String email)
+{}
