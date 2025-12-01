@@ -86,6 +86,7 @@ class UserGroupMembershipCacheBuilderServiceIntegrationTest
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
 
         // With parallel execution, duration should be much less than sequential (10 * 100ms)
+        // This will fail when manually debugging
         assertThat(duration).isLessThan(500);
 
         // Verify actual parallelism occurred
@@ -96,7 +97,7 @@ class UserGroupMembershipCacheBuilderServiceIntegrationTest
     void shouldMaintainThreadSafetyUnderConcurrentLoad()
     {
         // Given
-        int userCount = 50;
+        int userCount = 5000;
         List<UserMapping> users = generateUsers(userCount);
 
         when(alfrescoClient.getUserGroups(anyString()))
