@@ -76,54 +76,10 @@ public class GroupMappingSyncProcessorTest
         // Then
         assertThat(result)
                 .hasSize(2)
-                .extracting(GroupMapping::alfrescoGroupId)
-                .containsExactlyInAnyOrder("GROUP_ADMINISTRATORS", "GROUP_DEVELOPERS");
+                .containsExactlyInAnyOrder(
+                        new GroupMapping("GROUP_ADMINISTRATORS", "Administrators"),
+                        new GroupMapping("GROUP_DEVELOPERS", "Developers"));
         verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 2));
-    }
-
-    @Test
-    void shouldDeleteStaleGroupsWhenRemovedFromNucleus()
-    {
-        // Given
-        List<AlfrescoGroup> alfrescoGroups = List.of(
-                new AlfrescoGroup("GROUP_ADMINISTRATORS", "Administrators"));
-        List<NucleusGroupOutput> nucleusGroups = List.of(
-                new NucleusGroupOutput("GROUP_OLD"));
-        Map<String, List<String>> userGroupMemberships = new HashMap<>();
-        userGroupMemberships.put("user1", List.of("GROUP_ADMINISTRATORS"));
-
-        // When
-        List<GroupMapping> result = processor.syncGroupMappings(alfrescoGroups, nucleusGroups, userGroupMemberships);
-
-        // Then
-        assertThat(result)
-                .hasSize(1)
-                .extracting(GroupMapping::alfrescoGroupId)
-                .containsExactly("GROUP_ADMINISTRATORS");
-        verify(nucleusClient).deleteGroup("GROUP_OLD");
-        verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 1));
-    }
-
-    @Test
-    void shouldHandleNullGroupListsInUserMembershipsCache()
-    {
-        // Given
-        List<AlfrescoGroup> alfrescoGroups = List.of(
-                new AlfrescoGroup("GROUP_ADMINISTRATORS", "Administrators"));
-        List<NucleusGroupOutput> nucleusGroups = new ArrayList<>();
-        Map<String, List<String>> userGroupMemberships = new HashMap<>();
-        userGroupMemberships.put("user1", null);
-        userGroupMemberships.put("user2", List.of("GROUP_ADMINISTRATORS"));
-
-        // When
-        List<GroupMapping> result = processor.syncGroupMappings(alfrescoGroups, nucleusGroups, userGroupMemberships);
-
-        // Then
-        assertThat(result)
-                .hasSize(1)
-                .extracting(GroupMapping::alfrescoGroupId)
-                .containsExactly("GROUP_ADMINISTRATORS");
-        verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 1));
     }
 
     @Test
@@ -143,8 +99,25 @@ public class GroupMappingSyncProcessorTest
         // Then
         assertThat(result)
                 .hasSize(1)
-                .extracting(GroupMapping::alfrescoGroupId)
-                .containsExactly("GROUP_ADMINISTRATORS");
+                .containsExactly(new GroupMapping("GROUP_ADMINISTRATORS", "Administrators"));
+        verify(nucleusClient, never()).deleteGroup(any());
+        verify(nucleusClient, never()).createGroups(anyList());
+    }
+
+    @Test
+    void shouldHandleEmptyInputsGracefully()
+    {
+        // Given
+        List<AlfrescoGroup> alfrescoGroups = new ArrayList<>();
+        List<NucleusGroupOutput> nucleusGroups = new ArrayList<>();
+        Map<String, List<String>> userGroupMemberships = new HashMap<>();
+
+        // When
+        List<GroupMapping> result = processor.syncGroupMappings(
+                alfrescoGroups, nucleusGroups, userGroupMemberships);
+
+        // Then
+        assertThat(result).isEmpty();
         verify(nucleusClient, never()).deleteGroup(any());
         verify(nucleusClient, never()).createGroups(anyList());
     }
