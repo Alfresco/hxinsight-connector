@@ -106,9 +106,9 @@ public class GroupMappingSyncProcessorIntegrationTest
 
         // Then - Verify creations with correct payload (3 new groups)
         verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 3 &&
-                groups.stream().anyMatch(g -> g.getExternalGroupId().equals("GROUP_ENGINEERING")) &&
-                groups.stream().anyMatch(g -> g.getExternalGroupId().equals("GROUP_DESIGN")) &&
-                groups.stream().anyMatch(g -> g.getExternalGroupId().equals("GROUP_PRODUCT"))));
+                groups.stream().anyMatch(g -> g.externalGroupId().equals("GROUP_ENGINEERING")) &&
+                groups.stream().anyMatch(g -> g.externalGroupId().equals("GROUP_DESIGN")) &&
+                groups.stream().anyMatch(g -> g.externalGroupId().equals("GROUP_PRODUCT"))));
 
         // Then - Verify returned mappings are correct (5 total: 3 new + 2 existing)
         assertThat(result)

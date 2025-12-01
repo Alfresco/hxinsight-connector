@@ -136,8 +136,8 @@ public class UserGroupMembershipSyncProcessor
         for (NucleusGroupMembershipOutput memberShip : currentNucleusMemberships)
         {
             nucleusState
-                    .computeIfAbsent(memberShip.getMemberExternalUserId(), k -> new HashSet<>())
-                    .add(memberShip.getExternalGroupId());
+                    .computeIfAbsent(memberShip.memberExternalUserId(), k -> new HashSet<>())
+                    .add(memberShip.externalGroupId());
         }
 
         return nucleusState;

@@ -107,14 +107,14 @@ public class UserMappingSyncProcessorIntegrationTest
 
         // Then - Verify creations with correct payload (3 new mappings)
         verify(nucleusClient).createUserMappings(argThat(mappings -> mappings.size() == 3 &&
-                mappings.stream().anyMatch(m -> m.getUserId().equals("be81a981-3726-483e-b9b1-ecf1d3f36b7d") &&
-                        m.getExternalUserId().equals("jdoe"))
+                mappings.stream().anyMatch(m -> m.userId().equals("be81a981-3726-483e-b9b1-ecf1d3f36b7d") &&
+                        m.externalUserId().equals("jdoe"))
                 &&
-                mappings.stream().anyMatch(m -> m.getUserId().equals("7c92b082-4837-594f-c0c2-fdf2e4g47c8e") &&
-                        m.getExternalUserId().equals("sjohnson"))
+                mappings.stream().anyMatch(m -> m.userId().equals("7c92b082-4837-594f-c0c2-fdf2e4g47c8e") &&
+                        m.externalUserId().equals("sjohnson"))
                 &&
-                mappings.stream().anyMatch(m -> m.getUserId().equals("8da3c193-5948-6a5g-d1d3-geg3f5h58d9f") &&
-                        m.getExternalUserId().equals("rbrown"))));
+                mappings.stream().anyMatch(m -> m.userId().equals("8da3c193-5948-6a5g-d1d3-geg3f5h58d9f") &&
+                        m.externalUserId().equals("rbrown"))));
 
         // Then - Verify returned mappings are correct (5 total: 3 new + 2 existing)
         assertThat(result)

@@ -75,16 +75,16 @@ public class GroupMappingSyncProcessor
                 .collect(Collectors.toSet());
 
         List<AlfrescoGroup> filteredAlfrescoGroups = alfrescoGroups.stream()
-                .filter(g -> relevantAlfrescoGroupIds.contains(g.getId()))
+                .filter(g -> relevantAlfrescoGroupIds.contains(g.id()))
                 .toList();
 
         Map<String, AlfrescoGroup> alfrescoGroupById = filteredAlfrescoGroups.stream()
-                .collect(Collectors.toMap(AlfrescoGroup::getId, Function.identity()));
+                .collect(Collectors.toMap(AlfrescoGroup::id, Function.identity()));
 
         Map<String, NucleusGroupOutput> nucleusGroupByAlfrescoId = currentNucleusGroups.stream()
                 .collect(
                         Collectors.toMap(
-                                NucleusGroupOutput::getExternalGroupId,
+                                NucleusGroupOutput::externalGroupId,
                                 Function.identity()));
 
         List<NucleusGroupInput> nucleusGroupsToCreate = new ArrayList<>();
@@ -107,10 +107,10 @@ public class GroupMappingSyncProcessor
             {
                 if (!hasNucleusGroup)
                 {
-                    nucleusGroupsToCreate.add(new NucleusGroupInput(alfrescoGroup.getId()));
+                    nucleusGroupsToCreate.add(new NucleusGroupInput(alfrescoGroup.id()));
                 }
                 cachedGroupMappings.add(
-                        new GroupMapping(alfrescoGroup.getId(), alfrescoGroup.getDisplayName()));
+                        new GroupMapping(alfrescoGroup.id(), alfrescoGroup.displayName()));
             }
             else
             {

@@ -71,16 +71,16 @@ public class UserMappingSyncProcessor
 
         // AlfrescoUsers must have email to map
         Map<String, AlfrescoUser> alfrescoUserByEmail = alfrescoUsers.stream()
-                .filter(u -> u.getEmail() != null && !u.getEmail().isEmpty())
-                .collect(Collectors.toMap(AlfrescoUser::getEmail, Function.identity()));
+                .filter(u -> u.email() != null && !u.email().isEmpty())
+                .collect(Collectors.toMap(AlfrescoUser::email, Function.identity()));
 
         Map<String, IamUser> nucleusIamUserByEmail = nucleusIamUsers.stream()
-                .collect(Collectors.toMap(IamUser::getEmail, Function.identity()));
+                .collect(Collectors.toMap(IamUser::email, Function.identity()));
 
         Map<String, NucleusUserMappingOutput> nucleusMappingByAlfrescoId = currentUserMappings.stream()
                 .collect(
                         Collectors.toMap(
-                                NucleusUserMappingOutput::getExternalUserId,
+                                NucleusUserMappingOutput::externalUserId,
                                 Function.identity()));
 
         List<String> nucleusMappingsToDelete = new ArrayList<>();
@@ -102,12 +102,12 @@ public class UserMappingSyncProcessor
 
             if (isAlfrescoUser && isNucleusUser)
             {
-                String alfrescoUserId = alfrescoUser.getId();
-                String nucleusUserId = nucleusIamUser.getUserId();
+                String alfrescoUserId = alfrescoUser.id();
+                String nucleusUserId = nucleusIamUser.userId();
 
                 validAlfrescoIds.add(alfrescoUserId);
                 cachedMappings.add(
-                        new UserMapping(alfrescoUser.getEmail(), alfrescoUserId, nucleusUserId));
+                        new UserMapping(alfrescoUser.email(), alfrescoUserId, nucleusUserId));
 
                 if (!nucleusMappingByAlfrescoId.containsKey(alfrescoUserId))
                 {
@@ -119,7 +119,7 @@ public class UserMappingSyncProcessor
 
         for (NucleusUserMappingOutput nucleusMapping : currentUserMappings)
         {
-            String alfrescoUserId = nucleusMapping.getExternalUserId();
+            String alfrescoUserId = nucleusMapping.externalUserId();
             if (!validAlfrescoIds.contains(alfrescoUserId))
             {
                 nucleusMappingsToDelete.add(alfrescoUserId);
