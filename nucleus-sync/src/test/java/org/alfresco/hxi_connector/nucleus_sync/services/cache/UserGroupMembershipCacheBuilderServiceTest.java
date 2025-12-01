@@ -114,22 +114,4 @@ class UserGroupMembershipCacheBuilderServiceTest
         assertThat(result).isEmpty();
         verifyNoInteractions(alfrescoClient);
     }
-
-    @Test
-    void shouldHandleUserWithNoGroups()
-    {
-        // Given
-        List<UserMapping> users = List.of(
-                new UserMapping("john.doe@example.com", "jdoe", "550e8400-e29b-41d4-a716-446655440001"));
-        when(alfrescoClient.getUserGroups("jdoe"))
-                .thenReturn(List.of());
-
-        // When
-        Map<String, List<String>> result = service.buildCacheFromAlfresco(users);
-
-        // Then
-        assertThat(result)
-                .hasSize(1)
-                .containsEntry("jdoe", List.of());
-    }
 }

@@ -133,7 +133,6 @@ public class GroupMappingSyncProcessor
     private void executeGroupBatchOperations(
             List<NucleusGroupInput> nucleusGroupsToCreate, List<String> nucleusGroupsToDelete)
     {
-
         for (String alfrescoGroupId : nucleusGroupsToDelete)
         {
             nucleusClient.deleteGroup(alfrescoGroupId);

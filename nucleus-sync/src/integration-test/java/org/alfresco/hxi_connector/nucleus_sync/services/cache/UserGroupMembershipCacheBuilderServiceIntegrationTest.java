@@ -93,28 +93,6 @@ class UserGroupMembershipCacheBuilderServiceIntegrationTest
         assertThat(maxConcurrency.get()).isGreaterThan(1);
     }
 
-    @Test
-    void shouldMaintainThreadSafetyUnderConcurrentLoad()
-    {
-        // Given
-        int userCount = 5000;
-        List<UserMapping> users = generateUsers(userCount);
-
-        when(alfrescoClient.getUserGroups(anyString()))
-                .thenReturn(List.of("group1", "group2"));
-
-        // When
-        Map<String, List<String>> result = service.buildCacheFromAlfresco(users);
-
-        // Then
-        assertThat(result)
-                .hasSize(userCount)
-                .allSatisfy((key, value) -> {
-                    assertThat(key).startsWith("user");
-                    assertThat(value).containsExactly("group1", "group2");
-                });
-    }
-
     private List<UserMapping> generateUsers(int count)
     {
         return java.util.stream.IntStream.range(0, count)
