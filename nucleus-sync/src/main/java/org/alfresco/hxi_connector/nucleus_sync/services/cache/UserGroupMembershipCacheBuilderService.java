@@ -25,9 +25,13 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.cache;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -57,28 +61,43 @@ public class UserGroupMembershipCacheBuilderService
     {
         LOGGER.info("Building user-group membership cache for {} users", localUserMappings.size());
 
-        Map<String, List<String>> cache = new HashMap<>();
+        ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
-        for (UserMapping userMapping : localUserMappings)
+        try
         {
-            try
-            {
-                List<String> groups = alfrescoClient.getUserGroups(userMapping.alfrescoUserId());
-                cache.put(userMapping.alfrescoUserId(), groups);
-            }
-            catch (Exception e)
-            {
-                LOGGER.error(
-                        "Failed to get groups for user: {} - {}",
-                        userMapping.alfrescoUserId(),
-                        e.getMessage(),
-                        e);
-                throw new RuntimeException(
-                        "Failed to fetch groups for user: " + userMapping.alfrescoUserId(), e);
-            }
-        }
+            Map<String, CompletableFuture<List<String>>> futures = localUserMappings.stream()
+                    .collect(Collectors.toMap(
+                            UserMapping::alfrescoUserId,
+                            userMapping -> CompletableFuture.supplyAsync(() -> {
+                                try
+                                {
+                                    return alfrescoClient.getUserGroups(userMapping.alfrescoUserId());
+                                }
+                                catch (Exception e)
+                                {
+                                    LOGGER.error(
+                                            "Failed to get groups for user: {} - {}",
+                                            userMapping.alfrescoUserId(),
+                                            e.getMessage(),
+                                            e);
+                                    throw new RuntimeException(
+                                            "Failed to fetch groups for user: " + userMapping.alfrescoUserId(), e);
+                                }
+                            }, executor)));
 
-        LOGGER.info("Successfully built cache for {} users", cache.size());
-        return cache;
+            Map<String, List<String>> cache = new ConcurrentHashMap<>();
+
+            for (Map.Entry<String, CompletableFuture<List<String>>> entry : futures.entrySet())
+            {
+                cache.put(entry.getKey(), entry.getValue().join());
+            }
+
+            LOGGER.info("Successfully built cache for {} users", cache.size());
+            return cache;
+        }
+        finally
+        {
+            executor.shutdown();
+        }
     }
 }
