@@ -50,7 +50,7 @@ import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 public class UserMappingSyncProcessor
 {
     private final NucleusClient nucleusClient;
-    private static final Logger logger = LoggerFactory.getLogger(UserMappingSyncProcessor.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserMappingSyncProcessor.class);
 
     /**
      * Sync alfresco and nucleus user mappings
@@ -128,7 +128,7 @@ public class UserMappingSyncProcessor
 
         executeUserBatchOperations(nucleusMappingsToDelete, nucleusMappingsToCreate);
 
-        logger.debug("Final user mappings count: {}", cachedMappings.size());
+        LOGGER.debug("Final user mappings count: {}", cachedMappings.size());
         return cachedMappings;
     }
 
@@ -140,12 +140,12 @@ public class UserMappingSyncProcessor
         {
             nucleusClient.deleteUserMapping(alfrescoUserId);
         }
-        logger.debug("Deleted {} user mapping in Nucleus.", nucleusMappingsToDelete.size());
+        LOGGER.debug("Deleted {} user mapping in Nucleus.", nucleusMappingsToDelete.size());
 
         if (!nucleusMappingsToCreate.isEmpty())
         {
             nucleusClient.createUserMappings(nucleusMappingsToCreate);
         }
-        logger.debug("Created {} user mappings in nucleus", nucleusMappingsToCreate.size());
+        LOGGER.debug("Created {} user mappings in nucleus", nucleusMappingsToCreate.size());
     }
 }
