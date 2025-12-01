@@ -25,9 +25,12 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.List;
 
@@ -39,6 +42,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
+import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
@@ -54,7 +58,7 @@ public class UserMappingSyncProcessorIntegrationTest
     @Test
     void shouldPerformCompleteUserMappingSyncWithCorrectApiCalls()
     {
-        // Given - Realistic scenario with creates, deletes, and unchanged mappings
+        // Given - A scenario with creates, deletes, and unchanged mappings
         List<AlfrescoUser> alfrescoUsers = List.of(
                 // new mapping - create
                 new AlfrescoUser("jdoe", "john.doe@company.com", true, "John", "Doe", "John Doe"),
@@ -107,43 +111,19 @@ public class UserMappingSyncProcessorIntegrationTest
 
         // Then - Verify creations with correct payload (3 new mappings)
         verify(nucleusClient).createUserMappings(argThat(mappings -> mappings.size() == 3 &&
-                mappings.stream().anyMatch(m -> m.userId().equals("be81a981-3726-483e-b9b1-ecf1d3f36b7d") &&
-                        m.externalUserId().equals("jdoe"))
-                &&
-                mappings.stream().anyMatch(m -> m.userId().equals("7c92b082-4837-594f-c0c2-fdf2e4g47c8e") &&
-                        m.externalUserId().equals("sjohnson"))
-                &&
-                mappings.stream().anyMatch(m -> m.userId().equals("8da3c193-5948-6a5g-d1d3-geg3f5h58d9f") &&
-                        m.externalUserId().equals("rbrown"))));
+                mappings.contains(new NucleusUserMappingInput("be81a981-3726-483e-b9b1-ecf1d3f36b7d", "jdoe")) &&
+                mappings.contains(new NucleusUserMappingInput("7c92b082-4837-594f-c0c2-fdf2e4g47c8e", "sjohnson")) &&
+                mappings.contains(new NucleusUserMappingInput("8da3c193-5948-6a5g-d1d3-geg3f5h58d9f", "rbrown"))));
 
         // Then - Verify returned mappings are correct (5 total: 3 new + 2 existing)
         assertThat(result)
                 .hasSize(5)
-                .anySatisfy(m -> {
-                    assertThat(m.getEmail()).isEqualTo("john.doe@company.com");
-                    assertThat(m.getAlfrescoUserId()).isEqualTo("jdoe");
-                    assertThat(m.getNucleusUserId()).isEqualTo("be81a981-3726-483e-b9b1-ecf1d3f36b7d");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.getEmail()).isEqualTo("sarah.johnson@company.com");
-                    assertThat(m.getAlfrescoUserId()).isEqualTo("sjohnson");
-                    assertThat(m.getNucleusUserId()).isEqualTo("7c92b082-4837-594f-c0c2-fdf2e4g47c8e");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.getEmail()).isEqualTo("robert.brown@company.com");
-                    assertThat(m.getAlfrescoUserId()).isEqualTo("rbrown");
-                    assertThat(m.getNucleusUserId()).isEqualTo("8da3c193-5948-6a5g-d1d3-geg3f5h58d9f");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.getEmail()).isEqualTo("michael.oliver@company.com");
-                    assertThat(m.getAlfrescoUserId()).isEqualTo("moliver");
-                    assertThat(m.getNucleusUserId()).isEqualTo("6b73fd36-d76e-40b7-8624-2d897f35603c");
-                })
-                .anySatisfy(m -> {
-                    assertThat(m.getEmail()).isEqualTo("emma.wilson@company.com");
-                    assertThat(m.getAlfrescoUserId()).isEqualTo("ewilson");
-                    assertThat(m.getNucleusUserId()).isEqualTo("9eb4d2a4-6a59-7b6h-e2e4-hfh4g6i69eag");
-                });
+                .containsExactlyInAnyOrder(
+                        new UserMapping("john.doe@company.com", "jdoe", "be81a981-3726-483e-b9b1-ecf1d3f36b7d"),
+                        new UserMapping("sarah.johnson@company.com", "sjohnson", "7c92b082-4837-594f-c0c2-fdf2e4g47c8e"),
+                        new UserMapping("robert.brown@company.com", "rbrown", "8da3c193-5948-6a5g-d1d3-geg3f5h58d9f"),
+                        new UserMapping("michael.oliver@company.com", "moliver", "6b73fd36-d76e-40b7-8624-2d897f35603c"),
+                        new UserMapping("emma.wilson@company.com", "ewilson", "9eb4d2a4-6a59-7b6h-e2e4-hfh4g6i69eag"));
 
         // Then - Verify exactly 4 interactions (3 deletes, 1 create batch)
         verify(nucleusClient, times(3)).deleteUserMapping(anyString());

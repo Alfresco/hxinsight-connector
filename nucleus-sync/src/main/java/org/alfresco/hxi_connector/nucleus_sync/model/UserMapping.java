@@ -25,18 +25,8 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.Setter;
-
-@Getter
-@Setter
-@AllArgsConstructor
-public class UserMapping
-{
-    private String email;
-
-    private String alfrescoUserId;
-
-    private String nucleusUserId;
-}
+public record UserMapping(
+        String email,
+        String alfrescoUserId,
+        String nucleusUserId)
+{}

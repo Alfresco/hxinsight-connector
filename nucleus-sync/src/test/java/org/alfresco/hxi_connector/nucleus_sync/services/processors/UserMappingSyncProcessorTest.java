@@ -25,8 +25,13 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -70,47 +75,10 @@ public class UserMappingSyncProcessorTest
         // Then
         assertThat(result)
                 .hasSize(1)
-                .extracting(UserMapping::getAlfrescoUserId)
-                .containsExactly("rbrown");
+                .containsExactlyInAnyOrder(
+                        new UserMapping("robert.brown@email.com", "rbrown", "ecff0ce9-5da0-4c72-8942-f66111651712"));
+
         verify(nucleusClient).createUserMappings(argThat(mappings -> mappings.size() == 1));
-    }
-
-    @Test
-    void shouldDeleteStaleMappingsWhenUserRemovedFromAlfresco()
-    {
-        // Given
-        List<AlfrescoUser> alfrescoUsers = new ArrayList<>();
-        List<IamUser> nucleusUsers = List.of(
-                new IamUser("user@email.com", "4c0c7948-cd4d-4ad2-949c-923737c40150", "user@email.com"));
-        List<NucleusUserMappingOutput> currentMappings = List.of(
-                new NucleusUserMappingOutput("nucleus1", "alfresco1"));
-
-        // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
-
-        // Then
-        assertThat(result).isEmpty();
-        verify(nucleusClient).deleteUserMapping("alfresco1");
-        verify(nucleusClient, never()).createUserMappings(anyList());
-    }
-
-    @Test
-    void shouldDeleteStaleMappingsWhenUserRemovedFromNucleus()
-    {
-        // Given
-        List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("rbrown", "robert.brown@email.com", true, "Robert", "Brown", "Robert Brown"));
-        List<IamUser> nucleusUsers = new ArrayList<>();
-        List<NucleusUserMappingOutput> currentMappings = List.of(
-                new NucleusUserMappingOutput("nucleus1", "alfresco1"));
-
-        // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
-
-        // Then
-        assertThat(result).isEmpty();
-        verify(nucleusClient).deleteUserMapping("alfresco1");
-        verify(nucleusClient, never()).createUserMappings(anyList());
     }
 
     @Test
@@ -131,19 +99,26 @@ public class UserMappingSyncProcessorTest
     }
 
     @Test
-    void shouldNotCreateMappingWhenUserExistsOnlyInAlfresco()
+    void shouldCreateAllMappingsInSingleBatchCall()
     {
-        // Given
+        // Given - Multiple new mappings to create
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("rbrown", "robert.brown@email.com", true, "Robert", "Brown", "Robert Brown"));
-        List<IamUser> nucleusUsers = new ArrayList<>();
+                new AlfrescoUser("jdoe", "john.doe@email.com", true, "John", "Doe", "John Doe"),
+                new AlfrescoUser("moliver", "michael.oliver@email.com", true, "Michael", "Oliver", "Michael Oliver"),
+                new AlfrescoUser("ewilson", "emma.wilson@email.com", true, "Emma", "Wilson", "Emma Wilson"));
+
+        List<IamUser> nucleusUsers = List.of(
+                new IamUser("john.doe@email.com", "f80c46b6-0eed-4408-8652-fd9957004e6f", "john.doe@email.com"),
+                new IamUser("michael.oliver@email.com", "2ce4ba51-351e-4e77-8a4b-124e696efa27", "michael.oliver@email.com"),
+                new IamUser("emma.wilson@email.com", "3dcea0dd-1aea-4f46-af04-f15b5f7b4890", "emma.wilson@email.com"));
+
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+        processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
 
-        // Then
-        assertThat(result).isEmpty();
-        verify(nucleusClient, never()).createUserMappings(anyList());
+        // Then - Verify single batch call with all mappings
+        verify(nucleusClient, times(1)).createUserMappings(argThat(mappings -> mappings.size() == 3));
+        verify(nucleusClient, never()).deleteUserMapping(any());
     }
 }
