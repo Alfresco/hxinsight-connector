@@ -13,9 +13,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v5
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v9.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v9.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v9.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v10.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v10.1.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v10.1.0
         env:
           MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
           MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
@@ -23,7 +23,7 @@ jobs:
           srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
       - name: "Notify on failure"
         if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v9.0.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v10.1.0
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           message: "Veracode SCA scan failed"
@@ -42,7 +42,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: "Notify on failure"
         if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v9.0.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v10.1.0
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           message: "Nightly tests failed"
