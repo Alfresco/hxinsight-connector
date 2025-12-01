@@ -10,7 +10,7 @@
     "sourceIds": [
       "c2886904-40d0-4ab9-b5b7-1ea624ccca80"
     ],
-    "permissions": [
+    "PERMISSIONS": [
       {
         "principalType": "user",
         "id": "e2b9471c-d869-48b4-94ce-5112dd71001c"
