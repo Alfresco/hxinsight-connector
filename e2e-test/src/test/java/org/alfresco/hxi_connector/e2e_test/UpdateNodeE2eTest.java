@@ -228,7 +228,7 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
 
-            assertFalse(requests.isEmpty());
+            assertFalse(requests.isEmpty(), "Expected ingestion events but none were received");
 
             Optional<LoggedRequest> permissionsUpdatedEvent = requests.stream()
                     .filter(request -> request.getBodyAsString().contains(createdNode.id()))
@@ -236,7 +236,7 @@ public class UpdateNodeE2eTest
                     .filter(request -> request.getBodyAsString().contains(PERMISSIONS_PROPERTY))
                     .findFirst();
 
-            assertTrue(permissionsUpdatedEvent.isPresent());
+            assertTrue(permissionsUpdatedEvent.isPresent(), "Expected permissions update event not found");
 
             JsonNode properties = objectMapper.readTree(permissionsUpdatedEvent.get().getBodyAsString())
                     .get(0)
@@ -264,7 +264,7 @@ public class UpdateNodeE2eTest
             assertEquals(Set.of(MIKE), denyIds);
 
             assertEquals("effective", permissionsValue.get("principalsType").asText());
-        });
+        }, DELAY_MS);
     }
 
     private void prepareHxInsightMockToReturnPredictionFor(String nodeId, String predictedValue)
