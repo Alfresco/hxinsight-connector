@@ -95,8 +95,7 @@ public class CreateNodeE2eTest
     private static final int DELAY_MS = 500;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
-    private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
-    private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
+    private static final String PERMISSIONS_PROPERTY = "PERMISSIONS";
 
     private static final Network network = Network.newNetwork();
     @Container
@@ -221,10 +220,23 @@ public class CreateNodeE2eTest
                     .get(0)
                     .get("properties");
 
-            assertTrue(properties.has(ALLOW_ACCESS_PROPERTY));
-            assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(ALLOW_ACCESS_PROPERTY).get("value")));
+            assertTrue(properties.has(PERMISSIONS_PROPERTY));
+            JsonNode permissionsValue = properties.get(PERMISSIONS_PROPERTY).get("value");
+            assertTrue(permissionsValue.has("read"));
+            assertTrue(permissionsValue.has("deny"));
+            assertTrue(permissionsValue.has("principalsType"));
 
-            assertFalse(properties.has(DENY_ACCESS_PROPERTY));
+            JsonNode readPermissions = permissionsValue.get("read");
+            assertEquals(1, readPermissions.size());
+
+            JsonNode groupEveryonePermission = readPermissions.get(0);
+            assertEquals("GROUP_EVERYONE", groupEveryonePermission.get("id").asText());
+            assertEquals("GROUP", groupEveryonePermission.get("type").asText());
+
+            JsonNode denyPermissions = permissionsValue.get("deny");
+            assertEquals(0, denyPermissions.size());
+
+            assertEquals("effective", permissionsValue.get("principalsType").asText());
         }, DELAY_MS);
     }
 
