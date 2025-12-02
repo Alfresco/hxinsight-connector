@@ -250,12 +250,6 @@ public class NucleusClientIntegrationTest
         List<NucleusGroupMembershipOutput> memberships = nucleusClient.getCurrentGroupMemberships();
 
         // Assert
-        assertThat(memberships).extracting(NucleusGroupMembershipOutput::memberExternalUserId)
-                .containsExactlyInAnyOrder("jdoe", "moliver", "aturing");
-        assertThat(memberships).extracting(NucleusGroupMembershipOutput::externalGroupId)
-                .containsExactlyInAnyOrder("GROUP_Frontend_Team", "GROUP_Frontend_Team",
-                        "GROUP_Backend_Team");
-
         assertThat(memberships).containsExactlyInAnyOrder(
                 new NucleusGroupMembershipOutput("GROUP_Frontend_Team", "jdoe"),
                 new NucleusGroupMembershipOutput("GROUP_Frontend_Team", "moliver"),
