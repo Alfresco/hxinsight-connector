@@ -59,7 +59,10 @@ public class UserGroupMembershipCacheBuilderService
      */
     public Map<String, List<String>> buildCacheFromAlfresco(List<UserMapping> localUserMappings)
     {
-        LOGGER.info("Building user-group membership cache for {} users", localUserMappings.size());
+        LOGGER.atInfo()
+                .setMessage("Building user-group membership cache for {} users")
+                .addArgument(localUserMappings.size())
+                .log();
 
         ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor();
 
@@ -92,7 +95,11 @@ public class UserGroupMembershipCacheBuilderService
                 cache.put(entry.getKey(), entry.getValue().join());
             }
 
-            LOGGER.info("Successfully built cache for {} users", cache.size());
+            LOGGER.atInfo()
+                    .setMessage("Successfully built user-group membership cache for {} users")
+                    .addArgument(cache.size())
+                    .log();
+
             return cache;
         }
         finally

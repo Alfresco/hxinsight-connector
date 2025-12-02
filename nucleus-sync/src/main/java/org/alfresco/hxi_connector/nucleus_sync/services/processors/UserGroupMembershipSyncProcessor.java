@@ -122,10 +122,11 @@ public class UserGroupMembershipSyncProcessor
         executeNucleusMembershipBatchOperations(
                 nucleusMembershipsToCreate, nucleusMembershipsToDelete);
 
-        if (LOGGER.isDebugEnabled())
-        {
-            LOGGER.debug("Final user and group membership count: {}", cachedMemberships.size());
-        }
+        LOGGER.atDebug()
+                .setMessage("Final user and group membership count: {}")
+                .addArgument(cachedMemberships.size())
+                .log();
+
         return cachedMemberships;
     }
 
@@ -177,26 +178,23 @@ public class UserGroupMembershipSyncProcessor
         {
             nucleusClient.assignGroupMembers(nucleusMembershipsToCreate);
         }
-        if (LOGGER.isDebugEnabled())
-        {
-            LOGGER.debug(
-                    "Assigned {} members to groups in Nucleus.", nucleusMembershipsToCreate.size());
-        }
+        LOGGER.atDebug()
+                .setMessage("Assigned {} members to groups in Nucleus.")
+                .addArgument(nucleusMembershipsToCreate.size())
+                .log();
 
         for (Map.Entry<String, List<String>> entry : nucleusMembershipsToRemove.entrySet())
         {
             nucleusClient.removeGroupMembers(entry.getKey(), entry.getValue());
-            if (LOGGER.isTraceEnabled())
-            {
-                LOGGER.trace(
-                        "Removed {} members from group {} in Nucleus.",
-                        entry.getValue().size(),
-                        entry.getKey());
-            }
+            LOGGER.atTrace()
+                    .setMessage("Removed {} members from group {} in Nucleus.")
+                    .addArgument(entry.getValue().size())
+                    .addArgument(entry.getKey())
+                    .log();
         }
-        if (LOGGER.isDebugEnabled())
-        {
-            LOGGER.debug("{} memberships deleted.", nucleusMembershipsToRemove.size());
-        }
+        LOGGER.atDebug()
+                .setMessage("Deleted {} memberships from Nucleus.")
+                .addArgument(nucleusMembershipsToRemove.size())
+                .log();
     }
 }

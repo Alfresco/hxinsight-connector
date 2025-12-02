@@ -156,7 +156,13 @@ public class AlfrescoClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error fetching " + errorContext + ": {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error fetching {}: {}")
+                    .addArgument(errorContext)
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to fetch " + errorContext, e);
         }
     }

@@ -123,10 +123,11 @@ public class GroupMappingSyncProcessor
 
         executeGroupBatchOperations(nucleusGroupsToCreate, nucleusGroupsToDelete);
 
-        if (LOGGER.isDebugEnabled())
-        {
-            LOGGER.debug("Updated group count: {}", cachedGroupMappings.size());
-        }
+        LOGGER.atDebug()
+                .setMessage("Updated group count: {}")
+                .addArgument(cachedGroupMappings.size())
+                .log();
+
         return cachedGroupMappings;
     }
 
@@ -137,18 +138,18 @@ public class GroupMappingSyncProcessor
         {
             nucleusClient.deleteGroup(alfrescoGroupId);
         }
-        if (LOGGER.isDebugEnabled())
-        {
-            LOGGER.debug("Deleted {} groups from Nucleus.", nucleusGroupsToDelete.size());
-        }
+        LOGGER.atDebug()
+                .setMessage("Deleted {} groups from Nucleus.")
+                .addArgument(nucleusGroupsToDelete.size())
+                .log();
 
         if (!nucleusGroupsToCreate.isEmpty())
         {
             nucleusClient.createGroups(nucleusGroupsToCreate);
         }
-        if (LOGGER.isDebugEnabled())
-        {
-            LOGGER.debug("Created {} groups in Nucleus.", nucleusGroupsToCreate.size());
-        }
+        LOGGER.atDebug()
+                .setMessage("Created {} groups in Nucleus.")
+                .addArgument(nucleusGroupsToCreate.size())
+                .log();
     }
 }
