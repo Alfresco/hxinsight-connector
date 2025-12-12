@@ -121,7 +121,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                               "primaryAncestorIds" : [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549" ]
                             },
                             "annotation" : "hierarchy"
-                          },
+                      },
                       "cm:content": {
                         "file": {
                           "content-metadata": {
@@ -131,7 +131,17 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""".formatted(sourceMimeType);
@@ -238,7 +248,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                               "primaryAncestorIds" : [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549" ]
                             },
                             "annotation" : "hierarchy"
-                          },
+                      },
                       "cm:content": {
                         "file": {
                           "content-metadata": {
@@ -248,7 +258,17 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""".formatted(sourceMimeType);

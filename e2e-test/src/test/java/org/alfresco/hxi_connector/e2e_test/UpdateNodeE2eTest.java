@@ -47,7 +47,6 @@ import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
@@ -120,8 +119,7 @@ public class UpdateNodeE2eTest
                 }
             }
             """;
-    private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
-    private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
+    private static final String PERMISSIONS_PROPERTY = "PERMISSIONS";
     public static final String GROUP_EVERYONE = "GROUP_EVERYONE";
     public static final String ALICE = "abeecher";
     public static final String MIKE = "mjackson";
@@ -230,26 +228,43 @@ public class UpdateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
 
-            assertFalse(requests.isEmpty());
+            assertFalse(requests.isEmpty(), "Expected ingestion events but none were received");
 
             Optional<LoggedRequest> permissionsUpdatedEvent = requests.stream()
                     .filter(request -> request.getBodyAsString().contains(createdNode.id()))
                     .filter(request -> request.getBodyAsString().contains("createOrUpdate"))
-                    .filter(request -> request.getBodyAsString().contains(ALLOW_ACCESS_PROPERTY))
+                    .filter(request -> request.getBodyAsString().contains(PERMISSIONS_PROPERTY))
                     .findFirst();
 
-            assertTrue(permissionsUpdatedEvent.isPresent());
+            assertTrue(permissionsUpdatedEvent.isPresent(), "Expected permissions update event not found");
 
             JsonNode properties = objectMapper.readTree(permissionsUpdatedEvent.get().getBodyAsString())
                     .get(0)
                     .get("properties");
 
-            assertTrue(properties.has(ALLOW_ACCESS_PROPERTY));
-            assertEquals(Set.of(GROUP_EVERYONE, ALICE), asSet(properties.get(ALLOW_ACCESS_PROPERTY).get("value")));
+            assertTrue(properties.has("PERMISSIONS"));
 
-            assertTrue(properties.has(DENY_ACCESS_PROPERTY));
-            assertEquals(Set.of(MIKE), asSet(properties.get(DENY_ACCESS_PROPERTY).get("value")));
-        });
+            JsonNode permissionsValue = properties.get("PERMISSIONS").get("value");
+            assertTrue(permissionsValue.has("read"));
+            assertTrue(permissionsValue.has("deny"));
+            assertTrue(permissionsValue.has("principalsType"));
+
+            JsonNode readPermissions = permissionsValue.get("read");
+            assertEquals(2, readPermissions.size());
+
+            Set<String> readIds = readPermissions.findValuesAsText("id").stream()
+                    .collect(java.util.stream.Collectors.toSet());
+            assertEquals(Set.of(GROUP_EVERYONE, ALICE), readIds);
+
+            JsonNode denyPermissions = permissionsValue.get("deny");
+            assertEquals(1, denyPermissions.size());
+
+            Set<String> denyIds = denyPermissions.findValuesAsText("id").stream()
+                    .collect(java.util.stream.Collectors.toSet());
+            assertEquals(Set.of(MIKE), denyIds);
+
+            assertEquals("effective", permissionsValue.get("principalsType").asText());
+        }, DELAY_MS);
     }
 
     private void prepareHxInsightMockToReturnPredictionFor(String nodeId, String predictedValue)

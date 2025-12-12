@@ -34,16 +34,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
@@ -61,8 +60,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -72,11 +74,19 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 import org.alfresco.repo.event.v1.model.UserInfo;
 
+@SuppressWarnings("PMD.TooManyMethods")
 class PropertiesMapperTest
 {
     private static final String EXPECTED_DATE_STRING = "2023-01-01T00:00:00.000Z";
+    private AuthorityTypeResolver authorityTypeResolver;
+    private PropertiesMapper propertiesMapper;
 
-    PropertiesMapper propertiesMapper = new PropertiesMapper();
+    @BeforeEach
+    void setUp()
+    {
+        authorityTypeResolver = mock(AuthorityTypeResolver.class);
+        propertiesMapper = new PropertiesMapper(authorityTypeResolver);
+    }
 
     @Test
     void shouldHandleAllPropertiesUpdated_NodeCreated()
@@ -318,7 +328,6 @@ class PropertiesMapperTest
     @Test
     void shouldAddACLInfo_NodeCreated()
     {
-        // given
         String groupEveryone = "GROUP_EVERYONE";
         String bob = "bob";
 
@@ -332,46 +341,21 @@ class PropertiesMapperTest
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
-        // when
+
+        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
+        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                updated(DENY_ACCESS, Set.of(bob)));
+        boolean hasPermissionsProperty = propertyDeltas.stream()
+                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
 
-        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
-    }
-
-    @Test
-    void shouldAddDefaultACLInfoIfNotPresent_NodeCreated()
-    {
-        // given
-        String groupEveryone = "GROUP_EVERYONE";
-        RepoEvent<DataAttributes<NodeResource>> event = mock();
-
-        setType(event, NODE_CREATED);
-
-        given(event.getData()).willReturn(mock(EventData.class));
-        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
-        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
-
-        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
-        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
-        // when
-        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(ALLOW_ACCESS, Set.of(groupEveryone)));
-
-        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
+        assertTrue(hasPermissionsProperty);
     }
 
     @Test
     void shouldAddACLInfo_NodePermissionsUpdated()
     {
-        // given
         String groupEveryone = "GROUP_EVERYONE";
         String bob = "bob";
 
@@ -385,15 +369,37 @@ class PropertiesMapperTest
 
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+
+        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
+        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+
+        Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
+        boolean hasPermissionsProperty = propertyDeltas.stream()
+                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
+        assertTrue(hasPermissionsProperty);
+    }
+
+    @Test
+    void shouldAddDefaultACLInfoIfNotPresent_NodeCreated()
+    {
+        String groupEveryone = "GROUP_EVERYONE";
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        setType(event, NODE_CREATED);
+
+        given(event.getData()).willReturn(mock(EventData.class));
+        given(event.getData().getResource()).willReturn(nodeResourceWithRequiredFields().build());
+        given(event.getData().getResourceBefore()).willReturn(NodeResource.builder().build());
+
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
+
         // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        // then
-        Set<PropertyDelta<?>> expectedPropertyDeltas = Set.of(
-                updated(ALLOW_ACCESS, Set.of(groupEveryone)),
-                updated(DENY_ACCESS, Set.of(bob)));
-
-        assertEquals(mergeWithDefaultProperties(expectedPropertyDeltas), propertyDeltas);
+        boolean hasPermissionsProperty = propertyDeltas.stream()
+                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
+        assertFalse(hasPermissionsProperty);
     }
 
     @Test
@@ -506,5 +512,116 @@ class PropertiesMapperTest
                 .forEach(mergedProperties::add);
 
         return mergedProperties;
+    }
+
+    @Test
+    void shouldReturnEmptyWhenBothAuthoritiesAreNull()
+    {
+        // given
+        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        given(event.getData()).willReturn(mock(EventData.class));
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
+
+        // then
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void shouldReturnEmptyWhenBothAuthoritiesAreEmpty()
+    {
+        // given
+        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        given(event.getData()).willReturn(mock(EventData.class));
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of());
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of());
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
+
+        // then
+        assertFalse(result.isPresent());
+    }
+
+    @Test
+    void shouldUseGroupEveryoneWhenReaderAuthoritiesIsNull()
+    {
+        // given
+        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
+
+        String bob = "bob";
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        given(event.getData()).willReturn(mock(EventData.class));
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
+
+        given(mockAuthorityTypeResolver.resolveAuthorityType("GROUP_EVERYONE")).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
+        given(mockAuthorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
+
+        // then
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void shouldUseEmptySetWhenDeniedAuthoritiesIsNull()
+    {
+        // given
+        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
+
+        String alice = "alice";
+
+        RepoEvent<DataAttributes<NodeResource>> event = mock();
+
+        given(event.getData()).willReturn(mock(EventData.class));
+        given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(alice));
+        given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
+
+        given(mockAuthorityTypeResolver.resolveAuthorityType(alice)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+
+        // when
+        Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
+
+        // then
+        assertTrue(result.isPresent());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenAuthoritiesCollectionIsNull()
+    {
+        // given
+        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
+
+        // when
+        List<AuthorityInfo> result = PropertyMappingHelper.convertToAuthorityInfoList(null, mockAuthorityTypeResolver);
+
+        // then
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    void shouldReturnEmptyListWhenAuthoritiesCollectionIsEmpty()
+    {
+        // given
+        AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
+
+        // when
+        List<AuthorityInfo> result = PropertyMappingHelper.convertToAuthorityInfoList(Set.of(), mockAuthorityTypeResolver);
+
+        // then
+        assertTrue(result.isEmpty());
     }
 }

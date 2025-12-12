@@ -14,9 +14,6 @@ body: [
       "modifiedAt": {
         "value": "2025-03-27T11:27:59.232Z",
         "annotation": "dateModified"
-      },"ALLOW_ACCESS": {
-        "value": [ "GROUP_EVERYONE","GROUP_site_swsdp_SiteContributor","GROUP_site_swsdp_SiteCollaborator","GROUP_site_swsdp_SiteManager","GROUP_site_swsdp_SiteConsumer" ],
-        "type": "string"
       },
       "aspectsNames": {
         "value": [ "rn:hiddenRendition","cm:indexControl","cm:auditable","rn:rendition2" ],
@@ -81,6 +78,29 @@ body: [
             "content-type": "image/png"
           }
         }
+      },
+      "PERMISSIONS": {
+        "value": {
+          "read": [ {
+            "id": "GROUP_EVERYONE",
+            "type": "GROUP"
+          }, {
+            "id": "GROUP_site_swsdp_SiteContributor",
+            "type": "GROUP"
+          }, {
+            "id": "GROUP_site_swsdp_SiteCollaborator",
+            "type": "GROUP"
+          }, {
+            "id": "GROUP_site_swsdp_SiteManager",
+            "type": "GROUP"
+          }, {
+            "id": "GROUP_site_swsdp_SiteConsumer",
+            "type": "GROUP"
+          } ],
+          "deny": [ ],
+          "principalsType": "effective"
+        },
+        "annotation": "principals"
       }
     }
   }

@@ -1,4 +1,4 @@
-/*-
+/*
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,20 +23,32 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.common.constant;
+package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util;
 
-public class NodeProperties
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.*;
+import org.springframework.stereotype.Component;
+
+@Slf4j
+@Component
+@RequiredArgsConstructor
+public class AuthorityTypeResolver
 {
-    public static final String NAME_PROPERTY = "cm:name";
-    public static final String CONTENT_PROPERTY = "cm:content";
-    public static final String TYPE_PROPERTY = "type";
-    public static final String CREATED_BY_PROPERTY = "createdBy";
-    public static final String MODIFIED_BY_PROPERTY = "modifiedBy";
-    public static final String CREATED_AT_PROPERTY = "createdAt";
-    public static final String MODIFIED_AT_PROPERTY = "modifiedAt";
-    public static final String ASPECT_NAMES_PROPERTY = "aspectsNames";
-    public static final String ALLOW_ACCESS = "ALLOW_ACCESS";
-    public static final String DENY_ACCESS = "DENY_ACCESS";
-    public static final String ANCESTORS_PROPERTY = "ancestors";
-    public static final String PERMISSIONS_PROPERTY = "PERMISSIONS";
+    public enum AuthorityType
+    {
+        USER, GROUP
+    }
+
+    public AuthorityType resolveAuthorityType(String authorityId)
+    {
+        if (authorityId.startsWith("GROUP_"))
+        {
+            return AuthorityType.GROUP;
+        }
+        else
+        {
+            return AuthorityType.USER;
+        }
+    }
 }

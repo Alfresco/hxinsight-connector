@@ -34,7 +34,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
 @SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[text/*]=application/pdf",
         "logging.level.org.alfresco=DEBUG"})
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 public class BulkIngesterEventIntegrationTest extends E2ETestBase
 {
     @Test

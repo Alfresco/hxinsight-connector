@@ -33,7 +33,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestsShouldIncludeAssert")
 public class UpdateRequestIntegrationTest extends E2ETestBase
 {
     @Test
@@ -97,7 +97,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "cm:description": "Old Description"
                       },
                       "aspectNames": [ "cm:versionable", "cm:thumbnailModification", "cm:author" ]
-                    }
+                    },
+                    "resourceReaderAuthorities": ["GROUP_EVERYONE"],
+                    "resourceDeniedAuthorities": []
                   }
                 }""";
         // when
@@ -151,7 +153,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "sizeInBytes": 123,
                         "encoding": "UTF-8"
                       }
-                    }
+                    },
+                    "resourceReaderAuthorities": ["GROUP_EVERYONE"],
+                    "resourceDeniedAuthorities": []
                   }
                 }""";
         // when
@@ -193,10 +197,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                 "value" : "purchase-order-scan.pdf",
                                 "annotation" : "name"
                               },
-                              "ALLOW_ACCESS" : {
-                                "type": "string",
-                                "value" : [ "GROUP_EVERYONE" ]
-                              },
                               "aspectsNames" : {
                                 "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                                 "annotation" : "aspects"
@@ -217,6 +217,17 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                                     "content-type" : "application/pdf"
                                   }
                                 }
+                              },
+                              "PERMISSIONS" : {
+                                "value" : {
+                                  "read" : [ {
+                                    "id" : "GROUP_EVERYONE",
+                                    "type" : "GROUP"
+                                  } ],
+                                  "deny" : [ ],
+                                  "principalsType" : "effective"
+                                },
+                                "annotation" : "principals"
                               }
                             }
                           }
@@ -272,10 +283,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -296,6 +303,17 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
+                      },
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
                       }
                     }
                   }
@@ -352,10 +370,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -376,6 +390,17 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
+                      },
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
                       }
                     }
                   }
@@ -451,10 +476,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -475,6 +496,17 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                             "content-type" : "application/pdf"
                           }
                         }
+                      },
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
                       }
                     }
                   }
@@ -523,7 +555,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "resourceBefore": {
                       "@type": "NodeResource",
                       "properties": %s
-                    }
+                    },
+                    "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
+                    "resourceDeniedAuthorities": [ ]
                   }
                 }""";
 
@@ -614,10 +648,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "321d84e3-a5fe-431e-92f5-f8e09480305e",
                         "annotation" : "name"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "type" : {
                         "value" : "cm:person",
                         "annotation" : "type"
@@ -661,7 +691,9 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "resourceBefore": {
                       "@type": "NodeResource",
                       "name": "Old Folder"
-                    }
+                    },
+                    "resourceReaderAuthorities": ["GROUP_EVERYONE"],
+                    "resourceDeniedAuthorities": []
                   }
                 }""";
         // when
@@ -692,10 +724,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "value" : "admin",
                         "annotation" : "createdBy"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "aspectsNames" : {
                         "value" : [ "cm:versionable", "cm:author", "cm:titled" ],
                         "annotation" : "aspects"
@@ -707,6 +735,17 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "type" : {
                         "value" : "cm:folder",
                         "annotation" : "type"
+                      },
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
                       }
                     }
                   }
@@ -801,10 +840,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                   "eventType" : "createOrUpdate",
                   "sourceTimestamp" : 1722422055416,
                   "properties" : {
-                    "ALLOW_ACCESS" : {
-                      "type": "string",
-                      "value" : [ "GROUP_EVERYONE", "abeecher" ]
-                    },
                     "cm:title" : {
                       "type": "string",
                       "value" : ""
@@ -863,7 +898,24 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                           "content-type" : "text/plain"
                         }
                       }
-                    }
+                    },
+                    "PERMISSIONS" : {
+                          "value" : {
+                            "read" : [
+                                {
+                                  "id" : "GROUP_EVERYONE",
+                                  "type" : "GROUP"
+                                },
+                                {
+                                  "id": "abeecher",
+                                  "type": "USER"
+                                }
+                            ],
+                            "deny" : [ ],
+                            "principalsType" : "effective"
+                          },
+                          "annotation" : "principals"
+                        }
                   }
                 }]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
