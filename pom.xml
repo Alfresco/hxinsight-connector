@@ -89,7 +89,7 @@
         <mapstruct.version>1.6.3</mapstruct.version>
 
         <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
         <license-maven-plugin.version>2.7.0</license-maven-plugin.version>
