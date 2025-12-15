@@ -399,6 +399,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                 }""".formatted(REQUEST_ID_PLACEHOLDER);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
     }
+
     @Test
     void testCreateRequestWithoutPermission()
     {

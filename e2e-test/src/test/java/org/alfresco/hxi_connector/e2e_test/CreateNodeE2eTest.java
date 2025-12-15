@@ -227,8 +227,7 @@ public class CreateNodeE2eTest
             Map<String, Object> expectedPermissions = Map.of(
                     "read", List.of(Map.of("id", "GROUP_EVERYONE", "type", "GROUP")),
                     "deny", List.of(),
-                    "principalsType", "effective"
-            );
+                    "principalsType", "effective");
 
             Map<String, Object> actualPermissions = objectMapper.convertValue(permissionsValue, Map.class);
             assertEquals(expectedPermissions, actualPermissions, "Permissions structure does not match expected format");
