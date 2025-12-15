@@ -347,10 +347,21 @@ class PropertiesMapperTest
 
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        boolean hasPermissionsProperty = propertyDeltas.stream()
-                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
+        assertEquals(8, propertyDeltas.size());
 
-        assertTrue(hasPermissionsProperty);
+        Optional<PropertyDelta<?>> permissionsDelta = propertyDeltas.stream()
+                .filter(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()))
+                .findFirst();
+
+        assertTrue(permissionsDelta.isPresent());
+
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> NAME_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> TYPE_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_AT_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_BY_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_AT_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_BY_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> ASPECT_NAMES_PROPERTY.equals(delta.getPropertyName())));
     }
 
     @Test
@@ -374,9 +385,23 @@ class PropertiesMapperTest
         given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
 
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
-        boolean hasPermissionsProperty = propertyDeltas.stream()
-                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
-        assertTrue(hasPermissionsProperty);
+
+        assertEquals(8, propertyDeltas.size());
+
+        Optional<PropertyDelta<?>> permissionsDelta = propertyDeltas.stream()
+                .filter(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()))
+                .findFirst();
+
+        assertTrue(permissionsDelta.isPresent());
+
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> NAME_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> TYPE_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_AT_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_BY_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_AT_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_BY_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> ASPECT_NAMES_PROPERTY.equals(delta.getPropertyName())));
+
     }
 
     @Test
@@ -394,12 +419,20 @@ class PropertiesMapperTest
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
 
-        // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        boolean hasPermissionsProperty = propertyDeltas.stream()
-                .anyMatch(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()));
-        assertFalse(hasPermissionsProperty);
+        Optional<PropertyDelta<?>> permissionsDelta = propertyDeltas.stream()
+                .filter(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()))
+                .findFirst();
+        assertFalse(permissionsDelta.isPresent());
+
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> NAME_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> TYPE_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_AT_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_BY_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_AT_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_BY_PROPERTY.equals(delta.getPropertyName())));
+        assertTrue(propertyDeltas.stream().anyMatch(delta -> ASPECT_NAMES_PROPERTY.equals(delta.getPropertyName())));
     }
 
     @Test
@@ -530,7 +563,7 @@ class PropertiesMapperTest
         Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
 
         // then
-        assertFalse(result.isPresent());
+        assertEquals(Optional.empty(), result);
     }
 
     @Test

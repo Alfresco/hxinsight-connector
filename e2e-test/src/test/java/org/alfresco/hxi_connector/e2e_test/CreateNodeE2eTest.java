@@ -49,6 +49,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -206,35 +207,31 @@ public class CreateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
 
-            assertFalse(requests.isEmpty());
+            assertFalse(requests.isEmpty(), "Expected ingestion events but none were received");
 
             Optional<LoggedRequest> createNodeEvent = requests.stream()
                     .filter(request -> request.getBodyAsString().contains(createdNode.id()))
                     .findFirst();
 
-            assertTrue(createNodeEvent.isPresent());
+            assertTrue(createNodeEvent.isPresent(), "Expected node creation event not found");
 
             JsonNode properties = objectMapper.readTree(createNodeEvent.get().getBodyAsString())
                     .get(0)
                     .get("properties");
 
-            assertTrue(properties.has(PERMISSIONS_PROPERTY));
+            assertTrue(properties.has(PERMISSIONS_PROPERTY), "Expected properties to contain PERMISSIONS field");
+
             JsonNode permissionsValue = properties.get(PERMISSIONS_PROPERTY).get("value");
-            assertTrue(permissionsValue.has("read"));
-            assertTrue(permissionsValue.has("deny"));
-            assertTrue(permissionsValue.has("principalsType"));
 
-            JsonNode readPermissions = permissionsValue.get("read");
-            assertEquals(1, readPermissions.size());
+            // Assert the entire permissions structure
+            Map<String, Object> expectedPermissions = Map.of(
+                    "read", List.of(Map.of("id", "GROUP_EVERYONE", "type", "GROUP")),
+                    "deny", List.of(),
+                    "principalsType", "effective"
+            );
 
-            JsonNode groupEveryonePermission = readPermissions.get(0);
-            assertEquals("GROUP_EVERYONE", groupEveryonePermission.get("id").asText());
-            assertEquals("GROUP", groupEveryonePermission.get("type").asText());
-
-            JsonNode denyPermissions = permissionsValue.get("deny");
-            assertEquals(0, denyPermissions.size());
-
-            assertEquals("effective", permissionsValue.get("principalsType").asText());
+            Map<String, Object> actualPermissions = objectMapper.convertValue(permissionsValue, Map.class);
+            assertEquals(expectedPermissions, actualPermissions, "Permissions structure does not match expected format");
         }, DELAY_MS);
     }
 
