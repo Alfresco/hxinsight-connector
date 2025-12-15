@@ -85,35 +85,28 @@ public class UserMappingSyncProcessor
 
         List<String> nucleusMappingsToDelete = new ArrayList<>();
         List<NucleusUserMappingInput> nucleusMappingsToCreate = new ArrayList<>();
-        List<UserMapping> cachedMappings = new ArrayList<>();
+        List<UserMapping> updatedUserMappings = new ArrayList<>();
         Set<String> validAlfrescoIds = new HashSet<>();
 
-        Set<String> allEmails = new HashSet<>();
-        allEmails.addAll(alfrescoUserByEmail.keySet());
-        allEmails.addAll(nucleusIamUserByEmail.keySet());
+        Set<String> commonEmails = new HashSet<>(alfrescoUserByEmail.keySet());
+        commonEmails.retainAll(nucleusIamUserByEmail.keySet());
 
-        for (String email : allEmails)
+        for (String email : commonEmails)
         {
             AlfrescoUser alfrescoUser = alfrescoUserByEmail.get(email);
             IamUser nucleusIamUser = nucleusIamUserByEmail.get(email);
 
-            boolean isAlfrescoUser = alfrescoUser != null;
-            boolean isNucleusUser = nucleusIamUser != null;
+            String alfrescoUserId = alfrescoUser.id();
+            String nucleusUserId = nucleusIamUser.userId();
 
-            if (isAlfrescoUser && isNucleusUser)
+            validAlfrescoIds.add(alfrescoUserId);
+            updatedUserMappings.add(
+                    new UserMapping(alfrescoUser.email(), alfrescoUserId, nucleusUserId));
+
+            if (!nucleusMappingByAlfrescoId.containsKey(alfrescoUserId))
             {
-                String alfrescoUserId = alfrescoUser.id();
-                String nucleusUserId = nucleusIamUser.userId();
-
-                validAlfrescoIds.add(alfrescoUserId);
-                cachedMappings.add(
-                        new UserMapping(alfrescoUser.email(), alfrescoUserId, nucleusUserId));
-
-                if (!nucleusMappingByAlfrescoId.containsKey(alfrescoUserId))
-                {
-                    nucleusMappingsToCreate.add(
-                            new NucleusUserMappingInput(nucleusUserId, alfrescoUserId));
-                }
+                nucleusMappingsToCreate.add(
+                        new NucleusUserMappingInput(nucleusUserId, alfrescoUserId));
             }
         }
 
@@ -130,10 +123,10 @@ public class UserMappingSyncProcessor
 
         LOGGER.atDebug()
                 .setMessage("Final user mappings count: {}")
-                .addArgument(cachedMappings.size())
+                .addArgument(updatedUserMappings.size())
                 .log();
 
-        return cachedMappings;
+        return updatedUserMappings;
     }
 
     private void executeUserBatchOperations(
