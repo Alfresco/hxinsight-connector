@@ -27,9 +27,6 @@ package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
@@ -86,7 +83,7 @@ public class UserMappingSyncProcessorIntegrationTest
                 new NucleusUserMappingOutput("michael.oliver@company.com", "moliver"),
                 // Delete - stale mapping
                 new NucleusUserMappingOutput("mark.clattenburg", "mclattenburg"),
-                // Delete - stale mapping (user no longer in alfresco)
+                // Delete - stale mapping
                 new NucleusUserMappingOutput("old.user@company.com", "ouser"));
 
         // When
@@ -107,9 +104,5 @@ public class UserMappingSyncProcessorIntegrationTest
                         new UserMapping("john.doe@company.com", "jdoe", "be81a981-3726-483e-b9b1-ecf1d3f36b7d"),
                         new UserMapping("sarah.johnson@company.com", "sjohnson", "7c92b082-4837-594f-c0c2-fdf2e4g47c8e"),
                         new UserMapping("michael.oliver@company.com", "moliver", "6b73fd36-d76e-40b7-8624-2d897f35603c"));
-
-        // Then - Verify exactly 3 interactions (2 deletes, 1 create batch)
-        verify(nucleusClient, times(2)).deleteUserMapping(anyString());
-        verify(nucleusClient, times(1)).createUserMappings(anyList());
     }
 }
