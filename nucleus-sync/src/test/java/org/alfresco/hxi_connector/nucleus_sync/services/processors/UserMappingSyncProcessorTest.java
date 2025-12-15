@@ -74,7 +74,6 @@ public class UserMappingSyncProcessorTest
 
         // Then
         assertThat(result)
-                .hasSize(1)
                 .containsExactlyInAnyOrder(
                         new UserMapping("robert.brown@email.com", "rbrown", "ecff0ce9-5da0-4c72-8942-f66111651712"));
 
