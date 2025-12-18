@@ -25,24 +25,5 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util;
 
-public class AuthorityInfo
-{
-    private final String id;
-    private final AuthorityTypeResolver.AuthorityType type;
-
-    public AuthorityInfo(String id, AuthorityTypeResolver.AuthorityType type)
-    {
-        this.id = id;
-        this.type = type;
-    }
-
-    public String getId()
-    {
-        return id;
-    }
-
-    public AuthorityTypeResolver.AuthorityType getType()
-    {
-        return type;
-    }
-}
+public record AuthorityInfo(String id, AuthorityTypeResolver.AuthorityType type)
+{}

@@ -44,7 +44,10 @@ import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver.AuthorityType.GROUP;
+import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver.AuthorityType.USER;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.contentMetadataUpdated;
+import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.permissionsMetadataUpdated;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta.updated;
 import static org.alfresco.hxi_connector.live_ingester.util.TestUtils.mapWith;
 import static org.alfresco.repo.event.v1.model.EventType.NODE_CREATED;
@@ -328,6 +331,7 @@ class PropertiesMapperTest
     @Test
     void shouldAddACLInfo_NodeCreated()
     {
+        // given
         String groupEveryone = "GROUP_EVERYONE";
         String bob = "bob";
 
@@ -342,31 +346,29 @@ class PropertiesMapperTest
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
 
-        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(GROUP);
+        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(USER);
 
+        // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        assertEquals(8, propertyDeltas.size());
-
+        // then
         Optional<PropertyDelta<?>> permissionsDelta = propertyDeltas.stream()
                 .filter(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()))
                 .findFirst();
 
         assertTrue(permissionsDelta.isPresent());
 
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> NAME_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> TYPE_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_AT_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_BY_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_AT_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_BY_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> ASPECT_NAMES_PROPERTY.equals(delta.getPropertyName())));
+        PropertyDelta<?> expected = permissionsMetadataUpdated(PERMISSIONS_PROPERTY,
+                List.of(new AuthorityInfo(groupEveryone, GROUP)),
+                List.of(new AuthorityInfo(bob, USER)));
+        assertEquals(expected, permissionsDelta.get());
     }
 
     @Test
     void shouldAddACLInfo_NodePermissionsUpdated()
     {
+        // given
         String groupEveryone = "GROUP_EVERYONE";
         String bob = "bob";
 
@@ -381,33 +383,29 @@ class PropertiesMapperTest
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(groupEveryone));
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
 
-        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+        given(authorityTypeResolver.resolveAuthorityType(groupEveryone)).willReturn(GROUP);
+        given(authorityTypeResolver.resolveAuthorityType(bob)).willReturn(USER);
 
+        // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
-        assertEquals(8, propertyDeltas.size());
-
+        // then
         Optional<PropertyDelta<?>> permissionsDelta = propertyDeltas.stream()
                 .filter(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()))
                 .findFirst();
 
         assertTrue(permissionsDelta.isPresent());
 
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> NAME_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> TYPE_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_AT_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_BY_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_AT_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_BY_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> ASPECT_NAMES_PROPERTY.equals(delta.getPropertyName())));
-
+        PropertyDelta<?> expected = permissionsMetadataUpdated(PERMISSIONS_PROPERTY,
+                List.of(new AuthorityInfo(groupEveryone, GROUP)),
+                List.of(new AuthorityInfo(bob, USER)));
+        assertEquals(expected, permissionsDelta.get());
     }
 
     @Test
     void shouldAddDefaultACLInfoIfNotPresent_NodeCreated()
     {
-        String groupEveryone = "GROUP_EVERYONE";
+        // given
         RepoEvent<DataAttributes<NodeResource>> event = mock();
 
         setType(event, NODE_CREATED);
@@ -419,20 +417,15 @@ class PropertiesMapperTest
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
 
+        // when
         Set<PropertyDelta<?>> propertyDeltas = propertiesMapper.mapToPropertyDeltas(event);
 
+        // then
         Optional<PropertyDelta<?>> permissionsDelta = propertyDeltas.stream()
                 .filter(delta -> PERMISSIONS_PROPERTY.equals(delta.getPropertyName()))
                 .findFirst();
-        assertFalse(permissionsDelta.isPresent());
 
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> NAME_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> TYPE_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_AT_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> CREATED_BY_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_AT_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> MODIFIED_BY_PROPERTY.equals(delta.getPropertyName())));
-        assertTrue(propertyDeltas.stream().anyMatch(delta -> ASPECT_NAMES_PROPERTY.equals(delta.getPropertyName())));
+        assertFalse(permissionsDelta.isPresent(), "Expected no permissions property delta when authorities are null");
     }
 
     @Test
@@ -599,8 +592,8 @@ class PropertiesMapperTest
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(null);
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(Set.of(bob));
 
-        given(mockAuthorityTypeResolver.resolveAuthorityType("GROUP_EVERYONE")).willReturn(AuthorityTypeResolver.AuthorityType.GROUP);
-        given(mockAuthorityTypeResolver.resolveAuthorityType(bob)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+        given(mockAuthorityTypeResolver.resolveAuthorityType("GROUP_EVERYONE")).willReturn(GROUP);
+        given(mockAuthorityTypeResolver.resolveAuthorityType(bob)).willReturn(USER);
 
         // when
         Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
@@ -623,7 +616,7 @@ class PropertiesMapperTest
         given(((EventData) event.getData()).getResourceReaderAuthorities()).willReturn(Set.of(alice));
         given(((EventData) event.getData()).getResourceDeniedAuthorities()).willReturn(null);
 
-        given(mockAuthorityTypeResolver.resolveAuthorityType(alice)).willReturn(AuthorityTypeResolver.AuthorityType.USER);
+        given(mockAuthorityTypeResolver.resolveAuthorityType(alice)).willReturn(USER);
 
         // when
         Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
