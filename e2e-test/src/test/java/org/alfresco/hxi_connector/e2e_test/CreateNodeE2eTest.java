@@ -41,7 +41,6 @@ import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getRepoJavaOptsWithTransforms;
-import static org.alfresco.hxi_connector.e2e_test.util.TestJsonUtils.asSet;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
@@ -50,8 +49,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,8 +94,7 @@ public class CreateNodeE2eTest
     private static final int DELAY_MS = 500;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
-    private static final String ALLOW_ACCESS_PROPERTY = "ALLOW_ACCESS";
-    private static final String DENY_ACCESS_PROPERTY = "DENY_ACCESS";
+    private static final String PERMISSIONS_PROPERTY = "PERMISSIONS";
 
     private static final Network network = Network.newNetwork();
     @Container
@@ -209,22 +207,30 @@ public class CreateNodeE2eTest
         RetryUtils.retryWithBackoff(() -> {
             List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
 
-            assertFalse(requests.isEmpty());
+            assertFalse(requests.isEmpty(), "Expected ingestion events but none were received");
 
             Optional<LoggedRequest> createNodeEvent = requests.stream()
                     .filter(request -> request.getBodyAsString().contains(createdNode.id()))
                     .findFirst();
 
-            assertTrue(createNodeEvent.isPresent());
+            assertTrue(createNodeEvent.isPresent(), "Expected node creation event not found");
 
             JsonNode properties = objectMapper.readTree(createNodeEvent.get().getBodyAsString())
                     .get(0)
                     .get("properties");
 
-            assertTrue(properties.has(ALLOW_ACCESS_PROPERTY));
-            assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(ALLOW_ACCESS_PROPERTY).get("value")));
+            assertTrue(properties.has(PERMISSIONS_PROPERTY), "Expected properties to contain PERMISSIONS field");
 
-            assertFalse(properties.has(DENY_ACCESS_PROPERTY));
+            JsonNode permissionsValue = properties.get(PERMISSIONS_PROPERTY).get("value");
+
+            // Assert the entire permissions structure
+            Map<String, Object> expectedPermissions = Map.of(
+                    "read", List.of(Map.of("id", "GROUP_EVERYONE", "type", "GROUP")),
+                    "deny", List.of(),
+                    "principalsType", "effective");
+
+            Map<String, Object> actualPermissions = objectMapper.convertValue(permissionsValue, Map.class);
+            assertEquals(expectedPermissions, actualPermissions, "Permissions structure does not match expected format");
         }, DELAY_MS);
     }
 

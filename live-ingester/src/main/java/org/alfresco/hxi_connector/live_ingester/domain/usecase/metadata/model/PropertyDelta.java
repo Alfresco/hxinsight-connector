@@ -28,14 +28,17 @@ package org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model;
 
 import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNonNull;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
 
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.ContentPropertyUpdated;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PermissionsMetadataUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PropertyUpdated;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.property.PropertyResolver;
 
@@ -62,6 +65,14 @@ public abstract class PropertyDelta<T>
                 .sourceMimeType(sourceMimeType)
                 .sourceSizeInBytes(sourceSizeInBytes)
                 .sourceFileName(sourceFileName).build();
+    }
+
+    public static PermissionsMetadataUpdated permissionsMetadataUpdated(String key, List<AuthorityInfo> allowAccess, List<AuthorityInfo> denyAccess)
+    {
+        return PermissionsMetadataUpdated.builder(key)
+                .read(allowAccess)
+                .deny(denyAccess)
+                .build();
     }
 
     protected PropertyDelta(String propertyName)
