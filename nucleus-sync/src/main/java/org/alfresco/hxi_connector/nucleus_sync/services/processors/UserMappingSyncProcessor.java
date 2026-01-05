@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -136,6 +136,10 @@ public class UserMappingSyncProcessor
         for (String alfrescoUserId : nucleusMappingsToDelete)
         {
             nucleusClient.deleteUserMapping(alfrescoUserId);
+            LOGGER.atTrace()
+                    .setMessage("Deleted user {} from nucleus.")
+                    .addArgument(alfrescoUserId)
+                    .log();
         }
         LOGGER.atDebug()
                 .setMessage("Deleted {} user mapping in Nucleus.")
@@ -145,6 +149,11 @@ public class UserMappingSyncProcessor
         if (!nucleusMappingsToCreate.isEmpty())
         {
             nucleusClient.createUserMappings(nucleusMappingsToCreate);
+
+            LOGGER.atTrace()
+                    .setMessage("Created user mappings for user ID: {}")
+                    .addArgument(nucleusMappingsToCreate.stream().map(mapping -> mapping.userId()).collect(Collectors.joining(",")))
+                    .log();
         }
         LOGGER.atDebug()
                 .setMessage("Created {} user mappings in nucleus")
