@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,7 +31,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import org.alfresco.hxi_connector.prediction_applier.domain.usecase.e2e.util.PredictionApplierE2ETestBase;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public class PredictionApplicationIntegrationTest extends PredictionApplierE2ETestBase
 {

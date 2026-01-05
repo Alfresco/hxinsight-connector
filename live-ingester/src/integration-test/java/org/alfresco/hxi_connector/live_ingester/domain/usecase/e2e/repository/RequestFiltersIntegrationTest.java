@@ -40,7 +40,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
         "alfresco.filter.path.allow[0]=5f355d16-f824-4173-bf4b-b1ec37ef5549", "alfresco.filter.path.allow[1]=93f7edf5-e4d8-4749-9b4c-e45097e2e19d",
         "alfresco.filter.path.deny[0]=11111111-1111-1111-1111-111111111111",
         "logging.level.org.alfresco=DEBUG"})
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 public class RequestFiltersIntegrationTest extends E2ETestBase
 {
 
@@ -135,7 +135,17 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""";
@@ -301,7 +311,17 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                           }
                         }
                       },
-                      "ALLOW_ACCESS": {"type": "string", "value": ["GROUP_EVERYONE"]}
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
                     }
                   }
                 ]""";
@@ -463,10 +483,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "value" : "admin",
                         "annotation" : "createdBy"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
@@ -477,7 +493,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                               "primaryAncestorIds" : [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549"]
                             },
                             "annotation" : "hierarchy"
-                          },
+                      },
                       "type": {"value": "cm:content", "annotation": "type"},
                       "cm:content" : {
                         "file" : {
@@ -662,10 +678,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                         "value" : "admin",
                         "annotation" : "createdBy"
                       },
-                      "ALLOW_ACCESS" : {
-                        "type": "string",
-                        "value" : [ "GROUP_EVERYONE" ]
-                      },
                       "cm:name" : {
                         "value" : "purchase-order-scan.pdf",
                         "annotation" : "name"
@@ -676,7 +688,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                               "primaryAncestorIds" : [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549" ]
                             },
                             "annotation" : "hierarchy"
-                          },
+                      },
                       "type": {"value": "cm:content", "annotation": "type"},
                       "cm:content" : {
                         "file" : {
@@ -1101,10 +1113,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                          "value" : "admin",
                          "annotation" : "createdBy"
                        },
-                       "ALLOW_ACCESS" : {
-                         "type": "string",
-                         "value" : [ "GROUP_EVERYONE" ]
-                       },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf",
                          "annotation" : "name"
@@ -1396,10 +1404,6 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                        "createdBy" : {
                          "value" : "admin",
                          "annotation" : "createdBy"
-                       },
-                       "ALLOW_ACCESS" : {
-                         "type": "string",
-                         "value" : [ "GROUP_EVERYONE" ]
                        },
                        "cm:name" : {
                          "value" : "purchase-order-scan.pdf",

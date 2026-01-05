@@ -75,26 +75,26 @@
         <alfresco-event-model.version>1.0.11</alfresco-event-model.version>
         <spring-boot.version>3.5.7</spring-boot.version>
         <spring-camel.version>4.14.0</spring-camel.version>
-        <commons-lang.version>3.19.0</commons-lang.version>
+        <commons-lang.version>3.20.0</commons-lang.version>
         <commons-collections.version>4.5.0</commons-collections.version>
-        <commons-io.version>2.20.0</commons-io.version>
+        <commons-io.version>2.21.0</commons-io.version>
         <pdfbox.version>3.0.6</pdfbox.version>
-        <aws-sdk-s3.version>2.37.4</aws-sdk-s3.version>
-        <wiremock.version>3.13.1</wiremock.version>
+        <aws-sdk-s3.version>2.40.10</aws-sdk-s3.version>
+        <wiremock.version>3.13.2</wiremock.version>
         <system-stubs.version>2.1.8</system-stubs.version>
 
-        <testcontainers.version>2.0.1</testcontainers.version>
+        <testcontainers.version>2.0.3</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-15</wiremock-testcontainers-module.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
 
-        <maven-resources-plugin.version>3.3.1</maven-resources-plugin.version>
-        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
-        <maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+        <maven-resources-plugin.version>3.4.0</maven-resources-plugin.version>
+        <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
+        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
         <license-maven-plugin.version>2.7.0</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <spotless-plugin.version>3.0.0</spotless-plugin.version>
+        <spotless-plugin.version>3.1.0</spotless-plugin.version>
         <jrebel-maven-plugin.version>1.2.1</jrebel-maven-plugin.version>
 
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->

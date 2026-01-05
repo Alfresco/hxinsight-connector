@@ -23,7 +23,6 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
 import static org.mockito.ArgumentMatchers.eq;
@@ -50,6 +49,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
@@ -69,6 +69,8 @@ class IngestEventProcessorTest
     private IngestContentCommandHandler ingestContentCommandHandler;
     @Mock
     private MimeTypeMapper mimeTypeMapper;
+    @Mock
+    private AuthorityTypeResolver authorityTypeResolver;
     @InjectMocks
     private IngestEventProcessor ingestEventProcessor;
 
