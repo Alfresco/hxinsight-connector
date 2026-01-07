@@ -56,9 +56,9 @@ public class UserGroupCacheService
      * Creates a 'cache' of users and their corresponding groups from alfresco.
      *
      * @param localUserMappings
-     *            the List of user mappings
+     *            the List of user mappingsCan
      * @return a map of alfresco user id and it's corresponding group ids
-     * @throws RuntimeException
+     * @throws UserGroupFetchException
      *             if any user's group fetch fails, or if timeout occurs
      */
     public Map<String, List<String>> fetchUserGroups(List<UserMapping> localUserMappings)
@@ -87,7 +87,7 @@ public class UserGroupCacheService
                                             userMapping.alfrescoUserId(),
                                             e.getMessage(),
                                             e);
-                                    throw new RuntimeException(
+                                    throw new UserGroupFetchException(
                                             "Failed to fetch groups for user: " + userMapping.alfrescoUserId(), e);
                                 }
                             }, executor)

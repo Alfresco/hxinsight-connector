@@ -152,7 +152,7 @@ public class UserMappingSyncProcessor
 
             LOGGER.atTrace()
                     .setMessage("Created user mappings for user ID: {}")
-                    .addArgument(nucleusMappingsToCreate.stream().map(mapping -> mapping.userId()).collect(Collectors.joining(",")))
+                    .addArgument(nucleusMappingsToCreate.stream().map(NucleusUserMappingInput::userId).collect(Collectors.joining(",")))
                     .log();
         }
         LOGGER.atDebug()
