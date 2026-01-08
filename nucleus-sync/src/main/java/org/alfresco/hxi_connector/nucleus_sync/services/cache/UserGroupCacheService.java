@@ -29,35 +29,45 @@ import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @Service
-@RequiredArgsConstructor
 public class UserGroupCacheService
 {
     private final AlfrescoClient alfrescoClient;
+    private final Duration fetchTimeout;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupCacheService.class);
-    private static final Duration FETCH_TIMEOUT = Duration.ofSeconds(30);
+    // size is 2x CPU cores to maximize throughput during network wait times
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
+
+    public UserGroupCacheService(
+            AlfrescoClient alfrescoClient,
+            @Value("${alfresco.user-group.fetch-timeout:PT5M}") Duration fetchTimeout)
+    {
+        this.alfrescoClient = alfrescoClient;
+        this.fetchTimeout = fetchTimeout;
+    }
 
     /**
      * Creates a 'cache' of users and their corresponding groups from alfresco.
      *
      * @param localUserMappings
-     *            the List of user mappingsCan
-     * @return a map of alfresco user id and it's corresponding group ids
+     *            the List of user mappings
+     * @return a map of alfresco user id and its corresponding group ids
      * @throws UserGroupFetchException
      *             if any user's group fetch fails, or if timeout occurs
      */
@@ -90,11 +100,13 @@ public class UserGroupCacheService
                                     throw new UserGroupFetchException(
                                             "Failed to fetch groups for user: " + userMapping.alfrescoUserId(), e);
                                 }
-                            }, executor)
-                                    .orTimeout(FETCH_TIMEOUT.toMillis(), TimeUnit.MILLISECONDS)));
+                            }, executor)));
+
+            CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.values().toArray(new CompletableFuture[0]));
+
+            allFutures.orTimeout(fetchTimeout.toMillis(), TimeUnit.MILLISECONDS).join();
 
             Map<String, List<String>> cache = new ConcurrentHashMap<>();
-
             for (Map.Entry<String, CompletableFuture<List<String>>> entry : futures.entrySet())
             {
                 cache.put(entry.getKey(), entry.getValue().join());
@@ -106,6 +118,16 @@ public class UserGroupCacheService
                     .log();
 
             return cache;
+        }
+        catch (CompletionException e)
+        {
+            if (e.getCause() instanceof TimeoutException)
+            {
+                LOGGER.error("Timeout fetching user groups after {} seconds", fetchTimeout.getSeconds());
+                throw new UserGroupFetchException(
+                        "Timeout fetching user groups after " + fetchTimeout.getSeconds() + " seconds", e);
+            }
+            throw e;
         }
         finally
         {

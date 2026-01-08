@@ -1,6 +1,8 @@
 alfresco:
   base-url: test-alfresco-base-url
   page-size: 100
+  user-group:
+    fetch-timeout: PT5M
 
 nucleus:
   idp-base-url: test-nucleus-idp-base-url

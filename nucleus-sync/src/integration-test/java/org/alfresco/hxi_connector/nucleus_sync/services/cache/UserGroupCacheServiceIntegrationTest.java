@@ -80,10 +80,10 @@ class UserGroupCacheServiceIntegrationTest
         Map<String, List<String>> result = service.fetchUserGroups(users);
 
         // Then
-        assertThat(result).hasSize(userCount);
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
 
         // Verify actual parallelism occurred
+        assertThat(result).hasSize(userCount);
         assertThat(maxConcurrency.get()).isGreaterThan(1);
     }
 

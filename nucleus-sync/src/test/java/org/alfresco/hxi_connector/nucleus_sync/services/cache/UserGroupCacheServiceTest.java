@@ -30,14 +30,15 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.TimeoutException;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -50,8 +51,15 @@ class UserGroupCacheServiceTest
     @Mock
     private AlfrescoClient alfrescoClient;
 
-    @InjectMocks
     private UserGroupCacheService service;
+
+    private static final int FETCH_TIMEOUT_SEC = 2;
+
+    @BeforeEach
+    void setUp()
+    {
+        service = new UserGroupCacheService(alfrescoClient, Duration.ofSeconds(FETCH_TIMEOUT_SEC));
+    }
 
     @Test
     void shouldBuildCacheSuccessfully()
@@ -110,13 +118,14 @@ class UserGroupCacheServiceTest
                 new UserMapping("slow.user@example.com", "slowuser", "550e8400-e29b-41d4-a716-446655440004"));
 
         when(alfrescoClient.getUserGroups("slowuser")).thenAnswer(invocation -> {
-            Thread.sleep(35000); // exceeds 30s timeout
+            Thread.sleep((FETCH_TIMEOUT_SEC + 1) * 1000);
             return List.of("GROUP_SLOW");
         });
 
         // When/Then
         assertThatThrownBy(() -> service.fetchUserGroups(users))
-                .isInstanceOf(CompletionException.class)
-                .hasCauseInstanceOf(TimeoutException.class);
+                .isInstanceOf(UserGroupFetchException.class)
+                .hasCauseInstanceOf(CompletionException.class)
+                .hasRootCauseInstanceOf(TimeoutException.class);
     }
 }
