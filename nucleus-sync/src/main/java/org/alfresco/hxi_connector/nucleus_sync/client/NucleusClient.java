@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -124,7 +124,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving iam users: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving iam users: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve iam users", e);
         }
     }
@@ -143,7 +148,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving groups: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving groups: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve groups", e);
         }
     }
@@ -160,7 +170,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in creating groups in nucleus: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in creating groups in nucleus: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to create groups in nucleus", e);
         }
     }
@@ -181,7 +196,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving user mappings: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving user mappings: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve user mappings", e);
         }
     }
@@ -198,7 +218,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in creating user mappings: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in creating user mappings: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to create user mappings", e);
         }
     }
@@ -219,7 +244,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving group memberships: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving group memberships: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve group memberships", e);
         }
     }
@@ -236,7 +266,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in creating member assignments to group: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in creating member assignments to group: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Error in creating member assignments to group", e);
         }
     }
@@ -255,7 +290,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in deleting group: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in deleting group: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to delete group", e);
         }
     }
@@ -274,7 +314,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in deleting user mappings: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in deleting user mapping: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to delete user mappings", e);
         }
     }
@@ -293,7 +338,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error removing group members: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in removing group members: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to remove group members", e);
         }
     }
