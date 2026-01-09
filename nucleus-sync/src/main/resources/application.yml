@@ -32,6 +32,8 @@ auth:
 alfresco:
   base-url: ${ALFRESCO_BASE_URL}
   page-size: 100
+  user-group:
+    fetch-timeout: PT5M
 
 nucleus:
   idp-base-url: ${NUCLEUS_IDP_BASE_URL}
