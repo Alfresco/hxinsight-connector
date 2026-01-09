@@ -25,12 +25,10 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -39,10 +37,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
-import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
 
 @Service
 @RequiredArgsConstructor
@@ -56,111 +52,73 @@ public class GroupMappingSyncProcessor
      *
      * Only those groups are synced whose users have been synced. Groups with no users or groups with all users who could not be synced are not synced with nucleus.
      *
-     * @param alfrescoGroups
-     *            list of all alfresco groups
      * @param currentNucleusGroups
      *            list of groups from nucleus
      * @param userGroupMembershipsCache
      *            cache of user and their groups
      * @return list of updated group mappings
      */
-    public List<GroupMapping> syncGroupMappings(
-            List<AlfrescoGroup> alfrescoGroups,
+    public List<String> syncGroupMappings(
             List<NucleusGroupOutput> currentNucleusGroups,
             Map<String, List<String>> userGroupMembershipsCache)
     {
-        Set<String> relevantAlfrescoGroupIds = userGroupMembershipsCache.values().stream()
-                .filter(groups -> groups != null)
+        Set<String> groupsWithUsers = userGroupMembershipsCache.values().stream()
+                .filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
 
-        List<AlfrescoGroup> filteredAlfrescoGroups = alfrescoGroups.stream()
-                .filter(g -> relevantAlfrescoGroupIds.contains(g.id()))
+        Set<String> existingNucleusGroupIds = currentNucleusGroups.stream()
+                .map(NucleusGroupOutput::externalGroupId)
+                .collect(Collectors.toSet());
+
+        List<String> groupsToCreate = groupsWithUsers.stream()
+                .filter(id -> !existingNucleusGroupIds.contains(id))
                 .toList();
 
-        Map<String, AlfrescoGroup> alfrescoGroupById = filteredAlfrescoGroups.stream()
-                .collect(Collectors.toMap(AlfrescoGroup::id, Function.identity()));
+        List<String> groupsToDelete = existingNucleusGroupIds.stream()
+                .filter(id -> !groupsWithUsers.contains(id))
+                .toList();
 
-        Map<String, NucleusGroupOutput> nucleusGroupByAlfrescoId = currentNucleusGroups.stream()
-                .collect(
-                        Collectors.toMap(
-                                NucleusGroupOutput::externalGroupId,
-                                Function.identity()));
-
-        List<NucleusGroupInput> nucleusGroupsToCreate = new ArrayList<>();
-        List<String> nucleusGroupsToDelete = new ArrayList<>();
-        List<GroupMapping> updatedGroupMappings = new ArrayList<>();
-
-        Set<String> allGroupIds = new HashSet<>();
-        allGroupIds.addAll(alfrescoGroupById.keySet());
-        allGroupIds.addAll(nucleusGroupByAlfrescoId.keySet());
-
-        for (String groupId : allGroupIds)
-        {
-            AlfrescoGroup alfrescoGroup = alfrescoGroupById.get(groupId);
-            NucleusGroupOutput nucleusGroup = nucleusGroupByAlfrescoId.get(groupId);
-
-            boolean hasAlfrescoGroup = alfrescoGroup != null;
-            boolean hasNucleusGroup = nucleusGroup != null;
-
-            if (hasAlfrescoGroup)
-            {
-                if (!hasNucleusGroup)
-                {
-                    nucleusGroupsToCreate.add(new NucleusGroupInput(alfrescoGroup.id()));
-                }
-                updatedGroupMappings.add(
-                        new GroupMapping(alfrescoGroup.id(), alfrescoGroup.displayName()));
-            }
-            else
-            {
-                if (hasNucleusGroup)
-                {
-                    nucleusGroupsToDelete.add(groupId);
-                }
-            }
-        }
-
-        executeGroupBatchOperations(nucleusGroupsToCreate, nucleusGroupsToDelete);
+        executeGroupOperations(groupsToCreate, groupsToDelete);
 
         LOGGER.atDebug()
                 .setMessage("Updated group count: {}")
-                .addArgument(updatedGroupMappings.size())
+                .addArgument(groupsWithUsers.size())
                 .log();
 
-        return updatedGroupMappings;
+        return groupsWithUsers.stream().toList();
     }
 
-    private void executeGroupBatchOperations(
-            List<NucleusGroupInput> nucleusGroupsToCreate, List<String> nucleusGroupsToDelete)
+    private void executeGroupOperations(List<String> toCreate, List<String> toDelete)
     {
-        for (String alfrescoGroupId : nucleusGroupsToDelete)
-        {
-            nucleusClient.deleteGroup(alfrescoGroupId);
-        }
-        if (!nucleusGroupsToDelete.isEmpty())
+        toDelete.forEach(nucleusClient::deleteGroup);
+        if (!toDelete.isEmpty())
         {
             LOGGER.atTrace()
-                    .setMessage("Deleted groups with ID: {}")
-                    .addArgument(nucleusGroupsToDelete.stream().collect(Collectors.joining(",")))
+                    .setMessage("Deleted groups: {}")
+                    .addArgument(() -> String.join(", ", toDelete))
                     .log();
         }
         LOGGER.atDebug()
                 .setMessage("Deleted {} groups from Nucleus.")
-                .addArgument(nucleusGroupsToDelete.size())
+                .addArgument(toDelete.size())
                 .log();
 
-        if (!nucleusGroupsToCreate.isEmpty())
+        if (!toCreate.isEmpty())
         {
-            nucleusClient.createGroups(nucleusGroupsToCreate);
+            List<NucleusGroupInput> inputs = toCreate.stream()
+                    .map(NucleusGroupInput::new)
+                    .toList();
+            nucleusClient.createGroups(inputs);
             LOGGER.atTrace()
-                    .setMessage("Created groups for ID: {}")
-                    .addArgument(nucleusGroupsToCreate.stream().map(NucleusGroupInput::externalGroupId).collect(Collectors.joining(",")))
+                    .setMessage("Created groups: {}")
+                    .addArgument(() -> String.join(", ", toCreate))
                     .log();
         }
+
         LOGGER.atDebug()
                 .setMessage("Created {} groups in Nucleus.")
-                .addArgument(nucleusGroupsToCreate.size())
+                .addArgument(toCreate.size())
                 .log();
     }
 }

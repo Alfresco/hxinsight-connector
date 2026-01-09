@@ -96,12 +96,6 @@ public class AlfrescoClient
                 "/people", new TypeReference<AlfrescoPagedResponse<AlfrescoUser>>() {}, "users");
     }
 
-    public List<AlfrescoGroup> getAllGroups()
-    {
-        return fetchAllPagedData(
-                "/groups", new TypeReference<AlfrescoPagedResponse<AlfrescoGroup>>() {}, "groups");
-    }
-
     public List<String> getUserGroups(String userId)
     {
         List<AlfrescoGroup> groups = fetchAllPagedData(

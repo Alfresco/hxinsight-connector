@@ -42,10 +42,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
-import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
 
 @SpringBootTest(classes = GroupMappingSyncProcessor.class)
 public class GroupMappingSyncProcessorIntegrationTest
@@ -60,16 +58,6 @@ public class GroupMappingSyncProcessorIntegrationTest
     void shouldSyncGroupMappingsWithCreatesDeletesAndUnchangedGroups()
     {
         // Given - A scenario with creates, deletes, and unchanged mappings
-        List<AlfrescoGroup> alfrescoGroups = List.of(
-                // new mapping - create
-                new AlfrescoGroup("GROUP_ENGINEERING", "Engineering Team"),
-                // new mapping - create
-                new AlfrescoGroup("GROUP_PRODUCT", "Product Team"),
-                // existing mapping - keep
-                new AlfrescoGroup("GROUP_HR", "Human Resources"),
-                // No user memberships, ignore
-                new AlfrescoGroup("GROUP_EMPTY", "Empty Group"));
-
         List<NucleusGroupOutput> nucleusGroups = List.of(
                 // Existing mapping, keep
                 new NucleusGroupOutput("GROUP_HR"),
@@ -77,16 +65,14 @@ public class GroupMappingSyncProcessorIntegrationTest
                 new NucleusGroupOutput("GROUP_SALES"));
 
         Map<String, List<String>> userGroupMemberships = new HashMap<>();
-        // Users in new groups to create
         userGroupMemberships.put("jdoe", List.of("GROUP_ENGINEERING", "GROUP_PRODUCT"));
         userGroupMemberships.put("bsmith", List.of("GROUP_ENGINEERING"));
         userGroupMemberships.put("mjohnson", List.of("GROUP_PRODUCT", "GROUP_HR"));
-        userGroupMemberships.put("awilliams", List.of("GROUP_DESIGN"));
         // User with null groups
         userGroupMemberships.put("tgarcia", null);
 
         // When
-        List<GroupMapping> result = processor.syncGroupMappings(alfrescoGroups, nucleusGroups, userGroupMemberships);
+        List<String> result = processor.syncGroupMappings(nucleusGroups, userGroupMemberships);
 
         // Then - Verify all deletions happened
         verify(nucleusClient).deleteGroup("GROUP_SALES");
@@ -98,10 +84,7 @@ public class GroupMappingSyncProcessorIntegrationTest
 
         // Then - Verify returned mappings are correct (5 total: 3 new + 2 existing)
         assertThat(result)
-                .containsExactlyInAnyOrder(
-                        new GroupMapping("GROUP_ENGINEERING", "Engineering Team"),
-                        new GroupMapping("GROUP_PRODUCT", "Product Team"),
-                        new GroupMapping("GROUP_HR", "Human Resources"));
+                .containsExactlyInAnyOrder("GROUP_ENGINEERING", "GROUP_PRODUCT", "GROUP_HR");
 
         // Then - Verify exactly 2 interactions (1 deletes, 1 create batch)
         verify(nucleusClient, times(1)).deleteGroup(anyString());
