@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -177,6 +177,14 @@ public class UserGroupMembershipSyncProcessor
         if (!nucleusMembershipsToCreate.isEmpty())
         {
             nucleusClient.assignGroupMembers(nucleusMembershipsToCreate);
+
+            LOGGER.atTrace()
+                    .setMessage("Created memberships in Nucleus: {}")
+                    .addArgument(() -> nucleusMembershipsToCreate.stream()
+                            .map(m -> String.format("user=%s -> group=%s",
+                                    m.memberExternalUserId(), m.externalGroupId()))
+                            .collect(Collectors.joining(",")))
+                    .log();
         }
         LOGGER.atDebug()
                 .setMessage("Assigned {} members to groups in Nucleus.")
@@ -192,6 +200,18 @@ public class UserGroupMembershipSyncProcessor
                     .addArgument(entry.getKey())
                     .log();
         }
+
+        if (!nucleusMembershipsToRemove.isEmpty())
+        {
+            LOGGER.atTrace()
+                    .setMessage("Deleted memberships from Nucleus: {}")
+                    .addArgument(() -> nucleusMembershipsToRemove.entrySet().stream()
+                            .flatMap(e -> e.getValue().stream()
+                                    .map(userId -> String.format("user=%s -> group=%s", userId, e.getKey())))
+                            .collect(Collectors.joining(", ")))
+                    .log();
+        }
+
         LOGGER.atDebug()
                 .setMessage("Deleted {} memberships from Nucleus.")
                 .addArgument(nucleusMembershipsToRemove.size())
