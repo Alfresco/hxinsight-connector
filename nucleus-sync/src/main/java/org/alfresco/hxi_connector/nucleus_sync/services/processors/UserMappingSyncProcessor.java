@@ -136,9 +136,12 @@ public class UserMappingSyncProcessor
         for (String alfrescoUserId : nucleusMappingsToDelete)
         {
             nucleusClient.deleteUserMapping(alfrescoUserId);
+        }
+        if (!nucleusMappingsToDelete.isEmpty())
+        {
             LOGGER.atTrace()
-                    .setMessage("Deleted user {} from nucleus.")
-                    .addArgument(alfrescoUserId)
+                    .setMessage("Deleted user mappings for User ID: {}")
+                    .addArgument(nucleusMappingsToDelete.stream().collect(Collectors.joining(",")))
                     .log();
         }
         LOGGER.atDebug()
