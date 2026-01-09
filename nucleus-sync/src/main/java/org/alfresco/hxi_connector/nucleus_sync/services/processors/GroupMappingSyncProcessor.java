@@ -86,7 +86,7 @@ public class GroupMappingSyncProcessor
                 .addArgument(groupsWithUsers.size())
                 .log();
 
-        return groupsWithUsers.stream().toList();
+        return List.copyOf(groupsWithUsers);
     }
 
     private void executeGroupOperations(List<String> toCreate, List<String> toDelete)
