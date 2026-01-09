@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -94,12 +94,6 @@ public class AlfrescoClient
     {
         return fetchAllPagedData(
                 "/people", new TypeReference<AlfrescoPagedResponse<AlfrescoUser>>() {}, "users");
-    }
-
-    public List<AlfrescoGroup> getAllGroups()
-    {
-        return fetchAllPagedData(
-                "/groups", new TypeReference<AlfrescoPagedResponse<AlfrescoGroup>>() {}, "groups");
     }
 
     public List<String> getUserGroups(String userId)

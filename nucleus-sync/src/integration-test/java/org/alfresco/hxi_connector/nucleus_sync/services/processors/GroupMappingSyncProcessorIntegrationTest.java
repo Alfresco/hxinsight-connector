@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -42,10 +42,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
-import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
 
 @SpringBootTest(classes = GroupMappingSyncProcessor.class)
 public class GroupMappingSyncProcessorIntegrationTest
@@ -57,75 +55,39 @@ public class GroupMappingSyncProcessorIntegrationTest
     private NucleusClient nucleusClient;
 
     @Test
-    void shouldPerformCompleteGroupMappingSyncWithCorrectApiCalls()
+    void shouldSyncGroupMappingsWithCreatesDeletesAndUnchangedGroups()
     {
-        // Given - Realistic scenario with creates, deletes, and unchanged mappings
-        List<AlfrescoGroup> alfrescoGroups = List.of(
-                // new mapping - create
-                new AlfrescoGroup("GROUP_ENGINEERING", "Engineering Team"),
-                // new mapping - create
-                new AlfrescoGroup("GROUP_DESIGN", "Design Team"),
-                // new mapping - create
-                new AlfrescoGroup("GROUP_PRODUCT", "Product Team"),
-                // existing mapping - keep
-                new AlfrescoGroup("GROUP_ADMINISTRATORS", "Administrators"),
-                // existing mapping - keep
-                new AlfrescoGroup("GROUP_HR", "Human Resources"),
-                // No user memberships, ignore
-                new AlfrescoGroup("GROUP_EMPTY", "Empty Group"),
-                // No user memberships, ignore
-                new AlfrescoGroup("GROUP_INACTIVE", "Inactive Group"));
-
+        // Given - A scenario with creates, deletes, and unchanged mappings
         List<NucleusGroupOutput> nucleusGroups = List.of(
                 // Existing mapping, keep
-                new NucleusGroupOutput("GROUP_ADMINISTRATORS"),
-                // Existing mapping, keep
                 new NucleusGroupOutput("GROUP_HR"),
-                // Delete - stale mapping (group removed from alfresco)
-                new NucleusGroupOutput("GROUP_SALES"),
-                // Delete - stale mapping (all users left)
-                new NucleusGroupOutput("GROUP_SUPPORT"),
-                // Delete - stale mapping (orphaned)
-                new NucleusGroupOutput("GROUP_ARCHIVED"));
+                // Delete - group removed from alfresco
+                new NucleusGroupOutput("GROUP_SALES"));
 
         Map<String, List<String>> userGroupMemberships = new HashMap<>();
-        // Users in new groups to create
-        userGroupMemberships.put("jdoe", List.of("GROUP_ENGINEERING", "GROUP_ADMINISTRATORS"));
-        userGroupMemberships.put("bsmith", List.of("GROUP_ENGINEERING", "GROUP_DESIGN"));
+        userGroupMemberships.put("jdoe", List.of("GROUP_ENGINEERING", "GROUP_PRODUCT"));
+        userGroupMemberships.put("bsmith", List.of("GROUP_ENGINEERING"));
         userGroupMemberships.put("mjohnson", List.of("GROUP_PRODUCT", "GROUP_HR"));
-        userGroupMemberships.put("awilliams", List.of("GROUP_DESIGN"));
-        // Users in existing groups to keep
-        userGroupMemberships.put("rbrown", List.of("GROUP_ADMINISTRATORS"));
-        userGroupMemberships.put("sjones", List.of("GROUP_HR", "GROUP_PRODUCT"));
         // User with null groups
         userGroupMemberships.put("tgarcia", null);
 
         // When
-        List<GroupMapping> result = processor.syncGroupMappings(alfrescoGroups, nucleusGroups, userGroupMemberships);
+        List<String> result = processor.syncGroupMappings(nucleusGroups, userGroupMemberships);
 
         // Then - Verify all deletions happened
         verify(nucleusClient).deleteGroup("GROUP_SALES");
-        verify(nucleusClient).deleteGroup("GROUP_SUPPORT");
-        verify(nucleusClient).deleteGroup("GROUP_ARCHIVED");
 
         // Then - Verify creations with correct payload (3 new groups)
-        verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 3 &&
+        verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 2 &&
                 groups.contains(new NucleusGroupInput("GROUP_ENGINEERING")) &&
-                groups.contains(new NucleusGroupInput("GROUP_DESIGN")) &&
                 groups.contains(new NucleusGroupInput("GROUP_PRODUCT"))));
 
         // Then - Verify returned mappings are correct (5 total: 3 new + 2 existing)
         assertThat(result)
-                .hasSize(5)
-                .containsExactlyInAnyOrder(
-                        new GroupMapping("GROUP_ENGINEERING", "Engineering Team"),
-                        new GroupMapping("GROUP_DESIGN", "Design Team"),
-                        new GroupMapping("GROUP_PRODUCT", "Product Team"),
-                        new GroupMapping("GROUP_ADMINISTRATORS", "Administrators"),
-                        new GroupMapping("GROUP_HR", "Human Resources"));
+                .containsExactlyInAnyOrder("GROUP_ENGINEERING", "GROUP_PRODUCT", "GROUP_HR");
 
-        // Then - Verify exactly 4 interactions (3 deletes, 1 create batch)
-        verify(nucleusClient, times(3)).deleteGroup(anyString());
+        // Then - Verify exactly 2 interactions (1 deletes, 1 create batch)
+        verify(nucleusClient, times(1)).deleteGroup(anyString());
         verify(nucleusClient, times(1)).createGroups(anyList());
     }
 }
