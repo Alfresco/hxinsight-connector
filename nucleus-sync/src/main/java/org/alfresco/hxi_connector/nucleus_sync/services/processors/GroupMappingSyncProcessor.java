@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -138,6 +138,13 @@ public class GroupMappingSyncProcessor
         {
             nucleusClient.deleteGroup(alfrescoGroupId);
         }
+        if (!nucleusGroupsToDelete.isEmpty())
+        {
+            LOGGER.atTrace()
+                    .setMessage("Deleted groups with ID: {}")
+                    .addArgument(nucleusGroupsToDelete.stream().collect(Collectors.joining(",")))
+                    .log();
+        }
         LOGGER.atDebug()
                 .setMessage("Deleted {} groups from Nucleus.")
                 .addArgument(nucleusGroupsToDelete.size())
@@ -146,6 +153,10 @@ public class GroupMappingSyncProcessor
         if (!nucleusGroupsToCreate.isEmpty())
         {
             nucleusClient.createGroups(nucleusGroupsToCreate);
+            LOGGER.atTrace()
+                    .setMessage("Created groups for ID: {}")
+                    .addArgument(nucleusGroupsToCreate.stream().map(NucleusGroupInput::externalGroupId).collect(Collectors.joining(",")))
+                    .log();
         }
         LOGGER.atDebug()
                 .setMessage("Created {} groups in Nucleus.")
