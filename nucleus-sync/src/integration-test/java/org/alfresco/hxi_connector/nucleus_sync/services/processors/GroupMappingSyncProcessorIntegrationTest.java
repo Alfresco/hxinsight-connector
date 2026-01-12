@@ -27,10 +27,8 @@ package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.anyList;
-import static org.mockito.Mockito.anyString;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.util.HashMap;
 import java.util.List;
@@ -77,17 +75,16 @@ public class GroupMappingSyncProcessorIntegrationTest
         // Then - Verify all deletions happened
         verify(nucleusClient).deleteGroup("GROUP_SALES");
 
-        // Then - Verify creations with correct payload (3 new groups)
-        verify(nucleusClient).createGroups(argThat(groups -> groups.size() == 2 &&
-                groups.contains(new NucleusGroupInput("GROUP_ENGINEERING")) &&
-                groups.contains(new NucleusGroupInput("GROUP_PRODUCT"))));
+        // Then - Verify creations with correct payload (2 new groups)
+        verify(nucleusClient).createGroups(argThat(groups -> assertThat(groups).containsExactlyInAnyOrder(
+                new NucleusGroupInput("GROUP_ENGINEERING"),
+                new NucleusGroupInput("GROUP_PRODUCT")) != null));
 
-        // Then - Verify returned mappings are correct (5 total: 3 new + 2 existing)
+        // Then - Verify returned mappings are correct (3 total: 2 new + 1 existing)
         assertThat(result)
                 .containsExactlyInAnyOrder("GROUP_ENGINEERING", "GROUP_PRODUCT", "GROUP_HR");
 
         // Then - Verify exactly 2 interactions (1 deletes, 1 create batch)
-        verify(nucleusClient, times(1)).deleteGroup(anyString());
-        verify(nucleusClient, times(1)).createGroups(anyList());
+        verifyNoMoreInteractions(nucleusClient);
     }
 }

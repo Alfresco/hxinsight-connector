@@ -54,15 +54,15 @@ public class GroupMappingSyncProcessor
      *
      * @param currentNucleusGroups
      *            list of groups from nucleus
-     * @param userGroupMembershipsCache
-     *            cache of user and their groups
+     * @param userGroupMemberships
+     *            map of user and their groups
      * @return list of updated group mappings
      */
     public List<String> syncGroupMappings(
             List<NucleusGroupOutput> currentNucleusGroups,
-            Map<String, List<String>> userGroupMembershipsCache)
+            Map<String, List<String>> userGroupMemberships)
     {
-        Set<String> groupsWithUsers = userGroupMembershipsCache.values().stream()
+        Set<String> groupsWithUsers = userGroupMemberships.values().stream()
                 .filter(Objects::nonNull)
                 .flatMap(List::stream)
                 .collect(Collectors.toSet());
