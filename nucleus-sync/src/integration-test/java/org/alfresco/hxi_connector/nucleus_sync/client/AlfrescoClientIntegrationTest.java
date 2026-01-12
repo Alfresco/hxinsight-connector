@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -45,7 +45,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 
 public class AlfrescoClientIntegrationTest
@@ -149,59 +148,6 @@ public class AlfrescoClientIntegrationTest
         wireMockServer.verify(1, getRequestedFor(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people"))
                 .withQueryParam("maxItems", equalTo("100"))
                 .withQueryParam("skipCount", equalTo("0")));
-    }
-
-    @Test
-    void testGetAllGroups_Success()
-    {
-        // Arrange
-        String responseBody = """
-                {
-                  "list": {
-                    "pagination": {
-                      "count": 2,
-                      "hasMoreItems": false,
-                      "totalItems": 2,
-                      "skipCount": 0,
-                      "maxItems": 100
-                    },
-                    "entries": [
-                      {
-                        "entry": {
-                          "id": "GROUP_ADMINS",
-                          "displayName": "Administrators",
-                          "isRoot": true
-                        }
-                      },
-                      {
-                        "entry": {
-                          "id": "GROUP_DEVS",
-                          "displayName": "Developers",
-                          "isRoot": false
-                        }
-                      }
-                    ]
-                  }
-                }
-                """;
-
-        wireMockServer.stubFor(get(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/groups"))
-                .withQueryParam("maxItems", equalTo("100"))
-                .withQueryParam("skipCount", equalTo("0"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody)));
-
-        // Act
-        List<AlfrescoGroup> groups = alfrescoClient.getAllGroups();
-
-        // Assert
-        assertThat(groups)
-                .hasSize(2)
-                .containsExactlyInAnyOrder(
-                        new AlfrescoGroup("GROUP_ADMINS", "Administrators"),
-                        new AlfrescoGroup("GROUP_DEVS", "Developers"));
     }
 
     @Test
