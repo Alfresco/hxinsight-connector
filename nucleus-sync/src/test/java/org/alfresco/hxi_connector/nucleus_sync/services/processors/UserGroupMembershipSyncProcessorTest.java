@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -47,8 +47,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMemberAssignmentInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
-import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
-import org.alfresco.hxi_connector.nucleus_sync.model.UserGroupMembership;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @ExtendWith(MockitoExtension.class)
@@ -68,16 +66,16 @@ class UserGroupMembershipSyncProcessorTest
 
     private UserMapping jdoeMapping;
     private UserMapping asmithMapping;
-    private GroupMapping adminsGroupMapping;
-    private GroupMapping developersGroupMapping;
+    private String adminsGroupMapping;
+    private String developersGroupMapping;
 
     @BeforeEach
     void setUp()
     {
         jdoeMapping = new UserMapping("jane.doe@email.com", "jdoe", "uuid-jdoe");
         asmithMapping = new UserMapping("alice.smith@email.com", "asmith", "uuid-asmith");
-        adminsGroupMapping = new GroupMapping("GROUP_ADMINS", "Admins");
-        developersGroupMapping = new GroupMapping("GROUP_DEVELOPERS", "Developers");
+        adminsGroupMapping = "GROUP_ADMINS";
+        developersGroupMapping = "GROUP_DEVELOPERS";
     }
 
     @Test
@@ -85,14 +83,13 @@ class UserGroupMembershipSyncProcessorTest
     {
         // Given
         List<UserMapping> userMappings = List.of(jdoeMapping);
-        List<GroupMapping> groupMappings = List.of(adminsGroupMapping, developersGroupMapping);
+        List<String> groupMappings = List.of(adminsGroupMapping, developersGroupMapping);
         List<NucleusGroupMembershipOutput> currentNucleusMemberships = List.of();
         Map<String, List<String>> userGroupCache = Map.of(
                 "jdoe", List.of("GROUP_ADMINS", "GROUP_DEVELOPERS"));
 
         // When
-        List<UserGroupMembership> result = processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
 
         // Then
         verify(nucleusClient).assignGroupMembers(assignmentCaptor.capture());
@@ -103,11 +100,6 @@ class UserGroupMembershipSyncProcessorTest
         assertThat(assignments).containsExactlyInAnyOrder(
                 new NucleusGroupMemberAssignmentInput("GROUP_ADMINS", "jdoe"),
                 new NucleusGroupMemberAssignmentInput("GROUP_DEVELOPERS", "jdoe"));
-
-        assertThat(result).hasSize(2);
-        assertThat(result).containsExactlyInAnyOrder(
-                new UserGroupMembership("jdoe", "GROUP_ADMINS", "jane.doe@email.com"),
-                new UserGroupMembership("jdoe", "GROUP_DEVELOPERS", "jane.doe@email.com"));
     }
 
     @Test
@@ -115,7 +107,7 @@ class UserGroupMembershipSyncProcessorTest
     {
         // Given
         List<UserMapping> userMappings = List.of(jdoeMapping);
-        List<GroupMapping> groupMappings = List.of(adminsGroupMapping, developersGroupMapping);
+        List<String> groupMappings = List.of(adminsGroupMapping, developersGroupMapping);
         List<NucleusGroupMembershipOutput> currentNucleusMemberships = List.of(
                 new NucleusGroupMembershipOutput("GROUP_ADMINS", "jdoe"),
                 new NucleusGroupMembershipOutput("GROUP_DEVELOPERS", "jdoe"));
@@ -123,17 +115,13 @@ class UserGroupMembershipSyncProcessorTest
                 "jdoe", List.of("GROUP_ADMINS"));
 
         // When
-        List<UserGroupMembership> result = processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
 
         // Then
         verify(nucleusClient, never()).assignGroupMembers(anyList());
         verify(nucleusClient).removeGroupMembers(eq("GROUP_DEVELOPERS"), removalCaptor.capture());
 
         assertThat(removalCaptor.getValue()).containsExactly("jdoe");
-        assertThat(result).hasSize(1);
-        assertThat(result).containsExactly(
-                new UserGroupMembership("jdoe", "GROUP_ADMINS", "jane.doe@email.com"));
     }
 
     @Test
@@ -141,7 +129,7 @@ class UserGroupMembershipSyncProcessorTest
     {
         // Given
         List<UserMapping> userMappings = List.of(jdoeMapping, asmithMapping);
-        List<GroupMapping> groupMappings = List.of(adminsGroupMapping, developersGroupMapping);
+        List<String> groupMappings = List.of(adminsGroupMapping, developersGroupMapping);
         List<NucleusGroupMembershipOutput> currentNucleusMemberships = List.of(
                 new NucleusGroupMembershipOutput("GROUP_ADMINS", "jdoe"));
         Map<String, List<String>> userGroupCache = Map.of(
@@ -149,8 +137,7 @@ class UserGroupMembershipSyncProcessorTest
                 "asmith", List.of("GROUP_ADMINS"));
 
         // When
-        List<UserGroupMembership> result = processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
 
         // Then
         verify(nucleusClient).assignGroupMembers(assignmentCaptor.capture());
@@ -163,7 +150,6 @@ class UserGroupMembershipSyncProcessorTest
                 new NucleusGroupMemberAssignmentInput("GROUP_ADMINS", "asmith"));
 
         assertThat(removalCaptor.getValue()).containsExactly("jdoe");
-        assertThat(result).hasSize(2);
     }
 
     @Test
@@ -171,14 +157,13 @@ class UserGroupMembershipSyncProcessorTest
     {
         // Given
         List<UserMapping> userMappings = List.of(jdoeMapping);
-        List<GroupMapping> groupMappings = List.of(adminsGroupMapping);
+        List<String> groupMappings = List.of(adminsGroupMapping);
         List<NucleusGroupMembershipOutput> currentNucleusMemberships = List.of();
         Map<String, List<String>> userGroupCache = Map.of(
                 "jdoe", List.of("GROUP_ADMINS", "GROUP_UNTRACKED"));
 
         // When
-        List<UserGroupMembership> result = processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
 
         // Then
         verify(nucleusClient).assignGroupMembers(assignmentCaptor.capture());
@@ -186,7 +171,6 @@ class UserGroupMembershipSyncProcessorTest
         assertThat(assignmentCaptor.getValue()).hasSize(1);
         assertThat(assignmentCaptor.getValue()).containsExactly(
                 new NucleusGroupMemberAssignmentInput("GROUP_ADMINS", "jdoe"));
-        assertThat(result).hasSize(1);
     }
 
     @Test
@@ -194,20 +178,18 @@ class UserGroupMembershipSyncProcessorTest
     {
         // Given
         List<UserMapping> userMappings = List.of(jdoeMapping);
-        List<GroupMapping> groupMappings = List.of(adminsGroupMapping);
+        List<String> groupMappings = List.of(adminsGroupMapping);
         List<NucleusGroupMembershipOutput> currentNucleusMemberships = List.of(
                 new NucleusGroupMembershipOutput("GROUP_ADMINS", "jdoe"));
         Map<String, List<String>> userGroupCache = Map.of(
                 "jdoe", List.of("GROUP_ADMINS"));
 
         // When
-        List<UserGroupMembership> result = processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
 
         // Then
         verify(nucleusClient, never()).assignGroupMembers(anyList());
         verify(nucleusClient, never()).removeGroupMembers(anyString(), anyList());
-        assertThat(result).hasSize(1);
     }
 
     @Test
@@ -215,17 +197,15 @@ class UserGroupMembershipSyncProcessorTest
     {
         // Given
         List<UserMapping> userMappings = List.of();
-        List<GroupMapping> groupMappings = List.of();
+        List<String> groupMappings = List.of();
         List<NucleusGroupMembershipOutput> currentNucleusMemberships = List.of();
         Map<String, List<String>> userGroupCache = Map.of();
 
         // When
-        List<UserGroupMembership> result = processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, groupMappings, currentNucleusMemberships, userGroupCache);
 
         // Then
         verify(nucleusClient, never()).assignGroupMembers(anyList());
         verify(nucleusClient, never()).removeGroupMembers(anyString(), anyList());
-        assertThat(result).isEmpty();
     }
 }

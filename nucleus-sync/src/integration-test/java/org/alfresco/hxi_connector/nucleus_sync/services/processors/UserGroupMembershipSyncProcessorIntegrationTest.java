@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.verify;
 
@@ -41,8 +40,6 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
-import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
-import org.alfresco.hxi_connector.nucleus_sync.model.UserGroupMembership;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @SpringBootTest(classes = UserGroupMembershipSyncProcessor.class)
@@ -59,13 +56,13 @@ class UserGroupMembershipSyncProcessorIntegrationTest
     {
         // Given - 100 users, 10 groups, mixed operations
         List<UserMapping> userMappings = new ArrayList<>();
-        List<GroupMapping> groupMappings = new ArrayList<>();
+        List<String> groupMappings = new ArrayList<>();
         List<NucleusGroupMembershipOutput> currentMemberships = new ArrayList<>();
         Map<String, List<String>> userGroupCache = new HashMap<>();
 
         for (int i = 0; i < 10; i++)
         {
-            groupMappings.add(new GroupMapping("GROUP_" + i, "Group " + i));
+            groupMappings.add("GROUP_" + i);
         }
 
         for (int i = 0; i < 100; i++)
@@ -89,11 +86,9 @@ class UserGroupMembershipSyncProcessorIntegrationTest
         }
 
         // When
-        List<UserGroupMembership> result = processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, groupMappings, currentMemberships, userGroupCache);
 
         // Then
         verify(nucleusClient).assignGroupMembers(any());
-        assertThat(result).hasSize(300); // 100 users * 3 groups each
     }
 }

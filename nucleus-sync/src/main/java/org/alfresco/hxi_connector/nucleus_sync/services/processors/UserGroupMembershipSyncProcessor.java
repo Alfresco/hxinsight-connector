@@ -25,13 +25,10 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
@@ -42,8 +39,6 @@ import org.springframework.stereotype.Service;
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMemberAssignmentInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
-import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
-import org.alfresco.hxi_connector.nucleus_sync.model.UserGroupMembership;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @Service
@@ -62,128 +57,78 @@ public class UserGroupMembershipSyncProcessor
      *            local group mappings
      * @param currentNucleusMemberships
      *            current nucleus memberships
-     * @param userGroupMembershipsCache
+     * @param userGroupMemberships
      *            cache of all user and their groups
      * @return list of user group mapping
      */
-    public List<UserGroupMembership> syncUserGroupMemberships(
+    public void syncUserGroupMemberships(
             List<UserMapping> localUserMappings,
-            List<GroupMapping> localGroupMappings,
+            List<String> localGroupMappings,
             List<NucleusGroupMembershipOutput> currentNucleusMemberships,
-            Map<String, List<String>> userGroupMembershipsCache)
+            Map<String, List<String>> userGroupMemberships)
     {
-        Map<String, GroupMapping> groupMappingByAlfrescoGroupId = localGroupMappings.stream()
-                .collect(
-                        Collectors.toMap(
-                                GroupMapping::alfrescoGroupId, Function.identity()));
+        // lookups
+        Map<String, String> alfUsrEmailByUsrId = localUserMappings.stream()
+                .collect(Collectors.toMap(UserMapping::alfrescoUserId, UserMapping::email));
 
-        List<UserGroupMembership> cachedMemberships = new ArrayList<>();
+        Set<String> syncGrpIds = new HashSet<>(localGroupMappings);
+        Set<String> syncUsrIds = new HashSet<>(alfUsrEmailByUsrId.keySet());
 
-        Map<String, Set<String>> currentNucleusState = buildCurrentNucleusState(currentNucleusMemberships);
+        // desired and current states
+        Set<UserGroupPair> desiredMemberships = calculateDesiredMemberships(syncUsrIds,
+                syncGrpIds, userGroupMemberships);
 
-        Map<String, Set<String>> desiredState = buildDesiredState(
-                localUserMappings,
-                userGroupMembershipsCache,
-                groupMappingByAlfrescoGroupId);
+        Set<UserGroupPair> currentMemberships = currentNucleusMemberships.stream()
+                .map(m -> new UserGroupPair(m.memberExternalUserId(), m.externalGroupId()))
+                .collect(Collectors.toSet());
 
-        List<NucleusGroupMemberAssignmentInput> nucleusMembershipsToCreate = new ArrayList<>();
-        Map<String, List<String>> nucleusMembershipsToDelete = new HashMap<>();
+        // the delta
+        Set<UserGroupPair> mappingsToCreate = new HashSet<>(desiredMemberships);
+        mappingsToCreate.removeAll(currentMemberships);
 
-        for (UserMapping userMapping : localUserMappings)
-        {
-            String alfrescoUserId = userMapping.alfrescoUserId();
+        Set<UserGroupPair> mappingsToDelete = new HashSet<>(currentMemberships);
+        mappingsToCreate.removeAll(desiredMemberships);
 
-            Set<String> desiredGroupsForUser = desiredState.getOrDefault(alfrescoUserId, Set.of());
-
-            Set<String> currentNucleusGroupsForUser = currentNucleusState.getOrDefault(alfrescoUserId, Set.of());
-
-            for (String groupId : desiredGroupsForUser)
-            {
-                cachedMemberships.add(
-                        new UserGroupMembership(alfrescoUserId, groupId, userMapping.email()));
-                if (!currentNucleusGroupsForUser.contains(groupId))
-                {
-                    nucleusMembershipsToCreate.add(
-                            new NucleusGroupMemberAssignmentInput(groupId, alfrescoUserId));
-                }
-            }
-
-            for (String groupId : currentNucleusGroupsForUser)
-            {
-                if (!desiredGroupsForUser.contains(groupId))
-                {
-                    nucleusMembershipsToDelete
-                            .computeIfAbsent(groupId, k -> new ArrayList<>())
-                            .add(alfrescoUserId);
-                }
-            }
-        }
-
-        executeNucleusMembershipBatchOperations(
-                nucleusMembershipsToCreate, nucleusMembershipsToDelete);
+        // execute
+        executeNucleusMembershipOperations(mappingsToCreate, mappingsToDelete);
 
         LOGGER.atDebug()
                 .setMessage("Final user and group membership count: {}")
-                .addArgument(cachedMemberships.size())
+                .addArgument(desiredMemberships.size())
                 .log();
-
-        return cachedMemberships;
     }
 
-    private Map<String, Set<String>> buildCurrentNucleusState(
-            List<NucleusGroupMembershipOutput> currentNucleusMemberships)
+    private Set<UserGroupPair> calculateDesiredMemberships(
+            Set<String> syncedUserIds,
+            Set<String> syncedGroupIds,
+            Map<String, List<String>> userGroupMembershipCache)
     {
-        Map<String, Set<String>> nucleusState = new HashMap<>();
+        return syncedUserIds.stream()
+                .flatMap(userId -> {
+                    List<String> userGroups = userGroupMembershipCache.getOrDefault(userId, List.of());
+                    return userGroups.stream()
+                            .filter(syncedGroupIds::contains)
+                            .map(groupId -> new UserGroupPair(userId, groupId));
 
-        for (NucleusGroupMembershipOutput memberShip : currentNucleusMemberships)
-        {
-            nucleusState
-                    .computeIfAbsent(memberShip.memberExternalUserId(), k -> new HashSet<>())
-                    .add(memberShip.externalGroupId());
-        }
-
-        return nucleusState;
+                }).collect(Collectors.toSet());
     }
 
-    private Map<String, Set<String>> buildDesiredState(
-            List<UserMapping> localUserMappings,
-            Map<String, List<String>> userGroupMembershipsCache,
-            Map<String, GroupMapping> groupMappingByAlfrescoGroupId)
-    {
-        Map<String, Set<String>> desiredState = new HashMap<>();
-
-        for (UserMapping userMapping : localUserMappings)
-        {
-            String alfrescoUserId = userMapping.alfrescoUserId();
-            List<String> alfrescoGroupIds = userGroupMembershipsCache.getOrDefault(alfrescoUserId, List.of());
-
-            Set<String> trackedGroupIds = alfrescoGroupIds.stream()
-                    .filter(groupMappingByAlfrescoGroupId::containsKey)
-                    .collect(Collectors.toSet());
-
-            if (!trackedGroupIds.isEmpty())
-            {
-                desiredState.put(alfrescoUserId, trackedGroupIds);
-            }
-        }
-
-        return desiredState;
-    }
-
-    private void executeNucleusMembershipBatchOperations(
-            List<NucleusGroupMemberAssignmentInput> nucleusMembershipsToCreate,
-            Map<String, List<String>> nucleusMembershipsToRemove)
+    private void executeNucleusMembershipOperations(
+            Set<UserGroupPair> nucleusMembershipsToCreate,
+            Set<UserGroupPair> nucleusMembershipsToRemove)
     {
         if (!nucleusMembershipsToCreate.isEmpty())
         {
-            nucleusClient.assignGroupMembers(nucleusMembershipsToCreate);
+            List<NucleusGroupMemberAssignmentInput> input = nucleusMembershipsToCreate.stream()
+                    .map(pair -> new NucleusGroupMemberAssignmentInput(pair.alfrescoGroupId(), pair.alfresoUserId()))
+                    .toList();
+            nucleusClient.assignGroupMembers(input);
 
             LOGGER.atTrace()
-                    .setMessage("Created memberships in Nucleus: {}")
+                    .setMessage("Created memberships: {}")
                     .addArgument(() -> nucleusMembershipsToCreate.stream()
-                            .map(m -> String.format("user=%s -> group=%s",
-                                    m.memberExternalUserId(), m.externalGroupId()))
-                            .collect(Collectors.joining(",")))
+                            .map(p -> String.format("user=%s -> group=%s", p.alfresoUserId(), p.alfrescoGroupId()))
+                            .collect(Collectors.joining(", ")))
                     .log();
         }
         LOGGER.atDebug()
@@ -191,23 +136,17 @@ public class UserGroupMembershipSyncProcessor
                 .addArgument(nucleusMembershipsToCreate.size())
                 .log();
 
-        for (Map.Entry<String, List<String>> entry : nucleusMembershipsToRemove.entrySet())
-        {
-            nucleusClient.removeGroupMembers(entry.getKey(), entry.getValue());
-            LOGGER.atTrace()
-                    .setMessage("Removed {} members from group {} in Nucleus.")
-                    .addArgument(entry.getValue().size())
-                    .addArgument(entry.getKey())
-                    .log();
-        }
-
         if (!nucleusMembershipsToRemove.isEmpty())
         {
+            Map<String, List<String>> deleteByGroup = nucleusMembershipsToRemove.stream()
+                    .collect(Collectors.groupingBy(UserGroupPair::alfrescoGroupId, Collectors.mapping(UserGroupPair::alfresoUserId, Collectors.toList())));
+            deleteByGroup.forEach((groupId, userIds) -> {
+                nucleusClient.removeGroupMembers(groupId, userIds);
+            });
             LOGGER.atTrace()
-                    .setMessage("Deleted memberships from Nucleus: {}")
-                    .addArgument(() -> nucleusMembershipsToRemove.entrySet().stream()
-                            .flatMap(e -> e.getValue().stream()
-                                    .map(userId -> String.format("user=%s -> group=%s", userId, e.getKey())))
+                    .setMessage("Deleted memberships: {}")
+                    .addArgument(() -> nucleusMembershipsToRemove.stream()
+                            .map(p -> String.format("user=%s -> group=%s", p.alfresoUserId(), p.alfrescoGroupId()))
                             .collect(Collectors.joining(", ")))
                     .log();
         }
@@ -217,4 +156,7 @@ public class UserGroupMembershipSyncProcessor
                 .addArgument(nucleusMembershipsToRemove.size())
                 .log();
     }
+
+    private record UserGroupPair(String alfresoUserId, String alfrescoGroupId)
+    {}
 }
