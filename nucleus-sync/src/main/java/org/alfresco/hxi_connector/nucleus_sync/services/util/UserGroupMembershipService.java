@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.services.cache;
+package org.alfresco.hxi_connector.nucleus_sync.services.util;
 
 import java.time.Duration;
 import java.util.List;
@@ -46,15 +46,15 @@ import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @Service
-public class UserGroupCacheService
+public class UserGroupMembershipService
 {
     private final AlfrescoClient alfrescoClient;
     private final Duration fetchTimeout;
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupCacheService.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupMembershipService.class);
     // size is 2x CPU cores to maximize throughput during network wait times
     private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
-    public UserGroupCacheService(
+    public UserGroupMembershipService(
             AlfrescoClient alfrescoClient,
             @Value("${alfresco.user-group.fetch-timeout:PT5M}") Duration fetchTimeout)
     {
@@ -63,7 +63,7 @@ public class UserGroupCacheService
     }
 
     /**
-     * Creates a 'cache' of users and their corresponding groups from alfresco.
+     * Creates a 'user-group-membership-map' of users and their corresponding groups from alfresco.
      *
      * @param localUserMappings
      *            the List of user mappings
@@ -71,10 +71,10 @@ public class UserGroupCacheService
      * @throws UserGroupFetchException
      *             if any user's group fetch fails, or if timeout occurs
      */
-    public Map<String, List<String>> fetchUserGroups(List<UserMapping> localUserMappings)
+    public Map<String, List<String>> buildUserGroupMemberships(List<UserMapping> localUserMappings)
     {
         LOGGER.atInfo()
-                .setMessage("Building user-group membership cache for {} users")
+                .setMessage("Building user-group membership membership for {} users")
                 .addArgument(localUserMappings.size())
                 .log();
 
@@ -106,18 +106,18 @@ public class UserGroupCacheService
 
             allFutures.orTimeout(fetchTimeout.toMillis(), TimeUnit.MILLISECONDS).join();
 
-            Map<String, List<String>> cache = new ConcurrentHashMap<>();
+            Map<String, List<String>> memberships = new ConcurrentHashMap<>();
             for (Map.Entry<String, CompletableFuture<List<String>>> entry : futures.entrySet())
             {
-                cache.put(entry.getKey(), entry.getValue().join());
+                memberships.put(entry.getKey(), entry.getValue().join());
             }
 
             LOGGER.atInfo()
-                    .setMessage("Successfully built user-group membership cache for {} users")
-                    .addArgument(cache.size())
+                    .setMessage("Successfully built user-group membership membership for {} users")
+                    .addArgument(memberships.size())
                     .log();
 
-            return cache;
+            return memberships;
         }
         catch (CompletionException e)
         {

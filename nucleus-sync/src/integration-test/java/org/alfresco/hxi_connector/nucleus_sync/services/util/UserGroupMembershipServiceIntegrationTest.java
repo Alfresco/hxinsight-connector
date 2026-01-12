@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.services.cache;
+package org.alfresco.hxi_connector.nucleus_sync.services.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -44,14 +44,14 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
-@SpringBootTest(classes = UserGroupCacheService.class)
-class UserGroupCacheServiceIntegrationTest
+@SpringBootTest(classes = UserGroupMembershipService.class)
+class UserGroupMembershipServiceIntegrationTest
 {
     @MockitoBean
     private AlfrescoClient alfrescoClient;
 
     @Autowired
-    private UserGroupCacheService service;
+    private UserGroupMembershipService service;
 
     @Test
     void shouldProcessMultipleUsersInParallel() throws InterruptedException
@@ -77,7 +77,7 @@ class UserGroupCacheServiceIntegrationTest
         });
 
         // When
-        Map<String, List<String>> result = service.fetchUserGroups(users);
+        Map<String, List<String>> result = service.buildUserGroupMemberships(users);
 
         // Then
         assertThat(latch.await(5, TimeUnit.SECONDS)).isTrue();
