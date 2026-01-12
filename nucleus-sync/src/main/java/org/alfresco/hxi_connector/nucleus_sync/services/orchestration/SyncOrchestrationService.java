@@ -39,18 +39,16 @@ import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
-import org.alfresco.hxi_connector.nucleus_sync.model.GroupMapping;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
-import org.alfresco.hxi_connector.nucleus_sync.services.cache.UserGroupCacheService;
 import org.alfresco.hxi_connector.nucleus_sync.services.processors.GroupMappingSyncProcessor;
 import org.alfresco.hxi_connector.nucleus_sync.services.processors.UserGroupMembershipSyncProcessor;
 import org.alfresco.hxi_connector.nucleus_sync.services.processors.UserMappingSyncProcessor;
+import org.alfresco.hxi_connector.nucleus_sync.services.util.UserGroupMembershipService;
 
 @Service
 @RequiredArgsConstructor
@@ -58,7 +56,7 @@ public class SyncOrchestrationService
 {
     private final AlfrescoClient alfrescoClient;
     private final NucleusClient nucleusClient;
-    private final UserGroupCacheService cacheBuilderService;
+    private final UserGroupMembershipService cacheBuilderService;
     private final UserMappingSyncProcessor userMappingSyncProcessor;
     private final GroupMappingSyncProcessor groupMappingSyncProcessor;
     private final UserGroupMembershipSyncProcessor userGroupMembershipSyncProcessor;
@@ -187,7 +185,7 @@ public class SyncOrchestrationService
         Map<String, List<String>> userGroupMembershipCache;
         try
         {
-            userGroupMembershipCache = cacheBuilderService.fetchUserGroups(updatedUserMappings);
+            userGroupMembershipCache = cacheBuilderService.buildUserGroupMemberships(updatedUserMappings);
             result.append("Fresh cache build: SUCCESS. ");
             LOGGER.atDebug()
                     .setMessage("Fresh user-group membership cache built successfully.");
@@ -205,11 +203,10 @@ public class SyncOrchestrationService
         }
 
         // Sync Groups
-        List<GroupMapping> updatedGroupMappings;
+        List<String> updatedGroupMappings;
         try
         {
             updatedGroupMappings = groupMappingSyncProcessor.syncGroupMappings(
-                    systemData.alfrescoGroups,
                     systemData.currentNucleusGroups,
                     userGroupMembershipCache);
             result.append("Group sync: SUCCESS. ");
@@ -261,7 +258,6 @@ public class SyncOrchestrationService
         try
         {
             data.alfrescoUsers = alfrescoClient.getAllUsers();
-            data.alfrescoGroups = alfrescoClient.getAllGroups();
             data.alfrescoAvailable = true;
             updateAlfrescoStatus("HEALTHY", LocalDateTime.now());
             result.append("Alfresco: SUCCESS. ");
@@ -269,16 +265,11 @@ public class SyncOrchestrationService
                     .setMessage("Found {} alfresco users.")
                     .addArgument(data.alfrescoUsers.size())
                     .log();
-            LOGGER.atDebug()
-                    .setMessage("Found {} alfresco groups.")
-                    .addArgument(data.alfrescoGroups.size())
-                    .log();
         }
         catch (Exception e)
         {
             data.alfrescoAvailable = false;
             data.alfrescoUsers = new ArrayList<>();
-            data.alfrescoGroups = new ArrayList<>();
             updateAlfrescoStatus("UNAVAILABLE: " + e.getMessage(), LocalDateTime.now());
             result.append("Alfresco: FAILED. ");
             LOGGER.atError()
@@ -385,7 +376,6 @@ public class SyncOrchestrationService
         boolean alfrescoAvailable = false;
         boolean nucleusAvailable = false;
         List<AlfrescoUser> alfrescoUsers = new ArrayList<>();
-        List<AlfrescoGroup> alfrescoGroups = new ArrayList<>();
         List<IamUser> nucleusIamUsers = new ArrayList<>();
         List<NucleusUserMappingOutput> currentUserMappings = new ArrayList<>();
         List<NucleusGroupOutput> currentNucleusGroups = new ArrayList<>();
