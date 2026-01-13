@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.services.cache;
+package org.alfresco.hxi_connector.nucleus_sync.services.util;
 
 public class UserGroupFetchException extends RuntimeException
 {

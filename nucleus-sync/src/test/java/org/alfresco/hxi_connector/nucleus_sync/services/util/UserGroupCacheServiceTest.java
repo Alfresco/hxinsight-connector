@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.services.cache;
+package org.alfresco.hxi_connector.nucleus_sync.services.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,14 +51,14 @@ class UserGroupCacheServiceTest
     @Mock
     private AlfrescoClient alfrescoClient;
 
-    private UserGroupCacheService service;
+    private UserGroupMembershipService service;
 
     private static final int FETCH_TIMEOUT_SEC = 2;
 
     @BeforeEach
     void setUp()
     {
-        service = new UserGroupCacheService(alfrescoClient, Duration.ofSeconds(FETCH_TIMEOUT_SEC));
+        service = new UserGroupMembershipService(alfrescoClient, Duration.ofSeconds(FETCH_TIMEOUT_SEC));
     }
 
     @Test
@@ -75,7 +75,7 @@ class UserGroupCacheServiceTest
                 .thenReturn(List.of("GROUP_MARKETING"));
 
         // When
-        Map<String, List<String>> result = service.fetchUserGroups(users);
+        Map<String, List<String>> result = service.buildUserGroupMemberships(users);
 
         // Then
         assertThat(result)
@@ -104,7 +104,7 @@ class UserGroupCacheServiceTest
                 .thenReturn(List.of("GROUP_SALES"));
 
         // When/Then
-        assertThatThrownBy(() -> service.fetchUserGroups(users))
+        assertThatThrownBy(() -> service.buildUserGroupMemberships(users))
                 .isInstanceOf(RuntimeException.class)
                 .hasMessageContaining("Failed to fetch groups for user: jsmith")
                 .hasCauseInstanceOf(RuntimeException.class);
@@ -123,7 +123,7 @@ class UserGroupCacheServiceTest
         });
 
         // When/Then
-        assertThatThrownBy(() -> service.fetchUserGroups(users))
+        assertThatThrownBy(() -> service.buildUserGroupMemberships(users))
                 .isInstanceOf(UserGroupFetchException.class)
                 .hasCauseInstanceOf(CompletionException.class)
                 .hasRootCauseInstanceOf(TimeoutException.class);
