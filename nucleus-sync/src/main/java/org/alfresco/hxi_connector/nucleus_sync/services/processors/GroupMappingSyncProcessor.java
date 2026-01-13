@@ -31,9 +31,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
@@ -41,11 +41,18 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
 
 @Service
-@RequiredArgsConstructor
 public class GroupMappingSyncProcessor
 {
     private final NucleusClient nucleusClient;
+    private final int createBatchSize;
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupMappingSyncProcessor.class);
+
+    public GroupMappingSyncProcessor(NucleusClient nucleusClient,
+            @Value("${alfresco.sync-batch-size:1000}") int createBatchSize)
+    {
+        this.nucleusClient = nucleusClient;
+        this.createBatchSize = createBatchSize;
+    }
 
     /**
      * Performs group sync operation with nucleus.
@@ -106,10 +113,17 @@ public class GroupMappingSyncProcessor
 
         if (!toCreate.isEmpty())
         {
-            List<NucleusGroupInput> inputs = toCreate.stream()
-                    .map(NucleusGroupInput::new)
-                    .toList();
-            nucleusClient.createGroups(inputs);
+            for (int i = 0; i < toCreate.size(); i += createBatchSize)
+            {
+                int endIndex = Math.min(i + createBatchSize, toCreate.size());
+                List<String> batch = toCreate.subList(i, endIndex);
+
+                List<NucleusGroupInput> inputs = batch.stream()
+                        .map(NucleusGroupInput::new)
+                        .toList();
+                nucleusClient.createGroups(inputs);
+            }
+
             LOGGER.atTrace()
                     .setMessage("Created groups: {}")
                     .addArgument(() -> String.join(", ", toCreate))

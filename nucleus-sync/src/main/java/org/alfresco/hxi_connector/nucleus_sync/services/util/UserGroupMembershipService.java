@@ -123,7 +123,11 @@ public class UserGroupMembershipService
         {
             if (e.getCause() instanceof TimeoutException)
             {
-                LOGGER.error("Timeout fetching user groups after {} seconds", fetchTimeout.getSeconds());
+                LOGGER.atError()
+                        .setMessage("Timeout fetching user groups after {} seconds")
+                        .addArgument(fetchTimeout.getSeconds())
+                        .setCause(e)
+                        .log();
                 throw new UserGroupFetchException(
                         "Timeout fetching user groups after " + fetchTimeout.getSeconds() + " seconds", e);
             }

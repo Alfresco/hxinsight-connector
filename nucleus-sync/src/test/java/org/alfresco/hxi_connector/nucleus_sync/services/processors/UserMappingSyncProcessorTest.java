@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -36,9 +36,9 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -54,8 +54,13 @@ public class UserMappingSyncProcessorTest
     @Mock
     private NucleusClient nucleusClient;
 
-    @InjectMocks
     private UserMappingSyncProcessor processor;
+
+    @BeforeEach
+    void setUp()
+    {
+        processor = new UserMappingSyncProcessor(nucleusClient, 1000);
+    }
 
     @Test
     void shouldIgnoreAlfrescoUsersWithInvalidEmail()
@@ -119,5 +124,27 @@ public class UserMappingSyncProcessorTest
         // Then - Verify single batch call with all mappings
         verify(nucleusClient, times(1)).createUserMappings(argThat(mappings -> mappings.size() == 3));
         verify(nucleusClient, never()).deleteUserMapping(any());
+    }
+
+    @Test
+    void shouldHandleExactBatchSizeMultiple()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = new ArrayList<>();
+        List<IamUser> nucleusUsers = new ArrayList<>();
+
+        for (int i = 0; i < 2000; i++)
+        {
+            String email = "user" + i + "@email.com";
+            alfrescoUsers.add(new AlfrescoUser("user" + i, email, true, "User", "Name" + i, "User Name" + i));
+            nucleusUsers.add(new IamUser(email, "uuid-" + i, email));
+        }
+
+        // When
+        processor.syncUserMappings(alfrescoUsers, nucleusUsers, new ArrayList<>());
+
+        // Then
+        verify(nucleusClient, times(2))
+                .createUserMappings(argThat(mappings -> mappings.size() == 1000));
     }
 }

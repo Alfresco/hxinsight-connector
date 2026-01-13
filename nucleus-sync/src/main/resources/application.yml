@@ -36,6 +36,7 @@ auth:
 alfresco:
   base-url: ${ALFRESCO_BASE_URL}
   page-size: 100
+  sync-batch-size: 1000
   user-group:
     fetch-timeout: PT5M
 

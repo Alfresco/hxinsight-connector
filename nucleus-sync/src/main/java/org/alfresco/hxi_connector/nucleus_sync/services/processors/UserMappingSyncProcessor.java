@@ -33,9 +33,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
@@ -46,11 +46,18 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @Service
-@RequiredArgsConstructor
 public class UserMappingSyncProcessor
 {
     private final NucleusClient nucleusClient;
+    private final int createBatchSize;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserMappingSyncProcessor.class);
+
+    public UserMappingSyncProcessor(NucleusClient nucleusClient,
+            @Value("${alfresco.sync-batch-size:1000}") int createBatchSize)
+    {
+        this.nucleusClient = nucleusClient;
+        this.createBatchSize = createBatchSize;
+    }
 
     /**
      * Sync alfresco and nucleus user mappings
@@ -151,11 +158,19 @@ public class UserMappingSyncProcessor
 
         if (!nucleusMappingsToCreate.isEmpty())
         {
-            nucleusClient.createUserMappings(nucleusMappingsToCreate);
+            for (int i = 0; i < nucleusMappingsToCreate.size(); i += createBatchSize)
+            {
+                int endIndex = Math.min(i + createBatchSize, nucleusMappingsToCreate.size());
+                List<NucleusUserMappingInput> batch = nucleusMappingsToCreate.subList(i, endIndex);
+
+                nucleusClient.createUserMappings(batch);
+            }
 
             LOGGER.atTrace()
                     .setMessage("Created user mappings for user ID: {}")
-                    .addArgument(nucleusMappingsToCreate.stream().map(NucleusUserMappingInput::userId).collect(Collectors.joining(",")))
+                    .addArgument(nucleusMappingsToCreate.stream()
+                            .map(NucleusUserMappingInput::userId)
+                            .collect(Collectors.joining(",")))
                     .log();
         }
         LOGGER.atDebug()
