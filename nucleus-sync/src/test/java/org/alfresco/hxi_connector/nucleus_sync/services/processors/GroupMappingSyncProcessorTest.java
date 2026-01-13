@@ -67,7 +67,6 @@ public class GroupMappingSyncProcessorTest
         for (int i = 0; i < 2000; i++)
         {
             String groupId = "group-" + i;
-            // Each user belongs to one unique group
             userGroupMemberships.put("user-" + i, List.of(groupId));
         }
 
