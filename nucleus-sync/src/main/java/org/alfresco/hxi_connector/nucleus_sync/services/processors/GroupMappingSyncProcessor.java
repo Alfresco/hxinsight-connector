@@ -123,6 +123,7 @@ public class GroupMappingSyncProcessor
                         .toList();
                 nucleusClient.createGroups(inputs);
             }
+
             LOGGER.atTrace()
                     .setMessage("Created groups: {}")
                     .addArgument(() -> String.join(", ", toCreate))
