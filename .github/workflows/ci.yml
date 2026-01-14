@@ -125,7 +125,7 @@ jobs:
             jacoco:report \
             -Djacoco.destFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec \
       - name: "Upload coverage data"
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         if: >
           github.actor != 'dependabot[bot]' &&
           github.ref_name != 'master' &&
@@ -187,7 +187,7 @@ jobs:
           env:
             WORKSPACE: ${{ github.workspace }}
         - name: "Upload coverage report"
-          uses: actions/upload-artifact@v5
+          uses: actions/upload-artifact@v6
           with:
             name: jacoco-coverage-report
             path: |
