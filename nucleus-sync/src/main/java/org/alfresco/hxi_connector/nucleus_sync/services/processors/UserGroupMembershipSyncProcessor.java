@@ -68,7 +68,6 @@ public class UserGroupMembershipSyncProcessor
      *            current nucleus memberships
      * @param userGroupMemberships
      *            cache of all user and their groups
-     * @return list of user group mapping
      */
     public void syncUserGroupMemberships(
             List<UserMapping> localUserMappings,
@@ -96,7 +95,7 @@ public class UserGroupMembershipSyncProcessor
         mappingsToCreate.removeAll(currentMemberships);
 
         Set<UserGroupPair> mappingsToDelete = new HashSet<>(currentMemberships);
-        mappingsToCreate.removeAll(desiredMemberships);
+        mappingsToDelete.removeAll(desiredMemberships);
 
         // execute
         executeNucleusMembershipOperations(mappingsToCreate, mappingsToDelete);
