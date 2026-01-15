@@ -25,15 +25,16 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
@@ -42,11 +43,19 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @Service
-@RequiredArgsConstructor
 public class UserGroupMembershipSyncProcessor
 {
     private final NucleusClient nucleusClient;
+    private final int createBatchSize;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupMembershipSyncProcessor.class);
+
+    public UserGroupMembershipSyncProcessor(
+            NucleusClient nucleusClient,
+            @Value("${alfresco.sync-batch-size:1000}") int createBatchSize)
+    {
+        this.nucleusClient = nucleusClient;
+        this.createBatchSize = createBatchSize;
+    }
 
     /**
      * Performs user group mappings with nucleus.
@@ -59,7 +68,6 @@ public class UserGroupMembershipSyncProcessor
      *            current nucleus memberships
      * @param userGroupMemberships
      *            cache of all user and their groups
-     * @return list of user group mapping
      */
     public void syncUserGroupMemberships(
             List<UserMapping> localUserMappings,
@@ -87,7 +95,7 @@ public class UserGroupMembershipSyncProcessor
         mappingsToCreate.removeAll(currentMemberships);
 
         Set<UserGroupPair> mappingsToDelete = new HashSet<>(currentMemberships);
-        mappingsToCreate.removeAll(desiredMemberships);
+        mappingsToDelete.removeAll(desiredMemberships);
 
         // execute
         executeNucleusMembershipOperations(mappingsToCreate, mappingsToDelete);
@@ -119,10 +127,19 @@ public class UserGroupMembershipSyncProcessor
     {
         if (!nucleusMembershipsToCreate.isEmpty())
         {
-            List<NucleusGroupMemberAssignmentInput> input = nucleusMembershipsToCreate.stream()
-                    .map(pair -> new NucleusGroupMemberAssignmentInput(pair.alfrescoGroupId(), pair.alfresoUserId()))
-                    .toList();
-            nucleusClient.assignGroupMembers(input);
+            List<UserGroupPair> membershipsList = new ArrayList<>(nucleusMembershipsToCreate);
+
+            for (int i = 0; i < nucleusMembershipsToCreate.size(); i += createBatchSize)
+            {
+                int endIndex = Math.min(i + createBatchSize, nucleusMembershipsToCreate.size());
+                List<UserGroupPair> batch = membershipsList.subList(i, endIndex);
+
+                List<NucleusGroupMemberAssignmentInput> input = batch.stream()
+                        .map(pair -> new NucleusGroupMemberAssignmentInput(
+                                pair.alfrescoGroupId(), pair.alfresoUserId()))
+                        .toList();
+                nucleusClient.assignGroupMembers(input);
+            }
 
             LOGGER.atTrace()
                     .setMessage("Created memberships: {}")
@@ -139,7 +156,9 @@ public class UserGroupMembershipSyncProcessor
         if (!nucleusMembershipsToRemove.isEmpty())
         {
             Map<String, List<String>> deleteByGroup = nucleusMembershipsToRemove.stream()
-                    .collect(Collectors.groupingBy(UserGroupPair::alfrescoGroupId, Collectors.mapping(UserGroupPair::alfresoUserId, Collectors.toList())));
+                    .collect(Collectors.groupingBy(
+                            UserGroupPair::alfrescoGroupId,
+                            Collectors.mapping(UserGroupPair::alfresoUserId, Collectors.toList())));
             deleteByGroup.forEach((groupId, userIds) -> {
                 nucleusClient.removeGroupMembers(groupId, userIds);
             });

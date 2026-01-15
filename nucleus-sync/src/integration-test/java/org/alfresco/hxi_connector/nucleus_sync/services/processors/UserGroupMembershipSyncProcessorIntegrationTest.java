@@ -25,25 +25,28 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
-import static org.mockito.Mockito.any;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.argThat;
+import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMemberAssignmentInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @SpringBootTest(classes = UserGroupMembershipSyncProcessor.class)
-class UserGroupMembershipSyncProcessorIntegrationTest
+public class UserGroupMembershipSyncProcessorIntegrationTest
 {
     @MockitoBean
     private NucleusClient nucleusClient;
@@ -51,44 +54,53 @@ class UserGroupMembershipSyncProcessorIntegrationTest
     @Autowired
     private UserGroupMembershipSyncProcessor processor;
 
+    @Captor
+    private ArgumentCaptor<List<NucleusGroupMemberAssignmentInput>> assignmentCaptor;
+
     @Test
-    void shouldHandleLargeScaleSynchronization()
+    void shouldSyncMembershipsWithCreatesDeletesAndUnchanged()
     {
-        // Given - 100 users, 10 groups, mixed operations
-        List<UserMapping> userMappings = new ArrayList<>();
-        List<String> groupMappings = new ArrayList<>();
-        List<NucleusGroupMembershipOutput> currentMemberships = new ArrayList<>();
-        Map<String, List<String>> userGroupCache = new HashMap<>();
+        // Given
+        List<UserMapping> userMappings = List.of(
+                new UserMapping("alice@email.com", "alice", "uuid-alice"),
+                new UserMapping("bob@email.com", "bob", "uuid-bob"),
+                new UserMapping("charlie@email.com", "charlie", "uuid-charlie"));
 
-        for (int i = 0; i < 10; i++)
-        {
-            groupMappings.add("GROUP_" + i);
-        }
+        List<String> groupMappings = List.of(
+                "GROUP_ADMINS",
+                "GROUP_DEVELOPERS",
+                "GROUP_DESIGNERS");
 
-        for (int i = 0; i < 100; i++)
-        {
-            String userId = "user" + i;
-            userMappings.add(new UserMapping(userId + "@email.com", userId, "uuid-" + i));
+        // Current state in Nucleus:
+        // - alice - ADMINS
+        // - bob - DEVELOPERS
+        List<NucleusGroupMembershipOutput> currentMemberships = List.of(
+                new NucleusGroupMembershipOutput("GROUP_ADMINS", "alice"),
+                new NucleusGroupMembershipOutput("GROUP_DEVELOPERS", "bob"));
 
-            // Each user belongs to 3 random groups
-            List<String> groups = new ArrayList<>();
-            for (int j = 0; j < 3; j++)
-            {
-                groups.add("GROUP_" + ((i + j) % 10));
-            }
-            userGroupCache.put(userId, groups);
-
-            // Half have existing memberships (some correct, some to remove)
-            if (i % 2 == 0)
-            {
-                currentMemberships.add(new NucleusGroupMembershipOutput("GROUP_" + (i % 10), userId));
-            }
-        }
+        // Desired state from Alfresco:
+        // - alice should be in DEVELOPERS (chnage of group)
+        // - bob should be in DEVELOPERS (unchanged)
+        // - charlie should be in DESIGNERS (new user)
+        Map<String, List<String>> userGroupCache = Map.of(
+                "alice", List.of("GROUP_DEVELOPERS"),
+                "bob", List.of("GROUP_DEVELOPERS"),
+                "charlie", List.of("GROUP_DESIGNERS"));
 
         // When
-        processor.syncUserGroupMemberships(userMappings, groupMappings, currentMemberships, userGroupCache);
+        processor.syncUserGroupMemberships(
+                userMappings, groupMappings, currentMemberships, userGroupCache);
 
         // Then
-        verify(nucleusClient).assignGroupMembers(any());
+        verify(nucleusClient).assignGroupMembers(assignmentCaptor.capture());
+        assertThat(assignmentCaptor.getValue())
+                .containsExactlyInAnyOrder(
+                        new NucleusGroupMemberAssignmentInput("GROUP_DEVELOPERS", "alice"),
+                        new NucleusGroupMemberAssignmentInput("GROUP_DESIGNERS", "charlie"));
+
+        // Then
+        verify(nucleusClient).removeGroupMembers(
+                eq("GROUP_ADMINS"),
+                argThat(users -> users.size() == 1 && users.contains("alice")));
     }
 }
