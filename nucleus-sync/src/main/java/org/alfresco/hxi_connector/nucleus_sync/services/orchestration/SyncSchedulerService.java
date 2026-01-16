@@ -32,6 +32,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.SyncException;
+import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.SyncInProgressException;
+
 @Service
 @RequiredArgsConstructor
 public class SyncSchedulerService
@@ -47,6 +50,9 @@ public class SyncSchedulerService
     {
         if (!syncEnabled)
         {
+            LOGGER.atDebug()
+                    .setMessage("Scheduled sync skipped - sync disabled")
+                    .log();
             return;
         }
 
@@ -56,26 +62,22 @@ public class SyncSchedulerService
         try
         {
             String result = syncOrchestrationService.performFullSync();
-            if (result.contains("already in progress"))
-            {
-                LOGGER.atWarn()
-                        .setMessage("Scheduled sync skipped - previous sync still running")
-                        .log();
-            }
-            else
-            {
-                LOGGER.atInfo()
-                        .setMessage("Scheduled sync completed: {}")
-                        .addArgument(result)
-                        .log();
-            }
+            LOGGER.atInfo()
+                    .setMessage("Scheduled sync completed: {}")
+                    .addArgument(result)
+                    .log();
         }
-        catch (Exception e)
+        catch (SyncInProgressException e)
         {
-            LOGGER.atError()
-                    .setMessage("Scheduled sync failed: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
+            LOGGER.atWarn()
+                    .setMessage("Scheduled sync skipped - previous sync still running")
+                    .log();
+            ;
+        }
+        catch (SyncException e)
+        {
+            LOGGER.atWarn()
+                    .setMessage("Scheduled sync failed - see previous logs for details")
                     .log();
         }
     }
