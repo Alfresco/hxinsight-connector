@@ -1,3 +1,7 @@
+sync:
+  enabled: true
+  cron.expression: "0 0 0 * * *"
+
 alfresco:
   base-url: test-alfresco-base-url
   page-size: 100
