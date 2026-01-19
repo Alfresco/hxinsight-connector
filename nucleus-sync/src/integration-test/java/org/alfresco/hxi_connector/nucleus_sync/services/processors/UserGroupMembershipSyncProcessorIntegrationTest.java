@@ -26,12 +26,13 @@
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.argThat;
-import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -57,6 +58,12 @@ public class UserGroupMembershipSyncProcessorIntegrationTest
     @Captor
     private ArgumentCaptor<List<NucleusGroupMemberAssignmentInput>> assignmentCaptor;
 
+    @Captor
+    private ArgumentCaptor<String> groupIdCaptor;
+
+    @Captor
+    private ArgumentCaptor<List<String>> userIdsCaptor;
+
     @Test
     void shouldSyncMembershipsWithCreatesDeletesAndUnchanged()
     {
@@ -64,7 +71,8 @@ public class UserGroupMembershipSyncProcessorIntegrationTest
         List<UserMapping> userMappings = List.of(
                 new UserMapping("alice@email.com", "alice", "uuid-alice"),
                 new UserMapping("bob@email.com", "bob", "uuid-bob"),
-                new UserMapping("charlie@email.com", "charlie", "uuid-charlie"));
+                new UserMapping("charlie@email.com", "charlie", "uuid-charlie"),
+                new UserMapping("dave@email.com", "dave", "uuid-dave"));
 
         List<String> groupMappings = List.of(
                 "GROUP_ADMINS",
@@ -74,33 +82,52 @@ public class UserGroupMembershipSyncProcessorIntegrationTest
         // Current state in Nucleus:
         // - alice - ADMINS
         // - bob - DEVELOPERS
+        // - dave - ADMINS, DEVELOPERS
         List<NucleusGroupMembershipOutput> currentMemberships = List.of(
                 new NucleusGroupMembershipOutput("GROUP_ADMINS", "alice"),
-                new NucleusGroupMembershipOutput("GROUP_DEVELOPERS", "bob"));
+                new NucleusGroupMembershipOutput("GROUP_DEVELOPERS", "bob"),
+                new NucleusGroupMembershipOutput("GROUP_ADMINS", "dave"),
+                new NucleusGroupMembershipOutput("GROUP_DEVELOPERS", "dave"));
 
         // Desired state from Alfresco:
         // - alice should be in DEVELOPERS (chnage of group)
         // - bob should be in DEVELOPERS (unchanged)
-        // - charlie should be in DESIGNERS (new user)
-        Map<String, List<String>> userGroupCache = Map.of(
+        // - charlie should be in DESIGNERS and DEVELOPERS (new user, multiple groups)
+        // - dave should be removed from all group
+        Map<String, List<String>> userGroupMap = Map.of(
                 "alice", List.of("GROUP_DEVELOPERS"),
                 "bob", List.of("GROUP_DEVELOPERS"),
-                "charlie", List.of("GROUP_DESIGNERS"));
+                "charlie", List.of("GROUP_DESIGNERS", "GROUP_DEVELOPERS"));
+        // dave not in cache - removed from all groups
 
         // When
         processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentMemberships, userGroupCache);
+                userMappings, groupMappings, currentMemberships, userGroupMap);
 
         // Then
         verify(nucleusClient).assignGroupMembers(assignmentCaptor.capture());
         assertThat(assignmentCaptor.getValue())
                 .containsExactlyInAnyOrder(
                         new NucleusGroupMemberAssignmentInput("GROUP_DEVELOPERS", "alice"),
-                        new NucleusGroupMemberAssignmentInput("GROUP_DESIGNERS", "charlie"));
+                        new NucleusGroupMemberAssignmentInput("GROUP_DESIGNERS", "charlie"),
+                        new NucleusGroupMemberAssignmentInput("GROUP_DEVELOPERS", "charlie"));
 
-        // Then
-        verify(nucleusClient).removeGroupMembers(
-                eq("GROUP_ADMINS"),
-                argThat(users -> users.size() == 1 && users.contains("alice")));
+        // Then - verify removals
+        verify(nucleusClient, times(2)).removeGroupMembers(
+                groupIdCaptor.capture(),
+                userIdsCaptor.capture());
+
+        // Build a map for easier verification
+        Map<String, List<String>> removalsByGroup = IntStream.range(0, groupIdCaptor.getAllValues().size())
+                .boxed()
+                .collect(Collectors.toMap(
+                        i -> groupIdCaptor.getAllValues().get(i),
+                        i -> userIdsCaptor.getAllValues().get(i)));
+
+        // Verify removals
+        assertThat(removalsByGroup.get("GROUP_ADMINS"))
+                .containsExactlyInAnyOrder("alice", "dave");
+        assertThat(removalsByGroup.get("GROUP_DEVELOPERS"))
+                .containsExactly("dave");
     }
 }
