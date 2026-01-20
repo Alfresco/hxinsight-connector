@@ -76,7 +76,6 @@ public class SyncSchedulerService
             LOGGER.atWarn()
                     .setMessage("Scheduled sync skipped - previous sync still running")
                     .log();
-            ;
         }
         catch (SyncException e)
         {
