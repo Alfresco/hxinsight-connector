@@ -62,16 +62,13 @@ public class UserGroupMembershipSyncProcessor
      *
      * @param localUserMappings
      *            local user mappings
-     * @param localGroupMappings
-     *            local group mappings
      * @param currentNucleusMemberships
      *            current nucleus memberships
      * @param userGroupMemberships
-     *            cache of all user and their groups
+     *            map of all user and their groups
      */
     public void syncUserGroupMemberships(
             List<UserMapping> localUserMappings,
-            List<String> localGroupMappings,
             List<NucleusGroupMembershipOutput> currentNucleusMemberships,
             Map<String, List<String>> userGroupMemberships)
     {
@@ -79,12 +76,10 @@ public class UserGroupMembershipSyncProcessor
         Map<String, String> alfUsrEmailByUsrId = localUserMappings.stream()
                 .collect(Collectors.toMap(UserMapping::alfrescoUserId, UserMapping::email));
 
-        Set<String> syncGrpIds = new HashSet<>(localGroupMappings);
         Set<String> syncUsrIds = new HashSet<>(alfUsrEmailByUsrId.keySet());
 
         // desired and current states
-        Set<UserGroupPair> desiredMemberships = calculateDesiredMemberships(syncUsrIds,
-                syncGrpIds, userGroupMemberships);
+        Set<UserGroupPair> desiredMemberships = calculateDesiredMemberships(syncUsrIds, userGroupMemberships);
 
         Set<UserGroupPair> currentMemberships = currentNucleusMemberships.stream()
                 .map(m -> new UserGroupPair(m.memberExternalUserId(), m.externalGroupId()))
@@ -108,17 +103,15 @@ public class UserGroupMembershipSyncProcessor
 
     private Set<UserGroupPair> calculateDesiredMemberships(
             Set<String> syncedUserIds,
-            Set<String> syncedGroupIds,
-            Map<String, List<String>> userGroupMembershipCache)
+            Map<String, List<String>> userGroupMemberships)
     {
         return syncedUserIds.stream()
                 .flatMap(userId -> {
-                    List<String> userGroups = userGroupMembershipCache.getOrDefault(userId, List.of());
+                    List<String> userGroups = userGroupMemberships.getOrDefault(userId, List.of());
                     return userGroups.stream()
-                            .filter(syncedGroupIds::contains)
                             .map(groupId -> new UserGroupPair(userId, groupId));
-
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
     }
 
     private void executeNucleusMembershipOperations(

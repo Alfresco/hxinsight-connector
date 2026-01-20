@@ -71,11 +71,8 @@ public class UserGroupMembershipSyncProcessorTest
             userGroupCache.put(userId, List.of("GROUP_A", "GROUP_B", "GROUP_C", "GROUP_D"));
         }
 
-        List<String> groupMappings = List.of("GROUP_A", "GROUP_B", "GROUP_C", "GROUP_D");
-
         // When
-        processor.syncUserGroupMemberships(
-                userMappings, groupMappings, List.of(), userGroupCache);
+        processor.syncUserGroupMemberships(userMappings, List.of(), userGroupCache);
 
         // Then
         verify(nucleusClient, times(2)).assignGroupMembers(argThat(list -> list.size() <= 1000));

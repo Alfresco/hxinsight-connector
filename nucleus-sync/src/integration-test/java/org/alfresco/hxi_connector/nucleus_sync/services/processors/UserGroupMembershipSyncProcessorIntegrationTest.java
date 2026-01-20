@@ -74,11 +74,6 @@ public class UserGroupMembershipSyncProcessorIntegrationTest
                 new UserMapping("charlie@email.com", "charlie", "uuid-charlie"),
                 new UserMapping("dave@email.com", "dave", "uuid-dave"));
 
-        List<String> groupMappings = List.of(
-                "GROUP_ADMINS",
-                "GROUP_DEVELOPERS",
-                "GROUP_DESIGNERS");
-
         // Current state in Nucleus:
         // - alice - ADMINS
         // - bob - DEVELOPERS
@@ -102,7 +97,7 @@ public class UserGroupMembershipSyncProcessorIntegrationTest
 
         // When
         processor.syncUserGroupMemberships(
-                userMappings, groupMappings, currentMemberships, userGroupMap);
+                userMappings, currentMemberships, userGroupMap);
 
         // Then
         verify(nucleusClient).assignGroupMembers(assignmentCaptor.capture());
