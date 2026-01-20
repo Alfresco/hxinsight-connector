@@ -84,7 +84,7 @@ public class SyncOrchestrationServiceTest
                 .thenThrow(new RuntimeException("Connection timeout"));
 
         // When/Then
-        assertThatThrownBy(() -> service.performFullSync())
+        assertThatThrownBy(service::performFullSync)
                 .isInstanceOf(AlfrescoUnavailableException.class)
                 .hasMessageContaining("Alfresco unavailable");
 
@@ -104,7 +104,7 @@ public class SyncOrchestrationServiceTest
                 .thenThrow(new RuntimeException("API error"));
 
         // When/Then
-        assertThatThrownBy(() -> service.performFullSync())
+        assertThatThrownBy(service::performFullSync)
                 .isInstanceOf(NucleusUnavailableException.class)
                 .hasMessageContaining("Nucleus unavailable");
 
@@ -135,7 +135,7 @@ public class SyncOrchestrationServiceTest
 
         // Start first sync in background
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<String> firstSync = executor.submit(() -> service.performFullSync());
+        Future<String> firstSync = executor.submit(service::performFullSync);
 
         try
         {
@@ -144,7 +144,7 @@ public class SyncOrchestrationServiceTest
 
             // When - Try to start second sync
             // Then - Should throw immediately
-            assertThatThrownBy(() -> service.performFullSync())
+            assertThatThrownBy(service::performFullSync)
                     .isInstanceOf(SyncInProgressException.class)
                     .hasMessage("Sync already in progress. Please wait for the current sync to complete.");
 
