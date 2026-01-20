@@ -67,7 +67,7 @@ public class UserGroupMembershipSyncProcessor
      * @param currentNucleusMemberships
      *            current nucleus memberships
      * @param userGroupMemberships
-     *            cache of all user and their groups
+     *            map of all user and their groups
      */
     public void syncUserGroupMemberships(
             List<UserMapping> localUserMappings,
@@ -109,16 +109,15 @@ public class UserGroupMembershipSyncProcessor
     private Set<UserGroupPair> calculateDesiredMemberships(
             Set<String> syncedUserIds,
             Set<String> syncedGroupIds,
-            Map<String, List<String>> userGroupMembershipCache)
+            Map<String, List<String>> userGroupMemberships)
     {
         return syncedUserIds.stream()
                 .flatMap(userId -> {
-                    List<String> userGroups = userGroupMembershipCache.getOrDefault(userId, List.of());
+                    List<String> userGroups = userGroupMemberships.getOrDefault(userId, List.of());
                     return userGroups.stream()
-                            .filter(syncedGroupIds::contains)
                             .map(groupId -> new UserGroupPair(userId, groupId));
-
-                }).collect(Collectors.toSet());
+                })
+                .collect(Collectors.toSet());
     }
 
     private void executeNucleusMembershipOperations(
