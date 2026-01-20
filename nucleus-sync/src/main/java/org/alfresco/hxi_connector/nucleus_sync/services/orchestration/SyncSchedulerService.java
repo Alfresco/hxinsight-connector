@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.orchestration;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,14 +35,19 @@ import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.SyncInProgressException;
 
 @Service
-@RequiredArgsConstructor
 public class SyncSchedulerService
 {
     private final SyncOrchestrationService syncOrchestrationService;
+    private final boolean syncEnabled;
     private static final Logger LOGGER = LoggerFactory.getLogger(SyncSchedulerService.class);
 
-    @Value("${sync.enabled}")
-    private boolean syncEnabled;
+    public SyncSchedulerService(
+            @Value("${sync.enabled}") boolean syncEnabled,
+            SyncOrchestrationService syncOrchestrationService)
+    {
+        this.syncEnabled = syncEnabled;
+        this.syncOrchestrationService = syncOrchestrationService;
+    }
 
     @Scheduled(cron = "${sync.cron.expression}")
     public void scheduledSync()
