@@ -62,8 +62,6 @@ public class UserGroupMembershipSyncProcessor
      *
      * @param localUserMappings
      *            local user mappings
-     * @param localGroupMappings
-     *            local group mappings
      * @param currentNucleusMemberships
      *            current nucleus memberships
      * @param userGroupMemberships
@@ -71,7 +69,6 @@ public class UserGroupMembershipSyncProcessor
      */
     public void syncUserGroupMemberships(
             List<UserMapping> localUserMappings,
-            List<String> localGroupMappings,
             List<NucleusGroupMembershipOutput> currentNucleusMemberships,
             Map<String, List<String>> userGroupMemberships)
     {
@@ -79,12 +76,10 @@ public class UserGroupMembershipSyncProcessor
         Map<String, String> alfUsrEmailByUsrId = localUserMappings.stream()
                 .collect(Collectors.toMap(UserMapping::alfrescoUserId, UserMapping::email));
 
-        Set<String> syncGrpIds = new HashSet<>(localGroupMappings);
         Set<String> syncUsrIds = new HashSet<>(alfUsrEmailByUsrId.keySet());
 
         // desired and current states
-        Set<UserGroupPair> desiredMemberships = calculateDesiredMemberships(syncUsrIds,
-                syncGrpIds, userGroupMemberships);
+        Set<UserGroupPair> desiredMemberships = calculateDesiredMemberships(syncUsrIds, userGroupMemberships);
 
         Set<UserGroupPair> currentMemberships = currentNucleusMemberships.stream()
                 .map(m -> new UserGroupPair(m.memberExternalUserId(), m.externalGroupId()))
@@ -108,7 +103,6 @@ public class UserGroupMembershipSyncProcessor
 
     private Set<UserGroupPair> calculateDesiredMemberships(
             Set<String> syncedUserIds,
-            Set<String> syncedGroupIds,
             Map<String, List<String>> userGroupMemberships)
     {
         return syncedUserIds.stream()
