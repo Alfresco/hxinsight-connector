@@ -117,7 +117,6 @@ public class UserGroupMembershipSyncProcessor
                     return userGroups.stream()
                             .map(groupId -> new UserGroupPair(userId, groupId));
                 })
-                .filter(pair -> syncedGroupIds.contains(pair.alfrescoGroupId()))
                 .collect(Collectors.toSet());
     }
 
