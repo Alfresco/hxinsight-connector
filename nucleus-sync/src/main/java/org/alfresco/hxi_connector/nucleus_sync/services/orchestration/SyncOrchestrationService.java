@@ -136,16 +136,13 @@ public class SyncOrchestrationService
                 .setMessage("Fresh user-group membership cache built successfully.");
 
         // 4. Sync Groups
-        List<String> groupMappings = groupMappingSyncProcessor.syncGroupMappings(
-                data.currentNucleusGroups,
-                userGroupMemberships);
+        groupMappingSyncProcessor.syncGroupMappings(data.currentNucleusGroups, userGroupMemberships);
         LOGGER.atInfo()
                 .setMessage("Group sync completed successfully.");
 
         // 5. Sync User-Group Memberships
         userGroupMembershipSyncProcessor.syncUserGroupMemberships(
                 userMappings,
-                groupMappings,
                 data.currentMemberships,
                 userGroupMemberships);
         LOGGER.atInfo()

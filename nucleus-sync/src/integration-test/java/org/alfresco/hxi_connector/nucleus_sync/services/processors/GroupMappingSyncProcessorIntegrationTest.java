@@ -70,7 +70,7 @@ public class GroupMappingSyncProcessorIntegrationTest
         userGroupMemberships.put("tgarcia", null);
 
         // When
-        List<String> result = processor.syncGroupMappings(nucleusGroups, userGroupMemberships);
+        processor.syncGroupMappings(nucleusGroups, userGroupMemberships);
 
         // Then - Verify all deletions happened
         verify(nucleusClient).deleteGroup("GROUP_SALES");
@@ -79,10 +79,6 @@ public class GroupMappingSyncProcessorIntegrationTest
         verify(nucleusClient).createGroups(argThat(groups -> assertThat(groups).containsExactlyInAnyOrder(
                 new NucleusGroupInput("GROUP_ENGINEERING"),
                 new NucleusGroupInput("GROUP_PRODUCT")) != null));
-
-        // Then - Verify returned mappings are correct (3 total: 2 new + 1 existing)
-        assertThat(result)
-                .containsExactlyInAnyOrder("GROUP_ENGINEERING", "GROUP_PRODUCT", "GROUP_HR");
 
         // Then - Verify exactly 2 interactions (1 deletes, 1 create batch)
         verifyNoMoreInteractions(nucleusClient);

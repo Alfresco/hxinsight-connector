@@ -103,10 +103,6 @@ public class SyncOrchestrationServiceIntegrationTest
         when(userGrpMembershipService.buildUserGroupMemberships(userMappings))
                 .thenReturn(userGroupMemberships);
 
-        List<String> groupMappings = List.of("GROUP_ADMINS");
-        when(groupMappingSyncProcessor.syncGroupMappings(currentGroups, userGroupMemberships))
-                .thenReturn(groupMappings);
-
         // When
         String result = service.performFullSync();
 
@@ -129,7 +125,7 @@ public class SyncOrchestrationServiceIntegrationTest
         inOrder.verify(userGrpMembershipService).buildUserGroupMemberships(userMappings);
         inOrder.verify(groupMappingSyncProcessor).syncGroupMappings(currentGroups, userGroupMemberships);
         inOrder.verify(userGroupMembershipSyncProcessor).syncUserGroupMemberships(
-                userMappings, groupMappings, currentMemberships, userGroupMemberships);
+                userMappings, currentMemberships, userGroupMemberships);
 
         assertThat(result).isEqualTo("Sync completed successfully");
 

@@ -63,9 +63,8 @@ public class GroupMappingSyncProcessor
      *            list of groups from nucleus
      * @param userGroupMemberships
      *            map of user and their groups
-     * @return list of updated group mappings
      */
-    public List<String> syncGroupMappings(
+    public void syncGroupMappings(
             List<NucleusGroupOutput> currentNucleusGroups,
             Map<String, List<String>> userGroupMemberships)
     {
@@ -92,8 +91,6 @@ public class GroupMappingSyncProcessor
                 .setMessage("Updated group count: {}")
                 .addArgument(groupsWithUsers.size())
                 .log();
-
-        return List.copyOf(groupsWithUsers);
     }
 
     private void executeGroupOperations(List<String> toCreate, List<String> toDelete)
