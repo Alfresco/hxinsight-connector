@@ -34,17 +34,17 @@ alfresco:
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_REPOSITORY_BASEURL` | Base URL for the Alfresco Repository REST API | - |
+| `ALFRESCO_REPOSITORY_BASEURL` | Base URL for the Alfresco Repository REST API | Required |
 | `ALFRESCO_REPOSITORY_EVENTSENDPOINT` | ActiveMQ topic to listen for repo events | `activemq:topic:alfresco.repo.event2` |
-| `ALFRESCO_REPOSITORY_DISCOVERYENDPOINT` | Alfresco Discovery API URL (used to determine ACS version) | By default this is derived from `base-url` |
-| `ALFRESCO_REPOSITORY_VERSIONOVERRIDE` | ACS version string to use instead of calling Discovery API | - |
-| `ALFRESCO_REPOSITORY_HEALTHPROBE_ENDPOINT` | Health check endpoint for Alfresco | By default derived from `base-url` |
+| `ALFRESCO_REPOSITORY_DISCOVERYENDPOINT` | Alfresco Discovery API URL (used to determine ACS version) | Derived from `base-url` |
+| `ALFRESCO_REPOSITORY_VERSIONOVERRIDE` | ACS version string to use instead of calling Discovery API (e.g., `23.2.0`) | - |
+| `ALFRESCO_REPOSITORY_HEALTHPROBE_ENDPOINT` | Health check endpoint for Alfresco | Derived from `base-url` |
 | `ALFRESCO_REPOSITORY_HEALTHPROBE_TIMEOUTSECONDS` | Max time to wait for Alfresco to become healthy (seconds) | `1800` |
 | `ALFRESCO_REPOSITORY_HEALTHPROBE_INTERVALSECONDS` | Interval between health checks (seconds) | `30` |
 
-> **Note:** Either `discovery-endpoint` or `version-override` must be set.
-> - Use `discovery-endpoint` to automatically detect the ACS version at startup (requires `health-probe.endpoint` to be set)
-> - Use `version-override` to skip discovery and specify the version directly (e.g., `23.2.0`)
+> **Note:** The connector needs to know the ACS version. Choose one approach:
+> - **Automatic detection (recommended):** Set `base-url` and leave `version-override` empty. The connector will call the Alfresco Discovery API at startup to determine the ACS version.
+> - **Manual override:** Set `version-override` to skip the Discovery API call (e.g., `23.2.0`). Useful if the Alfresco Discovery API is inaccessible.
 
 ### HX Insight Ingestion
 
@@ -202,7 +202,7 @@ alfresco:
 
 ### Transform with CIC Document Filters
 
-Hyland Knowledge Discovery and Hyland Knowledge Enrichment include the ability to transform some file types. If Alfresco Transform Services is not able to convert a particular file type to pdf then it's possible to map it to itself so that the file is uploaded as-is. After the file is uploaded then Document Filters will attempt to convert it to a format that it can read.
+Hyland's [Content Innovation Cloud](https://www.hyland.com/en/platform) includes [Document Filters](https://www.hyland.com/en/solutions/products/document-filters), which can transform many file types. If Alfresco Transform Services cannot convert a particular file type to PDF, you can map the file type to itself to upload it without transformation. After upload, Document Filters will attempt to convert it to a readable format.
 
 ### Transform Options
 

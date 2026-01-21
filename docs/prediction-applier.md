@@ -47,11 +47,12 @@ hyland-experience:
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_BASEURL` | HXI Predictions API base URL (provided by Hyland) | - |
-| `HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_POLLPERIODMILLIS` | How often to poll for new predictions (milliseconds) | - |
+| `HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_BASEURL` | HXI Predictions API base URL (provided by Hyland) | Required |
+| `HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_POLLPERIODMILLIS` | How often to poll for new predictions (milliseconds) | Required* |
 | `HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_BUFFERENDPOINT` | ActiveMQ queue for buffering predictions | `activemq:queue:predictions-buffer` |
+| `HYLANDEXPERIENCE_INSIGHT_PREDICTIONS_COLLECTORTIMERENDPOINT` | Advanced: Custom Camel timer endpoint for polling | By default this is generated from `poll-period-millis` |
 
-> **Note:** Either `poll-period-millis` or `collector-timer-endpoint` must be set to enable prediction polling.
+> **Note:** *Either `poll-period-millis` or `collector-timer-endpoint` must be set to enable prediction polling. In most cases, set `poll-period-millis` and the timer endpoint will be automatically generated.
 
 ### Authentication
 

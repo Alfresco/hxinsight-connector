@@ -14,7 +14,7 @@ See [Compatibility](compatibility.md) for supported Alfresco versions and requir
 | Nucleus User Sync | ✅ | ✅ | ✅ | [→](nucleus-sync.md) |
 | Prediction Applier | ✅ | ✅ | ✅ | [→](prediction-applier.md) |
 
-*\* The Docker image bundles the module with Alfresco—it's not a standalone container.*
+*The Docker image bundles the module with Alfresco—it's not a standalone container.*
 
 ---
 
@@ -97,14 +97,14 @@ docker run -d \
 
 ### Docker Compose
 
-A complete docker-compose environment is provided in `distribution/src/main/resources/docker-compose/`:
+A complete docker-compose environment for testing purposes is provided in the repository at `distribution/src/main/resources/docker-compose/`:
 
 ```bash
 cd distribution/src/main/resources/docker-compose
 docker compose up -d
 ```
 
-See the [docker-compose.yml](../distribution/src/main/resources/docker-compose/docker-compose.yml) for a full example configuration.
+See the `docker-compose.yml` in that directory for a full example configuration.
 
 ---
 

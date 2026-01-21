@@ -126,14 +126,16 @@ hxi.question.max-context-size-for-question=100
 
 ### Connector Identity
 
+These properties are sent to Knowledge Discovery to enable tracking the original source of documents.
+
 ```properties
-hxi.connector.version="@project.version@"
+hxi.connector.version=2.0.0
 hxi.connector.source-id=a1f3e7c0-d193-7023-ce1d-0a63de491876
 ```
 
 | Property | Description |
 |----------|-------------|
-| `hxi.connector.version` | Connector version (auto-populated from build) |
+| `hxi.connector.version` | Connector version. This is automatically set during the build process (e.g., `2.0.0`). You typically don't need to set this manually. |
 | `hxi.connector.source-id` | Unique identifier for this Alfresco source in HXI |
 
 ---
@@ -161,4 +163,4 @@ To enable the Knowledge Retrieval UI in Alfresco Digital Workspace, set:
 APP_CONFIG_PLUGIN_KNOWLEDGE_RETRIEVAL: true
 ```
 
-This enables the Discovery search panel in ADW, which uses the APIs provided by the HxInsight Extension.
+This enables the Discovery search panel in ADW, which uses the APIs provided by the Knowledge Discovery JAR Module.

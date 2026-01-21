@@ -33,7 +33,7 @@ Use these components to index Alfresco content in HX Insight for AI-powered sear
 
 To enable the HX Insight Discovery search panel in Alfresco Digital Workspace:
 
-- **HxInsight Extension (JAMP)** - Must be installed in the Alfresco Repository. Provides the server-side APIs that ADW uses to query HX Insight.
+- **Knowledge Discovery JAR Module** - Must be installed in the Alfresco Repository. Provides the server-side APIs that ADW uses to query HX Insight.
 
 ## Quick Links
 
