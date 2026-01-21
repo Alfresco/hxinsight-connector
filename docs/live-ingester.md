@@ -219,6 +219,39 @@ alfresco:
           someOption: value
 ```
 
+### Setting MIME Type Mappings in Docker Compose
+
+MIME type mappings **cannot be set using simple environment variables** because MIME type keys contain slashes (e.g., `image/png`) which cannot be represented in environment variable names.
+
+**Option 1: Use `SPRING_APPLICATION_JSON`**
+
+Pass the mapping as JSON ([not YAML](https://github.com/spring-projects/spring-boot/issues/4239#issuecomment-149908348)) in your docker-compose file as documented in the [Spring Boot docs](https://docs.spring.io/spring-boot/reference/features/external-config.html).
+
+```yaml
+services:
+  live-ingester:
+    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
+    environment:
+      SPRING_APPLICATION_JSON: |
+        {
+          ...
+        }
+```
+
+**Option 2: Mount a custom configuration file**
+
+Create your own `application.yml` based on the [example in this repository](../live-ingester/src/main/resources/application.yml), then mount it:
+
+```yaml
+services:
+  live-ingester:
+    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
+    volumes:
+      - ./custom-application.yml:/app/resources/application.yml
+    environment:
+      SPRING_CONFIG_LOCATION: file:/app/resources/application.yml
+```
+
 ---
 
 ## Node Filtering
@@ -329,17 +362,48 @@ Available retry configurations:
 
 ## Logging
 
+The Live Ingester uses [Spring Boot's logging configuration](https://docs.spring.io/spring-boot/reference/features/logging.html). Log levels can be set via configuration files, command-line arguments, or environment variables.
+
+### Configuration File
+
 ```yaml
 logging:
   level:
     org.alfresco: INFO
 ```
 
+### Setting Log Levels from Docker Compose
+
+```yaml
+services:
+  live-ingester:
+    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
+    environment:
+      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+      # You can also target specific packages:
+      LOGGING_LEVEL_ORG_APACHE_CAMEL: WARN
+```
+
+### Setting Log Levels from JAR Command Line
+
+```bash
+java -jar alfresco-hxinsight-connector-live-ingester-*.jar \
+  --logging.level.org.alfresco=DEBUG \
+  --logging.level.org.apache.camel=WARN
+```
+
+Or using environment variables:
+
+```bash
+export LOGGING_LEVEL_ORG_ALFRESCO=DEBUG
+java -jar alfresco-hxinsight-connector-live-ingester-*.jar
+```
+
+### Common Packages
+
 | Environment Variable | Description |
 |---------------------|-------------|
-| `LOGGING_LEVEL_ORG_ALFRESCO` | Log level for connector classes |
-
-**Useful log levels:**
-- `INFO` - Standard operational logging
-- `DEBUG` - Full event payloads from Alfresco, detailed processing info
-- `TRACE` - Very verbose, includes all HTTP requests/responses
+| `LOGGING_LEVEL_ORG_ALFRESCO` | All connector classes |
+| `LOGGING_LEVEL_ORG_ALFRESCO_HXI_CONNECTOR_LIVE_INGESTER` | Live Ingester specific |
+| `LOGGING_LEVEL_ORG_APACHE_CAMEL` | Apache Camel routing |
+| `LOGGING_LEVEL_ORG_SPRINGFRAMEWORK` | Spring Framework |
