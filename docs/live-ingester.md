@@ -36,13 +36,13 @@ alfresco:
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_REPOSITORY_BASEURL` | Base URL for the Alfresco Repository REST API | Required |
-| `ALFRESCO_REPOSITORY_EVENTSENDPOINT` | ActiveMQ topic to listen for repo events | `activemq:topic:alfresco.repo.event2` |
-| `ALFRESCO_REPOSITORY_DISCOVERYENDPOINT` | Alfresco Discovery API URL (used to determine ACS version) | Derived from `base-url` |
-| `ALFRESCO_REPOSITORY_VERSIONOVERRIDE` | ACS version string to use instead of calling Discovery API (e.g., `23.2.0`) | - |
-| `ALFRESCO_REPOSITORY_HEALTHPROBE_ENDPOINT` | Health check endpoint for Alfresco | Derived from `base-url` |
-| `ALFRESCO_REPOSITORY_HEALTHPROBE_TIMEOUTSECONDS` | Max time to wait for Alfresco to become healthy (seconds) | `1800` |
-| `ALFRESCO_REPOSITORY_HEALTHPROBE_INTERVALSECONDS` | Interval between health checks (seconds) | `30` |
+| `ALFRESCO_REPOSITORY_BASEURL` | Base URL for the Alfresco Repository REST API (URL) | Required |
+| `ALFRESCO_REPOSITORY_EVENTSENDPOINT` | ActiveMQ topic to listen for repo events (string) | `activemq:topic:alfresco.repo.event2` |
+| `ALFRESCO_REPOSITORY_DISCOVERYENDPOINT` | Alfresco Discovery API URL (URL) | Derived from `base-url` |
+| `ALFRESCO_REPOSITORY_VERSIONOVERRIDE` | ACS version string to use instead of calling Discovery API (string, e.g., `23.2.0`) | - |
+| `ALFRESCO_REPOSITORY_HEALTHPROBE_ENDPOINT` | Health check endpoint for Alfresco (URL) | Derived from `base-url` |
+| `ALFRESCO_REPOSITORY_HEALTHPROBE_TIMEOUTSECONDS` | Max time to wait for Alfresco to become healthy in seconds (integer) | `1800` |
+| `ALFRESCO_REPOSITORY_HEALTHPROBE_INTERVALSECONDS` | Interval between health checks in seconds (integer) | `30` |
 
 > **Note:** The connector needs to know the ACS version. Choose one approach:
 > - **Automatic detection (recommended):** Set `base-url` and leave `version-override` empty. The connector will call the Alfresco Discovery API at startup to determine the ACS version.
@@ -90,12 +90,19 @@ auth:
 
 | Environment Variable | Description |
 |---------------------|-------------|
-| `AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID` | HXI OAuth client ID |
-| `AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTSECRET` | HXI OAuth client secret |
-| `AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI` | HXI OAuth token endpoint |
-| `AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY` | HXI environment key (identifies your HXI tenant) |
-| `AUTH_PROVIDERS_ALFRESCO_USERNAME` | Alfresco admin username (for API calls to ACS) |
-| `AUTH_PROVIDERS_ALFRESCO_PASSWORD` | Alfresco admin password |
+| `AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID` | HXI OAuth client ID (string) |
+| `AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTSECRET` | HXI OAuth client secret (string) |
+| `AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI` | HXI OAuth token endpoint (URL) |
+| `AUTH_PROVIDERS_HYLANDEXPERIENCE_GRANTTYPE` | OAuth grant type (string, default: `client_credentials`) |
+| `AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY` | HXI environment key (string, identifies your HXI tenant) |
+| `AUTH_PROVIDERS_ALFRESCO_USERNAME` | Alfresco admin username (string, for API calls to ACS) |
+| `AUTH_PROVIDERS_ALFRESCO_PASSWORD` | Alfresco admin password (string) |
+
+### Application Identity
+
+| Environment Variable | Description |
+|---------------------|-------------|
+| `APPLICATION_SOURCEID` | Unique identifier for this connector instance (UUID). Used to identify the source of ingested content in HX Insight. A default is provided but can be overridden for multi-instance deployments. |
 
 ---
 
@@ -105,7 +112,7 @@ The Live Ingester receives events from the Bulk Ingester via an ActiveMQ queue. 
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_BULKINGESTER_ENDPOINT` | ActiveMQ queue to receive bulk ingestion events | `activemq:queue:bulk-ingester-events` |
+| `ALFRESCO_BULKINGESTER_ENDPOINT` | ActiveMQ queue to receive bulk ingestion events (string) | `activemq:queue:bulk-ingester-events` |
 
 > **Important:** This endpoint must match the `ALFRESCO_BULK_INGEST_PUBLISHER_ENDPOINT` configured in the [Bulk Ingester](bulk-ingester.md).
 
@@ -117,11 +124,11 @@ The Live Ingester uses Alfresco Transform Service (ATS) to convert documents bef
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_TRANSFORM_REQUEST_ENDPOINT` | ActiveMQ queue to send transform requests to ATS | `activemq:queue:acs-repo-transform-request` |
-| `ALFRESCO_TRANSFORM_REQUEST_TIMEOUT` | Max time to wait for transform to complete (ms) | `20000` |
-| `ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL` | Shared File Store base URL | Required |
-| `ALFRESCO_TRANSFORM_RESPONSE_QUEUENAME` | Queue name for receiving transform responses | `org.alfresco.hxinsight-connector.transform.response` |
-| `ALFRESCO_TRANSFORM_RESPONSE_RETRYINGESTION_ATTEMPTS` | Retry attempts for failed ingestion after transform (`-1` = unlimited) | `-1` |
+| `ALFRESCO_TRANSFORM_REQUEST_ENDPOINT` | ActiveMQ queue to send transform requests to ATS (string) | `activemq:queue:acs-repo-transform-request` |
+| `ALFRESCO_TRANSFORM_REQUEST_TIMEOUT` | Max time to wait for transform to complete in ms (integer) | `20000` |
+| `ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL` | Shared File Store base URL (URL) | Required |
+| `ALFRESCO_TRANSFORM_RESPONSE_QUEUENAME` | Queue name for receiving transform responses (string) | `org.alfresco.hxinsight-connector.transform.response` |
+| `ALFRESCO_TRANSFORM_RESPONSE_RETRYINGESTION_ATTEMPTS` | Retry attempts for failed ingestion after transform (integer, `-1` = unlimited) | `-1` |
 
 ---
 

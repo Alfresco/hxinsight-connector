@@ -4,12 +4,9 @@ The Alfresco Connector for Content Intelligence provides knowledge retrieval cap
 
 ## Documentation
 
-📚 **[Full Documentation](docs/index.md)**
-
-### Quick Links
-
 | Document | Description |
 |----------|-------------|
+| [Documentation Index](docs/index.md) | Index page for documentation |
 | [Compatibility](docs/compatibility.md) | Supported Alfresco versions and requirements |
 | [Component Overview](docs/components.md) | Status and description of all components |
 | [Installation Guide](docs/installation.md) | JAR, Docker, and Kubernetes deployment |
@@ -17,7 +14,7 @@ The Alfresco Connector for Content Intelligence provides knowledge retrieval cap
 | [Bulk Ingester Config](docs/bulk-ingester.md) | Batch ingestion configuration |
 | [Knowledge Discovery JAR Module](docs/hxinsight-extension.md) | Alfresco repository module configuration |
 | [Nucleus User Sync](docs/nucleus-sync.md) | User synchronization (WIP) |
-| [Prediction Applier](docs/prediction-applier.md) | Prediction application (Experimental) |
+| [Prediction Applier](docs/prediction-applier.md) | Prediction application (Deprecated) |
 | [ACS Private APIs](docs/acs-private-apis.md) | Internal API documentation |
 
 ### Development Environment

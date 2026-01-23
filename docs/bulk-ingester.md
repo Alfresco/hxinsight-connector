@@ -14,10 +14,10 @@ The Bulk Ingester requires direct read access to the Alfresco database.
 
 | Environment Variable | Description |
 |---------------------|-------------|
-| `SPRING_DATASOURCE_URL` | JDBC connection URL (e.g., `jdbc:postgresql://postgres:5432/alfresco`) |
-| `SPRING_DATASOURCE_USERNAME` | Database username (read access required) |
-| `SPRING_DATASOURCE_PASSWORD` | Database password |
-| `SPRING_ACTIVEMQ_BROKERURL` | ActiveMQ broker URL |
+| `SPRING_DATASOURCE_URL` | JDBC connection URL (string, e.g., `jdbc:postgresql://postgres:5432/alfresco`) |
+| `SPRING_DATASOURCE_USERNAME` | Database username (string, read access required) |
+| `SPRING_DATASOURCE_PASSWORD` | Database password (string) |
+| `SPRING_ACTIVEMQ_BROKERURL` | ActiveMQ broker URL (string) |
 
 ---
 
@@ -39,15 +39,15 @@ Additionally it is possible to configure filters in both the Bulk and Live Inges
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_BULK_INGEST_NODEPARAMS_FROMID` | Starting node ID (inclusive) | `0` |
-| `ALFRESCO_BULK_INGEST_NODEPARAMS_TOID` | Ending node ID (inclusive) | Required |
-| `ALFRESCO_BULK_INGEST_REPOSITORY_PAGESIZE` | Nodes per database query | `2000` |
-| `ALFRESCO_BULK_INGEST_PUBLISHER_ENDPOINT` | ActiveMQ queue for ingestion events | `activemq:queue:bulk-ingester-events` |
-| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_ATTEMPTS` | Retry attempts for publishing events | `10` |
-| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_INITIALDELAY` | Initial delay between retries (ms) | `500` |
-| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_DELAYMULTIPLIER` | Multiplier for exponential backoff | `2` |
-| `ALFRESCO_REINDEX_PATHCACHESIZE` | Cache size for path lookups | `10000` |
-| `SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE` | Database connection pool size | `20` |
+| `ALFRESCO_BULK_INGEST_NODEPARAMS_FROMID` | Starting node ID, inclusive (integer) | `0` |
+| `ALFRESCO_BULK_INGEST_NODEPARAMS_TOID` | Ending node ID, inclusive (integer) | Required |
+| `ALFRESCO_BULK_INGEST_REPOSITORY_PAGESIZE` | Nodes per database query (integer) | `2000` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_ENDPOINT` | ActiveMQ queue for ingestion events (string) | `activemq:queue:bulk-ingester-events` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_ATTEMPTS` | Retry attempts for publishing events (integer) | `10` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_INITIALDELAY` | Initial delay between retries in ms (integer) | `500` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_DELAYMULTIPLIER` | Multiplier for exponential backoff (integer) | `2` |
+| `ALFRESCO_REINDEX_PATHCACHESIZE` | Cache size for path lookups (integer) | `10000` |
+| `SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE` | Database connection pool size (integer) | `20` |
 
 Use node ID ranges to process specific batches, resume interrupted runs, or split ingestion across instances.
 

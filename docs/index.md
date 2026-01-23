@@ -15,8 +15,8 @@ Using Alfresco Digital Workspace as the user interface, you can select one or mo
 | [Live Ingester](live-ingester.md) | ✅ Complete | Keeps data in Knowledge Discovery up to date with day-to-day changes |
 | [Bulk Ingester](bulk-ingester.md) | ✅ Complete | Initial ingestion of documents, or recovering after downtime |
 | [Knowledge Discovery JAR Module](hxinsight-extension.md) | ✅ Complete | Enables Digital Workspace to interact with Knowledge Discovery |
-| [Nucleus User Sync](nucleus-sync.md) | ⚠️ Incomplete | User/group synchronization with Nucleus |
-| [Prediction Applier](prediction-applier.md) | 🧪 Experimental | Applies HXI predictions back to Alfresco |
+| [Nucleus User Sync](nucleus-sync.md) | ⚠️ Coming Soon | User/group synchronization with Nucleus (not yet production-ready) |
+| [Prediction Applier](prediction-applier.md) | 🧪 Deprecated | Applies HXI predictions back to Alfresco (being replaced by CFS component) |
 
 ## Use Cases
 

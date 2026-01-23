@@ -2,7 +2,9 @@
 
 [← Components](components.md) | [Installation →](installation.md)
 
-> 🧪 **Status: Experimental**
+> 🧪 **Status: Deprecated**
+>
+> This component is experimental and will be replaced by a new Content Federated Services (CFS) component in a future release. It is not recommended for production use.
 
 The Prediction Applier polls HX Insight for AI-generated predictions and applies them back to Alfresco documents as metadata. This enables automatic tagging, classification, and enrichment of documents based on HX Insight's AI analysis.
 
