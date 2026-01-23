@@ -4,112 +4,60 @@
 
 The Bulk Ingester reads directly from the Alfresco database to batch-ingest existing content into Knowledge Discovery. It is responsible for the initial ingestion of documents, or recovering after a period of downtime.
 
+> **Default configuration:** See [`application.yml`](../bulk-ingester/src/main/resources/application.yml) for all defaults.
+
 ## Required Configuration
 
 ### Database Connection
 
 The Bulk Ingester requires direct read access to the Alfresco database.
 
-```yaml
-spring:
-  datasource:
-    url: jdbc:postgresql://postgres:5432/alfresco
-    username: alfresco
-    password: alfresco
-```
-
 | Environment Variable | Description |
 |---------------------|-------------|
-| `SPRING_DATASOURCE_URL` | JDBC connection URL to Alfresco database |
+| `SPRING_DATASOURCE_URL` | JDBC connection URL (e.g., `jdbc:postgresql://postgres:5432/alfresco`) |
 | `SPRING_DATASOURCE_USERNAME` | Database username (read access required) |
 | `SPRING_DATASOURCE_PASSWORD` | Database password |
-
-### ActiveMQ Connection
-
-```yaml
-spring:
-  activemq:
-    broker-url: nio://activemq:61616
-```
-
-| Environment Variable | Description |
-|---------------------|-------------|
 | `SPRING_ACTIVEMQ_BROKERURL` | ActiveMQ broker URL |
+
+---
+
+## How Bulk Ingestion Works
+
+The Bulk Ingester does not send documents directly to HX Insight. Instead, it:
+
+1. Reads node metadata from the Alfresco database
+2. Publishes events to an ActiveMQ queue
+3. The **Live Ingester** consumes these events and handles the actual ingestion (transforms, uploads, etc.)
+
+> **Important:** The Live Ingester must be running and configured with a matching `ALFRESCO_BULKINGESTER_ENDPOINT` to process bulk ingestion events.
+
+Additionally it is possible to configure filters in both the Bulk and Live Ingester, and discrepancies in these may result in data being loaded from the database, but not sent on to HX Insight.
 
 ---
 
 ## Ingestion Configuration
 
-### Node ID Range
-
-Control which nodes to ingest by specifying database node ID ranges. This allows you to:
-- Process specific batches of content
-- Resume interrupted ingestion runs
-- Split large ingestions across multiple instances
-
-```yaml
-alfresco:
-  bulk:
-    ingest:
-      node-params:
-        from-id: 0
-        to-id: 1000000
-```
-
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `ALFRESCO_BULK_INGEST_NODEPARAMS_FROMID` | Starting node ID (inclusive) | `0` |
 | `ALFRESCO_BULK_INGEST_NODEPARAMS_TOID` | Ending node ID (inclusive) | Required |
+| `ALFRESCO_BULK_INGEST_REPOSITORY_PAGESIZE` | Nodes per database query | `2000` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_ENDPOINT` | ActiveMQ queue for ingestion events | `activemq:queue:bulk-ingester-events` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_ATTEMPTS` | Retry attempts for publishing events | `10` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_INITIALDELAY` | Initial delay between retries (ms) | `500` |
+| `ALFRESCO_BULK_INGEST_PUBLISHER_RETRY_DELAYMULTIPLIER` | Multiplier for exponential backoff | `2` |
+| `ALFRESCO_REINDEX_PATHCACHESIZE` | Cache size for path lookups | `10000` |
+| `SPRING_DATASOURCE_HIKARI_MAXIMUMPOOLSIZE` | Database connection pool size | `20` |
 
-> **Tip:** Query your database to find the max node ID: `SELECT MAX(id) FROM alf_node;`
+Use node ID ranges to process specific batches, resume interrupted runs, or split ingestion across instances.
 
-### Repository Settings
-
-```yaml
-alfresco:
-  bulk:
-    ingest:
-      repository:
-        page-size: 100
-```
-
-| Environment Variable | Description | Default |
-|---------------------|-------------|---------|
-| `ALFRESCO_BULK_INGEST_REPOSITORY_PAGESIZE` | Number of nodes to fetch per database query | `100` |
-
-### Event Publisher
-
-```yaml
-alfresco:
-  bulk:
-    ingest:
-      publisher:
-        endpoint: activemq:queue:bulk-ingester-events
-```
-
-| Environment Variable | Description |
-|---------------------|-------------|
-| `ALFRESCO_BULK_INGEST_PUBLISHER_ENDPOINT` | ActiveMQ queue for publishing ingestion events |
+> **Tip:** Find max node ID: `SELECT MAX(id) FROM alf_node;`
 
 ---
 
 ## Node Filtering
 
-Control which nodes are ingested using allow/deny lists. Filters are applied in order: a node must pass all allow lists (if specified) and not match any deny lists.
-
-```yaml
-alfresco:
-  filter:
-    aspect:
-      allow: []
-      deny: []
-    type:
-      allow: []
-      deny: []
-    path:
-      allow: []
-      deny: []
-```
+Control which nodes are ingested using allow/deny lists. A node must pass all allow lists (if specified) and not match any deny lists.
 
 | Environment Variable | Description |
 |---------------------|-------------|
@@ -122,100 +70,69 @@ alfresco:
 
 ### Filter Examples
 
-**By Node Type** - Use the prefixed QName format:
 ```yaml
 alfresco:
   filter:
     type:
-      allow:
-        - cm:content           # Standard content nodes
-        - custom:document      # Custom type from your model
-      deny:
-        - cm:thumbnail         # Exclude thumbnails
-        - cm:failedThumbnail
-```
-
-**By Aspect** - Use the prefixed QName format:
-```yaml
-alfresco:
-  filter:
+      allow: [cm:content, custom:document]
+      deny: [cm:thumbnail, cm:failedThumbnail]
     aspect:
-      allow:
-        - cm:versionable       # Only versioned content
-      deny:
-        - sys:hidden           # Exclude hidden nodes
-        - cm:workingcopy       # Exclude working copies
+      allow: [cm:versionable]
+      deny: [sys:hidden, cm:workingcopy]
+    path:
+      allow: [/app:company_home/st:sites/*/cm:documentLibrary/**]
+      deny: [/app:company_home/st:sites/*/cm:dataLists/**]
 ```
 
-**By Path** - Use repository paths:
-```yaml
-alfresco:
-  filter:
-    path:
-      allow:
-        - /app:company_home/st:sites/*/cm:documentLibrary/**  # Site document libraries
-      deny:
-        - /app:company_home/st:sites/*/cm:dataLists/**        # Exclude data lists
-```
+Use prefixed QName format for types and aspects. Paths support wildcards (`*` for single segment, `**` for multiple).
 
 ---
 
 ## Namespace Prefix Mapping
 
-The Alfresco database stores QNames as full namespace URIs, not prefixed names. You must provide a mapping file so the Bulk Ingester can convert them to the prefixed format expected by HX Insight.
-
-```yaml
-alfresco:
-  bulk:
-    ingest:
-      namespace-prefixes-mapping: classpath:namespace-prefixes.json
-```
+The Alfresco database stores QNames as full namespace URIs. You must provide a mapping file to convert them to the prefixed format expected by HX Insight.
 
 | Environment Variable | Description |
 |---------------------|-------------|
 | `ALFRESCO_BULK_INGEST_NAMESPACEPREFIXESMAPPING` | Path to namespace mapping file |
 
-### Generating the Mapping File
-
-Use the provided script to generate the mapping from your Alfresco instance:
+Generate the mapping from your Alfresco instance:
 
 ```bash
 python3 scripts/utils/namespaces-to-namespace-prefixes-file-generator.py \
-  --url http://localhost:8080/alfresco \
-  --username admin \
-  --password admin \
-  --output namespace-prefixes.json
+  --url http://localhost:8080/alfresco --username admin --password admin --output namespace-prefixes.json
 ```
 
-### Example Mapping File
-
-```json
-{
-  "http://www.alfresco.org/model/content/1.0": "cm",
-  "http://www.alfresco.org/model/system/1.0": "sys",
-  "http://www.alfresco.org/model/dictionary/1.0": "d",
-  "http://www.alfresco.org/model/site/1.0": "st",
-  "http://www.alfresco.org/model/application/1.0": "app",
-  "http://www.mycompany.com/model/custom/1.0": "custom"
-}
-```
-
-> **Important:** Include mappings for all custom content models used in your repository.
+The mapping file is JSON: `{"http://www.alfresco.org/model/content/1.0": "cm", ...}`. Include mappings for all custom content models.
 
 ---
 
 ## Logging
 
-```yaml
-logging:
-  level:
-    org.alfresco: INFO
+The Bulk Ingester uses [Spring Boot's logging configuration](https://docs.spring.io/spring-boot/reference/features/logging.html). Log levels can be set via environment variables or command-line arguments.
+
+### Setting Log Levels
+
+**Environment variables** (Docker/Kubernetes):
+```bash
+LOGGING_LEVEL_ORG_ALFRESCO=DEBUG
 ```
+
+**Command line** (JAR deployment):
+```bash
+java -jar alfresco-hxinsight-connector-bulk-ingester-*.jar \
+  --logging.level.org.alfresco=DEBUG
+```
+
+### Common Packages
 
 | Environment Variable | Description |
 |---------------------|-------------|
-| `LOGGING_LEVEL_ORG_ALFRESCO` | Log level for connector classes |
+| `LOGGING_LEVEL_ORG_ALFRESCO` | All connector classes |
+| `LOGGING_LEVEL_ORG_ALFRESCO_HXI_CONNECTOR_BULK_INGESTER` | Bulk Ingester specific |
+| `LOGGING_LEVEL_ORG_SPRINGFRAMEWORK` | Spring Framework |
 
-**Useful log levels:**
-- `INFO` - Progress updates, summary statistics
-- `DEBUG` - Individual node processing details
+### Recommended Levels
+
+- **Production:** `INFO` - Shows progress updates and summary statistics
+- **Troubleshooting:** `DEBUG` - Shows individual node processing details

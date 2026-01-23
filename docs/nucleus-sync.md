@@ -6,6 +6,8 @@
 
 The Nucleus User Sync application periodically synchronizes Alfresco users and groups with the Nucleus identity system. This enables HX Insight to understand user permissions and provide personalized search results.
 
+> **Default configuration:** See [`application.yml`](../nucleus-sync/src/main/resources/application.yml) for all defaults.
+
 ## Required Configuration
 
 ### Alfresco Connection

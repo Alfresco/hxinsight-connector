@@ -121,63 +121,13 @@ See the `docker-compose.yml` in that directory for a full example configuration.
 
 ### Example Deployment
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: hxi-live-ingester
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: hxi-live-ingester
-  template:
-    metadata:
-      labels:
-        app: hxi-live-ingester
-    spec:
-      containers:
-      - name: live-ingester
-        image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
-        resources:
-          requests:
-            memory: "256Mi"
-          limits:
-            memory: "512Mi"
-        env:
-        - name: SPRING_ACTIVEMQ_BROKERURL
-          value: "nio://activemq:61616"
-        - name: ALFRESCO_REPOSITORY_BASEURL
-          value: "http://alfresco:8080/alfresco"
-        - name: ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL
-          value: "http://shared-file-store:8099"
-        - name: HYLANDEXPERIENCE_INSIGHT_INGESTION_BASEURL
-          value: "https://hxinsight.hyland.com"
-        - name: AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID
-          valueFrom:
-            secretKeyRef:
-              name: hxi-credentials
-              key: client-id
-        - name: AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTSECRET
-          valueFrom:
-            secretKeyRef:
-              name: hxi-credentials
-              key: client-secret
-```
+A minimal Kubernetes deployment consists of:
+1. **Secret** for HXI credentials (`client-id`, `client-secret`, `environment-key`)
+2. **Deployment** referencing the connector image with environment variables
 
-### Using Secrets
+Key environment variables to set: `SPRING_ACTIVEMQ_BROKERURL`, `ALFRESCO_REPOSITORY_BASEURL`, `HYLANDEXPERIENCE_INSIGHT_INGESTION_BASEURL`, and auth credentials (via `secretKeyRef`).
 
-```yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: hxi-credentials
-type: Opaque
-stringData:
-  client-id: <your-client-id>
-  client-secret: <your-client-secret>
-  environment-key: <your-env-key>
-```
+See each component's configuration page for the full list of required environment variables.
 
 ---
 

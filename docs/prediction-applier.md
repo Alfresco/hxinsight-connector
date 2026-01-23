@@ -6,6 +6,8 @@
 
 The Prediction Applier polls HX Insight for AI-generated predictions and applies them back to Alfresco documents as metadata. This enables automatic tagging, classification, and enrichment of documents based on HX Insight's AI analysis.
 
+> **Default configuration:** See [`application.yml`](../prediction-applier/src/main/resources/application.yml) for all defaults.
+
 ## Required Configuration
 
 ### ActiveMQ Connection

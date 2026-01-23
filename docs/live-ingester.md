@@ -4,6 +4,8 @@
 
 The Live Ingester processes real-time events from Alfresco and sends documents to Hyland Experience Insight (HXI) for indexing. It is responsible for keeping the data in Knowledge Discovery up to date with the day-to-day changes made in Alfresco Content Services.
 
+> **Default configuration:** See [`application.yml`](../live-ingester/src/main/resources/application.yml) for all defaults.
+
 ## Required Configuration
 
 ### ActiveMQ Connection
@@ -97,31 +99,29 @@ auth:
 
 ---
 
+## Bulk Ingester Integration
+
+The Live Ingester receives events from the Bulk Ingester via an ActiveMQ queue. This allows the Bulk Ingester to discover documents from the database while the Live Ingester handles the actual ingestion to HX Insight.
+
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `ALFRESCO_BULKINGESTER_ENDPOINT` | ActiveMQ queue to receive bulk ingestion events | `activemq:queue:bulk-ingester-events` |
+
+> **Important:** This endpoint must match the `ALFRESCO_BULK_INGEST_PUBLISHER_ENDPOINT` configured in the [Bulk Ingester](bulk-ingester.md).
+
+---
+
 ## Transform Service Configuration
 
 The Live Ingester uses Alfresco Transform Service (ATS) to convert documents before sending to HX Insight.
-
-```yaml
-alfresco:
-  transform:
-    request:
-      endpoint: activemq:queue:acs-repo-transform-request
-      timeout: 20000
-    response:
-      queue-name: org.alfresco.hxinsight-connector.transform.response
-      endpoint: activemq:queue:${alfresco.transform.response.queue-name}
-    shared-file-store:
-      base-url: http://shared-file-store:8099
-      file-endpoint: ${alfresco.transform.shared-file-store.base-url}/alfresco/api/-default-/private/sfs/versions/1/file
-```
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
 | `ALFRESCO_TRANSFORM_REQUEST_ENDPOINT` | ActiveMQ queue to send transform requests to ATS | `activemq:queue:acs-repo-transform-request` |
 | `ALFRESCO_TRANSFORM_REQUEST_TIMEOUT` | Max time to wait for transform to complete (ms) | `20000` |
+| `ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL` | Shared File Store base URL | Required |
 | `ALFRESCO_TRANSFORM_RESPONSE_QUEUENAME` | Queue name for receiving transform responses | `org.alfresco.hxinsight-connector.transform.response` |
-| `ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL` | Shared File Store base URL | - |
-| `ALFRESCO_TRANSFORM_SHAREDFILESTORE_FILEENDPOINT` | Shared File Store endpoint for downloading transformed files (derived from `base-url`) | - |
+| `ALFRESCO_TRANSFORM_RESPONSE_RETRYINGESTION_ATTEMPTS` | Retry attempts for failed ingestion after transform (`-1` = unlimited) | `-1` |
 
 ---
 
@@ -153,52 +153,13 @@ alfresco:
   transform:
     mime-type:
       mapping:
-        # Exact matches
-        image/png: image/png
-        image/bmp: image/png
-        image/gif: image/png
-        # Subtype wildcard - matches any image/* not listed above
-        image/*: image/jpeg
-        # Universal wildcard - catch-all for anything else
-        "*": application/pdf
+        image/png: image/png    # Exact match (highest priority)
+        image/*: image/jpeg     # Subtype wildcard
+        video/*: ""             # Empty string = skip this type
+        "*": application/pdf    # Universal catch-all (lowest priority)
 ```
 
-### Wildcard Matching
-
-Wildcards allow you to handle groups of MIME types:
-
-| Pattern | Matches |
-|---------|---------|
-| `image/*` | Any `image/` type (e.g., `image/png`, `image/webp`) |
-| `text/*` | Any `text/` type (e.g., `text/plain`, `text/html`) |
-| `application/*` | Any `application/` type |
-| `*` | Everything (universal catch-all) |
-
-### Lookup Order
-
-**Exact matches always take precedence over wildcards:**
-
-1. **Exact match** - e.g., `image/png` → `image/png`
-2. **Subtype wildcard** - e.g., `image/*` → `image/jpeg`
-3. **Universal wildcard** - e.g., `*` → `application/pdf`
-4. **No match** - content is skipped (not ingested)
-
-This means you can define specific handling for certain types while using wildcards as fallbacks.
-
-### Skipping Content Types
-
-To exclude a MIME type from content ingestion, map it to an empty string:
-
-```yaml
-alfresco:
-  transform:
-    mime-type:
-      mapping:
-        video/*: ""           # Skip all videos
-        audio/*: ""           # Skip all audio
-        application/*: application/pdf
-        "*": application/pdf  # Everything else to PDF
-```
+**Lookup order:** Exact match → Subtype wildcard (`type/*`) → Universal wildcard (`*`) → No match (skipped)
 
 ### Transform with CIC Document Filters
 
@@ -221,56 +182,16 @@ alfresco:
 
 ### Setting MIME Type Mappings in Docker Compose
 
-MIME type mappings **cannot be set using simple environment variables** because MIME type keys contain slashes (e.g., `image/png`) which cannot be represented in environment variable names.
+MIME type mappings **cannot be set using simple environment variables** because MIME type keys contain slashes. Use one of these approaches:
 
-**Option 1: Use `SPRING_APPLICATION_JSON`**
-
-Pass the mapping as JSON ([not YAML](https://github.com/spring-projects/spring-boot/issues/4239#issuecomment-149908348)) in your docker-compose file as documented in the [Spring Boot docs](https://docs.spring.io/spring-boot/reference/features/external-config.html).
-
-```yaml
-services:
-  live-ingester:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
-    environment:
-      SPRING_APPLICATION_JSON: |
-        {
-          ...
-        }
-```
-
-**Option 2: Mount a custom configuration file**
-
-Create your own `application.yml` based on the [example in this repository](../live-ingester/src/main/resources/application.yml), then mount it:
-
-```yaml
-services:
-  live-ingester:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
-    volumes:
-      - ./custom-application.yml:/app/resources/application.yml
-    environment:
-      SPRING_CONFIG_LOCATION: file:/app/resources/application.yml
-```
+- **`SPRING_APPLICATION_JSON`** - Pass mappings as JSON (see [Spring Boot docs](https://docs.spring.io/spring-boot/reference/features/external-config.html))
+- **Mount a config file** - Mount a volume pointing to a custom `application.yml` and set `SPRING_CONFIG_LOCATION=file:/path/to/application.yml`
 
 ---
 
 ## Node Filtering
 
 Control which nodes are ingested using allow/deny lists. Filters are applied in order: a node must pass all allow lists (if specified) and not match any deny lists.
-
-```yaml
-alfresco:
-  filter:
-    aspect:
-      allow: []
-      deny: []
-    type:
-      allow: []
-      deny: []
-    path:
-      allow: []
-      deny: []
-```
 
 | Environment Variable | Description |
 |---------------------|-------------|
@@ -281,47 +202,27 @@ alfresco:
 | `ALFRESCO_FILTER_PATH_ALLOW` | Paths to include |
 | `ALFRESCO_FILTER_PATH_DENY` | Paths to exclude |
 
-### Filter Examples
+### Example
 
-**By Node Type** - Use the prefixed QName format:
 ```yaml
 alfresco:
   filter:
     type:
-      allow:
-        - cm:content           # Standard content nodes
-        - st:site              # Site nodes
-        - custom:document      # Custom type from your model
-      deny:
-        - cm:thumbnail         # Exclude thumbnails
-        - cm:failedThumbnail
-```
-
-**By Aspect** - Use the prefixed QName format:
-```yaml
-alfresco:
-  filter:
+      allow: [cm:content, st:site, custom:document]
+      deny: [cm:thumbnail, cm:failedThumbnail]
     aspect:
-      allow:
-        - cm:versionable       # Only versioned content
-        - cm:titled            # Only content with titles
-      deny:
-        - sys:hidden           # Exclude hidden nodes
-        - cm:workingcopy       # Exclude working copies
-```
-
-**By Path** - Use repository paths with wildcards:
-```yaml
-alfresco:
-  filter:
+      allow: [cm:versionable, cm:titled]
+      deny: [sys:hidden, cm:workingcopy]
     path:
       allow:
-        - /app:company_home/st:sites/*/cm:documentLibrary/**  # All site document libraries
-        - /app:company_home/cm:shared/**                       # Shared folder
+        - /app:company_home/st:sites/*/cm:documentLibrary/**
+        - /app:company_home/cm:shared/**
       deny:
-        - /app:company_home/st:sites/*/cm:dataLists/**        # Exclude data lists
-        - /**/cm:temp/**                                       # Exclude temp folders anywhere
+        - /app:company_home/st:sites/*/cm:dataLists/**
+        - /**/cm:temp/**
 ```
+
+Use prefixed QName format for types and aspects. Paths support wildcards (`*` for single segment, `**` for multiple).
 
 ### Filter Logic
 
@@ -334,69 +235,34 @@ alfresco:
 
 ## Retry Configuration
 
-All external calls support retry configuration with exponential backoff.
+All external calls support retry configuration with exponential backoff. Configure via `*.retry.attempts`, `*.retry.initial-delay`, and `*.retry.delay-multiplier` for these prefixes:
 
-```yaml
-hyland-experience:
-  ingester:
-    retry:
-      attempts: 10
-      initial-delay: 500
-      delay-multiplier: 2
-```
+- `auth` - Authentication requests
+- `alfresco.transform.shared-file-store` - File downloads from Shared File Store
+- `hyland-experience.storage.location` - Storage location requests
+- `hyland-experience.storage.upload` - File uploads to HXI storage
+- `hyland-experience.ingester` - Ingestion event requests
 
-Available retry configurations:
-- `auth.retry.*` - Authentication requests to HXI
-- `alfresco.transform.shared-file-store.retry.*` - File downloads from Shared File Store
-- `hyland-experience.storage.location.retry.*` - Storage location requests to HXI
-- `hyland-experience.storage.upload.retry.*` - File uploads to HXI storage
-- `hyland-experience.ingester.retry.*` - Ingestion event requests to HXI
-
-| Property | Description | Default |
-|----------|-------------|---------|
-| `attempts` | Maximum retry attempts | `10` |
-| `initial-delay` | Initial delay between retries (ms) | `500` |
-| `delay-multiplier` | Multiplier for exponential backoff | `2` |
+Default: 10 attempts, 500ms initial delay, 2x multiplier.
 
 ---
 
 ## Logging
 
-The Live Ingester uses [Spring Boot's logging configuration](https://docs.spring.io/spring-boot/reference/features/logging.html). Log levels can be set via configuration files, command-line arguments, or environment variables.
+The Live Ingester uses [Spring Boot's logging configuration](https://docs.spring.io/spring-boot/reference/features/logging.html). Log levels can be set via environment variables or command-line arguments.
 
-### Configuration File
+### Setting Log Levels
 
-```yaml
-logging:
-  level:
-    org.alfresco: INFO
+**Environment variables** (Docker/Kubernetes):
+```bash
+LOGGING_LEVEL_ORG_ALFRESCO=DEBUG
+LOGGING_LEVEL_ORG_APACHE_CAMEL=WARN
 ```
 
-### Setting Log Levels from Docker Compose
-
-```yaml
-services:
-  live-ingester:
-    image: quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
-    environment:
-      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
-      # You can also target specific packages:
-      LOGGING_LEVEL_ORG_APACHE_CAMEL: WARN
-```
-
-### Setting Log Levels from JAR Command Line
-
+**Command line** (JAR deployment):
 ```bash
 java -jar alfresco-hxinsight-connector-live-ingester-*.jar \
-  --logging.level.org.alfresco=DEBUG \
-  --logging.level.org.apache.camel=WARN
-```
-
-Or using environment variables:
-
-```bash
-export LOGGING_LEVEL_ORG_ALFRESCO=DEBUG
-java -jar alfresco-hxinsight-connector-live-ingester-*.jar
+  --logging.level.org.alfresco=DEBUG
 ```
 
 ### Common Packages
