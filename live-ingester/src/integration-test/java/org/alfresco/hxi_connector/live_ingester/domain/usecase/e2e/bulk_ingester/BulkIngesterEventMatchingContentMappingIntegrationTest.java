@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -38,13 +38,14 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ETestBase
 {
     private static final long TIMESTAMP = 1_308_061_016L;
+    private static final String NODE_ID = "37be157c-741c-4e51-b781-20d36e4e335a";
 
     @ParameterizedTest
     @CsvSource({
-            "image/gif,image/png", "image/bmp,image/png", "image/png,image/png", "image/raw,image/png",
-            "image/jpeg,image/jpeg", "image/heic,image/jpeg", "image/webp,image/jpeg"
+            "image/gif,image/png", "image/bmp,image/png", "image/raw,image/png",
+            "image/heic,image/jpeg", "image/webp,image/jpeg"
     })
-    void givenMappingForImage_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
+    void givenMappingForImage_whenContentRequiresTransform_thenSendATSRequest(
             String sourceMimeType, String expectedTargetMimeType)
     {
         // given
@@ -130,11 +131,83 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
     }
 
     @ParameterizedTest
+    @CsvSource({"image/png,image/png", "image/jpeg,image/jpeg"})
+    void givenMappingForImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
+            String sourceMimeType, String expectedTargetMimeType)
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent(NODE_ID, sourceMimeType);
+
+        // when
+        String repoEvent = """
+                {
+                  "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
+                  "timestamp": %s,
+                  "contentInfo": {
+                    "contentSize": 330,
+                    "encoding": "ISO-8859-1",
+                    "mimetype": "%s"
+                  },
+                  "properties": {
+                    "cm:name": "dashboard.xml",
+                    "cm:isContentIndexed": true,
+                    "cm:isIndexed": false,
+                    "createdAt": "2011-06-14T02:16:56.000Z",
+                    "modifiedAt": "2011-06-15T02:16:56.000Z",
+                    "type": "cm:content",
+                    "createdBy": "admin",
+                    "modifiedBy": "hr_user",
+                    "aspectsNames": [
+                      "cm:indexControl",
+                      "cm:auditable"
+                    ]
+                  }
+                }""".formatted(TIMESTAMP, sourceMimeType);
+        containerSupport.raiseBulkIngesterEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                [
+                  {
+                    "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
+                    "eventType" : "createOrUpdate",
+                    "sourceTimestamp": %s,
+                    "properties" : {
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
+                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
+                      "createdAt": {"value": "2011-06-14T02:16:56.000Z", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2011-06-15T02:16:56.000Z", "annotation": "dateModified"},
+                      "cm:name": {
+                        "value": "dashboard.xml",
+                        "annotation" : "name"
+                      },
+                      "cm:isContentIndexed": {"type": "boolean", "value": true},
+                      "cm:isIndexed": {"type": "boolean", "value": false},
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "name": "dashboard.xml",
+                            "size": 330,
+                            "content-type": "%s"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]""".formatted(TIMESTAMP, sourceMimeType);
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        containerSupport.expectAlfrescoContentDownloaded(NODE_ID);
+    }
+
+    @ParameterizedTest
     @CsvSource({
-            "application/msword,application/pdf", "application/pdf,application/pdf",
-            "text/plain,application/pdf", "text/html,application/pdf"
+            "application/msword,application/pdf", "text/plain,application/pdf", "text/html,application/pdf"
     })
-    void givenMappingForNonImage_whenContentWithMatchingTypeIngested_thenProcessWithTransformRequest(
+    void givenMappingForNonImage_whenContentRequiresTransform_thenSendATSRequest(
             String sourceMimeType, String expectedTargetMimeType)
     {
         // given
@@ -214,5 +287,78 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
                     "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
                 }""".formatted(REQUEST_ID_PLACEHOLDER, expectedTargetMimeType, expectedTargetMimeType, TIMESTAMP);
         containerSupport.verifyATSRequestReceived(expectedATSRequest);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"application/pdf,application/pdf"})
+    void givenMappingForNonImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
+            String sourceMimeType, String expectedTargetMimeType)
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent(NODE_ID, sourceMimeType);
+
+        // when
+        String repoEvent = """
+                {
+                  "nodeId": "37be157c-741c-4e51-b781-20d36e4e335a",
+                  "timestamp": %s,
+                  "contentInfo": {
+                    "contentSize": 330,
+                    "encoding": "ISO-8859-1",
+                    "mimetype": "%s"
+                  },
+                  "properties": {
+                    "cm:name": "dashboard.xml",
+                    "cm:isContentIndexed": true,
+                    "cm:isIndexed": false,
+                    "createdAt": "2011-06-14T02:16:56.000Z",
+                    "modifiedAt": "2011-06-15T02:16:56.000Z",
+                    "type": "cm:content",
+                    "createdBy": "admin",
+                    "modifiedBy": "hr_user",
+                    "aspectsNames": [
+                      "cm:indexControl",
+                      "cm:auditable"
+                    ]
+                  }
+                }""".formatted(TIMESTAMP, sourceMimeType);
+        containerSupport.raiseBulkIngesterEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                [
+                  {
+                    "objectId" : "37be157c-741c-4e51-b781-20d36e4e335a",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
+                    "eventType" : "createOrUpdate",
+                    "sourceTimestamp": %s,
+                    "properties" : {
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "hr_user", "annotation": "modifiedBy"},
+                      "aspectsNames": {"value": ["cm:indexControl", "cm:auditable"], "annotation": "aspects"},
+                      "createdAt": {"value": "2011-06-14T02:16:56.000Z", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2011-06-15T02:16:56.000Z", "annotation": "dateModified"},
+                      "cm:name": {
+                        "value": "dashboard.xml",
+                        "annotation" : "name"
+                      },
+                      "cm:isContentIndexed": {"type": "boolean", "value": true},
+                      "cm:isIndexed": {"type": "boolean", "value": false},
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "name": "dashboard.xml",
+                            "size": 330,
+                            "content-type": "%s"
+                          }
+                        }
+                      }
+                    }
+                  }
+                ]""".formatted(TIMESTAMP, sourceMimeType);
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        containerSupport.expectAlfrescoContentDownloaded(NODE_ID);
     }
 }

@@ -24,22 +24,21 @@
  * #L%
  */
 
-package org.alfresco.hxi_connector.live_ingester.domain.usecase.content;
+package org.alfresco.hxi_connector.live_ingester.domain.ports.repository;
 
-import static org.alfresco.hxi_connector.common.util.EnsureUtils.ensureNotBlank;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
-public record TriggerContentIngestionCommand(String nodeId, String sourceMimeType, String targetMimeType, long timestamp)
+/**
+ * Port interface for downloading content directly from Alfresco repository. Used when content does not require transformation (source and target MIME types match).
+ */
+public interface RepositoryContentStorage
 {
-    public TriggerContentIngestionCommand
-    {
-        ensureNotBlank(nodeId, "Node id cannot be blank");
-    }
-
     /**
-     * @return true if the source and target MIME types are the same, meaning no transformation is needed
+     * Downloads content for a node directly from the Alfresco repository.
+     *
+     * @param nodeId
+     *            the node ID (UUID format, without workspace://SpacesStore/ prefix)
+     * @return the file content
      */
-    public boolean requiresTransform()
-    {
-        return !sourceMimeType.equals(targetMimeType);
-    }
+    File downloadContent(String nodeId);
 }

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -115,6 +115,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         // Repo event showing the content was updated, but the content metadata stayed the same.
         String repoEvent = """
@@ -162,16 +163,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         containerSupport.raiseRepoEvent(repoEvent);
 
         // then
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e65");
         containerSupport.expectHxIngestMessageReceived(
                 """
                         [
@@ -926,6 +918,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         String repoEvent = """
                 {
@@ -941,7 +934,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                     "resource": {
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
-                      "name": "purchase-order-scan.pdf",
+                      "name": "purchase-order-scan.doc",
                       "nodeType": "cm:content",
                       "primaryHierarchy": ["5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d"],
                       "createdAt": "2021-01-21T11:14:15.695Z",
@@ -955,7 +948,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "displayName": "Alice Beecher"
                       },
                       "content": {
-                        "mimeType": "application/pdf",
+                        "mimeType": "application/doc",
                         "sizeInBytes": 531152,
                         "encoding": "UTF-8"
                       },
@@ -997,6 +990,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         String repoEvent = """
                 {
@@ -1051,16 +1045,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-or-update-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e65");
     }
 
     @Test
@@ -1068,6 +1053,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         String repoEvent = """
                 {
@@ -1121,15 +1107,6 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-or-update-document.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e65");
     }
 }

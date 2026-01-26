@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -86,6 +86,7 @@ public class E2ETestBase
     private static WireMock hxAuthMock;
     private static WireMock hxInsightMock;
     private static WireMock sfsMock;
+    private static WireMock acsMock;
     protected ContainerSupport containerSupport;
 
     @Autowired
@@ -126,6 +127,12 @@ public class E2ETestBase
         registry.add("local.aws.secret-access-key", localStackServer::getSecretKey);
 
         registry.add("alfresco.repository.discovery-endpoint", () -> acsServer.getBaseUrl() + "/alfresco/api/discovery");
+        registry.add("alfresco.repository.base-url", acsServer::getBaseUrl);
+    }
+
+    public static WireMock getAcsMock()
+    {
+        return acsMock;
     }
 
     @BeforeAll
@@ -136,12 +143,12 @@ public class E2ETestBase
         hxAuthMock = new WireMock(hxAuthServer.getHost(), hxAuthServer.getPort());
         hxInsightMock = new WireMock(hxInsightServer.getHost(), hxInsightServer.getPort());
         sfsMock = new WireMock(sfsServer.getHost(), sfsServer.getPort());
+        acsMock = new WireMock(acsServer.getHost(), acsServer.getPort());
         WireMock.configureFor(hxAuthMock);
         WireMock.givenThat(post(AuthUtils.TOKEN_PATH)
                 .willReturn(aResponse()
                         .withStatus(OK)
                         .withBody(AuthUtils.createAuthResponseBody())));
-        WireMock acsMock = new WireMock(acsServer.getHost(), acsServer.getPort());
         WireMock.configureFor(acsMock);
         WireMock.givenThat(get("/alfresco/api/discovery")
                 .willReturn(aResponse()
@@ -185,6 +192,8 @@ public class E2ETestBase
         hxInsightMock.resetMappings();
         sfsMock.resetRequests();
         sfsMock.resetMappings();
+        // Only reset requests for ACS mock - keep the discovery endpoint mapping but remove content endpoints
+        acsMock.resetRequests();
         containerSupport.clearATSQueue();
     }
 

@@ -18,6 +18,7 @@ A Spring Boot application that listens to Alfresco repository events via ActiveM
 
 **Dependencies:**
 - ActiveMQ (for receiving Alfresco events)
+- Alfresco Repository REST API (for downloading content)
 - Alfresco Transform Service (for content transformation)
 - Shared File Store (for transformed content)
 

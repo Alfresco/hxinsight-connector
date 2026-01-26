@@ -57,7 +57,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       "@type": "NodeResource",
                       "id": "d71dd823-82c7-477c-8490-04cb0e826e65",
                       "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
-                      "name": "purchase-order-scan.pdf",
+                      "name": "purchase-order-scan.doc",
                       "nodeType": "cm:content",
                       "createdByUser": {
                         "id": "admin",
@@ -70,7 +70,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       },
                       "modifiedAt": "2021-01-26T10:29:42.529Z",
                       "content": {
-                        "mimeType": "application/pdf",
+                        "mimeType": "application/doc",
                         "sizeInBytes": 531152,
                         "encoding": "UTF-8"
                       },
@@ -112,6 +112,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("2f794000-7b44-4bd7-b940-007b44ebd755", "image/png");
 
         String repoEvent = """
                 {
@@ -178,16 +179,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-thumbnail.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/2f794000-7b44-4bd7-b940-007b44ebd755",
-                    "targetMediaType": "image/png",
-                    "clientData": "{\\"nodeRef\\":\\"2f794000-7b44-4bd7-b940-007b44ebd755\\",\\"targetMimeType\\":\\"image/png\\",\\"retryAttempt\\":0,\\"timestamp\\":1743074879280}",
-                    "transformOptions": { "resizeWidth": "3840", "resizeHeight": "3840", "allowEnlargement": "false", "timeout": "20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("2f794000-7b44-4bd7-b940-007b44ebd755");
     }
 
     @Test
@@ -195,6 +187,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         String repoEvent = """
                 {
@@ -249,16 +242,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/ancestors/create-request-with-ancestors.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e65");
     }
 
     @Test
@@ -266,6 +250,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         String repoEvent = """
                 {
@@ -320,16 +305,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/ancestors/create-request-without-ancestors.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e65");
     }
 
     @Test
@@ -337,6 +313,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         String repoEvent = """
                 {
@@ -389,16 +366,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/ancestors/create-request-without-ancestors.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e65");
     }
 
     @Test
@@ -459,6 +427,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e65", "application/pdf");
 
         String repoEvent = """
                 {
@@ -509,16 +478,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
         HxInsightRequest request = RequestLoader.load("/rest/hxinsight/requests/create-request-without-permission.yml");
         containerSupport.expectHxIngestMessageReceived(request.body());
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e65",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e65\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611656982995}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e65");
     }
 
 }
