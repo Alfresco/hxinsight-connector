@@ -84,6 +84,7 @@ quay.io/alfresco/alfresco-hxinsight-connector-nucleus-sync:<version>
 ```bash
 docker run -d \
   --name live-ingester \
+  -e APPLICATION_SOURCEID=<source-id> \
   -e SPRING_ACTIVEMQ_BROKERURL=nio://activemq:61616 \
   -e ALFRESCO_REPOSITORY_BASEURL=http://alfresco:8080/alfresco \
   -e ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL=http://shared-file-store:8099 \
@@ -94,6 +95,8 @@ docker run -d \
   -e AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY=<env-key> \
   quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
 ```
+
+The `APPLICATION_SOURCEID` is generated when you register your Alfresco instance in CIC for Knowledge Discovery. In some systems (Nucleus) then it is referred to as "system id", where as Knowledge Discovery calls it a "source id."
 
 ### Docker Compose
 
@@ -124,8 +127,6 @@ See the `docker-compose.yml` in that directory for a full example configuration.
 A minimal Kubernetes deployment consists of:
 1. **Secret** for HXI credentials (`client-id`, `client-secret`, `environment-key`)
 2. **Deployment** referencing the connector image with environment variables
-
-Key environment variables to set: `SPRING_ACTIVEMQ_BROKERURL`, `ALFRESCO_REPOSITORY_BASEURL`, `HYLANDEXPERIENCE_INSIGHT_INGESTION_BASEURL`, and auth credentials (via `secretKeyRef`).
 
 See each component's configuration page for the full list of required environment variables.
 

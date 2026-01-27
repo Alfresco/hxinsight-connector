@@ -102,7 +102,7 @@ auth:
 
 | Environment Variable | Description |
 |---------------------|-------------|
-| `APPLICATION_SOURCEID` | Unique identifier for this connector instance (UUID). Used to identify the source of ingested content in HX Insight. A default is provided but can be overridden for multi-instance deployments. |
+| `APPLICATION_SOURCEID` | Unique identifier for the Alfresco instance (UUID). Used to identify the source of ingested content in HX Insight. Generate a new UUID for each deployment. |
 
 ---
 
