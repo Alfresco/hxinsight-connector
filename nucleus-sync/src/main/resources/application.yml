@@ -35,7 +35,7 @@ auth:
 
 alfresco:
   base-url: ${ALFRESCO_BASE_URL}
-  page-size: 100
+  page-size: 1000
   sync-batch-size: 1000
   user-group:
     fetch-timeout: PT5M
@@ -44,6 +44,7 @@ nucleus:
   idp-base-url: ${NUCLEUS_IDP_BASE_URL}
   base-url: ${NUCLEUS_BASE_URL}
   system-id: ${NUCLEUS_SYSTEM_ID}
+  page-size: 1000
   delete-group-member-batch-size: ${DELETE_BATCH_SIZE}
 
 logging:
