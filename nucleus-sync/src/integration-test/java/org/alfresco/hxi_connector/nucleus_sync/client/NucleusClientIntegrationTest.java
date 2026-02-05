@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -65,6 +65,8 @@ public class NucleusClientIntegrationTest
     private NucleusClient nucleusClient;
 
     private static final String SYSTEM_ID = "test-system-id";
+    private static final String CURSOR = "test-cursor";
+    private static final Integer LIMIT = 1;
 
     @BeforeEach
     void setUp()
@@ -93,6 +95,7 @@ public class NucleusClientIntegrationTest
                 SYSTEM_ID,
                 nucleusBaseUrl,
                 idpBaseUrl,
+                LIMIT,
                 50,
                 5);
     }
@@ -104,10 +107,10 @@ public class NucleusClientIntegrationTest
     }
 
     @Test
-    void testGetAllIamUsers_Success()
+    void testGetAllIamUsers_WithPagination_Success()
     {
         // Arrange
-        String responseBody = """
+        String page1Response = """
                 {
                   "users": [
                     {
@@ -115,7 +118,15 @@ public class NucleusClientIntegrationTest
                       "userId": "714e1cbd-d88a-4fd1-a491-be438f7a2233",
                       "email": "Jane.Doe+cin@hyland.com",
                       "preferredLanguage": "en-US"
-                    },
+                    }
+                  ],
+                  "next": "/api/users?cursor=%1$s&limit=%2$s"
+                }
+                """.formatted(CURSOR, LIMIT);
+
+        String page2Response = """
+                {
+                  "users": [
                     {
                       "userName": "moliver",
                       "userId": "34f8e319-6a8f-4359-a5b1-d26a04a4abc0",
@@ -126,12 +137,22 @@ public class NucleusClientIntegrationTest
                 }
                 """;
 
-        wireMockServer.stubFor(get(urlEqualTo("/api/users"))
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/users"))
+                .withQueryParam("limit", equalTo("1"))
                 .withHeader("Authorization", equalTo("Bearer nucleus-token"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody)));
+                        .withBody(page1Response)));
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/api/users"))
+                .withQueryParam("limit", equalTo(LIMIT.toString()))
+                .withQueryParam("cursor", equalTo(CURSOR))
+                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(page2Response)));
 
         // Act
         List<IamUser> users = nucleusClient.getAllIamUsers();
@@ -145,16 +166,24 @@ public class NucleusClientIntegrationTest
     }
 
     @Test
-    void testGetAllExternalGroups_Success()
+    void testGetAllExternalGroups_WithPagination_Success()
     {
         // Arrange
-        String responseBody = """
+        String page1response = """
                 {
                   "items": [
                     {
                       "externalGroupId": "GROUP_HR",
                       "attributes": []
-                    },
+                    }
+                  ],
+                  "next": "/system-integrations/systems/%1$s/groups?cursor=%2$s&limit=%3$s"
+                }
+                """.formatted(SYSTEM_ID, CURSOR, LIMIT);
+
+        String page2response = """
+                {
+                  "items": [
                     {
                       "externalGroupId": "GROUP_MARKETING",
                       "attributes": []
@@ -163,12 +192,22 @@ public class NucleusClientIntegrationTest
                 }
                 """;
 
-        wireMockServer.stubFor(get(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/groups"))
+        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/groups"))
+                .withQueryParam("limit", equalTo(LIMIT.toString()))
                 .withHeader("Authorization", equalTo("Bearer nucleus-token"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody)));
+                        .withBody(page1response)));
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/groups"))
+                .withQueryParam("limit", equalTo(LIMIT.toString()))
+                .withQueryParam("cursor", equalTo(CURSOR))
+                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(page2response)));
 
         // Act
         List<NucleusGroupOutput> groups = nucleusClient.getAllExternalGroups();
@@ -180,17 +219,25 @@ public class NucleusClientIntegrationTest
     }
 
     @Test
-    void testGetCurrentUserMappings_Success()
+    void testGetCurrentUserMappings_WithPagination_Success()
     {
         // Arrange
-        String responseBody = """
+        String page1Response = """
                 {
                   "items": [
                     {
                       "userId": "18a17e9d-dbb1-4643-a2e7-3e1859961f5b",
                       "externalUserId": "jdoe",
                       "attributes": []
-                    },
+                    }
+                  ],
+                  "next": "/system-integrations/systems/%1$s/user-mappings?cursor=%2$s&limit=%3$s"
+                }
+                """.formatted(SYSTEM_ID, CURSOR, LIMIT);
+
+        String page2Response = """
+                {
+                  "items": [
                     {
                       "userId": "24bd547d-58b3-4722-889a-84e68c41615b",
                       "externalUserId": "moliver",
@@ -200,12 +247,22 @@ public class NucleusClientIntegrationTest
                 }
                 """;
 
-        wireMockServer.stubFor(get(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings"))
+        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings"))
+                .withQueryParam("limit", equalTo(LIMIT.toString()))
                 .withHeader("Authorization", equalTo("Bearer nucleus-token"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody)));
+                        .withBody(page1Response)));
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings"))
+                .withQueryParam("limit", equalTo(LIMIT.toString()))
+                .withQueryParam("cursor", equalTo(CURSOR))
+                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(page2Response)));
 
         // Act
         List<NucleusUserMappingOutput> mappings = nucleusClient.getCurrentUserMappings();
@@ -217,34 +274,48 @@ public class NucleusClientIntegrationTest
     }
 
     @Test
-    void testGetCurrentGroupMemberships_Success()
+    void testGetCurrentGroupMemberships_WithPagination_Success()
     {
         // Arrange
-        String responseBody = """
+        String page1Response = """
                 {
                   "items": [
                     {
                       "externalGroupId": "GROUP_Frontend_Team",
                       "memberExternalUserId": "jdoe"
-                    },
+                    }
+                  ],
+                  "next": "/system-integrations/systems/%1$s/group-members?cursor=%2$s&limit=%3$s"
+                }
+                """.formatted(SYSTEM_ID, CURSOR, LIMIT);
+
+        String page2Response = """
+                {
+                  "items": [
                     {
                       "externalGroupId": "GROUP_Frontend_Team",
                       "memberExternalUserId": "moliver"
-                    },
-                    {
-                      "externalGroupId": "GROUP_Backend_Team",
-                      "memberExternalUserId": "aturing"
                     }
                   ]
                 }
                 """;
 
-        wireMockServer.stubFor(get(urlEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
+        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
+                .withQueryParam("limit", equalTo(LIMIT.toString()))
                 .withHeader("Authorization", equalTo("Bearer nucleus-token"))
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody(responseBody)));
+                        .withBody(page1Response)));
+
+        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
+                .withQueryParam("limit", equalTo(LIMIT.toString()))
+                .withQueryParam("cursor", equalTo(CURSOR))
+                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody(page2Response)));
 
         // Act
         List<NucleusGroupMembershipOutput> memberships = nucleusClient.getCurrentGroupMemberships();
@@ -252,8 +323,7 @@ public class NucleusClientIntegrationTest
         // Assert
         assertThat(memberships).containsExactlyInAnyOrder(
                 new NucleusGroupMembershipOutput("GROUP_Frontend_Team", "jdoe"),
-                new NucleusGroupMembershipOutput("GROUP_Frontend_Team", "moliver"),
-                new NucleusGroupMembershipOutput("GROUP_Backend_Team", "aturing"));
+                new NucleusGroupMembershipOutput("GROUP_Frontend_Team", "moliver"));
     }
 
     @Test
