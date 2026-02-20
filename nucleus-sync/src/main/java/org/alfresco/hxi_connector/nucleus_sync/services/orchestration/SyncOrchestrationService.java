@@ -172,7 +172,6 @@ public class SyncOrchestrationService
         }
         catch (Exception e)
         {
-            alfrescoStatus = "UNAVAILABLE: " + e.getMessage();
             LOGGER.atError()
                     .setMessage("Alfresco unavailable: {}")
                     .addArgument(e.getMessage())
@@ -204,7 +203,6 @@ public class SyncOrchestrationService
         }
         catch (Exception e)
         {
-            nucleusStatus = "UNAVAILABLE: " + e.getMessage();
             LOGGER.atError()
                     .setMessage("Nucleus unavailable: {}")
                     .addArgument(e.getMessage())
