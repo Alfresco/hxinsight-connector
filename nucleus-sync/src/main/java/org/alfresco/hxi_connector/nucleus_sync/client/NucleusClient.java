@@ -81,8 +81,8 @@ public class NucleusClient
             @Value("${nucleus.system-id}") String systemId,
             @Value("${nucleus.base-url}") String nucleusBaseUrl,
             @Value("${nucleus.idp-base-url}") String idpBaseUrl,
-            @Value("${nucleus.page-size}") int pageSize,
-            @Value("${nucleus.delete-group-member-batch-size:50}") int deleteBatchSize,
+            @Value("${nucleus.page-size:1000}") int pageSize,
+            @Value("${nucleus.delete-group-member-batch-size:100}") int deleteBatchSize,
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins)
     {
         this(
