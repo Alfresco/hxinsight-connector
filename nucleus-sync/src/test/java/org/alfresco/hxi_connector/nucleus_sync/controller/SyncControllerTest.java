@@ -45,7 +45,7 @@ import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.NucleusUnavailableException;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.SyncInProgressException;
 
-@SuppressWarnings("PMD.JUnitTestsShouldIncludeAssert")
+@SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 @WebMvcTest(SyncController.class)
 class SyncControllerTest
 {
