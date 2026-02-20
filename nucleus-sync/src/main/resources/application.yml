@@ -26,7 +26,6 @@ auth:
       token-uri: ${HX_TOKEN_URI}
       grant-type: client_credentials
       scope:
-        - hxp.integrations
         - iam.user-data.account
         - system-integrations-config
         - system-integrations-runtime
