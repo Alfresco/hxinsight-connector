@@ -86,7 +86,7 @@ public class SyncSchedulerServiceTest
                 .thenThrow(new SyncInProgressException());
 
         // When/Then - Should not propagate exception
-        assertThatNoException().isThrownBy(() -> schedulerService.scheduledSync());
+        assertThatNoException().isThrownBy(schedulerService::scheduledSync);
 
         verify(syncOrchestrationService).performFullSync();
     }
@@ -101,7 +101,7 @@ public class SyncSchedulerServiceTest
                         new RuntimeException()));
 
         // When/Then - Should not propagate exception
-        assertThatNoException().isThrownBy(() -> schedulerService.scheduledSync());
+        assertThatNoException().isThrownBy(schedulerService::scheduledSync);
 
         verify(syncOrchestrationService).performFullSync();
     }
