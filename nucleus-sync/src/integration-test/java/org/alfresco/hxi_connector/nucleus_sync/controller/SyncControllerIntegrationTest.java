@@ -23,9 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync;
+package org.alfresco.hxi_connector.nucleus_sync.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.Map;
@@ -33,9 +34,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.client.TestRestTemplate;
-import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpMethod;
@@ -46,13 +45,10 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.SyncOrchestrationService;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class NucleusSyncApplicationIntegrationTest
+class SyncControllerIntegrationTest
 {
-    @Autowired
-    private ApplicationContext context;
-
     @Autowired
     private TestRestTemplate restTemplate;
 
@@ -60,51 +56,11 @@ public class NucleusSyncApplicationIntegrationTest
     private SyncOrchestrationService syncOrchestrationService;
 
     @Test
-    void contextLoads()
-    {
-        assertThat(context).isNotNull();
-    }
-
-    @Test
-    void applicationStartsSuccessfully()
-    {
-        assertThat(context.getBean(NucleusSyncApplication.class)).isNotNull();
-    }
-
-    @Test
-    void actuatorHealthEndpointIsAvailable()
-    {
-        ResponseEntity<String> response = restTemplate.getForEntity("/actuator/health", String.class);
-
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).contains("UP");
-    }
-
-    @Test
-    void syncStatusEndpointIsAvailable()
-    {
-        // Given
-        when(syncOrchestrationService.getSyncStatus())
-                .thenReturn(Map.of("syncInProgress", false));
-
-        // When
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                "/sync/status",
-                HttpMethod.GET,
-                null,
-                new ParameterizedTypeReference<Map<String, Object>>() {});
-
-        // Then
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).containsKey("syncInProgress");
-    }
-
-    @Test
-    void syncTriggerEndpointIsAvailable()
+    void shouldTriggerSyncViaRestEndpoint()
     {
         // Given
         when(syncOrchestrationService.performFullSync())
-                .thenReturn("Sync completed");
+                .thenReturn("Sync completed successfully");
 
         // When
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -115,6 +71,35 @@ public class NucleusSyncApplicationIntegrationTest
 
         // Then
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(response.getBody()).containsKey("success");
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("success")).isEqualTo(true);
+        assertThat(response.getBody().get("message")).isEqualTo("Sync completed successfully");
+
+        verify(syncOrchestrationService).performFullSync();
+    }
+
+    @Test
+    void shouldGetSyncStatusViaRestEndpoint()
+    {
+        // Given
+        Map<String, Object> expectedStatus = Map.of(
+                "syncInProgress", false,
+                "lastSyncResult", "Sync completed successfully");
+        when(syncOrchestrationService.getSyncStatus()).thenReturn(expectedStatus);
+
+        // When
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                "/sync/status",
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<Map<String, Object>>() {});
+
+        // Then
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        assertThat(response.getBody()).isNotNull();
+        assertThat(response.getBody().get("syncInProgress")).isEqualTo(false);
+        assertThat(response.getBody().get("lastSyncResult")).isEqualTo("Sync completed successfully");
+
+        verify(syncOrchestrationService).getSyncStatus();
     }
 }

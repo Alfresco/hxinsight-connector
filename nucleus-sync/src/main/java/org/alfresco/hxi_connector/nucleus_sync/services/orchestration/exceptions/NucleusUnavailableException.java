@@ -23,16 +23,12 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.dto;
+package org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions;
 
-import java.util.List;
-
-public record IamUsersOutput(List<IamUser> users, String next)
-        implements NucleusPagedResponse<IamUser>
+public class NucleusUnavailableException extends SyncException
 {
-    @Override
-    public List<IamUser> items()
+    public NucleusUnavailableException(String message, Throwable cause)
     {
-        return users;
+        super("Nucleus unavailable: " + message, cause);
     }
 }
