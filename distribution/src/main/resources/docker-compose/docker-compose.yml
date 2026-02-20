@@ -358,6 +358,35 @@ services:
     ports:
       - "5009:5009"
 
+  nucleus-sync:
+    image: quay.io/alfresco/alfresco-hxinsight-connector-nucleus-sync:${HXINSIGHT_CONNECTOR_TAG}
+    deploy:
+      resources:
+        limits:
+          memory: 512m
+    depends_on:
+      alfresco:
+        condition: service_healthy
+    environment:
+      JAVA_TOOL_OPTIONS: -agentlib:jdwp=transport=dt_socket,address=*:5010,server=y,suspend=n
+      SERVER_PORT: 8081
+      SYNC_ENABLED: true
+      SYNC_CRON_EXPRESSION: "0 0 */2 * * ?"
+      AUTH_ALFRESCO_TYPE: basic
+      ALFRESCO_USER_NAME:
+      ALFRESCO_PASSWORD:
+      AUTH_HX_TYPE: oauth2
+      HX_CLIENT_ID:
+      HX_CLIENT_SECRET:
+      HX_TOKEN_URI:
+      ALFRESCO_BASE_URL:
+      NUCLEUS_IDP_BASE_URL:
+      NUCLEUS_BASE_URL:
+      NUCLEUS_SYSTEM_ID:
+      LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
+    ports:
+      - "8081:8081"
+
   hxinsight-mock:
     image: wiremock/wiremock:${WIREMOCK_TAG}
     deploy:
