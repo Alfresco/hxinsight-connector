@@ -1,0 +1,22 @@
+{
+  "users": [
+    {
+      "userName": "admin",
+      "userId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+      "email": "admin@alfresco.com",
+      "preferredLanguage": "en-US"
+    },
+    {
+      "userName": "bob",
+      "userId": "b0b2c3d4-e5f6-7890-abcd-ef1234567b0b",
+      "email": "bob@alfresco.com",
+      "preferredLanguage": "en-US"
+    },
+    {
+      "userName": "charlie",
+      "userId": "c4a211e0-e5f6-7890-abcd-ef123c4a211e",
+      "email": "charlie@alfresco.com",
+      "preferredLanguage": "en-US"
+    }
+  ]
+}
