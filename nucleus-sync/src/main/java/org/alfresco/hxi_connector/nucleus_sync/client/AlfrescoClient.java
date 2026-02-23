@@ -118,7 +118,7 @@ public class AlfrescoClient
     public List<String> getUserGroups(String userId)
     {
         List<AlfrescoGroup> groups = fetchAllPagedData(
-                "/people/" + userId + "/groups?",
+                "/people/" + userId + "/groups?fields=id&",
                 new TypeReference<AlfrescoPagedResponse<AlfrescoGroup>>() {},
                 "groups for user " + userId);
         return groups.stream().map(AlfrescoGroup::id).toList();
