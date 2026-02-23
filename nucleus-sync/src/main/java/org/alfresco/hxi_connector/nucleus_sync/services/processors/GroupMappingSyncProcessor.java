@@ -48,7 +48,7 @@ public class GroupMappingSyncProcessor
     private static final Logger LOGGER = LoggerFactory.getLogger(GroupMappingSyncProcessor.class);
 
     public GroupMappingSyncProcessor(NucleusClient nucleusClient,
-            @Value("${alfresco.sync-batch-size:1000}") int createBatchSize)
+            @Value("${nucleus.sync-batch-size:1000}") int createBatchSize)
     {
         this.nucleusClient = nucleusClient;
         this.createBatchSize = createBatchSize;

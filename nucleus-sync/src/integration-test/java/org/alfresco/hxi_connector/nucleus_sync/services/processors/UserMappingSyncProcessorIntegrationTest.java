@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -58,15 +58,15 @@ public class UserMappingSyncProcessorIntegrationTest
         // Given - A scenario with creates, deletes, and unchanged mappings
         List<AlfrescoUser> alfrescoUsers = List.of(
                 // new mapping - create
-                new AlfrescoUser("jdoe", "john.doe@company.com", true, "John", "Doe", "John Doe"),
+                new AlfrescoUser("jdoe", "john.doe@company.com", true),
                 // new mapping - create
-                new AlfrescoUser("sjohnson", "sarah.johnson@company.com", true, "Sarah", "Johnson", "Sarah Johnson"),
+                new AlfrescoUser("sjohnson", "sarah.johnson@company.com", true),
                 // existing mapping - keep
-                new AlfrescoUser("moliver", "michael.oliver@company.com", true, "Michael", "Oliver", "Michael Oliver"),
+                new AlfrescoUser("moliver", "michael.oliver@company.com", true),
                 // No nucleus match, ignore
-                new AlfrescoUser("ataylor", "anthony.taylor@company.com", true, "Anthony", "Taylor", "Anthony Taylor"),
+                new AlfrescoUser("ataylor", "anthony.taylor@company.com", true),
                 // No email, ignore
-                new AlfrescoUser("dcoot", null, true, "David", "Coot", "David Coot"));
+                new AlfrescoUser("dcoot", null, true));
 
         List<IamUser> nucleusUsers = List.of(
                 // New mapping to create

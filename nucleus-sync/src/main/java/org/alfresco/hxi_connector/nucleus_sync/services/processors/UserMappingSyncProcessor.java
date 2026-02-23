@@ -53,7 +53,7 @@ public class UserMappingSyncProcessor
     private static final Logger LOGGER = LoggerFactory.getLogger(UserMappingSyncProcessor.class);
 
     public UserMappingSyncProcessor(NucleusClient nucleusClient,
-            @Value("${alfresco.sync-batch-size:1000}") int createBatchSize)
+            @Value("${nucleus.sync-batch-size:1000}") int createBatchSize)
     {
         this.nucleusClient = nucleusClient;
         this.createBatchSize = createBatchSize;

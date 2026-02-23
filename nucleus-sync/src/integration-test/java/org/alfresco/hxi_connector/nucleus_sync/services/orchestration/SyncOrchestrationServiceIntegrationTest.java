@@ -80,7 +80,7 @@ public class SyncOrchestrationServiceIntegrationTest
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("asmith", "alice@email.com", true, "Alice", "Smith", "Alice Smith"));
+                new AlfrescoUser("asmith", "alice@email.com", true));
         List<IamUser> iamUsers = List.of(
                 new IamUser("alice@email.com", "uuid-alice", "alice@email.com"));
         List<NucleusUserMappingOutput> currentUserMappings = List.of();

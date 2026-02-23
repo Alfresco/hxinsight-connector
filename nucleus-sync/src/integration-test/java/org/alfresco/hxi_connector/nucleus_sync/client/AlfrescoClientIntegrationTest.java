@@ -76,7 +76,8 @@ public class AlfrescoClientIntegrationTest
                 authService,
                 5,
                 baseUrl,
-                100);
+                100,
+                true);
     }
 
     @AfterEach
@@ -93,9 +94,9 @@ public class AlfrescoClientIntegrationTest
                 {
                   "list": {
                     "pagination": {
-                      "count": 2,
+                      "count": 3,
                       "hasMoreItems": false,
-                      "totalItems": 2,
+                      "totalItems": 3,
                       "skipCount": 0,
                       "maxItems": 100
                     },
@@ -103,21 +104,22 @@ public class AlfrescoClientIntegrationTest
                       {
                         "entry": {
                           "id": "jdoe",
-                          "firstName": "John",
-                          "lastName": "Doe",
                           "email": "john.doe@example.com",
-                          "enabled": true,
-                          "displayName": "John Doe"
+                          "enabled": true
                         }
                       },
                       {
                         "entry": {
                           "id": "jsmith",
-                          "firstName": "Jane",
-                          "lastName": "Smith",
                           "email": "jane.smith@example.com",
-                          "enabled": true,
-                          "displayName": "Jane Smith"
+                          "enabled": true
+                        }
+                      },
+                      {
+                        "entry": {
+                          "id": "aturing",
+                          "email": "alan.turing@example.com",
+                          "enabled": false
                         }
                       }
                     ]
@@ -126,6 +128,7 @@ public class AlfrescoClientIntegrationTest
                 """;
 
         wireMockServer.stubFor(get(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people"))
+                .withQueryParam("fields", equalTo("id,email,enabled"))
                 .withQueryParam("maxItems", equalTo("100"))
                 .withQueryParam("skipCount", equalTo("0"))
                 .withHeader("Authorization", equalTo("Bearer test-token"))
@@ -141,8 +144,8 @@ public class AlfrescoClientIntegrationTest
         assertThat(users)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(
-                        new AlfrescoUser("jdoe", "john.doe@example.com", true, "John", "Doe", "John Doe"),
-                        new AlfrescoUser("jsmith", "jane.smith@example.com", true, "Jane", "Smith", "Jane Smith"));
+                        new AlfrescoUser("jdoe", "john.doe@example.com", true),
+                        new AlfrescoUser("jsmith", "jane.smith@example.com", true));
 
         // Verify the request was made
         wireMockServer.verify(1, getRequestedFor(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people"))
@@ -168,16 +171,12 @@ public class AlfrescoClientIntegrationTest
                     "entries": [
                       {
                         "entry": {
-                          "id": "GROUP_ADMINS",
-                          "displayName": "Administrators",
-                          "isRoot": true
+                          "id": "GROUP_ADMINS"
                         }
                       },
                       {
                         "entry": {
-                          "id": "GROUP_DEVS",
-                          "displayName": "Developers",
-                          "isRoot": true
+                          "id": "GROUP_DEVS"
                         }
                       }
                     ]
@@ -186,6 +185,7 @@ public class AlfrescoClientIntegrationTest
                 """;
 
         wireMockServer.stubFor(get(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people/" + userId + "/groups"))
+                .withQueryParam("fields", equalTo("id"))
                 .withQueryParam("maxItems", equalTo("100"))
                 .withQueryParam("skipCount", equalTo("0"))
                 .willReturn(aResponse()
