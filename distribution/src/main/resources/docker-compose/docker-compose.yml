@@ -373,16 +373,16 @@ services:
       SYNC_ENABLED: true
       SYNC_CRON_EXPRESSION: "0 0 */2 * * ?"
       AUTH_ALFRESCO_TYPE: basic
-      ALFRESCO_USER_NAME:
-      ALFRESCO_PASSWORD:
+      ALFRESCO_USER_NAME: admin
+      ALFRESCO_PASSWORD: admin
       AUTH_HX_TYPE: oauth2
-      HX_CLIENT_ID:
-      HX_CLIENT_SECRET:
-      HX_TOKEN_URI:
-      ALFRESCO_BASE_URL:
-      NUCLEUS_IDP_BASE_URL:
-      NUCLEUS_BASE_URL:
-      NUCLEUS_SYSTEM_ID:
+      HX_CLIENT_ID: dummy-client-id
+      HX_CLIENT_SECRET: dummy-client-secret
+      HX_TOKEN_URI: http://hxinsight-mock:8080/token
+      ALFRESCO_BASE_URL: http://alfresco:8080/alfresco/api/-default-/public/alfresco/versions/1
+      NUCLEUS_IDP_BASE_URL: http://hxinsight-mock:8080
+      NUCLEUS_BASE_URL: http://hxinsight-mock:8080
+      NUCLEUS_SYSTEM_ID: mock-system-id
       LOGGING_LEVEL_ORG_ALFRESCO: DEBUG
     ports:
       - "8081:8081"

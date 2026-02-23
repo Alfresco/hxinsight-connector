@@ -3,7 +3,7 @@ server:
 
 sync:
   enabled: ${SYNC_ENABLED:true}
-  cron.expression: ${SYNC_CRON_EXPRESSION:"0 0 * * *"}
+  cron.expression: ${SYNC_CRON_EXPRESSION:"0 0 0 * * *"}
 
 http-client:
   timeout-minutes: ${HTTP_CLIENT_TIMEOUT_MINUTES:5}
