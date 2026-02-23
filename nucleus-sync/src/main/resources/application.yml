@@ -7,6 +7,7 @@ sync:
 
 http-client:
   timeout-minutes: ${HTTP_CLIENT_TIMEOUT_MINUTES:5}
+  buffer-size-kilobytes: ${HTTP_CLIENT_BUFFER_KB:10240}
   retry:
     max-attempts: ${HTTP_RETRY_MAX_ATTEMPTS:3}
     initial-delay-ms: ${HTTP_RETRY_INITIAL_DELAY_MS:2000}
@@ -34,7 +35,8 @@ auth:
 alfresco:
   base-url: ${ALFRESCO_BASE_URL}
   page-size: 1000
-  sync-batch-size: 1000
+  user:
+    skip-not-enabled: ${ALFRESCO_SKIP_DISABLED_USER:true}
   user-group:
     fetch-timeout: PT5M
 
@@ -43,6 +45,7 @@ nucleus:
   base-url: ${NUCLEUS_BASE_URL}
   system-id: ${NUCLEUS_SYSTEM_ID}
   page-size: 1000
+  sync-batch-size: 1000
   delete-group-member-batch-size: ${DELETE_BATCH_SIZE:100}
 
 logging:

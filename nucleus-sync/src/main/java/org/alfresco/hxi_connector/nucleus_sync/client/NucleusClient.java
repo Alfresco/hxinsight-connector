@@ -83,10 +83,15 @@ public class NucleusClient
             @Value("${nucleus.idp-base-url}") String idpBaseUrl,
             @Value("${nucleus.page-size:1000}") int pageSize,
             @Value("${nucleus.delete-group-member-batch-size:100}") int deleteBatchSize,
-            @Value("${http-client.timeout-minutes:5}") int timeoutInMins)
+            @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
+            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB)
     {
         this(
-                WebClient.builder().build(),
+                WebClient.builder()
+                        .codecs(configurer -> configurer
+                                .defaultCodecs()
+                                .maxInMemorySize(bufferInKB * 1024))
+                        .build(),
                 new ObjectMapper(),
                 authService,
                 systemId,

@@ -29,6 +29,7 @@ import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -56,6 +57,7 @@ public class AlfrescoClient
     private final String alfrescoBaseUrl;
     private final int timeoutInMins;
     private final int pageSize;
+    private final boolean skipNotEnabled;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoClient.class);
 
@@ -64,14 +66,22 @@ public class AlfrescoClient
             AuthService authService,
             @Value("${alfresco.base-url}") String alfrescoBaseUrl,
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
-            @Value("${alfresco.page-size:100}") int pageSize)
+            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB,
+            @Value("${alfresco.page-size:100}") int pageSize,
+            @Value("${alfresco.user.skip-not-enabled:true}") boolean skipNotEnabled)
     {
-        this(WebClient.builder().build(),
+        this(
+                WebClient.builder()
+                        .codecs(configurer -> configurer
+                                .defaultCodecs()
+                                .maxInMemorySize(bufferInKB * 1024))
+                        .build(),
                 new ObjectMapper(),
                 authService,
                 timeoutInMins,
                 alfrescoBaseUrl,
-                pageSize);
+                pageSize,
+                skipNotEnabled);
     }
 
     AlfrescoClient(
@@ -80,7 +90,8 @@ public class AlfrescoClient
             AuthService authService,
             int timeoutInMins,
             String alfrescoBaseUrl,
-            int pageSize)
+            int pageSize,
+            boolean skipNotEnabled)
     {
         this.webClient = webClient;
         this.objectMapper = objectMapper;
@@ -88,18 +99,26 @@ public class AlfrescoClient
         this.timeoutInMins = timeoutInMins;
         this.alfrescoBaseUrl = alfrescoBaseUrl;
         this.pageSize = pageSize;
+        this.skipNotEnabled = skipNotEnabled;
     }
 
     public List<AlfrescoUser> getAllUsers()
     {
-        return fetchAllPagedData(
-                "/people", new TypeReference<AlfrescoPagedResponse<AlfrescoUser>>() {}, "users");
+        List<AlfrescoUser> users = fetchAllPagedData(
+                "/people?fields=id,email,enabled&",
+                new TypeReference<AlfrescoPagedResponse<AlfrescoUser>>() {}, "users");
+
+        return this.skipNotEnabled
+                ? users.stream()
+                        .filter(AlfrescoUser::enabled)
+                        .collect(Collectors.toList())
+                : users;
     }
 
     public List<String> getUserGroups(String userId)
     {
         List<AlfrescoGroup> groups = fetchAllPagedData(
-                "/people/" + userId + "/groups",
+                "/people/" + userId + "/groups?",
                 new TypeReference<AlfrescoPagedResponse<AlfrescoGroup>>() {},
                 "groups for user " + userId);
         return groups.stream().map(AlfrescoGroup::id).toList();
@@ -118,7 +137,7 @@ public class AlfrescoClient
             while (hasMoreItems)
             {
                 String response = makeAuthenticatedRequest(
-                        basePath + "?maxItems=" + pageSize + "&skipCount=" + skipCount)
+                        basePath + "maxItems=" + pageSize + "&skipCount=" + skipCount)
                                 .bodyToMono(String.class)
                                 .block(Duration.ofMinutes(timeoutInMins));
 

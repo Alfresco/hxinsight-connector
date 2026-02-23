@@ -51,7 +51,7 @@ public class UserGroupMembershipSyncProcessor
 
     public UserGroupMembershipSyncProcessor(
             NucleusClient nucleusClient,
-            @Value("${alfresco.sync-batch-size:1000}") int createBatchSize)
+            @Value("${nucleus.sync-batch-size:1000}") int createBatchSize)
     {
         this.nucleusClient = nucleusClient;
         this.createBatchSize = createBatchSize;
