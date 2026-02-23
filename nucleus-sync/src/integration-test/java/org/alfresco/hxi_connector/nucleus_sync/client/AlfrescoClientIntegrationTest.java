@@ -76,7 +76,8 @@ public class AlfrescoClientIntegrationTest
                 authService,
                 5,
                 baseUrl,
-                100);
+                100,
+                true);
     }
 
     @AfterEach
@@ -126,6 +127,7 @@ public class AlfrescoClientIntegrationTest
                 """;
 
         wireMockServer.stubFor(get(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people"))
+                .withQueryParam("fields", equalTo("id,email,enabled"))
                 .withQueryParam("maxItems", equalTo("100"))
                 .withQueryParam("skipCount", equalTo("0"))
                 .withHeader("Authorization", equalTo("Bearer test-token"))
@@ -141,8 +143,8 @@ public class AlfrescoClientIntegrationTest
         assertThat(users)
                 .hasSize(2)
                 .containsExactlyInAnyOrder(
-                        new AlfrescoUser("jdoe", "john.doe@example.com", true, "John", "Doe", "John Doe"),
-                        new AlfrescoUser("jsmith", "jane.smith@example.com", true, "Jane", "Smith", "Jane Smith"));
+                        new AlfrescoUser("jdoe", "john.doe@example.com", true),
+                        new AlfrescoUser("jsmith", "jane.smith@example.com", true));
 
         // Verify the request was made
         wireMockServer.verify(1, getRequestedFor(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people"))

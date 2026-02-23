@@ -98,7 +98,7 @@ public class SyncOrchestrationServiceTest
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("asmith", "alice@email.com", true, "Alice", "Smith", "Alice Smith"));
+                new AlfrescoUser("asmith", "alice@email.com", true));
         when(alfrescoClient.getAllUsers()).thenReturn(alfrescoUsers);
         when(nucleusClient.getAllIamUsers())
                 .thenThrow(new RuntimeException("API error"));
@@ -125,7 +125,7 @@ public class SyncOrchestrationServiceTest
         CountDownLatch blockSync = new CountDownLatch(1);
 
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("asmith", "alice@email.com", true, "Alice", "Smith", "Alice Smith"));
+                new AlfrescoUser("asmith", "alice@email.com", true));
         when(alfrescoClient.getAllUsers()).thenAnswer(invocation -> {
             // Block first sync
             syncStarted.countDown();

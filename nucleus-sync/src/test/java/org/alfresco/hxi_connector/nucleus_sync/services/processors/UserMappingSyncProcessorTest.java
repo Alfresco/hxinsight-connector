@@ -67,9 +67,9 @@ public class UserMappingSyncProcessorTest
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("jdoe", null, true, "John", "Doe", "John Doe"),
-                new AlfrescoUser("rbrown", "robert.brown@email.com", true, "Robert", "Brown", "Robert Brown"),
-                new AlfrescoUser("ewilson", "", true, "Emma", "Wilson", "Emma Wilson"));
+                new AlfrescoUser("jdoe", null, true),
+                new AlfrescoUser("rbrown", "robert.brown@email.com", true),
+                new AlfrescoUser("ewilson", "", true));
         List<IamUser> nucleusUsers = List.of(
                 new IamUser("robert.brown@email.com", "ecff0ce9-5da0-4c72-8942-f66111651712", "robert.brown@email.com"));
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
@@ -107,9 +107,9 @@ public class UserMappingSyncProcessorTest
     {
         // Given - Multiple new mappings to create
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("jdoe", "john.doe@email.com", true, "John", "Doe", "John Doe"),
-                new AlfrescoUser("moliver", "michael.oliver@email.com", true, "Michael", "Oliver", "Michael Oliver"),
-                new AlfrescoUser("ewilson", "emma.wilson@email.com", true, "Emma", "Wilson", "Emma Wilson"));
+                new AlfrescoUser("jdoe", "john.doe@email.com", true),
+                new AlfrescoUser("moliver", "michael.oliver@email.com", true),
+                new AlfrescoUser("ewilson", "emma.wilson@email.com", true));
 
         List<IamUser> nucleusUsers = List.of(
                 new IamUser("john.doe@email.com", "f80c46b6-0eed-4408-8652-fd9957004e6f", "john.doe@email.com"),
@@ -136,7 +136,7 @@ public class UserMappingSyncProcessorTest
         for (int i = 0; i < 2000; i++)
         {
             String email = "user" + i + "@email.com";
-            alfrescoUsers.add(new AlfrescoUser("user" + i, email, true, "User", "Name" + i, "User Name" + i));
+            alfrescoUsers.add(new AlfrescoUser("user" + i, email, true));
             nucleusUsers.add(new IamUser(email, "uuid-" + i, email));
         }
 
