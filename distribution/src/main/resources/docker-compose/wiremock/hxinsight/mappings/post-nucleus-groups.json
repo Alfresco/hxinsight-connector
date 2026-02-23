@@ -4,10 +4,6 @@
     "urlPathPattern": "/system-integrations/systems/[^/]+/groups"
   },
   "response": {
-    "status": 200,
-    "headers": {
-      "Content-Type": "application/json"
-    },
-    "body": "[]"
+    "status": 204
   }
 }
