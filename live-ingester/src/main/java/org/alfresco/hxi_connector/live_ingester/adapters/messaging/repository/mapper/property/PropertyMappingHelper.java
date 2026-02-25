@@ -135,23 +135,21 @@ public class PropertyMappingHelper
         return Optional.of(PropertyDelta.updated(ANCESTORS_PROPERTY, ancestorsData));
     }
 
-    public static Optional<PropertyDelta<?>> calculatePermissionsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, AuthorityTypeResolver authorityTypeResolver)
+    public static Optional<PropertyDelta<?>> calculatePermissionsPropertyDelta(
+            RepoEvent<DataAttributes<NodeResource>> event, AuthorityTypeResolver authorityTypeResolver)
     {
         EventData eventData = (EventData) event.getData();
-        if ((eventData.getResourceReaderAuthorities() == null || eventData.getResourceReaderAuthorities().isEmpty())
-                && (eventData.getResourceDeniedAuthorities() == null || eventData.getResourceDeniedAuthorities().isEmpty()))
-        {
-            return Optional.empty();
-        }
-        // We store permissions as a map with two entries: allowAccess and denyAccess
-        // This way we can update both properties in a single PropertyDelta
-        // If either of the lists is null, we treat it as "everyone" for allowAccess and empty for denyAccess
         Set<String> allowAccess = eventData.getResourceReaderAuthorities() == null
-                ? Set.of(GROUP_EVERYONE)
+                ? Collections.emptySet()
                 : eventData.getResourceReaderAuthorities();
         Set<String> denyAccess = eventData.getResourceDeniedAuthorities() == null
                 ? Collections.emptySet()
                 : eventData.getResourceDeniedAuthorities();
+
+        // Return empty if both are empty
+        if (allowAccess.isEmpty() && denyAccess.isEmpty()) {
+            return Optional.empty();
+        }
 
         List<AuthorityInfo> allowAccessWithTypes = convertToAuthorityInfoList(allowAccess, authorityTypeResolver);
         List<AuthorityInfo> denyAccessWithTypes = convertToAuthorityInfoList(denyAccess, authorityTypeResolver);
