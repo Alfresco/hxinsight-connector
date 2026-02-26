@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -135,19 +135,12 @@ public class PropertyMappingHelper
         return Optional.of(PropertyDelta.updated(ANCESTORS_PROPERTY, ancestorsData));
     }
 
-    public static Optional<PropertyDelta<?>> calculatePermissionsPropertyDelta(RepoEvent<DataAttributes<NodeResource>> event, AuthorityTypeResolver authorityTypeResolver)
+    public static Optional<PropertyDelta<?>> calculatePermissionsPropertyDelta(
+            RepoEvent<DataAttributes<NodeResource>> event, AuthorityTypeResolver authorityTypeResolver)
     {
         EventData eventData = (EventData) event.getData();
-        if ((eventData.getResourceReaderAuthorities() == null || eventData.getResourceReaderAuthorities().isEmpty())
-                && (eventData.getResourceDeniedAuthorities() == null || eventData.getResourceDeniedAuthorities().isEmpty()))
-        {
-            return Optional.empty();
-        }
-        // We store permissions as a map with two entries: allowAccess and denyAccess
-        // This way we can update both properties in a single PropertyDelta
-        // If either of the lists is null, we treat it as "everyone" for allowAccess and empty for denyAccess
         Set<String> allowAccess = eventData.getResourceReaderAuthorities() == null
-                ? Set.of(GROUP_EVERYONE)
+                ? Collections.emptySet()
                 : eventData.getResourceReaderAuthorities();
         Set<String> denyAccess = eventData.getResourceDeniedAuthorities() == null
                 ? Collections.emptySet()
