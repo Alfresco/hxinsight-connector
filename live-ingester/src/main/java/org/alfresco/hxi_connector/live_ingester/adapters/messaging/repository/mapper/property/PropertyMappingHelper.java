@@ -146,12 +146,6 @@ public class PropertyMappingHelper
                 ? Collections.emptySet()
                 : eventData.getResourceDeniedAuthorities();
 
-        // Return empty if both are empty
-        if (allowAccess.isEmpty() && denyAccess.isEmpty())
-        {
-            return Optional.empty();
-        }
-
         List<AuthorityInfo> allowAccessWithTypes = convertToAuthorityInfoList(allowAccess, authorityTypeResolver);
         List<AuthorityInfo> denyAccessWithTypes = convertToAuthorityInfoList(denyAccess, authorityTypeResolver);
 
