@@ -69,7 +69,6 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PermissionsMetadataUpdated;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventData;
@@ -579,7 +578,7 @@ class PropertiesMapperTest
         Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
 
         // then
-        assertEquals(PermissionsMetadataUpdated.permissionsMetadataUpdated(PERMISSIONS_PROPERTY, List.of(), List.of()), result.get());
+        assertEquals(permissionsMetadataUpdated(PERMISSIONS_PROPERTY, List.of(), List.of()), result.get());
     }
 
     @Test

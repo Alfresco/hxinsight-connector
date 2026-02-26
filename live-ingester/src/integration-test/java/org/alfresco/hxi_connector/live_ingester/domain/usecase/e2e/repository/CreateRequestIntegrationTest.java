@@ -33,6 +33,7 @@ import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
+@SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
 public class CreateRequestIntegrationTest extends E2ETestBase
 {
     @Test
