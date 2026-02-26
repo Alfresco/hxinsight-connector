@@ -25,6 +25,9 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -76,10 +79,9 @@ public class UserMappingSyncProcessor
             List<NucleusUserMappingOutput> currentUserMappings)
     {
 
-        // AlfrescoUsers must have email to map
-        Map<String, AlfrescoUser> alfrescoUserByEmail = alfrescoUsers.stream()
+        Map<String, Set<AlfrescoUser>> alfrescoUserByEmail = alfrescoUsers.stream()
                 .filter(u -> u.email() != null && !u.email().isEmpty())
-                .collect(Collectors.toMap(AlfrescoUser::email, Function.identity()));
+                .collect(groupingBy(AlfrescoUser::email, toSet()));
 
         Map<String, IamUser> nucleusIamUserByEmail = nucleusIamUsers.stream()
                 .collect(Collectors.toMap(IamUser::email, Function.identity()));
@@ -100,20 +102,22 @@ public class UserMappingSyncProcessor
 
         for (String email : commonEmails)
         {
-            AlfrescoUser alfrescoUser = alfrescoUserByEmail.get(email);
+            Set<AlfrescoUser> alfrescoUsersForEmail = alfrescoUserByEmail.get(email);
             IamUser nucleusIamUser = nucleusIamUserByEmail.get(email);
-
-            String alfrescoUserId = alfrescoUser.id();
             String nucleusUserId = nucleusIamUser.userId();
 
-            validAlfrescoIds.add(alfrescoUserId);
-            updatedUserMappings.add(
-                    new UserMapping(alfrescoUser.email(), alfrescoUserId, nucleusUserId));
-
-            if (!nucleusMappingByAlfrescoId.containsKey(alfrescoUserId))
+            for (AlfrescoUser alfrescoUser : alfrescoUsersForEmail)
             {
-                nucleusMappingsToCreate.add(
-                        new NucleusUserMappingInput(nucleusUserId, alfrescoUserId));
+                String alfrescoUserId = alfrescoUser.id();
+                validAlfrescoIds.add(alfrescoUserId);
+                updatedUserMappings.add(
+                        new UserMapping(alfrescoUser.email(), alfrescoUserId, nucleusUserId));
+
+                if (!nucleusMappingByAlfrescoId.containsKey(alfrescoUserId))
+                {
+                    nucleusMappingsToCreate.add(
+                            new NucleusUserMappingInput(nucleusUserId, alfrescoUserId));
+                }
             }
         }
 

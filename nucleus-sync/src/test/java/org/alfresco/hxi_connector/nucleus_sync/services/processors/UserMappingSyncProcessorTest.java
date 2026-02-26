@@ -147,4 +147,27 @@ public class UserMappingSyncProcessorTest
         verify(nucleusClient, times(2))
                 .createUserMappings(argThat(mappings -> mappings.size() == 1000));
     }
+
+    @Test
+    void shouldHandleDuplicateEmailInAlfresco()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = List.of(
+                new AlfrescoUser("jdoe", "john.doe@email.com", true),
+                new AlfrescoUser("johnd", "john.doe@email.com", true));
+        List<IamUser> nucleusUsers = List.of(
+                new IamUser("john.doe", "ecff0ce9-5da0-4c72-8942-f66111651712", "john.doe@email.com"));
+        List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
+
+        // When
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+
+        // Then
+        assertThat(result)
+                .containsExactlyInAnyOrder(
+                        new UserMapping("john.doe@email.com", "jdoe", "ecff0ce9-5da0-4c72-8942-f66111651712"),
+                        new UserMapping("john.doe@email.com", "johnd", "ecff0ce9-5da0-4c72-8942-f66111651712"));
+
+        verify(nucleusClient).createUserMappings(argThat(mappings -> mappings.size() == 2));
+    }
 }
