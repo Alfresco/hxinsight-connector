@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -69,6 +69,7 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.PropertyDelta;
+import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.property.PermissionsMetadataUpdated;
 import org.alfresco.repo.event.v1.model.ContentInfo;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.EventData;
@@ -498,6 +499,9 @@ class PropertiesMapperTest
         }
 
         EventData<NodeResource> data = mock();
+        // Default to missing permissions to simplify unit tests.
+        given(data.getResourceReaderAuthorities()).willReturn(null);
+        given(data.getResourceDeniedAuthorities()).willReturn(null);
 
         given(event.getData()).willReturn(data);
 
@@ -560,7 +564,7 @@ class PropertiesMapperTest
     }
 
     @Test
-    void shouldReturnEmptyWhenBothAuthoritiesAreEmpty()
+    void shouldReturnEmptyACLListWhenBothAuthoritiesAreEmpty()
     {
         // given
         AuthorityTypeResolver mockAuthorityTypeResolver = mock(AuthorityTypeResolver.class);
@@ -575,7 +579,7 @@ class PropertiesMapperTest
         Optional<PropertyDelta<?>> result = PropertyMappingHelper.calculatePermissionsPropertyDelta(event, mockAuthorityTypeResolver);
 
         // then
-        assertFalse(result.isPresent());
+        assertEquals(PermissionsMetadataUpdated.permissionsMetadataUpdated(PERMISSIONS_PROPERTY, List.of(), List.of()), result.get());
     }
 
     @Test
