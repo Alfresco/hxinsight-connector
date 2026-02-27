@@ -25,9 +25,13 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.orchestration;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
+
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.RequiredArgsConstructor;
@@ -115,30 +119,34 @@ public class SyncOrchestrationService
     {
         LocalDateTime syncStartTime = LocalDateTime.now();
 
-        // 1. Load the data
+        // Identify Alfresco users with non-unique emails
+        Set<String> unsyncableAlfrescoUserIds = findUnsyncableAlfrescoUserIds();
+
+        // Load the data
         List<AlfrescoUser> alfrescoUsers = loadAlfrescoUsers();
         List<IamUser> nucleusIamUsers = loadNucleusIamUsers();
         List<NucleusUserMappingOutput> currentUserMappings = loadNucleusUserMappings();
         List<NucleusGroupOutput> currentNucleusGroups = loadNucleusGroups();
         List<NucleusGroupMembershipOutput> currentMemberships = loadNucleusMemberships();
 
-        // 2. Sync Users
+        // Sync Users
         List<UserMapping> userMappings = userMappingSyncProcessor.syncUserMappings(
                 alfrescoUsers,
                 nucleusIamUsers,
-                currentUserMappings);
+                currentUserMappings,
+                unsyncableAlfrescoUserIds);
         LOGGER.info("User sync completed successfully.");
 
-        // 3. Build user group membership
+        // Build user group membership
         Map<String, List<String>> userGroupMemberships = userGrpMembershipService
                 .buildUserGroupMemberships(userMappings);
         LOGGER.debug("Fresh user-group membership cache built successfully.");
 
-        // 4. Sync Groups
+        // Sync Groups
         groupMappingSyncProcessor.syncGroupMappings(currentNucleusGroups, userGroupMemberships);
         LOGGER.info("Group sync completed successfully.");
 
-        // 5. Sync User-Group Memberships
+        // Sync User-Group Memberships
         userGroupMembershipSyncProcessor.syncUserGroupMemberships(
                 userMappings,
                 currentMemberships,
@@ -146,6 +154,30 @@ public class SyncOrchestrationService
         LOGGER.info("User-Group Membership sync completed successfully.");
 
         return SyncResult.success("HEALTHY", "HEALTHY", syncStartTime);
+    }
+
+    private Set<String> findUnsyncableAlfrescoUserIds()
+    {
+        List<AlfrescoUser> alfrescoUsers = loadAlfrescoUsers();
+
+        Set<String> unsyncableAlfrescoUserIds = alfrescoUsers.stream()
+                .filter(u -> u.email() != null && !u.email().isEmpty())
+                .collect(groupingBy(AlfrescoUser::email, toSet()))
+                .values().stream()
+                .filter(users -> users.size() > 1)
+                .flatMap(Set::stream)
+                .map(AlfrescoUser::id)
+                .collect(toSet());
+
+        if (!unsyncableAlfrescoUserIds.isEmpty())
+        {
+            LOGGER.atWarn()
+                    .setMessage("Skipping Alfresco users with non-unique email addresses: {}")
+                    .addArgument(() -> String.join(", ", unsyncableAlfrescoUserIds))
+                    .log();
+        }
+
+        return unsyncableAlfrescoUserIds;
     }
 
     private List<AlfrescoUser> loadAlfrescoUsers()

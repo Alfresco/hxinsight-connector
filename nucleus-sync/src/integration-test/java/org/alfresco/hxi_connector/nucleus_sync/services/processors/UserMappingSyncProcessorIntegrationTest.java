@@ -30,6 +30,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,7 +88,7 @@ public class UserMappingSyncProcessorIntegrationTest
                 new NucleusUserMappingOutput("old.user@company.com", "ouser"));
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
 
         // Then - Verify all deletions happened
         verify(nucleusClient).deleteUserMapping("mclattenburg");
