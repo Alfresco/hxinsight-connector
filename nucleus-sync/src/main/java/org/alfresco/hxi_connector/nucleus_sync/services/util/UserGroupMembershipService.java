@@ -50,16 +50,17 @@ public class UserGroupMembershipService
 {
     private final AlfrescoClient alfrescoClient;
     private final Duration fetchTimeout;
+    private final int maxConcurrentRequests;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupMembershipService.class);
-    // size is 2x CPU cores to maximize throughput during network wait times
-    private static final int THREAD_POOL_SIZE = Runtime.getRuntime().availableProcessors() * 2;
 
     public UserGroupMembershipService(
             AlfrescoClient alfrescoClient,
-            @Value("${alfresco.user-group.fetch-timeout:PT5M}") Duration fetchTimeout)
+            @Value("${alfresco.user-group.fetch-timeout:PT5M}") Duration fetchTimeout,
+            @Value("${alfresco.user-group.max-concurrent-requests:10}") int maxConcurrentRequests)
     {
         this.alfrescoClient = alfrescoClient;
         this.fetchTimeout = fetchTimeout;
+        this.maxConcurrentRequests = maxConcurrentRequests;
     }
 
     /**
@@ -78,7 +79,7 @@ public class UserGroupMembershipService
                 .addArgument(localUserMappings.size())
                 .log();
 
-        ExecutorService executor = Executors.newFixedThreadPool(THREAD_POOL_SIZE);
+        ExecutorService executor = Executors.newFixedThreadPool(maxConcurrentRequests);
 
         try
         {
@@ -135,7 +136,7 @@ public class UserGroupMembershipService
         }
         finally
         {
-            executor.shutdown();
+            executor.shutdownNow();
         }
     }
 }
