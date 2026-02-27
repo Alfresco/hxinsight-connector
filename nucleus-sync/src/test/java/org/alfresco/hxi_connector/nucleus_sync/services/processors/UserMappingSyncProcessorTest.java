@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -64,7 +63,54 @@ public class UserMappingSyncProcessorTest
     }
 
     @Test
-    void shouldIgnoreAlfrescoUsersWithInvalidEmail()
+    void deleteShouldDeleteMappingWhenAlfrescoUserNoLongerExists()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = List.of();
+        List<NucleusUserMappingOutput> currentMappings = List.of(
+                new NucleusUserMappingOutput("uuid-jd", "jdoe"));
+
+        // When
+        processor.deleteUserMappings(alfrescoUsers, currentMappings, Set.of());
+
+        // Then
+        verify(nucleusClient).deleteUserMapping("jdoe");
+    }
+
+    @Test
+    void deleteShouldNotDeleteMappingWhenAlfrescoUserStillMatches()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = List.of(
+                new AlfrescoUser("jdoe", "john.doe@email.com", true));
+        List<NucleusUserMappingOutput> currentMappings = List.of(
+                new NucleusUserMappingOutput("uuid-jd", "jdoe"));
+
+        // When
+        processor.deleteUserMappings(alfrescoUsers, currentMappings, Set.of());
+
+        // Then
+        verify(nucleusClient, never()).deleteUserMapping(any());
+    }
+
+    @Test
+    void deleteShouldDeleteMappingWhenAlfrescoUserIsUnsyncable()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = List.of(
+                new AlfrescoUser("jdoe", "john.doe@email.com", true));
+        List<NucleusUserMappingOutput> currentMappings = List.of(
+                new NucleusUserMappingOutput("uuid-jd", "jdoe"));
+
+        // When
+        processor.deleteUserMappings(alfrescoUsers, currentMappings, Set.of("jdoe"));
+
+        // Then
+        verify(nucleusClient).deleteUserMapping("jdoe");
+    }
+
+    @Test
+    void addShouldIgnoreAlfrescoUsersWithInvalidEmail()
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
@@ -76,7 +122,7 @@ public class UserMappingSyncProcessorTest
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
+        List<UserMapping> result = processor.addUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
 
         // Then
         assertThat(result)
@@ -87,24 +133,7 @@ public class UserMappingSyncProcessorTest
     }
 
     @Test
-    void shouldHandleEmptyInputsGracefully()
-    {
-        // Given
-        List<AlfrescoUser> alfrescoUsers = new ArrayList<>();
-        List<IamUser> nucleusUsers = new ArrayList<>();
-        List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
-
-        // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
-
-        // Then
-        assertThat(result).isEmpty();
-        verify(nucleusClient, never()).deleteUserMapping(any());
-        verify(nucleusClient, never()).createUserMappings(anyList());
-    }
-
-    @Test
-    void shouldCreateAllMappingsInSingleBatchCall()
+    void addShouldCreateAllMappingsInSingleBatchCall()
     {
         // Given - Multiple new mappings to create
         List<AlfrescoUser> alfrescoUsers = List.of(
@@ -120,15 +149,14 @@ public class UserMappingSyncProcessorTest
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
 
         // When
-        processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
+        processor.addUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
 
         // Then - Verify single batch call with all mappings
         verify(nucleusClient, times(1)).createUserMappings(argThat(mappings -> mappings.size() == 3));
-        verify(nucleusClient, never()).deleteUserMapping(any());
     }
 
     @Test
-    void shouldHandleExactBatchSizeMultiple()
+    void addShouldHandleExactBatchSizeMultiple()
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = new ArrayList<>();
@@ -142,7 +170,7 @@ public class UserMappingSyncProcessorTest
         }
 
         // When
-        processor.syncUserMappings(alfrescoUsers, nucleusUsers, new ArrayList<>(), Set.of());
+        processor.addUserMappings(alfrescoUsers, nucleusUsers, new ArrayList<>(), Set.of());
 
         // Then
         verify(nucleusClient, times(2))
@@ -150,7 +178,7 @@ public class UserMappingSyncProcessorTest
     }
 
     @Test
-    void shouldSkipUnsyncableUserIds()
+    void addShouldSkipUnsyncableUserIds()
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
@@ -162,14 +190,14 @@ public class UserMappingSyncProcessorTest
         Set<String> unsyncableUserIds = Set.of("jdoe", "johnd");
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, unsyncableUserIds);
+        List<UserMapping> result = processor.addUserMappings(alfrescoUsers, nucleusUsers, currentMappings, unsyncableUserIds);
 
         // Then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void shouldStillMapNonUnsyncableUsers()
+    void addShouldStillMapNonUnsyncableUsers()
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
@@ -183,7 +211,7 @@ public class UserMappingSyncProcessorTest
         Set<String> unsyncableUserIds = Set.of("jdoe", "johnd");
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, unsyncableUserIds);
+        List<UserMapping> result = processor.addUserMappings(alfrescoUsers, nucleusUsers, currentMappings, unsyncableUserIds);
 
         // Then
         assertThat(result)
