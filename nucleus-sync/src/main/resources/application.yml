@@ -39,7 +39,7 @@ alfresco:
     skip-not-enabled: ${ALFRESCO_SKIP_DISABLED_USER:true}
   user-group:
     fetch-timeout: ${ALFRESCO_USR_GRP_FETCH_TIMEOUT:PT15M}
-    max-concurrent-requests: ${ALFRESCO_USER_GRP_MAX_REQUESTS:50}
+    max-concurrent-requests: ${ALFRESCO_USR_GRP_MAX_REQUESTS:50}
 
 nucleus:
   idp-base-url: ${NUCLEUS_IDP_BASE_URL}
