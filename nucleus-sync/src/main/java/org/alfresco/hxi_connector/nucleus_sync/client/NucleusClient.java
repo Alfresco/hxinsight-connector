@@ -59,6 +59,7 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusPagedResponse;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingListOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
+import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.NucleusUnavailableException;
 
 @Component
 public class NucleusClient
@@ -140,7 +141,7 @@ public class NucleusClient
                     .setCause(e)
                     .log();
 
-            throw new ClientException("Failed to retrieve iam users", e);
+            throw new NucleusUnavailableException("Failed to retrieve iam users", e);
         }
     }
 
@@ -160,7 +161,7 @@ public class NucleusClient
                     .setCause(e)
                     .log();
 
-            throw new ClientException("Failed to retrieve groups", e);
+            throw new NucleusUnavailableException("Failed to retrieve groups", e);
         }
     }
 
@@ -202,7 +203,7 @@ public class NucleusClient
                     .setCause(e)
                     .log();
 
-            throw new ClientException("Failed to retrieve user mappings", e);
+            throw new NucleusUnavailableException("Failed to retrieve user mappings", e);
         }
     }
 
@@ -248,7 +249,7 @@ public class NucleusClient
                     .setCause(e)
                     .log();
 
-            throw new ClientException("Failed to retrieve group memberships", e);
+            throw new NucleusUnavailableException("Failed to retrieve group memberships", e);
         }
     }
 
