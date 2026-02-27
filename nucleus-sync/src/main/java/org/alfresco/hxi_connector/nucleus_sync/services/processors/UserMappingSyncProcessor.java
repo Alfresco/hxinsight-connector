@@ -71,12 +71,15 @@ public class UserMappingSyncProcessor
      *            list of IAM users of nucleus
      * @param currentUserMappings
      *            current nucleus user mappings
+     * @param unsyncableAlfrescoUserIds
+     *            set of user ids from Alfresco that cannot be synced to Nucleus
      * @return list of updated user mappings
      */
     public List<UserMapping> syncUserMappings(
             List<AlfrescoUser> alfrescoUsers,
             List<IamUser> nucleusIamUsers,
-            List<NucleusUserMappingOutput> currentUserMappings)
+            List<NucleusUserMappingOutput> currentUserMappings,
+            Set<String> unsyncableAlfrescoUserIds)
     {
 
         Map<String, Set<AlfrescoUser>> alfrescoUserByEmail = alfrescoUsers.stream()
@@ -102,20 +105,11 @@ public class UserMappingSyncProcessor
 
         for (String email : commonEmails)
         {
-            Set<AlfrescoUser> alfrescoUsersForEmail = alfrescoUserByEmail.get(email);
-            if (alfrescoUsersForEmail.size() > 1)
+            AlfrescoUser alfrescoUser = alfrescoUserByEmail.get(email).iterator().next();
+            if (unsyncableAlfrescoUserIds.contains(alfrescoUser.id()))
             {
-                LOGGER.atWarn()
-                        .setMessage("Skipping Alfresco email {} as it is duplicated across users with ids: {}")
-                        .addArgument(email)
-                        .addArgument(() -> alfrescoUsersForEmail.stream()
-                                .map(AlfrescoUser::id)
-                                .collect(Collectors.joining(", ")))
-                        .log();
                 continue;
             }
-
-            AlfrescoUser alfrescoUser = alfrescoUsersForEmail.iterator().next();
             IamUser nucleusIamUser = nucleusIamUserByEmail.get(email);
             String alfrescoUserId = alfrescoUser.id();
             String nucleusUserId = nucleusIamUser.userId();

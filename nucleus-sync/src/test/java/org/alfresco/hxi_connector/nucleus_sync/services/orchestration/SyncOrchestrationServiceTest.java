@@ -90,7 +90,7 @@ public class SyncOrchestrationServiceTest
 
         // Verify sync stopped
         verify(nucleusClient, never()).getAllIamUsers();
-        verify(userMappingSyncProcessor, never()).syncUserMappings(any(), any(), any());
+        verify(userMappingSyncProcessor, never()).syncUserMappings(any(), any(), any(), any());
     }
 
     @Test
@@ -109,7 +109,7 @@ public class SyncOrchestrationServiceTest
                 .hasMessageContaining("Nucleus unavailable");
 
         // Verify sync stopped
-        verify(userMappingSyncProcessor, never()).syncUserMappings(any(), any(), any());
+        verify(userMappingSyncProcessor, never()).syncUserMappings(any(), any(), any(), any());
 
         // Verify status
         Map<String, Object> status = service.getSyncStatus();

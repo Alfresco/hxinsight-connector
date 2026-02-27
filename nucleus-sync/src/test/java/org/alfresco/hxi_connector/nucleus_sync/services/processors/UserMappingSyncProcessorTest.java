@@ -35,6 +35,7 @@ import static org.mockito.Mockito.verify;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,7 @@ public class UserMappingSyncProcessorTest
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
 
         // Then
         assertThat(result)
@@ -94,7 +95,7 @@ public class UserMappingSyncProcessorTest
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
 
         // Then
         assertThat(result).isEmpty();
@@ -119,7 +120,7 @@ public class UserMappingSyncProcessorTest
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
 
         // When
-        processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+        processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
 
         // Then - Verify single batch call with all mappings
         verify(nucleusClient, times(1)).createUserMappings(argThat(mappings -> mappings.size() == 3));
@@ -141,7 +142,7 @@ public class UserMappingSyncProcessorTest
         }
 
         // When
-        processor.syncUserMappings(alfrescoUsers, nucleusUsers, new ArrayList<>());
+        processor.syncUserMappings(alfrescoUsers, nucleusUsers, new ArrayList<>(), Set.of());
 
         // Then
         verify(nucleusClient, times(2))
@@ -149,7 +150,7 @@ public class UserMappingSyncProcessorTest
     }
 
     @Test
-    void shouldSkipDuplicateEmailInAlfresco()
+    void shouldSkipUnsyncableUserIds()
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
@@ -158,16 +159,17 @@ public class UserMappingSyncProcessorTest
         List<IamUser> nucleusUsers = List.of(
                 new IamUser("john.doe", "ecff0ce9-5da0-4c72-8942-f66111651712", "john.doe@email.com"));
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
+        Set<String> unsyncableUserIds = Set.of("jdoe", "johnd");
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, unsyncableUserIds);
 
         // Then
         assertThat(result).isEmpty();
     }
 
     @Test
-    void shouldStillMapNonDuplicateUsersWhenDuplicatesExist()
+    void shouldStillMapNonUnsyncableUsers()
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
@@ -178,9 +180,10 @@ public class UserMappingSyncProcessorTest
                 new IamUser("john.doe", "ecff0ce9-5da0-4c72-8942-f66111651712", "john.doe@email.com"),
                 new IamUser("robert.brown", "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "robert.brown@email.com"));
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
+        Set<String> unsyncableUserIds = Set.of("jdoe", "johnd");
 
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, unsyncableUserIds);
 
         // Then
         assertThat(result)

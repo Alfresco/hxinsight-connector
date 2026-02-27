@@ -27,10 +27,12 @@ package org.alfresco.hxi_connector.nucleus_sync.services.orchestration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
@@ -95,7 +97,7 @@ public class SyncOrchestrationServiceIntegrationTest
 
         List<UserMapping> userMappings = List.of(
                 new UserMapping("alice@email.com", "alice", "iam-alice"));
-        when(userMappingSyncProcessor.syncUserMappings(alfrescoUsers, iamUsers, currentUserMappings))
+        when(userMappingSyncProcessor.syncUserMappings(alfrescoUsers, iamUsers, currentUserMappings, Set.of()))
                 .thenReturn(userMappings);
 
         Map<String, List<String>> userGroupMemberships = Map.of(
@@ -115,13 +117,12 @@ public class SyncOrchestrationServiceIntegrationTest
                 groupMappingSyncProcessor,
                 userGroupMembershipSyncProcessor);
 
-        inOrder.verify(alfrescoClient).getAllUsers();
+        inOrder.verify(alfrescoClient, times(2)).getAllUsers();
         inOrder.verify(nucleusClient).getAllIamUsers();
         inOrder.verify(nucleusClient).getCurrentUserMappings();
         inOrder.verify(nucleusClient).getAllExternalGroups();
         inOrder.verify(nucleusClient).getCurrentGroupMemberships();
-        inOrder.verify(userMappingSyncProcessor).syncUserMappings(alfrescoUsers,
-                iamUsers, currentUserMappings);
+        inOrder.verify(userMappingSyncProcessor).syncUserMappings(alfrescoUsers, iamUsers, currentUserMappings, Set.of());
         inOrder.verify(userGrpMembershipService).buildUserGroupMemberships(userMappings);
         inOrder.verify(groupMappingSyncProcessor).syncGroupMappings(currentGroups, userGroupMemberships);
         inOrder.verify(userGroupMembershipSyncProcessor).syncUserGroupMemberships(
