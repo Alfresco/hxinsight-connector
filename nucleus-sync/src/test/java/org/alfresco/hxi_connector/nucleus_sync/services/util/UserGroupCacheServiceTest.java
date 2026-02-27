@@ -54,11 +54,14 @@ class UserGroupCacheServiceTest
     private UserGroupMembershipService service;
 
     private static final int FETCH_TIMEOUT_SEC = 2;
+    private static final int MAX_CONCURRENT_REQUESTS = 10;
 
     @BeforeEach
     void setUp()
     {
-        service = new UserGroupMembershipService(alfrescoClient, Duration.ofSeconds(FETCH_TIMEOUT_SEC));
+        service = new UserGroupMembershipService(alfrescoClient,
+                Duration.ofSeconds(FETCH_TIMEOUT_SEC),
+                MAX_CONCURRENT_REQUESTS);
     }
 
     @Test
