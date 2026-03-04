@@ -45,6 +45,8 @@ import java.net.http.HttpRequest.BodyPublishers;
 import java.net.http.HttpResponse;
 import java.net.http.HttpResponse.BodyHandlers;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -100,7 +102,8 @@ public class HxInsightClient
     {
         try
         {
-            String body = objectMapper.writeValueAsString(question);
+            Question hxiQuestion = withContentLakeIds(question);
+            String body = objectMapper.writeValueAsString(hxiQuestion);
             log.atDebug().log("Sending question to agent {}: {}", agentId, body);
 
             HttpRequest request = requestWithRequiredHeaders()
@@ -173,6 +176,18 @@ public class HxInsightClient
                 .comments(comments)
                 .build());
         return askQuestion(agentId, question);
+    }
+
+    private Question withContentLakeIds(Question question)
+    {
+        String sourceId = applicationInfoProvider.getSourceId();
+        Set<String> contentLakeIds = question.getContextObjectIds().stream()
+                // The magic __ string is needed to create the global format of ids used by HxInsight.
+                .map(nodeId -> sourceId + "__" + nodeId)
+                .collect(Collectors.toSet());
+        Question hxiQuestion = new Question(question.getQuestion(), contentLakeIds);
+        hxiQuestion.setUserId(question.getUserId());
+        return hxiQuestion;
     }
 
     private HttpRequest.Builder requestWithRequiredHeaders()

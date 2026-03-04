@@ -76,6 +76,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 public class QuestionsAndAnswersE2eTest
 {
     private static final String PREEXISTING_DOCUMENT_ID = "1a0b110f-1e09-4ca2-b367-fe25e4964a4e";
+    private static final String SOURCE_ID = "a1f3e7c0-d193-7023-ce1d-0a63de491876";
     private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions";
     private static final String SUBMIT_QUESTION_SCENARIO = "Submit-question";
     private static final String NEXT_QUESTION_STATE = "Next-question";
@@ -139,7 +140,7 @@ public class QuestionsAndAnswersE2eTest
                     .hasSize(1)
                     .first()
                     .extracting(this::extractContextObjectIdsFromBody)
-                    .isEqualTo(List.of(PREEXISTING_DOCUMENT_ID));
+                    .isEqualTo(List.of(SOURCE_ID + "__" + PREEXISTING_DOCUMENT_ID));
             assertThat(loggedRequests)
                     .first()
                     .extracting(this::extractUserIdFromBody)
@@ -425,7 +426,7 @@ public class QuestionsAndAnswersE2eTest
                     .hasSize(1)
                     .first()
                     .extracting(this::extractContextObjectIdsFromBody)
-                    .isEqualTo(List.of(PREEXISTING_DOCUMENT_ID));
+                    .isEqualTo(List.of(SOURCE_ID + "__" + PREEXISTING_DOCUMENT_ID));
             assertThat(loggedRequests)
                     .first()
                     .extracting(this::extractUserIdFromBody)
