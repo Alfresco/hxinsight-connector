@@ -156,10 +156,10 @@ class HxInsightClientTest
         String expectedJson = """
                 {
                     "question": "What is the meaning of life?",
-                    "contextObjectIds": ["%s__%s"],
+                    "contextObjectIds": ["%s"],
                     "userId": "some-user-id"
                 }
-                """.formatted(SOURCE_ID, OBJECT_ID);
+                """.formatted(OBJECT_ID);
         ArgumentCaptor<Object> serializationCaptor = ArgumentCaptor.forClass(Object.class);
         then(objectMapper).should().writeValueAsString(serializationCaptor.capture());
         String actualBody = new ObjectMapper().writeValueAsString(serializationCaptor.getValue());
