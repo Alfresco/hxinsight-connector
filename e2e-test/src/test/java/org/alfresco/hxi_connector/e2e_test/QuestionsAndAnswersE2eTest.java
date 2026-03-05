@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -76,6 +76,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 public class QuestionsAndAnswersE2eTest
 {
     private static final String PREEXISTING_DOCUMENT_ID = "1a0b110f-1e09-4ca2-b367-fe25e4964a4e";
+    private static final String SOURCE_ID = "a1f3e7c0-d193-7023-ce1d-0a63de491876";
     private static final String QUESTIONS_URL = "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions";
     private static final String SUBMIT_QUESTION_SCENARIO = "Submit-question";
     private static final String NEXT_QUESTION_STATE = "Next-question";
@@ -137,6 +138,10 @@ public class QuestionsAndAnswersE2eTest
                     .withRequestBody(containing("userId")));
             assertThat(loggedRequests)
                     .hasSize(1)
+                    .first()
+                    .extracting(this::extractContextObjectIdsFromBody)
+                    .isEqualTo(List.of(SOURCE_ID + "__" + PREEXISTING_DOCUMENT_ID));
+            assertThat(loggedRequests)
                     .first()
                     .extracting(this::extractUserIdFromBody)
                     .extracting(this::getUsernameByNodeId)
@@ -420,6 +425,10 @@ public class QuestionsAndAnswersE2eTest
             assertThat(loggedRequests)
                     .hasSize(1)
                     .first()
+                    .extracting(this::extractContextObjectIdsFromBody)
+                    .isEqualTo(List.of(SOURCE_ID + "__" + PREEXISTING_DOCUMENT_ID));
+            assertThat(loggedRequests)
+                    .first()
                     .extracting(this::extractUserIdFromBody)
                     .extracting(this::getUsernameByNodeId)
                     .isEqualTo(ADMIN_USER.username());
@@ -469,6 +478,17 @@ public class QuestionsAndAnswersE2eTest
     private String extractUserIdFromBody(LoggedRequest request)
     {
         return new ObjectMapper().readTree(request.getBodyAsString()).get("userId").asText();
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private List<String> extractContextObjectIdsFromBody(LoggedRequest request)
+    {
+        List<String> ids = new java.util.ArrayList<>();
+        new ObjectMapper().readTree(request.getBodyAsString())
+                .get("contextObjectIds")
+                .forEach(node -> ids.add(node.asText()));
+        return ids;
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

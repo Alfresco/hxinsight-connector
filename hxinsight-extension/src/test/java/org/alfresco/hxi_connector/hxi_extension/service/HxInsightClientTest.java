@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -38,6 +38,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType.GOOD;
@@ -75,12 +76,13 @@ class HxInsightClientTest
 {
     private static final String USER_ID = "user-id";
     private static final String AGENT_ID = "agent-id";
-    private static final Set<String> OBJECT_IDS = Set.of("dummy-node-id");
+    private static final String OBJECT_ID = "dummy-node-id";
+    private static final Set<String> OBJECT_IDS = Set.of(OBJECT_ID);
     private static final String USER_AGENT_HEADER = "ACS HXI Connector/1.0.0 ACS/23.2.0 (Windows 10 amd64)";
     private static final String SOURCE_ID = "a1f3e7c0-d193-7023-ce1d-0a63de491876";
     private final HxInsightClientConfig config = new HxInsightClientConfig("http://hxinsight", "http://hxinsight");
     private final AuthService authService = mock(AuthService.class);
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = spy(new ObjectMapper());
     private final HttpClient httpClient = mock(HttpClient.class);
     private final ApplicationInfoProvider applicationInfoProvider = mock(ApplicationInfoProvider.class);
     private final HxInsightClient hxInsightClient = new HxInsightClient(
@@ -130,6 +132,38 @@ class HxInsightClientTest
         assertEquals(expectedQuestionId, actualQuestionId);
         then(httpClient).should().send(requestCaptor.capture(), any());
         assertEquals(USER_AGENT_HEADER, requestCaptor.getValue().headers().map().get(USER_AGENT).get(0));
+    }
+
+    @Test
+    @SneakyThrows
+    void shouldSendExpectedBodyToHxInsight()
+    {
+        // given
+        HttpResponse response = mock(HttpResponse.class);
+        given(response.statusCode()).willReturn(SC_ACCEPTED);
+        given(response.body()).willReturn("""
+                { "questionId": "some-question-id" }
+                """);
+        given(httpClient.send(any(), any())).willReturn(response);
+
+        Question question = new Question("What is the meaning of life?", OBJECT_IDS);
+        question.setUserId("some-user-id");
+
+        // when
+        hxInsightClient.askQuestion(AGENT_ID, question);
+
+        // then
+        String expectedJson = """
+                {
+                    "question": "What is the meaning of life?",
+                    "contextObjectIds": ["%s__%s"],
+                    "userId": "some-user-id"
+                }
+                """.formatted(SOURCE_ID, OBJECT_ID);
+        ArgumentCaptor<Object> serializationCaptor = ArgumentCaptor.forClass(Object.class);
+        then(objectMapper).should().writeValueAsString(serializationCaptor.capture());
+        String actualBody = new ObjectMapper().writeValueAsString(serializationCaptor.getValue());
+        assertEquals(objectMapper.readTree(expectedJson), objectMapper.readTree(actualBody));
     }
 
     @Test
