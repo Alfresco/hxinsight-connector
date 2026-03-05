@@ -282,7 +282,7 @@ public class NucleusClient
                     + "/system-integrations/systems/"
                     + systemId
                     + "/groups/"
-                    + URLEncoder.encode(externalGroupId, StandardCharsets.UTF_8);
+                    + externalGroupId;
 
             executeDeleteRequest(fullUrl);
         }
@@ -306,7 +306,7 @@ public class NucleusClient
                     + "/system-integrations/systems/"
                     + systemId
                     + "/user-mappings/"
-                    + URLEncoder.encode(externalUserId, StandardCharsets.UTF_8);
+                    + externalUserId;
 
             executeDeleteRequest(fullUrl);
         }
@@ -353,13 +353,13 @@ public class NucleusClient
                 .append(systemId)
                 .append("/group-members")
                 .append("?parentExternalGroupId=")
-                .append(URLEncoder.encode(parentExternalGroupId, StandardCharsets.UTF_8));
+                .append(parentExternalGroupId);
 
         // Add user IDs as query parameters
         for (String userId : batch)
         {
             urlBuilder.append("&memberExternalUserIds=")
-                    .append(URLEncoder.encode(userId, StandardCharsets.UTF_8));
+                    .append(userId);
         }
 
         executeDeleteRequest(urlBuilder.toString());
