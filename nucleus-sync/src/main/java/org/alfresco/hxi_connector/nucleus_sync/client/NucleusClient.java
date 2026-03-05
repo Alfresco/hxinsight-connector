@@ -25,8 +25,7 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
+
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -439,11 +438,11 @@ public class NucleusClient
                     delayExpression = "#{${http-client.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
-    private String executePostRequest(String fullUrl, String jsonBody)
+    private void executePostRequest(String fullUrl, String jsonBody)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
 
-        return webClient
+        webClient
                 .post()
                 .uri(fullUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -460,11 +459,11 @@ public class NucleusClient
                     delayExpression = "#{${http-client.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
-    private String executeDeleteRequest(String fullUrl)
+    private void executeDeleteRequest(String fullUrl)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
 
-        return webClient
+        webClient
                 .delete()
                 .uri(fullUrl)
                 .headers(httpHeaders -> headers.forEach(httpHeaders::set))
