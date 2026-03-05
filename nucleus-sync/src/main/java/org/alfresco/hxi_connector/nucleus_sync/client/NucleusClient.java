@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
