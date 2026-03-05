@@ -92,7 +92,7 @@
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
         <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.1</maven-shade-plugin.version>
-        <license-maven-plugin.version>2.7.0</license-maven-plugin.version>
+        <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <spotless-plugin.version>3.1.0</spotless-plugin.version>
         <jrebel-maven-plugin.version>1.2.1</jrebel-maven-plugin.version>
