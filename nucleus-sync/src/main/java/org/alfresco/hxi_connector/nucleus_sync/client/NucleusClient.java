@@ -25,8 +25,6 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -282,7 +280,7 @@ public class NucleusClient
                     + "/system-integrations/systems/"
                     + systemId
                     + "/groups/"
-                    + URLEncoder.encode(externalGroupId, StandardCharsets.UTF_8);
+                    + externalGroupId;
 
             executeDeleteRequest(fullUrl);
         }
@@ -306,7 +304,7 @@ public class NucleusClient
                     + "/system-integrations/systems/"
                     + systemId
                     + "/user-mappings/"
-                    + URLEncoder.encode(externalUserId, StandardCharsets.UTF_8);
+                    + externalUserId;
 
             executeDeleteRequest(fullUrl);
         }
@@ -353,13 +351,13 @@ public class NucleusClient
                 .append(systemId)
                 .append("/group-members")
                 .append("?parentExternalGroupId=")
-                .append(URLEncoder.encode(parentExternalGroupId, StandardCharsets.UTF_8));
+                .append(parentExternalGroupId);
 
         // Add user IDs as query parameters
         for (String userId : batch)
         {
             urlBuilder.append("&memberExternalUserIds=")
-                    .append(URLEncoder.encode(userId, StandardCharsets.UTF_8));
+                    .append(userId);
         }
 
         executeDeleteRequest(urlBuilder.toString());
@@ -439,11 +437,11 @@ public class NucleusClient
                     delayExpression = "#{${http-client.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
-    private String executePostRequest(String fullUrl, String jsonBody)
+    private void executePostRequest(String fullUrl, String jsonBody)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
 
-        return webClient
+        webClient
                 .post()
                 .uri(fullUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -460,11 +458,11 @@ public class NucleusClient
                     delayExpression = "#{${http-client.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
-    private String executeDeleteRequest(String fullUrl)
+    private void executeDeleteRequest(String fullUrl)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
 
-        return webClient
+        webClient
                 .delete()
                 .uri(fullUrl)
                 .headers(httpHeaders -> headers.forEach(httpHeaders::set))

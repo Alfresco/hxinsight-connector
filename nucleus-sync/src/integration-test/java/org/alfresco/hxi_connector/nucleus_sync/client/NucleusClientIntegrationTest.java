@@ -247,22 +247,24 @@ public class NucleusClientIntegrationTest
                 }
                 """;
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings"))
-                .withQueryParam("limit", equalTo(LIMIT.toString()))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(page1Response)));
+        wireMockServer.stubFor(
+                get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings"))
+                        .withQueryParam("limit", equalTo(LIMIT.toString()))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(page1Response)));
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings"))
-                .withQueryParam("limit", equalTo(LIMIT.toString()))
-                .withQueryParam("cursor", equalTo(CURSOR))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(page2Response)));
+        wireMockServer.stubFor(
+                get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/user-mappings"))
+                        .withQueryParam("limit", equalTo(LIMIT.toString()))
+                        .withQueryParam("cursor", equalTo(CURSOR))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(page2Response)));
 
         // Act
         List<NucleusUserMappingOutput> mappings = nucleusClient.getCurrentUserMappings();
@@ -300,22 +302,24 @@ public class NucleusClientIntegrationTest
                 }
                 """;
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
-                .withQueryParam("limit", equalTo(LIMIT.toString()))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(page1Response)));
+        wireMockServer.stubFor(
+                get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
+                        .withQueryParam("limit", equalTo(LIMIT.toString()))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(page1Response)));
 
-        wireMockServer.stubFor(get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
-                .withQueryParam("limit", equalTo(LIMIT.toString()))
-                .withQueryParam("cursor", equalTo(CURSOR))
-                .withHeader("Authorization", equalTo("Bearer nucleus-token"))
-                .willReturn(aResponse()
-                        .withStatus(200)
-                        .withHeader("Content-Type", "application/json")
-                        .withBody(page2Response)));
+        wireMockServer.stubFor(
+                get(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID + "/group-members"))
+                        .withQueryParam("limit", equalTo(LIMIT.toString()))
+                        .withQueryParam("cursor", equalTo(CURSOR))
+                        .withHeader("Authorization", equalTo("Bearer nucleus-token"))
+                        .willReturn(aResponse()
+                                .withStatus(200)
+                                .withHeader("Content-Type", "application/json")
+                                .withBody(page2Response)));
 
         // Act
         List<NucleusGroupMembershipOutput> memberships = nucleusClient.getCurrentGroupMemberships();
@@ -383,7 +387,7 @@ public class NucleusClientIntegrationTest
 
         // Assert
         wireMockServer.verify(1, deleteRequestedFor(urlPathEqualTo("/system-integrations/systems/" + SYSTEM_ID
-                + "/user-mappings/user%252Bcin%2540example.com")));
+                + "/user-mappings/user+cin@example.com")));
     }
 
     @Test
