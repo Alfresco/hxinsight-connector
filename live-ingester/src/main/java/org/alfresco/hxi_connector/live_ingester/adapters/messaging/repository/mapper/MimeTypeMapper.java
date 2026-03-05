@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
 import java.util.Map;
+import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
@@ -47,8 +48,27 @@ public class MimeTypeMapper
             "image/raw", "image/png",
             "image/*", "image/jpeg",
             "application/*", "application/pdf",
-            "text/*", "application/pdf");
+            "text/*", "application/pdf",
+            "*", "*");
     private final IntegrationProperties integrationProperties;
+
+    @PostConstruct
+    void validateMappings()
+    {
+        Map<String, String> mappings = integrationProperties.alfresco().transform().mimeType().mapping();
+        if (mappings == null)
+        {
+            return;
+        }
+        mappings.forEach((source, target) -> {
+            if (target.contains("*") && !target.equals(source))
+            {
+                throw new IllegalArgumentException(
+                        "Invalid MIME type mapping: wildcard target '%s' is only supported as a passthrough when it matches the source pattern '%s'"
+                                .formatted(target, source));
+            }
+        });
+    }
 
     public String mapMimeType(String inputType)
     {
@@ -62,13 +82,17 @@ public class MimeTypeMapper
         {
             if (mapping.getKey().endsWith("/*") && getType(inputType).equals(getType(mapping.getKey())))
             {
+                if (mapping.getKey().equals(mapping.getValue()))
+                {
+                    return inputType;
+                }
                 return StringUtils.defaultIfBlank(mapping.getValue(), EMPTY_MIME_TYPE);
             }
         }
         return mappings.entrySet().stream()
                 .filter(mapping -> mapping.getKey().equals("*"))
                 .findFirst()
-                .map(Map.Entry::getValue)
+                .map(entry -> entry.getKey().equals(entry.getValue()) ? inputType : entry.getValue())
                 .orElse(EMPTY_MIME_TYPE);
     }
 

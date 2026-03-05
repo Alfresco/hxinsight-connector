@@ -34,6 +34,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.alfresco.hxi_connector.live_ingester.util.E2ETestBase;
 
 @SpringBootTest(properties = {"alfresco.transform.mime-type.mapping.[text/*]=application/pdf",
+        "alfresco.transform.mime-type.mapping.[video/*]=video/*",
         "logging.level.org.alfresco=DEBUG"})
 public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
 {
@@ -403,6 +404,117 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
     @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void givenMappingForNonImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
             String sourceMimeType, String expectedTargetMimeType)
+    {
+        // given
+        containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent(NODE_ID, sourceMimeType);
+
+        // when
+        String repoEvent = """
+                {
+                  "specversion": "1.0",
+                  "type": "org.alfresco.event.node.Created",
+                  "id": "368818d9-eaeq-4b8b-8eab-e050253d7f61",
+                  "source": "/08d9b620-14de-4247-8f33-360988d3b191",
+                  "time": "2021-01-21T11:14:16.42372Z",
+                  "dataschema": "https://api.alfresco.com/schema/event/repo/v1/nodeCreated",
+                  "datacontenttype": "application/json",
+                  "data": {
+                    "eventGroupId": "4004ca99-9f2e-400d-9d80-8f840e223581",
+                    "resource": {
+                      "@type": "NodeResource",
+                      "id": "d71dd823-01c7-477c-8490-04cb0e826e61",
+                      "primaryHierarchy": [ "5f355d16-f824-4173-bf4b-b1ec37ef5549", "93f7edf5-e4d8-4749-9b4c-e45097e2e19d" ],
+                      "name": "purchase-order-scan.bmp",
+                      "nodeType": "cm:content",
+                      "createdByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "admin",
+                        "displayName": "Administrator"
+                      },
+                      "modifiedAt": "2021-01-21T11:14:15.695Z",
+                      "content": {
+                        "mimeType": "%s",
+                        "sizeInBytes": 531152,
+                        "encoding": "UTF-8"
+                      },
+                      "properties": {
+                        "cm:autoVersion": true,
+                        "cm:versionType": "MAJOR"
+                      },
+                      "aspectNames": [ "cm:versionable", "cm:auditable" ],
+                      "isFolder": false,
+                      "isFile": true
+                    },
+                    "resourceReaderAuthorities": [ "GROUP_EVERYONE" ],
+                    "resourceDeniedAuthorities": [ ]
+                  }
+                }""".formatted(sourceMimeType);
+        containerSupport.raiseRepoEvent(repoEvent);
+
+        // then
+        String expectedBody = """
+                [
+                  {
+                    "objectId": "d71dd823-01c7-477c-8490-04cb0e826e61",
+                    "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
+                    "eventType": "createOrUpdate",
+                    "sourceTimestamp" : 1611227656423,
+                    "properties": {
+                      "cm:autoVersion": {"type": "boolean", "value": true},
+                      "createdAt": {"value": "2021-01-21T11:14:15.695Z", "annotation": "dateCreated"},
+                      "modifiedAt": {"value": "2021-01-21T11:14:15.695Z", "annotation": "dateModified"},
+                      "cm:versionType": {"type": "string", "value": "MAJOR"},
+                      "aspectsNames": {"value": ["cm:versionable", "cm:auditable"], "annotation": "aspects"},
+                      "cm:name": {
+                        "value": "purchase-order-scan.bmp",
+                        "annotation" : "name"
+                      },
+                      "type": {"value": "cm:content", "annotation": "type"},
+                      "createdBy": {"value": "admin", "annotation": "createdBy"},
+                      "modifiedBy": {"value": "admin", "annotation": "modifiedBy"},
+                      "ancestors" : {
+                            "value" : {
+                              "primaryParentId" : "5f355d16-f824-4173-bf4b-b1ec37ef5549",
+                              "primaryAncestorIds" : [ "93f7edf5-e4d8-4749-9b4c-e45097e2e19d","5f355d16-f824-4173-bf4b-b1ec37ef5549" ]
+                            },
+                            "annotation" : "hierarchy"
+                      },
+                      "cm:content": {
+                        "file": {
+                          "content-metadata": {
+                            "size": 531152,
+                            "name": "purchase-order-scan.bmp",
+                            "content-type": "%s"
+                          }
+                        }
+                      },
+                      "PERMISSIONS" : {
+                        "value" : {
+                          "read" : [ {
+                            "id" : "GROUP_EVERYONE",
+                            "type" : "GROUP"
+                          } ],
+                          "deny" : [ ],
+                          "principalsType" : "effective"
+                        },
+                        "annotation" : "principals"
+                      }
+                    }
+                  }
+                ]""".formatted(sourceMimeType);
+        containerSupport.expectHxIngestMessageReceived(expectedBody);
+        containerSupport.expectAlfrescoContentDownloaded(NODE_ID);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"video/mp4"})
+    void givenSubtypeWildcardPassthrough_whenSourceMatchesWildcard_thenPassthroughDirectlyToHxInsight(
+            String sourceMimeType)
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();

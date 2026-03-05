@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -36,6 +36,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -152,6 +153,63 @@ class MimeTypeMapperTest
         assertEquals(targetMimeType, resultMimeType);
     }
 
+    @ParameterizedTest
+    @CsvSource({"image/png,image/png", "image/gif,image/gif", "image/bmp,image/bmp"})
+    void givenSubtypeWildcardPassthroughConfigured_whenSourceMatchesWildcard_thenReturnSourceMimeType(String sourceMimeType, String expectedMimeType)
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "image/*"));
+        // when
+        String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
+        // then
+        assertEquals(expectedMimeType, resultMimeType);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"text/csv,text/csv", "image/png,image/png", "application/pdf,application/pdf"})
+    void givenUniversalWildcardPassthroughConfigured_whenAnySourceMimeType_thenReturnSourceMimeType(String sourceMimeType, String expectedMimeType)
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("*", "*"));
+        // when
+        String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
+        // then
+        assertEquals(expectedMimeType, resultMimeType);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"image/png,image/png", "image/gif,image/gif", "text/csv,application/pdf", "application/xml,application/pdf"})
+    void givenSubtypeWildcardPassthroughAndUniversalCatchAll_whenSourceMatches_thenReturnCorrectTarget(String sourceMimeType, String expectedMimeType)
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "image/*", "*", "application/pdf"));
+        // when
+        String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
+        // then
+        assertEquals(expectedMimeType, resultMimeType);
+    }
+
+    @Test
+    void givenWildcardInTargetNotMatchingSource_whenValidating_thenThrowException()
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "text/*"));
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> objectUnderTest.validateMappings());
+    }
+
+    @Test
+    void givenUniversalWildcardTargetNotMatchingSource_whenValidating_thenThrowException()
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "*"));
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> objectUnderTest.validateMappings());
+    }
+
+    @Test
+    void givenConcreteSourceWithWildcardTarget_whenValidating_thenThrowException()
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("text/csv", "text/*"));
+        // when & then
+        assertThrows(IllegalArgumentException.class, () -> objectUnderTest.validateMappings());
+    }
+
     private String getWildcardMappingFromDefault(String inputType)
     {
 
@@ -159,13 +217,17 @@ class MimeTypeMapperTest
         {
             if (mapping.getKey().endsWith("/*") && getType(inputType).equals(getType(mapping.getKey())))
             {
+                if (mapping.getKey().equals(mapping.getValue()))
+                {
+                    return inputType;
+                }
                 return StringUtils.defaultIfBlank(mapping.getValue(), EMPTY_MIME_TYPE);
             }
         }
         return DEFAULT_MIME_TYPES.entrySet().stream()
                 .filter(mapping -> mapping.getKey().equals("*"))
                 .findFirst()
-                .map(Map.Entry::getValue)
+                .map(entry -> entry.getKey().equals(entry.getValue()) ? inputType : entry.getValue())
                 .orElse(EMPTY_MIME_TYPE);
     }
 }

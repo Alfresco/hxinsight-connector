@@ -134,15 +134,15 @@ The Live Ingester uses Alfresco Transform Service (ATS) to convert documents bef
 
 ## MIME Type Mapping
 
-The Live Ingester transforms content before sending it to HX Insight. The `mime-type.mapping` configuration controls which source MIME types are transformed and what target format they become.
+The `mime-type.mapping` configuration controls which source MIME types are accepted and what target format they are transformed to before being sent to HX Insight. When the source and target MIME types are the same, content is uploaded directly without transformation (passthrough).
 
 ### Default Mappings
 
-By default, content is transformed to **PDF** or **image** formats:
+By default, content is transformed to **PDF** or **image** formats, with all other types passed through without transformation:
 
 | Source MIME Type | Target MIME Type |
 |-----------------|------------------|
-| `image/png` | `image/png` (unchanged) |
+| `image/png` | `image/png` (passthrough) |
 | `image/bmp` | `image/png` |
 | `image/tiff` | `image/png` |
 | `image/gif` | `image/png` |
@@ -150,6 +150,7 @@ By default, content is transformed to **PDF** or **image** formats:
 | `image/*` (other images) | `image/jpeg` |
 | `application/*` (all applications) | `application/pdf` |
 | `text/*` (all text) | `application/pdf` |
+| `*` (everything else) | `*` (passthrough) |
 
 ### Custom Mappings
 
@@ -158,25 +159,29 @@ Override the defaults by providing your own mapping. The mapping value determine
 | Mapping | Behaviour |
 |---------|-----------|
 | Source → different target (e.g. `text/csv: application/pdf`) | Content is transformed via ATS and the result is uploaded to HX Insight |
-| Source → itself (e.g. `text/csv: text/csv`) | Content is downloaded directly from Alfresco and uploaded to HX Insight without transformation (passthrough). Useful when relying on [CIC Document Filters](#transform-with-cic-document-filters) for server-side conversion. |
+| Source → itself (e.g. `text/csv: text/csv`) | Content is downloaded directly from Alfresco and uploaded to HX Insight without transformation (passthrough). Useful when relying on [CIC Document Filters](#passthrough-with-cic-document-filters) for server-side conversion. |
+| Wildcard → itself (e.g. `image/*: image/*` or `"*": "*"`) | Passthrough for all matching types. Each matched source type is uploaded as-is without transformation. |
 | Source → empty string (e.g. `text/csv: ""`) | Content upload is skipped entirely. Node metadata is still ingested. |
+
+> **Note:** Wildcards in the target value are only valid when they match the source pattern exactly (e.g. `image/*: image/*` or `"*": "*"`). Any other use of wildcards on the right-hand side (e.g. `image/*: text/*`) is a configuration error and will prevent the application from starting.
 
 ```yaml
 alfresco:
   transform:
     mime-type:
       mapping:
-        image/png: image/png    # Exact match (highest priority)
-        image/*: image/jpeg     # Subtype wildcard
-        video/*: ""             # Empty string = skip this type
-        "*": application/pdf    # Universal catch-all (lowest priority)
+        text/csv: application/pdf  # Transform via ATS
+        image/png: image/png       # Passthrough for a specific type
+        video/*: video/*           # Passthrough for all video types
+        audio/*: ""                # Skip content upload for all audio
+        "*": application/pdf       # Universal catch-all (lowest priority)
 ```
 
 **Lookup order:** Exact match → Subtype wildcard (`type/*`) → Universal wildcard (`*`) → No match (skipped)
 
-### Transform with CIC Document Filters
+### Passthrough with CIC Document Filters
 
-Hyland's [Content Innovation Cloud](https://www.hyland.com/en/platform) includes [Document Filters](https://www.hyland.com/en/solutions/products/document-filters), which can transform many file types. If Alfresco Transform Services cannot convert a particular file type to PDF, you can map the file type to itself to upload it without transformation. After upload, Document Filters will attempt to convert it to a readable format.
+Hyland's [Content Innovation Cloud](https://www.hyland.com/en/platform) includes [Document Filters](https://www.hyland.com/en/solutions/products/document-filters), which can transform many file types. If Alfresco Transform Services cannot convert a particular file type to PDF, you can map the file type to itself (e.g. `video/mp4: video/mp4`) or use a wildcard passthrough (e.g. `"*": "*"`) to send all content directly. When source and target MIME types match, the connector downloads the content directly from the Alfresco repository and uploads it to HX Insight without sending it through ATS. Document Filters will then attempt to convert it to a readable format.
 
 ### Transform Options
 
