@@ -143,8 +143,6 @@ class UserSyncFlowIntegrationTest
         assertThat(result).isEqualTo("Sync completed successfully");
 
         NUCLEUS_MOCK.verify(postRequestedFor(urlEqualTo(userMappingsPath()))
-
-
                 .withRequestBody(matchingJsonPath("$[?(@.userId == 'iam-bob' && @.externalUserId == 'bjones')]")));
         NUCLEUS_MOCK.verify(deleteRequestedFor(urlEqualTo(userMappingsPath() + "/legacy")));
 
