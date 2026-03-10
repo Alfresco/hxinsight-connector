@@ -114,8 +114,8 @@ class UserSyncFlowIntegrationTest
     @BeforeEach
     void resetServers()
     {
-      NUCLEUS_MOCK.resetAll();
-      ALFRESCO_MOCK.resetAll();
+        NUCLEUS_MOCK.resetAll();
+        ALFRESCO_MOCK.resetAll();
     }
 
     @AfterAll
@@ -143,16 +143,20 @@ class UserSyncFlowIntegrationTest
         assertThat(result).isEqualTo("Sync completed successfully");
 
         NUCLEUS_MOCK.verify(postRequestedFor(urlEqualTo(userMappingsPath()))
-                .withRequestBody(matchingJsonPath("$[?(@.userId == 'iam-bob' && @.externalUserId == 'bjones')]") ));
+
+
+                .withRequestBody(matchingJsonPath("$[?(@.userId == 'iam-bob' && @.externalUserId == 'bjones')]")));
         NUCLEUS_MOCK.verify(deleteRequestedFor(urlEqualTo(userMappingsPath() + "/legacy")));
 
         NUCLEUS_MOCK.verify(postRequestedFor(urlEqualTo(groupsPath()))
-                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING')]") ));
+                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING')]")));
         NUCLEUS_MOCK.verify(deleteRequestedFor(urlEqualTo(groupsPath() + "/GROUP_ORPHAN")));
 
         NUCLEUS_MOCK.verify(postRequestedFor(urlEqualTo(groupMembersPath()))
-                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING' && @.memberExternalUserId == 'asmith')]") )
-                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_HR' && @.memberExternalUserId == 'bjones')]") ));
+                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING' && @.memberExternalUserId == 'asmith')]"))
+                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_HR' && @.memberExternalUserId == 'bjones')]")));
+    .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING' && @.memberExternalUserId == 'asmith')]"))
+    .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_HR' && @.memberExternalUserId == 'bjones')]")));
 
         NUCLEUS_MOCK.verify(deleteRequestedFor(urlPathEqualTo(groupMembersPath()))
                 .withQueryParam("parentExternalGroupId", equalTo("GROUP_ORPHAN"))
