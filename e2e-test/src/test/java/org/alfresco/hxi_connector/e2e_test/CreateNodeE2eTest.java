@@ -92,6 +92,7 @@ public class CreateNodeE2eTest
     private static final ObjectMapper objectMapper = new ObjectMapper();
     protected static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int DELAY_MS = 500;
+    private static final int MAX_RETRY_ATTEMPTS = 60;
     private static final String PARENT_ID = "-my-";
     private static final String DUMMY_CONTENT = "Dummy's file dummy content";
     private static final String PERMISSIONS_PROPERTY = "PERMISSIONS";
@@ -161,7 +162,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, DELAY_MS);
+        }, MAX_RETRY_ATTEMPTS, DELAY_MS);
     }
 
     @Test
@@ -189,7 +190,7 @@ public class CreateNodeE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, DELAY_MS);
+        }, MAX_RETRY_ATTEMPTS, DELAY_MS);
     }
 
     @Test
@@ -231,7 +232,7 @@ public class CreateNodeE2eTest
 
             Map<String, Object> actualPermissions = objectMapper.convertValue(permissionsValue, Map.class);
             assertEquals(expectedPermissions, actualPermissions, "Permissions structure does not match expected format");
-        }, DELAY_MS);
+            }, MAX_RETRY_ATTEMPTS, DELAY_MS);
     }
 
     @SneakyThrows
