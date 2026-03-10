@@ -109,26 +109,15 @@ class NucleusSyncE2eTest
     @BeforeEach
     void resetMocks()
     {
-<<<<<<< Updated upstream
-      resetWireMock(nucleusWireMock);
-      resetWireMock(alfrescoWireMock);
-=======
         resetWireMock(nucleusWireMock);
         resetWireMock(alfrescoWireMock);
->>>>>>> Stashed changes
     }
 
     private void resetWireMock(WireMock wireMock)
     {
-<<<<<<< Updated upstream
-      wireMock.resetRequests();
-      wireMock.resetMappings();
-      wireMock.resetScenarios();
-=======
         wireMock.resetRequests();
         wireMock.resetMappings();
         wireMock.resetScenarios();
->>>>>>> Stashed changes
     }
 
     @Test
@@ -147,18 +136,6 @@ class NucleusSyncE2eTest
         triggerSync();
 
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo(userMappingsPath()))
-<<<<<<< Updated upstream
-                .withRequestBody(matchingJsonPath("$[?(@.userId == 'iam-bob' && @.externalUserId == 'bjones')]") )));
-        RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(deleteRequestedFor(urlEqualTo(userMappingsPath() + "/legacy"))));
-
-        RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo(groupsPath()))
-                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING')]") )));
-        RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(deleteRequestedFor(urlEqualTo(groupsPath() + "/GROUP_ORPHAN"))));
-
-        RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo(groupMembersPath()))
-                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING' && @.memberExternalUserId == 'asmith')]") )
-                .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_HR' && @.memberExternalUserId == 'bjones')]") )));
-=======
                 .withRequestBody(matchingJsonPath("$[?(@.userId == 'iam-bob' && @.externalUserId == 'bjones')]"))));
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(deleteRequestedFor(urlEqualTo(userMappingsPath() + "/legacy"))));
 
@@ -169,7 +146,6 @@ class NucleusSyncE2eTest
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo(groupMembersPath()))
                 .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING' && @.memberExternalUserId == 'asmith')]"))
                 .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_HR' && @.memberExternalUserId == 'bjones')]"))));
->>>>>>> Stashed changes
 
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(deleteRequestedFor(urlPathEqualTo(groupMembersPath()))
                 .withQueryParam("parentExternalGroupId", equalTo("GROUP_ORPHAN"))
@@ -178,26 +154,6 @@ class NucleusSyncE2eTest
 
     private void triggerSync()
     {
-<<<<<<< Updated upstream
-      RetryUtils.retryWithBackoff(() -> {
-        try
-        {
-          given()
-              .baseUri("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081))
-              .accept(ContentType.JSON)
-              .when()
-              .post("/sync/trigger")
-              .then()
-              .statusCode(200)
-              .body("success", Matchers.equalTo(true))
-              .body("message", Matchers.equalTo("Sync completed successfully"));
-        }
-        catch (Exception exception)
-        {
-          throw new AssertionError("Sync trigger endpoint not ready", exception);
-        }
-      }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
-=======
         RetryUtils.retryWithBackoff(() -> {
             try
             {
@@ -216,7 +172,6 @@ class NucleusSyncE2eTest
                 throw new AssertionError("Sync trigger endpoint not ready", exception);
             }
         }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
->>>>>>> Stashed changes
     }
 
     private void stubTokenEndpoint()
