@@ -155,8 +155,6 @@ class UserSyncFlowIntegrationTest
         NUCLEUS_MOCK.verify(postRequestedFor(urlEqualTo(groupMembersPath()))
                 .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING' && @.memberExternalUserId == 'asmith')]"))
                 .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_HR' && @.memberExternalUserId == 'bjones')]")));
-    .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_ENGINEERING' && @.memberExternalUserId == 'asmith')]"))
-    .withRequestBody(matchingJsonPath("$[?(@.externalGroupId == 'GROUP_HR' && @.memberExternalUserId == 'bjones')]")));
 
         NUCLEUS_MOCK.verify(deleteRequestedFor(urlPathEqualTo(groupMembersPath()))
                 .withQueryParam("parentExternalGroupId", equalTo("GROUP_ORPHAN"))
