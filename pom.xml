@@ -78,7 +78,7 @@
         <commons-lang.version>3.20.0</commons-lang.version>
         <commons-collections.version>4.5.0</commons-collections.version>
         <commons-io.version>2.21.0</commons-io.version>
-        <pdfbox.version>3.0.6</pdfbox.version>
+        <pdfbox.version>3.0.7</pdfbox.version>
         <aws-sdk-s3.version>2.40.10</aws-sdk-s3.version>
         <wiremock.version>3.13.2</wiremock.version>
         <system-stubs.version>2.1.8</system-stubs.version>
