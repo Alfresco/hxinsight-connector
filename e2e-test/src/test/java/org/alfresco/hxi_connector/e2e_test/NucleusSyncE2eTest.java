@@ -36,6 +36,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static io.restassured.RestAssured.given;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
@@ -133,7 +134,7 @@ class NucleusSyncE2eTest
         stubCurrentMemberships();
         stubMutationEndpoints();
 
-        triggerSync();
+        assertDoesNotThrow(this::triggerSync, "Sync trigger should complete successfully");
 
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo(userMappingsPath()))
                 .withRequestBody(matchingJsonPath("$[?(@.userId == 'iam-bob' && @.externalUserId == 'bjones')]"))));
