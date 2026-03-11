@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,12 +25,12 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +41,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
@@ -52,6 +53,7 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMemberAssignmentI
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipListOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
+import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusPagedResponse;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingInput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingListOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
@@ -65,6 +67,7 @@ public class NucleusClient
     private final String systemId;
     private final String nucleusBaseUrl;
     private final String idpBaseUrl;
+    private final int pageSize;
     private final int timeoutInMin;
     private final int deleteBatchSize;
 
@@ -76,16 +79,23 @@ public class NucleusClient
             @Value("${nucleus.system-id}") String systemId,
             @Value("${nucleus.base-url}") String nucleusBaseUrl,
             @Value("${nucleus.idp-base-url}") String idpBaseUrl,
-            @Value("${nucleus.delete-group-member-batch-size:50}") int deleteBatchSize,
-            @Value("${http-client.timeout-minutes:5}") int timeoutInMins)
+            @Value("${nucleus.page-size:1000}") int pageSize,
+            @Value("${nucleus.delete-group-member-batch-size:100}") int deleteBatchSize,
+            @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
+            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB)
     {
         this(
-                WebClient.builder().build(),
+                WebClient.builder()
+                        .codecs(configurer -> configurer
+                                .defaultCodecs()
+                                .maxInMemorySize(bufferInKB * 1024))
+                        .build(),
                 new ObjectMapper(),
                 authService,
                 systemId,
                 nucleusBaseUrl,
                 idpBaseUrl,
+                pageSize,
                 deleteBatchSize,
                 timeoutInMins);
     }
@@ -97,6 +107,7 @@ public class NucleusClient
             String systemId,
             String nucleusBaseUrl,
             String idpBaseUrl,
+            int pageSize,
             int deleteBatchSize,
             int timeoutInMin)
     {
@@ -106,44 +117,47 @@ public class NucleusClient
         this.systemId = systemId;
         this.nucleusBaseUrl = nucleusBaseUrl;
         this.idpBaseUrl = idpBaseUrl;
+        this.pageSize = pageSize;
         this.timeoutInMin = timeoutInMin;
         this.deleteBatchSize = deleteBatchSize;
     }
 
     public List<IamUser> getAllIamUsers()
     {
-        String url = idpBaseUrl + "/api/users";
+        String initialPath = "/api/users";
 
         try
         {
-            String response = executeGetRequest(url);
-
-            IamUsersOutput iamUsersOutput = objectMapper.readValue(response, IamUsersOutput.class);
-
-            return iamUsersOutput.users();
+            return fetchAllPages(idpBaseUrl, initialPath, "users", IamUsersOutput.class);
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving iam users: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving iam users: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve iam users", e);
         }
     }
 
     public List<NucleusGroupOutput> getAllExternalGroups()
     {
-        String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/groups";
+        String initialPath = "/system-integrations/systems/" + systemId + "/groups";
 
         try
         {
-            String response = executeGetRequest(url);
-
-            NucleusGroupListOutput groupsOutput = objectMapper.readValue(response, NucleusGroupListOutput.class);
-
-            return groupsOutput.items() != null ? groupsOutput.items() : List.of();
+            return fetchAllPages(nucleusBaseUrl, initialPath, "groups", NucleusGroupListOutput.class);
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving groups: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving groups: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve groups", e);
         }
     }
@@ -160,28 +174,32 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in creating groups in nucleus: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in creating groups in nucleus: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to create groups in nucleus", e);
         }
     }
 
     public List<NucleusUserMappingOutput> getCurrentUserMappings()
     {
-        String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/user-mappings";
+        String initialPath = "/system-integrations/systems/" + systemId + "/user-mappings";
 
         try
         {
-            String response = executeGetRequest(url);
-
-            NucleusUserMappingListOutput userMappingsOutput = objectMapper.readValue(response, NucleusUserMappingListOutput.class);
-
-            return userMappingsOutput.items() != null
-                    ? userMappingsOutput.items()
-                    : List.of();
+            return fetchAllPages(nucleusBaseUrl, initialPath, "user mappings", NucleusUserMappingListOutput.class);
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving user mappings: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving user mappings: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve user mappings", e);
         }
     }
@@ -198,28 +216,36 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in creating user mappings: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in creating user mappings: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to create user mappings", e);
         }
     }
 
     public List<NucleusGroupMembershipOutput> getCurrentGroupMemberships()
     {
-        String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/group-members";
+        String initalPath = "/system-integrations/systems/" + systemId + "/group-members";
 
         try
         {
-            String response = executeGetRequest(url);
-
-            NucleusGroupMembershipListOutput groupMembershipOutput = objectMapper.readValue(response, NucleusGroupMembershipListOutput.class);
-
-            return groupMembershipOutput.items() != null
-                    ? groupMembershipOutput.items()
-                    : List.of();
+            return fetchAllPages(
+                    nucleusBaseUrl,
+                    initalPath,
+                    "group memberships",
+                    NucleusGroupMembershipListOutput.class);
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in retrieving group memberships: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in retrieving group memberships: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to retrieve group memberships", e);
         }
     }
@@ -236,7 +262,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in creating member assignments to group: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in creating member assignments to group: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Error in creating member assignments to group", e);
         }
     }
@@ -249,13 +280,18 @@ public class NucleusClient
                     + "/system-integrations/systems/"
                     + systemId
                     + "/groups/"
-                    + URLEncoder.encode(externalGroupId, StandardCharsets.UTF_8);
+                    + externalGroupId;
 
             executeDeleteRequest(fullUrl);
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in deleting group: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in deleting group: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to delete group", e);
         }
     }
@@ -268,13 +304,18 @@ public class NucleusClient
                     + "/system-integrations/systems/"
                     + systemId
                     + "/user-mappings/"
-                    + URLEncoder.encode(externalUserId, StandardCharsets.UTF_8);
+                    + externalUserId;
 
             executeDeleteRequest(fullUrl);
         }
         catch (Exception e)
         {
-            LOGGER.error("Error in deleting user mappings: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in deleting user mapping: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to delete user mappings", e);
         }
     }
@@ -293,7 +334,12 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.error("Error removing group members: {}", e.getMessage(), e);
+            LOGGER.atError()
+                    .setMessage("Error in removing group members: {}")
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
             throw new ClientException("Failed to remove group members", e);
         }
     }
@@ -305,16 +351,61 @@ public class NucleusClient
                 .append(systemId)
                 .append("/group-members")
                 .append("?parentExternalGroupId=")
-                .append(URLEncoder.encode(parentExternalGroupId, StandardCharsets.UTF_8));
+                .append(parentExternalGroupId);
 
         // Add user IDs as query parameters
         for (String userId : batch)
         {
             urlBuilder.append("&memberExternalUserIds=")
-                    .append(URLEncoder.encode(userId, StandardCharsets.UTF_8));
+                    .append(userId);
         }
 
         executeDeleteRequest(urlBuilder.toString());
+    }
+
+    private <T, R extends NucleusPagedResponse<T>> List<T> fetchAllPages(
+            String baseUrl,
+            String initialPath,
+            String context,
+            Class<R> responseType) throws JsonProcessingException
+    {
+        List<T> allItems = new ArrayList<>();
+        String nextPath = UriComponentsBuilder
+                .fromUriString(initialPath)
+                .queryParam("limit", pageSize)
+                .toUriString();
+
+        int pageCount = 0;
+
+        while (nextPath != null)
+        {
+            LOGGER.atTrace()
+                    .setMessage("Fetching page {} of nucleus {}")
+                    .addArgument(++pageCount)
+                    .addArgument(context)
+                    .log();
+
+            String fullUrl = baseUrl + nextPath;
+
+            String response = executeGetRequest(fullUrl);
+            R page = objectMapper.readValue(response, responseType);
+
+            if (page.items() != null && !page.items().isEmpty())
+            {
+                allItems.addAll(page.items());
+            }
+
+            nextPath = page.next();
+        }
+
+        LOGGER.atDebug()
+                .setMessage("Retrieved {} total {} across {} pages")
+                .addArgument(allItems.size())
+                .addArgument(context)
+                .addArgument(pageCount)
+                .log();
+
+        return allItems;
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
@@ -346,11 +437,11 @@ public class NucleusClient
                     delayExpression = "#{${http-client.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
-    private String executePostRequest(String fullUrl, String jsonBody)
+    private void executePostRequest(String fullUrl, String jsonBody)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
 
-        return webClient
+        webClient
                 .post()
                 .uri(fullUrl)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -367,11 +458,11 @@ public class NucleusClient
                     delayExpression = "#{${http-client.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
-    private String executeDeleteRequest(String fullUrl)
+    private void executeDeleteRequest(String fullUrl)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
 
-        return webClient
+        webClient
                 .delete()
                 .uri(fullUrl)
                 .headers(httpHeaders -> headers.forEach(httpHeaders::set))

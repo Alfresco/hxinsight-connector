@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,5 +27,6 @@ package org.alfresco.hxi_connector.nucleus_sync.dto;
 
 import java.util.List;
 
-public record NucleusUserMappingListOutput(List<NucleusUserMappingOutput> items)
+public record NucleusUserMappingListOutput(List<NucleusUserMappingOutput> items, String next)
+        implements NucleusPagedResponse<NucleusUserMappingOutput>
 {}

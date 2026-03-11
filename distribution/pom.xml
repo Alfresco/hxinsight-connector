@@ -61,6 +61,13 @@
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.alfresco</groupId>
+                                            <artifactId>alfresco-hxinsight-connector-nucleus-sync</artifactId>
+                                            <version>${project.version}</version>
+                                            <classifier>app</classifier>
+                                            <outputDirectory>${project.basedir}/target/dependency</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.alfresco</groupId>
                                             <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
                                             <version>${project.version}</version>
                                             <outputDirectory>${project.basedir}/target/dependency</outputDirectory>
@@ -96,6 +103,13 @@
                                             <version>${project.version}</version>
                                             <classifier>app</classifier>
                                             <outputDirectory>${project.build.directory}/classes/docker/prediction-applier</outputDirectory>
+                                        </artifactItem>
+                                        <artifactItem>
+                                            <groupId>org.alfresco</groupId>
+                                            <artifactId>alfresco-hxinsight-connector-nucleus-sync</artifactId>
+                                            <version>${project.version}</version>
+                                            <classifier>app</classifier>
+                                            <outputDirectory>${project.build.directory}/classes/docker/nucleus-sync</outputDirectory>
                                         </artifactItem>
                                         <artifactItem>
                                             <groupId>org.alfresco</groupId>
@@ -228,6 +242,39 @@
                                         </resource>
                                         <resource>
                                             <directory>${project.parent.basedir}/prediction-applier/target/generated-resources</directory>
+                                            <includes>
+                                                <include>licenses/*</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>${project.basedir}/src/main/resources</directory>
+                                            <includes>
+                                                <include>Dockerfile</include>
+                                            </includes>
+                                        </resource>
+                                        <resource>
+                                            <directory>${project.basedir}</directory>
+                                            <includes>
+                                                <include>README.md</include>
+                                            </includes>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>copy-resources-docker-nucleus-sync</id>
+                                <phase>process-resources</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/classes/docker/nucleus-sync</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.parent.basedir}/nucleus-sync/target/generated-sources/license</directory>
+                                        </resource>
+                                        <resource>
+                                            <directory>${project.parent.basedir}/nucleus-sync/target/generated-resources</directory>
                                             <includes>
                                                 <include>licenses/*</include>
                                             </includes>

@@ -1,8 +1,13 @@
 server:
   port: ${SERVER_PORT:8081}
 
+sync:
+  enabled: ${SYNC_ENABLED:true}
+  cron.expression: ${SYNC_CRON_EXPRESSION:"0 0 0 * * *"}
+
 http-client:
   timeout-minutes: ${HTTP_CLIENT_TIMEOUT_MINUTES:5}
+  buffer-size-kilobytes: ${HTTP_CLIENT_BUFFER_KB:10240}
   retry:
     max-attempts: ${HTTP_RETRY_MAX_ATTEMPTS:3}
     initial-delay-ms: ${HTTP_RETRY_INITIAL_DELAY_MS:2000}
@@ -22,22 +27,27 @@ auth:
       token-uri: ${HX_TOKEN_URI}
       grant-type: client_credentials
       scope:
-        - hxp.integrations
         - iam.user-data.account
         - system-integrations-config
         - system-integrations-runtime
         - environment_authorization
-      environment-key: ${HX_ENV_KEY}
 
 alfresco:
   base-url: ${ALFRESCO_BASE_URL}
-  page-size: 100
+  page-size: 1000
+  user:
+    skip-not-enabled: ${ALFRESCO_SKIP_DISABLED_USER:true}
+  user-group:
+    fetch-timeout: ${ALFRESCO_USR_GRP_FETCH_TIMEOUT:PT15M}
+    max-concurrent-requests: ${ALFRESCO_USR_GRP_MAX_REQUESTS:50}
 
 nucleus:
   idp-base-url: ${NUCLEUS_IDP_BASE_URL}
   base-url: ${NUCLEUS_BASE_URL}
   system-id: ${NUCLEUS_SYSTEM_ID}
-  delete-group-member-batch-size: ${DELETE_BATCH_SIZE}
+  page-size: 1000
+  sync-batch-size: 1000
+  delete-group-member-batch-size: ${DELETE_BATCH_SIZE:100}
 
 logging:
   level:

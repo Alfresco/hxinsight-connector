@@ -19,7 +19,7 @@ env:
   # As the release is triggered by a commit message with "[release]" keyword on a release branch,
   # setting these variables to new values can be done in the same commit and will indicate the release and the dev versions in it.
   DEVELOPMENT_VERSION: "2.0.3-SNAPSHOT" # The version that will be set in pom files after the release (next dev version)
-  RELEASE_VERSION: "2.0.3-A.7" # The version of the release (tag).
+  RELEASE_VERSION: "2.0.3-A.13" # The version of the release (tag).
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
@@ -224,7 +224,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repoVersion: [ 7.3.2, 7.4.2, 23.3.0 ]
+        repoVersion: [ 7.4.2, 23.3.0 ]
     steps:
       - uses: actions/checkout@v5
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v10.1.0
@@ -251,7 +251,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repoVersion: [ 7.3.2, 7.4.2, 23.4.1, 25.1.0-M1 ]
+        repoVersion: [ 7.4.2, 23.4.1, 25.1.0-M1 ]
     steps:
       - uses: actions/checkout@v5
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v10.1.0
@@ -284,7 +284,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repoVersion: [ 7.3.2, 7.4.2 ]
+        repoVersion: [ 7.4.2 ]
     steps:
       - uses: actions/checkout@v5
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v10.1.0

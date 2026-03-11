@@ -1,10 +1,21 @@
-# Alfresco Connector for Hyland Experience Insight
+# Alfresco Connector for Content Intelligence
 
-Connector for sending ACS events to Hx Insight and updating the Repository with the predictions that it generates.
+The Alfresco Connector for Content Intelligence provides knowledge retrieval capabilities by connecting your content repository, Alfresco Content Services (ACS), to Knowledge Discovery. Knowledge Discovery allows you to apply machine learning to your content repository.
 
-## Additional Documentation
+## Documentation
 
-* [ACS Private API Documentation](docs/acs-private-apis.md)
+| Document | Description |
+|----------|-------------|
+| [Documentation Index](docs/index.md) | Index page for documentation |
+| [Compatibility](docs/compatibility.md) | Supported Alfresco versions and requirements |
+| [Component Overview](docs/components.md) | Status and description of all components |
+| [Installation Guide](docs/installation.md) | JAR, Docker, and Kubernetes deployment |
+| [Live Ingester Config](docs/live-ingester.md) | Real-time event processing configuration |
+| [Bulk Ingester Config](docs/bulk-ingester.md) | Batch ingestion configuration |
+| [Knowledge Discovery JAR Module](docs/hxinsight-extension.md) | Alfresco repository module configuration |
+| [Nucleus User Sync](docs/nucleus-sync.md) | User synchronization (WIP) |
+| [Prediction Applier](docs/prediction-applier.md) | Prediction application (Deprecated) |
+| [ACS Private APIs](docs/acs-private-apis.md) | Internal API documentation |
 
 ### Development Environment
 

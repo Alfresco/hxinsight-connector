@@ -1,0 +1,142 @@
+/*-
+ * #%L
+ * Alfresco HX Insight Connector
+ * %%
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
+ * %%
+ * This file is part of the Alfresco software.
+ * If the software was purchased under a paid Alfresco license, the terms of
+ * the paid license agreement will prevail.  Otherwise, the software is
+ * provided under the following open source license terms:
+ *
+ * Alfresco is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU Lesser General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Alfresco is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
+ * #L%
+ */
+package org.alfresco.hxi_connector.nucleus_sync.services.util;
+
+import java.time.Duration;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+
+import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
+import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
+
+@Service
+public class UserGroupMembershipService
+{
+    private final AlfrescoClient alfrescoClient;
+    private final Duration fetchTimeout;
+    private final int maxConcurrentRequests;
+    private static final Logger LOGGER = LoggerFactory.getLogger(UserGroupMembershipService.class);
+
+    public UserGroupMembershipService(
+            AlfrescoClient alfrescoClient,
+            @Value("${alfresco.user-group.fetch-timeout:PT5M}") Duration fetchTimeout,
+            @Value("${alfresco.user-group.max-concurrent-requests:10}") int maxConcurrentRequests)
+    {
+        this.alfrescoClient = alfrescoClient;
+        this.fetchTimeout = fetchTimeout;
+        this.maxConcurrentRequests = maxConcurrentRequests;
+    }
+
+    /**
+     * Creates a 'user-group-membership-map' of users and their corresponding groups from alfresco.
+     *
+     * @param localUserMappings
+     *            the List of user mappings
+     * @return a map of alfresco user id and its corresponding group ids
+     * @throws UserGroupFetchException
+     *             if any user's group fetch fails, or if timeout occurs
+     */
+    public Map<String, List<String>> buildUserGroupMemberships(List<UserMapping> localUserMappings)
+    {
+        LOGGER.atInfo()
+                .setMessage("Building user-group membership membership for {} users")
+                .addArgument(localUserMappings.size())
+                .log();
+
+        ExecutorService executor = Executors.newFixedThreadPool(maxConcurrentRequests);
+
+        try
+        {
+            Map<String, CompletableFuture<List<String>>> futures = localUserMappings.stream()
+                    .collect(Collectors.toMap(
+                            UserMapping::alfrescoUserId,
+                            userMapping -> CompletableFuture.supplyAsync(() -> {
+                                try
+                                {
+                                    return alfrescoClient.getUserGroups(userMapping.alfrescoUserId());
+                                }
+                                catch (Exception e)
+                                {
+                                    LOGGER.error(
+                                            "Failed to get groups for user: {} - {}",
+                                            userMapping.alfrescoUserId(),
+                                            e.getMessage(),
+                                            e);
+                                    throw new UserGroupFetchException(
+                                            "Failed to fetch groups for user: " + userMapping.alfrescoUserId(), e);
+                                }
+                            }, executor)));
+
+            CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.values().toArray(new CompletableFuture[0]));
+
+            allFutures.orTimeout(fetchTimeout.toMillis(), TimeUnit.MILLISECONDS).join();
+
+            Map<String, List<String>> memberships = new ConcurrentHashMap<>();
+            for (Map.Entry<String, CompletableFuture<List<String>>> entry : futures.entrySet())
+            {
+                memberships.put(entry.getKey(), entry.getValue().join());
+            }
+
+            LOGGER.atInfo()
+                    .setMessage("Successfully built user-group membership membership for {} users")
+                    .addArgument(memberships.size())
+                    .log();
+
+            return memberships;
+        }
+        catch (CompletionException e)
+        {
+            if (e.getCause() instanceof TimeoutException)
+            {
+                LOGGER.atError()
+                        .setMessage("Timeout fetching user groups after {} seconds")
+                        .addArgument(fetchTimeout.getSeconds())
+                        .setCause(e)
+                        .log();
+                throw new UserGroupFetchException(
+                        "Timeout fetching user groups after " + fetchTimeout.getSeconds() + " seconds", e);
+            }
+            throw e;
+        }
+        finally
+        {
+            executor.shutdownNow();
+        }
+    }
+}

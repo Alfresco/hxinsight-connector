@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,6 +25,9 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.services.processors;
 
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.toSet;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -33,9 +36,9 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
@@ -46,11 +49,18 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @Service
-@RequiredArgsConstructor
 public class UserMappingSyncProcessor
 {
     private final NucleusClient nucleusClient;
+    private final int createBatchSize;
     private static final Logger LOGGER = LoggerFactory.getLogger(UserMappingSyncProcessor.class);
+
+    public UserMappingSyncProcessor(NucleusClient nucleusClient,
+            @Value("${nucleus.sync-batch-size:1000}") int createBatchSize)
+    {
+        this.nucleusClient = nucleusClient;
+        this.createBatchSize = createBatchSize;
+    }
 
     /**
      * Sync alfresco and nucleus user mappings
@@ -69,10 +79,9 @@ public class UserMappingSyncProcessor
             List<NucleusUserMappingOutput> currentUserMappings)
     {
 
-        // AlfrescoUsers must have email to map
-        Map<String, AlfrescoUser> alfrescoUserByEmail = alfrescoUsers.stream()
+        Map<String, Set<AlfrescoUser>> alfrescoUserByEmail = alfrescoUsers.stream()
                 .filter(u -> u.email() != null && !u.email().isEmpty())
-                .collect(Collectors.toMap(AlfrescoUser::email, Function.identity()));
+                .collect(groupingBy(AlfrescoUser::email, toSet()));
 
         Map<String, IamUser> nucleusIamUserByEmail = nucleusIamUsers.stream()
                 .collect(Collectors.toMap(IamUser::email, Function.identity()));
@@ -93,9 +102,21 @@ public class UserMappingSyncProcessor
 
         for (String email : commonEmails)
         {
-            AlfrescoUser alfrescoUser = alfrescoUserByEmail.get(email);
-            IamUser nucleusIamUser = nucleusIamUserByEmail.get(email);
+            Set<AlfrescoUser> alfrescoUsersForEmail = alfrescoUserByEmail.get(email);
+            if (alfrescoUsersForEmail.size() > 1)
+            {
+                LOGGER.atWarn()
+                        .setMessage("Skipping Alfresco email {} as it is duplicated across users with ids: {}")
+                        .addArgument(email)
+                        .addArgument(() -> alfrescoUsersForEmail.stream()
+                                .map(AlfrescoUser::id)
+                                .collect(Collectors.joining(", ")))
+                        .log();
+                continue;
+            }
 
+            AlfrescoUser alfrescoUser = alfrescoUsersForEmail.iterator().next();
+            IamUser nucleusIamUser = nucleusIamUserByEmail.get(email);
             String alfrescoUserId = alfrescoUser.id();
             String nucleusUserId = nucleusIamUser.userId();
 
@@ -137,6 +158,13 @@ public class UserMappingSyncProcessor
         {
             nucleusClient.deleteUserMapping(alfrescoUserId);
         }
+        if (!nucleusMappingsToDelete.isEmpty())
+        {
+            LOGGER.atTrace()
+                    .setMessage("Deleted user mappings for User ID: {}")
+                    .addArgument(nucleusMappingsToDelete.stream().collect(Collectors.joining(",")))
+                    .log();
+        }
         LOGGER.atDebug()
                 .setMessage("Deleted {} user mapping in Nucleus.")
                 .addArgument(nucleusMappingsToDelete.size())
@@ -144,7 +172,20 @@ public class UserMappingSyncProcessor
 
         if (!nucleusMappingsToCreate.isEmpty())
         {
-            nucleusClient.createUserMappings(nucleusMappingsToCreate);
+            for (int i = 0; i < nucleusMappingsToCreate.size(); i += createBatchSize)
+            {
+                int endIndex = Math.min(i + createBatchSize, nucleusMappingsToCreate.size());
+                List<NucleusUserMappingInput> batch = nucleusMappingsToCreate.subList(i, endIndex);
+
+                nucleusClient.createUserMappings(batch);
+            }
+
+            LOGGER.atTrace()
+                    .setMessage("Created user mappings for user ID: {}")
+                    .addArgument(nucleusMappingsToCreate.stream()
+                            .map(NucleusUserMappingInput::userId)
+                            .collect(Collectors.joining(",")))
+                    .log();
         }
         LOGGER.atDebug()
                 .setMessage("Created {} user mappings in nucleus")

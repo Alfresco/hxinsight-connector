@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -36,9 +36,9 @@ import static org.mockito.Mockito.verify;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -54,17 +54,22 @@ public class UserMappingSyncProcessorTest
     @Mock
     private NucleusClient nucleusClient;
 
-    @InjectMocks
     private UserMappingSyncProcessor processor;
+
+    @BeforeEach
+    void setUp()
+    {
+        processor = new UserMappingSyncProcessor(nucleusClient, 1000);
+    }
 
     @Test
     void shouldIgnoreAlfrescoUsersWithInvalidEmail()
     {
         // Given
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("jdoe", null, true, "John", "Doe", "John Doe"),
-                new AlfrescoUser("rbrown", "robert.brown@email.com", true, "Robert", "Brown", "Robert Brown"),
-                new AlfrescoUser("ewilson", "", true, "Emma", "Wilson", "Emma Wilson"));
+                new AlfrescoUser("jdoe", null, true),
+                new AlfrescoUser("rbrown", "robert.brown@email.com", true),
+                new AlfrescoUser("ewilson", "", true));
         List<IamUser> nucleusUsers = List.of(
                 new IamUser("robert.brown@email.com", "ecff0ce9-5da0-4c72-8942-f66111651712", "robert.brown@email.com"));
         List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
@@ -102,9 +107,9 @@ public class UserMappingSyncProcessorTest
     {
         // Given - Multiple new mappings to create
         List<AlfrescoUser> alfrescoUsers = List.of(
-                new AlfrescoUser("jdoe", "john.doe@email.com", true, "John", "Doe", "John Doe"),
-                new AlfrescoUser("moliver", "michael.oliver@email.com", true, "Michael", "Oliver", "Michael Oliver"),
-                new AlfrescoUser("ewilson", "emma.wilson@email.com", true, "Emma", "Wilson", "Emma Wilson"));
+                new AlfrescoUser("jdoe", "john.doe@email.com", true),
+                new AlfrescoUser("moliver", "michael.oliver@email.com", true),
+                new AlfrescoUser("ewilson", "emma.wilson@email.com", true));
 
         List<IamUser> nucleusUsers = List.of(
                 new IamUser("john.doe@email.com", "f80c46b6-0eed-4408-8652-fd9957004e6f", "john.doe@email.com"),
@@ -119,5 +124,67 @@ public class UserMappingSyncProcessorTest
         // Then - Verify single batch call with all mappings
         verify(nucleusClient, times(1)).createUserMappings(argThat(mappings -> mappings.size() == 3));
         verify(nucleusClient, never()).deleteUserMapping(any());
+    }
+
+    @Test
+    void shouldHandleExactBatchSizeMultiple()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = new ArrayList<>();
+        List<IamUser> nucleusUsers = new ArrayList<>();
+
+        for (int i = 0; i < 2000; i++)
+        {
+            String email = "user" + i + "@email.com";
+            alfrescoUsers.add(new AlfrescoUser("user" + i, email, true));
+            nucleusUsers.add(new IamUser(email, "uuid-" + i, email));
+        }
+
+        // When
+        processor.syncUserMappings(alfrescoUsers, nucleusUsers, new ArrayList<>());
+
+        // Then
+        verify(nucleusClient, times(2))
+                .createUserMappings(argThat(mappings -> mappings.size() == 1000));
+    }
+
+    @Test
+    void shouldSkipDuplicateEmailInAlfresco()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = List.of(
+                new AlfrescoUser("jdoe", "john.doe@email.com", true),
+                new AlfrescoUser("johnd", "john.doe@email.com", true));
+        List<IamUser> nucleusUsers = List.of(
+                new IamUser("john.doe", "ecff0ce9-5da0-4c72-8942-f66111651712", "john.doe@email.com"));
+        List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
+
+        // When
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+
+        // Then
+        assertThat(result).isEmpty();
+    }
+
+    @Test
+    void shouldStillMapNonDuplicateUsersWhenDuplicatesExist()
+    {
+        // Given
+        List<AlfrescoUser> alfrescoUsers = List.of(
+                new AlfrescoUser("jdoe", "john.doe@email.com", true),
+                new AlfrescoUser("johnd", "john.doe@email.com", true),
+                new AlfrescoUser("rbrown", "robert.brown@email.com", true));
+        List<IamUser> nucleusUsers = List.of(
+                new IamUser("john.doe", "ecff0ce9-5da0-4c72-8942-f66111651712", "john.doe@email.com"),
+                new IamUser("robert.brown", "a1b2c3d4-e5f6-7890-abcd-ef1234567890", "robert.brown@email.com"));
+        List<NucleusUserMappingOutput> currentMappings = new ArrayList<>();
+
+        // When
+        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings);
+
+        // Then
+        assertThat(result)
+                .containsExactly(
+                        new UserMapping("robert.brown@email.com", "rbrown", "a1b2c3d4-e5f6-7890-abcd-ef1234567890"));
     }
 }

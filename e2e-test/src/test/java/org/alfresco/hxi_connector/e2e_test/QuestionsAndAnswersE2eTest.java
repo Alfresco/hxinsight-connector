@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -137,6 +137,10 @@ public class QuestionsAndAnswersE2eTest
                     .withRequestBody(containing("userId")));
             assertThat(loggedRequests)
                     .hasSize(1)
+                    .first()
+                    .extracting(this::extractContextObjectIdsFromBody)
+                    .isEqualTo(List.of(PREEXISTING_DOCUMENT_ID));
+            assertThat(loggedRequests)
                     .first()
                     .extracting(this::extractUserIdFromBody)
                     .extracting(this::getUsernameByNodeId)
@@ -420,6 +424,10 @@ public class QuestionsAndAnswersE2eTest
             assertThat(loggedRequests)
                     .hasSize(1)
                     .first()
+                    .extracting(this::extractContextObjectIdsFromBody)
+                    .isEqualTo(List.of(PREEXISTING_DOCUMENT_ID));
+            assertThat(loggedRequests)
+                    .first()
                     .extracting(this::extractUserIdFromBody)
                     .extracting(this::getUsernameByNodeId)
                     .isEqualTo(ADMIN_USER.username());
@@ -469,6 +477,17 @@ public class QuestionsAndAnswersE2eTest
     private String extractUserIdFromBody(LoggedRequest request)
     {
         return new ObjectMapper().readTree(request.getBodyAsString()).get("userId").asText();
+    }
+
+    @SneakyThrows
+    @SuppressWarnings("PMD.UnusedPrivateMethod")
+    private List<String> extractContextObjectIdsFromBody(LoggedRequest request)
+    {
+        List<String> ids = new java.util.ArrayList<>();
+        new ObjectMapper().readTree(request.getBodyAsString())
+                .get("contextObjectIds")
+                .forEach(node -> ids.add(node.asText()));
+        return ids;
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
