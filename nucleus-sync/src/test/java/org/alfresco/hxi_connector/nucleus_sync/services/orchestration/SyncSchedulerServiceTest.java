@@ -32,10 +32,8 @@ import static org.mockito.Mockito.when;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.AlfrescoUnavailableException;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.SyncInProgressException;
@@ -46,14 +44,11 @@ public class SyncSchedulerServiceTest
     @Mock
     private SyncOrchestrationService syncOrchestrationService;
 
-    @InjectMocks
-    private SyncSchedulerService schedulerService;
-
     @Test
     void shouldExecuteScheduledSyncWhenEnabled()
     {
         // Given
-        ReflectionTestUtils.setField(schedulerService, "syncEnabled", true);
+        SyncSchedulerService schedulerService = createSchedulerService(true);
         when(syncOrchestrationService.performFullSync())
                 .thenReturn("Sync completed successfully");
 
@@ -68,7 +63,7 @@ public class SyncSchedulerServiceTest
     void shouldSkipScheduledSyncWhenDisabled()
     {
         // Given
-        ReflectionTestUtils.setField(schedulerService, "syncEnabled", false);
+        SyncSchedulerService schedulerService = createSchedulerService(false);
 
         // When
         schedulerService.scheduledSync();
@@ -81,7 +76,7 @@ public class SyncSchedulerServiceTest
     void shouldHandleSyncInProgressExceptionGracefully()
     {
         // Given
-        ReflectionTestUtils.setField(schedulerService, "syncEnabled", true);
+        SyncSchedulerService schedulerService = createSchedulerService(true);
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new SyncInProgressException());
 
@@ -95,7 +90,7 @@ public class SyncSchedulerServiceTest
     void shouldHandleSyncExceptionGracefully()
     {
         // Given
-        ReflectionTestUtils.setField(schedulerService, "syncEnabled", true);
+        SyncSchedulerService schedulerService = createSchedulerService(true);
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new AlfrescoUnavailableException("Connection failed",
                         new RuntimeException()));
@@ -104,5 +99,10 @@ public class SyncSchedulerServiceTest
         assertThatNoException().isThrownBy(schedulerService::scheduledSync);
 
         verify(syncOrchestrationService).performFullSync();
+    }
+
+    private SyncSchedulerService createSchedulerService(boolean enabled)
+    {
+        return new SyncSchedulerService(enabled, syncOrchestrationService);
     }
 }
