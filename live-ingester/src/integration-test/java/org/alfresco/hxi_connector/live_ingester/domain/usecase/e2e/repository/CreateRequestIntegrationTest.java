@@ -70,7 +70,7 @@ public class CreateRequestIntegrationTest extends E2ETestBase
                       },
                       "modifiedAt": "2021-01-26T10:29:42.529Z",
                       "content": {
-                        "mimeType": "application/doc",
+                        "mimeType": "application/msword",
                         "sizeInBytes": 531152,
                         "encoding": "UTF-8"
                       },

@@ -948,7 +948,7 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                         "displayName": "Alice Beecher"
                       },
                       "content": {
-                        "mimeType": "application/doc",
+                        "mimeType": "application/msword",
                         "sizeInBytes": 531152,
                         "encoding": "UTF-8"
                       },

@@ -158,7 +158,7 @@ Override the defaults by providing your own mapping. The mapping value determine
 | Mapping | Behaviour |
 |---------|-----------|
 | Source → different target (e.g. `text/csv: application/pdf`) | Content is transformed via ATS and the result is uploaded to HX Insight |
-| Source → itself (e.g. `text/csv: text/csv`) | Content is downloaded directly from Alfresco and uploaded to HX Insight without transformation (passthrough). Useful when relying on [CIC Document Filters](#passthrough-with-cic-document-filters) for server-side conversion. |
+| Source → itself (e.g. `text/csv: text/csv`) | Content is downloaded directly from Alfresco and uploaded to HX Insight without transformation (passthrough). Useful when relying on [CIC Document Filters](#transform-with-cic-document-filters) for server-side conversion. |
 | Source → empty string (e.g. `text/csv: ""`) | Content upload is skipped entirely. Node metadata is still ingested. |
 
 ```yaml

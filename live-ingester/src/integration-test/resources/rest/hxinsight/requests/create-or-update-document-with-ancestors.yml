@@ -67,7 +67,7 @@ body: [
           "content-metadata": {
             "size": 531152,
             "name": "purchase-order-scan.doc",
-            "content-type": "application/doc"
+            "content-type": "application/msword"
           }
         }
       },
