@@ -168,6 +168,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
 
     @ParameterizedTest
     @CsvSource({"image/png", "image/jpeg"})
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void givenMappingForImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
             String sourceMimeType)
     {
@@ -399,6 +400,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
 
     @ParameterizedTest
     @CsvSource({"application/pdf,application/pdf"})
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void givenMappingForNonImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
             String sourceMimeType, String expectedTargetMimeType)
     {

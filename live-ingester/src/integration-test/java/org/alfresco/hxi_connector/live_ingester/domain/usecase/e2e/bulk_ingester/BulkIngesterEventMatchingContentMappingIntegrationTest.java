@@ -132,6 +132,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
 
     @ParameterizedTest
     @CsvSource({"image/png", "image/jpeg"})
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void givenMappingForImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
             String sourceMimeType)
     {
@@ -291,6 +292,7 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
 
     @ParameterizedTest
     @CsvSource({"application/pdf,application/pdf"})
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void givenMappingForNonImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
             String sourceMimeType, String expectedTargetMimeType)
     {

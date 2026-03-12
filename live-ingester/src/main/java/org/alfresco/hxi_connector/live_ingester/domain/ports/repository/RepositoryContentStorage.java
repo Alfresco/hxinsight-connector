@@ -31,6 +31,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 /**
  * Port interface for downloading content directly from Alfresco repository. Used when content does not require transformation (source and target MIME types match).
  */
+@FunctionalInterface
 public interface RepositoryContentStorage
 {
     /**
