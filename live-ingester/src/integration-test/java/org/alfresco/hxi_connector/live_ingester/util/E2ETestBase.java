@@ -192,7 +192,7 @@ public class E2ETestBase
         hxInsightMock.resetMappings();
         sfsMock.resetRequests();
         sfsMock.resetMappings();
-        // Only reset requests for ACS mock - keep the discovery endpoint mapping but remove content endpoints
+        // Only clear the request journal for ACS mock - preserve the discovery endpoint mapping registered in @BeforeAll
         acsMock.resetRequests();
         containerSupport.clearATSQueue();
     }

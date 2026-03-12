@@ -35,9 +35,6 @@ public record TriggerContentIngestionCommand(String nodeId, String sourceMimeTyp
         ensureNotBlank(nodeId, "Node id cannot be blank");
     }
 
-    /**
-     * @return true if the source and target MIME types are the same, meaning no transformation is needed
-     */
     public boolean requiresTransform()
     {
         return !sourceMimeType.equals(targetMimeType);

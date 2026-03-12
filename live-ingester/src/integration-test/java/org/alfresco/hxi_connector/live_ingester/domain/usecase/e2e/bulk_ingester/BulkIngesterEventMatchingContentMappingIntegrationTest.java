@@ -131,9 +131,9 @@ public class BulkIngesterEventMatchingContentMappingIntegrationTest extends E2ET
     }
 
     @ParameterizedTest
-    @CsvSource({"image/png,image/png", "image/jpeg,image/jpeg"})
+    @CsvSource({"image/png", "image/jpeg"})
     void givenMappingForImage_whenSourceMatchesTarget_thenPassthroughDirectlyToHxInsight(
-            String sourceMimeType, String expectedTargetMimeType)
+            String sourceMimeType)
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
