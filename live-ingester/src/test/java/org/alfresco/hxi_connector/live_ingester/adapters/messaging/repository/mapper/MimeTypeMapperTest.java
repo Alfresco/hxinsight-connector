@@ -28,13 +28,10 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper.DEFAULT_MIME_TYPES;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper.EMPTY_MIME_TYPE;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper.getType;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -74,13 +71,13 @@ class MimeTypeMapperTest
 
     @ParameterizedTest
     @ValueSource(strings = {"text/plain", "application/pdf", "text/html", "image/png", "image/jpg", "image/gif", "application/msword"})
-    void givenNoMappingsConfigured_whenAnySourceMimeTypeAsInput_thenAlwaysReturnDefaultMimeType(String sourceMimeType)
+    void givenNoMappingsConfigured_whenAnySourceMimeTypeAsInput_thenAlwaysPassthrough(String sourceMimeType)
     {
         given(mockMimeTypeProperties.mapping()).willReturn(null);
         // when
         String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
         // then
-        assertEquals(DEFAULT_MIME_TYPES.getOrDefault(sourceMimeType, getWildcardMappingFromDefault(sourceMimeType)), resultMimeType);
+        assertEquals(sourceMimeType, resultMimeType);
     }
 
     @ParameterizedTest
@@ -210,24 +207,4 @@ class MimeTypeMapperTest
         assertThrows(IllegalArgumentException.class, () -> objectUnderTest.validateMappings());
     }
 
-    private String getWildcardMappingFromDefault(String inputType)
-    {
-
-        for (Map.Entry<String, String> mapping : DEFAULT_MIME_TYPES.entrySet())
-        {
-            if (mapping.getKey().endsWith("/*") && getType(inputType).equals(getType(mapping.getKey())))
-            {
-                if (mapping.getKey().equals(mapping.getValue()))
-                {
-                    return inputType;
-                }
-                return StringUtils.defaultIfBlank(mapping.getValue(), EMPTY_MIME_TYPE);
-            }
-        }
-        return DEFAULT_MIME_TYPES.entrySet().stream()
-                .filter(mapping -> mapping.getKey().equals("*"))
-                .findFirst()
-                .map(entry -> entry.getKey().equals(entry.getValue()) ? inputType : entry.getValue())
-                .orElse(EMPTY_MIME_TYPE);
-    }
 }

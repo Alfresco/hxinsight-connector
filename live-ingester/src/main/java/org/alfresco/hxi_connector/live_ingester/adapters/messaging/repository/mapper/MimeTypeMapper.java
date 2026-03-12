@@ -41,15 +41,7 @@ public class MimeTypeMapper
 {
 
     public static final String EMPTY_MIME_TYPE = "";
-    static final Map<String, String> DEFAULT_MIME_TYPES = Map.of("image/png", "image/png",
-            "image/bmp", "image/png",
-            "image/tiff", "image/png",
-            "image/gif", "image/png",
-            "image/raw", "image/png",
-            "image/*", "image/jpeg",
-            "application/*", "application/pdf",
-            "text/*", "application/pdf",
-            "*", "*");
+    static final Map<String, String> DEFAULT_MIME_TYPES = Map.of("*", "*");
     private final IntegrationProperties integrationProperties;
 
     @PostConstruct
