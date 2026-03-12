@@ -188,7 +188,7 @@ class MimeTypeMapperTest
     {
         given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "text/*"));
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> objectUnderTest.validateMappings());
+        assertThrows(IllegalArgumentException.class, objectUnderTest::validateMappings);
     }
 
     @Test
@@ -196,7 +196,7 @@ class MimeTypeMapperTest
     {
         given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "*"));
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> objectUnderTest.validateMappings());
+        assertThrows(IllegalArgumentException.class, objectUnderTest::validateMappings);
     }
 
     @Test
@@ -204,7 +204,7 @@ class MimeTypeMapperTest
     {
         given(mockMimeTypeProperties.mapping()).willReturn(Map.of("text/csv", "text/*"));
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> objectUnderTest.validateMappings());
+        assertThrows(IllegalArgumentException.class, objectUnderTest::validateMappings);
     }
 
 }

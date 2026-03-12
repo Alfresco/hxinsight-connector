@@ -513,6 +513,7 @@ public class MatchingContentMappingRequestIntegrationTest extends E2ETestBase
 
     @ParameterizedTest
     @CsvSource({"video/mp4"})
+    @SuppressWarnings("PMD.UnitTestShouldIncludeAssert")
     void givenSubtypeWildcardPassthrough_whenSourceMatchesWildcard_thenPassthroughDirectlyToHxInsight(
             String sourceMimeType)
     {
