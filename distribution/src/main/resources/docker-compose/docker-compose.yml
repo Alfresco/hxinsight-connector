@@ -406,7 +406,7 @@ services:
     deploy:
       resources:
         limits:
-          memory: 256m
+          memory: 1g
     environment:
       SERVICES: s3
       BUCKET_NAME: hxinsight-bucket-mock
