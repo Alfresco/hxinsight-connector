@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -37,7 +37,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @Testcontainers
 @DirtiesContext // Kills app before testcontainers (activemq) so there are no errors related to lost connection
-@SuppressWarnings({"PMD.UseUtilityClass", "PMD.UnusedPrivateMethod"})
+@SuppressWarnings("PMD.UseUtilityClass")
 public class ActiveMqIntegrationTestBase
 {
     private static final String BULK_INGESTER_QUEUE = "test.bulk.ingester.queue";
@@ -46,7 +46,7 @@ public class ActiveMqIntegrationTestBase
     static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainer();
 
     @DynamicPropertySource
-    private static void configureProperties(DynamicPropertyRegistry registry)
+    static void configureProperties(DynamicPropertyRegistry registry)
     {
         registry.add("spring.activemq.broker-url", () -> "tcp://localhost:" + activemq.getFirstMappedPort());
         registry.add("alfresco.bulk.ingest.endpoint", () -> "activemq:queue:" + BULK_INGESTER_QUEUE);
