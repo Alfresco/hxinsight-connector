@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -46,6 +46,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.common.test.util.RetryUtils.retryWithBackoff;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.BUCKET_NAME;
+import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getAcsMock;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getHxInsightMock;
 import static org.alfresco.hxi_connector.live_ingester.util.E2ETestBase.getSfsMock;
 
@@ -89,6 +90,7 @@ public class ContainerSupport
     private static ContainerSupport instance;
     public static final String ATS_RESPONSE_QUEUE = "ats.response.queue";
     public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
+    public static final String ACS_CONTENT_PATH = "/api/-default-/public/alfresco/versions/1/nodes/";
     private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/presigned-urls";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"%s\": \"%s\"}]";
     private static final String OBJECT_KEY = "dummy-file.pdf";
@@ -283,5 +285,36 @@ public class ContainerSupport
         InputStream bucketFileInputStream = localStorageClient.downloadBucketObject(BUCKET_NAME, OBJECT_KEY);
 
         assertThat(expectedInputStream).hasSameContentAs(bucketFileInputStream);
+    }
+
+    public void prepareAlfrescoToReturnContent(String nodeId, String contentType)
+    {
+        WireMock acsMock = getAcsMock();
+        WireMock.configureFor(acsMock);
+
+        byte[] dummyContent = "test content for passthrough".getBytes();
+        givenThat(get(ACS_CONTENT_PATH + nodeId + "/content")
+                .willReturn(aResponse()
+                        .withStatus(HTTP_OK_STATUS)
+                        .withBody(dummyContent)
+                        .withHeader("Content-Type", contentType)));
+
+        WireMock.configureFor(getHxInsightMock());
+    }
+
+    /**
+     * Verifies that content was downloaded directly from Alfresco (passthrough mode).
+     *
+     * @param nodeId
+     *            the node ID that should have been requested
+     */
+    public void expectAlfrescoContentDownloaded(String nodeId)
+    {
+        WireMock acsMock = getAcsMock();
+        WireMock.configureFor(acsMock);
+
+        retryWithBackoff(() -> acsMock.verifyThat(exactly(1), getRequestedFor(urlPathEqualTo(ACS_CONTENT_PATH + nodeId + "/content"))));
+
+        WireMock.configureFor(getHxInsightMock());
     }
 }

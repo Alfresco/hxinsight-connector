@@ -48,7 +48,7 @@ body: [
         "annotation": "createdBy"
       },
       "cm:name": {
-        "value": "purchase-order-scan.pdf",
+        "value": "purchase-order-scan.doc",
         "annotation": "name"
       },
       "ancestors": {
@@ -66,8 +66,8 @@ body: [
         "file": {
           "content-metadata": {
             "size": 531152,
-            "name": "purchase-order-scan.pdf",
-            "content-type": "application/pdf"
+            "name": "purchase-order-scan.doc",
+            "content-type": "application/msword"
           }
         }
       },

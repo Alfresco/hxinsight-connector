@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,8 +26,6 @@
 
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
-import static org.alfresco.hxi_connector.live_ingester.util.ContainerSupport.REQUEST_ID_PLACEHOLDER;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -49,6 +47,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
     {
         // given
         containerSupport.prepareHxInsightToReturnSuccess();
+        containerSupport.prepareAlfrescoToReturnContent("d71dd823-82c7-477c-8490-04cb0e826e01", "application/pdf");
 
         String repoEvent = """
                 {
@@ -151,16 +150,7 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                 ]""";
         containerSupport.expectHxIngestMessageReceived(expectedBody);
 
-        String expectedATSRequest = """
-                {
-                    "requestId": "%s",
-                    "nodeRef": "workspace://SpacesStore/d71dd823-82c7-477c-8490-04cb0e826e01",
-                    "targetMediaType": "application/pdf",
-                    "clientData": "{\\"nodeRef\\":\\"d71dd823-82c7-477c-8490-04cb0e826e01\\",\\"targetMimeType\\":\\"application/pdf\\",\\"retryAttempt\\":0,\\"timestamp\\":1611227656423}",
-                    "transformOptions": { "timeout":"20000" },
-                    "replyQueue": "org.alfresco.hxinsight-connector.transform.response"
-                }""".formatted(REQUEST_ID_PLACEHOLDER);
-        containerSupport.verifyATSRequestReceived(expectedATSRequest);
+        containerSupport.expectAlfrescoContentDownloaded("d71dd823-82c7-477c-8490-04cb0e826e01");
     }
 
     @Test

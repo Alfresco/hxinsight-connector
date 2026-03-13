@@ -120,7 +120,7 @@ The Live Ingester receives events from the Bulk Ingester via an ActiveMQ queue. 
 
 ## Transform Service Configuration
 
-The Live Ingester uses Alfresco Transform Service (ATS) to convert documents before sending to HX Insight.
+The Live Ingester uses Alfresco Transform Service (ATS) to convert documents before sending to HX Insight. When the source and target MIME types are the same (see [MIME Type Mapping](#mime-type-mapping)), content is downloaded directly from the Alfresco repository and uploaded to HX Insight without transformation.
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
@@ -153,7 +153,13 @@ By default, content is transformed to **PDF** or **image** formats:
 
 ### Custom Mappings
 
-Override the defaults by providing your own mapping:
+Override the defaults by providing your own mapping. The mapping value determines how content is handled:
+
+| Mapping | Behaviour |
+|---------|-----------|
+| Source → different target (e.g. `text/csv: application/pdf`) | Content is transformed via ATS and the result is uploaded to HX Insight |
+| Source → itself (e.g. `text/csv: text/csv`) | Content is downloaded directly from Alfresco and uploaded to HX Insight without transformation (passthrough). Useful when relying on [CIC Document Filters](#transform-with-cic-document-filters) for server-side conversion. |
+| Source → empty string (e.g. `text/csv: ""`) | Content upload is skipped entirely. Node metadata is still ingested. |
 
 ```yaml
 alfresco:
