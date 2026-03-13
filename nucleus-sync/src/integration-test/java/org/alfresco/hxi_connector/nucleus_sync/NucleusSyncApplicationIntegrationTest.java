@@ -30,11 +30,12 @@ import static org.mockito.Mockito.when;
 
 import java.util.Map;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.context.ApplicationContext;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpEntity;
@@ -43,6 +44,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.web.client.RestTemplate;
 
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.SyncOrchestrationService;
 
@@ -53,11 +55,24 @@ public class NucleusSyncApplicationIntegrationTest
     @Autowired
     private ApplicationContext context;
 
-    @Autowired
-    private TestRestTemplate restTemplate;
+    @Value("${local.server.port}")
+    private int port;
+
+    private RestTemplate restTemplate;
 
     @MockitoBean
     private SyncOrchestrationService syncOrchestrationService;
+
+    @BeforeEach
+    void setUp()
+    {
+        restTemplate = new RestTemplate();
+    }
+
+    private String url(String path)
+    {
+        return "http://localhost:" + port + path;
+    }
 
     @Test
     void contextLoads()
@@ -74,7 +89,7 @@ public class NucleusSyncApplicationIntegrationTest
     @Test
     void actuatorHealthEndpointIsAvailable()
     {
-        ResponseEntity<String> response = restTemplate.getForEntity("/actuator/health", String.class);
+        ResponseEntity<String> response = restTemplate.getForEntity(url("/actuator/health"), String.class);
 
         assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
         assertThat(response.getBody()).contains("UP");
@@ -89,7 +104,7 @@ public class NucleusSyncApplicationIntegrationTest
 
         // When
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                "/sync/status",
+                url("/sync/status"),
                 HttpMethod.GET,
                 null,
                 new ParameterizedTypeReference<Map<String, Object>>() {});
@@ -108,7 +123,7 @@ public class NucleusSyncApplicationIntegrationTest
 
         // When
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                "/sync/trigger",
+                url("/sync/trigger"),
                 HttpMethod.POST,
                 HttpEntity.EMPTY,
                 new ParameterizedTypeReference<Map<String, Object>>() {});

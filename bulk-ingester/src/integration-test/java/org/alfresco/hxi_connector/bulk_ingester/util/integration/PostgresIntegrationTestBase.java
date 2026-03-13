@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -35,7 +35,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 
 @Testcontainers
-@SuppressWarnings({"PMD.UseUtilityClass", "PMD.UnusedPrivateMethod"})
+@SuppressWarnings("PMD.UseUtilityClass")
 public class PostgresIntegrationTestBase
 {
 
@@ -47,7 +47,7 @@ public class PostgresIntegrationTestBase
             .withReuse(true);
 
     @DynamicPropertySource
-    private static void configureProperties(DynamicPropertyRegistry registry)
+    static void configureProperties(DynamicPropertyRegistry registry)
     {
         registry.add("spring.datasource.url", postgres::getJdbcUrl);
         registry.add("spring.datasource.username", postgres::getUsername);

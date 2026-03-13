@@ -73,8 +73,10 @@
         <alfresco-sdk.version>4.14.0</alfresco-sdk.version>
         <alfresco-db-connector.version>1.2.0</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.11</alfresco-event-model.version>
-        <spring-boot.version>3.5.7</spring-boot.version>
+        <spring-boot.version>4.0.3</spring-boot.version>
         <spring-camel.version>4.14.0</spring-camel.version>
+        <spring-retry.version>2.0.12</spring-retry.version>
+        <rest-assured.version>6.0.0</rest-assured.version>
         <commons-lang.version>3.20.0</commons-lang.version>
         <commons-collections.version>4.5.0</commons-collections.version>
         <commons-io.version>2.21.0</commons-io.version>
@@ -271,6 +273,16 @@
                 <version>${spring-boot.version}</version>
             </dependency>
             <dependency>
+                <groupId>org.springframework.retry</groupId>
+                <artifactId>spring-retry</artifactId>
+                <version>${spring-retry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${rest-assured.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.wiremock.integrations.testcontainers</groupId>
                 <artifactId>wiremock-testcontainers-module</artifactId>
                 <version>${wiremock-testcontainers-module.version}</version>
@@ -328,6 +340,16 @@
 
         <pluginManagement>
             <plugins>
+                <plugin>
+                    <artifactId>maven-surefire-plugin</artifactId>
+                    <version>3.5.4</version>
+                </plugin>
+
+                <plugin>
+                    <artifactId>maven-failsafe-plugin</artifactId>
+                    <version>3.5.4</version>
+                </plugin>
+
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
                     <version>${maven-resources-plugin.version}</version>
