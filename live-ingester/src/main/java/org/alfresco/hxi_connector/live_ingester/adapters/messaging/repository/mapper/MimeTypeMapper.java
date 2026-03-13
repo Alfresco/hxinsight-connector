@@ -57,6 +57,12 @@ public class MimeTypeMapper
         }
         log.atInfo().log("Active MIME type mappings: {}", mappings);
         mappings.forEach((source, target) -> {
+            if (!source.equals("*") && !source.contains("/"))
+            {
+                log.atWarn().log("MIME type mapping key '{}' does not look like a valid MIME type pattern - "
+                        + "keys containing '/' must be wrapped in square brackets in YAML config, "
+                        + "e.g. \"[text/csv]\": application/pdf", source);
+            }
             if (target.contains("*") && !target.equals(source))
             {
                 throw new IllegalArgumentException(

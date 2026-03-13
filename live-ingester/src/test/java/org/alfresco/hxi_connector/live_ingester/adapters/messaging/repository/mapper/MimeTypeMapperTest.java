@@ -25,13 +25,19 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.BDDMockito.given;
 
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper.EMPTY_MIME_TYPE;
 
+import java.util.List;
 import java.util.Map;
 
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.read.ListAppender;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -42,6 +48,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
@@ -205,6 +212,26 @@ class MimeTypeMapperTest
         given(mockMimeTypeProperties.mapping()).willReturn(Map.of("text/csv", "text/*"));
         // when & then
         assertThrows(IllegalArgumentException.class, objectUnderTest::validateMappings);
+    }
+
+    @Test
+    void givenKeyWithoutSlash_whenValidating_thenLogsWarning()
+    {
+        // Spring Boot mangles map keys containing '/' unless wrapped in brackets, e.g. "[text/plain]"
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("textplain", "application/pdf"));
+        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(MimeTypeMapper.class);
+
+        // when
+        objectUnderTest.validateMappings();
+
+        // then
+        List<String> warnings = logEntries.list.stream()
+                .filter(event -> event.getLevel() == Level.WARN)
+                .map(ILoggingEvent::getFormattedMessage)
+                .toList();
+        assertThat(warnings).singleElement().asString()
+                .contains("textplain")
+                .contains("does not look like a valid MIME type pattern");
     }
 
 }
