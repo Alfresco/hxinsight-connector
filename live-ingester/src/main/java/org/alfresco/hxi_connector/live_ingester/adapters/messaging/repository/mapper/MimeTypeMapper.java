@@ -29,12 +29,14 @@ import java.util.Map;
 import jakarta.annotation.PostConstruct;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class MimeTypeMapper
@@ -50,8 +52,10 @@ public class MimeTypeMapper
         Map<String, String> mappings = integrationProperties.alfresco().transform().mimeType().mapping();
         if (mappings == null)
         {
+            log.atDebug().log("No custom MIME type mappings configured, using default: {}", DEFAULT_MIME_TYPES);
             return;
         }
+        log.atInfo().log("Active MIME type mappings: {}", mappings);
         mappings.forEach((source, target) -> {
             if (target.contains("*") && !target.equals(source))
             {
