@@ -69,7 +69,7 @@ public class IngestContentCommandHandler
         }
         else
         {
-            log.atInfo().log("Passthrough :: Source and target MIME types match ({}) for node: {}, skipping ATS transform", command.sourceMimeType(), command.nodeId());
+            log.atDebug().log("Passthrough :: Source and target MIME types match ({}) for node: {}, skipping ATS transform", command.sourceMimeType(), command.nodeId());
             handlePassthroughContent(command);
         }
     }
