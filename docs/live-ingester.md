@@ -120,7 +120,7 @@ The Live Ingester receives events from the Bulk Ingester via an ActiveMQ queue. 
 
 ## Transform Service Configuration
 
-The Live Ingester uses Alfresco Transform Service (ATS) to convert documents before sending to HX Insight. When the source and target MIME types are the same (see [MIME Type Mapping](#mime-type-mapping)), content is downloaded directly from the Alfresco repository and uploaded to HX Insight without transformation.
+By default, the Live Ingester downloads content directly from the Alfresco repository and uploads it to HX Insight without transformation (passthrough). If you need to convert documents to a different format before ingestion, you can configure [MIME Type Mappings](#mime-type-mapping) to route specific content types through the Alfresco Transform Service (ATS).
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
@@ -134,49 +134,42 @@ The Live Ingester uses Alfresco Transform Service (ATS) to convert documents bef
 
 ## MIME Type Mapping
 
-The Live Ingester transforms content before sending it to HX Insight. The `mime-type.mapping` configuration controls which source MIME types are transformed and what target format they become.
+The `mime-type.mapping` configuration controls which source MIME types are accepted and what target format they are transformed to before being sent to HX Insight. When the source and target MIME types are the same, content is uploaded directly without transformation (passthrough).
 
 ### Default Mappings
 
-By default, content is transformed to **PDF** or **image** formats:
-
-| Source MIME Type | Target MIME Type |
-|-----------------|------------------|
-| `image/png` | `image/png` (unchanged) |
-| `image/bmp` | `image/png` |
-| `image/tiff` | `image/png` |
-| `image/gif` | `image/png` |
-| `image/raw` | `image/png` |
-| `image/*` (other images) | `image/jpeg` |
-| `application/*` (all applications) | `application/pdf` |
-| `text/*` (all text) | `application/pdf` |
+By default, **all content is passed through without transformation** — content is downloaded directly from the Alfresco repository and uploaded to HX Insight as-is. This relies on [CIC Document Filters](#passthrough-with-cic-document-filters) to handle any server-side conversion. To route specific content types through ATS instead, provide a custom mapping (see below).
 
 ### Custom Mappings
 
-Override the defaults by providing your own mapping. The mapping value determines how content is handled:
+Override the default passthrough behaviour by providing your own mapping. When custom mappings are configured, they **replace** the defaults entirely — any MIME types not covered by an explicit entry will have their content upload skipped. To ensure uncovered types still pass through, include a universal wildcard entry (`"*": "*"`) as a catch-all. The mapping value determines how content is handled:
 
 | Mapping | Behaviour |
 |---------|-----------|
 | Source → different target (e.g. `text/csv: application/pdf`) | Content is transformed via ATS and the result is uploaded to HX Insight |
-| Source → itself (e.g. `text/csv: text/csv`) | Content is downloaded directly from Alfresco and uploaded to HX Insight without transformation (passthrough). Useful when relying on [CIC Document Filters](#transform-with-cic-document-filters) for server-side conversion. |
+| Source → itself (e.g. `text/csv: text/csv`) | Content is downloaded directly from Alfresco and uploaded to HX Insight without transformation (passthrough). Useful when relying on [CIC Document Filters](#passthrough-with-cic-document-filters) for server-side conversion. |
+| Wildcard → itself (e.g. `image/*: image/*` or `"*": "*"`) | Passthrough for all matching types. Each matched source type is uploaded as-is without transformation. |
 | Source → empty string (e.g. `text/csv: ""`) | Content upload is skipped entirely. Node metadata is still ingested. |
+
+> **Note:** Wildcards in the target value are only valid when they match the source pattern exactly (e.g. `image/*: image/*` or `"*": "*"`). Any other use of wildcards on the right-hand side (e.g. `image/*: text/*`) is a configuration error and will prevent the application from starting.
 
 ```yaml
 alfresco:
   transform:
     mime-type:
       mapping:
-        image/png: image/png    # Exact match (highest priority)
-        image/*: image/jpeg     # Subtype wildcard
-        video/*: ""             # Empty string = skip this type
-        "*": application/pdf    # Universal catch-all (lowest priority)
+        text/csv: application/pdf  # Transform via ATS
+        image/png: image/png       # Passthrough for a specific type
+        video/*: video/*           # Passthrough for all video types
+        audio/*: ""                # Skip content upload for all audio
+        "*": application/pdf       # Universal catch-all (lowest priority)
 ```
 
 **Lookup order:** Exact match → Subtype wildcard (`type/*`) → Universal wildcard (`*`) → No match (skipped)
 
-### Transform with CIC Document Filters
+### Passthrough with CIC Document Filters
 
-Hyland's [Content Innovation Cloud](https://www.hyland.com/en/platform) includes [Document Filters](https://www.hyland.com/en/solutions/products/document-filters), which can transform many file types. If Alfresco Transform Services cannot convert a particular file type to PDF, you can map the file type to itself to upload it without transformation. After upload, Document Filters will attempt to convert it to a readable format.
+Hyland's [Content Innovation Cloud](https://www.hyland.com/en/platform) includes [Document Filters](https://www.hyland.com/en/solutions/products/document-filters), which can transform many file types. The default passthrough behaviour sends all content directly to HX Insight without ATS transformation, relying on Document Filters for any server-side conversion. If you need to transform specific content types via ATS before ingestion, override the defaults with a custom mapping (e.g. `text/csv: application/pdf`). When source and target MIME types match, the connector downloads the content directly from the Alfresco repository and uploads it to HX Insight without sending it through ATS.
 
 ### Transform Options
 

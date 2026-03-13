@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,14 +28,12 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.BDDMockito.given;
 
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper.DEFAULT_MIME_TYPES;
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper.EMPTY_MIME_TYPE;
-import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper.getType;
 
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -73,13 +71,13 @@ class MimeTypeMapperTest
 
     @ParameterizedTest
     @ValueSource(strings = {"text/plain", "application/pdf", "text/html", "image/png", "image/jpg", "image/gif", "application/msword"})
-    void givenNoMappingsConfigured_whenAnySourceMimeTypeAsInput_thenAlwaysReturnDefaultMimeType(String sourceMimeType)
+    void givenNoMappingsConfigured_whenAnySourceMimeTypeAsInput_thenAlwaysPassthrough(String sourceMimeType)
     {
         given(mockMimeTypeProperties.mapping()).willReturn(null);
         // when
         String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
         // then
-        assertEquals(DEFAULT_MIME_TYPES.getOrDefault(sourceMimeType, getWildcardMappingFromDefault(sourceMimeType)), resultMimeType);
+        assertEquals(sourceMimeType, resultMimeType);
     }
 
     @ParameterizedTest
@@ -152,20 +150,61 @@ class MimeTypeMapperTest
         assertEquals(targetMimeType, resultMimeType);
     }
 
-    private String getWildcardMappingFromDefault(String inputType)
+    @ParameterizedTest
+    @CsvSource({"image/png,image/png", "image/gif,image/gif", "image/bmp,image/bmp"})
+    void givenSubtypeWildcardPassthroughConfigured_whenSourceMatchesWildcard_thenReturnSourceMimeType(String sourceMimeType, String expectedMimeType)
     {
-
-        for (Map.Entry<String, String> mapping : DEFAULT_MIME_TYPES.entrySet())
-        {
-            if (mapping.getKey().endsWith("/*") && getType(inputType).equals(getType(mapping.getKey())))
-            {
-                return StringUtils.defaultIfBlank(mapping.getValue(), EMPTY_MIME_TYPE);
-            }
-        }
-        return DEFAULT_MIME_TYPES.entrySet().stream()
-                .filter(mapping -> mapping.getKey().equals("*"))
-                .findFirst()
-                .map(Map.Entry::getValue)
-                .orElse(EMPTY_MIME_TYPE);
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "image/*"));
+        // when
+        String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
+        // then
+        assertEquals(expectedMimeType, resultMimeType);
     }
+
+    @ParameterizedTest
+    @CsvSource({"text/csv,text/csv", "image/png,image/png", "application/pdf,application/pdf"})
+    void givenUniversalWildcardPassthroughConfigured_whenAnySourceMimeType_thenReturnSourceMimeType(String sourceMimeType, String expectedMimeType)
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("*", "*"));
+        // when
+        String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
+        // then
+        assertEquals(expectedMimeType, resultMimeType);
+    }
+
+    @ParameterizedTest
+    @CsvSource({"image/png,image/png", "image/gif,image/gif", "text/csv,application/pdf", "application/xml,application/pdf"})
+    void givenSubtypeWildcardPassthroughAndUniversalCatchAll_whenSourceMatches_thenReturnCorrectTarget(String sourceMimeType, String expectedMimeType)
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "image/*", "*", "application/pdf"));
+        // when
+        String resultMimeType = objectUnderTest.mapMimeType(sourceMimeType);
+        // then
+        assertEquals(expectedMimeType, resultMimeType);
+    }
+
+    @Test
+    void givenWildcardInTargetNotMatchingSource_whenValidating_thenThrowException()
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "text/*"));
+        // when & then
+        assertThrows(IllegalArgumentException.class, objectUnderTest::validateMappings);
+    }
+
+    @Test
+    void givenUniversalWildcardTargetNotMatchingSource_whenValidating_thenThrowException()
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("image/*", "*"));
+        // when & then
+        assertThrows(IllegalArgumentException.class, objectUnderTest::validateMappings);
+    }
+
+    @Test
+    void givenConcreteSourceWithWildcardTarget_whenValidating_thenThrowException()
+    {
+        given(mockMimeTypeProperties.mapping()).willReturn(Map.of("text/csv", "text/*"));
+        // when & then
+        assertThrows(IllegalArgumentException.class, objectUnderTest::validateMappings);
+    }
+
 }
