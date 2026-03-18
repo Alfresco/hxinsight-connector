@@ -69,7 +69,7 @@
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
         <skipE2eTests>${skipTests}</skipE2eTests>
 
-        <alfresco-platform.version>25.3.0-A.15</alfresco-platform.version>
+        <alfresco-platform.version>25.3.0</alfresco-platform.version>
         <alfresco-sdk.version>4.15.0</alfresco-sdk.version>
         <alfresco-db-connector.version>1.2.0</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.11</alfresco-event-model.version>
@@ -104,9 +104,9 @@
         <dist.alfresco.version>${alfresco-platform.version}</dist.alfresco.version>
         <dist.share.version>${alfresco-platform.version}</dist.share.version>
         <dist.postgres.version>14.4</dist.postgres.version>
-        <dist.transform.router.version>4.1.4</dist.transform.router.version>
-        <dist.transform.core.aio.version>5.1.4</dist.transform.core.aio.version>
-        <dist.transform.sfs.version>4.1.4</dist.transform.sfs.version>
+        <dist.transform.router.version>4.3.0</dist.transform.router.version>
+        <dist.transform.core.aio.version>5.3.0</dist.transform.core.aio.version>
+        <dist.transform.sfs.version>4.3.0</dist.transform.sfs.version>
         <dist.activemq.version>5.18.5</dist.activemq.version>
         <dist.activemq.docker.tag>${dist.activemq.version}-jre17-rockylinux8</dist.activemq.docker.tag>
         <dist.digital.workspace.version>5.1.0</dist.digital.workspace.version>
