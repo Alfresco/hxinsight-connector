@@ -158,11 +158,11 @@ alfresco:
   transform:
     mime-type:
       mapping:
-        text/csv: application/pdf  # Transform via ATS
-        image/png: image/png       # Passthrough for a specific type
-        video/*: video/*           # Passthrough for all video types
-        audio/*: ""                # Skip content upload for all audio
-        "*": application/pdf       # Universal catch-all (lowest priority)
+        "[text/csv]": application/pdf  # Transform via ATS
+        "[image/png]": image/png       # Passthrough for a specific type
+        "[video/*]": video/*           # Passthrough for all video types
+        "[audio/*]": ""                # Skip content upload for all audio
+        "[*]": application/pdf       # Universal catch-all (lowest priority)
 ```
 
 **Lookup order:** Exact match → Subtype wildcard (`type/*`) → Universal wildcard (`*`) → No match (skipped)
