@@ -65,8 +65,8 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 
 /**
- * E2E tests verifying that real ATS (Alfresco Transform Service) transformations work correctly
- * with the default mime-type mapping configured in application.yml:
+ * E2E tests verifying that real ATS (Alfresco Transform Service) transformations work correctly with the mime-type mapping configured in application.yml:
+ *
  * <pre>
  * [text/*]        → application/pdf
  * [image/*]       → image/jpeg
@@ -75,13 +75,9 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
  * [*]             → * (passthrough)
  * </pre>
  *
- * These E2E tests use real Docker containers for transform-router, transform-core-aio and shared-file-store.
- * This means the tests will fail if the configured ATS do not support the required transformations.
+ * These E2E tests use real Docker containers for transform-router, transform-core-aio and shared-file-store. This means the tests will fail if the configured ATS do not support the required transformations.
  * <p>
- * Transform requests from the live-ingester go through ACS's transform pipeline (matching the
- * docker-compose setup): ACS consumes from {@code acs-repo-transform-request}, checks the transform
- * capability registry, uploads source content to SFS, and forwards enriched requests to the
- * transform-router. This ensures old/broken transform versions are detected by ACS's config check.
+ * Transform requests from the live-ingester go through ACS's transform pipeline (matching the docker-compose setup): ACS consumes from {@code acs-repo-transform-request}, checks the transform capability registry, uploads source content to SFS, and forwards enriched requests to the transform-router. This ensures old/broken transform versions are detected by ACS's config check.
  */
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -139,8 +135,7 @@ public class ATSTransformE2eTest
     }
 
     /**
-     * Verifies that a text/plain file is transformed to application/pdf by the ATS.
-     * This test will fail if the ATS version does not support text/plain → application/pdf transformation.
+     * Verifies that a text/plain file is transformed to application/pdf by the ATS. This test will fail if the ATS version does not support text/plain → application/pdf transformation.
      * <p>
      * Mapping: [text/*] → application/pdf
      */
