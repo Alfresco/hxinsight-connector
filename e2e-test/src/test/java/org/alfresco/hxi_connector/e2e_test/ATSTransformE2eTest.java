@@ -81,7 +81,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
  */
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases", "PMD.JUnitTestsShouldIncludeAssert"})
 public class ATSTransformE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
