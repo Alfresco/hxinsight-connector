@@ -89,3 +89,19 @@ Base path for all endpoints mentioned below is `{host}:{port}/sync`
     "nucleusStatus": "HEALTHY"
   }
   ```
+
+### Health Check
+
+* Method: `GET`
+* Path: `/actuator/health`
+* Response:
+    * Status: 200
+    * Content-Type: `application/json`
+    * Body:
+        * `status` [string] - `"UP"` or `"DOWN"`
+    * Sample
+    ```json
+    {
+      "status": "UP"
+    }
+    ```
