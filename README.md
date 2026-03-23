@@ -179,4 +179,5 @@ The following information is published:
 * Alfresco Groups if their member users are mapped.
 * Alfresco Group memberships for those users and groups which have been mapped.
 
-For a more detailed documentation go [here](./docs/nucleus-sync.md).
+The sync can be performed periodically using a cron expression in config or can
+be performed on demand using REST API.

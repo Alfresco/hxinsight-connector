@@ -18,7 +18,7 @@ alfresco:
   user:
     skip-not-enabled: true
   user-group:
-    fetch-timeout: PT45M
+    fetch-timeout: PT15M
     max-concurrent-requests: 50
 ```
 
