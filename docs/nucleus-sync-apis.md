@@ -9,9 +9,9 @@ status and perform health-check.
 
 ### Endpoint
 
-The base url is either `localhost` or the machine-name. Port by default is 8081.
+The base url is either `localhost` or the machine-name. Port is configured via the `SERVER_PORT` environment variable and defaults to `8081`.
 
-Base path for all endpoints mentioned below is `{host}:{port}/sync`
+Base path for all sync endpoints mentioned below is `{host}:{port}/sync`
 
 ### Perform an on-demand sync
 
@@ -90,18 +90,20 @@ Base path for all endpoints mentioned below is `{host}:{port}/sync`
   }
   ```
 
+---
+
 ### Health Check
 
-* Method: `GET`
-* Path: `/actuator/health`
-* Response:
-    * Status: 200
-    * Content-Type: `application/json`
-    * Body:
-        * `status` [string] - `"UP"` or `"DOWN"`
-    * Sample
-    ```json
-    {
-      "status": "UP"
-    }
-    ```
+- Method: `GET`
+- Path: `/actuator/health`
+- Response:
+  - Status: 200
+  - Content-Type: `application/json`
+  - Body:
+    - `status` [string] - `"UP"` or `"DOWN"`
+  - Sample
+  ```json
+  {
+    "status": "UP"
+  }
+  ```
