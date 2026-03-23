@@ -75,12 +75,12 @@ An Alfresco JAR module that extends the Alfresco repository with Knowledge Disco
 
 ## Nucleus User Sync
 
-**Status:** ⚠️ Incomplete (Work in Progress) | [Configuration →](nucleus-sync.md)
+**Status:**  ✅ Complete | [Configuration →](nucleus-sync.md) | [API Reference →](nucleus-sync-apis.md)
 
 A Spring Boot application that periodically synchronizes Alfresco users and groups with the Nucleus identity system.
 
 **Key Features:**
-- Periodic user/group synchronization via REST API
+- Periodic (or on-demand) user/group synchronization via REST API
 - Email-based user mapping between Alfresco and Nucleus
 - Group membership sync
 

@@ -1,6 +1,6 @@
 # Nucleus User Sync Configuration
 
-[← Components](components.md) | [Installation →](installation.md)
+[← Components](components.md) | [Installation →](installation.md) | [API Reference →](nucleus-sync-apis.md)
 
 The Nucleus User Sync application periodically synchronizes Alfresco users and groups with the Nucleus identity system.
 This enables HX Insight to understand user permissions and provide personalized search results.
@@ -100,22 +100,6 @@ sync:
 |-----------------------|-------------------------------------------------------------------------------------------|---------------|
 | `SYNC_ENABLED`        | Whether scheduled sync should be enabled. (If not sync is to be performed using REST API) | `true`        |
 | `SYNC_CRONEXPRESSION` | Cron expression for scheduled sync                                                        | `"0 0 0 * * *"` |
----
-
-## Synchronization using REST API
-
-- The following URL needs to be called to perform an on-demand sync
-
-```sh
-curl -X POST "http://<base-url>:<port>/sync/trigger"
-```
-
-- We can also view the last sync status using
-
-```sh
-curl -X GET "http://<base-url>:<port>/sync/status"
-```
-
 ---
 
 ## Synchronization Behavior
