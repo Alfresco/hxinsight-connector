@@ -2,10 +2,6 @@
 
 [← Components](components.md) | [Installation →](installation.md)
 
-> ⚠️ **Status: Coming Soon**
->
-> This component is under active development and not yet production-ready. It will be available in a future release.
-
 The Nucleus User Sync application periodically synchronizes Alfresco users and groups with the Nucleus identity system.
 This enables HX Insight to understand user permissions and provide personalized search results.
 
