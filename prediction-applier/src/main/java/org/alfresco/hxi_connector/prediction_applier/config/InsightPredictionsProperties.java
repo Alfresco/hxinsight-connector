@@ -56,7 +56,7 @@ public record InsightPredictionsProperties(
 
         if (pollPeriodMillis != null && collectorTimerEndpoint == null)
         {
-            collectorTimerEndpoint = "quartz:predictions-collector-timer?autoStartScheduler=true&trigger.repeatInterval=" + pollPeriodMillis;
+            collectorTimerEndpoint = "scheduler:predictions-collector-timer?delay=" + pollPeriodMillis + "&initialDelay=0";
         }
     }
 }
