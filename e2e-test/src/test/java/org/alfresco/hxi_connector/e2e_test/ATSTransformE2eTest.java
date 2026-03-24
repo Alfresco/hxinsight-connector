@@ -141,11 +141,11 @@ public class ATSTransformE2eTest
     /**
      * Parameterized test verifying that each file type results in content being uploaded to S3:
      * <ul>
-     *   <li>text/plain → application/pdf (ATS transform)</li>
-     *   <li>image/png → image/jpeg (ATS transform)</li>
-     *   <li>application/pdf → application/pdf (passthrough, source matches target)</li>
-     *   <li>application/vnd.openxmlformats → application/pdf (ATS transform)</li>
-     *   <li>video/quicktime → video/quicktime (passthrough via catch-all [*]→*)</li>
+     * <li>text/plain → application/pdf (ATS transform)</li>
+     * <li>image/png → image/jpeg (ATS transform)</li>
+     * <li>application/pdf → application/pdf (passthrough, source matches target)</li>
+     * <li>application/vnd.openxmlformats → application/pdf (ATS transform)</li>
+     * <li>video/quicktime → video/quicktime (passthrough via catch-all [*]→*)</li>
      * </ul>
      */
     @ParameterizedTest(name = "{0}")
