@@ -85,7 +85,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
  */
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases", "PMD.JUnitTestsShouldIncludeAssert"})
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases", "PMD.UnitTestShouldIncludeAssert"})
 public class ATSTransformE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
@@ -150,7 +150,7 @@ public class ATSTransformE2eTest
      */
     @ParameterizedTest(name = "{0}")
     @MethodSource("contentUploadedTestCases")
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    @SuppressWarnings({"PMD.UnitTestShouldIncludeAssert"})
     final void givenFile_whenCreatedInRepo_thenContentUploadedToS3(String description, String filePath)
     {
         // given
@@ -178,7 +178,7 @@ public class ATSTransformE2eTest
      * Mapping: [audio/*] → "" (no content ingestion)
      */
     @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    @SuppressWarnings({"PMD.UnitTestShouldIncludeAssert"})
     final void givenAudioFile_whenCreatedInRepo_thenNoContentUploadedToS3()
     {
         // given
