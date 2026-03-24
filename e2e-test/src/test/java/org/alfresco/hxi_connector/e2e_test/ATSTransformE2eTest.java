@@ -41,12 +41,16 @@ import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.A
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
@@ -135,106 +139,28 @@ public class ATSTransformE2eTest
     }
 
     /**
-     * Verifies that a text/plain file is transformed to application/pdf by the ATS. This test will fail if the ATS version does not support text/plain → application/pdf transformation.
-     * <p>
-     * Mapping: [text/*] → application/pdf
+     * Parameterized test verifying that each file type results in content being uploaded to S3:
+     * <ul>
+     *   <li>text/plain → application/pdf (ATS transform)</li>
+     *   <li>image/png → image/jpeg (ATS transform)</li>
+     *   <li>application/pdf → application/pdf (passthrough, source matches target)</li>
+     *   <li>application/vnd.openxmlformats → application/pdf (ATS transform)</li>
+     *   <li>video/quicktime → video/quicktime (passthrough via catch-all [*]→*)</li>
+     * </ul>
      */
-    @Test
+    @ParameterizedTest(name = "{0}")
+    @MethodSource("contentUploadedTestCases")
     @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
-    final void givenTextFile_whenCreatedInRepo_thenATSTransformsToPdfAndContentUploadedToS3()
+    final void givenFile_whenCreatedInRepo_thenContentUploadedToS3(String description, String filePath)
     {
         // given
-        File textFile = new File("src/test/resources/test-files/All cats are gray.txt");
+        File file = new File(filePath);
         List<S3Object> initialBucketContent = awsS3Client.listS3Content();
 
         // when
-        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, textFile);
+        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, file);
 
-        // then - verify the full ATS round-trip: request → real ATS transform → SFS → S3 upload → ingestion event
-        RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
-
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
-                    .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, DELAY_MS);
-    }
-
-    /**
-     * Verifies that an image/png file is transformed to image/jpeg by the ATS.
-     * <p>
-     * Mapping: [image/*] → image/jpeg
-     */
-    @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
-    final void givenPngImage_whenCreatedInRepo_thenATSTransformsToJpegAndContentUploadedToS3()
-    {
-        // given
-        File pngFile = new File("src/test/resources/test-files/Bird.png");
-        List<S3Object> initialBucketContent = awsS3Client.listS3Content();
-
-        // when
-        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, pngFile);
-
-        // then - verify the full ATS round-trip for image transformation
-        RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
-
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
-                    .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, DELAY_MS);
-    }
-
-    /**
-     * Verifies that an application/pdf file is passed through directly (source matches target type).
-     * <p>
-     * Mapping: [application/*] → application/pdf, so application/pdf → application/pdf is a passthrough.
-     */
-    @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
-    final void givenPdfFile_whenCreatedInRepo_thenPassthroughDirectlyToS3()
-    {
-        // given
-        File pdfFile = new File("src/test/resources/test-files/Alfresco Control Center.pdf");
-        List<S3Object> initialBucketContent = awsS3Client.listS3Content();
-
-        // when
-        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, pdfFile);
-
-        // then - verify passthrough: PDF source matches PDF target, no ATS transform needed
-        RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
-
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
-                    .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, DELAY_MS);
-    }
-
-    /**
-     * Verifies that a .docx file is transformed to application/pdf by the ATS.
-     * <p>
-     * Mapping: [application/*] → application/pdf
-     */
-    @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
-    final void givenDocxFile_whenCreatedInRepo_thenATSTransformsToPdfAndContentUploadedToS3()
-    {
-        // given
-        File docxFile = new File("src/test/resources/test-files/Alfresco Content Services 7.4.docx");
-        List<S3Object> initialBucketContent = awsS3Client.listS3Content();
-
-        // when
-        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, docxFile);
-
-        // then - verify the full ATS round-trip: docx → pdf via LibreOffice
+        // then
         RetryUtils.retryWithBackoff(() -> {
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
@@ -267,38 +193,24 @@ public class ATSTransformE2eTest
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size());
 
-            // Metadata event should still be sent, but no presigned-urls request (no content upload)
             WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events")));
         }, DELAY_MS);
     }
 
-    /**
-     * Verifies that a video file is passed through directly via the catch-all mapping.
-     * <p>
-     * Mapping: [*] → * (passthrough) — no video-specific mapping exists, so the catch-all applies.
-     */
-    @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
-    final void givenVideoFile_whenCreatedInRepo_thenPassthroughDirectlyToS3()
+    static Stream<Arguments> contentUploadedTestCases()
     {
-        // given
-        File videoFile = new File("src/test/resources/test-files/Test video.mov");
-        List<S3Object> initialBucketContent = awsS3Client.listS3Content();
-
-        // when
-        Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, videoFile);
-
-        // then - verify passthrough via catch-all [*] -> * mapping: no ATS transform needed
-        RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
-
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
-                    .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
-                    .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, DELAY_MS);
+        return Stream.of(
+                Arguments.of("text/plain → application/pdf (ATS transform)",
+                        "src/test/resources/test-files/All cats are gray.txt"),
+                Arguments.of("image/png → image/jpeg (ATS transform)",
+                        "src/test/resources/test-files/Bird.png"),
+                Arguments.of("application/pdf → application/pdf (passthrough)",
+                        "src/test/resources/test-files/Alfresco Control Center.pdf"),
+                Arguments.of("application/docx → application/pdf (ATS transform)",
+                        "src/test/resources/test-files/Alfresco Content Services 7.4.docx"),
+                Arguments.of("video/quicktime → passthrough (catch-all [*]→*)",
+                        "src/test/resources/test-files/Test video.mov"));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
