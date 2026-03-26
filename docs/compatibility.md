@@ -4,7 +4,7 @@
 
 ## Alfresco Content Services Versions
 
-**Supported:** ACS 7.4 through 25.x (Enterprise Edition only)
+**Supported:** ACS 7.4 through 26.x (Enterprise Edition only)
 
 > ⚠️ **Alfresco Community Edition is not supported.** The connector currently requires enterprise events and so will only run against Alfresco Enterprise Edition.
 
@@ -15,9 +15,9 @@
 | Component | Java Version |
 |-----------|-------------|
 | Live Ingester, Bulk Ingester, Prediction Applier, Nucleus User Sync | Java 17+ |
-| [Knowledge Discovery JAR Module](hxinsight-extension.md) | Java 11 or 17 (matches your ACS version) |
+| [Knowledge Discovery JAR Module](hxinsight-extension.md) | Java 11, 17 or 21 (matches your ACS version) |
 
-The Knowledge Discovery JAR Module Docker image can switch between Java 11 and 17 at runtime to match older Alfresco versions (7.3.x, 7.4.x).
+The Knowledge Discovery JAR Module Docker image can switch between Java 11, 17 and 21 at runtime to match your Alfresco version (7.4.x uses Java 11, 23.x/25.x use Java 17, 26.x uses Java 21).
 
 ---
 

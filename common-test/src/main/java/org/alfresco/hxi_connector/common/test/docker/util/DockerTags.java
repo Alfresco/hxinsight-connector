@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -42,14 +42,14 @@ import lombok.SneakyThrows;
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class DockerTags
 {
-    private static final String REPOSITORY_TAG_DEFAULT = "23.2.1";
+    private static final String REPOSITORY_TAG_DEFAULT = "26.1.0";
     private static final String POSTGRES_TAG_DEFAULT = "14.4";
     private static final String ACTIVEMQ_TAG_DEFAULT = "5.18.3-jre17-rockylinux8";
     private static final String WIREMOCK_TAG_DEFAULT = "3.4.2";
     private static final String LOCALSTACK_TAG_DEFAULT = "3.2.0";
-    private static final String TRANSFORM_ROUTER_TAG_DEFAULT = "4.0.1";
-    private static final String TRANSFORM_CORE_AIO_TAG_DEFAULT = "5.0.1";
-    private static final String SFS_TAG_DEFAULT = "4.0.1";
+    private static final String TRANSFORM_ROUTER_TAG_DEFAULT = "4.4.0";
+    private static final String TRANSFORM_CORE_AIO_TAG_DEFAULT = "5.4.0";
+    private static final String SFS_TAG_DEFAULT = "4.4.0";
     private static final String PROPERTIES_FILE = "docker-tags.properties";
 
     private static Properties properties;
