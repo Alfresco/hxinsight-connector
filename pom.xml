@@ -89,6 +89,7 @@
         <rest-assured.version>5.5.7</rest-assured.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
+        <lombok.version>1.18.38</lombok.version>
 
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
@@ -302,6 +303,11 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.retry</groupId>
