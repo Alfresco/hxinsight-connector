@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.prediction_applier;
 
+import lombok.Generated;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
@@ -34,6 +35,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 @EnableConfigurationProperties
 @ConfigurationPropertiesScan
 @SuppressWarnings("PMD.UseUtilityClass")
+@Generated
 public class PredictionApplierApplication
 {
 
