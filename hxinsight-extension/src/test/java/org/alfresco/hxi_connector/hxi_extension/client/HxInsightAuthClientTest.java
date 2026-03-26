@@ -33,12 +33,9 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.test.appender.ListAppender;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -65,25 +62,24 @@ class HxInsightAuthClientTest
     HxInsightAuthClient hxInsightAuthClient;
 
     ListAppender testAppender;
-    LoggerConfig rootLoggerConfig;
 
     @BeforeAll
     void beforeAll()
     {
-        LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
-        Configuration loggerConfig = loggerContext.getConfiguration();
         testAppender = ListAppender.newBuilder().setName("test-appender").build();
         testAppender.start();
-        rootLoggerConfig = loggerConfig.getLoggerConfig(StringUtils.EMPTY);
-        rootLoggerConfig.setLevel(Level.INFO);
-        rootLoggerConfig.addAppender(testAppender, Level.ALL, null);
-        loggerContext.updateLoggers();
+        // Target the exact Log4j Logger that @Slf4j uses in HxInsightAuthClient.
+        // Logger.addAppender() creates a dedicated LoggerConfig and calls updateLoggers().
+        // Logger.setLevel() directly updates the Logger's cached level.
+        Logger targetLogger = (Logger) LogManager.getLogger(HxInsightAuthClient.class);
+        targetLogger.addAppender(testAppender);
+        targetLogger.setLevel(Level.INFO);
     }
 
     @AfterAll
     void afterAll()
     {
-        rootLoggerConfig.removeAppender(testAppender.getName());
+        testAppender.stop();
     }
 
     @Test
