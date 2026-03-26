@@ -77,6 +77,7 @@ class HxInsightAuthClientTest
         rootLoggerConfig = loggerConfig.getLoggerConfig(StringUtils.EMPTY);
         rootLoggerConfig.setLevel(Level.INFO);
         rootLoggerConfig.addAppender(testAppender, Level.ALL, null);
+        loggerContext.updateLoggers();
     }
 
     @AfterAll
