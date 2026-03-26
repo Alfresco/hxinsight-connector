@@ -32,6 +32,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getHxInsightRepoJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
+import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.util.List;
 import java.util.Map;
@@ -51,7 +52,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient;
-import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.TestResponse;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.SimpleResponse;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -84,10 +85,9 @@ public class AgentsE2eTest
         // given: contained in wiremock file - get-agents.json.
 
         // when
-        TestResponse response = HttpTestClient.get(
+        SimpleResponse response = HttpTestClient.get(
                 repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents",
-                "admin",
-                "admin");
+                ADMIN_USER);
 
         // then
         LoggedRequest loggedRequest = WireMock.findAll(WireMock.getRequestedFor(WireMock.anyUrl())).get(0);

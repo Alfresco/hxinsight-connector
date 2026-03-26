@@ -50,7 +50,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Visibility;
 @AllArgsConstructor
 public class RepositoryClient
 {
-    private static final ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
     public static final User ADMIN_USER = new User("admin", "admin");
     private static final String API_PATH = "%s/alfresco/api/-default-/public/alfresco/versions/1";
     private static final String GS_API_PATH = "%s/alfresco/api/-default-/public/gs/versions/1";
@@ -233,13 +233,13 @@ public class RepositoryClient
     @SneakyThrows
     private NodeEntry readNodeEntry(String responseBody)
     {
-        return objectMapper.readValue(responseBody, NodeEntry.class);
+        return OBJECT_MAPPER.readValue(responseBody, NodeEntry.class);
     }
 
     @SneakyThrows
     private String extractId(String responseBody)
     {
-        JsonNode root = objectMapper.readTree(responseBody);
+        JsonNode root = OBJECT_MAPPER.readTree(responseBody);
         return root.path("entry").path("id").asText();
     }
 
@@ -257,8 +257,8 @@ public class RepositoryClient
         byte[] newLine = "\r\n".getBytes(StandardCharsets.UTF_8);
 
         outputStream.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
-        outputStream.write(("Content-Disposition: form-data; name=\"filedata\"; filename=\"%s\"\r\n".formatted(filename)).getBytes(StandardCharsets.UTF_8));
-        outputStream.write(("Content-Type: %s\r\n\r\n".formatted(mimeType != null ? mimeType : "application/octet-stream")).getBytes(StandardCharsets.UTF_8));
+        outputStream.write("Content-Disposition: form-data; name=\"filedata\"; filename=\"%s\"\r\n".formatted(filename).getBytes(StandardCharsets.UTF_8));
+        outputStream.write("Content-Type: %s\r\n\r\n".formatted(mimeType != null ? mimeType : "application/octet-stream").getBytes(StandardCharsets.UTF_8));
         fileContent.transferTo(outputStream);
         outputStream.write(newLine);
 

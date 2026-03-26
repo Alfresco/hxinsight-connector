@@ -51,7 +51,7 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient;
-import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.TestResponse;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.SimpleResponse;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
@@ -112,7 +112,7 @@ public class QuestionsPermissionsAGSE2eTest
     void adminShouldBeAbleToAskQuestionAboutPublicDocument()
     {
         // when
-        TestResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, ADMIN_USER, SAMPLE_QUESTION.formatted(publicDocumentId));
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, ADMIN_USER, SAMPLE_QUESTION.formatted(publicDocumentId));
 
         // then
         assertEquals(SC_OK, response.statusCode());
@@ -122,7 +122,7 @@ public class QuestionsPermissionsAGSE2eTest
     void adminShouldBeAbleToAskQuestionAboutDocumentWithSecurityMark()
     {
         // when
-        TestResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, ADMIN_USER, SAMPLE_QUESTION.formatted(superConfidentialDocumentId));
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, ADMIN_USER, SAMPLE_QUESTION.formatted(superConfidentialDocumentId));
 
         // then
         assertEquals(SC_OK, response.statusCode());
@@ -132,7 +132,7 @@ public class QuestionsPermissionsAGSE2eTest
     void regularUserShouldBeAbleToAskQuestionAboutPublicDocument()
     {
         // when
-        TestResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, regularUser, SAMPLE_QUESTION.formatted(publicDocumentId));
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, regularUser, SAMPLE_QUESTION.formatted(publicDocumentId));
 
         // then
         assertEquals(SC_OK, response.statusCode());
@@ -142,7 +142,7 @@ public class QuestionsPermissionsAGSE2eTest
     void regularUserShouldNotBeAbleToAskQuestionAboutDocumentWithSecurityMark()
     {
         // when
-        TestResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, regularUser, SAMPLE_QUESTION.formatted(superConfidentialDocumentId));
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, regularUser, SAMPLE_QUESTION.formatted(superConfidentialDocumentId));
 
         // then
         assertEquals(SC_FORBIDDEN, response.statusCode());

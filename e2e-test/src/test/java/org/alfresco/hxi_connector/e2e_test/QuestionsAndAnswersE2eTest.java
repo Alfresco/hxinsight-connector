@@ -68,7 +68,7 @@ import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoReposito
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient;
-import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.TestResponse;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.SimpleResponse;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 
 @Testcontainers
@@ -122,7 +122,7 @@ public class QuestionsAndAnswersE2eTest
                 """.formatted(PREEXISTING_DOCUMENT_ID);
 
         // when
-        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions", questions);
+        SimpleResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions", questions);
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_OK);
@@ -166,7 +166,7 @@ public class QuestionsAndAnswersE2eTest
                 """.formatted(PREEXISTING_DOCUMENT_ID, PREEXISTING_DOCUMENT_ID);
 
         // when
-        TestResponse response = postAsAdmin(QUESTIONS_URL, questions);
+        SimpleResponse response = postAsAdmin(QUESTIONS_URL, questions);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -180,7 +180,7 @@ public class QuestionsAndAnswersE2eTest
         String questions = "[]";
 
         // when
-        TestResponse response = postAsAdmin(QUESTIONS_URL, questions);
+        SimpleResponse response = postAsAdmin(QUESTIONS_URL, questions);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -200,7 +200,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        TestResponse response = postAsAdmin(QUESTIONS_URL, questions);
+        SimpleResponse response = postAsAdmin(QUESTIONS_URL, questions);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -213,7 +213,7 @@ public class QuestionsAndAnswersE2eTest
         String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
 
         // when
-        TestResponse response = getAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId));
+        SimpleResponse response = getAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId));
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_OK);
@@ -253,7 +253,7 @@ public class QuestionsAndAnswersE2eTest
         String questionId = "non-existing-question-id";
 
         // when
-        TestResponse response = getAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId));
+        SimpleResponse response = getAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId));
 
         // then
         assertEquals(SC_NOT_FOUND, response.statusCode());
@@ -275,7 +275,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
+        SimpleResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_CREATED, response.statusCode());
@@ -300,7 +300,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
+        SimpleResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_NOT_FOUND, response.statusCode());
@@ -315,7 +315,7 @@ public class QuestionsAndAnswersE2eTest
         String feedback = "[]";
 
         // when
-        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
+        SimpleResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -340,7 +340,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
+        SimpleResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -365,7 +365,7 @@ public class QuestionsAndAnswersE2eTest
         WireMock.setScenarioState(SUBMIT_QUESTION_SCENARIO, NEXT_QUESTION_STATE);
 
         // when
-        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId), retry);
+        SimpleResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId), retry);
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_CREATED);
@@ -410,7 +410,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId), retry);
+        SimpleResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId), retry);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -426,12 +426,12 @@ public class QuestionsAndAnswersE2eTest
                 .withJavaOpts(javaOpts);
     }
 
-    private TestResponse postAsAdmin(String path, String body)
+    private SimpleResponse postAsAdmin(String path, String body)
     {
         return HttpTestClient.postJson(repository.getBaseUrl() + path, ADMIN_USER, body);
     }
 
-    private TestResponse getAsAdmin(String path)
+    private SimpleResponse getAsAdmin(String path)
     {
         return HttpTestClient.get(repository.getBaseUrl() + path, ADMIN_USER);
     }

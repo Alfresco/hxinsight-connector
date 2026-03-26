@@ -39,18 +39,23 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
 public final class HttpTestClient
 {
-    private static final HttpClient httpClient = HttpClient.newHttpClient();
+    private static final HttpClient HTTP_CLIENT = HttpClient.newHttpClient();
 
     private HttpTestClient()
     {}
 
-    public static TestResponse get(String url, User user)
+    public static SimpleResponse get(String url, User user)
     {
         return get(url, user.username(), user.password());
     }
 
+    public static SimpleResponse postJson(String url, User user, String body)
+    {
+        return postJson(url, user.username(), user.password(), body);
+    }
+
     @SneakyThrows
-    public static TestResponse get(String url, String username, String password)
+    private static SimpleResponse get(String url, String username, String password)
     {
         HttpRequest request = requestBuilder(url, username, password)
                 .GET()
@@ -58,13 +63,8 @@ public final class HttpTestClient
         return send(request);
     }
 
-    public static TestResponse postJson(String url, User user, String body)
-    {
-        return postJson(url, user.username(), user.password(), body);
-    }
-
     @SneakyThrows
-    public static TestResponse postJson(String url, String username, String password, String body)
+    private static SimpleResponse postJson(String url, String username, String password, String body)
     {
         HttpRequest request = requestBuilder(url, username, password)
                 .header("Content-Type", "application/json")
@@ -74,10 +74,10 @@ public final class HttpTestClient
     }
 
     @SneakyThrows
-    private static TestResponse send(HttpRequest request)
+    private static SimpleResponse send(HttpRequest request)
     {
-        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
-        return new TestResponse(response.statusCode(), response.body());
+        HttpResponse<String> response = HTTP_CLIENT.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        return new SimpleResponse(response.statusCode(), response.body());
     }
 
     private static HttpRequest.Builder requestBuilder(String url, String username, String password)
@@ -93,12 +93,12 @@ public final class HttpTestClient
         return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
     }
 
-    public static final class TestResponse
+    public static final class SimpleResponse
     {
         private final int statusCode;
         private final String body;
 
-        private TestResponse(int statusCode, String body)
+        private SimpleResponse(int statusCode, String body)
         {
             this.statusCode = statusCode;
             this.body = body;
