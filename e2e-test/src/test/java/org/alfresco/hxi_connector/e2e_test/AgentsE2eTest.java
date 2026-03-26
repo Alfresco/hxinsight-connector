@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -39,7 +38,6 @@ import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -52,6 +50,8 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.TestResponse;
 
 @Testcontainers
 @SuppressWarnings("PMD.FieldNamingConventions")
@@ -84,10 +84,10 @@ public class AgentsE2eTest
         // given: contained in wiremock file - get-agents.json.
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents")
-                .then().extract().response();
+        TestResponse response = HttpTestClient.get(
+                repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents",
+                "admin",
+                "admin");
 
         // then
         LoggedRequest loggedRequest = WireMock.findAll(WireMock.getRequestedFor(WireMock.anyUrl())).get(0);

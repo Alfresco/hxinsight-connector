@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -61,7 +61,7 @@ import org.apache.hc.core5.http.HttpStatus;
 import org.assertj.core.api.Condition;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.testcontainers.junit.jupiter.Container;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
@@ -81,7 +81,7 @@ public abstract class DefaultAuthenticationClientTest
     @SuppressWarnings("PMD.FieldNamingConventions")
     protected static final WireMockContainer hxAuthMock = DockerContainers.createWireMockContainer();
 
-    @SpyBean
+    @MockitoSpyBean
     protected AuthenticationClient authenticationClient;
 
     @BeforeAll

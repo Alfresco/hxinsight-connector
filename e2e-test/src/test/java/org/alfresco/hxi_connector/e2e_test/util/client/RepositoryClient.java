@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,12 +25,22 @@
  */
 package org.alfresco.hxi_connector.e2e_test.util.client;
 
-import static io.restassured.RestAssured.given;
-
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.util.Base64;
+import java.util.UUID;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
 
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.NodeEntry;
@@ -40,6 +50,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Visibility;
 @AllArgsConstructor
 public class RepositoryClient
 {
+    private static final ObjectMapper objectMapper = new ObjectMapper();
     public static final User ADMIN_USER = new User("admin", "admin");
     private static final String API_PATH = "%s/alfresco/api/-default-/public/alfresco/versions/1";
     private static final String GS_API_PATH = "%s/alfresco/api/-default-/public/gs/versions/1";
@@ -47,142 +58,144 @@ public class RepositoryClient
     private static final String SITES_BASE_URL = API_PATH + "/sites";
     private static final String SECURITY_GROUPS_BASE_URL = GS_API_PATH + "/security-groups";
 
+    private final HttpClient httpClient = HttpClient.newHttpClient();
     private final String baseUrl;
     private User user;
 
+    @SneakyThrows
     public void createUser(User userToCreate)
     {
         String uri = API_PATH.formatted(baseUrl) + "/people";
 
-        given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .body("""
+        send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("""
                         {
                           "id": "%s",
                           "firstName": "%s",
                           "email": "test@example.com",
                           "password": "%s"
                         }
-                        """.formatted(userToCreate.username(), userToCreate.username(), userToCreate.password()))
-                .when().post(uri);
+                        """.formatted(userToCreate.username(), userToCreate.username(), userToCreate.password()), StandardCharsets.UTF_8))
+                .build());
     }
 
+    @SneakyThrows
     public String createSite(String title, Visibility visibility)
     {
         String uri = SITES_BASE_URL.formatted(baseUrl);
 
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .body("""
+        return extractId(send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("""
                         {
                           "title": "%s",
                           "visibility": "%s"
                         }
-                        """.formatted(title, visibility.name()))
-                .when().post(uri)
-                .body().jsonPath().get("entry.id");
+                        """.formatted(title, visibility.name()), StandardCharsets.UTF_8))
+                .build()).body());
     }
 
+    @SneakyThrows
     public String getSiteDocumentLibraryId(String siteId)
     {
         String uri = SITES_BASE_URL.formatted(baseUrl) + "/" + siteId + "/containers/documentLibrary";
 
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .when().get(uri)
-                .body().jsonPath().get("entry.id");
+        return extractId(send(requestBuilder(uri).GET().build()).body());
     }
 
+    @SneakyThrows
     public String createSecurityGroup(String name)
     {
         String uri = SECURITY_GROUPS_BASE_URL.formatted(baseUrl);
 
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .body("""
+        return extractId(send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("""
                         {
                           "groupName": "%s",
                           "groupType": "user_requires_all"
                         }
-                        """.formatted(name))
-                .when().post(uri)
-                .body().jsonPath().get("entry.id");
+                        """.formatted(name), StandardCharsets.UTF_8))
+                .build()).body());
     }
 
+    @SneakyThrows
     public String createSecurityMark(String securityGroupId, String name)
     {
         String uri = (SECURITY_GROUPS_BASE_URL + "/%s/security-marks").formatted(baseUrl, securityGroupId);
 
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .body("""
+        return extractId(send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("""
                         {
                           "name": "%s"
                         }
-                        """.formatted(name))
-                .when().post(uri)
-                .body().jsonPath().get("entry.id");
+                        """.formatted(name), StandardCharsets.UTF_8))
+                .build()).body());
     }
 
+    @SneakyThrows
     public Node getNode(String nodeId)
     {
         String uri = NODES_URL_PATTERN.formatted(baseUrl, nodeId);
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .when().get(uri)
-                .then().extract().response()
-                .as(NodeEntry.class).node();
+        return readNodeEntry(send(requestBuilder(uri)
+                .header("Accept", "application/json")
+                .GET()
+                .build()).body()).node();
     }
 
+    @SneakyThrows
     public Node createNodeWithContent(String parentNodeId, String filename, InputStream fileContent, String mimeType)
     {
         String uri = NODES_URL_PATTERN.formatted(baseUrl, parentNodeId) + "/children";
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("multipart/form-data")
-                .multiPart("filedata", filename, fileContent, mimeType)
-                .multiPart("autoRename", "true")
-                .when().post(uri)
-                .then().extract().response()
-                .as(NodeEntry.class).node();
+        MultipartBody multipartBody = createMultipartBody(filename, fileContent, mimeType);
+        return readNodeEntry(send(requestBuilder(uri)
+                .header("Content-Type", "multipart/form-data; boundary=" + multipartBody.boundary())
+                .header("Accept", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofByteArray(multipartBody.content()))
+                .build()).body()).node();
     }
 
+    @SneakyThrows
     public Node createNodeWithContent(String parentId, File content)
     {
-        String uri = NODES_URL_PATTERN.formatted(baseUrl, parentId) + "/children";
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("multipart/form-data")
-                .multiPart("filedata", content)
-                .multiPart("autoRename", "true")
-                .when().post(uri)
-                .then().extract().response()
-                .as(NodeEntry.class).node();
+        try (InputStream fileContent = Files.newInputStream(content.toPath()))
+        {
+            String mimeType = Files.probeContentType(content.toPath());
+            return createNodeWithContent(parentId, content.getName(), fileContent, mimeType != null ? mimeType : "application/octet-stream");
+        }
     }
 
+    @SneakyThrows
     public Node updateNodeWithContent(String nodeId, String updateBody)
     {
         String uri = NODES_URL_PATTERN.formatted(baseUrl, nodeId);
-        return given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .body(updateBody)
-                .when().put(uri)
-                .then().extract().response()
-                .as(NodeEntry.class).node();
+        return readNodeEntry(send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString(updateBody, StandardCharsets.UTF_8))
+                .build()).body()).node();
     }
 
+    @SneakyThrows
     public void deleteNode(String nodeId)
     {
         String uri = NODES_URL_PATTERN.formatted(baseUrl, nodeId);
-        given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .when().delete(uri);
+        send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .DELETE()
+                .build());
     }
 
+    @SneakyThrows
     public void secureNode(String nodeId, String securityGroupId, String securityMarkId)
     {
         String uri = (GS_API_PATH + "/secured-nodes/%s/securing-marks").formatted(baseUrl, nodeId);
 
-        given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .body("""
+        send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .POST(HttpRequest.BodyPublishers.ofString("""
                         [
                           {
                             "id": "%s",
@@ -190,18 +203,19 @@ public class RepositoryClient
                             "op": "ADD"
                           }
                         ]
-                        """.formatted(securityMarkId, securityGroupId))
-                .when().post(uri);
+                        """.formatted(securityMarkId, securityGroupId), StandardCharsets.UTF_8))
+                .build());
     }
 
+    @SneakyThrows
     public void setReadAccess(String nodeId, String allowedUserId, String deniedUserId)
     {
         String uri = NODES_URL_PATTERN.formatted(baseUrl, nodeId);
 
-        given().auth().preemptive().basic(user.username(), user.password())
-                .contentType("application/json")
-                .accept("application/json")
-                .body("""
+        send(requestBuilder(uri)
+                .header("Content-Type", "application/json")
+                .header("Accept", "application/json")
+                .PUT(HttpRequest.BodyPublishers.ofString("""
                         {
                           "permissions":
                             {
@@ -212,7 +226,69 @@ public class RepositoryClient
                                 ]
                             }
                         }
-                        """.formatted(allowedUserId, deniedUserId))
-                .when().put(uri);
+                        """.formatted(allowedUserId, deniedUserId), StandardCharsets.UTF_8))
+                .build());
     }
+
+    @SneakyThrows
+    private NodeEntry readNodeEntry(String responseBody)
+    {
+        return objectMapper.readValue(responseBody, NodeEntry.class);
+    }
+
+    @SneakyThrows
+    private String extractId(String responseBody)
+    {
+        JsonNode root = objectMapper.readTree(responseBody);
+        return root.path("entry").path("id").asText();
+    }
+
+    private HttpRequest.Builder requestBuilder(String uri)
+    {
+        return HttpRequest.newBuilder(URI.create(uri))
+                .header("Authorization", basicAuthorizationHeader(user));
+    }
+
+    @SneakyThrows
+    private MultipartBody createMultipartBody(String filename, InputStream fileContent, String mimeType)
+    {
+        String boundary = "----HxInsightConnectorBoundary" + UUID.randomUUID();
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] newLine = "\r\n".getBytes(StandardCharsets.UTF_8);
+
+        outputStream.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        outputStream.write(("Content-Disposition: form-data; name=\"filedata\"; filename=\"%s\"\r\n".formatted(filename)).getBytes(StandardCharsets.UTF_8));
+        outputStream.write(("Content-Type: %s\r\n\r\n".formatted(mimeType != null ? mimeType : "application/octet-stream")).getBytes(StandardCharsets.UTF_8));
+        fileContent.transferTo(outputStream);
+        outputStream.write(newLine);
+
+        outputStream.write(("--" + boundary + "\r\n").getBytes(StandardCharsets.UTF_8));
+        outputStream.write("Content-Disposition: form-data; name=\"autoRename\"\r\n\r\n".getBytes(StandardCharsets.UTF_8));
+        outputStream.write("true".getBytes(StandardCharsets.UTF_8));
+        outputStream.write(newLine);
+        outputStream.write(("--" + boundary + "--\r\n").getBytes(StandardCharsets.UTF_8));
+
+        return new MultipartBody(boundary, outputStream.toByteArray());
+    }
+
+    @SneakyThrows
+    private HttpResponse<String> send(HttpRequest request)
+    {
+        HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+        if (response.statusCode() >= 400)
+        {
+            throw new IllegalStateException("Request to %s failed with status %s and body: %s"
+                    .formatted(request.uri(), response.statusCode(), response.body()));
+        }
+        return response;
+    }
+
+    private String basicAuthorizationHeader(User user)
+    {
+        String credentials = user.username() + ":" + user.password();
+        return "Basic " + Base64.getEncoder().encodeToString(credentials.getBytes(StandardCharsets.UTF_8));
+    }
+
+    private record MultipartBody(String boundary, byte[] content)
+    {}
 }

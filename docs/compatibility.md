@@ -4,7 +4,7 @@
 
 ## Alfresco Content Services Versions
 
-**Supported:** ACS 7.4 through 25.x (Enterprise Edition only)
+**Supported:** ACS 7.4 through 26.x (Enterprise Edition only)
 
 > ⚠️ **Alfresco Community Edition is not supported.** The connector currently requires enterprise events and so will only run against Alfresco Enterprise Edition.
 

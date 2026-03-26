@@ -33,7 +33,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathTemplate;
-import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_BAD_REQUEST;
 import static org.apache.http.HttpStatus.SC_CREATED;
 import static org.apache.http.HttpStatus.SC_NOT_FOUND;
@@ -52,7 +51,6 @@ import java.util.Map;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import io.restassured.response.Response;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
@@ -69,6 +67,8 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.TestResponse;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 
 @Testcontainers
@@ -122,11 +122,7 @@ public class QuestionsAndAnswersE2eTest
                 """.formatted(PREEXISTING_DOCUMENT_ID);
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(questions)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions")
-                .then().extract().response();
+        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions", questions);
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_OK);
@@ -170,11 +166,7 @@ public class QuestionsAndAnswersE2eTest
                 """.formatted(PREEXISTING_DOCUMENT_ID, PREEXISTING_DOCUMENT_ID);
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(questions)
-                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
-                .then().extract().response();
+        TestResponse response = postAsAdmin(QUESTIONS_URL, questions);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -188,11 +180,7 @@ public class QuestionsAndAnswersE2eTest
         String questions = "[]";
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(questions)
-                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
-                .then().extract().response();
+        TestResponse response = postAsAdmin(QUESTIONS_URL, questions);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -212,11 +200,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(questions)
-                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
-                .then().extract().response();
+        TestResponse response = postAsAdmin(QUESTIONS_URL, questions);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -229,10 +213,7 @@ public class QuestionsAndAnswersE2eTest
         String questionId = "5fca2c77-cdc0-4118-9373-e75f53177ff8";
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = getAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId));
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_OK);
@@ -272,10 +253,7 @@ public class QuestionsAndAnswersE2eTest
         String questionId = "non-existing-question-id";
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .when().get(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = getAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/answers/-default-".formatted(questionId));
 
         // then
         assertEquals(SC_NOT_FOUND, response.statusCode());
@@ -297,11 +275,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_CREATED, response.statusCode());
@@ -326,11 +300,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_NOT_FOUND, response.statusCode());
@@ -345,11 +315,7 @@ public class QuestionsAndAnswersE2eTest
         String feedback = "[]";
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -374,11 +340,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(feedback)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/questions/%s/feedback".formatted(questionId), feedback);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -403,11 +365,7 @@ public class QuestionsAndAnswersE2eTest
         WireMock.setScenarioState(SUBMIT_QUESTION_SCENARIO, NEXT_QUESTION_STATE);
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(retry)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId), retry);
 
         // then
         assertThat(response.statusCode()).isEqualTo(SC_CREATED);
@@ -452,11 +410,7 @@ public class QuestionsAndAnswersE2eTest
                 """;
 
         // when
-        Response response = given().auth().preemptive().basic("admin", "admin")
-                .contentType("application/json")
-                .body(retry)
-                .when().post(repository.getBaseUrl() + "/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId))
-                .then().extract().response();
+        TestResponse response = postAsAdmin("/alfresco/api/-default-/private/hxi/versions/1/agents/agent-id/questions/%s/retry".formatted(questionId), retry);
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
@@ -470,6 +424,16 @@ public class QuestionsAndAnswersE2eTest
 
         return DockerContainers.createExtendedRepositoryContainerWithin(network)
                 .withJavaOpts(javaOpts);
+    }
+
+    private TestResponse postAsAdmin(String path, String body)
+    {
+        return HttpTestClient.postJson(repository.getBaseUrl() + path, ADMIN_USER, body);
+    }
+
+    private TestResponse getAsAdmin(String path)
+    {
+        return HttpTestClient.get(repository.getBaseUrl() + path, ADMIN_USER);
     }
 
     @SneakyThrows

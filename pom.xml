@@ -69,11 +69,11 @@
         <skipIntegrationTests>${skipTests}</skipIntegrationTests>
         <skipE2eTests>${skipTests}</skipE2eTests>
 
-        <alfresco-platform.version>25.3.0</alfresco-platform.version>
+        <alfresco-platform.version>26.1.0</alfresco-platform.version>
         <alfresco-sdk.version>4.15.0</alfresco-sdk.version>
         <alfresco-db-connector.version>1.2.0</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.11</alfresco-event-model.version>
-        <spring-boot.version>3.5.11</spring-boot.version>
+        <spring-boot.version>4.0.4</spring-boot.version>
         <spring-camel.version>4.18.0</spring-camel.version>
         <commons-lang.version>3.20.0</commons-lang.version>
         <commons-collections.version>4.5.0</commons-collections.version>
@@ -85,6 +85,8 @@
 
         <testcontainers.version>2.0.4</testcontainers.version>
         <wiremock-testcontainers-module.version>1.0-alpha-15</wiremock-testcontainers-module.version>
+        <spring-retry.version>2.0.12</spring-retry.version>
+        <rest-assured.version>5.5.7</rest-assured.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
 
@@ -95,6 +97,7 @@
         <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
         <spotless-plugin.version>3.4.0</spotless-plugin.version>
+        <maven.surefire-plugin.version>3.5.2</maven.surefire-plugin.version>
         <jrebel-maven-plugin.version>1.2.1</jrebel-maven-plugin.version>
 
         <!-- Used by the generated .env file and Dockerfile for docker-compose -->
@@ -103,20 +106,20 @@
         <dist.alfresco.repo.extension>alfresco-hxinsight-connector-hxinsight-extension</dist.alfresco.repo.extension>
         <dist.alfresco.version>${alfresco-platform.version}</dist.alfresco.version>
         <dist.share.version>${alfresco-platform.version}</dist.share.version>
-        <dist.postgres.version>14.4</dist.postgres.version>
-        <dist.transform.router.version>4.3.0</dist.transform.router.version>
-        <dist.transform.core.aio.version>5.3.0</dist.transform.core.aio.version>
-        <dist.transform.sfs.version>4.3.0</dist.transform.sfs.version>
-        <dist.activemq.version>5.18.5</dist.activemq.version>
+        <dist.postgres.version>17.9</dist.postgres.version>
+        <dist.transform.router.version>4.4.0</dist.transform.router.version>
+        <dist.transform.core.aio.version>5.4.0</dist.transform.core.aio.version>
+        <dist.transform.sfs.version>4.4.0</dist.transform.sfs.version>
+        <dist.activemq.version>5.19</dist.activemq.version>
         <dist.activemq.docker.tag>${dist.activemq.version}-jre17-rockylinux8</dist.activemq.docker.tag>
-        <dist.digital.workspace.version>5.1.0</dist.digital.workspace.version>
-        <dist.control.center.version>9.1.0</dist.control.center.version>
+        <dist.digital.workspace.version>7.3.0</dist.digital.workspace.version>
+        <dist.control.center.version>10.3.0</dist.control.center.version>
         <dist.nginx.version>3.4.2</dist.nginx.version>
-        <dist.elasticsearch.version>7.17.15</dist.elasticsearch.version>
-        <dist.search.enterprise.version>4.1.0</dist.search.enterprise.version>
+        <dist.elasticsearch.version>8.17.0</dist.elasticsearch.version>
+        <dist.search.enterprise.version>5.4.0</dist.search.enterprise.version>
         <dist.localstack.version>3.2.0</dist.localstack.version>
         <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
-        <dist.keycloak.version>24.0.5</dist.keycloak.version>
+        <dist.keycloak.version>26.5.0</dist.keycloak.version>
     </properties>
 
     <repositories>
@@ -299,6 +302,32 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework.retry</groupId>
+                <artifactId>spring-retry</artifactId>
+                <version>${spring-retry.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.rest-assured</groupId>
+                <artifactId>rest-assured</artifactId>
+                <version>${rest-assured.version}</version>
+            </dependency>
+            <!-- Explicit testcontainers modules for Spring Boot 4.0 compatibility -->
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-junit-jupiter</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-postgresql</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-localstack</artifactId>
+                <version>${testcontainers.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -608,6 +637,7 @@
 
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
+                <version>${maven.surefire-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>**/*IT.java</exclude>
@@ -622,6 +652,7 @@
 
             <plugin>
                 <artifactId>maven-failsafe-plugin</artifactId>
+                <version>${maven.surefire-plugin.version}</version>
                 <executions>
                     <execution>
                         <goals>

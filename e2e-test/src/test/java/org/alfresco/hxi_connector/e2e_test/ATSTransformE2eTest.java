@@ -36,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getRepoJavaOptsWithTransforms;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.File;
@@ -81,7 +82,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
  *
  * These E2E tests use real Docker containers for transform-router, transform-core-aio and shared-file-store. This means the tests will fail if the configured ATS do not support the required transformations.
  * <p>
- * Transform requests from the live-ingester go through ACS's transform pipeline (matching the docker-compose setup): ACS consumes from {@code acs-repo-transform-request}, checks the transform capability registry, uploads source content to SFS, and forwards enriched requests to the transform-router. This ensures old/broken transform versions are detected by ACS's config check.
+ * Transform requests from the live-ingester go through ACS's transform pipeline: ACS is configured with {@code getRepoJavaOptsWithTransforms} which sets up local transform URLs so ACS can discover transform capabilities from the transform engines. ACS consumes from {@code acs-repo-transform-request}, checks the transform capability registry, uploads source content to SFS, and forwards enriched requests to the transform-router. This ensures old/broken transform versions are detected by ACS's config check.
  */
 @Testcontainers
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -215,18 +216,12 @@ public class ATSTransformE2eTest
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
-        // Enable ACS transform service with remote transform config only (no local transform URLs).
-        // Local transforms bypass SFS (sending content directly to the t-engine via HTTP) and fail
-        // in the test environment. Remote transforms go through SFS + transform-router, matching
-        // the production pipeline and ensuring ACS checks the transform capability registry.
-        // This means old/broken transform versions will be detected by ACS's config check.
-        String repoJavaOpts = DockerContainers.concatJavaOpts(
-                DockerContainers.getMinimalRepoJavaOpts(postgres, activemq)
-                        .replace("-Dtransform.service.enabled=false", "-Dtransform.service.enabled=true"),
-                "-Dtransform.service.url=http://transform-router:8095",
-                "-Dsfs.url=http://shared-file-store:8099");
+        // Enable ACS transform service with full transform config (matching docker-compose-minimal.yml).
+        // Local transform URLs are required for ACS to discover transform capabilities from the
+        // transform engines. Without them, the transform capability registry is empty and ACS
+        // returns 400 for all transform requests.
         return DockerContainers.createExtendedRepositoryContainerWithin(network, ENTERPRISE)
-                .withJavaOpts(repoJavaOpts);
+                .withJavaOpts(getRepoJavaOptsWithTransforms(postgres, activemq));
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()
