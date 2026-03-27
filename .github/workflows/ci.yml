@@ -46,6 +46,8 @@ jobs:
         with:
           write-list-to-env: true
       - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v15.6.2
+        with:
+          pre-commit-all-files: "false"
 
   veracode_sast:
     name: "Pipeline SAST Scan"
