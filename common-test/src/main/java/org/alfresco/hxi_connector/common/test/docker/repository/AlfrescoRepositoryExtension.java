@@ -46,10 +46,11 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
 
 public class AlfrescoRepositoryExtension extends ImageFromDockerfile
 {
-    private static final String REPO_JAVA_VERSION = DockerTags.getOrDefault("repository.java.version", "17");
+    private static final String REPO_JAVA_VERSION = DockerTags.getOrDefault("repository.java.version", "21");
     private static final String LOCAL_IMAGE_DEFAULT = "localhost/alfresco/alfresco-content-repository-extended";
     private static final String JAVA_INSTALL_SCRIPT = """
-            if [[ "$JAVA_VERSION" == "21" ]]; then
+            CURRENT_MAJOR=$(java -version 2>&1 | head -1 | sed 's/.*"\\([0-9]*\\).*/\\1/') &&
+            if [[ "$JAVA_VERSION" == "21" && "$CURRENT_MAJOR" != "21" ]]; then
               ARCH=$(uname -m | sed s/86_//);
               JAVA_RELEASE=21.0.7_6;
               curl -fsLo java.tar.gz https://github.com/adoptium/temurin${JAVA_VERSION}-binaries/releases/download/jdk-${JAVA_RELEASE/_/+}/OpenJDK${JAVA_VERSION}U-jre_${ARCH}_linux_hotspot_${JAVA_RELEASE}.tar.gz &&
@@ -57,7 +58,7 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
               mv jdk-* /usr/lib/jvm/temurin-21-jdk &&
               update-alternatives --install /usr/bin/java java /usr/lib/jvm/temurin-21-jdk/bin/java 1 &&
               update-alternatives --remove java $(update-alternatives --display java | head -2 | tail -1 | cut -d " " -f6);
-            elif [[ "$JAVA_VERSION" == "11" ]]; then
+            elif [[ "$JAVA_VERSION" == "11" && "$CURRENT_MAJOR" != "11" ]]; then
               ARCH=$(uname -m | sed s/86_//);
               JAVA_RELEASE=11.0.24_8;
               curl -fsLo java.tar.gz https://github.com/adoptium/temurin${JAVA_VERSION}-binaries/releases/download/jdk-${JAVA_RELEASE/_/+}/OpenJDK${JAVA_VERSION}U-jre_${ARCH}_linux_hotspot_${JAVA_RELEASE}.tar.gz &&
