@@ -47,4 +47,4 @@ To enable the HX Insight Discovery search panel in Alfresco Digital Workspace:
 - **Alfresco Content Services Enterprise Edition** 7.4.x or later (Community Edition not supported)
 - ActiveMQ 5.x
 - HX Insight subscription (credentials provided by Hyland)
-- Java 17 or later (for JAR deployments)
+- Java 21 or later (for JAR deployments)

@@ -21,7 +21,7 @@ See [Compatibility](compatibility.md) for supported Alfresco versions and requir
 ## Standalone JAR Deployment
 
 ### Prerequisites
-- Java 17 or later
+- Java 21 or later
 - Access to Alfresco Repository
 - Access to ActiveMQ
 - Access to HX Insight APIs
