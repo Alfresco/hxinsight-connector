@@ -234,7 +234,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        repoVersion: [ 7.4.2, 23.3.0 ]
+        repoVersion: [ 7.4.2, 23.3.0, 25.3.0, 26.1.0 ]
     steps:
       - uses: actions/checkout@v5
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v15.6.2
