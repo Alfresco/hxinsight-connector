@@ -74,12 +74,12 @@
         <alfresco-db-connector.version>1.2.0</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.11</alfresco-event-model.version>
         <spring-boot.version>3.5.12</spring-boot.version>
-        <spring-camel.version>4.18.0</spring-camel.version>
+        <spring-camel.version>4.18.1</spring-camel.version>
         <commons-lang.version>3.20.0</commons-lang.version>
         <commons-collections.version>4.5.0</commons-collections.version>
         <commons-io.version>2.21.0</commons-io.version>
         <pdfbox.version>3.0.7</pdfbox.version>
-        <aws-sdk-s3.version>2.42.20</aws-sdk-s3.version>
+        <aws-sdk-s3.version>2.42.23</aws-sdk-s3.version>
         <wiremock.version>3.13.2</wiremock.version>
         <system-stubs.version>2.1.8</system-stubs.version>
 
