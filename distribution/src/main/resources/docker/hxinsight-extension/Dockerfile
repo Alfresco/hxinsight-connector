@@ -24,6 +24,14 @@ RUN CURRENT_MAJOR=$(java -version 2>&1 | head -1 | sed 's/.*"\([0-9]*\).*/\1/') 
       mv jdk-* /usr/lib/jvm/temurin-21-jdk && \
       update-alternatives --install /usr/bin/java java /usr/lib/jvm/temurin-21-jdk/bin/java 1 && \
       update-alternatives --remove java $(update-alternatives --display java | head -2 | tail -1 | cut -d " " -f6); \
+    elif [[ "$JAVA_VERSION" == "17" && "$CURRENT_MAJOR" != "17" ]]; then \
+      ARCH=$(uname -m | sed s/86_//); \
+      JAVA_RELEASE=17.0.15_6; \
+      curl -fsLo java.tar.gz https://github.com/adoptium/temurin${JAVA_VERSION}-binaries/releases/download/jdk-${JAVA_RELEASE/_/+}/OpenJDK${JAVA_VERSION}U-jre_${ARCH}_linux_hotspot_${JAVA_RELEASE}.tar.gz && \
+      tar xvfz java.tar.gz && \
+      mv jdk-* /usr/lib/jvm/temurin-17-jdk && \
+      update-alternatives --install /usr/bin/java java /usr/lib/jvm/temurin-17-jdk/bin/java 1 && \
+      update-alternatives --remove java $(update-alternatives --display java | head -2 | tail -1 | cut -d " " -f6); \
     elif [[ "$JAVA_VERSION" == "11" && "$CURRENT_MAJOR" != "11" ]]; then \
       ARCH=$(uname -m | sed s/86_//); \
       JAVA_RELEASE=11.0.24_8; \
