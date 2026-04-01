@@ -68,7 +68,7 @@ public class CamelEventMapper
             {
                 String eventType = eventNode.path("type").asText();
                 String eventId = eventNode.path("id").asText();
-                log.atInfo().log("Repository :: Skipping {} event - resource type is not {}. Event id: {}",
+                log.atInfo().log("Repository :: Skipping {} event - resource type is not {}. Event ID: {}",
                         eventType, NODE_RESOURCE_TYPE, eventId);
                 return null;
             }
