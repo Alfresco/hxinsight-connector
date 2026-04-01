@@ -31,14 +31,14 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @NoArgsConstructor(access = PRIVATE)
-@Slf4j
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class RetryUtils
 {
+    private static final Logger log = LoggerFactory.getLogger(RetryUtils.class);
     private static final int MAX_ATTEMPTS = 15;
     private static final int INITIAL_DELAY_MS = 100;
 
@@ -63,13 +63,11 @@ public class RetryUtils
         }, maxAttempts, delayMs);
     }
 
-    @SneakyThrows
     public static <T> T retryWithBackoff(Supplier<T> supplier)
     {
         return retryWithBackoff(supplier, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 
-    @SneakyThrows
     public static <T> T retryWithBackoff(Supplier<T> supplier, int maxAttempts, int delayMs)
     {
         int attempt = 0;
@@ -88,7 +86,15 @@ public class RetryUtils
                     throw e;
                 }
                 log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delayMs);
-                TimeUnit.MILLISECONDS.sleep(delayMs);
+                try
+                {
+                    TimeUnit.MILLISECONDS.sleep(delayMs);
+                }
+                catch (InterruptedException interruptedException)
+                {
+                    Thread.currentThread().interrupt();
+                    throw new IllegalStateException("Retry interrupted", interruptedException);
+                }
             }
         }
     }
@@ -98,10 +104,16 @@ public class RetryUtils
         void runUnsafe() throws Exception;
 
         @Override
-        @SneakyThrows
         default void run()
         {
-            runUnsafe();
+            try
+            {
+                runUnsafe();
+            }
+            catch (Exception exception)
+            {
+                throw new RuntimeException(exception);
+            }
         }
     }
 }

@@ -26,14 +26,19 @@
 
 package org.alfresco.hxi_connector.common.test.docker.repository;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
-@Getter
-@RequiredArgsConstructor
 public enum RepositoryType
 {
     ENTERPRISE("quay.io/alfresco/alfresco-content-repository"), COMMUNITY("alfresco/alfresco-content-repository-community"), ENT_GOVERNANCE("quay.io/alfresco/alfresco-governance-repository-enterprise");
 
     private final String imageName;
+
+    RepositoryType(String imageName)
+    {
+        this.imageName = imageName;
+    }
+
+    public String getImageName()
+    {
+        return imageName;
+    }
 }
