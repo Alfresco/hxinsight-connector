@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -67,6 +67,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .routeId(ROUTE_ID)
                 .log(DEBUG, log, "Repository :: Received event: ${body}")
                 .setBody(camelEventMapper::repoEventFrom)
+                .filter(body().isNotNull())
                 .log(INFO, log, "Repository :: Received event with ID: ${body.id} and type: ${body.type} for node: ${body.data?.resource?.id}")
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)
