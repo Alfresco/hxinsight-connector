@@ -29,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.delete;
 import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.matchingJsonPath;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -66,6 +67,8 @@ class NucleusSyncE2eTest
     private static final String PEOPLE_ENDPOINT = "/alfresco/api/-default-/public/alfresco/versions/1/people";
     private static final String BASIC_ADMIN = Base64.getEncoder().encodeToString("admin:admin".getBytes(StandardCharsets.UTF_8));
     private static final String ACCESS_TOKEN = "stub-access-token";
+    private static final String PRIMARY_SCOPE = "iam.user-data.account";
+    private static final String SECONDARY_SCOPE = "system-integrations-config";
     private static final String NUCLEUS_ALIAS = "nucleus-mock";
     private static final String ALFRESCO_ALIAS = "alfresco-mock";
     private static final int SYNC_TRIGGER_MAX_ATTEMPTS = 30;
@@ -90,6 +93,7 @@ class NucleusSyncE2eTest
             .withEnv("HX_CLIENT_ID", "client-id")
             .withEnv("HX_CLIENT_SECRET", "client-secret")
             .withEnv("HX_TOKEN_URI", "http://" + NUCLEUS_ALIAS + ":8080/token")
+            .withEnv("SPRING_APPLICATION_JSON", multiScopeConfig())
             .withEnv("ALFRESCO_BASE_URL", "http://" + ALFRESCO_ALIAS + ":8080/alfresco/api/-default-/public/alfresco/versions/1")
             .withEnv("NUCLEUS_IDP_BASE_URL", "http://" + NUCLEUS_ALIAS + ":8080")
             .withEnv("NUCLEUS_BASE_URL", "http://" + NUCLEUS_ALIAS + ":8080")
@@ -136,6 +140,9 @@ class NucleusSyncE2eTest
 
         assertDoesNotThrow(this::triggerSync, "Sync trigger should complete successfully");
 
+        RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo("/token"))
+                .withRequestBody(matching(encodedScopesPattern()))));
+
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo(userMappingsPath()))
                 .withRequestBody(matchingJsonPath("$[?(@.userId == 'iam-bob' && @.externalUserId == 'bjones')]"))));
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(deleteRequestedFor(urlEqualTo(userMappingsPath() + "/legacy"))));
@@ -175,6 +182,19 @@ class NucleusSyncE2eTest
         }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
     }
 
+    private static String multiScopeConfig()
+    {
+        return "{\"auth\":{\"providers\":{\"hyland-experience\":{\"scope\":[\""
+                + PRIMARY_SCOPE + "\",\"" + SECONDARY_SCOPE + "\"]}}}}";
+    }
+
+    private static String encodedScopesPattern()
+    {
+        String primaryScope = PRIMARY_SCOPE.replace(".", "\\.");
+        String secondaryScope = SECONDARY_SCOPE.replace(".", "\\.");
+        return ".*scope=(" + primaryScope + "\\+" + secondaryScope + "|" + secondaryScope + "\\+" + primaryScope + ").*";
+    }
+
     private void stubTokenEndpoint()
     {
         nucleusWireMock.register(post(urlEqualTo("/token"))
@@ -183,9 +203,9 @@ class NucleusSyncE2eTest
                           \"access_token\": \"%s\",
                           \"expires_in\": 3600,
                           \"token_type\": \"Bearer\",
-                          \"scope\": \"iam.user-data.account\"
+                          \"scope\": \"%s %s\"
                         }
-                        """.formatted(ACCESS_TOKEN))));
+                        """.formatted(ACCESS_TOKEN, PRIMARY_SCOPE, SECONDARY_SCOPE))));
     }
 
     private void stubAlfrescoUsers()
