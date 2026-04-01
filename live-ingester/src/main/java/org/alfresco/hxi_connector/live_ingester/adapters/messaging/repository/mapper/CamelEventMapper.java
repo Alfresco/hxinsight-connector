@@ -55,7 +55,7 @@ public class CamelEventMapper
      *
      * @param exchange
      *            Camel Exchange object
-     * @return RepoEvent or null if the event is not related to NodeResource
+     * @return {@link RepoEvent} or null if the event is not related to NodeResource
      */
     public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
     {
