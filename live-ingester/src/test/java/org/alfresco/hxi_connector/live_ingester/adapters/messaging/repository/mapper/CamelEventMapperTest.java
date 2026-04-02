@@ -150,7 +150,7 @@ class CamelEventMapperTest
         assertThat(logs)
                 .isNotEmpty()
                 .last().asString()
-                .isEqualTo("Repository :: Skipping org.alfresco.event.assoc.child.Created event - resource type is not NodeResource. Event id: 97a0994d-d213-4cb8-b920-9b9006b30ad6");
+                .isEqualTo("Repository :: Skipping org.alfresco.event.assoc.child.Created event - resource type is not NodeResource. Event ID: 97a0994d-d213-4cb8-b920-9b9006b30ad6");
     }
 
     @Test
