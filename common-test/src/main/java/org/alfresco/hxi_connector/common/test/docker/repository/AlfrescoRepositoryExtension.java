@@ -28,8 +28,8 @@ package org.alfresco.hxi_connector.common.test.docker.repository;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_TAG;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.COMMUNITY;
 
-import java.nio.file.Files;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
