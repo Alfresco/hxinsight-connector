@@ -95,6 +95,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v10.1.0
       - uses: Alfresco/ya-pmd-scan@v4.4.1
 
+
   test_application:
     name: "Build and test application"
     runs-on: ubuntu-latest
