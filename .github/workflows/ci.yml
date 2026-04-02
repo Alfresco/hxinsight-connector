@@ -233,7 +233,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platformJavaVersion: [ 11, 17, 21 ]
         include:
           - repoVersion: 7.4.2
             platformJavaVersion: 11
@@ -271,7 +270,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        platformJavaVersion: [ 11, 17, 21 ]
         include:
           - repoVersion: 7.4.2
             platformJavaVersion: 11
