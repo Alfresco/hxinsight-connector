@@ -38,7 +38,7 @@ import org.slf4j.LoggerFactory;
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class RetryUtils
 {
-    private static final Logger log = LoggerFactory.getLogger(RetryUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RetryUtils.class);
     private static final int MAX_ATTEMPTS = 15;
     private static final int INITIAL_DELAY_MS = 100;
 
@@ -82,26 +82,32 @@ public class RetryUtils
                 attempt++;
                 if (attempt >= maxAttempts)
                 {
-                    log.atDebug().log("Attempt {} failed", attempt);
+                    LOG.atDebug().setCause(e).log("Attempt {} failed", attempt);
                     throw e;
                 }
-                log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delayMs);
-                try
-                {
-                    TimeUnit.MILLISECONDS.sleep(delayMs);
-                }
-                catch (InterruptedException interruptedException)
-                {
-                    Thread.currentThread().interrupt();
-                    throw new IllegalStateException("Retry interrupted", interruptedException);
-                }
+                LOG.atDebug().setCause(e).log("Attempt {} failed, retrying after {}ms", attempt, delayMs);
+                sleep(delayMs);
             }
         }
     }
 
-    public interface ErrorCatchingRunnable extends Runnable
+    private static void sleep(int delayMs)
     {
-        void runUnsafe() throws Exception;
+        try
+        {
+            TimeUnit.MILLISECONDS.sleep(delayMs);
+        }
+        catch (InterruptedException interruptedException)
+        {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Retry interrupted", interruptedException);
+        }
+    }
+
+    @FunctionalInterface
+    public interface ErrorCatchingRunnable<E extends Exception> extends Runnable
+    {
+        void runUnsafe() throws E;
 
         @Override
         default void run()
@@ -110,9 +116,13 @@ public class RetryUtils
             {
                 runUnsafe();
             }
+            catch (RuntimeException runtimeException)
+            {
+                throw runtimeException;
+            }
             catch (Exception exception)
             {
-                throw new RuntimeException(exception);
+                throw new IllegalStateException("Runnable execution failed", exception);
             }
         }
     }

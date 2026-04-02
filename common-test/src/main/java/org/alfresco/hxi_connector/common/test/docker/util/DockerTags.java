@@ -27,7 +27,6 @@ package org.alfresco.hxi_connector.common.test.docker.util;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.NoSuchFileException;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
@@ -154,17 +153,20 @@ public class DockerTags
 
     private static void loadProperties(boolean failOnMissingFile)
     {
-        try (InputStream propertiesStream = DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE))
+        InputStream propertiesStream = DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
+        if (propertiesStream == null)
         {
-            if (propertiesStream != null)
+            if (failOnMissingFile)
             {
-                properties = new Properties();
-                properties.load(propertiesStream);
+                throw new IllegalStateException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
             }
-            else if (failOnMissingFile)
-            {
-                throw new NoSuchFileException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
-            }
+            return;
+        }
+
+        try (propertiesStream)
+        {
+            properties = new Properties();
+            properties.load(propertiesStream);
         }
         catch (IOException e)
         {
