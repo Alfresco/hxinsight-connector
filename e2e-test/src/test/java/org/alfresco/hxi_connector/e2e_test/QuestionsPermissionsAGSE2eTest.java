@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_FORBIDDEN;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -39,7 +38,6 @@ import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.A
 import java.io.ByteArrayInputStream;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import io.restassured.response.Response;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.BindMode;
@@ -52,6 +50,8 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient;
+import org.alfresco.hxi_connector.e2e_test.util.client.HttpTestClient.SimpleResponse;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
@@ -112,11 +112,7 @@ public class QuestionsPermissionsAGSE2eTest
     void adminShouldBeAbleToAskQuestionAboutPublicDocument()
     {
         // when
-        Response response = given().auth().preemptive().basic(ADMIN_USER.username(), ADMIN_USER.password())
-                .contentType("application/json")
-                .body(SAMPLE_QUESTION.formatted(publicDocumentId))
-                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
-                .then().extract().response();
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, ADMIN_USER, SAMPLE_QUESTION.formatted(publicDocumentId));
 
         // then
         assertEquals(SC_OK, response.statusCode());
@@ -126,11 +122,7 @@ public class QuestionsPermissionsAGSE2eTest
     void adminShouldBeAbleToAskQuestionAboutDocumentWithSecurityMark()
     {
         // when
-        Response response = given().auth().preemptive().basic(ADMIN_USER.username(), ADMIN_USER.password())
-                .contentType("application/json")
-                .body(SAMPLE_QUESTION.formatted(superConfidentialDocumentId))
-                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
-                .then().extract().response();
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, ADMIN_USER, SAMPLE_QUESTION.formatted(superConfidentialDocumentId));
 
         // then
         assertEquals(SC_OK, response.statusCode());
@@ -140,11 +132,7 @@ public class QuestionsPermissionsAGSE2eTest
     void regularUserShouldBeAbleToAskQuestionAboutPublicDocument()
     {
         // when
-        Response response = given().auth().preemptive().basic(regularUser.username(), regularUser.password())
-                .contentType("application/json")
-                .body(SAMPLE_QUESTION.formatted(publicDocumentId))
-                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
-                .then().extract().response();
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, regularUser, SAMPLE_QUESTION.formatted(publicDocumentId));
 
         // then
         assertEquals(SC_OK, response.statusCode());
@@ -154,11 +142,7 @@ public class QuestionsPermissionsAGSE2eTest
     void regularUserShouldNotBeAbleToAskQuestionAboutDocumentWithSecurityMark()
     {
         // when
-        Response response = given().auth().preemptive().basic(regularUser.username(), regularUser.password())
-                .contentType("application/json")
-                .body(SAMPLE_QUESTION.formatted(superConfidentialDocumentId))
-                .when().post(repository.getBaseUrl() + QUESTIONS_URL)
-                .then().extract().response();
+        SimpleResponse response = HttpTestClient.postJson(repository.getBaseUrl() + QUESTIONS_URL, regularUser, SAMPLE_QUESTION.formatted(superConfidentialDocumentId));
 
         // then
         assertEquals(SC_FORBIDDEN, response.statusCode());

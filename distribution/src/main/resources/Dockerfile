@@ -1,5 +1,5 @@
 # More infos about this image: https://github.com/Alfresco/alfresco-docker-base-java
-FROM alfresco/alfresco-base-java:jre17-rockylinux9@sha256:f98833508b7be8c4b44a25450f9faac44cacfdc075f2295e02836b93fd05bb9c
+FROM alfresco/alfresco-base-java:jre21-rockylinux9@sha256:3e591bfb135c4beb7f39e39d5c14ddb4ba863bab683f05c12d21342429514add
 ENV PORT=8080
 EXPOSE 8080
 ARG JAR_FILE=*-app.jar

@@ -1,7 +1,13 @@
 #!/bin/bash
 set -e
 
-# Switch to Java 11 if it has been installed
-[ -d "/usr/lib/jvm/temurin-11-jdk" ] && export JAVA_HOME=/usr/lib/jvm/temurin-11-jdk
+# Switch to the installed custom JRE if present
+if [ -d "/usr/lib/jvm/temurin-21-jdk" ]; then
+  export JAVA_HOME=/usr/lib/jvm/temurin-21-jdk
+elif [ -d "/usr/lib/jvm/temurin-17-jdk" ]; then
+  export JAVA_HOME=/usr/lib/jvm/temurin-17-jdk
+elif [ -d "/usr/lib/jvm/temurin-11-jdk" ]; then
+  export JAVA_HOME=/usr/lib/jvm/temurin-11-jdk
+fi
 
 exec "$@"

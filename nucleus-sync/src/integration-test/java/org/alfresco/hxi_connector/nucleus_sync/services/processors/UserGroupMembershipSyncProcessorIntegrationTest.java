@@ -34,9 +34,9 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -55,14 +55,17 @@ public class UserGroupMembershipSyncProcessorIntegrationTest
     @Autowired
     private UserGroupMembershipSyncProcessor processor;
 
-    @Captor
     private ArgumentCaptor<List<NucleusGroupMemberAssignmentInput>> assignmentCaptor;
-
-    @Captor
     private ArgumentCaptor<String> groupIdCaptor;
-
-    @Captor
     private ArgumentCaptor<List<String>> userIdsCaptor;
+
+    @BeforeEach
+    void setUp()
+    {
+        assignmentCaptor = ArgumentCaptor.forClass(List.class);
+        groupIdCaptor = ArgumentCaptor.forClass(String.class);
+        userIdsCaptor = ArgumentCaptor.forClass(List.class);
+    }
 
     @Test
     void shouldSyncMembershipsWithCreatesDeletesAndUnchanged()
