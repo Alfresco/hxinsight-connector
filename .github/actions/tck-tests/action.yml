@@ -10,10 +10,13 @@ inputs:
   github-token:
     description: GitHub token for GHCR login
     required: true
+  java-version:
+    description: Java version to use
+    default: '21'
 runs:
   using: "composite"
   steps:
-    - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v8.14.1
+    - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v15.6.2
     - name: "Clone TCK repository"
       shell: bash
       run: ./scripts/ci/cloneTCK.sh
@@ -29,7 +32,9 @@ runs:
       shell: bash
       run: docker compose -f ./ingestion-connector-tck/compose.yaml up -d
     - name: "Set up JDK"
-      uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v8.14.1
+      uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v15.6.2
+      with:
+        java-version: ${{ inputs.java-version }}
     - name: "Build application"
       shell: bash
       run: mvn ${{ inputs.maven-cli-opts }} clean install -DskipTests -pl live-ingester -am
