@@ -37,6 +37,7 @@ import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
@@ -120,7 +121,7 @@ public class OpenApiTckRequestValidationTest
         }
         catch (IOException | InterruptedException e)
         {
-            throw new RuntimeException(e);
+            throw new LiveIngesterRuntimeException(e);
         }
     }
 }
