@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,16 +25,18 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
-import static io.restassured.RestAssured.given;
 import static org.apache.http.HttpStatus.SC_ACCEPTED;
 import static org.apache.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
+import lombok.Cleanup;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
@@ -45,12 +47,6 @@ public class OpenApiTckRequestValidationTest
 {
 
     private static final String BASE_URL = "http://localhost:4010";
-
-    @BeforeEach
-    void setUp()
-    {
-        RestAssured.baseURI = BASE_URL;
-    }
 
     @Test
     void testRequestToPresignedUrls()
@@ -84,32 +80,33 @@ public class OpenApiTckRequestValidationTest
     void testDeleteRequestToIngestionEvents()
     {
         int actualStatusCode = validateRequest("/rest/hxinsight/requests/delete-document.yml");
-
         assertThat(actualStatusCode).isEqualTo(SC_ACCEPTED);
     }
 
+    @SneakyThrows
     private int validateRequest(String yamlPath)
     {
         // given
         HxInsightRequest request = RequestLoader.load(yamlPath);
 
+        HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
+                .uri(URI.create(BASE_URL + request.url()))
+                .POST(request.body() != null
+                        ? HttpRequest.BodyPublishers.ofString(request.body())
+                        : HttpRequest.BodyPublishers.noBody());
+
+        request.headers().forEach(requestBuilder::header);
+
         // when
-        RequestSpecification requestSpec = given().log().all().headers(request.headers());
-
-        if (request.body() != null)
-        {
-            requestSpec.body(request.body());
-        }
-
-        Response response = requestSpec
-                .when()
-                .post(request.url());
+        @Cleanup
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpResponse<String> response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 
         // then
-        log.info("Response Status Code: " + response.getStatusCode());
-        log.info("Response Headers: " + response.getHeaders().asList());
-        log.info("Response Body: " + response.getBody().asPrettyString());
+        log.info("Response Status Code: {}", response.statusCode());
+        log.info("Response Headers: {}", response.headers().map());
+        log.info("Response Body: {}", response.body());
 
-        return response.getStatusCode();
+        return response.statusCode();
     }
 }
