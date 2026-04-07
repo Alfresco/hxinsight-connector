@@ -25,19 +25,20 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
+import static org.apache.hc.core5.http.HttpStatus.SC_ACCEPTED;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.Map;
 
+import lombok.Cleanup;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
@@ -46,8 +47,6 @@ public class OpenApiTckRequestValidationTest
 {
 
     private static final String BASE_URL = "http://localhost:4010";
-    private static final int SC_OK = 200;
-    private static final int SC_ACCEPTED = 202;
 
     @Test
     void testRequestToPresignedUrls()
@@ -81,47 +80,33 @@ public class OpenApiTckRequestValidationTest
     void testDeleteRequestToIngestionEvents()
     {
         int actualStatusCode = validateRequest("/rest/hxinsight/requests/delete-document.yml");
-
         assertThat(actualStatusCode).isEqualTo(SC_ACCEPTED);
     }
 
+    @SneakyThrows
     private int validateRequest(String yamlPath)
     {
         // given
         HxInsightRequest request = RequestLoader.load(yamlPath);
 
-        // when
         HttpRequest.Builder requestBuilder = HttpRequest.newBuilder()
-                .uri(URI.create(BASE_URL + request.url()));
+                .uri(URI.create(BASE_URL + request.url()))
+                .POST(request.body() != null
+                        ? HttpRequest.BodyPublishers.ofString(request.body())
+                        : HttpRequest.BodyPublishers.noBody());
 
-        for (Map.Entry<String, String> header : request.headers().entrySet())
-        {
-            requestBuilder.header(header.getKey(), header.getValue());
-        }
+        request.headers().forEach(requestBuilder::header);
 
-        if (request.body() != null)
-        {
-            requestBuilder.POST(HttpRequest.BodyPublishers.ofString(request.body()));
-        }
-        else
-        {
-            requestBuilder.POST(HttpRequest.BodyPublishers.noBody());
-        }
+        // when
+        @Cleanup
+        HttpClient httpClient = HttpClient.newHttpClient();
+        HttpResponse<String> response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 
-        try (HttpClient client = HttpClient.newHttpClient())
-        {
-            HttpResponse<String> response = client.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
+        // then
+        log.info("Response Status Code: {}", response.statusCode());
+        log.info("Response Headers: {}", response.headers().map());
+        log.info("Response Body: {}", response.body());
 
-            // then
-            log.info("Response Status Code: " + response.statusCode());
-            log.info("Response Headers: " + response.headers().map());
-            log.info("Response Body: " + response.body());
-
-            return response.statusCode();
-        }
-        catch (IOException | InterruptedException e)
-        {
-            throw new LiveIngesterRuntimeException(e);
-        }
+        return response.statusCode();
     }
 }

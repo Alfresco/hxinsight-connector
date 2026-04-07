@@ -114,7 +114,7 @@ jobs:
       fail-fast: false
       matrix:
         subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
-                      "live-ingester", "prediction-applier", "hxinsight-extension" ]
+                      "live-ingester", "prediction-applier", "hxinsight-extension", "nucleus-sync" ]
     steps:
       - uses: actions/checkout@v5
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v15.6.2
@@ -146,81 +146,6 @@ jobs:
             ${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec
           retention-days: 1
           if-no-files-found: warn
-
-  code_coverage_report:
-      name: "Generate Code Coverage Report"
-      runs-on: ubuntu-latest
-      needs:
-        - test_application
-      permissions:
-        pull-requests: write
-      if: >
-        github.actor != 'dependabot[bot]' &&
-        github.ref_name != 'master' &&
-        !contains(github.event.head_commit.message, '[release]') &&
-        !contains(github.event.head_commit.message, '[skip tests]') &&
-        !contains(github.event.head_commit.message, '[skip coverage]')
-      steps:
-        - uses: actions/checkout@v5
-          with:
-            fetch-depth: 0
-        - name: Get PR number
-          id: pr
-          run: |
-            # Try to find PR by branch name
-            PR_NUMBER=$(gh pr list --head "${{ github.ref_name }}" --state open --json number --jq '.[0].number // empty')
-            if [ -n "$PR_NUMBER" ]; then
-              echo "pull_request_number=$PR_NUMBER" >> $GITHUB_OUTPUT
-              echo "pr_found=true" >> $GITHUB_OUTPUT
-              echo "Found PR #$PR_NUMBER for branch ${{ github.ref_name }}"
-            else
-              echo "pull_request_number=" >> $GITHUB_OUTPUT
-              echo "pr_found=false" >> $GITHUB_OUTPUT
-              echo "No PR found for branch ${{ github.ref_name }}"
-            fi
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v15.6.2
-        - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v15.6.2
-          with:
-            java-version: ${{ env.JAVA_VERSION }}
-
-        - name: "Download all coverage data"
-          uses: actions/download-artifact@v8
-          with:
-            pattern: jacoco-report-*
-            path: ${{ github.workspace }}/jacoco-data
-            merge-multiple: false
-        - name: "Generate aggregated coverage report"
-          run: |
-            bash ./scripts/ci/generateCoverageReport.sh
-          env:
-            WORKSPACE: ${{ github.workspace }}
-        - name: "Upload coverage report"
-          uses: actions/upload-artifact@v7
-          with:
-            name: jacoco-coverage-report
-            path: |
-              ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
-            retention-days: 7
-            if-no-files-found: warn
-        - name: "Add Coverage Report to PR"
-          id: process_coverage
-          if: steps.pr.outputs.pr_found == 'true'
-          run: |
-            pip install PyGithub
-            python ./scripts/ci/processCoverageReport.py
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-            PR_NUMBER: ${{ steps.pr.outputs.pull_request_number }}
-            GITHUB_REPOSITORY: ${{ github.repository }}
-            WORKSPACE: ${{ github.workspace }}
-        - name: "Enforce minimum code coverage threshold on changed files"
-          if: ${{ steps.pr.outputs.pr_found == 'true' && steps.process_coverage.outputs.coverage-changed-files < 80.0 }}
-          uses: actions/github-script@v8
-          with:
-            script: |
-              core.setFailed('Files changed coverage is less than 80%!')
 
   test_distribution:
     name: "Build application with distribution profile"
@@ -321,6 +246,81 @@ jobs:
           maven-cli-opts: ${{ env.MAVEN_CLI_OPTS }}
           github-token: ${{ secrets.GITHUB_TOKEN }}
           java-version: ${{ env.JAVA_VERSION }}
+
+  code_coverage_report:
+    name: "Generate Code Coverage Report"
+    runs-on: ubuntu-latest
+    needs:
+      - test_application
+    permissions:
+      pull-requests: write
+    if: >
+      github.actor != 'dependabot[bot]' &&
+      github.ref_name != 'master' &&
+      !contains(github.event.head_commit.message, '[release]') &&
+      !contains(github.event.head_commit.message, '[skip tests]') &&
+      !contains(github.event.head_commit.message, '[skip coverage]')
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: Get PR number
+        id: pr
+        run: |
+          # Try to find PR by branch name
+          PR_NUMBER=$(gh pr list --head "${{ github.ref_name }}" --state open --json number --jq '.[0].number // empty')
+          if [ -n "$PR_NUMBER" ]; then
+            echo "pull_request_number=$PR_NUMBER" >> $GITHUB_OUTPUT
+            echo "pr_found=true" >> $GITHUB_OUTPUT
+            echo "Found PR #$PR_NUMBER for branch ${{ github.ref_name }}"
+          else
+            echo "pull_request_number=" >> $GITHUB_OUTPUT
+            echo "pr_found=false" >> $GITHUB_OUTPUT
+            echo "No PR found for branch ${{ github.ref_name }}"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v15.6.2
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v15.6.2
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: "Download all coverage data"
+        uses: actions/download-artifact@v8
+        with:
+          pattern: jacoco-report-*
+          path: ${{ github.workspace }}/jacoco-data
+          merge-multiple: false
+      - name: "Generate aggregated coverage report"
+        run: |
+          bash ./scripts/ci/generateCoverageReport.sh
+        env:
+          WORKSPACE: ${{ github.workspace }}
+      - name: "Upload coverage report"
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-coverage-report
+          path: |
+            ${{ github.workspace }}/**/target/site/jacoco/jacoco.xml
+          retention-days: 7
+          if-no-files-found: warn
+      - name: "Add Coverage Report to PR"
+        id: process_coverage
+        if: steps.pr.outputs.pr_found == 'true'
+        run: |
+          pip install PyGithub
+          python ./scripts/ci/processCoverageReport.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr.outputs.pull_request_number }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          WORKSPACE: ${{ github.workspace }}
+      - name: "Enforce minimum code coverage threshold on changed files"
+        if: ${{ steps.pr.outputs.pr_found == 'true' && steps.process_coverage.outputs.coverage-changed-files < 80.0 }}
+        uses: actions/github-script@v8
+        with:
+          script: |
+            core.setFailed('Files changed coverage is less than 80%!')
 
   push_docker_images:
     name: "Push docker images"

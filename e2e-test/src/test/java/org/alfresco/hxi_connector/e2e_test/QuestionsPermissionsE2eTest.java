@@ -25,8 +25,8 @@
  */
 package org.alfresco.hxi_connector.e2e_test;
 
-import static org.apache.http.HttpStatus.SC_FORBIDDEN;
-import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.hc.core5.http.HttpStatus.SC_FORBIDDEN;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.concatJavaOpts;
