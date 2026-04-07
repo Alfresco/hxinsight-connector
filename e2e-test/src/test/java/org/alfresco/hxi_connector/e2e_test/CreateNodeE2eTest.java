@@ -129,7 +129,7 @@ public class CreateNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    @SuppressWarnings({"PMD.UnitTestShouldIncludeAssert"})
     final void testCreateNodeContainingImageFile() throws IOException
     {
         // given
@@ -152,7 +152,7 @@ public class CreateNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    @SuppressWarnings({"PMD.UnitTestShouldIncludeAssert"})
     final void testCreateNodeContainingTextFile() throws IOException
     {
         // given
@@ -180,7 +180,7 @@ public class CreateNodeE2eTest
     }
 
     @Test
-    @SuppressWarnings({"PMD.JUnitTestsShouldIncludeAssert"})
+    @SuppressWarnings({"PMD.UnitTestShouldIncludeAssert"})
     final void testCreateNodeWithDefaultPermissions()
     {
         // when

@@ -153,18 +153,17 @@ public class DockerTags
 
     private static void loadProperties(boolean failOnMissingFile)
     {
-        InputStream propertiesStream = DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
-        if (propertiesStream == null)
+        try (InputStream propertiesStream =
+                     DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE))
         {
-            if (failOnMissingFile)
+            if (propertiesStream == null)
             {
-                throw new IllegalStateException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
+                if (failOnMissingFile)
+                {
+                    throw new IllegalStateException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
+                }
+                return;
             }
-            return;
-        }
-
-        try (propertiesStream)
-        {
             properties = new Properties();
             properties.load(propertiesStream);
         }

@@ -45,7 +45,18 @@ public class RetryUtils
     public static void retryWithBackoff(ErrorCatchingRunnable runnable)
     {
         retryWithBackoff(() -> {
-            runnable.run();
+            try
+            {
+                runnable.runUnsafe();
+            }
+            catch (RuntimeException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new IllegalStateException("Runnable execution failed", e);
+            }
             return null;
         });
     }
@@ -58,7 +69,18 @@ public class RetryUtils
     public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts, int delayMs)
     {
         retryWithBackoff(() -> {
-            runnable.run();
+            try
+            {
+                runnable.runUnsafe();
+            }
+            catch (RuntimeException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new IllegalStateException("Runnable execution failed", e);
+            }
             return null;
         }, maxAttempts, delayMs);
     }
@@ -105,25 +127,8 @@ public class RetryUtils
     }
 
     @FunctionalInterface
-    public interface ErrorCatchingRunnable<E extends Exception> extends Runnable
+    public interface ErrorCatchingRunnable<E extends Exception>
     {
         void runUnsafe() throws E;
-
-        @Override
-        default void run()
-        {
-            try
-            {
-                runUnsafe();
-            }
-            catch (RuntimeException runtimeException)
-            {
-                throw runtimeException;
-            }
-            catch (Exception exception)
-            {
-                throw new IllegalStateException("Runnable execution failed", exception);
-            }
-        }
     }
 }
