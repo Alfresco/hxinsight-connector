@@ -100,7 +100,6 @@ jobs:
           java-version: ${{ env.JAVA_VERSION }}
       - uses: Alfresco/ya-pmd-scan@v4.4.1
 
-
   test_application:
     name: "Build and test application"
     runs-on: ubuntu-latest
