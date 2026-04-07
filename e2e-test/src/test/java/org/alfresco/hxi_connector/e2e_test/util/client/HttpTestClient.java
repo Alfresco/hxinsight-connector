@@ -32,7 +32,8 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
-import io.restassured.path.json.JsonPath;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.ReadContext;
 import lombok.SneakyThrows;
 
 import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
@@ -109,9 +110,9 @@ public final class HttpTestClient
             return statusCode;
         }
 
-        public JsonPath jsonPath()
+        public JsonPathWrapper jsonPath()
         {
-            return JsonPath.from(body);
+            return new JsonPathWrapper(body);
         }
 
         public ResponseBody body()
@@ -132,6 +133,21 @@ public final class HttpTestClient
         public String asString()
         {
             return body;
+        }
+    }
+
+    public static final class JsonPathWrapper
+    {
+        private final ReadContext context;
+
+        private JsonPathWrapper(String body)
+        {
+            this.context = JsonPath.parse(body);
+        }
+
+        public <T> T get(String path)
+        {
+            return context.read("$." + path);
         }
     }
 }
