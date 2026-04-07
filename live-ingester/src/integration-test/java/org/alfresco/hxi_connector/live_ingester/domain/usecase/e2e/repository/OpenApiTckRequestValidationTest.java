@@ -25,8 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.domain.usecase.e2e.repository;
 
-import static org.apache.http.HttpStatus.SC_ACCEPTED;
-import static org.apache.http.HttpStatus.SC_OK;
+import static org.apache.hc.core5.http.HttpStatus.SC_ACCEPTED;
+import static org.apache.hc.core5.http.HttpStatus.SC_OK;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.net.URI;
