@@ -40,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.alfresco.hxi_connector.common.constant.HttpHeaders.USER_AGENT;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getRepoJavaOptsWithTransforms;
+import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 import static org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient.ADMIN_USER;
 
 import java.io.ByteArrayInputStream;
@@ -59,10 +59,6 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.pdfbox.Loader;
-import org.apache.pdfbox.io.RandomAccessReadBuffer;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.text.PDFTextStripper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -103,21 +99,13 @@ public class CreateNodeE2eTest
     @Container
     private static final GenericContainer<?> activemq = DockerContainers.createActiveMqContainerWithin(network);
     @Container
-    private static final GenericContainer<?> sfs = DockerContainers.createSfsContainerWithin(network);
-    @Container
-    private static final GenericContainer<?> transformCore = DockerContainers.createTransformCoreAioContainerWithin(network)
-            .dependsOn(activemq);
-    @Container
-    private static final GenericContainer<?> transformRouter = DockerContainers.createTransformRouterContainerWithin(network)
-            .dependsOn(activemq, transformCore);
-    @Container
     private static final WireMockContainer hxInsightMock = DockerContainers.createWireMockContainerWithin(network)
             .withFileSystemBind("src/test/resources/wiremock/hxinsight", "/home/wiremock", BindMode.READ_ONLY);
     @Container
     private static final LocalStackContainer awsMock = DockerContainers.createLocalStackContainerWithin(network);
     @Container
     private static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
-            .dependsOn(postgres, activemq, transformRouter, sfs);
+            .dependsOn(postgres, activemq);
     @Container
     private static final GenericContainer<?> liveIngester = createLiveIngesterContainer()
             .dependsOn(activemq, hxInsightMock, awsMock, repository);
@@ -132,8 +120,6 @@ public class CreateNodeE2eTest
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
-        // wait for repo to load transform config
-        RetryUtils.retryWithBackoff(() -> assertThat(transformRouter.getLogs()).contains("GET Transform Config version"), 1000);
     }
 
     @AfterEach
@@ -183,8 +169,8 @@ public class CreateNodeE2eTest
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size() + 1);
 
             S3Object s3Object = new ArrayList<>(CollectionUtils.disjunction(initialBucketContent, actualBucketContent)).get(0);
-            String actualPdfContent = getPdfContent(s3Object.key());
-            assertThat(actualPdfContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
+            String actualContent = getTextContent(s3Object.key());
+            assertThat(actualContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
 
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
@@ -236,20 +222,17 @@ public class CreateNodeE2eTest
     }
 
     @SneakyThrows
-    private String getPdfContent(String objectKey)
+    private String getTextContent(String objectKey)
     {
         @Cleanup
-        InputStream pdfContent = awsS3Client.getS3ObjectContent(objectKey);
-        @Cleanup
-        PDDocument document = Loader.loadPDF(new RandomAccessReadBuffer(pdfContent));
-        PDFTextStripper pdfStripper = new PDFTextStripper();
-        return pdfStripper.getText(document);
+        InputStream content = awsS3Client.getS3ObjectContent(objectKey);
+        return new String(content.readAllBytes());
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()
     {
         return DockerContainers.createExtendedRepositoryContainerWithin(network, ENTERPRISE)
-                .withJavaOpts(getRepoJavaOptsWithTransforms(postgres, activemq));
+                .withJavaOpts(getMinimalRepoJavaOpts(postgres, activemq));
     }
 
     private static GenericContainer<?> createLiveIngesterContainer()

@@ -48,7 +48,8 @@ public class SyncSchedulerServiceTest
     void shouldExecuteScheduledSyncWhenEnabled()
     {
         // Given
-        SyncSchedulerService schedulerService = createSchedulerService(true);
+
+        SyncSchedulerService schedulerService = new SyncSchedulerService(true, syncOrchestrationService);
         when(syncOrchestrationService.performFullSync())
                 .thenReturn("Sync completed successfully");
 
@@ -63,7 +64,7 @@ public class SyncSchedulerServiceTest
     void shouldSkipScheduledSyncWhenDisabled()
     {
         // Given
-        SyncSchedulerService schedulerService = createSchedulerService(false);
+        SyncSchedulerService schedulerService = new SyncSchedulerService(false, syncOrchestrationService);
 
         // When
         schedulerService.scheduledSync();
@@ -76,7 +77,7 @@ public class SyncSchedulerServiceTest
     void shouldHandleSyncInProgressExceptionGracefully()
     {
         // Given
-        SyncSchedulerService schedulerService = createSchedulerService(true);
+        SyncSchedulerService schedulerService = new SyncSchedulerService(true, syncOrchestrationService);
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new SyncInProgressException());
 
@@ -90,7 +91,7 @@ public class SyncSchedulerServiceTest
     void shouldHandleSyncExceptionGracefully()
     {
         // Given
-        SyncSchedulerService schedulerService = createSchedulerService(true);
+        SyncSchedulerService schedulerService = new SyncSchedulerService(true, syncOrchestrationService);
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new AlfrescoUnavailableException("Connection failed",
                         new RuntimeException()));

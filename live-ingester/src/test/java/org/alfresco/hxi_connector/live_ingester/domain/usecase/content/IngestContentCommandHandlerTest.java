@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -46,6 +46,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
+import org.alfresco.hxi_connector.live_ingester.domain.ports.repository.RepositoryContentStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequester;
@@ -67,6 +68,8 @@ class IngestContentCommandHandlerTest
     @Mock
     TransformEngineFileStorage transformEngineFileStorageMock;
     @Mock
+    RepositoryContentStorage repositoryContentStorageMock;
+    @Mock
     IngestionEngineStorageClient storageClientMock;
     @Mock
     IngestNodeCommandHandler ingestNodeCommandHandler;
@@ -76,17 +79,42 @@ class IngestContentCommandHandlerTest
 
     @ParameterizedTest
     @ValueSource(strings = {"application/pdf", "image/png", "image/jpeg"})
-    void shouldRequestNodeContentTransformation(String mimeType)
+    void shouldRequestNodeContentTransformation(String targetMimeType)
     {
-        // given
-        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, mimeType, TIMESTAMP);
+        // given - source and target are different, so transformation is required
+        String sourceMimeType = "text/plain";
+        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, sourceMimeType, targetMimeType, TIMESTAMP);
 
         // when
         ingestContentCommandHandler.handle(command);
 
         // then
-        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, mimeType, TIMESTAMP);
+        TransformRequest expectedTransformationRequest = new TransformRequest(NODE_ID, targetMimeType, TIMESTAMP);
         then(transformRequesterMock).should().requestTransform(expectedTransformationRequest);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"application/pdf", "image/png", "image/jpeg"})
+    @SneakyThrows
+    void shouldSkipTransformWhenSourceAndTargetMimeTypesMatch(String mimeType)
+    {
+        // given
+        TriggerContentIngestionCommand command = new TriggerContentIngestionCommand(NODE_ID, mimeType, mimeType, TIMESTAMP);
+
+        File fileToUpload = mock();
+        given(repositoryContentStorageMock.downloadContent(NODE_ID)).willReturn(fileToUpload);
+        IngestContentResponse ingestContentResponse = new IngestContentResponse(UPLOADED_CONTENT_ID, mimeType);
+        given(storageClientMock.upload(fileToUpload, mimeType, NODE_ID)).willReturn(ingestContentResponse);
+
+        // when
+        ingestContentCommandHandler.handle(command);
+
+        // then - should NOT call transform requester
+        then(transformRequesterMock).shouldHaveNoInteractions();
+        // should download directly from repository
+        then(repositoryContentStorageMock).should().downloadContent(NODE_ID);
+        // should upload to HXI
+        then(storageClientMock).should().upload(fileToUpload, mimeType, NODE_ID);
     }
 
     @ParameterizedTest

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -32,7 +32,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
-public record Repository(@NotBlank String eventsEndpoint, String discoveryEndpoint, String versionOverride, HealthProbe healthProbe)
+public record Repository(@NotBlank String baseUrl, @NotBlank String eventsEndpoint, String discoveryEndpoint, String versionOverride, HealthProbe healthProbe)
 {
 
     public Repository

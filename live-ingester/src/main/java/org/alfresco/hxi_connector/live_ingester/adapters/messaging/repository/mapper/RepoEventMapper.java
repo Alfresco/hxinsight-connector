@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -58,8 +58,9 @@ public class RepoEventMapper
         ensureThat(isEventTypeCreated(event) || isEventTypeUpdated(event), "Unsupported event type");
 
         final NodeResource resource = event.getData().getResource();
-        String mimeType = mimeTypeMapper.mapMimeType(resource.getContent().getMimeType());
-        return new TriggerContentIngestionCommand(resource.getId(), mimeType, getEventTimestamp(event));
+        String sourceMimeType = resource.getContent().getMimeType();
+        String targetMimeType = mimeTypeMapper.mapMimeType(sourceMimeType);
+        return new TriggerContentIngestionCommand(resource.getId(), sourceMimeType, targetMimeType, getEventTimestamp(event));
     }
 
     public IngestNodeCommand mapToIngestNodeCommand(RepoEvent<DataAttributes<NodeResource>> event)

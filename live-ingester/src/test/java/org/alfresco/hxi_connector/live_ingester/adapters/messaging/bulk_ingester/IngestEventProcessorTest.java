@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -139,7 +139,7 @@ class IngestEventProcessorTest
         then(ingestNodeCommandHandler).should().handle(expectedCommand);
 
         then(mimeTypeMapper).should().mapMimeType(mimeType);
-        then(ingestContentCommandHandler).should().handle(eq(new TriggerContentIngestionCommand(NODE_ID, mimeType, TIMESTAMP)));
+        then(ingestContentCommandHandler).should().handle(eq(new TriggerContentIngestionCommand(NODE_ID, mimeType, mimeType, TIMESTAMP)));
     }
 
     @Test

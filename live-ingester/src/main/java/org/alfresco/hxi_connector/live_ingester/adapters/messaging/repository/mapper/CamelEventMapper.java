@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.m
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,20 +46,34 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 public class CamelEventMapper
 {
 
+    private static final String NODE_RESOURCE_TYPE = NodeResource.class.getSimpleName();
+
     private final ObjectMapper mapper;
 
     /**
-     * Unmarshalls Camel exchange body to RepoEvent POJO
+     * Unmarshalls Camel exchange body to RepoEvent POJO in case of Repository Events containing NodeResource objects.
      *
      * @param exchange
      *            Camel Exchange object
-     * @return RepoEvent
+     * @return {@link RepoEvent} or null if the event is not related to {@link NodeResource}
      */
     public RepoEvent<DataAttributes<NodeResource>> repoEventFrom(Exchange exchange)
     {
         try
         {
-            return mapper.readValue(exchange.getIn().getBody(String.class), new TypeReference<>() {});
+            String body = exchange.getIn().getBody(String.class);
+            JsonNode eventNode = mapper.readTree(body);
+            String resourceType = eventNode.path("data").path("resource").path("@type").asText();
+            if (!NODE_RESOURCE_TYPE.equals(resourceType))
+            {
+                String eventType = eventNode.path("type").asText();
+                String eventId = eventNode.path("id").asText();
+                log.atInfo().log("Repository :: Skipping {} event - resource type is not {}. Event ID: {}",
+                        eventType, NODE_RESOURCE_TYPE, eventId);
+                return null;
+            }
+
+            return mapper.convertValue(eventNode, new TypeReference<>() {});
         }
         catch (JsonProcessingException e)
         {

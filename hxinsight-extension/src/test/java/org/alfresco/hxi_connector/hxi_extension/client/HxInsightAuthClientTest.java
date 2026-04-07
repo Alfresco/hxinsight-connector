@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -33,15 +33,11 @@ import static org.mockito.Mockito.when;
 import java.util.Map;
 import java.util.Set;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.test.appender.ListAppender;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -65,23 +61,20 @@ class HxInsightAuthClientTest
     HxInsightAuthClient hxInsightAuthClient;
 
     ListAppender testAppender;
-    LoggerConfig rootLoggerConfig;
 
     @BeforeAll
     void beforeAll()
     {
+        // Retrieve the ListAppender pre-configured in log4j2-test.xml.
+        // This is set up at Log4j initialization time, before any SLF4J loggers are created.
         LoggerContext loggerContext = (LoggerContext) LogManager.getContext(false);
-        Configuration loggerConfig = loggerContext.getConfiguration();
-        testAppender = ListAppender.newBuilder().setName("test-appender").build();
-        rootLoggerConfig = loggerConfig.getLoggerConfig(StringUtils.EMPTY);
-        rootLoggerConfig.setLevel(Level.INFO);
-        rootLoggerConfig.addAppender(testAppender, Level.ALL, null);
+        testAppender = loggerContext.getConfiguration().getAppender("test-appender");
     }
 
-    @AfterAll
-    void afterAll()
+    @BeforeEach
+    void beforeEach()
     {
-        rootLoggerConfig.removeAppender(testAppender.getName());
+        testAppender.clear();
     }
 
     @Test
@@ -103,12 +96,11 @@ class HxInsightAuthClientTest
         // then
         assertThat(actualException).isInstanceOf(EndpointServerErrorException.class);
         assertThat(testAppender.getEvents())
-            .hasSize(3)
-            .extracting(events -> events.getMessage().getFormattedMessage())
-            .containsExactlyInAnyOrder(
-                "Attempt 1 of 3 failed, retrying after 500ms",
-                "Attempt 2 of 3 failed, retrying after 1000ms",
-                "Attempt 3 of 3 failed"
-            );
+                .hasSize(3)
+                .extracting(events -> events.getMessage().getFormattedMessage())
+                .containsExactlyInAnyOrder(
+                        "Attempt 1 of 3 failed, retrying after 500ms",
+                        "Attempt 2 of 3 failed, retrying after 1000ms",
+                        "Attempt 3 of 3 failed");
     }
 }

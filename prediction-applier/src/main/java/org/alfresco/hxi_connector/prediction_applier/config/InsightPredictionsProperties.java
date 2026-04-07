@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -56,7 +56,7 @@ public record InsightPredictionsProperties(
 
         if (pollPeriodMillis != null && collectorTimerEndpoint == null)
         {
-            collectorTimerEndpoint = "quartz:predictions-collector-timer?autoStartScheduler=true&trigger.repeatInterval=" + pollPeriodMillis;
+            collectorTimerEndpoint = "scheduler:predictions-collector-timer?delay=" + pollPeriodMillis + "&initialDelay=0";
         }
     }
 }

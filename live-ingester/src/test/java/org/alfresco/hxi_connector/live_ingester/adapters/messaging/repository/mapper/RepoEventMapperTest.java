@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -77,15 +77,16 @@ class RepoEventMapperTest
     void shouldMapToIngestNodeContentCommand()
     {
         // given
-        String mimeType = "application/pdf";
-        given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(mimeType);
-        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_CREATED, mimeType);
+        String sourceMimeType = "application/pdf";
+        String targetMimeType = "application/pdf";
+        given(mimeTypeMapper.mapMimeType(sourceMimeType)).willReturn(targetMimeType);
+        RepoEvent<DataAttributes<NodeResource>> event = mockMinimalEvent(NODE_CREATED, sourceMimeType);
 
         // when
         TriggerContentIngestionCommand actualCommand = repoEventMapper.mapToIngestContentCommand(event);
 
         // then
-        TriggerContentIngestionCommand expectedCommand = new TriggerContentIngestionCommand(NODE_ID, mimeType, TIMESTAMP);
+        TriggerContentIngestionCommand expectedCommand = new TriggerContentIngestionCommand(NODE_ID, sourceMimeType, targetMimeType, TIMESTAMP);
 
         assertEquals(expectedCommand, actualCommand);
     }

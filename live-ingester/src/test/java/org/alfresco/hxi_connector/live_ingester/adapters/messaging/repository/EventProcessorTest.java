@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -374,7 +374,7 @@ class EventProcessorTest
         given(mockMessage.getBody(RepoEvent.class)).willReturn(event);
 
         TriggerContentIngestionCommand triggerContentIngestionCommand = mock();
-        given(triggerContentIngestionCommand.mimeType()).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
+        given(triggerContentIngestionCommand.targetMimeType()).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
         given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(triggerContentIngestionCommand);
 
         // when

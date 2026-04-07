@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -45,6 +45,7 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -59,8 +60,8 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.prediction_applier.IntegrationTestConfig;
 import org.alfresco.hxi_connector.prediction_applier.util.ContainerSupport;
 
-@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"},
-        classes = IntegrationTestConfig.class)
+@SpringBootTest(properties = {"logging.level.org.alfresco=DEBUG"})
+@Import(IntegrationTestConfig.class)
 @ActiveProfiles("test")
 @DirtiesContext // Forces framework to kill application after tests (i.e. before testcontainers die).
 @Testcontainers

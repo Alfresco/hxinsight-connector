@@ -21,7 +21,7 @@ See [Compatibility](compatibility.md) for supported Alfresco versions and requir
 ## Standalone JAR Deployment
 
 ### Prerequisites
-- Java 17 or later
+- Java 21 or later
 - Access to Alfresco Repository
 - Access to ActiveMQ
 - Access to HX Insight APIs
@@ -45,6 +45,20 @@ java -jar alfresco-hxinsight-connector-bulk-ingester-*.jar \
 java -jar alfresco-hxinsight-connector-prediction-applier-*.jar \
   --spring.activemq.broker-url=nio://activemq:61616 \
   --alfresco.repository.base-url=http://alfresco:8080/alfresco
+
+# Nucleus User Sync
+java -jar alfresco-hxinsight-connector-nucleus-sync-*.jar \
+  --alfresco.base-url=http://alfresco:8080/alfresco/api/-default-/public/alfresco/versions/1 \
+  --auth.providers.alfresco.type=basic \
+  --auth.providers.alfresco.username=<alfresco-username> \
+  --auth.providers.alfresco.password=<alfresco-password> \
+  --auth.providers.hyland-experience.type=oauth2 \
+  --auth.providers.hyland-experience.client-id=<client-id> \
+  --auth.providers.hyland-experience.client-secret=<client-secret> \
+  --auth.providers.hyland-experience.token-uri=<token-uri> \
+  --nucleus.idp-base-url=<nucleus-idp-base-url> \
+  --nucleus.base-url=<nucleus-base-url> \
+  --nucleus.system-id=<system-id>
 ```
 
 ### Using Environment Variables
@@ -94,6 +108,27 @@ docker run -d \
   -e AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI=https://auth.hyland.com/oauth/token \
   -e AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY=<env-key> \
   quay.io/alfresco/alfresco-hxinsight-connector-live-ingester:<version>
+```
+
+```bash
+docker run -d \
+  --name nucleus-sync \
+  -e SERVER_PORT=8081 \
+  -e SYNC_ENABLED=true \
+  -e SYNC_CRON_EXPRESSION="0 0 0 * * *" \
+  -e AUTH_ALFRESCO_TYPE=basic \
+  -e ALFRESCO_USER_NAME=<alfresco-username> \
+  -e ALFRESCO_PASSWORD=<alfresco-password> \
+  -e AUTH_HX_TYPE=oauth2 \
+  -e HX_CLIENT_ID=<client-id> \
+  -e HX_CLIENT_SECRET=<client-secret> \
+  -e HX_TOKEN_URI=<token-uri> \
+  -e ALFRESCO_BASE_URL=http://alfresco:8080/alfresco/api/-default-/public/alfresco/versions/1 \
+  -e NUCLEUS_IDP_BASE_URL=<nucleus-idp-base-url> \
+  -e NUCLEUS_BASE_URL=<nucleus-base-url> \
+  -e NUCLEUS_SYSTEM_ID=<system-id> \
+  -p 8081:8081 \
+  quay.io/alfresco/alfresco-hxinsight-connector-nucleus-sync:<version>
 ```
 
 The `APPLICATION_SOURCEID` is generated when you register your Alfresco instance in CIC for Knowledge Discovery. In some systems (Nucleus) then it is referred to as "system id", where as Knowledge Discovery calls it a "source id."
