@@ -59,10 +59,7 @@ public class OpenApiTckRequestValidationTest
     @AfterAll
     static void afterAll()
     {
-        if (httpClient != null)
-        {
-            httpClient.close();
-        }
+        httpClient = null;
     }
 
     @Test
