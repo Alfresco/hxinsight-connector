@@ -37,6 +37,7 @@ import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealth
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.ValidationException;
 
+@SuppressWarnings("PMD.CloseResource") // HttpClient is not AutoCloseable on Java 17
 class AppConfigTest
 {
 
