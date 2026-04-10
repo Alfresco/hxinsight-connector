@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -36,7 +36,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.MockitoAnnotations.openMocks;
 
-import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType.AUTOFILL;
+import static org.alfresco.hxi_connector.common.model.prediction.UpdateType.AUTOFILL;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.NODES_DIRECT_ENDPOINT;
 import static org.alfresco.hxi_connector.prediction_applier.repository.NodesClient.ROUTE_ID;
 
@@ -64,7 +64,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
+import org.alfresco.hxi_connector.common.model.prediction.PredictionModel;
 import org.alfresco.hxi_connector.prediction_applier.config.RepositoryApiProperties;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponse;
 import org.alfresco.hxi_connector.prediction_applier.model.repository.PredictionModelResponseEntry;

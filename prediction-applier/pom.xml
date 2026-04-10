@@ -22,11 +22,6 @@
             <artifactId>alfresco-hxinsight-connector-common-authentication</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.alfresco</groupId>
-            <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -49,10 +49,10 @@ import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 
+import org.alfresco.hxi_connector.common.model.prediction.ReviewStatus;
+import org.alfresco.hxi_connector.common.model.prediction.UpdateType;
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.exception.PredictionStateChangedException;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.ReviewStatus;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;

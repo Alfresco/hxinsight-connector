@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -33,7 +33,7 @@ import java.util.List;
 
 import lombok.Setter;
 
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.PredictionModel;
+import org.alfresco.hxi_connector.common.model.prediction.PredictionModel;
 import org.alfresco.hxi_connector.hxi_extension.service.PredictionMapper;
 import org.alfresco.hxi_connector.hxi_extension.service.PredictionService;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
