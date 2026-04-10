@@ -44,6 +44,7 @@ import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightReques
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
 @Slf4j
+@SuppressWarnings("PMD.CloseResource") // HttpClient is not AutoCloseable on Java 17
 public class OpenApiTckRequestValidationTest
 {
     private static final String BASE_URL = "http://localhost:4010";
@@ -59,10 +60,7 @@ public class OpenApiTckRequestValidationTest
     @AfterAll
     static void afterAll()
     {
-        if (httpClient != null)
-        {
-            httpClient.close();
-        }
+        httpClient = null;
     }
 
     @Test

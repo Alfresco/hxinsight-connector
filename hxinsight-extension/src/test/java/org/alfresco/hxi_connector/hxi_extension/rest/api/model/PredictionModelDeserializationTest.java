@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,8 +30,8 @@ import static java.time.format.DateTimeFormatter.ISO_INSTANT;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.ReviewStatus.UNREVIEWED;
-import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType.AUTOFILL;
+import static org.alfresco.hxi_connector.common.model.prediction.ReviewStatus.UNREVIEWED;
+import static org.alfresco.hxi_connector.common.model.prediction.UpdateType.AUTOFILL;
 
 import java.time.Instant;
 import java.util.Date;
@@ -40,6 +40,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.model.prediction.PredictionModel;
 
 /** Unit tests for {@link PredictionModel} deserialization. */
 public class PredictionModelDeserializationTest

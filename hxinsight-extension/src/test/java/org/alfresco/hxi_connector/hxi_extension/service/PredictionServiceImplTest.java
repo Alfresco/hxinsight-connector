@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -33,6 +33,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 
+import static org.alfresco.hxi_connector.common.model.prediction.ReviewStatus.UNREVIEWED;
+import static org.alfresco.hxi_connector.common.model.prediction.UpdateType.AUTOCORRECT;
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.ASSOC_PREDICTED_BY;
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.PROP_CONFIDENCE_LEVEL;
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.PROP_MODEL_ID;
@@ -42,8 +44,6 @@ import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.Predi
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.PROP_REVIEW_STATUS;
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.PROP_UPDATE_TYPE;
 import static org.alfresco.hxi_connector.hxi_extension.rest.api.data_model.PredictionDataModel.TYPE_PREDICTION;
-import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.ReviewStatus.UNREVIEWED;
-import static org.alfresco.hxi_connector.hxi_extension.rest.api.model.UpdateType.AUTOCORRECT;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -59,8 +59,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.exception.ValidationException;
+import org.alfresco.hxi_connector.common.model.prediction.ReviewStatus;
 import org.alfresco.hxi_connector.hxi_extension.rest.api.exception.PredictionStateChangedException;
-import org.alfresco.hxi_connector.hxi_extension.rest.api.model.ReviewStatus;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Prediction;
 import org.alfresco.service.cmr.repository.ChildAssociationRef;
 import org.alfresco.service.cmr.repository.NodeRef;
