@@ -192,6 +192,29 @@ class DockerContainersTest
     }
 
     @Test
+    void shouldCreateNucleusSyncContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+
+        GenericContainer<?> container = DockerContainers.createNucleusSyncContainerWithin(network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("nucleus-sync");
+        assertThat(container.getExposedPorts()).contains(8081);
+    }
+
+    @Test
+    void shouldCreateNucleusSyncContainerWithoutNetwork()
+    {
+        GenericContainer<?> container = DockerContainers.createNucleusSyncContainerWithin(null);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getExposedPorts()).contains(8081);
+        assertThat(container.getNetworkAliases()).doesNotContain("nucleus-sync");
+    }
+
+    @Test
     void shouldGetAppInfoRegex()
     {
         String regex = DockerContainers.getAppInfoRegex();
