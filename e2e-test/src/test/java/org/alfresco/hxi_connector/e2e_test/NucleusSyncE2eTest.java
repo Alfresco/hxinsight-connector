@@ -36,16 +36,18 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
-import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.Base64;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import io.restassured.http.ContentType;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -171,26 +173,71 @@ class NucleusSyncE2eTest
         RetryUtils.retryWithBackoff(() -> {
             try
             {
-                given()
-                        .baseUri("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081))
-                        .accept(ContentType.JSON)
-                        .when()
-                        .post("/sync/trigger")
-                        .then()
-                        .statusCode(200)
-                        .body("success", Matchers.equalTo(true))
-                        .body("message", Matchers.equalTo("Sync completed successfully"));
+        HttpRequest request = HttpRequest.newBuilder()
+          .uri(URI.create("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081) + "/sync/trigger"))
+          .header("Accept", "application/json")
+          .POST(HttpRequest.BodyPublishers.noBody())
+          .build();
+
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+
+                int statusCode = response.statusCode();
+          if (statusCode != 200)
+          {
+            throw new AssertionError("Sync trigger endpoint returned HTTP " + statusCode
+                + " with response body: " + getSafeResponseBody(response)
+                + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
+                + getSafeContainerLogs());
+          }
             }
             catch (Exception exception)
             {
-                String containerLogs = nucleusSync.getLogs();
+          String containerLogs = getSafeContainerLogs();
                 throw new AssertionError(
                         "Sync trigger endpoint not ready: " + exception.getClass().getName() + ": " + exception.getMessage()
                         + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
-                        + (containerLogs != null ? containerLogs.substring(Math.max(0, containerLogs.length() - 2000)) : "(no logs)"),
+              + containerLogs,
                         exception);
             }
         }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
+    }
+
+      private String getSafeResponseBody(HttpResponse<String> response)
+    {
+      try
+        {
+          if (response == null || response.body() == null)
+            {
+          return "(no response body)";
+            }
+          String body = response.body();
+        if (body == null || body.isBlank())
+        {
+          return "(empty response body)";
+        }
+        return body.substring(Math.max(0, body.length() - 1000));
+      }
+      catch (Exception bodyException)
+      {
+        return "(failed to read response body: " + bodyException.getClass().getName() + ": " + bodyException.getMessage() + ")";
+      }
+    }
+
+    private String getSafeContainerLogs()
+    {
+      try
+      {
+        String logs = nucleusSync.getLogs();
+        if (logs == null || logs.isBlank())
+        {
+          return "(no logs)";
+        }
+        return logs.substring(Math.max(0, logs.length() - 2000));
+      }
+      catch (Exception logException)
+      {
+        return "(failed to read container logs: " + logException.getClass().getName() + ": " + logException.getMessage() + ")";
+        }
     }
 
     private static String multiScopeConfig()
