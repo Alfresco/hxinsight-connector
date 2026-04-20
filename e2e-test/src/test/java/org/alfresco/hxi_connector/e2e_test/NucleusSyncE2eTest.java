@@ -71,8 +71,8 @@ class NucleusSyncE2eTest
     private static final String SECONDARY_SCOPE = "system-integrations-config";
     private static final String NUCLEUS_ALIAS = "nucleus-mock";
     private static final String ALFRESCO_ALIAS = "alfresco-mock";
-    private static final int SYNC_TRIGGER_MAX_ATTEMPTS = 30;
-    private static final int SYNC_TRIGGER_DELAY_MS = 500;
+    private static final int SYNC_TRIGGER_MAX_ATTEMPTS = 120;
+    private static final int SYNC_TRIGGER_DELAY_MS = 1000;
 
     @Container
     private static final WireMockContainer nucleusMock = DockerContainers.createWireMockContainerWithin(network)
@@ -162,6 +162,8 @@ class NucleusSyncE2eTest
 
     private void triggerSync()
     {
+        waitForSyncEndpointReadiness();
+
         RetryUtils.retryWithBackoff(() -> {
             try
             {
@@ -177,7 +179,28 @@ class NucleusSyncE2eTest
             }
             catch (Exception exception)
             {
-                throw new AssertionError("Sync trigger endpoint not ready", exception);
+                throw new AssertionError("Sync trigger endpoint not ready: " + exception.getMessage(), exception);
+            }
+        }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
+    }
+
+    private void waitForSyncEndpointReadiness()
+    {
+        RetryUtils.retryWithBackoff(() -> {
+            try
+            {
+                given()
+                        .baseUri("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081))
+                        .accept(ContentType.JSON)
+                        .when()
+                        .get("/actuator/health/readiness")
+                        .then()
+                        .statusCode(200)
+                        .body("status", Matchers.equalTo("UP"));
+            }
+            catch (Exception exception)
+            {
+                throw new AssertionError("Sync readiness endpoint not ready: " + exception.getMessage(), exception);
             }
         }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
     }
