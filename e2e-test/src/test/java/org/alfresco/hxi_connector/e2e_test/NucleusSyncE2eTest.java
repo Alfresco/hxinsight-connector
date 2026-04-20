@@ -102,8 +102,10 @@ class NucleusSyncE2eTest
             .withEnv("NUCLEUS_SYSTEM_ID", SYSTEM_ID)
             .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
             .dependsOn(alfrescoMock, nucleusMock)
-            .waitingFor(Wait.forListeningPort())
-            .withStartupTimeout(Duration.ofMinutes(3));
+            .waitingFor(Wait.forHttp("/actuator/health")
+                    .forPort(8081)
+                    .forStatusCode(200))
+            .withStartupTimeout(Duration.ofMinutes(5));
 
     private static WireMock nucleusWireMock;
     private static WireMock alfrescoWireMock;
@@ -181,9 +183,12 @@ class NucleusSyncE2eTest
             }
             catch (Exception exception)
             {
-              throw new AssertionError(
-                  "Sync trigger endpoint not ready: " + exception.getClass().getName() + ": " + exception.getMessage(),
-                  exception);
+                String containerLogs = nucleusSync.getLogs();
+                throw new AssertionError(
+                        "Sync trigger endpoint not ready: " + exception.getClass().getName() + ": " + exception.getMessage()
+                        + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
+                        + (containerLogs != null ? containerLogs.substring(Math.max(0, containerLogs.length() - 2000)) : "(no logs)"),
+                        exception);
             }
         }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
     }
