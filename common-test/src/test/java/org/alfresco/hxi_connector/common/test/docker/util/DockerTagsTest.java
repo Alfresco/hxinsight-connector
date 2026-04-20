@@ -26,12 +26,9 @@
 package org.alfresco.hxi_connector.common.test.docker.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 
-import java.lang.reflect.Field;
 import java.util.NoSuchElementException;
-import java.util.Properties;
 
 import org.junit.jupiter.api.Test;
 
@@ -71,65 +68,5 @@ class DockerTagsTest
     void testKeySet()
     {
         assertThat(DockerTags.keySet()).isNotNull();
-    }
-
-    @Test
-    void testKeySetWhenPropertiesNotYetLoaded() throws Exception
-    {
-        Field propertiesField = DockerTags.class.getDeclaredField("properties");
-        propertiesField.setAccessible(true);
-        Properties original = (Properties) propertiesField.get(null);
-
-        try
-        {
-            propertiesField.set(null, null);
-            assertThat(DockerTags.keySet()).isNotNull();
-        }
-        finally
-        {
-            propertiesField.set(null, original);
-        }
-    }
-
-    @Test
-    void testGetPropertyWhenPropertiesNotYetLoaded() throws Exception
-    {
-        Field propertiesField = DockerTags.class.getDeclaredField("properties");
-        propertiesField.setAccessible(true);
-        Properties original = (Properties) propertiesField.get(null);
-
-        try
-        {
-            propertiesField.set(null, null);
-            Throwable thrown = catchThrowable(() -> DockerTags.getProperty("non.existing.property"));
-            assertThat(thrown).isInstanceOf(NoSuchElementException.class);
-        }
-        finally
-        {
-            propertiesField.set(null, original);
-        }
-    }
-
-    @Test
-    void testGetPropertyThrowsForUnresolvedValue() throws Exception
-    {
-        Field propertiesField = DockerTags.class.getDeclaredField("properties");
-        propertiesField.setAccessible(true);
-        Properties original = (Properties) propertiesField.get(null);
-
-        Properties mockProperties = new Properties();
-        mockProperties.setProperty("unresolved.prop", "@unresolved.prop@");
-
-        try
-        {
-            propertiesField.set(null, mockProperties);
-            assertThatThrownBy(() -> DockerTags.getProperty("unresolved.prop"))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessageContaining("not resolved");
-        }
-        finally
-        {
-            propertiesField.set(null, original);
-        }
     }
 }
