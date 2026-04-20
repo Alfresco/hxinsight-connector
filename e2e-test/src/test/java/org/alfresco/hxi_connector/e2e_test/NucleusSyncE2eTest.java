@@ -40,6 +40,7 @@ import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.nio.charset.StandardCharsets;
+import java.time.Duration;
 import java.util.Base64;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
@@ -51,6 +52,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.Network;
+import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
@@ -99,7 +101,9 @@ class NucleusSyncE2eTest
             .withEnv("NUCLEUS_BASE_URL", "http://" + NUCLEUS_ALIAS + ":8080")
             .withEnv("NUCLEUS_SYSTEM_ID", SYSTEM_ID)
             .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
-            .dependsOn(alfrescoMock, nucleusMock);
+            .dependsOn(alfrescoMock, nucleusMock)
+            .waitingFor(Wait.forListeningPort())
+            .withStartupTimeout(Duration.ofMinutes(3));
 
     private static WireMock nucleusWireMock;
     private static WireMock alfrescoWireMock;
@@ -162,8 +166,6 @@ class NucleusSyncE2eTest
 
     private void triggerSync()
     {
-        waitForSyncEndpointReadiness();
-
         RetryUtils.retryWithBackoff(() -> {
             try
             {
@@ -179,28 +181,9 @@ class NucleusSyncE2eTest
             }
             catch (Exception exception)
             {
-                throw new AssertionError("Sync trigger endpoint not ready: " + exception.getMessage(), exception);
-            }
-        }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
-    }
-
-    private void waitForSyncEndpointReadiness()
-    {
-        RetryUtils.retryWithBackoff(() -> {
-            try
-            {
-                given()
-                        .baseUri("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081))
-                        .accept(ContentType.JSON)
-                        .when()
-                        .get("/actuator/health/readiness")
-                        .then()
-                        .statusCode(200)
-                        .body("status", Matchers.equalTo("UP"));
-            }
-            catch (Exception exception)
-            {
-                throw new AssertionError("Sync readiness endpoint not ready: " + exception.getMessage(), exception);
+              throw new AssertionError(
+                  "Sync trigger endpoint not ready: " + exception.getClass().getName() + ": " + exception.getMessage(),
+                  exception);
             }
         }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
     }
