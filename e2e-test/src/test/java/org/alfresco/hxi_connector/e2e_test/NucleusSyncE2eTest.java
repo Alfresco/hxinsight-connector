@@ -103,6 +103,7 @@ class NucleusSyncE2eTest
             .withEnv("NUCLEUS_BASE_URL", "http://" + NUCLEUS_ALIAS + ":8080")
             .withEnv("NUCLEUS_SYSTEM_ID", SYSTEM_ID)
             .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
+            .withEnv("SPRING_THREADS_VIRTUAL_ENABLED", "true")
             .dependsOn(alfrescoMock, nucleusMock)
             .waitingFor(Wait.forHttp("/actuator/health")
                     .forPort(8081)
@@ -117,6 +118,7 @@ class NucleusSyncE2eTest
     {
         nucleusWireMock = new WireMock(nucleusMock.getHost(), nucleusMock.getPort());
         alfrescoWireMock = new WireMock(alfrescoMock.getHost(), alfrescoMock.getPort());
+        WireMock.configureFor(nucleusMock.getHost(), nucleusMock.getPort());
     }
 
     @BeforeEach
@@ -146,6 +148,7 @@ class NucleusSyncE2eTest
         stubCurrentMemberships();
         stubMutationEndpoints();
 
+        waitUntilServiceIsReadyForSync();
         assertDoesNotThrow(this::triggerSync, "Sync trigger should complete successfully");
 
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo("/token"))
@@ -166,6 +169,44 @@ class NucleusSyncE2eTest
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(deleteRequestedFor(urlPathEqualTo(groupMembersPath()))
                 .withQueryParam("parentExternalGroupId", equalTo("GROUP_ORPHAN"))
                 .withQueryParam("memberExternalUserIds", equalTo("ghost"))));
+    }
+
+    private void waitUntilServiceIsReadyForSync()
+    {
+        RetryUtils.retryWithBackoff(() -> {
+            try
+            {
+                HttpRequest healthRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081) + "/actuator/health"))
+                        .GET()
+                        .build();
+                HttpResponse<String> healthResp = HttpClient.newHttpClient().send(healthRequest, HttpResponse.BodyHandlers.ofString());
+                if (healthResp.statusCode() != 200)
+                {
+                    throw new AssertionError("nucleus-sync health not OK yet: " + healthResp.statusCode());
+                }
+
+                HttpRequest alfrescoRequest = HttpRequest.newBuilder()
+                        .uri(URI.create("http://" + alfrescoMock.getHost() + ":" + alfrescoMock.getPort()
+                                + PEOPLE_ENDPOINT + "?maxItems=1000&skipCount=0"))
+                        .header("Authorization", "Basic " + BASIC_ADMIN)
+                        .GET()
+                        .build();
+                HttpResponse<String> alfrescoResp = HttpClient.newHttpClient().send(alfrescoRequest, HttpResponse.BodyHandlers.ofString());
+                if (alfrescoResp.statusCode() != 200)
+                {
+                    throw new AssertionError("alfresco mock not responding yet: " + alfrescoResp.statusCode());
+                }
+            }
+            catch (AssertionError ae)
+            {
+                throw ae;
+            }
+            catch (Exception e)
+            {
+                throw new AssertionError("Service readiness check failed: " + e.getMessage(), e);
+            }
+        }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
     }
 
     private void triggerSync()
