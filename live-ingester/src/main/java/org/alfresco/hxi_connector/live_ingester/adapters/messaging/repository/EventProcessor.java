@@ -42,6 +42,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
+import org.hyland.sdk.cic.http.client.CICSdkException;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -73,6 +74,7 @@ public class EventProcessor
 
     public void process(Exchange exchange)
     {
+        CICSdkException sdkException;
         boolean allowEvent = repoEventFilterHandler.handleAndGetAllowed(exchange, integrationProperties.alfresco().filter());
         final RepoEvent<DataAttributes<NodeResource>> event = exchange.getIn().getBody(RepoEvent.class);
 

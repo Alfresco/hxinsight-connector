@@ -85,6 +85,7 @@
         <wiremock.version>3.13.2</wiremock.version>
         <wiremock-testcontainers-module.version>1.0-alpha-15</wiremock-testcontainers-module.version>
         <system-stubs.version>2.1.8</system-stubs.version>
+        <cic.sdk.version>0.1.0-SNAPSHOT</cic.sdk.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.version>1.18.44</lombok.version>
@@ -304,6 +305,21 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hyland.sdk</groupId>
+                <artifactId>cic-ingest</artifactId>
+                <version>${cic.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hyland.sdk</groupId>
+                <artifactId>cic-http-client-jackson2</artifactId>
+                <version>${cic.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hyland.sdk</groupId>
+                <artifactId>cic-http-client</artifactId>
+                <version>${cic.sdk.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
