@@ -24,7 +24,7 @@ env:
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-  HX_MAVEN_USERNAME: ${{ env.HX_GH_PACKAGES_READ_ONLY_USERNAME }}
+  HX_MAVEN_USERNAME: ${{ vars.HX_GH_PACKAGES_READ_ONLY_USERNAME }}
   HX_MAVEN_PASSWORD: ${{ secrets.HX_GH_PACKAGES_READ_ONLY_PASSWORD }}
   MAVEN_SETTINGS: "./scripts/ci/.ci.settings.xml"
   JAVA_VERSION: "21"
