@@ -87,7 +87,7 @@
         <system-stubs.version>2.1.8</system-stubs.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
-        <lombok.version>1.18.44</lombok.version>
+        <lombok.version>1.18.46</lombok.version>
 
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
