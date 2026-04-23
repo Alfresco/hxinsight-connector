@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,21 +31,32 @@ import java.util.concurrent.TimeUnit;
 import java.util.function.Supplier;
 
 import lombok.NoArgsConstructor;
-import lombok.SneakyThrows;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @NoArgsConstructor(access = PRIVATE)
-@Slf4j
 @SuppressWarnings("PMD.SignatureDeclareThrowsException")
 public class RetryUtils
 {
+    private static final Logger LOG = LoggerFactory.getLogger(RetryUtils.class);
     private static final int MAX_ATTEMPTS = 15;
     private static final int INITIAL_DELAY_MS = 100;
 
     public static void retryWithBackoff(ErrorCatchingRunnable runnable)
     {
         retryWithBackoff(() -> {
-            runnable.run();
+            try
+            {
+                runnable.runUnsafe();
+            }
+            catch (RuntimeException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new IllegalStateException("Runnable execution failed", e);
+            }
             return null;
         });
     }
@@ -58,18 +69,27 @@ public class RetryUtils
     public static void retryWithBackoff(ErrorCatchingRunnable runnable, int maxAttempts, int delayMs)
     {
         retryWithBackoff(() -> {
-            runnable.run();
+            try
+            {
+                runnable.runUnsafe();
+            }
+            catch (RuntimeException e)
+            {
+                throw e;
+            }
+            catch (Exception e)
+            {
+                throw new IllegalStateException("Runnable execution failed", e);
+            }
             return null;
         }, maxAttempts, delayMs);
     }
 
-    @SneakyThrows
     public static <T> T retryWithBackoff(Supplier<T> supplier)
     {
         return retryWithBackoff(supplier, MAX_ATTEMPTS, INITIAL_DELAY_MS);
     }
 
-    @SneakyThrows
     public static <T> T retryWithBackoff(Supplier<T> supplier, int maxAttempts, int delayMs)
     {
         int attempt = 0;
@@ -84,24 +104,31 @@ public class RetryUtils
                 attempt++;
                 if (attempt >= maxAttempts)
                 {
-                    log.atDebug().log("Attempt {} failed", attempt);
+                    LOG.atDebug().setCause(e).log("Attempt {} failed", attempt);
                     throw e;
                 }
-                log.atDebug().log("Attempt {} failed, retrying after {}ms", attempt, delayMs);
-                TimeUnit.MILLISECONDS.sleep(delayMs);
+                LOG.atDebug().setCause(e).log("Attempt {} failed, retrying after {}ms", attempt, delayMs);
+                sleep(delayMs);
             }
         }
     }
 
-    public interface ErrorCatchingRunnable extends Runnable
+    private static void sleep(int delayMs)
     {
-        void runUnsafe() throws Exception;
-
-        @Override
-        @SneakyThrows
-        default void run()
+        try
         {
-            runUnsafe();
+            TimeUnit.MILLISECONDS.sleep(delayMs);
         }
+        catch (InterruptedException interruptedException)
+        {
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException("Retry interrupted", interruptedException);
+        }
+    }
+
+    @FunctionalInterface
+    public interface ErrorCatchingRunnable<E extends Exception>
+    {
+        void runUnsafe() throws E;
     }
 }

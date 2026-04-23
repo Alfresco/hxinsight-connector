@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,7 +29,6 @@ import static org.alfresco.hxi_connector.common.test.docker.repository.Repositor
 
 import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.PullImageResultCallback;
-import com.github.dockerjava.api.model.PullResponseItem;
 import lombok.NonNull;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
@@ -52,13 +51,7 @@ public class AlfrescoRepositoryContainer extends GenericContainer<AlfrescoReposi
     public static void pullRepositoryImage(RepositoryType repositoryType)
     {
         DockerClient dockerClient = DockerClientFactory.instance().client();
-        PullImageResultCallback callback = new PullImageResultCallback() {
-            @Override
-            public void onNext(PullResponseItem item)
-            {
-                super.onNext(item);
-            }
-        };
+        PullImageResultCallback callback = new PullImageResultCallback();
         dockerClient.pullImageCmd(String.valueOf(DockerImageName.parse(repositoryType.getImageName()).withTag(REPOSITORY_TAG)))
                 .exec(callback);
     }
