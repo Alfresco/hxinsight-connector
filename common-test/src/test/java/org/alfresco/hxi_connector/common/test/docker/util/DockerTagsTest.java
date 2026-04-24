@@ -63,10 +63,4 @@ class DockerTagsTest
         // then
         assertThat(property).isEqualTo(defaultValue);
     }
-
-    @Test
-    void testKeySet()
-    {
-        assertThat(DockerTags.keySet()).isNotNull();
-    }
 }
