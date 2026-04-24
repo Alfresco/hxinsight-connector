@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,23 +26,22 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 
 import java.io.InputStream;
-import java.net.URL;
+import java.util.Optional;
 
+import org.hyland.sdk.cic.ingest.object.PreSignedUrl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.LiveIngestService;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
@@ -54,9 +53,7 @@ class HttpHxInsightStorageClientTest
     private static final String CONTENT_ID = "CONTENT ID";
 
     @Mock
-    StorageLocationRequester storageLocationRequesterMock;
-    @Mock
-    FileUploader fileUploaderMock;
+    LiveIngestService ingestServiceMock;
 
     @InjectMocks
     HttpHxInsightStorageClient httpStorageClient;
@@ -66,19 +63,31 @@ class HttpHxInsightStorageClientTest
     void testUploadDataFromInputStream()
     {
         // given
-        URL urlMock = mock(URL.class);
-        PreSignedUrlResponse preSignedUrlResponse = new PreSignedUrlResponse(urlMock, CONTENT_ID);
-        given(storageLocationRequesterMock.requestStorageLocation()).willReturn(preSignedUrlResponse);
         InputStream inputStreamMock = mock(InputStream.class);
         File testData = new File(inputStreamMock);
+        PreSignedUrl preSignedUrl = new PreSignedUrl(CONTENT_ID, "https://storage.example.com/upload");
+        given(ingestServiceMock.uploadBlobIfNeeded(eq(NODE_ID), any())).willReturn(Optional.of(preSignedUrl));
 
         // when
         IngestContentResponse ingestContentResponse = httpStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
 
         // then
         assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(CONTENT_ID, FILE_CONTENT_TYPE));
-        then(storageLocationRequesterMock).should().requestStorageLocation();
-        FileUploadRequest expectedFileUploadRequest = new FileUploadRequest(new File(inputStreamMock), FILE_CONTENT_TYPE, urlMock);
-        then(fileUploaderMock).should().upload(expectedFileUploadRequest, NODE_ID);
+    }
+
+    @Test
+    @SuppressWarnings("PMD.CloseResource")
+    void testUploadSkippedWhenBlobAlreadyExists()
+    {
+        // given
+        InputStream inputStreamMock = mock(InputStream.class);
+        File testData = new File(inputStreamMock);
+        given(ingestServiceMock.uploadBlobIfNeeded(eq(NODE_ID), any())).willReturn(Optional.empty());
+
+        // when
+        IngestContentResponse ingestContentResponse = httpStorageClient.upload(testData, FILE_CONTENT_TYPE, NODE_ID);
+
+        // then
+        assertThat(ingestContentResponse).isEqualTo(new IngestContentResponse(null, FILE_CONTENT_TYPE));
     }
 }

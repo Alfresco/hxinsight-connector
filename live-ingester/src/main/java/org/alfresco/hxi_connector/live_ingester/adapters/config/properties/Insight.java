@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,9 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import java.net.URL;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 
-public record PreSignedUrlResponse(URL url, String id)
-{}
+public record Insight(@NotNull Ingestion ingestion)
+{
+
+    public record Ingestion(@NotBlank String baseUrl)
+    {}
+}

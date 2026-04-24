@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -34,7 +34,8 @@ import org.springframework.extensions.webscripts.Status;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.FeedbackModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
+import org.alfresco.hxi_connector.hxi_extension.service.model.FeedbackType;
 import org.alfresco.rest.framework.resource.RelationshipResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.RelationshipResourceAction;
 import org.alfresco.rest.framework.resource.parameters.Parameters;
@@ -43,14 +44,15 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 @RelationshipResource(name = "feedback", title = "Feedback about answers given to questions", entityResource = QuestionsEntityResource.class)
 public class QuestionFeedbackRelation implements RelationshipResourceAction.Create<FeedbackModel>
 {
-    private final HxInsightClient hxInsightClient;
+    private final QuestionService questionService;
 
     @Override
     public List<FeedbackModel> create(String questionId, List<FeedbackModel> feedbackEntries, Parameters parameters)
     {
         ensureThat(feedbackEntries.size() == 1, () -> new WebScriptException(Status.STATUS_BAD_REQUEST, "Exactly one feedback entry must be provided."));
 
-        hxInsightClient.submitFeedback(questionId, feedbackEntries.get(0).toServiceModel());
+        FeedbackType serviceFeedbackType = feedbackEntries.get(0).toServiceModel().getFeedbackType();
+        questionService.submitFeedback(questionId, serviceFeedbackType);
 
         return feedbackEntries;
     }

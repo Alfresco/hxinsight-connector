@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,19 +25,18 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hyland.sdk.cic.http.client.mapper.object.CICBlob;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploadRequest;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.FileUploader;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.StorageLocationRequester;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
-import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.LiveIngestService;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -47,28 +46,37 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
 @Slf4j
 public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
 {
+    private final LiveIngestService ingestService;
 
-    private final StorageLocationRequester storageLocationRequester;
-    private final FileUploader fileUploader;
-
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.attempts}",
+            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.initialDelay}",
+                    multiplierExpression = "#{@integrationProperties.hylandExperience.storage.upload.retry.delayMultiplier}"))
     @Override
     public IngestContentResponse upload(File file, String contentType, String nodeId)
     {
-        PreSignedUrlResponse preSignedUrlResponse = storageLocationRequester.requestStorageLocation();
-        log.atDebug().log("Storage :: Received target location with transfer ID: {} for node: {}",
-                preSignedUrlResponse.id(), nodeId);
-        URL preSignedUrl = preSignedUrlResponse.url();
-        try (InputStream fileData = file.data())
-        {
-            log.atDebug().log("Storage :: Uploading content rendition of node: {} with size of {} bytes to: {}",
-                    nodeId, fileData.available(), preSignedUrl.getPath());
-            fileUploader.upload(new FileUploadRequest(new File(fileData), contentType, preSignedUrl), nodeId);
-        }
-        catch (IOException e)
-        {
-            throw new LiveIngesterRuntimeException(e);
-        }
+        CICBlob blob = new CICBlob() {
+            @Override
+            public InputStream getInputStream()
+            {
+                return file.data();
+            }
 
-        return new IngestContentResponse(preSignedUrlResponse.id(), contentType);
+            @Override
+            public Optional<String> getDigest()
+            {
+                return Optional.empty();
+            }
+        };
+
+        return ingestService.uploadBlobIfNeeded(nodeId, blob)
+                .map(preSignedUrl -> {
+                    log.atInfo().log("Storage :: Content of type: {} for node: {} successfully uploaded using pre-signed URL", contentType, nodeId);
+                    return new IngestContentResponse(preSignedUrl.id(), contentType);
+                })
+                .orElseGet(() -> {
+                    log.atInfo().log("Storage :: Content of type: {} for node: {} already exists, no upload needed", contentType, nodeId);
+                    return new IngestContentResponse(null, contentType);
+                });
     }
 }

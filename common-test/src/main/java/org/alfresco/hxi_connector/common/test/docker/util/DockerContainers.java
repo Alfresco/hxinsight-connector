@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -165,8 +165,8 @@ public class DockerContainers
     {
         String hXIMockAlias = hxInsightMockContainer.getNetworkAliases().stream().findFirst().get();
         return """
-                -Dhxi.discovery.agents-endpoint=http://%s:8080
-                -Dhxi.discovery.questions-endpoint=http://%s:8080
+                -Dhxi.discovery.agent-base-url=http://%s:8080/agent
+                -Dhxi.discovery.qna-base-url=http://%s:8080/qna
                 -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
                 -Dhxi.question.max-context-size-for-question=10
                 """

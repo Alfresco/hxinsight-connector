@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -33,7 +33,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.AgentModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 import org.alfresco.rest.framework.resource.EntityResource;
 import org.alfresco.rest.framework.resource.actions.interfaces.EntityResourceAction;
 import org.alfresco.rest.framework.resource.parameters.CollectionWithPagingInfo;
@@ -44,12 +44,14 @@ import org.alfresco.rest.framework.resource.parameters.Parameters;
 @EntityResource(name = "agents", title = "AI Agents")
 public class AgentsEntityResource implements EntityResourceAction.Read<AgentModel>
 {
-    private HxInsightClient hxInsightClient;
+    private QuestionService questionService;
 
     @Override
     public CollectionWithPagingInfo<AgentModel> readAll(Parameters params)
     {
-        List<AgentModel> agents = hxInsightClient.getAgents().stream().map(AgentModel::fromServiceModel).collect(toList());
+        List<AgentModel> agents = questionService.listAgents().stream()
+                .map(AgentModel::fromServiceModel)
+                .collect(toList());
         return CollectionWithPagingInfo.asPaged(params.getPaging(), agents);
     }
 }

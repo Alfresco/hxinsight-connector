@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,15 +26,10 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.DeleteNodeEventSerializer;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.jackson.UpdateNodeEventSerializer;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.DeleteNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 import org.alfresco.repo.event.databind.ObjectMapperFactory;
 
 @Configuration
@@ -46,16 +41,6 @@ public class MappingConfig
     {
         ObjectMapper objectMapper = ObjectMapperFactory.createInstance();
         objectMapper.registerModule(new JavaTimeModule());
-        objectMapper.registerModule(createModuleWithCustomSerializers());
-
         return objectMapper;
-    }
-
-    private SimpleModule createModuleWithCustomSerializers()
-    {
-        SimpleModule module = new SimpleModule();
-        module.addSerializer(UpdateNodeEvent.class, new UpdateNodeEventSerializer());
-        module.addSerializer(DeleteNodeEvent.class, new DeleteNodeEventSerializer());
-        return module;
     }
 }

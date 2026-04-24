@@ -1,7 +1,7 @@
 {
   "request": {
     "method": "GET",
-    "urlPath": "/agents"
+    "urlPath": "/agent/integrations/agents"
   },
   "response": {
     "status": 200,
@@ -10,7 +10,7 @@
         "id": "61254576-62a3-453f-8cd8-19e2f6554f29",
         "hxEnvironmentId": "ecf13dd4-c061-462b-8122-e3203cc40a0d",
         "name": "HR Policy Agent",
-        "version": "1",
+        "version": 1,
         "description": "This agent is responsible for HR policy predictions",
         "instructions": "Keep responses professional and concise",
         "modelName": "meta-llama3-8b",
@@ -31,7 +31,7 @@
         "id": "b999ee14-3974-41b2-bef8-70ab38c9e642",
         "hxEnvironmentId": "e2119fa1-9e11-421a-bef3-222667b1db34",
         "name": "Knowledge Base Agent",
-        "version": "1",
+        "version": 1,
         "description": "Very smart about product knowledge",
         "instructions": "Keep responses professional but friendly",
         "modelName": "meta-llama3-8b",
