@@ -159,7 +159,7 @@ public class UpdateNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))), DELAY_MS);
         WireMock.reset();
     }
@@ -180,7 +180,7 @@ public class UpdateNodeE2eTest
 
         // when
         Node updatedNode = repositoryClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
-        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
         WireMock.reset();
@@ -197,7 +197,7 @@ public class UpdateNodeE2eTest
                     .containsKey(PROPERTY_TO_UPDATE)
                     .extracting(map -> map.get(PROPERTY_TO_UPDATE)).isEqualTo(USER_VALUE);
         }, DELAY_MS);
-        List<LoggedRequest> requests = WireMock.findAll(anyRequestedFor(urlEqualTo("/ingestion-events")));
+        List<LoggedRequest> requests = WireMock.findAll(anyRequestedFor(urlEqualTo("/v2/ingestion-events")));
         boolean hasNodeRequest = requests.stream()
                 .anyMatch(req -> req.getBodyAsString().contains(updatedNode.id()));
         assertFalse(hasNodeRequest, "Unexpected ingestion event for updated node: " + updatedNode.id());
@@ -211,7 +211,7 @@ public class UpdateNodeE2eTest
         Node updatedNode = repositoryClient.updateNodeWithContent(createdNode.id(), UPDATE_NODE_PROPERTIES);
 
         // then
-        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                 .withRequestBody(containing(updatedNode.id()))
                 .withRequestBody(containing("sourceTimestamp"))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))));
@@ -226,7 +226,7 @@ public class UpdateNodeE2eTest
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
+            List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/v2/ingestion-events")));
 
             assertFalse(requests.isEmpty(), "Expected ingestion events but none were received");
 

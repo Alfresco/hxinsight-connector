@@ -166,8 +166,8 @@ public class ATSTransformE2eTest
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
 
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=100")));
+            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
         }, DELAY_MS);
@@ -194,8 +194,8 @@ public class ATSTransformE2eTest
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size());
 
-            WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events")));
+            WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=100")));
+            WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/v2/ingestion-events")));
         }, DELAY_MS);
     }
 

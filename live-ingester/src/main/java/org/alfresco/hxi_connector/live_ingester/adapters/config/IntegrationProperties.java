@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -40,6 +40,7 @@ import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Insight;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
@@ -70,6 +71,7 @@ public class IntegrationProperties
     @Validated
     @ConfigurationProperties("hyland-experience")
     public record HylandExperience(
+            @NotNull @NestedConfigurationProperty Insight insight,
             @NotNull @NestedConfigurationProperty Storage storage,
             @NotNull @NestedConfigurationProperty Ingester ingester)
     {}

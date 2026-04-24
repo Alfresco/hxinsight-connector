@@ -64,9 +64,9 @@ hyland-experience:
   storage:
     digest-algorithm: SHA-256
     location:
-      endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
+      endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls
   ingester:
-    endpoint: ${hyland-experience.insight.ingestion.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
+    endpoint: ${hyland-experience.insight.ingestion.base-url}/ingestion-events
 
 auth:
   providers:

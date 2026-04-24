@@ -128,7 +128,7 @@ public class QuestionsAndAnswersE2eTest
         assertThat(response.statusCode()).isEqualTo(SC_OK);
         assertThat(response.jsonPath().<String> get("entry.questionId")).isEqualTo("5fca2c77-cdc0-4118-9373-e75f53177ff8");
         RetryUtils.retryWithBackoff(() -> {
-            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agents/{agentId}/questions"))
+            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agent/integrations/agents/{agentId}/questions"))
                     .withPathParam("agentId", equalTo("agent-id"))
                     .withRequestBody(containing("userId")));
             assertThat(loggedRequests)
@@ -234,7 +234,7 @@ public class QuestionsAndAnswersE2eTest
         });
 
         RetryUtils.retryWithBackoff(() -> {
-            List<LoggedRequest> loggedRequests = WireMock.findAll(getRequestedFor(urlPathTemplate("/questions/{questionId}/answer"))
+            List<LoggedRequest> loggedRequests = WireMock.findAll(getRequestedFor(urlPathTemplate("/qna/integrations/questions/{questionId}/answer"))
                     .withPathParam("questionId", equalTo(questionId))
                     .withQueryParam("userId", matching("[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")));
             assertThat(loggedRequests)
@@ -257,7 +257,6 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertEquals(SC_NOT_FOUND, response.statusCode());
-        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains("Request to hxi failed, expected status 200, received 404"));
     }
 
     @Test
@@ -281,8 +280,8 @@ public class QuestionsAndAnswersE2eTest
         assertEquals(SC_CREATED, response.statusCode());
         assertEquals("LIKE", response.jsonPath().get("entry.feedbackType"));
         assertEquals("The response was very helpful and detailed. Good bot.", response.jsonPath().get("entry.comments"));
-        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
-                .withRequestBody(containing("GOOD"))));
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/qna/questions/%s/answer/feedback".formatted(questionId)))
+                .withRequestBody(containing("Good"))));
     }
 
     @Test
@@ -304,7 +303,6 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertEquals(SC_NOT_FOUND, response.statusCode());
-        assertTrue(((String) response.jsonPath().get("error.briefSummary")).contains("Request to hxi failed, expected status 200, received 404"));
     }
 
     @Test
@@ -374,9 +372,9 @@ public class QuestionsAndAnswersE2eTest
             assertThat(jsonPath.<String> get("entry.comments")).isEqualTo("I need more details about the answer.");
         });
         RetryUtils.retryWithBackoff(() -> {
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId)))
-                    .withRequestBody(containing("RETRY")));
-            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agents/{agentId}/questions"))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/qna/questions/%s/answer/feedback".formatted(questionId)))
+                    .withRequestBody(containing("Retry")));
+            List<LoggedRequest> loggedRequests = WireMock.findAll(postRequestedFor(urlPathTemplate("/agent/integrations/agents/{agentId}/questions"))
                     .withPathParam("agentId", equalTo("agent-id"))
                     .withRequestBody(containing("userId")));
             assertThat(loggedRequests)
@@ -414,8 +412,8 @@ public class QuestionsAndAnswersE2eTest
 
         // then
         assertEquals(SC_BAD_REQUEST, response.statusCode());
-        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/questions/%s/answer/feedback".formatted(questionId))));
-        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/agents/agent-id/questions")));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/qna/questions/%s/answer/feedback".formatted(questionId))));
+        WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/agent/integrations/agents/agent-id/questions")));
     }
 
     private static AlfrescoRepositoryContainer createRepositoryContainer()

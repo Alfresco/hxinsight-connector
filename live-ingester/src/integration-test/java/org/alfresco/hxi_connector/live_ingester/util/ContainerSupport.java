@@ -82,7 +82,7 @@ public class ContainerSupport
 {
     private static final int HTTP_OK_STATUS = 200;
     private static final int HTTP_ACCEPTED_STATUS = 202;
-    public static final String HX_INSIGHT_INGEST_ENDPOINT = "/ingestion-events";
+    public static final String HX_INSIGHT_INGEST_ENDPOINT = "/v2/ingestion-events";
     public static final String REPO_EVENT_TOPIC = "repo.event.topic";
     public static final String BULK_INGESTER_QUEUE = "bulk.ingester.queue";
     public static final String ATS_QUEUE = "ats.queue";
@@ -91,7 +91,7 @@ public class ContainerSupport
     public static final String ATS_RESPONSE_QUEUE = "ats.response.queue";
     public static final String SFS_PATH = "/alfresco/api/-default-/private/sfs/versions/1/file/";
     public static final String ACS_CONTENT_PATH = "/api/-default-/public/alfresco/versions/1/nodes/";
-    private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/presigned-urls";
+    private static final String HX_INSIGHT_PRE_SIGNED_URL_PATH = "/v1/presigned-urls";
     private static final String HX_INSIGHT_RESPONSE_BODY_PATTERN = "[{\"%s\": \"%s\", \"%s\": \"%s\"}]";
     private static final String OBJECT_KEY = "dummy-file.pdf";
     private static final String OBJECT_CONTENT_TYPE = "application/pdf";

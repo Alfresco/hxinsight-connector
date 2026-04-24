@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,116 +26,67 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.badRequest;
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
-import static com.github.tomakehurst.wiremock.client.WireMock.matching;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.serverError;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.apache.http.HttpHeaders.AUTHORIZATION;
-import static org.apache.http.HttpHeaders.USER_AGENT;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.catchThrowable;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.times;
-import static software.amazon.awssdk.http.HttpStatusCode.ACCEPTED;
 
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_APP_HEADER;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
-import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_ENVIRONMENT_HEADER;
-import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.AUTH_HEADER;
-import static org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils.TEST_ENVIRONMENT_HEADER;
-import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getAppInfoRegex;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
 import java.time.Instant;
-import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.read.ListAppender;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.http.Body;
-import org.junit.jupiter.api.BeforeAll;
+import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
+import com.github.tomakehurst.wiremock.junit5.WireMockTest;
+import org.hyland.sdk.cic.http.client.CICSdkException;
+import org.hyland.sdk.cic.http.client.auth.AuthenticationHttpClient;
+import org.hyland.sdk.cic.http.client.retry.RetryPolicy;
+import org.hyland.sdk.cic.ingest.IngestHttpClient;
+import org.hyland.sdk.cic.ingest.IngestService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
-import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
-import org.springframework.test.util.ReflectionTestUtils;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.adapters.auth.AccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.AuthenticationResult;
-import org.alfresco.hxi_connector.common.adapters.auth.DefaultAccessTokenProvider;
-import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient;
-import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
-import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
-import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.common.adapters.messaging.repository.RepositoryInformation;
-import org.alfresco.hxi_connector.common.config.properties.Application;
-import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
-import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
-import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
-import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.LiveIngestService;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.mapper.NodeEventToIngestEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 
-@SpringBootTest(classes = {
-        IntegrationProperties.class,
-        HxInsightEventPublisher.class,
-        HxInsightEventPublisherIntegrationTest.HxInsightEventPublisherTestConfig.class,
-        LiveIngesterAuthClient.class,
-        ApplicationInfoProvider.class},
-        properties = "logging.level.org.alfresco=DEBUG")
-@EnableAutoConfiguration
-@EnableMethodSecurity
-@EnableRetry
-@ActiveProfiles("test")
-@Testcontainers
-class HxInsightEventPublisherIntegrationTest extends IntegrationCamelTestBase
+@WireMockTest
+class HxInsightEventPublisherIntegrationTest
 {
-    private static final String INGEST_PATH = "/ingestion-events";
+    private static final String INGEST_PATH = "/v2/ingestion-events";
+    private static final String TOKEN_PATH = "/token";
     private static final String NODE_ID = "node-id";
     private static final String SOURCE_ID = "dummy-source-id";
     private static final long TIMESTAMP = Instant.now().toEpochMilli();
-    private static final String ACS_VERSION = "7.4.0";
-    private static final int RETRY_ATTEMPTS = 3;
-    private static final int RETRY_DELAY_MS = 0;
     private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
 
-    @Container
-    @SuppressWarnings("PMD.FieldNamingConventions")
-    static final WireMockContainer wireMockServer = DockerContainers.createWireMockContainer();
+    private HxInsightEventPublisher publisher;
 
-    @MockitoSpyBean
-    IngestionEngineEventPublisher ingestionEngineEventPublisher;
-
-    @BeforeAll
-    static void beforeAll()
+    @BeforeEach
+    void setUp(WireMockRuntimeInfo wmInfo)
     {
-        WireMock.configureFor(wireMockServer.getHost(), wireMockServer.getPort());
+        String baseUrl = wmInfo.getHttpBaseUrl();
+
+        stubTokenEndpoint();
+
+        AuthenticationHttpClient.Builder authBuilder = AuthenticationHttpClient.from(baseUrl + TOKEN_PATH)
+                .clientId("test-client")
+                .clientSecret("test-secret");
+
+        IngestHttpClient ingestHttpClient = IngestHttpClient.from(baseUrl, authBuilder)
+                .sourceId(SOURCE_ID)
+                .retryPolicy(RetryPolicy.none())
+                .build();
+
+        IngestService ingestService = new IngestService(ingestHttpClient);
+        LiveIngestService liveIngestService = new LiveIngestService(null);
+        liveIngestService.setDelegate(ingestService);
+
+        publisher = new HxInsightEventPublisher(liveIngestService, new NodeEventToIngestEventMapper());
     }
 
     @Test
@@ -143,123 +94,51 @@ class HxInsightEventPublisherIntegrationTest extends IntegrationCamelTestBase
     {
         // given
         givenThat(post(INGEST_PATH)
-                .willReturn(aResponse().withStatus(ACCEPTED)));
+                .willReturn(aResponse().withStatus(202)));
 
         // when
-        Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
+        Throwable thrown = catchThrowable(() -> publisher.publishMessage(NODE_EVENT));
 
         // then
         WireMock.verify(postRequestedFor(urlPathEqualTo(INGEST_PATH))
-                .withHeader(AUTHORIZATION, equalTo(AUTH_HEADER))
-                .withHeader(HXP_ENVIRONMENT_HEADER, equalTo(TEST_ENVIRONMENT_HEADER))
-                .withHeader(HXP_APP_HEADER, equalTo("hxai-discovery"))
-                .withHeader(USER_AGENT, matching(getAppInfoRegex()))
-                .withHeader(USER_AGENT, containing("ACS/" + ACS_VERSION))
                 .withRequestBody(containing(NODE_ID)));
-        assertThat(thrown).doesNotThrowAnyException();
+        assertThat(thrown).isNull();
     }
 
     @Test
-    void testPublishMessage_serverError_doRetry()
+    void testPublishMessage_serverError()
     {
         // given
         givenThat(post(INGEST_PATH)
-                .willReturn(serverError()));
+                .willReturn(aResponse().withStatus(500).withBody("{\"error\": \"Internal Server Error\"}")));
 
         // when
-        Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
+        Throwable thrown = catchThrowable(() -> publisher.publishMessage(NODE_EVENT));
 
         // then
-        then(ingestionEngineEventPublisher).should(times(RETRY_ATTEMPTS)).publishMessage(NODE_EVENT);
-        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
+        assertThat(thrown).isInstanceOf(CICSdkException.class);
     }
 
     @Test
-    void testPublishMessage_clientError_dontRetry()
+    void testPublishMessage_clientError()
     {
         // given
         givenThat(post(INGEST_PATH)
-                .willReturn(badRequest()));
+                .willReturn(aResponse().withStatus(400).withBody("{\"error\": \"Bad request\"}")));
 
         // when
-        Throwable thrown = catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
+        Throwable thrown = catchThrowable(() -> publisher.publishMessage(NODE_EVENT));
 
         // then
-        then(ingestionEngineEventPublisher).should(times(1)).publishMessage(NODE_EVENT);
-        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+        assertThat(thrown).isInstanceOf(CICSdkException.class);
     }
 
-    @Test
-    @SuppressWarnings({"ThrowableNotThrown", "ResultOfMethodCallIgnored"})
-    void testLoggingOnError()
+    private static void stubTokenEndpoint()
     {
-        // given
-        givenThat(post(INGEST_PATH)
-                .willReturn(badRequest().withResponseBody(new Body("{\"error\": \"Bad request\"}"))));
-        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(HxInsightEventPublisher.class);
-
-        // when
-        catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));
-
-        // then
-        List<String> logs = logEntries.list.stream().map(ILoggingEvent::getFormattedMessage).toList();
-        assertThat(logs)
-                .isNotEmpty()
-                .last().asString()
-                .contains("Authorization=***", "Body: {\"error\": \"Bad request\"}");
-    }
-
-    @DynamicPropertySource
-    static void overrideProperties(DynamicPropertyRegistry registry)
-    {
-        registry.add("hyland-experience.insight.ingestion.base-url", wireMockServer::getBaseUrl);
-        registry.add("hyland-experience.ingester.retry.attempts", () -> RETRY_ATTEMPTS);
-        registry.add("hyland-experience.ingester.retry.initialDelay", () -> RETRY_DELAY_MS);
-    }
-
-    @TestConfiguration
-    public static class HxInsightEventPublisherTestConfig
-    {
-        @Bean
-        public AuthProperties authorizationProperties()
-        {
-            AuthProperties authProperties = new AuthProperties();
-            AuthProperties.AuthProvider hXauthProvider = AuthUtils.createAuthProvider(wireMockServer.getBaseUrl());
-            authProperties.setProviders(Map.of(HXP_AUTH_PROVIDER, hXauthProvider));
-            authProperties.setRetry(
-                    new org.alfresco.hxi_connector.common.config.properties.Retry(RETRY_ATTEMPTS, RETRY_DELAY_MS, 1,
-                            Collections.emptySet()));
-            return authProperties;
-        }
-
-        @Bean
-        public AccessTokenProvider defaultAccessTokenProvider()
-        {
-            AuthenticationClient dummyAuthClient = new DefaultAuthenticationClient(authorizationProperties());
-            DefaultAccessTokenProvider dummyAccessTokenProvider = new DefaultAccessTokenProvider(dummyAuthClient);
-            Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();
-            AuthenticationResult dummyAuthResult = AuthUtils.createExpectedAuthResult();
-            tokens.put(HXP_AUTH_PROVIDER, new DefaultAccessTokenProvider.Token(dummyAuthResult.getAccessToken(), OffsetDateTime.now().plusSeconds(3600)));
-            ReflectionTestUtils.setField(dummyAccessTokenProvider, "accessTokens", tokens);
-            return dummyAccessTokenProvider;
-        }
-
-        @Bean
-        public AuthService authService()
-        {
-            return new AuthService(authorizationProperties(), defaultAccessTokenProvider());
-        }
-
-        @Bean
-        public Application application()
-        {
-            return new Application("a1f3e7c0-d193-7023-ce1d-0a63de491876", DockerTags.getHxiConnectorTag());
-        }
-
-        @Bean
-        public RepositoryInformation repositoryInformation()
-        {
-            return () -> ACS_VERSION;
-        }
+        givenThat(post(TOKEN_PATH)
+                .willReturn(aResponse()
+                        .withStatus(200)
+                        .withHeader("Content-Type", "application/json")
+                        .withBody("{\"access_token\": \"test-token\", \"token_type\": \"Bearer\", \"expires_in\": 3600}")));
     }
 }

@@ -321,6 +321,16 @@
                 <artifactId>cic-http-client</artifactId>
                 <version>${cic.sdk.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.hyland.sdk</groupId>
+                <artifactId>cic-qna</artifactId>
+                <version>${cic.sdk.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.hyland.sdk</groupId>
+                <artifactId>cic-agent</artifactId>
+                <version>${cic.sdk.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

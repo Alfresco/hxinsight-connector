@@ -94,7 +94,7 @@ public class AgentsE2eTest
         LoggedRequest loggedRequest = WireMock.findAll(WireMock.getRequestedFor(WireMock.anyUrl())).get(0);
 
         assertNotNull(loggedRequest);
-        assertEquals("/agents?sourceId=a1f3e7c0-d193-7023-ce1d-0a63de491876", loggedRequest.getUrl());
+        assertEquals("/agent/integrations/agents?sourceId=a1f3e7c0-d193-7023-ce1d-0a63de491876", loggedRequest.getUrl());
 
         assertEquals(SC_OK, response.statusCode());
         List<Map<String, Map<String, String>>> expectedEntries = getExpectedDocuments();

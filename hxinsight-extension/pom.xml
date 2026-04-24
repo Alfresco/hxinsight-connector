@@ -61,6 +61,23 @@
         </dependency>
 
         <dependency>
+            <groupId>org.hyland.sdk</groupId>
+            <artifactId>cic-qna</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hyland.sdk</groupId>
+            <artifactId>cic-agent</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hyland.sdk</groupId>
+            <artifactId>cic-http-client-jackson2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hyland.sdk</groupId>
+            <artifactId>cic-http-client</artifactId>
+        </dependency>
+
+        <dependency>
             <groupId>jakarta.validation</groupId>
             <artifactId>jakarta.validation-api</artifactId>
             <scope>provided</scope>
@@ -191,8 +208,15 @@
                                 <includes>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common</include>
                                     <include>org.alfresco:alfresco-hxinsight-connector-common-authentication</include>
+                                    <include>org.hyland.sdk:cic-http-client</include>
+                                    <include>org.hyland.sdk:cic-http-client-jackson2</include>
+                                    <include>org.hyland.sdk:cic-qna</include>
+                                    <include>org.hyland.sdk:cic-agent</include>
                                 </includes>
                             </artifactSet>
+                            <transformers>
+                                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                            </transformers>
                         </configuration>
                     </execution>
                 </executions>
