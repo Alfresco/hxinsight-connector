@@ -1,12 +1,6 @@
 server:
   port: ${SERVER_PORT:8081}
 
-management:
-  endpoints.web.exposure.include: health
-  endpoint.health.probes.enabled: true
-  health.liveness-state.enabled: true
-  health.readiness-state.enabled: true
-
 sync:
   enabled: ${SYNC_ENABLED:true}
   cron.expression: ${SYNC_CRON_EXPRESSION:"0 0 0 * * *"}
@@ -37,10 +31,6 @@ auth:
         - system-integrations-config
         - system-integrations-runtime
         - environment_authorization
-  retry:
-    attempts: ${AUTH_RETRY_ATTEMPTS:3}
-    initial-delay: ${AUTH_RETRY_INITIAL_DELAY:500}
-    delay-multiplier: ${AUTH_RETRY_DELAY_MULTIPLIER:2}
 
 alfresco:
   base-url: ${ALFRESCO_BASE_URL}

@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2026 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -73,7 +73,6 @@ public class DockerContainers
     private static final String LIVE_INGESTER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-live-ingester";
     private static final String HXI_CONNECTOR_TAG = DockerTags.getHxiConnectorTag();
     private static final String PREDICTION_APPLIER_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-prediction-applier";
-    private static final String NUCLEUS_SYNC_IMAGE = "quay.io/alfresco/alfresco-hxinsight-connector-nucleus-sync";
     private static final String DB_USER = "alfresco";
     private static final String DB_PASS = "alfresco";
     private static final String DB_NAME = "alfresco";
@@ -86,7 +85,6 @@ public class DockerContainers
     private static final String BULK_INGESTER_ALIAS = "bulk-ingester";
     private static final String LIVE_INGESTER_ALIAS = "live-ingester";
     private static final String PREDICTION_APPLIER_ALIAS = "prediction-applier";
-    private static final String NUCLEUS_SYNC_ALIAS = "nucleus-sync";
     private static final String LOCALSTACK_ALIAS = "aws-mock";
     public static final String MINIMAL_REPO_JAVA_OPTS = """
             -Ddb.driver=org.postgresql.Driver
@@ -331,21 +329,6 @@ public class DockerContainers
         Optional.ofNullable(network).ifPresent(n -> predictionApplier.withNetwork(n).withNetworkAliases(PREDICTION_APPLIER_ALIAS));
 
         return predictionApplier;
-    }
-
-    public static GenericContainer<?> createNucleusSyncContainerWithin(Network network)
-    {
-        GenericContainer<?> nucleusSync = new GenericContainer<>(DockerImageName.parse(NUCLEUS_SYNC_IMAGE).withTag(HXI_CONNECTOR_TAG))
-                .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
-                .withExposedPorts(8081)
-                .waitingFor(Wait.forHttp("/actuator/health/readiness")
-                        .forPort(8081)
-                        .withStartupTimeout(Duration.ofMinutes(2)))
-                .withLogConsumer(new Slf4jLogConsumer(LoggerFactory.getLogger("NucleusSyncContainer")));
-
-        Optional.ofNullable(network).ifPresent(n -> nucleusSync.withNetwork(n).withNetworkAliases(NUCLEUS_SYNC_ALIAS));
-
-        return nucleusSync;
     }
 
     public static WireMockContainer createWireMockContainer()

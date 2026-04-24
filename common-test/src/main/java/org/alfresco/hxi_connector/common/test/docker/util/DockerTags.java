@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2026 Alfresco Software Limited
+ * Copyright (C) 2023 - 2025 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -25,14 +25,16 @@
  */
 package org.alfresco.hxi_connector.common.test.docker.util;
 
-import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.NoSuchFileException;
 import java.util.NoSuchElementException;
 import java.util.Properties;
 import java.util.Set;
 
 import lombok.AccessLevel;
+import lombok.Cleanup;
 import lombok.NoArgsConstructor;
+import lombok.SneakyThrows;
 
 /**
  * Allows to access properties from 'docker-tags.properties' file. It's required to run: `mvn package` before accessing the properties file, to allow Maven filter out and replace variables.
@@ -151,25 +153,19 @@ public class DockerTags
         loadProperties(true);
     }
 
+    @SneakyThrows
     private static void loadProperties(boolean failOnMissingFile)
     {
-        try (InputStream propertiesStream =
-                     DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE))
+        @Cleanup
+        InputStream propertiesStream = DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE);
+        if (propertiesStream != null)
         {
-            if (propertiesStream == null)
-            {
-                if (failOnMissingFile)
-                {
-                    throw new IllegalStateException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
-                }
-                return;
-            }
             properties = new Properties();
             properties.load(propertiesStream);
         }
-        catch (IOException e)
+        else if (failOnMissingFile)
         {
-            throw new IllegalStateException("Failed to load docker tags properties", e);
+            throw new NoSuchFileException("File: target/test-classes/'" + PROPERTIES_FILE + "' not found");
         }
     }
 }
