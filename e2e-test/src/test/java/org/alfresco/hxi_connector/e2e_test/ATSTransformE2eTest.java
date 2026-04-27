@@ -91,8 +91,8 @@ public class ATSTransformE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int DELAY_MS = 1000;
-    private static final int CONTENT_UPLOAD_RETRY_DELAY_MS = 2000;
-    private static final int CONTENT_UPLOAD_MAX_ATTEMPTS = 60;
+    private static final int RETRY_DELAY_MS = 2000;
+    private static final int MAX_ATTEMPTS = 60;
     private static final String PARENT_ID = "-my-";
 
     private static final Network network = Network.newNetwork();
@@ -133,6 +133,12 @@ public class ATSTransformE2eTest
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+
+        // Wait for ACS to have polled transform-core-aio for its transform config at least once.
+        RetryUtils.retryWithBackoff(() -> {
+            assertThat(transformCore.getLogs()).contains("GET Transform Config version:");
+            assertThat(transformRouter.getLogs()).contains("GET Transform Config version:");
+        }, MAX_ATTEMPTS, RETRY_DELAY_MS);
     }
 
     @AfterEach
@@ -172,7 +178,7 @@ public class ATSTransformE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, CONTENT_UPLOAD_MAX_ATTEMPTS, CONTENT_UPLOAD_RETRY_DELAY_MS);
+        }, MAX_ATTEMPTS, RETRY_DELAY_MS);
     }
 
     /**
