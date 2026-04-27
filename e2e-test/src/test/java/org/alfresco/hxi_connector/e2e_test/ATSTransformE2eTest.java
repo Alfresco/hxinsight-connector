@@ -91,6 +91,8 @@ public class ATSTransformE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int DELAY_MS = 1000;
+    private static final int CONTENT_UPLOAD_RETRY_DELAY_MS = 2000;
+    private static final int CONTENT_UPLOAD_MAX_ATTEMPTS = 60;
     private static final String PARENT_ID = "-my-";
 
     private static final Network network = Network.newNetwork();
@@ -170,7 +172,7 @@ public class ATSTransformE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, DELAY_MS);
+        }, CONTENT_UPLOAD_MAX_ATTEMPTS, CONTENT_UPLOAD_RETRY_DELAY_MS);
     }
 
     /**
