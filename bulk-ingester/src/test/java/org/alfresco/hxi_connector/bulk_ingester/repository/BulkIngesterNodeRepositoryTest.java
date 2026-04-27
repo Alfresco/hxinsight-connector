@@ -140,7 +140,7 @@ class BulkIngesterNodeRepositoryTest
 
         assertEquals(nodes, foundNodes);
         List<NodeParams> expected = IntStream.range(0, 3)
-                .mapToObj(page -> NodeParams.searchByIdRange(0, 4).withPaging(page, 2).withPrimaryHierarchy(true))
+                .mapToObj(page -> NodeParams.searchByIdRange(0, 4).withPaging(page, 2).withPrimaryHierarchy(true).withAppliedAcls(true))
                 .collect(toList());
         assertEquals(expected, metadataRepository.getRequestList());
     }
@@ -157,7 +157,7 @@ class BulkIngesterNodeRepositoryTest
                 .toList();
 
         assertEquals(nodes, foundNodes);
-        NodeParams nodeParams = NodeParams.searchByIdRange(0, 5).withPaging(0, 2).withPrimaryHierarchy(true);
+        NodeParams nodeParams = NodeParams.searchByIdRange(0, 5).withPaging(0, 2).withPrimaryHierarchy(true).withAppliedAcls(true);
         assertEquals(List.of(nodeParams), metadataRepository.getRequestList());
     }
 
@@ -170,7 +170,7 @@ class BulkIngesterNodeRepositoryTest
                 .forEach(node -> log.debug("Found node {}", node.getId()));
 
         List<NodeParams> expected = IntStream.range(0, 3)
-                .mapToObj(page -> NodeParams.searchByIdRange(0, 4).withPaging(page, 2).withPrimaryHierarchy(true))
+                .mapToObj(page -> NodeParams.searchByIdRange(0, 4).withPaging(page, 2).withPrimaryHierarchy(true).withAppliedAcls(true))
                 .collect(toList());
         assertEquals(expected, metadataRepository.getRequestList());
     }

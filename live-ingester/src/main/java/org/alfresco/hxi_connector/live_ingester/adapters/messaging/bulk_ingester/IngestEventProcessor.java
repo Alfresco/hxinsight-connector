@@ -116,10 +116,20 @@ public class IngestEventProcessor
         // Handle permissions
         List<String> allowAccess = (List<String>) properties.get("ALLOW_ACCESS");
         List<String> denyAccess = (List<String>) properties.get("DENY_ACCESS");
-        if (allowAccess != null || denyAccess != null)
+        List<String> appliedAllowAccess = (List<String>) properties.get("APPLIED_ALLOW_ACCESS");
+        List<String> appliedDenyAccess = (List<String>) properties.get("APPLIED_DENY_ACCESS");
+//        if (allowAccess != null || denyAccess != null)
+//        {
+//            List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(allowAccess != null ? allowAccess : Collections.emptyList(), authorityTypeResolver);
+//            List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(denyAccess != null ? denyAccess : Collections.emptyList(), authorityTypeResolver);
+//
+//            PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes);
+//            metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));
+//        }
+        if (appliedAllowAccess != null || appliedDenyAccess != null)
         {
-            List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(allowAccess != null ? allowAccess : Collections.emptyList(), authorityTypeResolver);
-            List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(denyAccess != null ? denyAccess : Collections.emptyList(), authorityTypeResolver);
+            List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(appliedAllowAccess != null ? appliedAllowAccess : Collections.emptyList(), authorityTypeResolver);
+            List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(appliedDenyAccess != null ? appliedDenyAccess : Collections.emptyList(), authorityTypeResolver);
 
             PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes);
             metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));

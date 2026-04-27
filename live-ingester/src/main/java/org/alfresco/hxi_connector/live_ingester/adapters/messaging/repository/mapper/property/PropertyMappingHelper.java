@@ -146,12 +146,12 @@ public class PropertyMappingHelper
             return Optional.empty();
         }
 
-        Set<String> allowAccess = eventData.getResourceReaderAuthorities() == null
+        Set<String> allowAccess = eventData.getResourceAppliedReaderAuthorities() == null
                 ? Collections.emptySet()
-                : eventData.getResourceReaderAuthorities();
-        Set<String> denyAccess = eventData.getResourceDeniedAuthorities() == null
+                : eventData.getResourceAppliedReaderAuthorities();
+        Set<String> denyAccess = eventData.getResourceAppliedDeniedAuthorities() == null
                 ? Collections.emptySet()
-                : eventData.getResourceDeniedAuthorities();
+                : eventData.getResourceAppliedDeniedAuthorities();
 
         List<AuthorityInfo> allowAccessWithTypes = convertToAuthorityInfoList(allowAccess, authorityTypeResolver);
         List<AuthorityInfo> denyAccessWithTypes = convertToAuthorityInfoList(denyAccess, authorityTypeResolver);

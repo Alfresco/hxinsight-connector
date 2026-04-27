@@ -51,7 +51,7 @@ public class PrincipalsMetadata
      */
     @SuppressWarnings("PMD.FinalFieldCouldBeStatic")
     @JsonProperty("principalsType")
-    private final String principalsType = "effective";
+    private final String principalsType = "applied";
 
     public PrincipalsMetadata(PermissionsProperty permissionsProperty)
     {

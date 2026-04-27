@@ -28,17 +28,7 @@ package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
 import static java.util.Optional.ofNullable;
 import static java.util.function.Predicate.not;
-
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ANCESTORS_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.ASPECT_NAMES_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_AT_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.MODIFIED_BY_PROPERTY;
-import static org.alfresco.hxi_connector.common.constant.NodeProperties.TYPE_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -121,6 +111,19 @@ public class AlfrescoNodeMapper
         {
             allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
         }
+        @SuppressWarnings("unchecked")
+        Set<String> appliedAllowAccess = (Set<String>) getResourceAppliedReaderAuthorities(alfrescoNode);
+        if (!allowAccess.isEmpty())
+        {
+            allProperties.put(APPLIED_ALLOW_ACCESS, (Serializable) appliedAllowAccess);
+        }
+
+        @SuppressWarnings("unchecked")
+        Set<String> appliedDenyAccess = (Set<String>) getResourceAppliedDeniedAuthorities(alfrescoNode);
+        if (!denyAccess.isEmpty())
+        {
+            allProperties.put(APPLIED_DENY_ACCESS, (Serializable) appliedDenyAccess);
+        }
         Map<String, Serializable> ancestorsMap = Map.of(
                 "primaryParentId", parentId != null ? parentId : "",
                 "primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));
@@ -185,9 +188,31 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toSet());
     }
 
+    private Serializable getResourceAppliedReaderAuthorities(AlfrescoNode node)
+    {
+        return (Serializable) ofNullable(node.getAppliedAccessControlList())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(AccessControlEntry::getAllowed)
+                .map(AccessControlEntry::getAccessControlEntryKey)
+                .map(AccessControlEntryKey::getAuthority)
+                .collect(Collectors.toSet());
+    }
+
     private Serializable getResourceDeniedAuthorities(AlfrescoNode node)
     {
         return (Serializable) ofNullable(node.getAccessControlList())
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(not(AccessControlEntry::getAllowed))
+                .map(AccessControlEntry::getAccessControlEntryKey)
+                .map(AccessControlEntryKey::getAuthority)
+                .collect(Collectors.toSet());
+    }
+
+    private Serializable getResourceAppliedDeniedAuthorities(AlfrescoNode node)
+    {
+        return (Serializable) ofNullable(node.getAppliedAccessControlList())
                 .stream()
                 .flatMap(Collection::stream)
                 .filter(not(AccessControlEntry::getAllowed))

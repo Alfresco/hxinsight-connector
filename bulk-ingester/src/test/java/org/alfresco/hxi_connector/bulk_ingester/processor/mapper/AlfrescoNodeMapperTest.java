@@ -114,7 +114,7 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setCreatedAt(CREATED_AT);
         alfrescoNode.setModifiedAt(MODIFIED_AT);
         alfrescoNode.setNodeProperties(Set.of());
-        alfrescoNode.setAccessControlList(
+        alfrescoNode.setAppliedAccessControlList(
                 Set.of(
                         createAccessControlEntry(true, GROUP_EVERYONE),
                         createAccessControlEntry(false, BOB)));
@@ -280,7 +280,7 @@ class AlfrescoNodeMapperTest
         alfrescoNode.setCreatedAt(CREATED_AT);
         alfrescoNode.setModifiedAt(MODIFIED_AT);
         alfrescoNode.setNodeProperties(Set.of());
-        alfrescoNode.setAccessControlList(Set.of());
+        alfrescoNode.setAppliedAccessControlList(Set.of());
 
         return alfrescoNode;
     }
