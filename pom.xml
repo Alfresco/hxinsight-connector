@@ -76,7 +76,7 @@
         <alfresco-event-model.version>1.0.12</alfresco-event-model.version>
         <spring-boot.version>4.0.6</spring-boot.version>
         <spring-retry.version>2.0.12</spring-retry.version>
-        <spring-camel.version>4.19.0</spring-camel.version>
+        <spring-camel.version>4.20.0</spring-camel.version>
         <commons-lang.version>3.20.0</commons-lang.version>
         <commons-collections.version>4.5.0</commons-collections.version>
         <commons-io.version>2.22.0</commons-io.version>
