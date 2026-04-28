@@ -44,12 +44,14 @@ public class PermissionsMetadataUpdated extends PropertyDelta<List<AuthorityInfo
 
     private final List<AuthorityInfo> allowAccess;
     private final List<AuthorityInfo> denyAccess;
+    private final Boolean inheritanceEnabled;
 
-    public PermissionsMetadataUpdated(String propertyName, List<AuthorityInfo> allowAccess, List<AuthorityInfo> denyAccess)
+    public PermissionsMetadataUpdated(String propertyName, List<AuthorityInfo> allowAccess, List<AuthorityInfo> denyAccess, Boolean inheritanceEnabled)
     {
         super(propertyName);
         this.allowAccess = allowAccess;
         this.denyAccess = denyAccess;
+        this.inheritanceEnabled = inheritanceEnabled;
     }
 
     public List<AuthorityInfo> getAllowAccess()
@@ -65,7 +67,7 @@ public class PermissionsMetadataUpdated extends PropertyDelta<List<AuthorityInfo
     @Override
     public void applyOn(UpdateNodeEvent event)
     {
-        event.addPermissionsInstruction(new PermissionsProperty(getPropertyName(), allowAccess, denyAccess));
+        event.addPermissionsInstruction(new PermissionsProperty(getPropertyName(), allowAccess, denyAccess, inheritanceEnabled));
     }
 
     @Override
@@ -84,6 +86,7 @@ public class PermissionsMetadataUpdated extends PropertyDelta<List<AuthorityInfo
         private final String propertyName;
         private List<AuthorityInfo> allowAccess;
         private List<AuthorityInfo> denyAccess;
+        private Boolean inheritanceEnabled;
 
         public PermissionsMetadataUpdatedBuilder(String propertyName)
         {
@@ -102,9 +105,15 @@ public class PermissionsMetadataUpdated extends PropertyDelta<List<AuthorityInfo
             return this;
         }
 
+        public PermissionsMetadataUpdatedBuilder inheritanceEnabled(Boolean inheritanceEnabled)
+        {
+            this.inheritanceEnabled = inheritanceEnabled;
+            return this;
+        }
+
         public PermissionsMetadataUpdated build()
         {
-            return new PermissionsMetadataUpdated(propertyName, allowAccess, denyAccess);
+            return new PermissionsMetadataUpdated(propertyName, allowAccess, denyAccess, inheritanceEnabled);
         }
     }
 }

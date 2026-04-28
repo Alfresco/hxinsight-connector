@@ -470,7 +470,9 @@ class UpdateNodeEventSerializerTest
                 .addPermissionsInstruction(new org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.PermissionsProperty(
                         "PERMISSIONS",
                         List.of(new AuthorityInfo("user1", AuthorityTypeResolver.AuthorityType.USER)),
-                        List.of(new AuthorityInfo("group1", AuthorityTypeResolver.AuthorityType.GROUP))))
+                        List.of(new AuthorityInfo("group1", AuthorityTypeResolver.AuthorityType.GROUP)),
+                        false))
+
                 .addMetadataInstruction(new NodeProperty<>(MODIFIED_BY_PROPERTY, "user2"));
 
         String expectedJson = """

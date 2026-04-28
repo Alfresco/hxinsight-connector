@@ -41,4 +41,5 @@ public class NodeProperties
     public static final String APPLIED_DENY_ACCESS = "APPLIED_DENY_ACCESS";
     public static final String ANCESTORS_PROPERTY = "ancestors";
     public static final String PERMISSIONS_PROPERTY = "PERMISSIONS";
+    public static final String INHERITANCE_ENABLED = "INHERITANCE_ENABLED";
 }

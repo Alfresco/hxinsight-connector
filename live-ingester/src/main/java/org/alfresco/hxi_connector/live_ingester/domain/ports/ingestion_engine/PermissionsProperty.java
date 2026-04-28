@@ -32,7 +32,7 @@ import java.util.List;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 
 public record PermissionsProperty(String propertyName, List<AuthorityInfo> allowAccess,
-        List<AuthorityInfo> denyAccess)
+        List<AuthorityInfo> denyAccess, Boolean inheritanceEnabled)
 {
     public PermissionsProperty
     {

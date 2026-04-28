@@ -1,4 +1,4 @@
-FROM @dist.alfresco.docker.image@:@dist.alfresco.version@
+FROM quay.io/alfresco/alfresco-content-repository:appliedacltestimage
 
 ARG TOMCAT_DIR=/usr/local/tomcat
 ARG USERNAME=@dist.alfresco.docker.user@

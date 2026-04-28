@@ -128,6 +128,11 @@ public class AlfrescoNodeMapper
                 "primaryParentId", parentId != null ? parentId : "",
                 "primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));
         allProperties.put(ANCESTORS_PROPERTY, (Serializable) ancestorsMap);
+
+        // set inheritance info
+        Boolean inheritanceEnabled = alfrescoNode.inheritanceEnabled();
+        allProperties.put(INHERITANCE_ENABLED, inheritanceEnabled);
+
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
         Map<String, Serializable> properties = getProperties(allProperties);
 

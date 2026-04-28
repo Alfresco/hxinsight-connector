@@ -75,6 +75,15 @@ public abstract class PropertyDelta<T>
                 .build();
     }
 
+    public static PermissionsMetadataUpdated permissionsMetadataUpdated(String key, List<AuthorityInfo> allowAccess, List<AuthorityInfo> denyAccess, Boolean inheritanceEnabled)
+    {
+        return PermissionsMetadataUpdated.builder(key)
+                .read(allowAccess)
+                .deny(denyAccess)
+                .inheritanceEnabled(inheritanceEnabled)
+                .build();
+    }
+
     protected PropertyDelta(String propertyName)
     {
         ensureNonNull(propertyName, "Property key cannot be null");

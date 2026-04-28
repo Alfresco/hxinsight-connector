@@ -26,7 +26,12 @@
 
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.APPLIED_ALLOW_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.APPLIED_DENY_ACCESS;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.DENY_ACCESS;
+import static org.alfresco.hxi_connector.common.constant.NodeProperties.INHERITANCE_ENABLED;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.NAME_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.PERMISSIONS_PROPERTY;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
@@ -114,25 +119,39 @@ public class IngestEventProcessor
             metadataDelta = Stream.concat(metadataDelta, Stream.of(contentDelta));
         }
         // Handle permissions
-        List<String> allowAccess = (List<String>) properties.get("ALLOW_ACCESS");
-        List<String> denyAccess = (List<String>) properties.get("DENY_ACCESS");
-        List<String> appliedAllowAccess = (List<String>) properties.get("APPLIED_ALLOW_ACCESS");
-        List<String> appliedDenyAccess = (List<String>) properties.get("APPLIED_DENY_ACCESS");
-//        if (allowAccess != null || denyAccess != null)
-//        {
-//            List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(allowAccess != null ? allowAccess : Collections.emptyList(), authorityTypeResolver);
-//            List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(denyAccess != null ? denyAccess : Collections.emptyList(), authorityTypeResolver);
-//
-//            PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes);
-//            metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));
-//        }
-        if (appliedAllowAccess != null || appliedDenyAccess != null)
-        {
-            List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(appliedAllowAccess != null ? appliedAllowAccess : Collections.emptyList(), authorityTypeResolver);
-            List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(appliedDenyAccess != null ? appliedDenyAccess : Collections.emptyList(), authorityTypeResolver);
+        List<String> allowAccess = (List<String>) properties.get(ALLOW_ACCESS);
+        List<String> denyAccess = (List<String>) properties.get(DENY_ACCESS);
+        List<String> appliedAllowAccess = (List<String>) properties.get(APPLIED_ALLOW_ACCESS);
+        List<String> appliedDenyAccess = (List<String>) properties.get(APPLIED_DENY_ACCESS);
+        Boolean inheritanceEnabled = (Boolean) properties.get(INHERITANCE_ENABLED);
 
-            PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes);
-            metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));
+        if (Boolean.TRUE.equals(inheritanceEnabled))
+        {
+            // Inheritance enabled so send directly-applied ACLs — KD will walk the hierarchy to compute effective
+            if (appliedAllowAccess != null || appliedDenyAccess != null)
+            {
+                List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(
+                        appliedAllowAccess != null ? appliedAllowAccess : Collections.emptyList(), authorityTypeResolver);
+                List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(
+                        appliedDenyAccess != null ? appliedDenyAccess : Collections.emptyList(), authorityTypeResolver);
+
+                PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes, true);
+                metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));
+            }
+        }
+        else
+        {
+            // Inheritance disabled, hence send effective ACLs
+            if (allowAccess != null || denyAccess != null)
+            {
+                List<AuthorityInfo> allowAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(
+                        allowAccess != null ? allowAccess : Collections.emptyList(), authorityTypeResolver);
+                List<AuthorityInfo> denyAccessWithTypes = PropertyMappingHelper.convertToAuthorityInfoList(
+                        denyAccess != null ? denyAccess : Collections.emptyList(), authorityTypeResolver);
+
+                PropertyDelta<?> permissionsDelta = permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes, false);
+                metadataDelta = Stream.concat(metadataDelta, Stream.of(permissionsDelta));
+            }
         }
         return metadataDelta.collect(Collectors.toSet());
     }

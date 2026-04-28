@@ -146,17 +146,36 @@ public class PropertyMappingHelper
             return Optional.empty();
         }
 
-        Set<String> allowAccess = eventData.getResourceAppliedReaderAuthorities() == null
-                ? Collections.emptySet()
-                : eventData.getResourceAppliedReaderAuthorities();
-        Set<String> denyAccess = eventData.getResourceAppliedDeniedAuthorities() == null
-                ? Collections.emptySet()
-                : eventData.getResourceAppliedDeniedAuthorities();
+        Boolean inheritanceEnabled = eventData.getInheritanceEnabled();
+
+        Set<String> allowAccess;
+        Set<String> denyAccess;
+
+        if (Boolean.TRUE.equals(inheritanceEnabled))
+        {
+            // Inheritance enabled so send directly-applied ACLs — KD will walk the hierarchy to compute effective
+            allowAccess = eventData.getResourceAppliedReaderAuthorities() == null
+                    ? Collections.emptySet()
+                    : eventData.getResourceAppliedReaderAuthorities();
+            denyAccess = eventData.getResourceAppliedDeniedAuthorities() == null
+                    ? Collections.emptySet()
+                    : eventData.getResourceAppliedDeniedAuthorities();
+        }
+        else
+        {
+            // Inheritance disabled, hence send effective ACLs
+            allowAccess = eventData.getResourceReaderAuthorities() == null
+                    ? Collections.emptySet()
+                    : eventData.getResourceReaderAuthorities();
+            denyAccess = eventData.getResourceDeniedAuthorities() == null
+                    ? Collections.emptySet()
+                    : eventData.getResourceDeniedAuthorities();
+        }
 
         List<AuthorityInfo> allowAccessWithTypes = convertToAuthorityInfoList(allowAccess, authorityTypeResolver);
         List<AuthorityInfo> denyAccessWithTypes = convertToAuthorityInfoList(denyAccess, authorityTypeResolver);
 
-        return Optional.of(permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes));
+        return Optional.of(permissionsMetadataUpdated(PERMISSIONS_PROPERTY, allowAccessWithTypes, denyAccessWithTypes, inheritanceEnabled));
     }
 
     public static List<AuthorityInfo> convertToAuthorityInfoList(Collection<String> authorities, AuthorityTypeResolver authorityTypeResolver)

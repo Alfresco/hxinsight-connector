@@ -32,30 +32,32 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.PermissionsProperty;
 
 @Getter
 @JsonInclude(NON_NULL)
-@RequiredArgsConstructor
 public class PrincipalsMetadata
 {
+    private static final String PRINCIPALS_TYPE_APPLIED = "applied";
+    private static final String PRINCIPALS_TYPE_EFFECTIVE = "effective";
+
     @JsonProperty("read")
     private final List<AuthorityInfo> allowAccess;
     @JsonProperty("deny")
     private final List<AuthorityInfo> denyAccess;
-    /**
-     * This field is intentionally non-static to ensure it's serialized by Jackson for each instance. Static fields are not serialized by Jackson's default behavior, and we need this field to appear in every JSON output with the constant value "effective".
-     */
-    @SuppressWarnings("PMD.FinalFieldCouldBeStatic")
     @JsonProperty("principalsType")
-    private final String principalsType = "applied";
+    private final String principalsType;
 
     public PrincipalsMetadata(PermissionsProperty permissionsProperty)
     {
         allowAccess = permissionsProperty.allowAccess();
         denyAccess = permissionsProperty.denyAccess();
+        // inheritance enabled → applied ACLs sent, KD walks hierarchy → "applied"
+        // inheritance disabled → effective ACLs sent, KD uses as-is → "effective"
+        principalsType = Boolean.TRUE.equals(permissionsProperty.inheritanceEnabled())
+                ? PRINCIPALS_TYPE_APPLIED
+                : PRINCIPALS_TYPE_EFFECTIVE;
     }
 }
