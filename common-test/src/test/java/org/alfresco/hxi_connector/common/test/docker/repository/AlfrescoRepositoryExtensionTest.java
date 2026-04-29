@@ -180,4 +180,23 @@ class AlfrescoRepositoryExtensionTest
             assertTrue(exception.getMessage().contains(extensionName + "-" + HXI_CONNECTOR_TAG + ".jar"));
         }
     }
+
+    @Test
+    void shouldThrowExceptionWhenDirectoryReadFails()
+    {
+        try (MockedStatic<DockerTags> dockerTagsMock = mockStatic(DockerTags.class);
+                MockedStatic<Files> filesMock = mockStatic(Files.class))
+        {
+            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(HXI_CONNECTOR_TAG);
+            IOException ioException = new IOException("Directory read failed");
+            filesMock.when(() -> Files.list(any(Path.class))).thenThrow(ioException);
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> new AlfrescoRepositoryExtension(extensionName));
+
+            assertTrue(exception.getMessage().contains("Failed to read directory"));
+            assertEquals(ioException, exception.getCause());
+        }
+    }
 }
