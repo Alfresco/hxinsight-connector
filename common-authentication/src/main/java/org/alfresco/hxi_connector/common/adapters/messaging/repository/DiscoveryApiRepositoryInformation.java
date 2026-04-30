@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -45,6 +45,7 @@ import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.api.DiscoveryApiResponse;
 import org.alfresco.hxi_connector.common.util.EnsureUtils;
 import org.alfresco.hxi_connector.common.util.ErrorUtils;
+import org.alfresco.hxi_connector.common.util.LogSanitizer;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -86,7 +87,7 @@ public class DiscoveryApiRepositoryInformation implements RepositoryInformation
         throwExceptionOnUnexpectedStatusCode(response.statusCode(), SC_OK);
 
         DiscoveryApiResponse discoveryApiResponse = objectMapper.readValue(response.body(), DiscoveryApiResponse.class);
-        log.trace("Discovery API response: {}", discoveryApiResponse);
+        log.trace("Discovery API response: {}", LogSanitizer.sanitize(discoveryApiResponse));
         return discoveryApiResponse;
     }
 }
