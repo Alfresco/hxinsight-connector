@@ -223,6 +223,12 @@ class NucleusSyncE2eTest
         HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
                 int statusCode = response.statusCode();
+
+                if (statusCode == 503)
+                {
+                    throw new AssertionError("Sync trigger not ready yet (503): " + getSafeResponseBody(response));
+                }
+
           if (statusCode != 200)
           {
             throw new AssertionError("Sync trigger endpoint returned HTTP " + statusCode
@@ -230,6 +236,10 @@ class NucleusSyncE2eTest
                 + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
                 + getSafeContainerLogs());
           }
+            }
+            catch (AssertionError ae)
+            {
+                throw ae;
             }
             catch (Exception exception)
             {
