@@ -30,6 +30,7 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
@@ -54,10 +55,18 @@ public class AwsS3Client
     @SneakyThrows
     public List<S3Object> listS3Content()
     {
-        HttpResponse<InputStream> response = executeGet("%s/%s".formatted(baseUrl, bucketName));
-        S3Bucket s3Bucket = xmlMapper.readValue(response.body(), S3Bucket.class);
-
-        return s3Bucket.content();
+        try
+        {
+            HttpResponse<InputStream> response = executeGet("%s/%s".formatted(baseUrl, bucketName));
+            S3Bucket s3Bucket = xmlMapper.readValue(response.body(), S3Bucket.class);
+            return s3Bucket.content();
+        }
+        catch (IllegalStateException e)
+        {
+            // When bucket is empty or not yet initialized, S3 may return an error response
+            // Return empty list to allow tests to proceed and retry
+            return Collections.emptyList();
+        }
     }
 
     @SneakyThrows
