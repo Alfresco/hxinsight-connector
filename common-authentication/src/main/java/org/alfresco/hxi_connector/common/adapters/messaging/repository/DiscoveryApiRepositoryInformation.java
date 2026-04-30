@@ -87,10 +87,10 @@ public class DiscoveryApiRepositoryInformation implements RepositoryInformation
         throwExceptionOnUnexpectedStatusCode(response.statusCode(), SC_OK);
 
         DiscoveryApiResponse discoveryApiResponse = objectMapper.readValue(response.body(), DiscoveryApiResponse.class);
-        if (log.isTraceEnabled())
-        {
-            log.trace("Discovery API response: {}", LogSanitizer.sanitize(discoveryApiResponse));
-        }
+        log.atTrace()
+                .setMessage("Discovery API response: {}")
+                .addArgument(() -> LogSanitizer.sanitize(discoveryApiResponse))
+                .log();
         return discoveryApiResponse;
     }
 }

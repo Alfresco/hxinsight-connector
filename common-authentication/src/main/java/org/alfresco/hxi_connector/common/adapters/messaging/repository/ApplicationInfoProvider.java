@@ -52,7 +52,10 @@ public class ApplicationInfoProvider
             log.debug("Calculating user agent data.");
             applicationInfo = calculateUserAgentData();
         }
-        log.debug("User agent data: {}", applicationInfo);
+        log.atDebug()
+                .setMessage("User agent data: {}")
+                .addArgument(() -> LogSanitizer.sanitize(applicationInfo))
+                .log();
         return applicationInfo;
     }
 
@@ -64,7 +67,7 @@ public class ApplicationInfoProvider
     private String calculateUserAgentData()
     {
         String applicationVersion = applicationProperties.getVersion();
-        String repositoryVersion = LogSanitizer.sanitize(repositoryInformation.getRepositoryVersion());
+        String repositoryVersion = repositoryInformation.getRepositoryVersion();
         String osVersion = System.getProperty("os.name") + " " + System.getProperty("os.version") + " " + System.getProperty("os.arch");
         return String.format(APP_INFO_PATTERN, applicationVersion, repositoryVersion, osVersion);
     }
