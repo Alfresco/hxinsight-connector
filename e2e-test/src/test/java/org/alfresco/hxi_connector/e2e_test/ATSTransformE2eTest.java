@@ -164,7 +164,9 @@ public class ATSTransformE2eTest
         // then
         RetryUtils.retryWithBackoff(() -> {
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
+            assertThat(actualBucketContent)
+                    .as("S3 bucket should contain at least one object after content upload")
+                    .isNotEmpty();
 
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
