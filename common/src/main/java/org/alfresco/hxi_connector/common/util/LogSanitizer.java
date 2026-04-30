@@ -30,20 +30,8 @@ import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
 
 /**
- * Utility for neutralizing untrusted data before it is written to log output, mitigating CWE-117
- * (Improper Output Neutralization for Logs / log forging).
- * <p>
- * Implementation follows Veracode's published guidance for CWE-117
- * (<a href="https://community.veracode.com/s/article/How-to-Fix-CWE-117-Improper-Output-Neutralization-for-Logs">"How to Fix CWE-117"</a>):
- * <ul>
- *   <li>Sanitize at the application code level - logging-framework configuration alone (e.g.
- *       Logback {@code %replace}) is not detected by static analysis and will not clear the flaw.</li>
- *   <li>Strip carriage-return / line-feed and other control characters that could be used to forge
- *       new log entries. We use {@link String#replaceAll(String, String)} - one of the
- *       neutralizer patterns the Veracode engine recognises in its taint-flow analysis.</li>
- * </ul>
- * Apply this at the trust boundary (where untrusted data first enters the application) so every
- * downstream log statement is automatically safe.
+ * Utility for neutralizing untrusted data before it is written to log output, mitigating CWE-117 (Improper Output Neutralization for Logs / log forging).
+ * Apply this at the trust boundary (where untrusted data first enters the application) so every downstream log statement is automatically safe.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class LogSanitizer
