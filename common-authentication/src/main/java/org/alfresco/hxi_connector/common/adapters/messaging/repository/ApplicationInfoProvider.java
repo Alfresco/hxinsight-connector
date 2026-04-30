@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2026 Alfresco Software Limited
+ * Copyright (C) 2023 - 2024 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,7 +30,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
 import org.alfresco.hxi_connector.common.config.properties.Application;
-import org.alfresco.hxi_connector.common.util.LogSanitizer;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -52,10 +51,7 @@ public class ApplicationInfoProvider
             log.debug("Calculating user agent data.");
             applicationInfo = calculateUserAgentData();
         }
-        log.atDebug()
-                .setMessage("User agent data: {}")
-                .addArgument(() -> LogSanitizer.sanitize(applicationInfo))
-                .log();
+        log.debug("User agent data: {}", applicationInfo);
         return applicationInfo;
     }
 
