@@ -30,8 +30,7 @@ import static lombok.AccessLevel.PRIVATE;
 import lombok.NoArgsConstructor;
 
 /**
- * Utility for neutralizing untrusted data before it is written to log output, mitigating CWE-117 (Improper Output Neutralization for Logs / log forging).
- * Apply this at the trust boundary (where untrusted data first enters the application) so every downstream log statement is automatically safe.
+ * Utility for neutralizing untrusted data before it is written to log output, mitigating CWE-117 (Improper Output Neutralization for Logs / log forging). Apply this at the trust boundary (where untrusted data first enters the application) so every downstream log statement is automatically safe.
  */
 @NoArgsConstructor(access = PRIVATE)
 public final class LogSanitizer
