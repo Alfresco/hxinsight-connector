@@ -48,7 +48,6 @@ import java.util.Base64;
 
 import com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder;
 import com.github.tomakehurst.wiremock.client.WireMock;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -214,13 +213,13 @@ class NucleusSyncE2eTest
         RetryUtils.retryWithBackoff(() -> {
             try
             {
-        HttpRequest request = HttpRequest.newBuilder()
-          .uri(URI.create("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081) + "/sync/trigger"))
-          .header("Accept", "application/json")
-          .POST(HttpRequest.BodyPublishers.noBody())
-          .build();
+                HttpRequest request = HttpRequest.newBuilder()
+                        .uri(URI.create("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081) + "/sync/trigger"))
+                        .header("Accept", "application/json")
+                        .POST(HttpRequest.BodyPublishers.noBody())
+                        .build();
 
-        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+                HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
 
                 int statusCode = response.statusCode();
 
@@ -229,13 +228,13 @@ class NucleusSyncE2eTest
                     throw new AssertionError("Sync trigger not ready yet (503): " + getSafeResponseBody(response));
                 }
 
-          if (statusCode != 200)
-          {
-            throw new AssertionError("Sync trigger endpoint returned HTTP " + statusCode
-                + " with response body: " + getSafeResponseBody(response)
-                + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
-                + getSafeContainerLogs());
-          }
+                if (statusCode != 200)
+                {
+                    throw new AssertionError("Sync trigger endpoint returned HTTP " + statusCode
+                            + " with response body: " + getSafeResponseBody(response)
+                            + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
+                            + getSafeContainerLogs());
+                }
             }
             catch (AssertionError ae)
             {
@@ -243,51 +242,51 @@ class NucleusSyncE2eTest
             }
             catch (Exception exception)
             {
-          String containerLogs = getSafeContainerLogs();
+                String containerLogs = getSafeContainerLogs();
                 throw new AssertionError(
                         "Sync trigger endpoint not ready: " + exception.getClass().getName() + ": " + exception.getMessage()
-                        + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
-              + containerLogs,
+                                + "\n--- nucleus-sync container logs (last 2000 chars) ---\n"
+                                + containerLogs,
                         exception);
             }
         }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
     }
 
-      private String getSafeResponseBody(HttpResponse<String> response)
+    private String getSafeResponseBody(HttpResponse<String> response)
     {
-      try
+        try
         {
-          if (response == null || response.body() == null)
+            if (response == null || response.body() == null)
             {
-          return "(no response body)";
+                return "(no response body)";
             }
-          String body = response.body();
-        if (body == null || body.isBlank())
-        {
-          return "(empty response body)";
+            String body = response.body();
+            if (body == null || body.isBlank())
+            {
+                return "(empty response body)";
+            }
+            return body.substring(Math.max(0, body.length() - 1000));
         }
-        return body.substring(Math.max(0, body.length() - 1000));
-      }
-      catch (Exception bodyException)
-      {
-        return "(failed to read response body: " + bodyException.getClass().getName() + ": " + bodyException.getMessage() + ")";
-      }
+        catch (Exception bodyException)
+        {
+            return "(failed to read response body: " + bodyException.getClass().getName() + ": " + bodyException.getMessage() + ")";
+        }
     }
 
     private String getSafeContainerLogs()
     {
-      try
-      {
-        String logs = nucleusSync.getLogs();
-        if (logs == null || logs.isBlank())
+        try
         {
-          return "(no logs)";
+            String logs = nucleusSync.getLogs();
+            if (logs == null || logs.isBlank())
+            {
+                return "(no logs)";
+            }
+            return logs.substring(Math.max(0, logs.length() - 2000));
         }
-        return logs.substring(Math.max(0, logs.length() - 2000));
-      }
-      catch (Exception logException)
-      {
-        return "(failed to read container logs: " + logException.getClass().getName() + ": " + logException.getMessage() + ")";
+        catch (Exception logException)
+        {
+            return "(failed to read container logs: " + logException.getClass().getName() + ": " + logException.getMessage() + ")";
         }
     }
 
