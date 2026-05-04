@@ -91,6 +91,7 @@ public class ATSTransformE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
     private static final int DELAY_MS = 1000;
+    private static final int MAX_ATTEMPTS = 60; // Allow up to 60 seconds for transform pipeline on CI
     private static final String PARENT_ID = "-my-";
 
     private static final Network network = Network.newNetwork();
@@ -180,7 +181,7 @@ public class ATSTransformE2eTest
             // Then verify S3 content was uploaded
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
-        }, DELAY_MS);
+        }, MAX_ATTEMPTS, DELAY_MS);
     }
 
     /**
@@ -208,7 +209,7 @@ public class ATSTransformE2eTest
             // Then verify S3 bucket is unchanged (no content uploaded)
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size());
-        }, DELAY_MS);
+        }, MAX_ATTEMPTS, DELAY_MS);
     }
 
     static Stream<Arguments> contentUploadedTestCases()
