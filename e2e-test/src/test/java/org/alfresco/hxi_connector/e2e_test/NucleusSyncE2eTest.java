@@ -196,19 +196,6 @@ class NucleusSyncE2eTest
                 {
                     throw new AssertionError("alfresco mock not responding yet: " + alfrescoResp.statusCode());
                 }
-
-                // Also verify the sync trigger endpoint is ready (not returning 503)
-                HttpRequest syncTriggerRequest = HttpRequest.newBuilder()
-                        .uri(URI.create("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081) + "/sync/trigger"))
-                        .header("Accept", "application/json")
-                        .POST(HttpRequest.BodyPublishers.noBody())
-                        .build();
-                HttpResponse<String> syncResp = HttpClient.newHttpClient().send(syncTriggerRequest, HttpResponse.BodyHandlers.ofString());
-                if (syncResp.statusCode() == 503)
-                {
-                    throw new AssertionError("sync trigger returning 503 (Alfresco unavailable): " + syncResp.body());
-                }
-                // Accept any non-503 status here - the actual sync call will verify 200
             }
             catch (AssertionError ae)
             {
