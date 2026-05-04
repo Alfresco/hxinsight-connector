@@ -201,11 +201,13 @@ public class ATSTransformE2eTest
 
         // then - verify no content was uploaded to S3 (no presigned-urls call for content)
         RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size());
-
+            // First verify the ingestion event happened but no presigned-url was requested
             WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events")));
+
+            // Then verify S3 bucket is unchanged (no content uploaded)
+            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
+            assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size());
         }, DELAY_MS);
     }
 
