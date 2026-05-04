@@ -74,7 +74,7 @@ class NucleusSyncE2eTest
     private static final String SECONDARY_SCOPE = "system-integrations-config";
     private static final String NUCLEUS_ALIAS = "nucleus-mock";
     private static final String ALFRESCO_ALIAS = "alfresco-mock";
-    private static final int SYNC_TRIGGER_MAX_ATTEMPTS = 240;
+    private static final int SYNC_TRIGGER_MAX_ATTEMPTS = 120;
     private static final int SYNC_TRIGGER_DELAY_MS = 1000;
 
     @Container
@@ -104,7 +104,7 @@ class NucleusSyncE2eTest
             .withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")
             .withEnv("SPRING_THREADS_VIRTUAL_ENABLED", "true")
             .dependsOn(alfrescoMock, nucleusMock)
-            .waitingFor(Wait.forHttp("/actuator/health")
+            .waitingFor(Wait.forHttp("/actuator/health/readiness")
                     .forPort(8081)
                     .forStatusCode(200))
             .withStartupTimeout(Duration.ofMinutes(5));
@@ -196,9 +196,6 @@ class NucleusSyncE2eTest
                 {
                     throw new AssertionError("alfresco mock not responding yet: " + alfrescoResp.statusCode());
                 }
-
-                // Additional delay to ensure Docker network DNS resolution is stable from nucleus-sync's perspective
-                Thread.sleep(2000);
             }
             catch (AssertionError ae)
             {
