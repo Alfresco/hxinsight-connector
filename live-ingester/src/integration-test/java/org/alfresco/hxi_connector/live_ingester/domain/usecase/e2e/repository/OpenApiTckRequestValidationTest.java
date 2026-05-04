@@ -34,19 +34,34 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
-import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
 
 @Slf4j
+@SuppressWarnings("PMD.CloseResource") // HttpClient is not AutoCloseable on Java 17
 public class OpenApiTckRequestValidationTest
 {
-
     private static final String BASE_URL = "http://localhost:4010";
+
+    private static HttpClient httpClient;
+
+    @BeforeAll
+    static void beforeAll()
+    {
+        httpClient = HttpClient.newHttpClient();
+    }
+
+    @AfterAll
+    static void afterAll()
+    {
+        httpClient = null;
+    }
 
     @Test
     void testRequestToPresignedUrls()
@@ -98,8 +113,6 @@ public class OpenApiTckRequestValidationTest
         request.headers().forEach(requestBuilder::header);
 
         // when
-        @Cleanup
-        HttpClient httpClient = HttpClient.newHttpClient();
         HttpResponse<String> response = httpClient.send(requestBuilder.build(), HttpResponse.BodyHandlers.ofString());
 
         // then

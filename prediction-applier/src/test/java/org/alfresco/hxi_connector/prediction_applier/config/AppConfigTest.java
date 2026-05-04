@@ -37,6 +37,7 @@ import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealth
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.ValidationException;
 
+@SuppressWarnings("PMD.CloseResource") // HttpClient is not AutoCloseable on Java 17
 class AppConfigTest
 {
 
@@ -53,44 +54,38 @@ class AppConfigTest
     @Test
     void shouldCreateHttpClient()
     {
-        try (HttpClient httpClient = appConfig.httpClient())
-        {
-            assertThat(httpClient).isNotNull();
-        }
+        HttpClient httpClient = appConfig.httpClient();
+        assertThat(httpClient).isNotNull();
     }
 
     @Test
     void shouldCreateAcsHealthProbe()
     {
-        try (HttpClient httpClient = HttpClient.newHttpClient())
-        {
-            RepositoryApiProperties properties = new RepositoryApiProperties(
-                    "http://localhost:8080",
-                    "http://localhost:8080/alfresco/api/discovery",
-                    new Retry(),
-                    new RepositoryApiProperties.HealthProbe("http://localhost:8080/alfresco/api/-default-/public/alfresco/versions/1/probes/-live-", 5, 1));
+        HttpClient httpClient = HttpClient.newHttpClient();
+        RepositoryApiProperties properties = new RepositoryApiProperties(
+                "http://localhost:8080",
+                "http://localhost:8080/alfresco/api/discovery",
+                new Retry(),
+                new RepositoryApiProperties.HealthProbe("http://localhost:8080/alfresco/api/-default-/public/alfresco/versions/1/probes/-live-", 5, 1));
 
-            AcsHealthProbe probe = appConfig.acsHealthProbe(httpClient, properties);
+        AcsHealthProbe probe = appConfig.acsHealthProbe(httpClient, properties);
 
-            assertThat(probe).isNotNull();
-        }
+        assertThat(probe).isNotNull();
     }
 
     @Test
     void shouldFailToCreateRepositoryInformationWithBlankDiscoveryEndpoint()
     {
-        try (HttpClient httpClient = HttpClient.newHttpClient())
-        {
-            RepositoryApiProperties properties = new RepositoryApiProperties(
-                    "http://localhost:8080",
-                    "",
-                    new Retry(),
-                    new RepositoryApiProperties.HealthProbe("", 5, 1));
+        HttpClient httpClient = HttpClient.newHttpClient();
+        RepositoryApiProperties properties = new RepositoryApiProperties(
+                "http://localhost:8080",
+                "",
+                new Retry(),
+                new RepositoryApiProperties.HealthProbe("", 5, 1));
 
-            Throwable throwable = catchThrowable(() -> appConfig.repositoryInformation(
-                    properties, null, new ObjectMapper(), httpClient, null));
+        Throwable throwable = catchThrowable(() -> appConfig.repositoryInformation(
+                properties, null, new ObjectMapper(), httpClient, null));
 
-            assertThat(throwable).isInstanceOf(ValidationException.class);
-        }
+        assertThat(throwable).isInstanceOf(ValidationException.class);
     }
 }

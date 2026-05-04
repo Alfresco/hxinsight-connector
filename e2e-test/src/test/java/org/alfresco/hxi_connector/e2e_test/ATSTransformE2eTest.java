@@ -133,13 +133,11 @@ public class ATSTransformE2eTest
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
 
-        // Wait for transform pipeline to be ready - ACS needs time to discover transform capabilities
-        // from transform-router and transform-core-aio before it can process transform requests.
-        // Use retry with backoff instead of fixed sleep to handle variable CI runner performance.
+        // Wait for ACS to have polled transform-core-aio for its transform config at least once.
         RetryUtils.retryWithBackoff(() -> {
-            // Verify WireMock is reachable (ensures network is ready)
-            WireMock.verify(0, postRequestedFor(urlEqualTo("/presigned-urls")));
-        }, 30, 1000);
+            assertThat(transformCore.getLogs()).contains("GET Transform Config version:");
+            assertThat(transformRouter.getLogs()).contains("GET Transform Config version:");
+        }, MAX_ATTEMPTS, DELAY_MS);
     }
 
     @AfterEach
@@ -176,7 +174,6 @@ public class ATSTransformE2eTest
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-
             // Then verify the presigned-url call happened (indicates content upload initiated)
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
 
