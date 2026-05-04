@@ -196,6 +196,9 @@ class NucleusSyncE2eTest
                 {
                     throw new AssertionError("alfresco mock not responding yet: " + alfrescoResp.statusCode());
                 }
+
+                // Additional delay to ensure Docker network DNS resolution is stable from nucleus-sync's perspective
+                Thread.sleep(2000);
             }
             catch (AssertionError ae)
             {
