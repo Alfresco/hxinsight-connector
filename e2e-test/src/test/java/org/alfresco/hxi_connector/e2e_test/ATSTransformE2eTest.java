@@ -131,6 +131,10 @@ public class ATSTransformE2eTest
         awsS3Client = new AwsS3Client(awsMock.getHost(), awsMock.getFirstMappedPort(), BUCKET_NAME);
         repositoryClient = new RepositoryClient(repository.getBaseUrl(), ADMIN_USER);
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
+
+        // Wait for transform pipeline to be ready - ACS needs time to discover transform capabilities
+        // from transform-router and transform-core-aio before it can process transform requests
+        Thread.sleep(10000);
     }
 
     @AfterEach
