@@ -133,8 +133,12 @@ public class ATSTransformE2eTest
         WireMock.configureFor(hxInsightMock.getHost(), hxInsightMock.getPort());
 
         // Wait for transform pipeline to be ready - ACS needs time to discover transform capabilities
-        // from transform-router and transform-core-aio before it can process transform requests
-        Thread.sleep(10000);
+        // from transform-router and transform-core-aio before it can process transform requests.
+        // Use retry with backoff instead of fixed sleep to handle variable CI runner performance.
+        RetryUtils.retryWithBackoff(() -> {
+            // Verify WireMock is reachable (ensures network is ready)
+            WireMock.verify(0, postRequestedFor(urlEqualTo("/presigned-urls")));
+        }, 30, 1000);
     }
 
     @AfterEach
@@ -167,13 +171,15 @@ public class ATSTransformE2eTest
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
-
+            // First verify the presigned-url call happened (indicates pipeline is processing)
             WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
+
+            // Then verify S3 content was uploaded
+            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
+            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
         }, DELAY_MS);
     }
 
