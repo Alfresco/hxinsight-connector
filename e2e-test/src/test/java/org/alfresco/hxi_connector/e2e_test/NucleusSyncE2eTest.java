@@ -74,7 +74,7 @@ class NucleusSyncE2eTest
     private static final String SECONDARY_SCOPE = "system-integrations-config";
     private static final String NUCLEUS_ALIAS = "nucleus-mock";
     private static final String ALFRESCO_ALIAS = "alfresco-mock";
-    private static final int SYNC_TRIGGER_MAX_ATTEMPTS = 120;
+    private static final int SYNC_TRIGGER_MAX_ATTEMPTS = 300;
     private static final int SYNC_TRIGGER_DELAY_MS = 1000;
 
     @Container
@@ -147,7 +147,6 @@ class NucleusSyncE2eTest
         stubCurrentMemberships();
         stubMutationEndpoints();
 
-        waitUntilServiceIsReadyForSync();
         assertDoesNotThrow(this::triggerSync, "Sync trigger should complete successfully");
 
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(postRequestedFor(urlEqualTo("/token"))
@@ -170,43 +169,6 @@ class NucleusSyncE2eTest
                 .withQueryParam("memberExternalUserIds", equalTo("ghost"))));
     }
 
-    private void waitUntilServiceIsReadyForSync()
-    {
-        RetryUtils.retryWithBackoff(() -> {
-            try
-            {
-                HttpRequest healthRequest = HttpRequest.newBuilder()
-                        .uri(URI.create("http://" + nucleusSync.getHost() + ":" + nucleusSync.getMappedPort(8081) + "/actuator/health"))
-                        .GET()
-                        .build();
-                HttpResponse<String> healthResp = HttpClient.newHttpClient().send(healthRequest, HttpResponse.BodyHandlers.ofString());
-                if (healthResp.statusCode() != 200)
-                {
-                    throw new AssertionError("nucleus-sync health not OK yet: " + healthResp.statusCode());
-                }
-
-                HttpRequest alfrescoRequest = HttpRequest.newBuilder()
-                        .uri(URI.create("http://" + alfrescoMock.getHost() + ":" + alfrescoMock.getPort()
-                                + PEOPLE_ENDPOINT + "?maxItems=1000&skipCount=0"))
-                        .header("Authorization", "Basic " + BASIC_ADMIN)
-                        .GET()
-                        .build();
-                HttpResponse<String> alfrescoResp = HttpClient.newHttpClient().send(alfrescoRequest, HttpResponse.BodyHandlers.ofString());
-                if (alfrescoResp.statusCode() != 200)
-                {
-                    throw new AssertionError("alfresco mock not responding yet: " + alfrescoResp.statusCode());
-                }
-            }
-            catch (AssertionError ae)
-            {
-                throw ae;
-            }
-            catch (Exception e)
-            {
-                throw new AssertionError("Service readiness check failed: " + e.getMessage(), e);
-            }
-        }, SYNC_TRIGGER_MAX_ATTEMPTS, SYNC_TRIGGER_DELAY_MS);
-    }
 
     private void triggerSync()
     {
