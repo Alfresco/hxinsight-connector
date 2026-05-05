@@ -26,9 +26,11 @@
 package org.alfresco.hxi_connector.nucleus_sync.controller;
 
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.asyncDispatch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.request;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
@@ -39,6 +41,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.SyncOrchestrationService;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.AlfrescoUnavailableException;
@@ -58,12 +61,14 @@ class SyncControllerTest
     @Test
     void shouldTriggerSyncSuccessfully() throws Exception
     {
-        // Given
         when(syncOrchestrationService.performFullSync())
                 .thenReturn("Sync completed successfully");
 
-        // When/Then
-        mockMvc.perform(post("/sync/trigger"))
+        MvcResult asyncResult = mockMvc.perform(post("/sync/trigger"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(asyncResult))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.message").value("Sync completed successfully"))
@@ -73,12 +78,14 @@ class SyncControllerTest
     @Test
     void shouldReturn409WhenSyncAlreadyInProgress() throws Exception
     {
-        // Given
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new SyncInProgressException());
 
-        // When/Then
-        mockMvc.perform(post("/sync/trigger"))
+        MvcResult asyncResult = mockMvc.perform(post("/sync/trigger"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(asyncResult))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.errorCode").value("SYNC_IN_PROGRESS"))
                 .andExpect(jsonPath("$.message").value("Sync already in progress. Please wait for the current sync to complete."))
@@ -88,13 +95,15 @@ class SyncControllerTest
     @Test
     void shouldReturn503WhenAlfrescoUnavailable() throws Exception
     {
-        // Given
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new AlfrescoUnavailableException("Connection timeout",
                         new RuntimeException()));
 
-        // When/Then
-        mockMvc.perform(post("/sync/trigger"))
+        MvcResult asyncResult = mockMvc.perform(post("/sync/trigger"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(asyncResult))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.errorCode").value("ALFRESCO_UNAVAILABLE"))
                 .andExpect(jsonPath("$.message").value("Alfresco unavailable: Connection timeout"))
@@ -104,13 +113,15 @@ class SyncControllerTest
     @Test
     void shouldReturn503WhenNucleusUnavailable() throws Exception
     {
-        // Given
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new NucleusUnavailableException("API error",
                         new RuntimeException()));
 
-        // When/Then
-        mockMvc.perform(post("/sync/trigger"))
+        MvcResult asyncResult = mockMvc.perform(post("/sync/trigger"))
+                .andExpect(request().asyncStarted())
+                .andReturn();
+
+        mockMvc.perform(asyncDispatch(asyncResult))
                 .andExpect(status().isServiceUnavailable())
                 .andExpect(jsonPath("$.errorCode").value("NUCLEUS_UNAVAILABLE"))
                 .andExpect(jsonPath("$.message").value("Nucleus unavailable: API error"))
@@ -120,7 +131,6 @@ class SyncControllerTest
     @Test
     void shouldReturnSyncStatus() throws Exception
     {
-        // Given
         Map<String, Object> status = Map.of(
                 "syncInProgress", false,
                 "lastSyncTime", LocalDateTime.now(),
@@ -129,7 +139,6 @@ class SyncControllerTest
                 "nucleusStatus", "HEALTHY");
         when(syncOrchestrationService.getSyncStatus()).thenReturn(status);
 
-        // When/Then
         mockMvc.perform(get("/sync/status"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.syncInProgress").value(false))

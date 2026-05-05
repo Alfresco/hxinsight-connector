@@ -90,9 +90,8 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
 public class ATSTransformE2eTest
 {
     private static final String BUCKET_NAME = "test-hxinsight-bucket";
-    private static final int DELAY_MS = 1000;
-    private static final int RETRY_DELAY_MS = 2000;
-    private static final int MAX_ATTEMPTS = 60;
+    private static final int DELAY_MS = 2000;
+    private static final int MAX_ATTEMPTS = 90; // Allow up to 3 minutes for transform pipeline on CI
     private static final String PARENT_ID = "-my-";
 
     private static final Network network = Network.newNetwork();
@@ -138,7 +137,7 @@ public class ATSTransformE2eTest
         RetryUtils.retryWithBackoff(() -> {
             assertThat(transformCore.getLogs()).contains("GET Transform Config version:");
             assertThat(transformRouter.getLogs()).contains("GET Transform Config version:");
-        }, MAX_ATTEMPTS, RETRY_DELAY_MS);
+        }, MAX_ATTEMPTS, DELAY_MS);
     }
 
     @AfterEach
@@ -171,14 +170,17 @@ public class ATSTransformE2eTest
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
-
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
+            // First verify ingestion events were sent (this happens early in the pipeline)
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
-        }, MAX_ATTEMPTS, RETRY_DELAY_MS);
+            // Then verify the presigned-url call happened (indicates content upload initiated)
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
+
+            // Finally verify S3 content was uploaded
+            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
+            assertThat(actualBucketContent.size()).isGreaterThan(initialBucketContent.size());
+        }, MAX_ATTEMPTS, DELAY_MS);
     }
 
     /**
@@ -199,12 +201,14 @@ public class ATSTransformE2eTest
 
         // then - verify no content was uploaded to S3 (no presigned-urls call for content)
         RetryUtils.retryWithBackoff(() -> {
-            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
-            assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size());
-
+            // First verify the ingestion event happened but no presigned-url was requested
             WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/presigned-urls")));
             WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/ingestion-events")));
-        }, DELAY_MS);
+
+            // Then verify S3 bucket is unchanged (no content uploaded)
+            List<S3Object> actualBucketContent = awsS3Client.listS3Content();
+            assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size());
+        }, MAX_ATTEMPTS, DELAY_MS);
     }
 
     static Stream<Arguments> contentUploadedTestCases()

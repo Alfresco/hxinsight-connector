@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -178,6 +178,25 @@ class AlfrescoRepositoryExtensionTest
 
             assertTrue(exception.getMessage().contains("not found"));
             assertTrue(exception.getMessage().contains(extensionName + "-" + HXI_CONNECTOR_TAG + ".jar"));
+        }
+    }
+
+    @Test
+    void shouldThrowExceptionWhenDirectoryReadFails()
+    {
+        try (MockedStatic<DockerTags> dockerTagsMock = mockStatic(DockerTags.class);
+                MockedStatic<Files> filesMock = mockStatic(Files.class))
+        {
+            dockerTagsMock.when(DockerTags::getHxiConnectorTag).thenReturn(HXI_CONNECTOR_TAG);
+            IOException ioException = new IOException("Directory read failed");
+            filesMock.when(() -> Files.list(any(Path.class))).thenThrow(ioException);
+
+            IllegalStateException exception = assertThrows(
+                    IllegalStateException.class,
+                    () -> new AlfrescoRepositoryExtension(extensionName));
+
+            assertTrue(exception.getMessage().contains("Failed to read directory"));
+            assertEquals(ioException, exception.getCause());
         }
     }
 }
