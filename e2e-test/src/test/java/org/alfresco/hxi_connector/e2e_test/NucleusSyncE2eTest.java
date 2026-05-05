@@ -169,7 +169,6 @@ class NucleusSyncE2eTest
                 .withQueryParam("memberExternalUserIds", equalTo("ghost"))));
     }
 
-
     private void triggerSync()
     {
         RetryUtils.retryWithBackoff(() -> {
