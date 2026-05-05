@@ -153,8 +153,7 @@ public class DockerTags
 
     private static void loadProperties(boolean failOnMissingFile)
     {
-        try (InputStream propertiesStream =
-                     DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE))
+        try (InputStream propertiesStream = DockerTags.class.getClassLoader().getResourceAsStream(PROPERTIES_FILE))
         {
             if (propertiesStream == null)
             {
