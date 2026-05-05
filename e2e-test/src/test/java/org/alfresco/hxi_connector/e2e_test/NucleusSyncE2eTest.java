@@ -280,6 +280,7 @@ class NucleusSyncE2eTest
     private void stubAlfrescoUsers()
     {
         alfrescoWireMock.register(get(urlPathEqualTo(PEOPLE_ENDPOINT))
+                .withQueryParam("fields", equalTo("id,email,enabled"))
                 .withQueryParam("maxItems", equalTo("1000"))
                 .withQueryParam("skipCount", equalTo("0"))
                 .withHeader("Authorization", equalTo("Basic " + BASIC_ADMIN))
@@ -323,6 +324,7 @@ class NucleusSyncE2eTest
     private void stubGroupsFor(String userId, String response)
     {
         alfrescoWireMock.register(get(urlPathEqualTo(PEOPLE_ENDPOINT + "/" + userId + "/groups"))
+                .withQueryParam("fields", equalTo("id"))
                 .withQueryParam("maxItems", equalTo("1000"))
                 .withQueryParam("skipCount", equalTo("0"))
                 .withHeader("Authorization", equalTo("Basic " + BASIC_ADMIN))
