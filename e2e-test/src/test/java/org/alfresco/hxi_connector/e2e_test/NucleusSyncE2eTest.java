@@ -135,7 +135,7 @@ class NucleusSyncE2eTest
     }
 
     @Test
-    void shouldSyncUsersGroupsAndMemberships()
+    void shouldSyncUsersGroupsAndMemberships() throws Exception
     {
         stubTokenEndpoint();
         stubAlfrescoUsers();
@@ -146,6 +146,8 @@ class NucleusSyncE2eTest
         stubCurrentGroups();
         stubCurrentMemberships();
         stubMutationEndpoints();
+
+        verifyStubsWork();
 
         assertDoesNotThrow(this::triggerSync, "Sync trigger should complete successfully");
 
@@ -167,6 +169,35 @@ class NucleusSyncE2eTest
         RetryUtils.retryWithBackoff(() -> nucleusWireMock.verify(deleteRequestedFor(urlPathEqualTo(groupMembersPath()))
                 .withQueryParam("parentExternalGroupId", equalTo("GROUP_ORPHAN"))
                 .withQueryParam("memberExternalUserIds", equalTo("ghost"))));
+    }
+
+    private void verifyStubsWork() throws Exception
+    {
+        // Verify stub works from test
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://" + alfrescoMock.getHost() + ":" + alfrescoMock.getPort()
+                        + PEOPLE_ENDPOINT + "?fields=id,email,enabled&maxItems=1000&skipCount=0"))
+                .header("Authorization", "Basic " + BASIC_ADMIN)
+                .GET()
+                .build();
+        HttpResponse<String> response = HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString());
+        if (response.statusCode() != 200)
+        {
+            throw new AssertionError("Stub not working from test. Status: " + response.statusCode()
+                    + ", body: " + response.body());
+        }
+
+        // Verify nucleus-sync can reach alfresco-mock from inside container
+        String alfrescoUrl = "http://" + ALFRESCO_ALIAS + ":8080" + PEOPLE_ENDPOINT + "?fields=id,email,enabled&maxItems=1000&skipCount=0";
+        var execResult = nucleusSync.execInContainer("curl", "-f", "-s", "-H", "Authorization: Basic " + BASIC_ADMIN, alfrescoUrl);
+
+        if (execResult.getExitCode() != 0)
+        {
+            throw new AssertionError("nucleus-sync cannot reach alfresco-mock from inside container. "
+                    + "Exit code: " + execResult.getExitCode()
+                    + ", stdout: " + execResult.getStdout()
+                    + ", stderr: " + execResult.getStderr());
+        }
     }
 
     private void triggerSync()
@@ -283,7 +314,6 @@ class NucleusSyncE2eTest
                 .withQueryParam("fields", equalTo("id,email,enabled"))
                 .withQueryParam("maxItems", equalTo("1000"))
                 .withQueryParam("skipCount", equalTo("0"))
-                .withHeader("Authorization", equalTo("Basic " + BASIC_ADMIN))
                 .willReturn(jsonResponse("""
                         {
                           \"list\": {
@@ -327,7 +357,6 @@ class NucleusSyncE2eTest
                 .withQueryParam("fields", equalTo("id"))
                 .withQueryParam("maxItems", equalTo("1000"))
                 .withQueryParam("skipCount", equalTo("0"))
-                .withHeader("Authorization", equalTo("Basic " + BASIC_ADMIN))
                 .willReturn(jsonResponse(response)));
     }
 
