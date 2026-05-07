@@ -39,9 +39,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupInput;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupOutput;
 
 @SpringBootTest(classes = GroupMappingSyncProcessor.class)
 public class GroupMappingSyncProcessorIntegrationTest

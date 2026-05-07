@@ -23,7 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.dto;
+package org.alfresco.hxi_connector.nucleus_client.dto;
 
-public record NucleusUserMappingInput(String userId, String externalUserId)
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
+public record NucleusUserMappingOutput(String userId, String externalUserId)
 {}

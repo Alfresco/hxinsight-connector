@@ -32,6 +32,7 @@ import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATI
 
 import java.util.AbstractMap;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,7 +76,7 @@ public class AuthService
     public Map<String, String> getHxpAuthHeaders()
     {
         return Stream.of(getAuthHeader(HXP_AUTH_PROVIDER), getHxpEnvironmentHeader(), getHxpAppHeader())
-                .filter(entry -> nonNull(entry.getValue()))
+                .filter(e -> nonNull(e.getValue()))
                 .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
     }
 

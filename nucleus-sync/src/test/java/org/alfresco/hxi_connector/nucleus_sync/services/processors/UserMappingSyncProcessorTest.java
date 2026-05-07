@@ -42,10 +42,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
-import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
+import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusUserMappingOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @ExtendWith(MockitoExtension.class)

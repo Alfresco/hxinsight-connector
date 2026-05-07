@@ -40,8 +40,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupOutput;
 
 @ExtendWith(MockitoExtension.class)
 public class GroupMappingSyncProcessorTest

@@ -64,11 +64,12 @@ public class AuthConfig
     }
 
     @Bean
-    @ConfigurationProperties(prefix = "auth")
+    @ConfigurationProperties(prefix = "authentication")
     public AuthProperties authorizationProperties()
     {
         return new AuthProperties();
     }
+
 
     @Bean
     public AuthService authService(AuthProperties authProperties, AccessTokenProvider defaultAccessTokenProvider)

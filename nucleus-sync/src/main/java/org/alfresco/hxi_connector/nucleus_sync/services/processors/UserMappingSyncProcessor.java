@@ -41,11 +41,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
-import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingInput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
+import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusUserMappingInput;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusUserMappingOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @Service

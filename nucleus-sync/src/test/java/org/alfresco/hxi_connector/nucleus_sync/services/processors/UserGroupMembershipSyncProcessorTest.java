@@ -40,7 +40,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 
 @ExtendWith(MockitoExtension.class)

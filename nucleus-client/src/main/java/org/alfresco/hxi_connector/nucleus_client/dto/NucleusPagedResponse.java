@@ -23,16 +23,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.dto;
+package org.alfresco.hxi_connector.nucleus_client.dto;
 
 import java.util.List;
 
-public record IamUsersOutput(List<IamUser> users, String next)
-        implements NucleusPagedResponse<IamUser>
+public interface NucleusPagedResponse<T>
 {
-    @Override
-    public List<IamUser> items()
-    {
-        return users;
-    }
+    List<T> items();
+
+    String next();
 }

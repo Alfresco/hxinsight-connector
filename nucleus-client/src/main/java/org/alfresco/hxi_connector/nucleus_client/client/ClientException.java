@@ -23,7 +23,22 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.dto;
+package org.alfresco.hxi_connector.nucleus_client.client;
 
-public record NucleusGroupMembershipOutput(String externalGroupId, String memberExternalUserId)
-{}
+public class ClientException extends RuntimeException
+{
+    public ClientException(String message)
+    {
+        super(message);
+    }
+
+    public ClientException(String message, Throwable cause)
+    {
+        super(message, cause);
+    }
+
+    public ClientException(Throwable cause)
+    {
+        super(cause);
+    }
+}

@@ -36,12 +36,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
-import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
+import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupMembershipOutput;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupOutput;
+import org.alfresco.hxi_connector.nucleus_client.dto.NucleusUserMappingOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.AlfrescoUnavailableException;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.NucleusUnavailableException;

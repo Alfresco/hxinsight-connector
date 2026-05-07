@@ -35,9 +35,9 @@ import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthPro
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 
 @Component
-public class NucleusSyncAuthClient extends DefaultAuthenticationClient
+public class NucleusAuthClient extends DefaultAuthenticationClient
 {
-    public NucleusSyncAuthClient(AuthProperties authProperties)
+    public NucleusAuthClient(AuthProperties authProperties)
     {
         super(authProperties);
     }

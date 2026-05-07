@@ -1,24 +1,35 @@
 server:
-  port: 8080
+  port: 8077
+
+logging:
+  level:
+    org.alfresco: ${LOGGING_LEVEL_ORG_ALFRESCO:DEBUG}
+
+spring:
+  activemq:
+    broker-url: ${SPRING_ACTIVEMQ_BROKERURL:tcp://localhost:61616}
+    packages:
+      trust-all: true
 
 management:
   endpoints.web.exposure.include: health
   endpoint.health.probes.enabled: true
   health.liveness-state.enabled: true
   health.readiness-state.enabled: true
+
 camel:
   springboot.main-run-controller: true
   dataformat.jackson.autoDiscoverObjectMapper: true
   main.auto-startup: false
 
 application:
-  source-id: a1f3e7c0-d193-7023-ce1d-0a63de491876
+  source-id: ${APPLICATION_SOURCEID:aaca2d59-e43f-47dc-a089-852245390852}
   version: "@project.version@"
 
 alfresco:
   repository:
     events-endpoint: activemq:topic:alfresco.repo.event2
-    base-url: http://localhost:8080/alfresco
+    base-url: ${ALFRESCO_REPOSITORY_BASEURL:http://localhost:8080/alfresco}
     discovery-endpoint: ${alfresco.repository.base-url}/api/discovery
     health-probe:
       endpoint: ${alfresco.repository.base-url}
@@ -45,7 +56,7 @@ alfresco:
       retry-ingestion:
         attempts: -1
     shared-file-store:
-      base-url: http://localhost:8099
+      base-url: ${ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL:http://localhost:8099}
       file-endpoint: ${alfresco.transform.shared-file-store.base-url}/alfresco/api/-default-/private/sfs/versions/1/file
   filter:
     aspect:
@@ -57,33 +68,49 @@ alfresco:
     path:
       allow:
       deny:
+    identity:
+      allow: cm:person, cm:authorityContainer, usr:user
+      deny:
+
+
 hyland-experience:
   insight:
     ingestion:
-      base-url: http://localhost:8001
+      base-url: ${HYLANDEXPERIENCE_INSIGHT_INGESTION_BASEURL:https://ingestion.insight.dev.experience.hyland.com/v1}
   storage:
     digest-algorithm: SHA-256
     location:
       endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
   ingester:
     endpoint: ${hyland-experience.insight.ingestion.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
+nucleus:
+  idp-base-url: ${NUCLEUS_IDP_BASE_URL:https://auth.iam.dev.experience.hyland.com}
+  base-url: ${NUCLEUS_BASE_URL:https://api.nucleus.dev.experience.hyland.com}
+  system-id: ${NUCLEUS_SYSTEM_ID:aaca2d59-e43f-47dc-a089-852245390852}
+  page-size: 1000
+  sync-batch-size: 1000
+  delete-group-member-batch-size: ${DELETE_BATCH_SIZE:100}
 
-auth:
+authentication:
   providers:
     hyland-experience:
       type: oauth2
-      client-id:
-      client-secret:
-      token-uri: http://localhost:8001/token
-      grant-type: client_credentials
+      client-id: ${AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTID:sc-91075e1c-be49-4668-87c1-ee9202c42ea5}
+      client-secret: ${AUTH_PROVIDERS_HYLANDEXPERIENCE_CLIENTSECRET:hyx_cs_tH08cH5rmaKN1VJqMaFNRPxKpxYOjNU5LsnuLLJ3cm1OMBywSM}
+      token-uri: ${AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI:https://auth.iam.dev.experience.hyland.com/idp/connect/token}
+      grant-type: ${AUTH_PROVIDERS_HYLANDEXPERIENCE_GRANTTYPE:client_credentials}
       scope:
-        - hxp.integrations
-      environment-key: hxi-env-key
+        - iam.user-data.account
+        - system-integrations-config
+        - system-integrations-runtime
+        - environment_authorization
+        - iam.scim
+      environment-key: ${AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY:hxai-acbf65ce-59b7-4def-b36f-a7dd47f30402}
       client-name: acs-insight-connector
     alfresco:
       type: basic
-      username:
-      password:
+      username: ${AUTH_PROVIDERS_ALFRESCO_USERNAME:admin}
+      password: ${AUTH_PROVIDERS_ALFRESCO_PASSWORD:admin}
   retry:
     attempts: 10
     initial-delay: 500

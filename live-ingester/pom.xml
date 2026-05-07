@@ -82,6 +82,10 @@
         </dependency>
         <dependency>
             <groupId>org.alfresco</groupId>
+            <artifactId>alfresco-hxinsight-connector-nucleus-client</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.alfresco</groupId>
             <artifactId>acs-event-model</artifactId>
         </dependency>
 
@@ -139,6 +143,7 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+
     </dependencies>
 
     <build>

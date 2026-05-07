@@ -45,9 +45,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
+import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoPagedResponse;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
+import reactor.core.scheduler.Schedulers;
 
 @Component
 public class AlfrescoClient
@@ -146,6 +148,7 @@ public class AlfrescoClient
 
                 String response = makeAuthenticatedRequest(uriBuilder.toUriString())
                         .bodyToMono(String.class)
+                        .subscribeOn(Schedulers.boundedElastic())
                         .block(Duration.ofMinutes(timeoutInMins));
 
                 AlfrescoPagedResponse<T> pagedResponse = objectMapper.readValue(response, typeRef);
