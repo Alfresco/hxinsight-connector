@@ -235,7 +235,8 @@ class ATSTransformResponseHandlerIntegrationTest extends IntegrationCamelTestBas
                                             retryTransformation),
                                     mock(),
                                     mock()),
-                            mock()),
+                            mock()
+                        ),
                     mock(),
                     new Application("dummy-source-id", "dummy-version"));
         }

@@ -47,7 +47,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusClient;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.AlfrescoUnavailableException;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.NucleusUnavailableException;

@@ -34,6 +34,7 @@ import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.subsystem.IAMEventFilterApplier;
 import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
@@ -113,6 +114,14 @@ public class RepoEventFilterHandler
             return Optional.of(NODE_CREATED.getType());
         }
         return Optional.empty();
+    }
+
+    public boolean isIAMEvent(RepoEvent<DataAttributes<NodeResource>> event,Filter filter)
+    {
+        return repoEventFilterAppliers.stream()
+                .filter(filterApplier -> filterApplier instanceof IAMEventFilterApplier)
+                .anyMatch(filterApplier -> filterApplier.isNodeAllowed(
+                        event.getData().getResource(), filter));
     }
 
     record FilteringResults(Boolean allowed, Optional<String> eventTypeOverride)

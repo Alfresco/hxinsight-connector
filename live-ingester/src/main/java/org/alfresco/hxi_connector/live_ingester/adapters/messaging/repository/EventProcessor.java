@@ -41,6 +41,7 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.live_ingester.subsystem.IdentitySyncSubsystem;
 import org.apache.camel.Exchange;
 import org.springframework.stereotype.Component;
 
@@ -70,12 +71,18 @@ public class EventProcessor
     private final RepoEventMapper repoEventMapper;
     private final RepoEventFilterHandler repoEventFilterHandler;
     private final IntegrationProperties integrationProperties;
+    private final IdentitySyncSubsystem identitySyncSubsystem;
 
     public void process(Exchange exchange)
     {
-        boolean allowEvent = repoEventFilterHandler.handleAndGetAllowed(exchange, integrationProperties.alfresco().filter());
         final RepoEvent<DataAttributes<NodeResource>> event = exchange.getIn().getBody(RepoEvent.class);
 
+        // If this event is some IAM event like USER CREATION/DELETION Group Creation/DELETION or Membership changes, then trigger identity sync to sync those changes to HxAI. This is required as some repository events like permission updates require up to date user and group information in HxAI to be processed correctly.
+        if (repoEventFilterHandler.isIAMEvent(event, integrationProperties.alfresco().filter())){
+            log.atDebug().log("Detected IAM event. Triggering identity sync for event with id: {}.", event.getId());
+            identitySyncSubsystem.handleIAMEvents(event);
+        }
+        boolean allowEvent = repoEventFilterHandler.handleAndGetAllowed(exchange, integrationProperties.alfresco().filter());
         if (!allowEvent)
         {
             log.atDebug().log("Repository event of id: {} is denied for further processing", event.getId());

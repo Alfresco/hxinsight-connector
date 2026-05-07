@@ -23,15 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.client;
+package org.alfresco.hxi_connector.nucleus_client.client;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.alfresco.hxi_connector.nucleus_client.dto.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,18 +47,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
-import org.alfresco.hxi_connector.nucleus_sync.dto.IamUsersOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupListOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMemberAssignmentInput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipListOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusPagedResponse;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingInput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingListOutput;
-import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
 
 @Component
 public class NucleusClient
@@ -100,7 +90,7 @@ public class NucleusClient
                 timeoutInMins);
     }
 
-    NucleusClient(
+    public NucleusClient(
             WebClient webClient,
             ObjectMapper objectMapper,
             AuthService authService,
@@ -204,6 +194,52 @@ public class NucleusClient
         }
     }
 
+    // Leverage the SCIM endpoint to fetch the UserId by email
+    public Optional<List<NucleusSCIMResponse.Resource>> getUserByEmailId(String emailId){
+        String url = idpBaseUrl + "/api/scim/v2/users?filter=email eq \"" + emailId + "\"";
+        try{
+            String response = executeGetRequest(url);
+            NucleusSCIMResponse usersOutput = objectMapper.readValue(response, NucleusSCIMResponse.class);
+            if(usersOutput.resources() != null && !usersOutput.resources().isEmpty()){
+                return Optional.of(usersOutput.resources());
+            }
+            return  Optional.empty();
+        }
+        catch (Exception e)
+        {
+            LOGGER.atError()
+                    .setMessage("Error in retrieving user by email id {}: {}")
+                    .addArgument(emailId)
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
+           return Optional.empty();
+        }
+    }
+
+    public Optional<NucleusUserMappingOutput> fetchUserMappingByExternalUserId(String externalUserId)
+    {
+        String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/user-mappings/" + externalUserId;
+
+        try
+        {
+            String response = executeGetRequest(url);
+            return Optional.of(objectMapper.readValue(response, NucleusUserMappingOutput.class));
+        }
+        catch (Exception e)
+        {
+            LOGGER.atError()
+                    .setMessage("Error in retrieving user mapping for external user id {}: {}")
+                    .addArgument(externalUserId)
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
+            return Optional.empty();
+        }
+    }
+
     public void createUserMappings(List<NucleusUserMappingInput> userMappings)
     {
         String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/user-mappings";
@@ -225,6 +261,29 @@ public class NucleusClient
             throw new ClientException("Failed to create user mappings", e);
         }
     }
+
+    public Optional<NucleusGroupOutput> getGroupByExternalId(String externalGroupId)
+    {
+        String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/groups/" + externalGroupId;
+
+        try
+        {
+            String response = executeGetRequest(url);
+            return Optional.of(objectMapper.readValue(response, NucleusGroupOutput.class));
+        }
+        catch (Exception e)
+        {
+            LOGGER.atError()
+                    .setMessage("Error in retrieving group for external group id {}: {}")
+                    .addArgument(externalGroupId)
+                    .addArgument(e.getMessage())
+                    .setCause(e)
+                    .log();
+
+            return Optional.empty();
+        }
+    }
+
 
     public List<NucleusGroupMembershipOutput> getCurrentGroupMemberships()
     {
@@ -252,6 +311,7 @@ public class NucleusClient
 
     public void assignGroupMembers(List<NucleusGroupMemberAssignmentInput> assignments)
     {
+        if(assignments.isEmpty()){return;}
         String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/group-members";
 
         try
@@ -323,6 +383,7 @@ public class NucleusClient
     public void removeGroupMembers(
             String parentExternalGroupId, List<String> memberExternalUserIds)
     {
+        if(memberExternalUserIds.isEmpty()){return;}
         try
         {
             for (int i = 0; i < memberExternalUserIds.size(); i += deleteBatchSize)

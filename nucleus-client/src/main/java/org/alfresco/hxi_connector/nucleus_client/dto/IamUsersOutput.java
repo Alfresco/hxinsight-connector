@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,24 +23,16 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync;
+package org.alfresco.hxi_connector.nucleus_client.dto;
 
-import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.retry.annotation.EnableRetry;
-import org.springframework.scheduling.annotation.EnableScheduling;
+import java.util.List;
 
-@SpringBootApplication(scanBasePackages = {
-        "org.alfresco.hxi_connector.nucleus_sync",
-        "org.alfresco.hxi_connector.nucleus_client"
-})
-@EnableScheduling
-@EnableRetry
-@SuppressWarnings("PMD.UseUtilityClass")
-public class NucleusSyncApplication
+public record IamUsersOutput(List<IamUser> users, String next)
+        implements NucleusPagedResponse<IamUser>
 {
-    public static void main(String[] args)
+    @Override
+    public List<IamUser> items()
     {
-        SpringApplication.run(NucleusSyncApplication.class, args);
+        return users;
     }
 }

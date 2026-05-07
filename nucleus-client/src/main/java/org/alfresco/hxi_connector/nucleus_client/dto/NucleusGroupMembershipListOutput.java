@@ -23,10 +23,10 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.dto;
+package org.alfresco.hxi_connector.nucleus_client.dto;
 
 import java.util.List;
 
-public record NucleusGroupListOutput(List<NucleusGroupOutput> items, String next)
-        implements NucleusPagedResponse<NucleusGroupOutput>
+public record NucleusGroupMembershipListOutput(List<NucleusGroupMembershipOutput> items, String next)
+        implements NucleusPagedResponse<NucleusGroupMembershipOutput>
 {}

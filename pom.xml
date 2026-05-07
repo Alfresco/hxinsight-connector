@@ -21,6 +21,7 @@
         <module>live-ingester</module>
         <module>prediction-applier</module>
         <module>hxinsight-extension</module>
+        <module>nucleus-client</module>
         <module>nucleus-sync</module>
         <module>distribution</module>
         <module>e2e-test</module>
@@ -204,6 +205,11 @@
             <dependency>
                 <groupId>org.alfresco</groupId>
                 <artifactId>alfresco-hxinsight-connector-hxinsight-extension</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.alfresco</groupId>
+                <artifactId>alfresco-hxinsight-connector-nucleus-client</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>

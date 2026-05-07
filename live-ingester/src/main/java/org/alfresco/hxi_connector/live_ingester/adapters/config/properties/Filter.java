@@ -29,7 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
-public record Filter(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path path)
+public record Filter(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path path, @NotNull Identity identity)
 {
     public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
     {}
@@ -38,5 +38,8 @@ public record Filter(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path p
     {}
 
     public record Path(@NotNull List<String> allow, @NotNull List<String> deny)
+    {}
+
+    public record Identity(@NotNull List<String> allow, @NotNull List<String> deny)
     {}
 }
