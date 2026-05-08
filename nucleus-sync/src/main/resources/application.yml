@@ -23,20 +23,20 @@ auth:
   providers:
     hyland-experience:
       type: ${AUTH_HX_TYPE:oauth2}
-      client-id: ${HX_CLIENT_ID:sc-91075e1c-be49-4668-87c1-ee9202c42ea5}
-      client-secret: ${HX_CLIENT_SECRET:hyx_cs_tH08cH5rmaKN1VJqMaFNRPxKpxYOjNU5LsnuLLJ3cm1OMBywSM}
-      token-uri: ${HX_TOKEN_URI:https://auth.iam.dev.experience.hyland.com/idp/connect/token}
+      client-id: ${HX_CLIENT_ID}
+      client-secret: ${HX_CLIENT_SECRET}
+      token-uri: ${HX_TOKEN_URI}
       grant-type: client_credentials
       scope:
         - iam.user-data.account
         - system-integrations-config
         - system-integrations-runtime
         - environment_authorization
-      environment-key: ${AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY:hxai-acbf65ce-59b7-4def-b36f-a7dd47f30402}
+      environment-key: ${AUTH_PROVIDERS_HYLANDEXPERIENCE_ENVIRONMENTKEY}
       client-name: acs-insight-connector
 
 alfresco:
-  base-url: ${ALFRESCO_BASE_URL:http://localhost:8080/alfresco/api/-default-/public/alfresco/versions/1}
+  base-url: ${ALFRESCO_BASE_URL}
   page-size: 100
   user:
     skip-not-enabled: ${ALFRESCO_SKIP_DISABLED_USER:true}
@@ -45,9 +45,9 @@ alfresco:
     max-concurrent-requests: ${ALFRESCO_USR_GRP_MAX_REQUESTS:5}
 
 nucleus:
-  idp-base-url: ${NUCLEUS_IDP_BASE_URL:https://auth.iam.dev.experience.hyland.com}
-  base-url: ${NUCLEUS_BASE_URL:https://api.nucleus.dev.experience.hyland.com}
-  system-id: ${NUCLEUS_SYSTEM_ID:aaca2d59-e43f-47dc-a089-852245390852}
+  idp-base-url: ${NUCLEUS_IDP_BASE_URL}
+  base-url: ${NUCLEUS_BASE_URL}
+  system-id: ${NUCLEUS_SYSTEM_ID}
   page-size: 1000
   sync-batch-size: 1000
   delete-group-member-batch-size: ${DELETE_BATCH_SIZE:100}
