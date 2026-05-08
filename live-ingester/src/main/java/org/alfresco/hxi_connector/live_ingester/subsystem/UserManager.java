@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.subsystem.Exceptions.IamSyncException;
+import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusSCIMResponse;
@@ -59,9 +60,16 @@ public class UserManager {
             nucleusClient.createUserMappings(List.of(userMappingInput));
     }
 
-    public void deleteUser(String externalId) {
+    public boolean deleteUser(String externalId) {
         // Logic to delete a user
-
+        try {
+            nucleusClient.deleteUserMapping(externalId);
+            return true;
+        }
+        catch (ClientException e){
+            log.error("Error while deleting user mapping for id: {}", externalId, e);
+            return false;
+        }
     }
 
     public Optional<IamUser> fetchUserByEmailId(String emailId) {
