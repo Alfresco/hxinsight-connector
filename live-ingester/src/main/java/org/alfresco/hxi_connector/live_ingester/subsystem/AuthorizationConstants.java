@@ -25,45 +25,80 @@
  */
 package org.alfresco.hxi_connector.live_ingester.subsystem;
 
-import jdk.jfr.Event;
-import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
+import java.util.Map;
+import java.util.Set;
+
+import org.alfresco.hxi_connector.live_ingester.subsystem.Exceptions.IamSyncException;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 /**
- * ALl The Types of Constants from Events to Users
+ * Constants and small helpers for IAM event handling.
  */
-public class AuthorizationConstants {
+public final class AuthorizationConstants
+{
     public static final String PERSON_TYPE = "cm:person";
-    public static final String USER_TYPE  = "usr:user";
+    public static final String USER_TYPE = "usr:user";
     public static final String GROUP_TYPE = "cm:authorityContainer";
 
     public static final String MAIL_ATTRIBUTE = "cm:email";
-
+    public static final String EMAIL_PROPERTY = "cm:email";
 
     public static final String EVENT_UPDATED_TYPE = "org.alfresco.event.node.Updated";
     public static final String EVENT_DELETE_TYPE = "org.alfresco.event.node.Deleted";
     public static final String EVENT_CREATED_TYPE = "org.alfresco.event.node.Created";
-    public static final String EMAIL_PROPERTY = "cm:email";
 
     public static final String USERNAME_PROPERTY_1 = "cm:userName";
     public static final String USERNAME_PROPERTY_2 = "usr:username";
 
+    public static final Set<String> USER_TYPES = Set.of(PERSON_TYPE, USER_TYPE);
+    public static final Set<String> UPDATE_OR_DELETE = Set.of(EVENT_UPDATED_TYPE, EVENT_DELETE_TYPE);
 
-    public static final String[] USER_TYPES = new String[]{PERSON_TYPE, USER_TYPE};
-    public static final String[] UPDATE_OR_DELETE = new String[] {EVENT_UPDATED_TYPE, EVENT_DELETE_TYPE};
-
-
-    public static String fetchUserId(RepoEvent<DataAttributes<NodeResource>> event){
-        if(event.getData().getResource().getProperties().containsKey(USERNAME_PROPERTY_1)){
-            return event.getData().getResource().getProperties().get(USERNAME_PROPERTY_1).toString();
-        } else if(event.getData().getResource().getProperties().containsKey(USERNAME_PROPERTY_2)){
-            return event.getData().getResource().getProperties().get(USERNAME_PROPERTY_2).toString();
-        } else {
-            throw new RuntimeException("Username property not found in the event resource properties");
-        }
+    private AuthorizationConstants()
+    {
+        // utility class
     }
 
-}
+    /**
+     * Reads the user id from a repo event, supporting both {@code cm:userName} and {@code usr:username}.
+     * Falls back to {@code resourceBefore} for delete events where the live resource is null.
+     *
+     * @throws IamSyncException if no username property is present.
+     */
+    public static String fetchUserId(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        Map<String, ?> props = propertiesOf(event);
+        if (props != null)
+        {
 
+            Object value = props.get(USERNAME_PROPERTY_1);
+            if (value == null)
+            {
+                value = props.get(USERNAME_PROPERTY_2);
+            }
+            if(value != null){
+                String userName = value.toString();
+                if(!userName.isEmpty()){
+                    return userName;
+                }
+            }
+        }
+        throw new IamSyncException("Username property not found or empty in event "
+                + (event != null ? event.getId() : "<null>"));
+    }
+
+    private static Map<String, ?> propertiesOf(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        if (event == null || event.getData() == null)
+        {
+            return null;
+        }
+        NodeResource resource = event.getData().getResource();
+        if (resource == null || resource.getProperties() == null)
+        {
+            resource = event.getData().getResourceBefore();
+        }
+        return resource == null ? null : resource.getProperties();
+    }
+}
