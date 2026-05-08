@@ -75,7 +75,7 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     public void configure()
     {
         // @formatter:off
-        String uploadEndpoint = "${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false";
+        String uploadEndpoint = buildUploadEndpoint();
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while uploading content - Endpoint: %s".formatted(uploadEndpoint))
             .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
@@ -94,6 +94,18 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
             .endChoice()
             .end();
         // @formatter:on
+    }
+
+    private String buildUploadEndpoint()
+    {
+        String base = "${headers." + STORAGE_LOCATION_HEADER + "}&throwExceptionOnFailure=false";
+        int timeoutMs = integrationProperties.hylandExperience().storage().upload().responseTimeoutMs();
+        if (timeoutMs <= 0)
+        {
+            // Camel HTTP component default — no upper bound, route worker thread will hang indefinitely on a slow PUT.
+            return base;
+        }
+        return base + "&httpClient.responseTimeout=" + timeoutMs;
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,

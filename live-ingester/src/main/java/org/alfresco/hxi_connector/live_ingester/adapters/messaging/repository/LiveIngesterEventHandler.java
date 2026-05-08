@@ -26,20 +26,22 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
 import static org.apache.camel.LoggingLevel.DEBUG;
-import static org.apache.camel.LoggingLevel.ERROR;
 import static org.apache.camel.LoggingLevel.INFO;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.builder.RouteBuilder;
-import org.slf4j.event.Level;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository.EventsSubscription;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingUtils;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DeadLetterChannels;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetric;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetricsRecorder;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
 
 @Component
 @Slf4j
@@ -47,19 +49,29 @@ import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LoggingU
 public class LiveIngesterEventHandler extends RouteBuilder
 {
     private static final String ROUTE_ID = "repo-events-consumer";
+    private static final DlqMetric DLQ_METRIC = new DlqMetric(
+            LiveIngesterMetrics.Dlq.REPO_EVENTS,
+            LiveIngesterMetrics.Dlq.REPO_EVENTS_DESCRIPTION);
 
     private final EventProcessor eventProcessor;
     private final IntegrationProperties integrationProperties;
     private final CamelEventMapper camelEventMapper;
+    private final DlqMetricsRecorder dlqMetricsRecorder;
 
     @Override
     public void configure()
     {
-        String eventSource = integrationProperties.alfresco().repository().eventsEndpoint();
-        onException(Exception.class)
-                .log(ERROR, log, "Repository :: Unexpected state while processing event from: %s".formatted(eventSource))
-                .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
-                .stop();
+        String eventSource = buildEventSourceUri();
+        EventsSubscription subscription = integrationProperties.alfresco().repository().eventsSubscription();
+
+        if (subscription.deadLetterEnabled())
+        {
+            errorHandler(DeadLetterChannels.forRoute(subscription, dlqMetricsRecorder, DLQ_METRIC, log));
+        }
+        else
+        {
+            log.warn("Repository :: dead-letter channel disabled. Set alfresco.repository.events-subscription.dead-letter-enabled=true to re-enable.");
+        }
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(eventSource)
@@ -72,5 +84,25 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .process(exchange -> SecurityContextHolder.setContext(securityContext))
                 .process(eventProcessor::process)
                 .end();
+    }
+
+    private String buildEventSourceUri()
+    {
+        String baseUri = integrationProperties.alfresco().repository().eventsEndpoint();
+        var subscription = integrationProperties.alfresco().repository().eventsSubscription();
+        if (subscription == null || !subscription.durable())
+        {
+            log.info("Repository :: Subscribing to {} as a non-durable consumer. Events published while disconnected will be dropped by the broker. Set ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE=true to enable a durable subscription.", baseUri);
+            return baseUri;
+        }
+
+        String separator = baseUri.contains("?") ? "&" : "?";
+        String durableUri = baseUri
+                + separator
+                + "subscriptionDurable=true"
+                + "&durableSubscriptionName=" + subscription.name();
+        log.info("Repository :: Subscribing to {} as a durable consumer with durableSubscriptionName={}. The connection's clientId is configured on the JMS ConnectionFactory by JmsClientIdConfigurer. Only one live-ingester instance can hold this subscription at a time; multi-instance HA is not yet supported.",
+                baseUri, subscription.name());
+        return durableUri;
     }
 }

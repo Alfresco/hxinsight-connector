@@ -29,13 +29,18 @@ import static java.util.Objects.requireNonNullElseGet;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 
 @SuppressWarnings("PMD.UnusedAssignment")
-public record Ingester(@NotBlank String endpoint, @NotNull @NestedConfigurationProperty Retry retry)
+public record Ingester(
+        @NotBlank String endpoint,
+        @NotNull @NestedConfigurationProperty Retry retry,
+        @PositiveOrZero @DefaultValue("30000") int responseTimeoutMs)
 {
     public Ingester
     {

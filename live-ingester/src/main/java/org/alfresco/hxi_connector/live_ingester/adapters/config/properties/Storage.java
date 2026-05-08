@@ -30,8 +30,10 @@ import static java.util.Objects.requireNonNullElseGet;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 
@@ -41,10 +43,13 @@ public record Storage(@NotNull Location location, @NotNull Upload upload)
 
     public Storage
     {
-        upload = requireNonNullElse(upload, new Upload(new Retry()));
+        upload = requireNonNullElse(upload, new Upload(new Retry(), 0));
     }
 
-    public record Location(@NotBlank String endpoint, @NotNull @NestedConfigurationProperty Retry retry)
+    public record Location(
+            @NotBlank String endpoint,
+            @NotNull @NestedConfigurationProperty Retry retry,
+            @PositiveOrZero @DefaultValue("30000") int responseTimeoutMs)
     {
         public Location
         {
@@ -52,7 +57,9 @@ public record Storage(@NotNull Location location, @NotNull Upload upload)
         }
     }
 
-    public record Upload(@NotNull @NestedConfigurationProperty Retry retry)
+    public record Upload(
+            @NotNull @NestedConfigurationProperty Retry retry,
+            @PositiveOrZero @DefaultValue("0") int responseTimeoutMs)
     {
         public Upload
         {

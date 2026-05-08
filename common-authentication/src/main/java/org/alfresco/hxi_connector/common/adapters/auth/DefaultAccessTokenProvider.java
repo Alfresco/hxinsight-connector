@@ -47,17 +47,17 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     @Override
     public String getAccessToken(String providerId)
     {
-        Token token = accessTokens.get(providerId);
         synchronized (this)
         {
+            Token token = accessTokens.get(providerId);
             if (shouldRefreshToken(token))
             {
                 refreshAuthenticationResult(providerId);
                 token = accessTokens.get(providerId);
             }
+            EnsureUtils.ensureNonNull(token, "Authentication result is null");
+            return token.getAccessToken();
         }
-        EnsureUtils.ensureNonNull(token, "Authentication result is null");
-        return token.getAccessToken();
     }
 
     private void refreshAuthenticationResult(String providerId)

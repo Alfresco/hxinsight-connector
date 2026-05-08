@@ -94,7 +94,7 @@ class PreSignedUrlRequesterTest
         camelContext.addRoutes(preSignedUrlRequester);
         camelContext.start();
 
-        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT + "&userAgent=", MockEndpoint.class);
+        mockEndpoint = camelContext.getEndpoint(MOCK_ENDPOINT + "&httpClient.responseTimeout=30000&userAgent=", MockEndpoint.class);
     }
 
     @AfterEach
@@ -226,7 +226,7 @@ class PreSignedUrlRequesterTest
 
     private IntegrationProperties integrationPropertiesOf(String endpoint)
     {
-        Storage storageProperties = new Storage(new Storage.Location(endpoint, new Retry()), new Storage.Upload(new Retry()));
+        Storage storageProperties = new Storage(new Storage.Location(endpoint, new Retry(), 30000), new Storage.Upload(new Retry(), 0));
         IntegrationProperties.HylandExperience hylandExperienceProperties = new IntegrationProperties.HylandExperience(storageProperties, null);
         Application applicationProperties = new Application("dummy-source-id", "dummy-version");
         return new IntegrationProperties(null, hylandExperienceProperties, applicationProperties);

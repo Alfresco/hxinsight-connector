@@ -39,6 +39,8 @@ import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.reposi
 import static org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.EventUtils.wasPredictionConfirmed;
 import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType.CREATE_OR_UPDATE;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
@@ -48,6 +50,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.RepoEventFilterHandler;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
@@ -63,13 +66,13 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 @RequiredArgsConstructor
 public class EventProcessor
 {
-
     private final IngestNodeCommandHandler ingestNodeCommandHandler;
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final DeleteNodeCommandHandler deleteNodeCommandHandler;
     private final RepoEventMapper repoEventMapper;
     private final RepoEventFilterHandler repoEventFilterHandler;
     private final IntegrationProperties integrationProperties;
+    private final MeterRegistry meterRegistry;
 
     public void process(Exchange exchange)
     {
@@ -91,6 +94,12 @@ public class EventProcessor
         if (isPredictionNodeEvent(event))
         {
             handlePredictionNodeEvent(event);
+            return;
+        }
+
+        if (!isKnownNodeEventType(event))
+        {
+            handleUnsupportedEventType(event);
             return;
         }
 
@@ -141,6 +150,32 @@ public class EventProcessor
         {
             DeleteNodeCommand deleteNodeCommand = repoEventMapper.mapToDeleteNodeCommand(event);
             deleteNodeCommandHandler.handle(deleteNodeCommand);
+        }
+    }
+
+    private static boolean isKnownNodeEventType(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        return isEventTypeCreated(event)
+                || isEventTypeUpdated(event)
+                || isEventTypePermissionsUpdated(event)
+                || isEventTypeDeleted(event);
+    }
+
+    private void handleUnsupportedEventType(RepoEvent<DataAttributes<NodeResource>> event)
+    {
+        String eventType = event.getType();
+        log.info("Repository :: Skipping event id={} with unsupported eventType={} — no dispatch predicate matched. Increment {}{{type=\"{}\"}} on every occurrence.",
+                event.getId(), eventType, LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED, eventType);
+
+        Counter.builder(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED)
+                .description(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED_DESCRIPTION)
+                .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, eventType == null ? "null" : eventType)
+                .register(meterRegistry)
+                .increment();
+
+        if (integrationProperties.alfresco().repository().eventsSubscription().deadLetterUnsupportedTypes())
+        {
+            throw new UnsupportedEventTypeException(event.getId(), eventType);
         }
     }
 }

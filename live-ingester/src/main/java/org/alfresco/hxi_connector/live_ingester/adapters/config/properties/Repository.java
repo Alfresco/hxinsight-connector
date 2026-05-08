@@ -26,13 +26,23 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
-public record Repository(@NotBlank String baseUrl, @NotBlank String eventsEndpoint, String discoveryEndpoint, String versionOverride, HealthProbe healthProbe)
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DeadLetterChannelConfig;
+
+public record Repository(@NotBlank String baseUrl,
+        @NotBlank String eventsEndpoint,
+        @NotNull EventsSubscription eventsSubscription,
+        String discoveryEndpoint,
+        String versionOverride,
+        HealthProbe healthProbe,
+        @PositiveOrZero @DefaultValue("0") int responseTimeoutMs)
 {
 
     public Repository
@@ -52,5 +62,17 @@ public record Repository(@NotBlank String baseUrl, @NotBlank String eventsEndpoi
 
     @Validated
     public record HealthProbe(String endpoint, @Positive @DefaultValue("1800") int timeoutSeconds, @Positive @DefaultValue("30") int intervalSeconds)
+    {}
+
+    @Validated
+    public record EventsSubscription(
+            @DefaultValue("false") boolean durable,
+            @NotBlank @DefaultValue("LiveIngesterSubscription") String name,
+            @DefaultValue("false") boolean deadLetterEnabled,
+            @NotBlank @DefaultValue("activemq:queue:ActiveMQ.DLQ") String deadLetterUri,
+            @PositiveOrZero @DefaultValue("6") int maximumRedeliveries,
+            @PositiveOrZero @DefaultValue("1000") long redeliveryDelayMs,
+            @DefaultValue("false") boolean deadLetterUnsupportedTypes)
+            implements DeadLetterChannelConfig
     {}
 }

@@ -30,7 +30,6 @@ import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATI
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import lombok.NoArgsConstructor;
 import org.apache.camel.Exchange;
@@ -46,14 +45,9 @@ public class LoggingUtils
     public static void logMaskedExchangeState(Exchange exchange, Logger log, Level level)
     {
         Map<String, Object> properties = exchange.getProperties();
-        Map<String, Object> headers = new HashMap<>(exchange.getMessage().getHeaders()).entrySet().stream()
-                .peek(e -> {
-                    if (HEADERS_TO_MASK.contains(e.getKey()))
-                    {
-                        e.setValue(MASK);
-                    }
-                })
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        Map<String, Object> headers = new HashMap<>();
+        exchange.getMessage().getHeaders().forEach((key, value) ->
+                headers.put(key, HEADERS_TO_MASK.contains(key) ? MASK : value));
         String bodyType = exchange.getMessage().getBody() != null ? exchange.getMessage().getBody().getClass().getName() : "";
         String body = exchange.getMessage().getBody(String.class);
 

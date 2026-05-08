@@ -73,7 +73,9 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     public void configure()
     {
         // @formatter:off
-        String ingestionEndpoint = integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
+        String ingestionEndpoint = integrationProperties.hylandExperience().ingester().endpoint()
+                + "&httpClient.responseTimeout=" + integrationProperties.hylandExperience().ingester().responseTimeoutMs()
+                + ApplicationInfoProvider.USER_AGENT_PARAM;
         onException(Exception.class)
             .log(LoggingLevel.ERROR, log, "Ingestion :: Unexpected response - Endpoint: %s".formatted(ingestionEndpoint))
             .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))

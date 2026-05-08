@@ -56,6 +56,7 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.ATSTransformRequester;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetricsRecorder;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformRequest;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommand;
@@ -66,6 +67,7 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
         properties = {"logging.level.org.alfresco=DEBUG"},
         classes = {
                 ATSTransformResponseHandler.class,
+                DlqMetricsRecorder.class,
                 ATSTransformResponseHandlerIntegrationTest.IntegrationPropertiesTestConfig.class,
                 IntegrationCamelTestBase.class})
 @EnableAutoConfiguration

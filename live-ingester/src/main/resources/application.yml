@@ -2,7 +2,7 @@ server:
   port: 8080
 
 management:
-  endpoints.web.exposure.include: health
+  endpoints.web.exposure.include: health,metrics
   endpoint.health.probes.enabled: true
   health.liveness-state.enabled: true
   health.readiness-state.enabled: true
@@ -18,7 +18,16 @@ application:
 alfresco:
   repository:
     events-endpoint: activemq:topic:alfresco.repo.event2
+    events-subscription:
+      durable: false
+      name: LiveIngesterSubscription
+      dead-letter-enabled: false
+      dead-letter-uri: activemq:queue:ActiveMQ.DLQ
+      maximum-redeliveries: 6
+      redelivery-delay-ms: 1000
+      dead-letter-unsupported-types: false
     base-url: http://localhost:8080/alfresco
+    response-timeout-ms: 0
     discovery-endpoint: ${alfresco.repository.base-url}/api/discovery
     health-probe:
       endpoint: ${alfresco.repository.base-url}
@@ -26,6 +35,10 @@ alfresco:
       interval-seconds: 30
   bulk-ingester:
     endpoint: activemq:queue:bulk-ingester-events
+    dead-letter-enabled: false
+    dead-letter-uri: activemq:queue:ActiveMQ.DLQ
+    maximum-redeliveries: 6
+    redelivery-delay-ms: 1000
   transform:
     request:
       endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text
@@ -44,6 +57,11 @@ alfresco:
       endpoint: activemq:queue:${alfresco.transform.response.queue-name}
       retry-ingestion:
         attempts: -1
+      dead-letter-enabled: false
+      dead-letter-uri: activemq:queue:ActiveMQ.DLQ
+      maximum-redeliveries: 6
+      redelivery-delay-ms: 1000
+      throw-failed-transforms: false
     shared-file-store:
       base-url: http://localhost:8099
       file-endpoint: ${alfresco.transform.shared-file-store.base-url}/alfresco/api/-default-/private/sfs/versions/1/file
@@ -65,8 +83,12 @@ hyland-experience:
     digest-algorithm: SHA-256
     location:
       endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
+      response-timeout-ms: 30000
+    upload:
+      response-timeout-ms: 0
   ingester:
     endpoint: ${hyland-experience.insight.ingestion.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
+    response-timeout-ms: 30000
 
 auth:
   providers:

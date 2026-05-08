@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.common.config.properties;
 
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -78,7 +79,8 @@ public class Retry
                 Stream.concat(RETRY_REASONS_BASIC.stream(), Stream.of(
                         HttpHostConnectException.class,
                         NoHttpResponseException.class,
-                        MalformedChunkCodingException.class)).collect(Collectors.toSet()));
+                        MalformedChunkCodingException.class,
+                        SocketException.class)).collect(Collectors.toSet()));
     }
 
     public Retry(int attempts, int initialDelay, double delayMultiplier, Set<Class<? extends Throwable>> reasons)

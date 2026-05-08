@@ -52,7 +52,7 @@ public class AuthConfig
     {
         return security
                 .formLogin(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/actuator/health/**").permitAll())
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/actuator/health/**", "/actuator/metrics/**").permitAll())
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().denyAll())
                 .build();
     }
