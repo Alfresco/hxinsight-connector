@@ -30,6 +30,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.subsystem.Exceptions.IamSyncException;
+import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingStrategy;
 import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
@@ -53,6 +54,7 @@ import static org.alfresco.hxi_connector.live_ingester.subsystem.AuthorizationCo
 public class UserManager {
     private final NucleusClient nucleusClient;
     private final MappingManager mappingManager;
+    private final UserFetchingStrategy userFetchingStrategy;
 
 
     public void mapUser(NucleusUserMappingInput userMappingInput) {
@@ -72,19 +74,7 @@ public class UserManager {
         }
     }
 
-    public Optional<IamUser> fetchUserByEmailId(String emailId) {
-        if(StringUtil.isNullOrEmpty(emailId)){
-            log.error("Email Id is null or empty, can't fetch user details");
-            return Optional.empty();
-        }
-        // Logic to fetch user details by email id
-        Optional<List<NucleusSCIMResponse.Resource>> userResources = nucleusClient.getUserByEmailId(emailId);
-        if(userResources.isEmpty() || userResources.get().isEmpty()){return Optional.empty();}
-        NucleusSCIMResponse.Resource userResource = userResources.get().get(0); // HxIAM has only one User Mapped to a single mail
 
-        return
-                Optional.of(new IamUser(userResource.userName(), userResource.id(), userResource.emails().get(0).value())); // considering only single mail user for now
-    }
 
     public Optional<NucleusUserMappingOutput> fetchUserMapping(String externalId) {
         // Logic to fetch user mapping details
@@ -102,7 +92,7 @@ public class UserManager {
             return;
         }
         // If the mapping does not exist, we need to check if the user exists by email id
-        Optional<IamUser> iamUser = fetchUserByEmailId(emailId);
+        Optional<IamUser> iamUser = userFetchingStrategy.fetchUserByEmailId(emailId);
         if(iamUser.isPresent()){
             log.debug("User with email id: {} exists in HxIAM with user id: {}. Creating mapping for this user.", emailId, iamUser.get().userId());
             mapUser(new NucleusUserMappingInput(iamUser.get().userId(), externalId));

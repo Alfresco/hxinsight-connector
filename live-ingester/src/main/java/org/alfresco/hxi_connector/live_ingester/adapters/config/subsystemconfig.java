@@ -29,6 +29,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 import org.alfresco.hxi_connector.live_ingester.subsystem.GroupManager;
 import org.alfresco.hxi_connector.live_ingester.subsystem.IdentitySyncSubsystem;
 import org.alfresco.hxi_connector.live_ingester.subsystem.MappingManager;
+import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingBulkStrategy;
+import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingStrategy;
 import org.alfresco.hxi_connector.live_ingester.subsystem.UserManager;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.springframework.context.annotation.Bean;
@@ -43,8 +45,8 @@ public class subsystemconfig {
     }
 
     @Bean
-    public UserManager userManager(NucleusClient nucleusClient,MappingManager mappingManager){
-        return new UserManager(nucleusClient,mappingManager);
+    public UserManager userManager(NucleusClient nucleusClient,MappingManager mappingManager,UserFetchingStrategy userFetchingStrategy){
+        return new UserManager(nucleusClient,mappingManager,userFetchingStrategy);
     }
 
     @Bean
@@ -55,6 +57,11 @@ public class subsystemconfig {
     @Bean
     public MappingManager mappingManager(NucleusClient nucleusClient){
         return new MappingManager(nucleusClient);
+    }
+
+    @Bean
+    public UserFetchingStrategy userFetchingStrategy(NucleusClient nucleusClient){
+        return new UserFetchingBulkStrategy(nucleusClient);
     }
 
 }
