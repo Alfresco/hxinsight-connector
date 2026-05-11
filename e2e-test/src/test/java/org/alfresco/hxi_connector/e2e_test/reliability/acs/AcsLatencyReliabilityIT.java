@@ -72,9 +72,7 @@ public class AcsLatencyReliabilityIT extends BaseReliabilityIT
      * Wall-clock budget for the connector to exhaust HTTP retries + JMS redelivery and surface the failure on the DLQ. Sized for {@code attempts=2 × ~3 s} on each of {@code maximumRedeliveries=1+1} JMS attempts, plus headroom for Camel internal scheduling.
      */
     private static final int DLQ_DEADLINE_MS = 30_000;
-    /**
-     * Substring from {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.AlfrescoRepositoryContentClient AlfrescoRepositoryContentClient}'s {@code onException(Exception.class).log(ERROR, ...)} chain. Fires once per @{@code Retryable} attempt when the ACS REST GET to {@code /alfresco/api/.../content} fails (timeout, connect-refused, RST, …) — i.e. exactly when the chaos under test is exercised. Asserting a non-zero count of this substring distinguishes "the download path actually ran and failed as designed" from "the download path was silently disabled and the DLQ entry comes from an unrelated regression in the rendition pipeline" — without it, a no-op {@code downloadContent} that returns an empty stream would land a DLQ entry through the rendition POST and satisfy the broad {@code dlqDepth >= 1} assertion. The log line includes the live-ingester-side ACS endpoint URL, so it cannot be invariant with respect to the download path running.
-     */
+
     private static final String ACS_DOWNLOAD_FAILURE_LOG_FRAGMENT = "Repository :: Unexpected response while downloading content";
 
     @Test
@@ -99,18 +97,16 @@ public class AcsLatencyReliabilityIT extends BaseReliabilityIT
                     .createNodeWithContent(PARENT_ID, "acs-latency-victim.txt", content, "text/plain");
             log.info("[reliability] Published node {} during ACS latency window — expecting DLQ within {} ms", slow.id(), DLQ_DEADLINE_MS);
 
-            // Asserting on dlqDepth + the ACS-download route's onException log line: the metadata POST runs
-            // ahead of the content download and may reach HX Insight even when the content path DLQs, so an
-            // ingestion-event count for this objectId is not a clean negative signal here. The log substring
-            // pins the DLQ entry to the chaos under test (the ACS download path) rather than to any
-            // collateral failure in the rendition pipeline; without it, a regression that silently disables
-            // the download path could still satisfy `dlqDepth >= 1` for an unrelated reason.
+            // Why not the simpler assertInDeliveryRetryFired-style check (ingestionEventsFor == 0): the
+            // metadata POST runs ahead of the content download and may reach HXI even when the content
+            // path DLQs, so its count is not a clean negative signal for this scenario. The log substring
+            // (asserted below) binds the DLQ entry to the ACS download path under test.
             RetryUtils.retryWithBackoff(() -> {
                 assertThat(environment().jolokia().dlqDepth())
                         .as("ACS slowdown should produce an observable DLQ entry — a zero here means the route is stuck waiting on the slow request, contradicting the bounded-retry contract pinned by alfresco.repository.responseTimeoutMs")
                         .isGreaterThanOrEqualTo(1);
                 assertThat(environment().liveIngesterContainer().getLogs())
-                        .as("the ACS-content-download route must actually have been attempted under the latency chaos — without this positive signal, a regression that silently disables the download (e.g. an early-return in AlfrescoRepositoryContentClient.downloadContent) would still satisfy dlqDepth >= 1 via a collateral failure further down the rendition pipeline (e.g. empty-stream upload). Asserting the route's `Repository :: Unexpected response while downloading content - Endpoint: ...` ERROR log binds the DLQ entry to the chaos under test")
+                        .as("DLQ entry is not bound to the ACS download path — log fragment <<%s>> missing, regression candidates: early-return in AlfrescoRepositoryContentClient.downloadContent, or collateral failure further down the rendition pipeline (e.g. empty-stream upload)".formatted(ACS_DOWNLOAD_FAILURE_LOG_FRAGMENT))
                         .contains(ACS_DOWNLOAD_FAILURE_LOG_FRAGMENT);
             }, CONVERGENCE_DELAY_MS);
         }

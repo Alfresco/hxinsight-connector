@@ -76,7 +76,7 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
         }
 
         /**
-         * Convenience constructor for hand-rolled test fixtures. Tests that don't care about the dead-letter wiring keep using the original 4-arg shape and pick up DLC-disabled defaults.
+         * Convenience constructor for hand-rolled test fixtures.
          */
         public Response(String endpoint, String queueName, Retry retryIngestion, Retry retryTransformation)
         {
