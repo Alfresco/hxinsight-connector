@@ -40,7 +40,7 @@ import lombok.NoArgsConstructor;
 import org.slf4j.LoggerFactory;
 
 @NoArgsConstructor(access = PRIVATE)
-public class LoggingUtils
+public class LogCaptureUtils
 {
 
     public static ListAppender<ILoggingEvent> createLogsListAppender(Class<?> classToTrack, Class<?>... classesToTrack)

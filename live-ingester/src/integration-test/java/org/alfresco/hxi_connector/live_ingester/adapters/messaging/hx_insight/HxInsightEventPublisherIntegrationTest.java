@@ -94,7 +94,7 @@ import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerTags;
-import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
+import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
@@ -196,7 +196,7 @@ class HxInsightEventPublisherIntegrationTest extends IntegrationCamelTestBase
         // given
         givenThat(post(INGEST_PATH)
                 .willReturn(badRequest().withResponseBody(new Body("{\"error\": \"Bad request\"}"))));
-        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(HxInsightEventPublisher.class);
+        ListAppender<ILoggingEvent> logEntries = LogCaptureUtils.createLogsListAppender(HxInsightEventPublisher.class);
 
         // when
         catchThrowable(() -> ingestionEngineEventPublisher.publishMessage(NODE_EVENT));

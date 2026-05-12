@@ -36,7 +36,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.LoggerFactory;
 
-class LoggingUtilsTest
+class LogCaptureUtilsTest
 {
     private Logger testLogger1;
     private Logger testLogger2;
@@ -66,7 +66,7 @@ class LoggingUtilsTest
     @Test
     void createLogsListAppender_singleClass_shouldAttachAppenderToLogger()
     {
-        listAppender = LoggingUtils.createLogsListAppender(LoggerOneSource.class);
+        listAppender = LogCaptureUtils.createLogsListAppender(LoggerOneSource.class);
 
         assertTrue(testLogger1.isAttached(listAppender));
         assertEquals(Level.DEBUG, testLogger1.getLevel());
@@ -75,7 +75,7 @@ class LoggingUtilsTest
     @Test
     void createLogsListAppender_multipleClasses_shouldAttachAppenderToAllLoggers()
     {
-        listAppender = LoggingUtils.createLogsListAppender(LoggerOneSource.class, LoggerTwoSource.class);
+        listAppender = LogCaptureUtils.createLogsListAppender(LoggerOneSource.class, LoggerTwoSource.class);
 
         assertTrue(testLogger1.isAttached(listAppender));
         assertTrue(testLogger2.isAttached(listAppender));
@@ -86,7 +86,7 @@ class LoggingUtilsTest
     @Test
     void createLogsListAppender_capturesLogMessages()
     {
-        listAppender = LoggingUtils.createLogsListAppender(LoggerOneSource.class);
+        listAppender = LogCaptureUtils.createLogsListAppender(LoggerOneSource.class);
         String testMessage = "Test log message";
 
         testLogger1.info(testMessage);
@@ -98,7 +98,7 @@ class LoggingUtilsTest
     @Test
     void createLogsListAppender_capturesLogMessagesFromMultipleClasses()
     {
-        listAppender = LoggingUtils.createLogsListAppender(LoggerOneSource.class, LoggerTwoSource.class);
+        listAppender = LogCaptureUtils.createLogsListAppender(LoggerOneSource.class, LoggerTwoSource.class);
         String message1 = "Message from class 1";
         String message2 = "Message from class 2";
 

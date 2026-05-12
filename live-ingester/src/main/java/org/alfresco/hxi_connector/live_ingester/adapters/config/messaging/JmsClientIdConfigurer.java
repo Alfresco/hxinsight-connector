@@ -35,13 +35,17 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
 /**
- * Sets the JMS connection {@code clientId} on the autoconfigured Spring {@link SingleConnectionFactory} (which {@link org.springframework.jms.connection.CachingConnectionFactory} extends) so the live-ingester can subscribe to the repository's {@code alfresco.repo.event2} topic as a durable consumer. The clientId must be set on the factory before any connection is established, otherwise {@code SingleConnectionFactory} rejects late {@code setClientID} calls with "setClientID call not supported on proxy for shared Connection".
+ * Sets the JMS {@code clientId} on the autoconfigured {@link SingleConnectionFactory} so the
+ * live-ingester can subscribe to {@code alfresco.repo.event2} as a durable consumer. Runs as a
+ * {@link BeanPostProcessor} because {@code SingleConnectionFactory} rejects late
+ * {@code setClientID} calls once a connection is open ("setClientID call not supported on proxy
+ * for shared Connection").
  *
- * <p>
- * Activated only when {@code alfresco.repository.events-subscription.durable=true}; the default (non-durable) deployment is unaffected.
+ * <p>The clientId applies to every JMS connection in this process (repo events, bulk-ingester
+ * events, transform.response). JMS permits one active connection per clientId per broker, so the
+ * durable-subscription path is single-instance only;
  *
- * <p>
- * Side effects: the configured clientId applies to <i>all</i> JMS connections opened by the live-ingester (including the bulk-ingester-events consumer and the transform.response consumer). JMS allows only one active connection per clientId per broker, so a second live-ingester instance using the same clientId will fail to open its connection. This matches the single-instance topology that production runs today; multi-instance HA is not yet supported.
+ * <p>Activated by {@code alfresco.repository.events-subscription.durable=true}.
  */
 @Component
 @ConditionalOnProperty(prefix = "alfresco.repository.events-subscription", name = "durable", havingValue = "true")

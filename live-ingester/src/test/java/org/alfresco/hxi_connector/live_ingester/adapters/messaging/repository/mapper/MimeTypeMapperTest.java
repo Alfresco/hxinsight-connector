@@ -48,7 +48,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
+import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
@@ -219,7 +219,7 @@ class MimeTypeMapperTest
     {
         // Spring Boot mangles map keys containing '/' unless wrapped in brackets, e.g. "[text/plain]"
         given(mockMimeTypeProperties.mapping()).willReturn(Map.of("textplain", "application/pdf"));
-        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(MimeTypeMapper.class);
+        ListAppender<ILoggingEvent> logEntries = LogCaptureUtils.createLogsListAppender(MimeTypeMapper.class);
 
         // when
         objectUnderTest.validateMappings();

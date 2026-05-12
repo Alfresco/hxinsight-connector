@@ -35,7 +35,7 @@ import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLogsListAppender;
+import static org.alfresco.hxi_connector.common.test.util.LogCaptureUtils.createLogsListAppender;
 
 import java.util.List;
 import java.util.stream.IntStream;

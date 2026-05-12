@@ -61,7 +61,7 @@ import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.common.exception.EndpointClientErrorException;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
-import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
+import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
@@ -179,7 +179,7 @@ class HttpFileUploaderIntegrationTest extends IntegrationCamelTestBase
         URL preSignedUrl = s3StorageMock.generatePreSignedUploadUrl("invalid-bucket", OBJECT_KEY, OBJECT_CONTENT_TYPE);
 
         FileUploadRequest fileUploadRequest = new FileUploadRequest(fileToUpload, OBJECT_CONTENT_TYPE, preSignedUrl);
-        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(HttpFileUploader.class);
+        ListAppender<ILoggingEvent> logEntries = LogCaptureUtils.createLogsListAppender(HttpFileUploader.class);
 
         // when
         catchThrowable(() -> fileUploader.upload(fileUploadRequest, NODE_ID));

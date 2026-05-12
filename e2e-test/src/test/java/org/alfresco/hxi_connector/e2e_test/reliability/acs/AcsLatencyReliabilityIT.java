@@ -101,7 +101,7 @@ public class AcsLatencyReliabilityIT extends BaseReliabilityIT
             // metadata POST runs ahead of the content download and may reach HXI even when the content
             // path DLQs, so its count is not a clean negative signal for this scenario. The log substring
             // (asserted below) binds the DLQ entry to the ACS download path under test.
-            RetryUtils.retryWithBackoff(() -> {
+            RetryUtils.assertWithRetry(() -> {
                 assertThat(environment().jolokia().dlqDepth())
                         .as("ACS slowdown should produce an observable DLQ entry — a zero here means the route is stuck waiting on the slow request, contradicting the bounded-retry contract pinned by alfresco.repository.responseTimeoutMs")
                         .isGreaterThanOrEqualTo(1);
@@ -121,7 +121,7 @@ public class AcsLatencyReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "acs-latency-sentinel.txt", postContent, "text/plain");
         log.info("[reliability] Post-latency sentinel {} — verifying liveness", sentinel.id());
 
-        RetryUtils.retryWithBackoff(() -> assertThat(WiremockCounts.ingestionEventsFor(sentinel.id()))
+        RetryUtils.assertWithRetry(() -> assertThat(WiremockCounts.ingestionEventsFor(sentinel.id()))
                 .as("post-recovery sentinel must reach HX Insight — failure here means the route stopped after the latency window")
                 .isGreaterThanOrEqualTo(1), CONVERGENCE_DELAY_MS);
     }
