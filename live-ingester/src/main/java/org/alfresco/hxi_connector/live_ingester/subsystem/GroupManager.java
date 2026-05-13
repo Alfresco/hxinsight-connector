@@ -46,8 +46,8 @@ import static org.alfresco.hxi_connector.live_ingester.subsystem.AuthorizationCo
 @Data
 public class GroupManager {
     private final NucleusClient nucleusClient;
-    private static final String EXTENDED_TO_PATH_ATTRIBUTE = "toPath";
     private final MappingManager mappingManager;
+    private final AlfrescoClient alfrescoClient;
 
     // MAPPING NOT Available for the Groups Directly created
     public void mapGroup(String externalId, String id) {
@@ -70,9 +70,9 @@ public class GroupManager {
     public void handleDeletionOrUpdation(RepoEvent<DataAttributes<NodeResource>> event) {
         /**
          * THERE IS A POSSIBILITY IF I ADD A GROUP INTO ANOTHER THIS TO_PATH CAN BE CHANGED
-         * TODO: Need to eliminate this extended attribute toPath to identify the group related issue
+         * [Relying on the repository to fetch if the node exists to identify the group deleted or not]
          */
-        if (!mappingManager.isGroupMembershipUpdated(event) && event.getExtensionAttributes().getExtension(EXTENDED_TO_PATH_ATTRIBUTE) != null) {
+        if (!mappingManager.isGroupMembershipUpdated(event) && !alfrescoClient.isNodeExist(event.getData().getResource().getId())) {
             // Group has been deleted, perform necessary operations such as deleting the group from nucleus as well
             deleteGroup(fetchGroupId(event.getData().getResource()));
         }

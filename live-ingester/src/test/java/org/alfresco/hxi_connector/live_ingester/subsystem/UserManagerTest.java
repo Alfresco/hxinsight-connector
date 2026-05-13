@@ -43,6 +43,7 @@ import java.util.Optional;
 
 import org.alfresco.hxi_connector.live_ingester.subsystem.Exceptions.IamSyncException;
 import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingStrategy;
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
@@ -65,6 +66,7 @@ import org.mockito.quality.Strictness;
 class UserManagerTest
 {
     private static final String EXTERNAL_ID = "alice";
+    private static final String NODE_ID = "user-node-uuid";
     private static final String EMAIL = "alice@example.com";
     private static final String IAM_USER_ID = "iam-uid-1";
 
@@ -74,13 +76,15 @@ class UserManagerTest
     private MappingManager mappingManager;
     @Mock
     private UserFetchingStrategy userFetchingStrategy;
+    @Mock
+    private AlfrescoClient alfrescoClient;
 
     private UserManager userManager;
 
     @BeforeEach
     void setUp()
     {
-        userManager = new UserManager(nucleusClient, mappingManager, userFetchingStrategy);
+        userManager = new UserManager(nucleusClient, mappingManager, userFetchingStrategy, alfrescoClient);
     }
 
     @Test
@@ -151,6 +155,8 @@ class UserManagerTest
     {
         RepoEvent<DataAttributes<NodeResource>> event = userEvent(
                 AuthorizationConstants.EVENT_DELETE_TYPE, AuthorizationConstants.PERSON_TYPE);
+        given(mappingManager.isGroupMembershipUpdated(event)).willReturn(false);
+        given(alfrescoClient.isNodeExist(NODE_ID)).willReturn(false);
 
         userManager.handleUpdateOrDelete(event);
 
@@ -163,6 +169,8 @@ class UserManagerTest
     {
         RepoEvent<DataAttributes<NodeResource>> event = userEvent(
                 AuthorizationConstants.EVENT_UPDATED_TYPE, AuthorizationConstants.PERSON_TYPE);
+        given(mappingManager.isGroupMembershipUpdated(event)).willReturn(true);
+        given(alfrescoClient.isNodeExist(NODE_ID)).willReturn(true);
 
         userManager.handleUpdateOrDelete(event);
 
@@ -175,6 +183,8 @@ class UserManagerTest
     {
         RepoEvent<DataAttributes<NodeResource>> event = userEvent(
                 AuthorizationConstants.EVENT_UPDATED_TYPE, AuthorizationConstants.USER_TYPE);
+        given(mappingManager.isGroupMembershipUpdated(event)).willReturn(true);
+        given(alfrescoClient.isNodeExist(NODE_ID)).willReturn(true);
 
         userManager.handleUpdateOrDelete(event);
 
@@ -194,6 +204,7 @@ class UserManagerTest
         props.put(AuthorizationConstants.USERNAME_PROPERTY_1, EXTERNAL_ID);
 
         NodeResource resource = NodeResource.builder()
+                .setId(NODE_ID)
                 .setNodeType(nodeType)
                 .setProperties(props)
                 .build();
@@ -202,4 +213,3 @@ class UserManagerTest
         return event;
     }
 }
-

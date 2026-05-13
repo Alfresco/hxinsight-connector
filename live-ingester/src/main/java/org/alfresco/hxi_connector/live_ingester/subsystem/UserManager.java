@@ -31,6 +31,7 @@ import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.live_ingester.subsystem.Exceptions.IamSyncException;
 import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingStrategy;
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
@@ -55,6 +56,7 @@ public class UserManager {
     private final NucleusClient nucleusClient;
     private final MappingManager mappingManager;
     private final UserFetchingStrategy userFetchingStrategy;
+    private final AlfrescoClient alfrescoClient;
 
 
     public void mapUser(NucleusUserMappingInput userMappingInput) {
@@ -108,12 +110,13 @@ public class UserManager {
      * @param event
      */
     public void handleUpdateOrDelete(RepoEvent<DataAttributes<NodeResource>> event) {
-        if(event.getType().equals(EVENT_DELETE_TYPE)){ // event deleted
+        if(!mappingManager.isGroupMembershipUpdated(event) && !alfrescoClient.isNodeExist(event.getData().getResource().getId())){ // event deleted
             log.debug("Deleting user mapping for id: {}", event.getId());
-
             deleteUser(fetchUserId(event));
+            return;
         }
-        else if(event.getData().getResource().getNodeType().equals(PERSON_TYPE)){ // Only take `cm:user` events not other types
+
+        if(event.getData().getResource().getNodeType().equals(PERSON_TYPE)){ // Only take `cm:user` events not other types
             // For Person only
             log.debug("Updating user mapping for id: {}", event.getId());
             mappingManager.updateGroupMapping(event);

@@ -56,7 +56,7 @@ public final class AuthorizationConstants
 
     public static final String GROUP_PREFIX = "";
 
-    public static final Set<String> USER_TYPES = Set.of(PERSON_TYPE, USER_TYPE);
+    public static final Set<String> USER_TYPES = Set.of(PERSON_TYPE);
     public static final Set<String> UPDATE_OR_DELETE = Set.of(EVENT_UPDATED_TYPE, EVENT_DELETE_TYPE);
 
     private AuthorizationConstants()

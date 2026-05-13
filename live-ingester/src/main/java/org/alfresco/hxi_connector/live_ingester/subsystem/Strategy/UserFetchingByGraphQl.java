@@ -26,17 +26,22 @@
 package org.alfresco.hxi_connector.live_ingester.subsystem.Strategy;
 
 import lombok.Data;
+import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
 
 import java.util.Optional;
 
 /**
- * Note: Current GraphQL doesn't support M2M communication So not implementing it for now, but keeping the class as a placeholder for future implementation when GraphQL supports M2M communication.
+ * For GraphQL operation the grant type must be urn:hyland:params:oauth:grant-type:api-credentials
  */
 @Data
 public class UserFetchingByGraphQl implements UserFetchingStrategy {
+    private final NucleusClient  nucleusClient;
+
+
     @Override
     public Optional<IamUser> fetchUserByEmailId(String emailId) {
-        throw new UnsupportedOperationException("GraphQL endpoint doesn't support M2M communication, so fetching user by email id is not supported using GraphQL endpoint");
+        Optional<String> externalUserId = nucleusClient.fetchUserIdByEmail(emailId);
+        return externalUserId.map(s -> new IamUser("<NOT_NEEDED>", s, emailId));
     }
 }

@@ -30,6 +30,7 @@ import org.alfresco.hxi_connector.live_ingester.subsystem.GroupManager;
 import org.alfresco.hxi_connector.live_ingester.subsystem.IdentitySyncSubsystem;
 import org.alfresco.hxi_connector.live_ingester.subsystem.MappingManager;
 import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingBulkStrategy;
+import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingByGraphQl;
 import org.alfresco.hxi_connector.live_ingester.subsystem.Strategy.UserFetchingStrategy;
 import org.alfresco.hxi_connector.live_ingester.subsystem.UserManager;
 import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
@@ -41,13 +42,13 @@ import org.springframework.context.annotation.Configuration;
 public class subsystemconfig {
 
     @Bean
-    public GroupManager groupManager(NucleusClient nucleusClient, MappingManager mappingManager){
-        return new GroupManager(nucleusClient,mappingManager);
+    public GroupManager groupManager(NucleusClient nucleusClient, MappingManager mappingManager,AlfrescoClient alfrescoClient){
+        return new GroupManager(nucleusClient,mappingManager,alfrescoClient);
     }
 
     @Bean
-    public UserManager userManager(NucleusClient nucleusClient,MappingManager mappingManager,UserFetchingStrategy userFetchingStrategy){
-        return new UserManager(nucleusClient,mappingManager,userFetchingStrategy);
+    public UserManager userManager(NucleusClient nucleusClient,MappingManager mappingManager,UserFetchingStrategy userFetchingStrategy,AlfrescoClient alfrescoClient){
+        return new UserManager(nucleusClient,mappingManager,userFetchingStrategy,alfrescoClient);
     }
 
     @Bean
@@ -62,7 +63,7 @@ public class subsystemconfig {
 
     @Bean
     public UserFetchingStrategy userFetchingStrategy(NucleusClient nucleusClient){
-        return new UserFetchingBulkStrategy(nucleusClient);
+        return new UserFetchingByGraphQl(nucleusClient);
     }
 
 }

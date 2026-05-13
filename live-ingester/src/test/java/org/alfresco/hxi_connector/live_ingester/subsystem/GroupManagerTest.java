@@ -31,13 +31,16 @@ import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
+import java.io.Serializable;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupInput;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupOutput;
-import org.alfresco.repo.event.extension.ExtensionAttributes;
 import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
@@ -54,24 +57,27 @@ import org.mockito.quality.Strictness;
 class GroupManagerTest
 {
     private static final String GROUP_ID = "group-1";
+    private static final String GROUP_NODE_ID = "node-uuid-1";
 
     @Mock
     private NucleusClient nucleusClient;
     @Mock
     private MappingManager mappingManager;
+    @Mock
+    private AlfrescoClient alfrescoClient;
 
     private GroupManager groupManager;
 
     @BeforeEach
     void setUp()
     {
-        groupManager = new GroupManager(nucleusClient, mappingManager);
+        groupManager = new GroupManager(nucleusClient, mappingManager, alfrescoClient);
     }
 
     @Test
     void shouldCreateGroupWhenNotExisting()
     {
-        NodeResource resource = NodeResource.builder().setId(GROUP_ID).build();
+        NodeResource resource = groupResource();
         given(nucleusClient.getGroupByExternalId(GROUP_ID)).willReturn(Optional.empty());
 
         groupManager.createGroup(resource);
@@ -82,7 +88,7 @@ class GroupManagerTest
     @Test
     void shouldSkipCreateWhenGroupAlreadyExists()
     {
-        NodeResource resource = NodeResource.builder().setId(GROUP_ID).build();
+        NodeResource resource = groupResource();
         given(nucleusClient.getGroupByExternalId(GROUP_ID))
                 .willReturn(Optional.of(new NucleusGroupOutput(GROUP_ID)));
 
@@ -100,10 +106,11 @@ class GroupManagerTest
     }
 
     @Test
-    void handleDeletionOrUpdationShouldDeleteWhenMembershipUnchangedAndToPathPresent()
+    void handleDeletionOrUpdationShouldDeleteWhenMembershipUnchangedAndNodeMissingInRepo()
     {
-        RepoEvent<DataAttributes<NodeResource>> event = groupEvent("/some/path");
+        RepoEvent<DataAttributes<NodeResource>> event = groupEvent();
         given(mappingManager.isGroupMembershipUpdated(event)).willReturn(false);
+        given(alfrescoClient.isNodeExist(GROUP_NODE_ID)).willReturn(false);
 
         groupManager.handleDeletionOrUpdation(event);
 
@@ -113,7 +120,7 @@ class GroupManagerTest
     @Test
     void handleDeletionOrUpdationShouldDoNothingWhenMembershipChanged()
     {
-        RepoEvent<DataAttributes<NodeResource>> event = groupEvent("/some/path");
+        RepoEvent<DataAttributes<NodeResource>> event = groupEvent();
         given(mappingManager.isGroupMembershipUpdated(event)).willReturn(true);
 
         groupManager.handleDeletionOrUpdation(event);
@@ -121,26 +128,39 @@ class GroupManagerTest
         then(nucleusClient).should(never()).deleteGroup(GROUP_ID);
     }
 
+    @Test
+    void handleDeletionOrUpdationShouldDoNothingWhenGroupStillExistsInRepo()
+    {
+        RepoEvent<DataAttributes<NodeResource>> event = groupEvent();
+        given(mappingManager.isGroupMembershipUpdated(event)).willReturn(false);
+        given(alfrescoClient.isNodeExist(GROUP_NODE_ID)).willReturn(true);
+
+        groupManager.handleDeletionOrUpdation(event);
+
+        then(nucleusClient).should(never()).deleteGroup(GROUP_ID);
+    }
+
     @SuppressWarnings("unchecked")
-    private static RepoEvent<DataAttributes<NodeResource>> groupEvent(String toPath)
+    private static RepoEvent<DataAttributes<NodeResource>> groupEvent()
     {
         RepoEvent<DataAttributes<NodeResource>> event = mock(RepoEvent.class);
         DataAttributes<NodeResource> data = mock(DataAttributes.class);
-        ExtensionAttributes extension = mock(ExtensionAttributes.class);
 
         given(event.getData()).willReturn(data);
-        given(event.getExtensionAttributes()).willReturn(extension);
-        given(extension.getExtension("toPath")).willReturn(toPath);
-
-        NodeResource resource = NodeResource.builder()
-                .setId(GROUP_ID)
-                .setNodeType(AuthorizationConstants.GROUP_TYPE)
-                .build();
-        given(data.getResource()).willReturn(resource);
+        given(data.getResource()).willReturn(groupResource());
 
         return event;
     }
+
+    private static NodeResource groupResource()
+    {
+        Map<String, Serializable> props = new HashMap<>();
+        props.put(AuthorizationConstants.GROUP_NAME_PROPERTY, GROUP_ID);
+
+        return NodeResource.builder()
+                .setId(GROUP_NODE_ID)
+                .setNodeType(AuthorizationConstants.GROUP_TYPE)
+                .setProperties(props)
+                .build();
+    }
 }
-
-
-

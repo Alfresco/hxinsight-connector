@@ -42,6 +42,7 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
@@ -126,10 +127,34 @@ public class AlfrescoClient
                     .bodyToMono(String.class)
                     .subscribeOn(Schedulers.boundedElastic())
                     .block(Duration.ofMinutes(timeoutInMins));
-            return Optional.ofNullable(objectMapper.readTree(response).path("entry").path("properties").path("cm:authorityName").asText(null));
+            return Optional.ofNullable(objectMapper.readTree(response)
+                                    .path("entry")
+                                    .path("properties")
+                                    .path("cm:authorityName")
+                                    .asText(null));
         }
         catch (Exception e){
             return Optional.empty();
+        }
+    }
+
+    // To check if node exists or not MUST be a GROUP or USER node, Primarily used for DELETION detection
+    public boolean isNodeExist(String nodeId)
+    {
+        try
+        {
+             makeAuthenticatedRequest("/alfresco/versions/1/nodes/" + nodeId)
+                    .bodyToMono(String.class)
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .block(Duration.ofMinutes(timeoutInMins));
+            return true;
+        }
+        catch (WebClientResponseException.NotFound e)
+        {
+            return false;
+        }
+        catch (Exception e){
+            throw e;
         }
     }
 

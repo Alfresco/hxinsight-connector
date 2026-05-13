@@ -89,10 +89,12 @@ class AuthorizationConstantsTest
     }
 
     @Test
-    void userTypesShouldContainPersonAndUserConstants()
+    void userTypesShouldContainPersonOnly()
     {
+        // USER_TYPES now intentionally tracks only cm:person events;
+        // usr:user is filtered out upstream.
         assertThat(AuthorizationConstants.USER_TYPES)
-                .containsExactlyInAnyOrder(AuthorizationConstants.PERSON_TYPE, AuthorizationConstants.USER_TYPE);
+                .containsExactly(AuthorizationConstants.PERSON_TYPE);
     }
 
     @SuppressWarnings("unchecked")

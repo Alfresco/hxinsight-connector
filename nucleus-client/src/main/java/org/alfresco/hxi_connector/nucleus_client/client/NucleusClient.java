@@ -32,6 +32,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.alfresco.hxi_connector.nucleus_client.dto.*;
 import org.slf4j.Logger;
@@ -57,9 +58,27 @@ public class NucleusClient
     private final String systemId;
     private final String nucleusBaseUrl;
     private final String idpBaseUrl;
+    private final String graphQlUrl;
     private final int pageSize;
     private final int timeoutInMin;
     private final int deleteBatchSize;
+
+    public static final String FETCH_USER_BY_EMAIL_GRAPHQL_QUERY = """
+        query usersByEmail($email: String!) {
+          currentUser {
+            homeAccount {
+              account {
+                paginatedUsers(where: { email: { eq: $email } }) {
+                  nodes {
+                    id
+                    email { value }
+                  }
+                }
+              }
+            }
+          }
+        }
+        """;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NucleusClient.class);
 
@@ -69,6 +88,7 @@ public class NucleusClient
             @Value("${nucleus.system-id}") String systemId,
             @Value("${nucleus.base-url}") String nucleusBaseUrl,
             @Value("${nucleus.idp-base-url}") String idpBaseUrl,
+            @Value("${nucleus.graphql-endpoint}") String graphQlUrl,
             @Value("${nucleus.page-size:1000}") int pageSize,
             @Value("${nucleus.delete-group-member-batch-size:100}") int deleteBatchSize,
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
@@ -76,15 +96,16 @@ public class NucleusClient
     {
         this(
                 WebClient.builder()
-                        .codecs(configurer -> configurer
+                                .codecs(configurer -> configurer
                                 .defaultCodecs()
                                 .maxInMemorySize(bufferInKB * 1024))
-                        .build(),
+                                .build(),
                 new ObjectMapper(),
                 authService,
                 systemId,
                 nucleusBaseUrl,
                 idpBaseUrl,
+                graphQlUrl,
                 pageSize,
                 deleteBatchSize,
                 timeoutInMins);
@@ -97,6 +118,7 @@ public class NucleusClient
             String systemId,
             String nucleusBaseUrl,
             String idpBaseUrl,
+            String graphQlUrl,
             int pageSize,
             int deleteBatchSize,
             int timeoutInMin)
@@ -110,6 +132,55 @@ public class NucleusClient
         this.pageSize = pageSize;
         this.timeoutInMin = timeoutInMin;
         this.deleteBatchSize = deleteBatchSize;
+        this.graphQlUrl = graphQlUrl;
+    }
+
+    // Fetch UserId based on Email Id
+    public Optional<String> fetchUserIdByEmail(String emailId){
+       if(emailId == null || emailId.isBlank()){
+           return Optional.empty();
+       }
+
+       try{
+           Map<String,Object> body = Map.of(
+                   "query", FETCH_USER_BY_EMAIL_GRAPHQL_QUERY,
+                   "variables", Map.of("email", emailId)
+           );
+
+           String jsonBody = objectMapper.writeValueAsString(body);
+           String response = executePostRequestForResponse(graphQlUrl, jsonBody);
+
+           JsonNode root = objectMapper.readTree(response);
+           JsonNode errors = root.path("errors");
+           if(errors.isArray() && !errors.isEmpty()){
+               LOGGER.warn("GraphQL query for fetching user by email {} returned errors: {}", emailId, errors.toString());
+               return Optional.empty();
+           }
+
+           JsonNode nodes = root.path("data")
+                                .path("currentUser")
+                                .path("homeAccount")
+                                .path("account")
+                                .path("paginatedUsers")
+                                .path("nodes");
+           if(!nodes.isArray() || nodes.isEmpty()){
+               LOGGER.debug("No user found in GraphQL response for email {}", emailId);
+               return Optional.empty();
+           }
+
+           String id = nodes.get(0).path("id").asText(null);
+           return Optional.of(id);
+       }
+       catch (Exception e){
+              LOGGER.atError()
+                     .setMessage("Error in fetching user id by email {}: {}")
+                     .addArgument(emailId)
+                     .addArgument(e.getMessage())
+                     .setCause(e)
+                     .log();
+
+              return Optional.empty();
+       }
     }
 
     public List<IamUser> getAllIamUsers()
@@ -194,7 +265,7 @@ public class NucleusClient
         }
     }
 
-    // Leverage the SCIM endpoint to fetch the UserId by email
+    // NOTE: Don't use this api as SCIM doesn't support email type filter
     public Optional<List<NucleusSCIMResponse.Resource>> getUserByEmailId(String emailId){
         String url = idpBaseUrl + "/api/scim/v2/users?filter=email eq \"" + emailId + "\"";
         try{
@@ -217,6 +288,8 @@ public class NucleusClient
            return Optional.empty();
         }
     }
+
+
 
     public Optional<NucleusUserMappingOutput> fetchUserMappingByExternalUserId(String externalUserId)
     {
@@ -505,6 +578,27 @@ public class NucleusClient
         webClient
                 .post()
                 .uri(fullUrl)
+                .contentType(MediaType.APPLICATION_JSON)
+                .headers(httpHeaders -> headers.forEach(httpHeaders::set))
+                .bodyValue(jsonBody)
+                .retrieve()
+                .bodyToMono(String.class)
+                .block(Duration.ofMinutes(timeoutInMin));
+    }
+
+    @Retryable(retryFor = EndpointServerErrorException.class,
+            maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+            backoff = @Backoff(
+                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
+    private String executePostRequestForResponse(String url, String jsonBody){
+        Map<String,String> headers = authService.getHxpAuthHeaders();
+
+        return
+                webClient
+                .post()
+                .uri(url)
                 .contentType(MediaType.APPLICATION_JSON)
                 .headers(httpHeaders -> headers.forEach(httpHeaders::set))
                 .bodyValue(jsonBody)

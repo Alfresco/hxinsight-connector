@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupMemberAssignmentInput;
@@ -53,21 +54,31 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+
+import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 class MappingManagerTest
 {
     private static final String USER_ID = "alice";
 
     @Mock
     private NucleusClient nucleusClient;
+    @Mock
+    private AlfrescoClient alfrescoClient;
 
     private MappingManager mappingManager;
 
     @BeforeEach
     void setUp()
     {
-        mappingManager = new MappingManager(nucleusClient);
+        mappingManager = new MappingManager(nucleusClient, alfrescoClient);
+        // Resolve any group node id to itself, so existing assertions on raw ids still apply.
+        given(alfrescoClient.getGroupNameByNodeId(any()))
+                .willAnswer(inv -> Optional.of(inv.getArgument(0, String.class)));
     }
 
     @Test
@@ -188,4 +199,3 @@ class MappingManagerTest
         return event;
     }
 }
-
