@@ -33,6 +33,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
+import reactor.core.scheduler.Schedulers;
 
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.SyncOrchestrationService;
 
@@ -44,10 +46,12 @@ public class SyncController
     private final SyncOrchestrationService syncOrchestrationService;
 
     @PostMapping("/trigger")
-    public SyncResponse triggerSync()
+    public Mono<SyncResponse> triggerSync()
     {
-        String result = syncOrchestrationService.performFullSync();
-        return new SyncResponse(true, result, LocalDateTime.now());
+        return Mono.fromCallable(() -> {
+            String result = syncOrchestrationService.performFullSync();
+            return new SyncResponse(true, result, LocalDateTime.now());
+        }).subscribeOn(Schedulers.boundedElastic());
     }
 
     @GetMapping("/status")

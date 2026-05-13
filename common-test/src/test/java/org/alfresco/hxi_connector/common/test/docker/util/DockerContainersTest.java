@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -37,6 +37,8 @@ import org.testcontainers.containers.Network;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
+
+import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 
 class DockerContainersTest
 {
@@ -192,6 +194,29 @@ class DockerContainersTest
     }
 
     @Test
+    void shouldCreateNucleusSyncContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+
+        GenericContainer<?> container = DockerContainers.createNucleusSyncContainerWithin(network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("nucleus-sync");
+        assertThat(container.getExposedPorts()).contains(8081);
+    }
+
+    @Test
+    void shouldCreateNucleusSyncContainerWithoutNetwork()
+    {
+        GenericContainer<?> container = DockerContainers.createNucleusSyncContainerWithin(null);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getExposedPorts()).contains(8081);
+        assertThat(container.getNetworkAliases()).doesNotContain("nucleus-sync");
+    }
+
+    @Test
     void shouldGetAppInfoRegex()
     {
         String regex = DockerContainers.getAppInfoRegex();
@@ -215,6 +240,126 @@ class DockerContainersTest
 
         assertThat(testRegex)
                 .isEqualTo("prefix/test\\[1\\.2\\.3\\]\\+\\{version\\}/suffix");
+    }
+
+    @Test
+    void shouldCreateTransformRouterContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+
+        GenericContainer<?> container = DockerContainers.createTransformRouterContainerWithin(network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("transform-router");
+        assertThat(container.getExposedPorts()).contains(8095);
+        assertThat(container.getEnvMap()).containsEntry("ACTIVEMQ_URL", "nio://activemq:61616");
+    }
+
+    @Test
+    void shouldCreateTransformCoreAioContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+
+        GenericContainer<?> container = DockerContainers.createTransformCoreAioContainerWithin(network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("transform-core-aio");
+        assertThat(container.getExposedPorts()).contains(8090);
+        assertThat(container.getEnvMap()).containsEntry("ACTIVEMQ_URL", "nio://activemq:61616");
+    }
+
+    @Test
+    void shouldCreateSfsContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+
+        GenericContainer<?> container = DockerContainers.createSfsContainerWithin(network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("shared-file-store");
+        assertThat(container.getExposedPorts()).contains(8099);
+        assertThat(container.getEnvMap()).containsEntry("JAVA_OPTS", "-Xms256m -Xmx512m");
+    }
+
+    @Test
+    void shouldCreateBulkIngesterContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+        PostgreSQLContainer<?> postgres = mock(PostgreSQLContainer.class);
+        when(postgres.getUsername()).thenReturn("alfresco");
+        when(postgres.getPassword()).thenReturn("alfresco");
+        when(postgres.getDatabaseName()).thenReturn("alfresco");
+        when(postgres.getNetworkAliases()).thenReturn(List.of("postgres"));
+
+        GenericContainer<?> container = DockerContainers.createBulkIngesterContainerWithin(postgres, network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("bulk-ingester");
+        assertThat(container.getExposedPorts()).contains(5008);
+        assertThat(container.getEnvMap()).containsEntry("SPRING_DATASOURCE_USERNAME", "alfresco");
+        assertThat(container.getEnvMap()).containsEntry("SPRING_DATASOURCE_URL", "jdbc:postgresql://postgres:5432/alfresco");
+    }
+
+    @Test
+    void shouldCreateLiveIngesterContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+
+        GenericContainer<?> container = DockerContainers.createLiveIngesterContainerWithin(network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("live-ingester");
+        assertThat(container.getExposedPorts()).contains(8080, 5007);
+        assertThat(container.getEnvMap()).containsEntry("SPRING_ACTIVEMQ_BROKERURL", "nio://activemq:61616");
+    }
+
+    @Test
+    void shouldCreateLiveIngesterContainerForWireMock()
+    {
+        Network network = Network.newNetwork();
+        WireMockContainer wireMock = mock(WireMockContainer.class);
+        when(wireMock.getNetworkAliases()).thenReturn(List.of("hxi-mock"));
+
+        GenericContainer<?> container = DockerContainers.createLiveIngesterContainerForWireMock(wireMock, network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getEnvMap()).containsEntry("HYLANDEXPERIENCE_INSIGHT_INGESTION_BASEURL", "http://hxi-mock:8080");
+        assertThat(container.getEnvMap()).containsEntry("AUTH_PROVIDERS_HYLANDEXPERIENCE_TOKENURI", "http://hxi-mock:8080/token");
+        assertThat(container.getEnvMap()).containsEntry("AUTH_PROVIDERS_ALFRESCO_USERNAME", "admin");
+    }
+
+    @Test
+    void shouldCreateLiveIngesterContainerForWireMockWithAcs()
+    {
+        Network network = Network.newNetwork();
+        WireMockContainer wireMock = mock(WireMockContainer.class);
+        when(wireMock.getNetworkAliases()).thenReturn(List.of("hxi-mock"));
+        AlfrescoRepositoryContainer acsContainer = mock(AlfrescoRepositoryContainer.class);
+        when(acsContainer.getNetworkAliases()).thenReturn(List.of("alfresco"));
+
+        GenericContainer<?> container = DockerContainers.createLiveIngesterContainerForWireMock(wireMock, acsContainer, network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getEnvMap()).containsEntry("ALFRESCO_REPOSITORY_BASE_URL", "http://alfresco:8080/alfresco");
+    }
+
+    @Test
+    void shouldCreatePredictionApplierContainerWithinNetwork()
+    {
+        Network network = Network.newNetwork();
+
+        GenericContainer<?> container = DockerContainers.createPredictionApplierContainerWithin(network);
+
+        assertThat(container).isNotNull();
+        assertThat(container.getNetwork()).isEqualTo(network);
+        assertThat(container.getNetworkAliases()).contains("prediction-applier");
+        assertThat(container.getExposedPorts()).contains(8080, 5009);
+        assertThat(container.getEnvMap()).containsEntry("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG");
     }
 
     private String escapeForRegex(String version)

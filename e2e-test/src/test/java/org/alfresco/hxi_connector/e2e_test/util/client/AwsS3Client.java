@@ -54,30 +54,29 @@ public class AwsS3Client
     @SneakyThrows
     public List<S3Object> listS3Content()
     {
-        HttpResponse<InputStream> response = executeGet("%s/%s".formatted(baseUrl, bucketName));
-        S3Bucket s3Bucket = xmlMapper.readValue(response.body(), S3Bucket.class);
+        HttpRequest request = HttpRequest.newBuilder(URI.create("%s/%s".formatted(baseUrl, bucketName)))
+                .GET()
+                .build();
 
+        HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
+        // Don't throw on errors for list operations - S3 may return various status codes for empty buckets
+        // This matches RestAssured behavior from the original implementation
+        S3Bucket s3Bucket = xmlMapper.readValue(response.body(), S3Bucket.class);
         return s3Bucket.content();
     }
 
     @SneakyThrows
     public InputStream getS3ObjectContent(String objectKey)
     {
-        return executeGet("%s/%s/%s".formatted(baseUrl, bucketName, objectKey)).body();
-    }
-
-    @SneakyThrows
-    private HttpResponse<InputStream> executeGet(String uri)
-    {
-        HttpRequest request = HttpRequest.newBuilder(URI.create(uri))
+        HttpRequest request = HttpRequest.newBuilder(URI.create("%s/%s/%s".formatted(baseUrl, bucketName, objectKey)))
                 .GET()
                 .build();
 
         HttpResponse<InputStream> response = httpClient.send(request, HttpResponse.BodyHandlers.ofInputStream());
         if (response.statusCode() >= 400)
         {
-            throw new IllegalStateException("Request to %s failed with status %s".formatted(uri, response.statusCode()));
+            throw new IllegalStateException("Request to %s/%s/%s failed with status %s".formatted(baseUrl, bucketName, objectKey, response.statusCode()));
         }
-        return response;
+        return response.body();
     }
 }

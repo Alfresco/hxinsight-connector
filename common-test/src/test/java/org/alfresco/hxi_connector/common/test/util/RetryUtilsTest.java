@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -159,5 +159,53 @@ class RetryUtilsTest
 
         assertThrows(AssertionError.class,
                 () -> RetryUtils.retryWithBackoff(alwaysFailingRunnable, customDelay));
+    }
+
+    @Test
+    void retryWithBackoff_runnable_shouldPropagateRuntimeException()
+    {
+        RuntimeException runtimeException = new RuntimeException("Runtime failure");
+        RetryUtils.ErrorCatchingRunnable<RuntimeException> runnable = () -> {
+            throw runtimeException;
+        };
+
+        RuntimeException thrown = assertThrows(RuntimeException.class,
+                () -> RetryUtils.retryWithBackoff(runnable, 3, 10));
+
+        assertSame(runtimeException, thrown);
+    }
+
+    @Test
+    void retryWithBackoff_runnable_shouldWrapCheckedException()
+    {
+        Exception checkedException = new Exception("Checked failure");
+        RetryUtils.ErrorCatchingRunnable<Exception> runnable = () -> {
+            throw checkedException;
+        };
+
+        IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                () -> RetryUtils.retryWithBackoff(runnable, 3, 10));
+
+        assertEquals("Runnable execution failed", thrown.getMessage());
+        assertSame(checkedException, thrown.getCause());
+    }
+
+    @Test
+    void retryWithBackoff_shouldThrowIllegalStateExceptionWhenInterrupted()
+    {
+        RetryUtils.ErrorCatchingRunnable alwaysFailingRunnable = () -> {
+            throw new AssertionError("fail");
+        };
+        Thread.currentThread().interrupt();
+        try
+        {
+            IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                    () -> RetryUtils.retryWithBackoff(alwaysFailingRunnable, 5, 10));
+            assertEquals("Retry interrupted", thrown.getMessage());
+        }
+        finally
+        {
+            Thread.interrupted();
+        }
     }
 }
