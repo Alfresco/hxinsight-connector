@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.util;
 /**
  * Inventory of every Micrometer counter the live-ingester exposes via {@code /actuator/metrics}. Producers (route builders, listeners, recorders) reference these constants instead of hard-coding names so operators have a single file to read when wiring dashboards / Prometheus scrape configs. Sister modules (bulk-ingester, nucleus-sync, prediction-applier) should mirror this shape with their own holder classes if/when they grow custom counters.
  */
+@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class LiveIngesterMetrics
 {
     private LiveIngesterMetrics()
@@ -74,7 +75,7 @@ public final class LiveIngesterMetrics
         public static final String REPO_EVENTS_UNHANDLED_DESCRIPTION = "Repository events whose eventType matched no dispatch predicate and were therefore skipped without being routed to any command handler";
 
         public static final String TRANSFORM_RESPONSE_SILENT = "live_ingester_transform_response_silent_drop_total";
-        public static final String TRANSFORM_RESPONSE_SILENT_DESCRIPTION = "Failed transform-responses (status=400) silently dropped by the default-deployment branch in ATSTransformResponseHandler.ingestContent (ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false). Drops to zero when deployments opt in to dead-letter coverage and the entries land on " + Dlq.TRANSFORM_RESPONSE + " instead.";
+        public static final String TRANSFORM_RESPONSE_SILENT_DESC = "Failed transform-responses (status=400) silently dropped by the default-deployment branch in ATSTransformResponseHandler.ingestContent (ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false). Drops to zero when deployments opt in to dead-letter coverage and the entries land on " + Dlq.TRANSFORM_RESPONSE + " instead.";
 
         private Drop()
         {}

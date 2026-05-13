@@ -48,6 +48,7 @@ import org.springframework.test.annotation.DirtiesContext;
  */
 @SpringBootTest(classes = RetryMetricsRecorderTest.TestConfig.class)
 @DirtiesContext
+@SuppressWarnings("PMD.TestClassWithoutTestCases")
 class RetryMetricsRecorderTest
 {
     @Autowired
@@ -61,7 +62,7 @@ class RetryMetricsRecorderTest
     {
         flakyService.reset();
         double before = currentCount();
-        assertThatThrownBy(() -> flakyService.alwaysFails())
+        assertThatThrownBy(flakyService::alwaysFails)
                 .isInstanceOf(IOException.class);
 
         assertThat(meterRegistry.find(LiveIngesterMetrics.Retry.ATTEMPTS)
@@ -107,7 +108,7 @@ class RetryMetricsRecorderTest
         double beforeIo = currentCount();
         double beforeUnknownWrapper = countTagged("WrappedRuntimeException");
 
-        assertThatThrownBy(() -> flakyService.alwaysFailsWithCamelWrappedIO())
+        assertThatThrownBy(flakyService::alwaysFailsWithCamelWrappedIO)
                 .isInstanceOf(org.apache.camel.CamelExecutionException.class);
 
         // alwaysFailsWithCamelWrappedIO has @Retryable(retryFor=IOException.class) and throws
@@ -163,7 +164,7 @@ class RetryMetricsRecorderTest
     @Component
     static class FlakyService
     {
-        private int attempts = 0;
+        private int attempts;
 
         void reset()
         {

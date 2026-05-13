@@ -192,7 +192,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 transformResponse.status(),
                 transformResponse.errorDetails());
         Counter.builder(LiveIngesterMetrics.Drop.TRANSFORM_RESPONSE_SILENT)
-                .description(LiveIngesterMetrics.Drop.TRANSFORM_RESPONSE_SILENT_DESCRIPTION)
+                .description(LiveIngesterMetrics.Drop.TRANSFORM_RESPONSE_SILENT_DESC)
                 .register(meterRegistry)
                 .increment();
     }

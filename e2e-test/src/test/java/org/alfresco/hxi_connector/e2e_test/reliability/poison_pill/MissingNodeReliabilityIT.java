@@ -69,7 +69,7 @@ public class MissingNodeReliabilityIT extends BaseReliabilityIT
 {
     private static final String REPO_EVENT_TOPIC = "alfresco.repo.event2";
     private static final String PARENT_ID = "-my-";
-    private static final int MIN_INGESTION_EVENTS_FOR_FABRICATED_ID = 1;
+    private static final int MIN_INGESTION_FOR_FABRICATED = 1;
     /**
      * Convergence budget tuned to the test-profile JMS DLC: 1 redelivery with 200 ms delay (see {@link ReliabilityEnvironment}). 4s gives the broker comfortable headroom to land the parked message on the DLQ even when the host is loaded, while staying short enough to keep the IT under 30s wall-time.
      */
@@ -102,8 +102,8 @@ public class MissingNodeReliabilityIT extends BaseReliabilityIT
                     .isGreaterThanOrEqualTo(1);
             assertThat(WiremockCounts.ingestionEventsFor(fabricatedNodeId))
                     .as("metadata flowed to HX Insight before the ACS 404: handleMetadataPropertiesChange runs ahead of handleContentChange so we expect at least %d POSTs for the fabricated objectId across the initial attempt + JMS redeliveries. A count of 0 here would mean the route failed before even POSTing metadata, which is unexpected for an unknown-node scenario",
-                            MIN_INGESTION_EVENTS_FOR_FABRICATED_ID)
-                    .isGreaterThanOrEqualTo(MIN_INGESTION_EVENTS_FOR_FABRICATED_ID);
+                            MIN_INGESTION_FOR_FABRICATED)
+                    .isGreaterThanOrEqualTo(MIN_INGESTION_FOR_FABRICATED);
         }, CONVERGENCE_DELAY_MS);
     }
 

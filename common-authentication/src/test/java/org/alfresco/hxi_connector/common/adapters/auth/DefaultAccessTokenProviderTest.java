@@ -134,6 +134,7 @@ class DefaultAccessTokenProviderTest
      * Trigger: pre-seed an expired token, then race two threads. Thread A enters the {@code synchronized} block first; the mock {@code authenticate} blocks until Thread B has done its outside-the-monitor read of the cache map and is queued on the monitor. When the mock returns, Thread A puts the fresh token into the map and releases the monitor; Thread B acquires it. A correctly-implemented double-checked-locking pattern re-reads the map inside the monitor and short-circuits the refresh; the buggy pattern checks a stale local variable captured before the monitor and triggers a redundant {@code authenticate} call.
      */
     @Test
+    @SuppressWarnings("PMD.CloseResource") // ExecutorService is shut down in the finally block; AutoCloseable arrived in JDK 19, this module is on JDK 17.
     void shouldRefreshOnlyOnceWhenConcurrentCallersRaceForExpiredToken() throws Exception
     {
         Map<String, DefaultAccessTokenProvider.Token> tokens = new HashMap<>();

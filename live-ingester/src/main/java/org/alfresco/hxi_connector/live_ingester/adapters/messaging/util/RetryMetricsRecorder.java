@@ -67,6 +67,7 @@ public class RetryMetricsRecorder implements RetryListener
     /**
      * Walks past Camel/concurrent framework wrappers (e.g. {@link org.apache.camel.CamelExecutionException} from {@code FluentProducerTemplate.request}) so the tag reflects the actual application exception rather than the wrapper.
      */
+    @SuppressWarnings("PMD.CompareObjectsWithEquals")
     private static String resolveTag(Throwable throwable)
     {
         if (throwable == null)
@@ -74,6 +75,8 @@ public class RetryMetricsRecorder implements RetryListener
             return UNKNOWN_EXCEPTION_VALUE;
         }
         Throwable current = throwable;
+        // Reference identity is intentional below: a self-cycle (cause == self) is the canonical
+        // sentinel for "no further unwrap target", and equals() on Throwable is identity-based anyway.
         while (isFrameworkWrapper(current) && current.getCause() != null && current.getCause() != current)
         {
             current = current.getCause();

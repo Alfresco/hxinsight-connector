@@ -63,7 +63,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases", "PMD.SignatureDeclareThrowsException"})
 public class SfsOutageReliabilityIT
 {
     private static final String PARENT_ID = "-my-";

@@ -47,6 +47,7 @@ import lombok.extern.slf4j.Slf4j;
  * The probe targets the underlying ActiveMQ container directly (not through Toxiproxy), so observations remain available during simulated network partitions on the broker -> live-ingester path.
  */
 @Slf4j
+@SuppressWarnings("PMD.GuardLogStatement")
 public final class JolokiaProbe
 {
     private static final String DEFAULT_USER = "admin";

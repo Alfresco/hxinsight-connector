@@ -105,12 +105,13 @@ public final class ActuatorMetricsProbe
             }
             return 0.0;
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
-            if (e instanceof InterruptedException)
-            {
-                Thread.currentThread().interrupt();
-            }
+            throw new IllegalStateException("Failed to read actuator metric %s from %s".formatted(metricName, uri), e);
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
             throw new IllegalStateException("Failed to read actuator metric %s from %s".formatted(metricName, uri), e);
         }
     }

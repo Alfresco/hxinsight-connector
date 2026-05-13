@@ -62,6 +62,7 @@ import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 @Slf4j
 @ExtendWith(SharedReliabilityEnvironmentExtension.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class BaseReliabilityIT
 {
     private static final String REPO_EVENT_TOPIC = ReliabilityEnvironment.REPO_EVENT_TOPIC;

@@ -50,7 +50,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
+@SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases", "PMD.SignatureDeclareThrowsException"})
 public class TransformPipelineUnreachableWithDlqOptInReliabilityIT
 {
     private static final int CONVERGENCE_DELAY_MS = 1_000;

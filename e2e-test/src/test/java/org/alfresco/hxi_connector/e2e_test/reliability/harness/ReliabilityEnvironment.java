@@ -78,6 +78,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
  * Reliability-fix opt-in toggles are exposed via the builder so paired IT classes can boot envs with the fix enabled / disabled and assert the matching contract on each. See {@link Builder#withTransformResponseDeadLetterEnabled()}.
  */
 @Slf4j
+@SuppressWarnings("PMD.LongVariable")
 public class ReliabilityEnvironment implements AutoCloseable
 {
     public static final String BUCKET_NAME = "test-hxinsight-bucket";
@@ -145,7 +146,6 @@ public class ReliabilityEnvironment implements AutoCloseable
     // === Host-port mappings refreshed after a chaos restart of the corresponding container
     // (Docker re-allocates ephemeral host ports on each `docker start`; Testcontainers caches the original allocation). ===
     private int activemqOpenWireHostPort;
-    private int activemqJolokiaHostPort;
     private int repositoryHostPort;
 
     public static Builder builder()
@@ -388,8 +388,7 @@ public class ReliabilityEnvironment implements AutoCloseable
         }
 
         activemqOpenWireHostPort = activemq.getMappedPort(ACTIVEMQ_PORT);
-        activemqJolokiaHostPort = activemq.getMappedPort(ACTIVEMQ_JOLOKIA_PORT);
-        jolokia = new JolokiaProbe(activemq.getHost(), activemqJolokiaHostPort);
+        jolokia = new JolokiaProbe(activemq.getHost(), activemq.getMappedPort(ACTIVEMQ_JOLOKIA_PORT));
 
         log.info("[reliability] Starting repository and live-ingester");
         repository.start();
@@ -539,10 +538,10 @@ public class ReliabilityEnvironment implements AutoCloseable
                 .inspectContainerCmd(activemq.getContainerId())
                 .exec();
         activemqOpenWireHostPort = readHostPort(info, ACTIVEMQ_PORT);
-        activemqJolokiaHostPort = readHostPort(info, ACTIVEMQ_JOLOKIA_PORT);
-        jolokia = new JolokiaProbe(activemq.getHost(), activemqJolokiaHostPort);
+        int jolokiaHostPort = readHostPort(info, ACTIVEMQ_JOLOKIA_PORT);
+        jolokia = new JolokiaProbe(activemq.getHost(), jolokiaHostPort);
         log.info("[reliability] Refreshed broker host port mappings: openwire={}, jolokia={}",
-                activemqOpenWireHostPort, activemqJolokiaHostPort);
+                activemqOpenWireHostPort, jolokiaHostPort);
     }
 
     private static int readHostPort(InspectContainerResponse info, int containerPort)

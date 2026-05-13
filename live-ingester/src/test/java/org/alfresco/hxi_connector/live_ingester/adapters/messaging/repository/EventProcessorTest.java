@@ -79,6 +79,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 class EventProcessorTest
 {
     private static final long CONTENT_SIZE = 123L;

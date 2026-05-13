@@ -50,6 +50,7 @@ import org.testcontainers.containers.GenericContainer;
  */
 @UtilityClass
 @Slf4j
+@SuppressWarnings("PMD.GuardLogStatement")
 public final class ProcessChaos
 {
     private static final String SIGKILL = "KILL";
@@ -182,12 +183,14 @@ public final class ProcessChaos
                     HttpResponse.BodyHandlers.discarding());
             return response.statusCode() < 500;
         }
-        catch (IOException | InterruptedException e)
+        catch (IOException e)
         {
-            if (e instanceof InterruptedException)
-            {
-                Thread.currentThread().interrupt();
-            }
+            log.debug("[chaos] HTTP probe at {} failed (treating as not-ready): {}", url, e.getMessage());
+            return false;
+        }
+        catch (InterruptedException e)
+        {
+            Thread.currentThread().interrupt();
             log.debug("[chaos] HTTP probe at {} failed (treating as not-ready): {}", url, e.getMessage());
             return false;
         }

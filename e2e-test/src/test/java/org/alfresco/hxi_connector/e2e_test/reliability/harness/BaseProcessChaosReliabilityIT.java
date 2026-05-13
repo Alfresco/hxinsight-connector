@@ -49,6 +49,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings({"PMD.AbstractClassWithoutAbstractMethod", "PMD.SignatureDeclareThrowsException"})
 public abstract class BaseProcessChaosReliabilityIT
 {
     protected static final String PARENT_ID = "-my-";

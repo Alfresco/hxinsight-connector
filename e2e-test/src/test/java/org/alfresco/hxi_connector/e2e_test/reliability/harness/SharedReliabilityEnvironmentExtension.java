@@ -43,7 +43,10 @@ import org.junit.jupiter.api.extension.ExtensionContext.Store.CloseableResource;
  * Tests that intentionally tear down infrastructure (e.g. process-level chaos that stops the broker container) must <b>not</b> use this extension, because killing a shared container would cascade-fail every subsequent test in the run. Such tests should keep their own per-class {@code @BeforeAll}/{@code @AfterAll} environment lifecycle.
  */
 @Slf4j
-@SuppressWarnings("deprecation") // ExtensionContext.Store.CloseableResource + getOrComputeIfAbsent(Object,Function,Class) deprecated in JUnit 5.13/6.0; replacements not adopted yet repo-wide.
+@SuppressWarnings({
+        "deprecation", // ExtensionContext.Store.CloseableResource + getOrComputeIfAbsent(Object,Function,Class) deprecated in JUnit 5.13/6.0; replacements not adopted yet repo-wide.
+        "PMD.CloseResource" // SharedEnvironment is closed by JUnit's Store at JVM shutdown via CloseableResource.close(); PMD can't see that lifecycle.
+})
 public final class SharedReliabilityEnvironmentExtension implements BeforeAllCallback
 {
     private static final Namespace NAMESPACE = Namespace.create(SharedReliabilityEnvironmentExtension.class);
