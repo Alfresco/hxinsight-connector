@@ -44,7 +44,6 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
 import org.alfresco.hxi_connector.nucleus_sync.model.UserMapping;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.AlfrescoUnavailableException;
-import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.NucleusUnavailableException;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.SyncException;
 import org.alfresco.hxi_connector.nucleus_sync.services.orchestration.exceptions.SyncInProgressException;
 import org.alfresco.hxi_connector.nucleus_sync.services.processors.GroupMappingSyncProcessor;
@@ -87,9 +86,7 @@ public class SyncOrchestrationService
 
         try
         {
-            LOGGER.atInfo()
-                    .setMessage("Sync starting ...")
-                    .log();
+            LOGGER.info("Sync starting ...");
             SyncResult syncResult = executeSync();
             lastSyncStatus = syncResult.toStatus();
             LOGGER.atInfo()
@@ -119,56 +116,48 @@ public class SyncOrchestrationService
         LocalDateTime syncStartTime = LocalDateTime.now();
 
         // 1. Load the data
-        SystemData data = getSystemData();
+        List<AlfrescoUser> alfrescoUsers = loadAlfrescoUsers();
+        List<IamUser> nucleusIamUsers = loadNucleusIamUsers();
+        List<NucleusUserMappingOutput> currentUserMappings = loadNucleusUserMappings();
+        List<NucleusGroupOutput> currentNucleusGroups = loadNucleusGroups();
+        List<NucleusGroupMembershipOutput> currentMemberships = loadNucleusMemberships();
 
         // 2. Sync Users
         List<UserMapping> userMappings = userMappingSyncProcessor.syncUserMappings(
-                data.alfrescoUsers,
-                data.nucleusIamUsers,
-                data.currentUserMappings);
-        LOGGER.atInfo()
-                .setMessage("User sync completed successfully.");
+                alfrescoUsers,
+                nucleusIamUsers,
+                currentUserMappings);
+        LOGGER.info("User sync completed successfully.");
 
         // 3. Build user group membership
         Map<String, List<String>> userGroupMemberships = userGrpMembershipService
                 .buildUserGroupMemberships(userMappings);
-        LOGGER.atDebug()
-                .setMessage("Fresh user-group membership cache built successfully.");
+        LOGGER.debug("Fresh user-group membership cache built successfully.");
 
         // 4. Sync Groups
-        groupMappingSyncProcessor.syncGroupMappings(data.currentNucleusGroups, userGroupMemberships);
-        LOGGER.atInfo()
-                .setMessage("Group sync completed successfully.");
+        groupMappingSyncProcessor.syncGroupMappings(currentNucleusGroups, userGroupMemberships);
+        LOGGER.info("Group sync completed successfully.");
 
         // 5. Sync User-Group Memberships
         userGroupMembershipSyncProcessor.syncUserGroupMemberships(
                 userMappings,
-                data.currentMemberships,
+                currentMemberships,
                 userGroupMemberships);
-        LOGGER.atInfo()
-                .setMessage("User-Group Membership sync completed successfully.");
+        LOGGER.info("User-Group Membership sync completed successfully.");
 
-        return SyncResult.success(
-                data.alfrescoHealthStatus(),
-                data.nucleusHealthStatus(),
-                syncStartTime);
+        return SyncResult.success("HEALTHY", "HEALTHY", syncStartTime);
     }
 
-    private SystemData getSystemData()
+    private List<AlfrescoUser> loadAlfrescoUsers()
     {
-        LocalDateTime now = LocalDateTime.now();
-
-        // Try Alfresco
-        List<AlfrescoUser> alfrescoUsers;
-        String alfrescoStatus;
         try
         {
-            alfrescoUsers = alfrescoClient.getAllUsers();
-            alfrescoStatus = "HEALTHY";
+            List<AlfrescoUser> users = alfrescoClient.getAllUsers();
             LOGGER.atDebug()
                     .setMessage("Found {} alfresco users.")
-                    .addArgument(alfrescoUsers.size())
+                    .addArgument(users.size())
                     .log();
+            return users;
         }
         catch (Exception e)
         {
@@ -179,59 +168,47 @@ public class SyncOrchestrationService
                     .log();
             throw new AlfrescoUnavailableException(e.getMessage(), e);
         }
-
-        // Try Nucleus
-        List<IamUser> nucleusIamUsers;
-        List<NucleusUserMappingOutput> currentUserMappings;
-        List<NucleusGroupOutput> currentNucleusGroups;
-        List<NucleusGroupMembershipOutput> currentMemberships;
-        String nucleusStatus;
-        try
-        {
-            nucleusIamUsers = nucleusClient.getAllIamUsers();
-            currentUserMappings = nucleusClient.getCurrentUserMappings();
-            currentNucleusGroups = nucleusClient.getAllExternalGroups();
-            currentMemberships = nucleusClient.getCurrentGroupMemberships();
-            nucleusStatus = "HEALTHY";
-            LOGGER.atDebug()
-                    .setMessage("Found {} IAM users, {} user mappings, {} alfresco groups, {} memberships.")
-                    .addArgument(nucleusIamUsers.size())
-                    .addArgument(currentUserMappings.size())
-                    .addArgument(currentNucleusGroups.size())
-                    .addArgument(currentMemberships.size())
-                    .log();
-        }
-        catch (Exception e)
-        {
-            LOGGER.atError()
-                    .setMessage("Nucleus unavailable: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-            throw new NucleusUnavailableException(e.getMessage(), e);
-        }
-
-        return new SystemData(
-                alfrescoUsers,
-                nucleusIamUsers,
-                currentUserMappings,
-                currentNucleusGroups,
-                currentMemberships,
-                alfrescoStatus,
-                nucleusStatus,
-                now);
     }
 
-    record SystemData(
-            List<AlfrescoUser> alfrescoUsers,
-            List<IamUser> nucleusIamUsers,
-            List<NucleusUserMappingOutput> currentUserMappings,
-            List<NucleusGroupOutput> currentNucleusGroups,
-            List<NucleusGroupMembershipOutput> currentMemberships,
-            String alfrescoHealthStatus,
-            String nucleusHealthStatus,
-            LocalDateTime healthCheckTime)
-    {}
+    private List<IamUser> loadNucleusIamUsers()
+    {
+        List<IamUser> users = nucleusClient.getAllIamUsers();
+        LOGGER.atDebug()
+                .setMessage("Found {} IAM users.")
+                .addArgument(users.size())
+                .log();
+        return users;
+    }
+
+    private List<NucleusUserMappingOutput> loadNucleusUserMappings()
+    {
+        List<NucleusUserMappingOutput> mappings = nucleusClient.getCurrentUserMappings();
+        LOGGER.atDebug()
+                .setMessage("Found {} user mappings.")
+                .addArgument(mappings.size())
+                .log();
+        return mappings;
+    }
+
+    private List<NucleusGroupOutput> loadNucleusGroups()
+    {
+        List<NucleusGroupOutput> groups = nucleusClient.getAllExternalGroups();
+        LOGGER.atDebug()
+                .setMessage("Found {} alfresco groups.")
+                .addArgument(groups.size())
+                .log();
+        return groups;
+    }
+
+    private List<NucleusGroupMembershipOutput> loadNucleusMemberships()
+    {
+        List<NucleusGroupMembershipOutput> memberships = nucleusClient.getCurrentGroupMemberships();
+        LOGGER.atDebug()
+                .setMessage("Found {} memberships.")
+                .addArgument(memberships.size())
+                .log();
+        return memberships;
+    }
 
     record SyncResult(
             boolean success, String message, String alfrescoHealth,

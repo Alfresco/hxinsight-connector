@@ -31,4 +31,9 @@ public class NucleusUnavailableException extends SyncException
     {
         super("Nucleus unavailable: " + message, cause);
     }
+
+    public NucleusUnavailableException(String message)
+    {
+        super("Nucleus unavailable: " + message);
+    }
 }

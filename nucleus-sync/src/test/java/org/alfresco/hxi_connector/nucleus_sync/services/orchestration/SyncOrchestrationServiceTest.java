@@ -101,7 +101,7 @@ public class SyncOrchestrationServiceTest
                 new AlfrescoUser("asmith", "alice@email.com", true));
         when(alfrescoClient.getAllUsers()).thenReturn(alfrescoUsers);
         when(nucleusClient.getAllIamUsers())
-                .thenThrow(new RuntimeException("API error"));
+                .thenThrow(new NucleusUnavailableException("API error"));
 
         // When/Then
         assertThatThrownBy(service::performFullSync)
