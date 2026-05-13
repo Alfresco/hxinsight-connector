@@ -83,7 +83,7 @@ public class RepoEventPoisonPillReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "post-poison-sentinel.txt", sentinel, "text/plain");
         log.info("[reliability] Sentinel node {} published — waiting for liveness signal at HX Insight", sentinelNode.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(sentinelNode.id()))
                     .as("liveness: sentinel event published after the poison pill must reach HX Insight — failure here means the poison pill stopped the route")
                     .isGreaterThanOrEqualTo(1);

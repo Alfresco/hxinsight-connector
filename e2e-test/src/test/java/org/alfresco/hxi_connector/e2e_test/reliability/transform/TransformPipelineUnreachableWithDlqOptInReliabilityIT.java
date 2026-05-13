@@ -92,7 +92,7 @@ public class TransformPipelineUnreachableWithDlqOptInReliabilityIT
                 TransformPipelineUnreachableReliabilityIT.createStuckRenditionAndSentinel(environment);
 
         WireMock.configureFor(environment.hxInsightMock().getHost(), environment.hxInsightMock().getPort());
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(environment.jolokia().dlqDepth())
                     .as("opt-in enabled: ACS-rejected transform request must surface on the DLQ. Zero here means the route's deadLetterChannel did not catch the FailedTransformResponseException")
                     .isGreaterThanOrEqualTo(1);

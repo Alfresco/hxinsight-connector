@@ -178,7 +178,7 @@ public class S3TransientBlipReliabilityIT extends BaseReliabilityIT
      */
     private void assertRecovers(Node victim, String faultLabel)
     {
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.contentEventsFor(victim.id()))
                     .as("brief S3 fault (%s) within retry budget must NOT prevent rendition upload — a zero here means Spring Retry / JMS redelivery did not recover the S3 PUT for objectId=%s (the connector emits the content envelope in /ingestion-events only after a successful upload)",
                             faultLabel, victim.id())
@@ -195,7 +195,7 @@ public class S3TransientBlipReliabilityIT extends BaseReliabilityIT
      */
     private void assertInDeliveryRetryFired(double retryCounterBefore, String faultLabel)
     {
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             double delta = environment().actuatorMetrics()
                     .counterValue(RETRY_COUNTER, "exception", RETRY_EXCEPTION_TAG) - retryCounterBefore;
             assertThat(delta)

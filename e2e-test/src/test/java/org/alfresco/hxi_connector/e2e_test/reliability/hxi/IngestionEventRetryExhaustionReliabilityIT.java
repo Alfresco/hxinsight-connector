@@ -93,7 +93,7 @@ public class IngestionEventRetryExhaustionReliabilityIT extends BaseReliabilityI
                 .createNodeWithContent(PARENT_ID, "ingestion-exhaustion.txt", content, "text/plain");
         log.info("[reliability] Created node {} with /ingestion-events forced to 500; expecting HTTP retries to exhaust then JMS DLQ to receive the parked message", createdNode.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(createdNode.id()))
                     .as("HTTP retry budget exercised: connector must attempt ≥ %d POSTs to /ingestion-events for this objectId before exhausting and falling through to the JMS handler. A count of 1 means the connector treated the first 500 as fatal",
                             MIN_HTTP_ATTEMPTS)

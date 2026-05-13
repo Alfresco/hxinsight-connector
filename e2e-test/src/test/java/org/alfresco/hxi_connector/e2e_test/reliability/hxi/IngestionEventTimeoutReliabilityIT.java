@@ -97,7 +97,7 @@ public class IngestionEventTimeoutReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "ingestion-timeout.txt", content, "text/plain");
         log.info("[reliability] Created node {} with /ingestion-events held for {} ms; expecting HTTP timeout then JMS DLQ", createdNode.id(), SERVER_DELAY_MS);
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(createdNode.id()))
                     .as("HTTP timeout actually fired and JMS retried: expected ≥ %d POSTs to /ingestion-events for this objectId. A count of 1 means the connector blocked indefinitely waiting for HX Insight — the regression the responseTimeoutMs knob exists to prevent",
                             MIN_HTTP_ATTEMPTS)

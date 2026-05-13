@@ -80,7 +80,7 @@ public class TimestampPassthroughReliabilityIT extends BaseReliabilityIT
         String sourceTimestampMarker = "\"sourceTimestamp\":" + expectedEpochMillis;
         String objectIdMarker = "\"objectId\":\"" + fabricatedNodeId + "\"";
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(findAll(postRequestedFor(urlEqualTo(WiremockCounts.INGESTION_EVENTS_PATH))
                     .withRequestBody(containing(objectIdMarker))
                     .withRequestBody(containing(sourceTimestampMarker))).size())
@@ -108,7 +108,7 @@ public class TimestampPassthroughReliabilityIT extends BaseReliabilityIT
 
         String objectIdMarker = "\"objectId\":\"" + fabricatedNodeId + "\"";
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(environment().jolokia().dlqDepth())
                     .as("[reject/%s] documented contract: the {@code sourceTimestamp > 0} guard in IngestNodeCommand throws ValidationException; the route's error handler must park the message on ActiveMQ.DLQ after bounded redelivery", label)
                     .isGreaterThanOrEqualTo(1);

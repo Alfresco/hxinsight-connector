@@ -68,7 +68,7 @@ public class TransformResponseFailureReliabilityIT extends BaseReliabilityIT
     {
         SyntheticFailure failure = injectSynthetic400Failure();
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(failure.sentinelNode().id()))
                     .as("liveness: sentinel must reach HX Insight after the route ACK'd the failed transform-response")
                     .isGreaterThanOrEqualTo(1);

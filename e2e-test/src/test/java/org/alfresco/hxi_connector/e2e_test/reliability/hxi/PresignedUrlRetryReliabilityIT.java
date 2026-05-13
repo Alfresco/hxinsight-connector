@@ -114,7 +114,7 @@ public class PresignedUrlRetryReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "presigned-url-retry.txt", content, "text/plain");
         log.info("[reliability] Created node {} with forced 500-once on /presigned-urls; expecting retry then full chain completion", createdNode.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             double retryCounterDelta = environment().actuatorMetrics()
                     .counterValue(RETRY_COUNTER, "exception", RETRY_EXCEPTION_TAG) - retryCounterBefore;
             assertThat(retryCounterDelta)

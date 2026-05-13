@@ -103,7 +103,7 @@ public class IdempotentIngestionReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "idempotent-retry.txt", content, "text/plain");
         log.info("[reliability] Created node {} with forced 500-once on /ingestion-events; expecting at least one retry", createdNode.id());
 
-        RetryUtils.retryWithBackoff(() -> assertThat(WiremockCounts.ingestionEventsFor(createdNode.id()))
+        RetryUtils.assertWithRetry(() -> assertThat(WiremockCounts.ingestionEventsFor(createdNode.id()))
                 .as("at-least-once retry: connector must redeliver after a 5xx on /ingestion-events. The natural ≥ 2-event flow plus one retry should push the journal to ≥ %d POSTs for this objectId; a count of 2 means the connector observed the 500 and stopped",
                         MIN_POSTS_AFTER_RETRY)
                 .isGreaterThanOrEqualTo(MIN_POSTS_AFTER_RETRY),
@@ -121,7 +121,7 @@ public class IdempotentIngestionReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "idempotent-equality.txt", content, "text/plain");
         log.info("[reliability] Created node {} with forced 500-once on /ingestion-events; expecting at least one body to appear bit-identical across retries", createdNode.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events"))
                     .withRequestBody(containing("\"objectId\":\"" + createdNode.id() + "\"")));
 

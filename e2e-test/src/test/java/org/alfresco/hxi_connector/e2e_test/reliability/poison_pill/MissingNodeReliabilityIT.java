@@ -93,7 +93,7 @@ public class MissingNodeReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "post-missing-node-sentinel.txt", sentinel, "text/plain");
         log.info("[reliability] Sentinel node {} published — waiting for liveness signal at HX Insight", sentinelNode.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(sentinelNode.id()))
                     .as("liveness: sentinel event published after the missing-node event must reach HX Insight — failure here means the route stopped on the ACS 404")
                     .isGreaterThanOrEqualTo(1);

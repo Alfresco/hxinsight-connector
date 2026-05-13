@@ -76,7 +76,7 @@ public class ActiveMqShortPartitionReliabilityIT extends BaseReliabilityIT
         Node preBlip = environment().repositoryClient()
                 .createNodeWithContent(PARENT_ID, "pre-blip.txt", pre, "text/plain");
         log.info("[reliability] Pre-blip node {} — waiting for baseline ingestion event", preBlip.id());
-        RetryUtils.retryWithBackoff(
+        RetryUtils.assertWithRetry(
                 () -> assertThat(WiremockCounts.ingestionEventsFor(preBlip.id())).isGreaterThanOrEqualTo(1),
                 CONVERGENCE_DELAY_MS);
 
@@ -94,7 +94,7 @@ public class ActiveMqShortPartitionReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "post-blip.txt", post, "text/plain");
         log.info("[reliability] Post-blip node {} — waiting for liveness signal", postBlip.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(postBlip.id()))
                     .as("liveness: post-blip sentinel must reach HX Insight — failure here means the route stopped after the partition")
                     .isGreaterThanOrEqualTo(1);

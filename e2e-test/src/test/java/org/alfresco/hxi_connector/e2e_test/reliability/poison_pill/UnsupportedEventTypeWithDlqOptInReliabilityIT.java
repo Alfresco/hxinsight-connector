@@ -85,7 +85,7 @@ public class UnsupportedEventTypeWithDlqOptInReliabilityIT
         UnsupportedEventTypeReliabilityIT.SyntheticUnknownTypeEvent event =
                 UnsupportedEventTypeReliabilityIT.injectSyntheticUnknownTypeEvent(environment);
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(environment.jolokia().dlqDepth())
                     .as("opt-in enabled: an unrecognised eventType must surface on the DLQ. Zero here means the EventProcessor never threw UnsupportedEventTypeException, or the repo-events DeadLetterChannel did not catch it")
                     .isGreaterThanOrEqualTo(1);

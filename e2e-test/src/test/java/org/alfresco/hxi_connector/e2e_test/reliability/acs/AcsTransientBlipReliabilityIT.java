@@ -100,7 +100,7 @@ public class AcsTransientBlipReliabilityIT extends BaseReliabilityIT
         }
 
         final Node finalVictim = victim;
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(finalVictim.id()))
                     .as("brief ACS blip within retry budget must NOT prevent ingestion — a zero here means @Retryable / JMS redelivery did not recover the event for objectId=%s",
                             finalVictim.id())

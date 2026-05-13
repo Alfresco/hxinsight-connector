@@ -78,7 +78,7 @@ public class ActiveMqResetPeerReliabilityIT extends BaseReliabilityIT
         Node preRst = environment().repositoryClient()
                 .createNodeWithContent(PARENT_ID, "pre-rst.txt", pre, "text/plain");
         log.info("[reliability] Pre-RST node {} — waiting for baseline ingestion event", preRst.id());
-        RetryUtils.retryWithBackoff(
+        RetryUtils.assertWithRetry(
                 () -> assertThat(WiremockCounts.ingestionEventsFor(preRst.id())).isGreaterThanOrEqualTo(1),
                 CONVERGENCE_DELAY_MS);
 
@@ -105,7 +105,7 @@ public class ActiveMqResetPeerReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "post-rst.txt", post, "text/plain");
         log.info("[reliability] Post-RST node {} — waiting for liveness + completeness", postRst.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(postRst.id()))
                     .as("post-RST sentinel must reach HX Insight — failure here means the route did not reconnect")
                     .isGreaterThanOrEqualTo(1);

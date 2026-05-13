@@ -101,7 +101,7 @@ public class HxiShortPartitionReliabilityIT extends BaseReliabilityIT
         log.info("[reliability] Post-partition sentinel {} — verifying liveness + DLQ visibility", sentinel.id());
 
         final Node finalVictim = victim;
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(sentinel.id()))
                     .as("liveness: post-partition sentinel must reach HX Insight — failure here means the route stopped after the HXI partition")
                     .isGreaterThanOrEqualTo(1);

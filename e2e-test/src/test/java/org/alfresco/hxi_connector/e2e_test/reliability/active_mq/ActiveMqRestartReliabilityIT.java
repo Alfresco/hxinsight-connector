@@ -69,7 +69,7 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
     void shouldRecoverConnectorAfterBrokerGracefulStopAndRestart() throws IOException
     {
         Node baseline = createNode("amq-restart-graceful-baseline.txt", "Graceful stop baseline");
-        awaitIngestionFor(baseline.id(), "graceful baseline");
+        assertIngestionFor(baseline.id(), "graceful baseline");
 
         log.info("[chaos] graceful stop on the broker container");
         ProcessChaos.gracefulStop(environment().activemqContainer());
@@ -79,14 +79,14 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         ProcessChaos.awaitConnectorReadiness(environment(), RECOVERY_DEADLINE_MS);
 
         Node sentinel = createNode("amq-restart-graceful-sentinel.txt", "Graceful stop sentinel");
-        awaitIngestionFor(sentinel.id(), "graceful sentinel");
+        assertIngestionFor(sentinel.id(), "graceful sentinel");
     }
 
     @Test
     void shouldRecoverConnectorAfterBrokerSigKillAndRestart() throws IOException
     {
         Node baseline = createNode("amq-restart-kill-baseline.txt", "SIGKILL baseline");
-        awaitIngestionFor(baseline.id(), "kill baseline");
+        assertIngestionFor(baseline.id(), "kill baseline");
 
         log.info("[chaos] SIGKILL on the broker container");
         ProcessChaos.sigKill(environment().activemqContainer());
@@ -96,7 +96,7 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         ProcessChaos.awaitConnectorReadiness(environment(), RECOVERY_DEADLINE_MS);
 
         Node sentinel = createNode("amq-restart-kill-sentinel.txt", "SIGKILL sentinel");
-        awaitIngestionFor(sentinel.id(), "kill sentinel");
+        assertIngestionFor(sentinel.id(), "kill sentinel");
     }
 
     @Test
@@ -140,7 +140,7 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
 
             for (Node node : backlog)
             {
-                awaitBacklogIngestionFor(node.id());
+                assertBacklogIngestionFor(node.id());
             }
         }
         finally
@@ -158,7 +158,7 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
                         .withFixedDelay(SLOW_RESPONSE_DELAY_MS)));
     }
 
-    private void awaitBacklogIngestionFor(String nodeId)
+    private void assertBacklogIngestionFor(String nodeId)
     {
         RetryUtils.retryWithBackoff(
                 () -> {

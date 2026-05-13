@@ -37,7 +37,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
  * Pins ACS-side restart recovery: graceful stop and abrupt SIGKILL of the repository container, followed by {@code docker start} and a sentinel publish. The repository's database state (Postgres) is preserved across the cycle, so the connector should rediscover ACS once it answers HTTP again — no operator intervention required.
  *
  * <p>
- * <b>Contract scope:</b> the post-recovery {@link #awaitIngestionFor(String, String) awaitIngestionFor} canary on each method asserts that the connector's <i>metadata pipeline</i> is alive after the ACS restart — i.e. the repo-event consumer reattached, the durable JMS subscription replayed pending events, and the metadata POST to {@code /ingestion-events} fired for the sentinel objectId. It does <b>not</b> verify the content-download path (which runs after the metadata POST, hits {@code AlfrescoRepositoryContentClient.downloadContent} against the live repository, and feeds the rendition pipeline). Adding a {@code WiremockCounts.contentEventsFor(sentinel.id()) >= 1} assertion would extend the contract to that path, but is intentionally out of scope here — the content-download retry contract is held by {@link AcsLatencyReliabilityIT} (in-budget timeout via {@code @Retryable} exhaustion) and {@link AcsTolerableLatencyReliabilityIT} (under-budget tolerance), both of which exercise the route under chaos with the live repository up. This IT's job is the restart-recovery shape: "ACS came back, the connector noticed, events resumed flowing".
+ * <b>Contract scope:</b> the post-recovery {@link #assertIngestionFor(String, String) awaitIngestionFor} canary on each method asserts that the connector's <i>metadata pipeline</i> is alive after the ACS restart — i.e. the repo-event consumer reattached, the durable JMS subscription replayed pending events, and the metadata POST to {@code /ingestion-events} fired for the sentinel objectId. It does <b>not</b> verify the content-download path (which runs after the metadata POST, hits {@code AlfrescoRepositoryContentClient.downloadContent} against the live repository, and feeds the rendition pipeline). Adding a {@code WiremockCounts.contentEventsFor(sentinel.id()) >= 1} assertion would extend the contract to that path, but is intentionally out of scope here — the content-download retry contract is held by {@link AcsLatencyReliabilityIT} (in-budget timeout via {@code @Retryable} exhaustion) and {@link AcsTolerableLatencyReliabilityIT} (under-budget tolerance), both of which exercise the route under chaos with the live repository up. This IT's job is the restart-recovery shape: "ACS came back, the connector noticed, events resumed flowing".
  *
  * <p>
  * Note on wall-time: ACS Spring boot from a warm Postgres still takes 1–2 minutes per restart, so this class is intentionally limited to two methods. {@link #ACS_READY_DEADLINE_MS} is generous on purpose to absorb that.
@@ -54,7 +54,7 @@ public class AcsRestartReliabilityIT extends BaseProcessChaosReliabilityIT
     void shouldRecoverConnectorAfterAcsGracefulStopAndRestart() throws IOException
     {
         Node baseline = createNode("acs-restart-graceful-baseline.txt", "Graceful stop baseline");
-        awaitIngestionFor(baseline.id(), "graceful baseline");
+        assertIngestionFor(baseline.id(), "graceful baseline");
 
         log.info("[chaos] graceful stop on the ACS repository container");
         ProcessChaos.gracefulStop(environment().repositoryContainer());
@@ -64,14 +64,14 @@ public class AcsRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         ProcessChaos.awaitAcsReadiness(environment(), ACS_READY_DEADLINE_MS);
 
         Node sentinel = createNode("acs-restart-graceful-sentinel.txt", "Graceful stop sentinel");
-        awaitIngestionFor(sentinel.id(), "graceful sentinel");
+        assertIngestionFor(sentinel.id(), "graceful sentinel");
     }
 
     @Test
     void shouldRecoverConnectorAfterAcsSigKillAndRestart() throws IOException
     {
         Node baseline = createNode("acs-restart-kill-baseline.txt", "SIGKILL baseline");
-        awaitIngestionFor(baseline.id(), "kill baseline");
+        assertIngestionFor(baseline.id(), "kill baseline");
 
         log.info("[chaos] SIGKILL on the ACS repository container");
         ProcessChaos.sigKill(environment().repositoryContainer());
@@ -81,6 +81,6 @@ public class AcsRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         ProcessChaos.awaitAcsReadiness(environment(), ACS_READY_DEADLINE_MS);
 
         Node sentinel = createNode("acs-restart-kill-sentinel.txt", "SIGKILL sentinel");
-        awaitIngestionFor(sentinel.id(), "kill sentinel");
+        assertIngestionFor(sentinel.id(), "kill sentinel");
     }
 }

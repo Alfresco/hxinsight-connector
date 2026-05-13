@@ -94,7 +94,7 @@ public class HxiTolerableLatencyReliabilityIT extends BaseReliabilityIT
             log.info("[reliability] Published node {} with {} ms HXI latency in place — expecting first-attempt success, no DLQ", tolerable.id(), HXI_LATENCY_MS);
 
             final Node finalTolerable = tolerable;
-            RetryUtils.retryWithBackoff(() -> {
+            RetryUtils.assertWithRetry(() -> {
                 assertThat(WiremockCounts.ingestionEventsFor(finalTolerable.id()))
                         .as("in-budget HXI latency must NOT prevent ingestion — a zero here means the response timeout fired prematurely or the route stalled on a slow-but-tolerable HXI request")
                         .isGreaterThanOrEqualTo(1);

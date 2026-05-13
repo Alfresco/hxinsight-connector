@@ -112,7 +112,7 @@ public class SfsOutageReliabilityIT
         }
         log.info("[reliability] Smoke node {} created with text/plain (mapping forces transform to application/pdf — full ATS round-trip)", node.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(node.id()))
                     .as("smoke: connector should post BOTH the metadata event AND the post-rendition content event for the node — failure here means the transform round-trip did not complete (env wiring broken, ATS containers not up, or connector cannot read from toxic-sfs)")
                     .isGreaterThanOrEqualTo(2);
@@ -146,7 +146,7 @@ public class SfsOutageReliabilityIT
         try
         {
             SfsOutageRun run = createVictimAndSentinelDuringOutage();
-            RetryUtils.retryWithBackoff(() -> {
+            RetryUtils.assertWithRetry(() -> {
                 assertThat(WiremockCounts.ingestionEventsFor(run.sentinel().id()))
                         .as("liveness: sentinel must reach HX Insight — failure here means SFS chaos has knocked out unrelated paths (catch-all [*]=* should bypass ATS+SFS entirely)")
                         .isGreaterThanOrEqualTo(1);

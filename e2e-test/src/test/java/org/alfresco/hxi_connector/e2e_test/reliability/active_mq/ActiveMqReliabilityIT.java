@@ -73,7 +73,7 @@ public class ActiveMqReliabilityIT extends BaseReliabilityIT
         Node createdNode = environment().repositoryClient()
                 .createNodeWithContent(PARENT_ID, "baseline.txt", fileContent, "text/plain");
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
 
             verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))

@@ -91,7 +91,7 @@ public class S3TolerableLatencyReliabilityIT extends BaseReliabilityIT
             log.info("[reliability] Published node {} with {} ms S3 latency in place — expecting first-attempt success, no DLQ", tolerable.id(), S3_LATENCY_MS);
 
             final Node finalTolerable = tolerable;
-            RetryUtils.retryWithBackoff(() -> {
+            RetryUtils.assertWithRetry(() -> {
                 assertThat(WiremockCounts.ingestionEventsFor(finalTolerable.id()))
                         .as("in-budget S3 latency must NOT prevent ingestion — a zero here means the upload response timeout fired prematurely or the route stalled on a slow-but-tolerable S3 PUT")
                         .isGreaterThanOrEqualTo(1);

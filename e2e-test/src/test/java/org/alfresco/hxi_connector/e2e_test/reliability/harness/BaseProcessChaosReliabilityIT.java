@@ -107,7 +107,7 @@ public abstract class BaseProcessChaosReliabilityIT
     /**
      * Wait for at least one POST to {@code /ingestion-events} carrying the given {@code objectId}. The {@code label} is only used in the assertion message to make triage one log scan rather than archaeology.
      */
-    protected final void awaitIngestionFor(String nodeId, String label)
+    protected final void assertIngestionFor(String nodeId, String label)
     {
         RetryUtils.retryWithBackoff(() -> assertThat(WiremockCounts.ingestionEventsFor(nodeId))
                 .as("[%s] connector did not deliver event for objectId=%s — restart left the consumer detached, durable subscription was lost, or event silently dropped",

@@ -66,7 +66,7 @@ public class UnsupportedEventTypeReliabilityIT extends BaseReliabilityIT
     {
         SyntheticUnknownTypeEvent event = injectSyntheticUnknownTypeEvent(environment());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(event.sentinelNode().id()))
                     .as("liveness: sentinel published after the unknown-type event must reach HX Insight — failure here means the route stopped on the unsupported event")
                     .isGreaterThanOrEqualTo(1);

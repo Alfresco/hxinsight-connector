@@ -100,7 +100,7 @@ public class HxiTransientBlipReliabilityIT extends BaseReliabilityIT
         }
 
         final Node finalVictim = victim;
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(finalVictim.id()))
                     .as("brief HXI blip within retry budget must NOT prevent ingestion — a zero here means Spring Retry / JMS redelivery did not recover the event for objectId=%s",
                             finalVictim.id())

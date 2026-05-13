@@ -115,7 +115,7 @@ public class SfsOutageWithDlqOptInReliabilityIT
 
             Thread.sleep(Duration.ofSeconds(SFS_OUTAGE_SETTLE_SECONDS).toMillis());
 
-            RetryUtils.retryWithBackoff(() -> {
+            RetryUtils.assertWithRetry(() -> {
                 assertThat(environment.jolokia().dlqDepth())
                         .as("opt-in enabled: SFS outage must surface on the DLQ. Zero here means the route's deadLetterChannel did not catch the post-201 download failure")
                         .isGreaterThanOrEqualTo(1);

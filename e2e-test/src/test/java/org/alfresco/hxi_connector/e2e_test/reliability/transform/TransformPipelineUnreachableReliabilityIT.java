@@ -108,7 +108,7 @@ public class TransformPipelineUnreachableReliabilityIT
         StuckRendition rendition = createStuckRenditionAndSentinel(environment);
 
         WireMock.configureFor(environment.hxInsightMock().getHost(), environment.hxInsightMock().getPort());
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(rendition.sentinelNode().id()))
                     .as("liveness: sentinel must reach HX Insight despite the stuck rendition request")
                     .isGreaterThanOrEqualTo(1);

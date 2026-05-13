@@ -48,7 +48,7 @@ public class LiveIngesterRestartReliabilityIT extends BaseProcessChaosReliabilit
     void shouldRecoverConnectorAfterLiveIngesterGracefulStopAndRestart() throws IOException
     {
         Node baseline = createNode("ingester-restart-graceful-baseline.txt", "Graceful stop baseline");
-        awaitIngestionFor(baseline.id(), "graceful baseline");
+        assertIngestionFor(baseline.id(), "graceful baseline");
 
         log.info("[chaos] graceful stop on the live-ingester container");
         ProcessChaos.gracefulStop(environment().liveIngesterContainer());
@@ -66,7 +66,7 @@ public class LiveIngesterRestartReliabilityIT extends BaseProcessChaosReliabilit
 
         for (Node node : backlog)
         {
-            awaitIngestionFor(node.id(), "graceful backlog");
+            assertIngestionFor(node.id(), "graceful backlog");
         }
     }
 
@@ -74,7 +74,7 @@ public class LiveIngesterRestartReliabilityIT extends BaseProcessChaosReliabilit
     void shouldRecoverConnectorAfterLiveIngesterSigKillAndRestart() throws IOException
     {
         Node baseline = createNode("ingester-restart-kill-baseline.txt", "SIGKILL baseline");
-        awaitIngestionFor(baseline.id(), "kill baseline");
+        assertIngestionFor(baseline.id(), "kill baseline");
 
         log.info("[chaos] SIGKILL on the live-ingester container");
         ProcessChaos.sigKill(environment().liveIngesterContainer());
@@ -92,7 +92,7 @@ public class LiveIngesterRestartReliabilityIT extends BaseProcessChaosReliabilit
 
         for (Node node : backlog)
         {
-            awaitIngestionFor(node.id(), "kill backlog");
+            assertIngestionFor(node.id(), "kill backlog");
         }
     }
 }

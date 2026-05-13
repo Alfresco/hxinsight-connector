@@ -76,7 +76,7 @@ public class ActiveMqFlappingReliabilityIT extends BaseReliabilityIT
         Node preFlap = environment().repositoryClient()
                 .createNodeWithContent(PARENT_ID, "pre-flap.txt", pre, "text/plain");
         log.info("[reliability] Pre-flap sentinel {} — waiting for baseline ingestion event", preFlap.id());
-        RetryUtils.retryWithBackoff(
+        RetryUtils.assertWithRetry(
                 () -> assertThat(WiremockCounts.ingestionEventsFor(preFlap.id())).isGreaterThanOrEqualTo(1),
                 CONVERGENCE_DELAY_MS);
 
@@ -102,7 +102,7 @@ public class ActiveMqFlappingReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "post-flap.txt", post, "text/plain");
         log.info("[reliability] Post-flap sentinel {} — waiting for liveness signal", postFlap.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(postFlap.id()))
                     .as("liveness: post-flap sentinel must reach HX Insight — failure here means the storm killed the route")
                     .isGreaterThanOrEqualTo(1);

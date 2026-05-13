@@ -80,7 +80,7 @@ public class ActiveMqLatencyJitterReliabilityIT extends BaseReliabilityIT
         Node preJitter = environment().repositoryClient()
                 .createNodeWithContent(PARENT_ID, "pre-jitter.txt", pre, "text/plain");
         log.info("[reliability] Pre-jitter node {} — waiting for baseline ingestion event", preJitter.id());
-        RetryUtils.retryWithBackoff(
+        RetryUtils.assertWithRetry(
                 () -> assertThat(WiremockCounts.ingestionEventsFor(preJitter.id())).isGreaterThanOrEqualTo(1),
                 CONVERGENCE_DELAY_MS);
 
@@ -114,7 +114,7 @@ public class ActiveMqLatencyJitterReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "post-jitter.txt", post, "text/plain");
         log.info("[reliability] Post-jitter node {} — waiting for completeness across {} events", postJitter.id(), EVENTS_DURING_LATENCY);
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(postJitter.id()))
                     .as("post-jitter sentinel must reach HX Insight after latency removed")
                     .isGreaterThanOrEqualTo(1);

@@ -119,7 +119,7 @@ public abstract class BaseReliabilityIT
         waitForBrokerIdle();
         env.jolokia().purgeQueue(DLQ_QUEUE);
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(env.jolokia().brokerHealthy())
                     .as("preceding test left the broker unhealthy — env reset cannot recover, fix the offending test")
                     .isTrue();

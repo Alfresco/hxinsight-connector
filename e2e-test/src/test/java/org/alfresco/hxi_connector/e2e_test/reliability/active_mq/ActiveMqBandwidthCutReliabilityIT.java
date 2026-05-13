@@ -85,7 +85,7 @@ public class ActiveMqBandwidthCutReliabilityIT extends BaseReliabilityIT
         Node preCut = environment().repositoryClient()
                 .createNodeWithContent(PARENT_ID, "pre-cut.txt", pre, "text/plain");
         log.info("[reliability] Pre-cut node {} — waiting for baseline ingestion event", preCut.id());
-        RetryUtils.retryWithBackoff(
+        RetryUtils.assertWithRetry(
                 () -> assertThat(WiremockCounts.ingestionEventsFor(preCut.id())).isGreaterThanOrEqualTo(1),
                 CONVERGENCE_DELAY_MS);
 
@@ -118,7 +118,7 @@ public class ActiveMqBandwidthCutReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "post-cut.txt", post, "text/plain");
         log.info("[reliability] Post-cut node {} — waiting for recovery + completeness", postCut.id());
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(postCut.id()))
                     .as("post-cut sentinel must reach HX Insight after bandwidth recovery")
                     .isGreaterThanOrEqualTo(1);

@@ -91,7 +91,7 @@ public class AcsTolerableLatencyReliabilityIT extends BaseReliabilityIT
             log.info("[reliability] Published node {} with {} ms ACS latency in place — expecting first-attempt success, no DLQ", tolerable.id(), ACS_LATENCY_MS);
 
             final Node finalTolerable = tolerable;
-            RetryUtils.retryWithBackoff(() -> {
+            RetryUtils.assertWithRetry(() -> {
                 assertThat(WiremockCounts.ingestionEventsFor(finalTolerable.id()))
                         .as("in-budget ACS latency must NOT prevent ingestion — a zero here means the response timeout fired prematurely or the route stalled on a slow-but-tolerable ACS request")
                         .isGreaterThanOrEqualTo(1);

@@ -57,6 +57,6 @@ public class PairedRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         ProcessChaos.awaitConnectorReadiness(environment(), RECOVERY_DEADLINE_MS);
 
         Node sentinel = createNode("paired-restart-sentinel.txt", "Paired-outage sentinel");
-        awaitIngestionFor(sentinel.id(), "paired sentinel");
+        assertIngestionFor(sentinel.id(), "paired sentinel");
     }
 }

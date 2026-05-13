@@ -91,7 +91,7 @@ public class S3LatencyReliabilityIT extends BaseReliabilityIT
                     .createNodeWithContent(PARENT_ID, "s3-latency-victim.txt", content, "text/plain");
             log.info("[reliability] Published node {} during S3 latency window — expecting DLQ", slow.id());
 
-            RetryUtils.retryWithBackoff(() -> assertThat(environment().jolokia().dlqDepth())
+            RetryUtils.assertWithRetry(() -> assertThat(environment().jolokia().dlqDepth())
                     .as("S3 slowdown should produce an observable DLQ entry — a zero here means the route is stuck waiting on the slow PUT, contradicting the bounded-retry contract pinned by hyland-experience.storage.upload.response-timeout-ms")
                     .isGreaterThanOrEqualTo(1), CONVERGENCE_DELAY_MS);
         }
@@ -106,7 +106,7 @@ public class S3LatencyReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "s3-latency-sentinel.txt", postContent, "text/plain");
         log.info("[reliability] Post-latency sentinel {} — verifying liveness", sentinel.id());
 
-        RetryUtils.retryWithBackoff(() -> assertThat(WiremockCounts.ingestionEventsFor(sentinel.id()))
+        RetryUtils.assertWithRetry(() -> assertThat(WiremockCounts.ingestionEventsFor(sentinel.id()))
                 .as("post-recovery sentinel must reach HX Insight — failure here means the route stopped after the latency window")
                 .isGreaterThanOrEqualTo(1), CONVERGENCE_DELAY_MS);
     }

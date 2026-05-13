@@ -81,7 +81,7 @@ public class ActiveMqPartitionReliabilityIT extends BaseReliabilityIT
                 .createNodeWithContent(PARENT_ID, "pre-outage.txt", pre, "text/plain");
 
         log.info("[reliability] Pre-outage node {} — waiting for baseline ingestion event", preOutage.id());
-        RetryUtils.retryWithBackoff(
+        RetryUtils.assertWithRetry(
                 () -> assertThat(WiremockCounts.ingestionEventsFor(preOutage.id())).isGreaterThanOrEqualTo(1),
                 CONVERGENCE_DELAY_MS);
 
@@ -114,7 +114,7 @@ public class ActiveMqPartitionReliabilityIT extends BaseReliabilityIT
 
         log.info("[reliability] Post-outage node {} — waiting for recovery + mid-outage backlog drain", postOutage.id());
         final Node finalMidOutage = midOutage;
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(WiremockCounts.ingestionEventsFor(postOutage.id()))
                     .as("post-outage node should reach HX Insight after partition heals")
                     .isGreaterThanOrEqualTo(1);

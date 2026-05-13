@@ -86,7 +86,7 @@ public class TransformResponseFailureWithDlqOptInReliabilityIT
         TransformResponseFailureReliabilityIT.SyntheticFailure failure =
                 TransformResponseFailureReliabilityIT.injectSynthetic400Failure(environment);
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             assertThat(environment.jolokia().dlqDepth())
                     .as("opt-in enabled: failed transform-response must surface on the DLQ. Zero here means the route's deadLetterChannel did not catch the FailedTransformResponseException")
                     .isGreaterThanOrEqualTo(1);

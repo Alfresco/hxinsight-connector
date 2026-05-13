@@ -78,7 +78,7 @@ public class ActiveMqBacklogDrainReliabilityIT extends BaseReliabilityIT
         Node preOutage = environment().repositoryClient()
                 .createNodeWithContent(PARENT_ID, "pre-outage.txt", pre, "text/plain");
         log.info("[reliability] Pre-outage node {} — waiting for baseline ingestion event", preOutage.id());
-        RetryUtils.retryWithBackoff(
+        RetryUtils.assertWithRetry(
                 () -> assertThat(WiremockCounts.ingestionEventsFor(preOutage.id())).isGreaterThanOrEqualTo(1),
                 CONVERGENCE_DELAY_MS);
 
@@ -108,7 +108,7 @@ public class ActiveMqBacklogDrainReliabilityIT extends BaseReliabilityIT
             environment().activemqProxy().enable();
         }
 
-        RetryUtils.retryWithBackoff(() -> {
+        RetryUtils.assertWithRetry(() -> {
             for (Node backlogNode : backlog)
             {
                 assertThat(WiremockCounts.ingestionEventsFor(backlogNode.id()))
