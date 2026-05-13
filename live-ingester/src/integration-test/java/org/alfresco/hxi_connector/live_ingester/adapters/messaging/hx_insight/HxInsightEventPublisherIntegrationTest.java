@@ -39,22 +39,25 @@ import static org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.m
 import java.time.Instant;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockRuntimeInfo;
-import com.github.tomakehurst.wiremock.junit5.WireMockTest;
 import org.hyland.sdk.cic.http.client.CICSdkException;
 import org.hyland.sdk.cic.http.client.auth.AuthenticationHttpClient;
 import org.hyland.sdk.cic.http.client.retry.RetryPolicy;
 import org.hyland.sdk.cic.ingest.IngestHttpClient;
 import org.hyland.sdk.cic.ingest.IngestService;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.wiremock.integrations.testcontainers.WireMockContainer;
 
+import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.LiveIngestService;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.mapper.NodeEventToIngestEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
 
-@WireMockTest
+@Testcontainers
 class HxInsightEventPublisherIntegrationTest
 {
     private static final String INGEST_PATH = "/v2/ingestion-events";
@@ -64,12 +67,24 @@ class HxInsightEventPublisherIntegrationTest
     private static final long TIMESTAMP = Instant.now().toEpochMilli();
     private static final NodeEvent NODE_EVENT = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP);
 
+    @Container
+    @SuppressWarnings("PMD.FieldNamingConventions")
+    static final WireMockContainer wireMockServer = DockerContainers.createWireMockContainer();
+
     private HxInsightEventPublisher publisher;
 
-    @BeforeEach
-    void setUp(WireMockRuntimeInfo wmInfo)
+    @BeforeAll
+    static void beforeAll()
     {
-        String baseUrl = wmInfo.getHttpBaseUrl();
+        WireMock.configureFor(wireMockServer.getHost(), wireMockServer.getPort());
+    }
+
+    @BeforeEach
+    void setUp()
+    {
+        WireMock.reset();
+
+        String baseUrl = wireMockServer.getBaseUrl();
 
         stubTokenEndpoint();
 
@@ -139,6 +154,6 @@ class HxInsightEventPublisherIntegrationTest
                 .willReturn(aResponse()
                         .withStatus(200)
                         .withHeader("Content-Type", "application/json")
-                        .withBody("{\"access_token\": \"test-token\", \"token_type\": \"Bearer\", \"expires_in\": 3600}")));
+                        .withBody("{\"access_token\": \"test-token\", \"token_type\": \"Bearer\", \"expires_in\": 3600, \"scope\": \"\"}")));
     }
 }

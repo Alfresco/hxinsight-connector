@@ -56,12 +56,15 @@ class CicClientFactoryTest
     {
         RetryPolicy policy = CicClientFactory.buildRetryPolicy(DEFAULT_RETRY);
 
-        // attempt 1: 500 * 2^0 = 500ms
-        assertEquals(Duration.ofMillis(500), policy.backoffStrategy().computeDelay(context(1, new IOException())));
-        // attempt 2: 500 * 2^1 = 1000ms
-        assertEquals(Duration.ofMillis(1000), policy.backoffStrategy().computeDelay(context(2, new IOException())));
-        // attempt 3: 500 * 2^2 = 2000ms
-        assertEquals(Duration.ofMillis(2000), policy.backoffStrategy().computeDelay(context(3, new IOException())));
+        // attempt 1: jittered in [0, 500 * 2^0] = [0, 500ms]
+        Duration delay1 = policy.backoffStrategy().computeDelay(context(1, new IOException()));
+        assertTrue(!delay1.isNegative() && delay1.compareTo(Duration.ofMillis(500)) <= 0);
+        // attempt 2: jittered in [0, 500 * 2^1] = [0, 1000ms]
+        Duration delay2 = policy.backoffStrategy().computeDelay(context(2, new IOException()));
+        assertTrue(!delay2.isNegative() && delay2.compareTo(Duration.ofMillis(1000)) <= 0);
+        // attempt 3: jittered in [0, 500 * 2^2] = [0, 2000ms]
+        Duration delay3 = policy.backoffStrategy().computeDelay(context(3, new IOException()));
+        assertTrue(!delay3.isNegative() && delay3.compareTo(Duration.ofMillis(2000)) <= 0);
     }
 
     @Test

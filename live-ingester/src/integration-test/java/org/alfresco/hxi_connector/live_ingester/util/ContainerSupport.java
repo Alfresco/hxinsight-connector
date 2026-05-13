@@ -260,7 +260,7 @@ public class ContainerSupport
     {
         URL preSignedUrl = localStorageClient.generatePreSignedUploadUrl(BUCKET_NAME, OBJECT_KEY, OBJECT_CONTENT_TYPE);
         String hxInsightResponse = HX_INSIGHT_RESPONSE_BODY_PATTERN.formatted("url", preSignedUrl, "id", contentId);
-        givenThat(post(HX_INSIGHT_PRE_SIGNED_URL_PATH)
+        givenThat(post(urlPathEqualTo(HX_INSIGHT_PRE_SIGNED_URL_PATH))
                 .willReturn(aResponse()
                         .withStatus(HTTP_OK_STATUS)
                         .withBody(hxInsightResponse)));

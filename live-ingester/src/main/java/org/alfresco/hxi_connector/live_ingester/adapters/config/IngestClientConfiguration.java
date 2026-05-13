@@ -67,7 +67,8 @@ public class IngestClientConfiguration
 
         AuthenticationHttpClient.Builder authBuilder = AuthenticationHttpClient.from(authProvider.getTokenUri())
                 .clientId(authProvider.getClientId())
-                .clientSecret(authProvider.getClientSecret());
+                .clientSecret(authProvider.getClientSecret())
+                .grantType(authProvider.getGrantType());
         authProvider.getScope().forEach(authBuilder::scope);
 
         Retry retryConfig = integrationProperties.hylandExperience().ingester().retry();
