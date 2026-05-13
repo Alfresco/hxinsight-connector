@@ -52,6 +52,10 @@ public final class AuthorizationConstants
     public static final String USERNAME_PROPERTY_1 = "cm:userName";
     public static final String USERNAME_PROPERTY_2 = "usr:username";
 
+    public static final String GROUP_NAME_PROPERTY = "cm:authorityName";
+
+    public static final String GROUP_PREFIX = "";
+
     public static final Set<String> USER_TYPES = Set.of(PERSON_TYPE, USER_TYPE);
     public static final Set<String> UPDATE_OR_DELETE = Set.of(EVENT_UPDATED_TYPE, EVENT_DELETE_TYPE);
 
@@ -86,6 +90,11 @@ public final class AuthorizationConstants
         }
         throw new IamSyncException("Username property not found or empty in event "
                 + (event != null ? event.getId() : "<null>"));
+    }
+
+    public static String fetchGroupId(NodeResource nodeResource)
+    {
+        return nodeResource.getProperties().get(GROUP_NAME_PROPERTY).toString();
     }
 
     private static Map<String, ?> propertiesOf(RepoEvent<DataAttributes<NodeResource>> event)

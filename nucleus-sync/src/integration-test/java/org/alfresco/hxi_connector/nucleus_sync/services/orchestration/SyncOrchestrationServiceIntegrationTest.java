@@ -38,9 +38,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
-import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
+import org.alfresco.hxi_connector.nucleus_client.dto.AlfrescoUser;
 import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupMembershipOutput;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupOutput;

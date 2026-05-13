@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,36 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.dto;
-
-import java.util.List;
+package org.alfresco.hxi_connector.nucleus_client.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AlfrescoPagedResponse<T>
-{
-    private ListWrapper<T> list;
+public record AlfrescoUser(String id, String email, boolean enabled)
+{}
 
-    public ListWrapper<T> getList()
-    {
-        return list;
-    }
-
-    public void setList(ListWrapper<T> list)
-    {
-        this.list = list;
-    }
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record ListWrapper<T>(List<EntryWrapper<T>> entries, Pagination pagination)
-    {}
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record EntryWrapper<T>(T entry)
-    {}
-
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public record Pagination(int count, boolean hasMoreItems, int totalItems, int skipCount, int maxItems)
-    {}
-}

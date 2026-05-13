@@ -27,6 +27,7 @@ package org.alfresco.hxi_connector.live_ingester.subsystem;
 
 import lombok.Data;
 import org.alfresco.hxi_connector.live_ingester.subsystem.dto.Group;
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupInput;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupOutput;
@@ -36,6 +37,8 @@ import org.alfresco.repo.event.v1.model.RepoEvent;
 
 import java.util.List;
 import java.util.Optional;
+
+import static org.alfresco.hxi_connector.live_ingester.subsystem.AuthorizationConstants.fetchGroupId;
 
 /**
  * Group Related Operations
@@ -53,9 +56,11 @@ public class GroupManager {
 
     public void deleteGroup(String externalId) {
         // Logic to delete a group
+        // need to fetch groupName based on group Id
         nucleusClient.deleteGroup(externalId); // Delete the group from nucleus
     }
 
+    // Not needed for now as it increases another network call
     public Group fetchGroupMapping(String externalId) {
         // Logic to fetch group mapping details
         return null;
@@ -69,18 +74,18 @@ public class GroupManager {
          */
         if (!mappingManager.isGroupMembershipUpdated(event) && event.getExtensionAttributes().getExtension(EXTENDED_TO_PATH_ATTRIBUTE) != null) {
             // Group has been deleted, perform necessary operations such as deleting the group from nucleus as well
-            deleteGroup(event.getData().getResource().getId());
+            deleteGroup(fetchGroupId(event.getData().getResource()));
         }
     }
 
-    public void createGroup(NodeResource nodeResource) {
-        Optional<NucleusGroupOutput> group = nucleusClient.getGroupByExternalId(nodeResource.getId());
+    public void createGroup(NodeResource resource) {
+        Optional<NucleusGroupOutput> group = nucleusClient.getGroupByExternalId(fetchGroupId(resource));
         if (group.isPresent()) {
             // group already exists, no need to perform any operation as of now
             return;
         }
         // create group in nucleus
         nucleusClient.createGroups(List.of(
-                new NucleusGroupInput(nodeResource.getId())));
+                new NucleusGroupInput(fetchGroupId(resource))));
     }
 }

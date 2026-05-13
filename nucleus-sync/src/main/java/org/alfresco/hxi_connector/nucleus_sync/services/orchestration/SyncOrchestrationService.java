@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import org.alfresco.hxi_connector.nucleus_sync.client.AlfrescoClient;
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
+import org.alfresco.hxi_connector.nucleus_client.dto.AlfrescoUser;
 import org.alfresco.hxi_connector.nucleus_client.dto.IamUser;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupMembershipOutput;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupOutput;

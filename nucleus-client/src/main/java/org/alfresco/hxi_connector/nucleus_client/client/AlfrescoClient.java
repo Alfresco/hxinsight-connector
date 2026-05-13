@@ -23,12 +23,13 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.client;
+package org.alfresco.hxi_connector.nucleus_client.client;
 
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -45,10 +46,9 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoPagedResponse;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
+import org.alfresco.hxi_connector.nucleus_client.dto.AlfrescoGroup;
+import org.alfresco.hxi_connector.nucleus_client.dto.AlfrescoPagedResponse;
+import org.alfresco.hxi_connector.nucleus_client.dto.AlfrescoUser;
 import reactor.core.scheduler.Schedulers;
 
 @Component
@@ -87,7 +87,7 @@ public class AlfrescoClient
                 skipNotEnabled);
     }
 
-    AlfrescoClient(
+    public AlfrescoClient(
             WebClient webClient,
             ObjectMapper objectMapper,
             AuthService authService,
@@ -117,6 +117,20 @@ public class AlfrescoClient
                         .filter(AlfrescoUser::enabled)
                         .collect(Collectors.toList())
                 : users;
+    }
+
+    // Fetch group AuthorityName based on GroupId
+    public Optional<String> getGroupNameByNodeId(String groupId){
+        try{
+            String response = makeAuthenticatedRequest("/alfresco/versions/1/nodes/" + groupId)
+                    .bodyToMono(String.class)
+                    .subscribeOn(Schedulers.boundedElastic())
+                    .block(Duration.ofMinutes(timeoutInMins));
+            return Optional.ofNullable(objectMapper.readTree(response).path("entry").path("properties").path("cm:authorityName").asText(null));
+        }
+        catch (Exception e){
+            return Optional.empty();
+        }
     }
 
     public List<String> getUserGroups(String userId)
@@ -207,3 +221,4 @@ public class AlfrescoClient
                 .retrieve();
     }
 }
+

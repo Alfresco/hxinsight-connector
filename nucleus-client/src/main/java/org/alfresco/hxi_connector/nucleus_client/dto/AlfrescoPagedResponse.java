@@ -23,10 +23,37 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.nucleus_sync.dto;
+package org.alfresco.hxi_connector.nucleus_client.dto;
+
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public record AlfrescoGroup(String id)
-{}
+public class AlfrescoPagedResponse<T>
+{
+    private ListWrapper<T> list;
+
+    public ListWrapper<T> getList()
+    {
+        return list;
+    }
+
+    public void setList(ListWrapper<T> list)
+    {
+        this.list = list;
+    }
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record ListWrapper<T>(List<EntryWrapper<T>> entries, Pagination pagination)
+    {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record EntryWrapper<T>(T entry)
+    {}
+
+    @JsonIgnoreProperties(ignoreUnknown = true)
+    public record Pagination(int count, boolean hasMoreItems, int totalItems, int skipCount, int maxItems)
+    {}
+}
+

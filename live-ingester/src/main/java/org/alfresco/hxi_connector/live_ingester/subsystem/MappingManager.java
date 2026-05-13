@@ -34,6 +34,7 @@ import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import org.alfresco.hxi_connector.nucleus_client.client.NucleusClient;
 import org.alfresco.hxi_connector.nucleus_client.dto.NucleusGroupMemberAssignmentInput;
@@ -41,6 +42,7 @@ import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
+import static org.alfresco.hxi_connector.live_ingester.subsystem.AuthorizationConstants.GROUP_PREFIX;
 import static org.alfresco.hxi_connector.live_ingester.subsystem.AuthorizationConstants.fetchUserId;
 
 /**
@@ -52,6 +54,7 @@ import static org.alfresco.hxi_connector.live_ingester.subsystem.AuthorizationCo
 public class MappingManager
 {
     private final NucleusClient nucleusClient;
+    private final AlfrescoClient alfrescoClient;
 
     /**
      * Computes the diff between the user's previous and current secondary parents
@@ -123,6 +126,8 @@ public class MappingManager
             return true;
         }
         List<NucleusGroupMemberAssignmentInput> assignments = groupsToAdd.stream()
+                .map(groupId -> GROUP_PREFIX + alfrescoClient.getGroupNameByNodeId(groupId)
+                         .orElseThrow(() -> new RuntimeException("Failed to fetch group name for groupId " + groupId)))
                 .map(groupId -> new NucleusGroupMemberAssignmentInput(groupId, userId))
                 .toList();
         try
@@ -144,7 +149,9 @@ public class MappingManager
         {
             try
             {
-                nucleusClient.removeGroupMembers(groupId, List.of(userId));
+                nucleusClient.removeGroupMembers(GROUP_PREFIX + alfrescoClient.getGroupNameByNodeId(groupId)
+                                                               .orElseThrow(),
+                                                 List.of(userId));
             }
             catch (ClientException e)
             {

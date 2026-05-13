@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
 
+import org.alfresco.hxi_connector.nucleus_client.client.AlfrescoClient;
 import org.alfresco.hxi_connector.nucleus_client.client.ClientException;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
@@ -47,7 +48,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
-import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
+import org.alfresco.hxi_connector.nucleus_client.dto.AlfrescoUser;
 
 public class AlfrescoClientIntegrationTest
 {
