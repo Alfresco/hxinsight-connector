@@ -25,8 +25,9 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.util;
 
-import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThatNoException;
+
+import static org.alfresco.hxi_connector.common.constant.HttpHeaders.AUTHORIZATION;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -62,9 +63,7 @@ class LoggingUtilsTest
     }
 
     /**
-     * A null header value must not crash the masking helper. JMS messages can legitimately carry null-valued
-     * headers (e.g. an unset {@code JMSCorrelationID} on synthetic publishers), and a crash here propagates into
-     * any {@code DeadLetterChannel} {@code onPrepareFailure} callback that uses this helper, blocking DLQ delivery.
+     * A null header value must not crash the masking helper. JMS messages can legitimately carry null-valued headers (e.g. an unset {@code JMSCorrelationID} on synthetic publishers), and a crash here propagates into any {@code DeadLetterChannel} {@code onPrepareFailure} callback that uses this helper, blocking DLQ delivery.
      */
     @Test
     void shouldNotThrowOnNullHeaderValue()

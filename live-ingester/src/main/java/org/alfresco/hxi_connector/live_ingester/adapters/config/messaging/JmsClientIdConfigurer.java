@@ -35,17 +35,13 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
 /**
- * Sets the JMS {@code clientId} on the autoconfigured {@link SingleConnectionFactory} so the
- * live-ingester can subscribe to {@code alfresco.repo.event2} as a durable consumer. Runs as a
- * {@link BeanPostProcessor} because {@code SingleConnectionFactory} rejects late
- * {@code setClientID} calls once a connection is open ("setClientID call not supported on proxy
- * for shared Connection").
+ * Sets the JMS {@code clientId} on the autoconfigured {@link SingleConnectionFactory} so the live-ingester can subscribe to {@code alfresco.repo.event2} as a durable consumer. Runs as a {@link BeanPostProcessor} because {@code SingleConnectionFactory} rejects late {@code setClientID} calls once a connection is open ("setClientID call not supported on proxy for shared Connection").
  *
- * <p>The clientId applies to every JMS connection in this process (repo events, bulk-ingester
- * events, transform.response). JMS permits one active connection per clientId per broker, so the
- * durable-subscription path is single-instance only;
+ * <p>
+ * The clientId applies to every JMS connection in this process (repo events, bulk-ingester events, transform.response). JMS permits one active connection per clientId per broker, so the durable-subscription path is single-instance only;
  *
- * <p>Activated by {@code alfresco.repository.events-subscription.durable=true}.
+ * <p>
+ * Activated by {@code alfresco.repository.events-subscription.durable=true}.
  */
 @Component
 @ConditionalOnProperty(prefix = "alfresco.repository.events-subscription", name = "durable", havingValue = "true")

@@ -143,7 +143,7 @@ public class ReliabilityEnvironment implements AutoCloseable
     private ActuatorMetricsProbe actuatorMetrics;
 
     // === Host-port mappings refreshed after a chaos restart of the corresponding container
-    //     (Docker re-allocates ephemeral host ports on each `docker start`; Testcontainers caches the original allocation). ===
+    // (Docker re-allocates ephemeral host ports on each `docker start`; Testcontainers caches the original allocation). ===
     private int activemqOpenWireHostPort;
     private int activemqJolokiaHostPort;
     private int repositoryHostPort;
@@ -185,8 +185,8 @@ public class ReliabilityEnvironment implements AutoCloseable
         // the upstream containers can collide on a port number (ACS and HXI both serve 8080) — the alias selects
         // which Toxiproxy listener a connector request hits, the listener port disambiguates within the proxy.
         String[] toxiproxyAliases = withTransformTopology
-                ? new String[] {TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS, TOXIC_SFS_ALIAS}
-                : new String[] {TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS};
+                ? new String[]{TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS, TOXIC_SFS_ALIAS}
+                : new String[]{TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS};
         toxiproxy = new ToxiproxyContainer(DockerImageName.parse(TOXIPROXY_IMAGE))
                 .withNetwork(network)
                 .withNetworkAliases(toxiproxyAliases)
@@ -666,8 +666,7 @@ public class ReliabilityEnvironment implements AutoCloseable
         private boolean withRepoEventsDeadLetterUnsupportedTypes;
 
         private Builder()
-        {
-        }
+        {}
 
         /**
          * Boot SFS + transform-router + transform-core-aio alongside the rest, switch ACS to {@code transform.service.enabled=true}, front SFS with a {@code toxic-sfs} Toxiproxy listener, and configure the live-ingester to read renditions from {@code toxic-sfs} (writes by transform-core-aio still go to the real {@code shared-file-store} alias). Adds ~90 s of env boot due to the heavyweight transform-core-aio image — only enable for transform-path chaos tests.

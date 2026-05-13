@@ -41,8 +41,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins broker-side restart recovery: graceful stop, abrupt SIGKILL, and restart while a backlog is still draining. In every variant the broker's KahaDB journal preserves the durable subscription across the cycle and the connector's Spring-JMS reconnect picks up where it left off.

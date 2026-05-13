@@ -217,8 +217,7 @@ public final class ProcessChaos
                 return;
             }
             sleep(READINESS_POLL_DELAY_MS);
-        }
-        while (Instant.now().isBefore(cutoff));
+        } while (Instant.now().isBefore(cutoff));
         throw new IllegalStateException("[chaos] " + message);
     }
 

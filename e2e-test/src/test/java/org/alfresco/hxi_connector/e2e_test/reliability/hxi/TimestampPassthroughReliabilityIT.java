@@ -25,12 +25,11 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.hxi;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.findAll;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.OffsetDateTime;
@@ -84,9 +83,9 @@ public class TimestampPassthroughReliabilityIT extends BaseReliabilityIT
             assertThat(findAll(postRequestedFor(urlEqualTo(WiremockCounts.INGESTION_EVENTS_PATH))
                     .withRequestBody(containing(objectIdMarker))
                     .withRequestBody(containing(sourceTimestampMarker))).size())
-                    .as("[passthrough/%s] verbatim propagation: expected a POST to /ingestion-events for objectId=%s carrying sourceTimestamp=%d (derived from time=%s). A zero here means either the timestamp was silently rewritten, the offset was stripped, the value was clamped, or the connector failed to emit the event at all",
-                            label, fabricatedNodeId, expectedEpochMillis, wireFormatTime)
-                    .isGreaterThanOrEqualTo(1);
+                            .as("[passthrough/%s] verbatim propagation: expected a POST to /ingestion-events for objectId=%s carrying sourceTimestamp=%d (derived from time=%s). A zero here means either the timestamp was silently rewritten, the offset was stripped, the value was clamped, or the connector failed to emit the event at all",
+                                    label, fabricatedNodeId, expectedEpochMillis, wireFormatTime)
+                            .isGreaterThanOrEqualTo(1);
             assertThat(environment().jolokia().dlqDepth())
                     .as("[passthrough/%s] no spurious dead-lettering: a parseable post-epoch timestamp is not a poison pill — DLQ must stay at zero", label)
                     .isZero();
@@ -114,9 +113,9 @@ public class TimestampPassthroughReliabilityIT extends BaseReliabilityIT
                     .isGreaterThanOrEqualTo(1);
             assertThat(findAll(postRequestedFor(urlEqualTo(WiremockCounts.INGESTION_EVENTS_PATH))
                     .withRequestBody(containing(objectIdMarker))).size())
-                    .as("[reject/%s] no POST escapes: the ValidationException is thrown inside the IngestNodeCommand record constructor, before the metadata POST is built — so /ingestion-events must see no traffic for objectId=%s. A non-zero count here means the guard moved past command construction and the connector now emits the event before rejecting it",
-                            label, fabricatedNodeId)
-                    .isZero();
+                            .as("[reject/%s] no POST escapes: the ValidationException is thrown inside the IngestNodeCommand record constructor, before the metadata POST is built — so /ingestion-events must see no traffic for objectId=%s. A non-zero count here means the guard moved past command construction and the connector now emits the event before rejecting it",
+                                    label, fabricatedNodeId)
+                            .isZero();
         }, CONVERGENCE_DELAY_MS);
     }
 

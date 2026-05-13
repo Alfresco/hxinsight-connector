@@ -34,7 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.containers.GenericContainer;
 
 /**
- * Reusable chaos scenarios for Toxiproxy proxies and Testcontainers containers, ready to be fed into a {@link ToxicPlanner}. 
+ * Reusable chaos scenarios for Toxiproxy proxies and Testcontainers containers, ready to be fed into a {@link ToxicPlanner}.
  */
 @Slf4j
 @UtilityClass

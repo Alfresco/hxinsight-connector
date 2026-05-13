@@ -50,7 +50,7 @@ import lombok.extern.slf4j.Slf4j;
 public final class JolokiaProbe
 {
     private static final String DEFAULT_USER = "admin";
-    private static final String DEFAULT_PASSWORD = "admin";
+    private static final String DEFAULT_PASSWORD = "admin"; // pragma: allowlist secret
     private static final String DEFAULT_BROKER_NAME = "localhost";
     /**
      * Jolokia ships with a default {@code jolokia-access.xml} that has {@code <strict-checking/>} enabled and only allows {@code http://localhost*} / {@code http://127.0.0.1*} origins. Java's {@link HttpClient} sends no {@code Origin} header by default, which makes Jolokia respond {@code 403 "Origin null is not allowed to call this agent"}. Sending an explicit, allow-listed {@code Origin} works around this without touching broker config.

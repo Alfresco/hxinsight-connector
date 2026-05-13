@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.e2e_test.reliability.s3;
 
 import static eu.rekawek.toxiproxy.model.ToxicDirection.DOWNSTREAM;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -39,8 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Positive counterpart to {@link S3NetworkPartitionReliabilityIT}: pins that brief, transient S3 failures <i>shorter</i> than the connector's upload-path retry budget recover via Spring Retry (within a single delivery) and/or JMS redelivery (across deliveries) — the upload PUT eventually completes, the rendition's content envelope reaches HX Insight, and {@code dlqDepth() == 0}.

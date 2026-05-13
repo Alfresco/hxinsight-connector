@@ -36,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Positive counterpart to {@link AcsShortPartitionReliabilityIT} and {@link AcsLatencyReliabilityIT}: pins that a brief ACS REST blip <i>shorter</i> than the connector's content-download retry budget recovers via {@link org.springframework.retry.annotation.Retryable @Retryable} (within a single delivery) or JMS redelivery (across deliveries) — the event reaches HX Insight and {@code dlqDepth() == 0}.

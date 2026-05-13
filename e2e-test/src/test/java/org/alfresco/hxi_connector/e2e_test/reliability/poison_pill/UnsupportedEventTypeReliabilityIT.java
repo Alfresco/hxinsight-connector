@@ -36,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins the default-deployment behaviour when a syntactically-valid CloudEvent arrives on {@code alfresco.repo.event2} carrying an {@code eventType} the live-ingester does not understand.
@@ -135,6 +135,5 @@ public class UnsupportedEventTypeReliabilityIT extends BaseReliabilityIT
      * Holder for the identifiers produced by the shared trigger so paired ITs can drive their assertions off the same publish without duplicating the setup code.
      */
     record SyntheticUnknownTypeEvent(String eventId, Node sentinelNode)
-    {
-    }
+    {}
 }

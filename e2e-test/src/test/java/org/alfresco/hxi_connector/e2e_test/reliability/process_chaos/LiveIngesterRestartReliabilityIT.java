@@ -32,8 +32,8 @@ import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins live-ingester restart recovery: graceful stop, abrupt SIGKILL, and restart while a backlog is queued. In every variant the broker holds events on the durable subscription while the connector is down; the restarted connector reattaches and drains the backlog without operator intervention.

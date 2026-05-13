@@ -88,8 +88,7 @@ public class TransformPipelineUnreachableWithDlqOptInReliabilityIT
     @Test
     void shouldDeadLetterRenditionWhenAcsRejectsTransformRequest() throws IOException, InterruptedException
     {
-        TransformPipelineUnreachableReliabilityIT.StuckRendition rendition =
-                TransformPipelineUnreachableReliabilityIT.createStuckRenditionAndSentinel(environment);
+        TransformPipelineUnreachableReliabilityIT.StuckRendition rendition = TransformPipelineUnreachableReliabilityIT.createStuckRenditionAndSentinel(environment);
 
         WireMock.configureFor(environment.hxInsightMock().getHost(), environment.hxInsightMock().getPort());
         RetryUtils.assertWithRetry(() -> {

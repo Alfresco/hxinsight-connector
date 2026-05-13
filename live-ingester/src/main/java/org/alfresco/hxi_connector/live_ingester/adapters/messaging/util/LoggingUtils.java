@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -46,8 +46,7 @@ public class LoggingUtils
     {
         Map<String, Object> properties = exchange.getProperties();
         Map<String, Object> headers = new HashMap<>();
-        exchange.getMessage().getHeaders().forEach((key, value) ->
-                headers.put(key, HEADERS_TO_MASK.contains(key) ? MASK : value));
+        exchange.getMessage().getHeaders().forEach((key, value) -> headers.put(key, HEADERS_TO_MASK.contains(key) ? MASK : value));
         String bodyType = exchange.getMessage().getBody() != null ? exchange.getMessage().getBody().getClass().getName() : "";
         String body = exchange.getMessage().getBody(String.class);
 

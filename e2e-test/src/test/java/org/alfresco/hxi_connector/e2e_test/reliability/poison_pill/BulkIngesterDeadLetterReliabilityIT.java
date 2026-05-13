@@ -36,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Verifies the bulk-ingester ingress route's explicit dead-letter policy: an unprocessable message must be retried with bounded redelivery, parked on {@code ActiveMQ.DLQ}, counted in the route's Micrometer counter, and the route must remain alive afterwards.

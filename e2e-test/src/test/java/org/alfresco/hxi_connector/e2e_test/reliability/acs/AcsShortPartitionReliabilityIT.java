@@ -37,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Brief network partition (~{@value #PARTITION_SECONDS} s) between live-ingester and ACS REST. Differs from {@link AcsLatencyReliabilityIT}: there the connection is reachable but slow, so each request times out individually; here the {@code toxic-acs} proxy is fully disabled, so connect attempts are refused outright.

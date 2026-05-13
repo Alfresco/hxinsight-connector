@@ -37,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Short network partition (~2 s) between live-ingester and ActiveMQ: the chaos window is shorter than the broker's heartbeat / reconnect detection budget, so the connector should ride it out without stopping the route or accumulating any DLQ traffic.

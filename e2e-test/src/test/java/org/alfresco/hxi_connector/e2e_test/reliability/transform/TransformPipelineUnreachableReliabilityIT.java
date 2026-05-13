@@ -39,8 +39,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins the default-deployment behaviour when ACS itself rejects a transform request — simulating an installation where the transform service is not deployed or has been administratively disabled. The reliability environment's ACS already runs with {@code transform.service.enabled=false} (from {@code DockerContainers.getMinimalRepoJavaOpts}), which is exactly that condition.
@@ -158,6 +158,5 @@ public class TransformPipelineUnreachableReliabilityIT
      * Holder for the identifiers produced by {@link #createStuckRenditionAndSentinel}. Shared with the paired opt-in IT.
      */
     record StuckRendition(Node stuckNode, Node sentinelNode)
-    {
-    }
+    {}
 }

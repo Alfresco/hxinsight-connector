@@ -36,9 +36,7 @@ import org.springframework.stereotype.Component;
  * Global Spring {@link RetryListener} bean: increments {@link LiveIngesterMetrics.Retry#ATTEMPTS} once per failed {@code @Retryable} attempt, tagged with the underlying exception class. Auto-wired by Spring Retry into every {@code @Retryable} proxy via {@code @EnableRetry}, so it covers every retry site in the module without per-site changes.
  *
  * <p>
- * The exception tag is the slicing mechanism: operators query
- * {@code …/actuator/metrics/live_ingester_retry_attempts_total?tag=exception:EndpointServerErrorException}
- * to break out e.g. transient 5xx from {@code ConnectException} from a stray {@code RuntimeException}.
+ * The exception tag is the slicing mechanism: operators query {@code …/actuator/metrics/live_ingester_retry_attempts_total?tag=exception:EndpointServerErrorException} to break out e.g. transient 5xx from {@code ConnectException} from a stray {@code RuntimeException}.
  *
  * <p>
  * Reuse: not currently shared, but the class is module-agnostic — only the counter name is module-scoped. If bulk-ingester / nucleus-sync / prediction-applier (all of which use {@code @EnableRetry} + Camel-wrapped {@code @Retryable}) want the same observability, lift this into {@code common/} with the counter name as a constructor argument and register one bean per module.

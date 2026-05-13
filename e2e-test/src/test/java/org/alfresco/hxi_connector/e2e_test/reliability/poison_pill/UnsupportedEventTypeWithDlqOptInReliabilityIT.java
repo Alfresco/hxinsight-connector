@@ -82,8 +82,7 @@ public class UnsupportedEventTypeWithDlqOptInReliabilityIT
     @Test
     void shouldDeadLetterEventWithUnsupportedEventType() throws IOException
     {
-        UnsupportedEventTypeReliabilityIT.SyntheticUnknownTypeEvent event =
-                UnsupportedEventTypeReliabilityIT.injectSyntheticUnknownTypeEvent(environment);
+        UnsupportedEventTypeReliabilityIT.SyntheticUnknownTypeEvent event = UnsupportedEventTypeReliabilityIT.injectSyntheticUnknownTypeEvent(environment);
 
         RetryUtils.assertWithRetry(() -> {
             assertThat(environment.jolokia().dlqDepth())

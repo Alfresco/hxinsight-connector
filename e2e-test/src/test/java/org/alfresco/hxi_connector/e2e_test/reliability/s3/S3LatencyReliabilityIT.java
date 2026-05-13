@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.e2e_test.reliability.s3;
 
 import static eu.rekawek.toxiproxy.model.ToxicDirection.DOWNSTREAM;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -38,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins bounded-failure visibility when Localstack S3 is reachable but pathologically slow on the upload PUT. Toxiproxy injects {@value #S3_LATENCY_MS} ms of downstream latency on the {@code toxic-s3} listener; the connector is configured with a {@code 3 s} upload response timeout (test profile, see {@link ReliabilityEnvironment}). The expected end state for a node whose upload PUT fires while the latency is in place:

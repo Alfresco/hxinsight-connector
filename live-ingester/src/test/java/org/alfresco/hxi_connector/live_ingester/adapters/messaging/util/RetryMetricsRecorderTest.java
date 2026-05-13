@@ -67,8 +67,8 @@ class RetryMetricsRecorderTest
         assertThat(meterRegistry.find(LiveIngesterMetrics.Retry.ATTEMPTS)
                 .tag(LiveIngesterMetrics.Tag.EXCEPTION, "IOException")
                 .counter())
-                .as("RetryMetricsRecorder must be auto-registered by Spring Retry; missing counter means @EnableRetry didn't pick up the bean from the context")
-                .isNotNull();
+                        .as("RetryMetricsRecorder must be auto-registered by Spring Retry; missing counter means @EnableRetry didn't pick up the bean from the context")
+                        .isNotNull();
         assertThat(currentCount() - before)
                 .as("the counter must increment once per failed @Retryable attempt — 3 attempts (initial + 2 retries) all fail, 3 onError invocations recorded")
                 .isEqualTo(3.0);

@@ -37,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Hard TCP reset (RST) on the broker -> live-ingester path: Toxiproxy's {@code reset_peer} toxic forces every connection through the proxy to be torn down with an RST instead of a FIN. Held for ~2 seconds, which is short enough that the broker is still considered up but long enough that any in-flight reads/writes from the consumer side blow up.

@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Bandwidth-cut on the broker -> live-ingester path: {@code 0 KB/s} downstream throttle for ~5 seconds, applied via Toxiproxy. The connection stays open from the kernel's perspective, but bytes stop flowing — Camel/Spring JMS may either ride it out or treat it as a heartbeat-timeout disconnect; either path must converge to "all events delivered, with bounded duplication" once the throttle is removed.

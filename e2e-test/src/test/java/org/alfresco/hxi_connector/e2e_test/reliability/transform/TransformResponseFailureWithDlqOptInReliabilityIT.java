@@ -83,8 +83,7 @@ public class TransformResponseFailureWithDlqOptInReliabilityIT
     @Test
     void shouldDeadLetterTransformResponseWith400Status() throws IOException
     {
-        TransformResponseFailureReliabilityIT.SyntheticFailure failure =
-                TransformResponseFailureReliabilityIT.injectSynthetic400Failure(environment);
+        TransformResponseFailureReliabilityIT.SyntheticFailure failure = TransformResponseFailureReliabilityIT.injectSynthetic400Failure(environment);
 
         RetryUtils.assertWithRetry(() -> {
             assertThat(environment.jolokia().dlqDepth())

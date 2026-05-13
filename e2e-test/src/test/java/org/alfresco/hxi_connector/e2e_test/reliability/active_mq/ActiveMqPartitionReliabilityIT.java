@@ -36,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Mid-stream network partition between live-ingester and ActiveMQ: the broker is reachable from the repository (which keeps publishing repo events) but unreachable from the live-ingester for the duration of the partition. Verifies that no event is silently dropped while the consumer is detached and that the route resumes on its own once connectivity heals.

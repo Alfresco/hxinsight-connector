@@ -40,8 +40,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Sister of {@link SfsOutageReliabilityIT}: boots the env with the {@code transform-response} dead-letter opt-in enabled (operator-doc {@code docs/live-ingester.md#transform-response-dead-letter-channel-recommended}) and asserts that a sustained SFS outage surfaces the failed transform-response on {@code ActiveMQ.DLQ} with a {@code live_ingester_transform_response_dlq_total} counter increment.

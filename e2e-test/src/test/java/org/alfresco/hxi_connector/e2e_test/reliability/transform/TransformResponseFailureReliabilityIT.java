@@ -36,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins the default-deployment behaviour when a transform-response message arriving on the connector's response queue carries {@code status == 400} (ATS' "I cannot produce this rendition, ever" signal — unsupported mime mapping, transform-engine config, etc.).
@@ -140,6 +140,5 @@ public class TransformResponseFailureReliabilityIT extends BaseReliabilityIT
      * Holder for the identifiers produced by the shared trigger so paired ITs can drive their assertions off the same publish without duplicating the setup code.
      */
     record SyntheticFailure(String droppedNodeRef, Node sentinelNode)
-    {
-    }
+    {}
 }

@@ -29,7 +29,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -41,8 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Verifies the live-ingester's repo-events route exhausts cleanly when HX Insight ingestion is hard-down: HTTP-level retries on {@code POST /ingestion-events} run to exhaustion, the resulting exception bubbles through the route's error handler, JMS-level redeliveries also exhaust, and the message lands on {@code ActiveMQ.DLQ} where an operator can see it. The complement to {@link IdempotentIngestionReliabilityIT}'s "retries help" story — this one proves retries don't help <i>forever</i>.

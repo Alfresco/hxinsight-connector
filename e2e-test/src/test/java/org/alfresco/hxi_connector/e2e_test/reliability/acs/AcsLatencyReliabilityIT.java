@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.e2e_test.reliability.acs;
 
 import static eu.rekawek.toxiproxy.model.ToxicDirection.DOWNSTREAM;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -38,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins bounded-failure visibility when ACS REST is reachable but pathologically slow. Toxiproxy injects {@value #ACS_LATENCY_MS} ms of downstream latency per byte; the connector is configured with a {@code 3 s} response timeout (test profile, see {@link ReliabilityEnvironment}). The expected end state for an event whose content download fires while the latency is in place:

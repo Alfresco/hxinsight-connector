@@ -39,8 +39,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Latency + jitter on the broker -> live-ingester path: Toxiproxy adds ~300 ms downstream latency with ±200 ms jitter for the duration of a sustained ~20-event publish burst. The connection stays open and bytes keep flowing, but message delivery is irregular and round-trips are stretched.

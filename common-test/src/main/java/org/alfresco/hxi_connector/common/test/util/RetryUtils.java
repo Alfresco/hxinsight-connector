@@ -115,15 +115,22 @@ public class RetryUtils
 
     /**
      * Cheap alias to make PMD happy about having actual assertions in lambda bodies.
-     * @param assertion a lambda containing assertions to be retried with backoff
+     *
+     * @param assertion
+     *            a lambda containing assertions to be retried with backoff
      */
-    public static void assertWithRetry(ErrorCatchingRunnable assertion) {
+    public static void assertWithRetry(ErrorCatchingRunnable assertion)
+    {
         retryWithBackoff(assertion);
     }
-    public static void assertWithRetry(ErrorCatchingRunnable assertion, int delayMs) {
+
+    public static void assertWithRetry(ErrorCatchingRunnable assertion, int delayMs)
+    {
         retryWithBackoff(assertion, delayMs);
     }
-    public static void assertWithRetry(ErrorCatchingRunnable assertion, int maxAttempts, int delayMs) {
+
+    public static void assertWithRetry(ErrorCatchingRunnable assertion, int maxAttempts, int delayMs)
+    {
         retryWithBackoff(assertion, maxAttempts, delayMs);
     }
 

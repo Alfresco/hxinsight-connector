@@ -38,8 +38,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Backlog drain after a broker partition: disable the Toxiproxy in front of ActiveMQ, publish a small batch of repo events while the live-ingester's consumer is detached, then re-enable the proxy and verify every backlog event eventually reaches HX Insight.

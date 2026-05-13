@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.e2e_test.reliability.acs;
 
 import static eu.rekawek.toxiproxy.model.ToxicDirection.DOWNSTREAM;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -38,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Positive counterpart to {@link AcsLatencyReliabilityIT}: pins that an ACS REST response slower than a healthy round-trip but <i>under</i> the connector's {@code alfresco.repository.responseTimeoutMs} budget completes successfully — ingestion event reaches HX Insight, {@code dlqDepth() == 0}.

@@ -37,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Brief network partition (~{@value #PARTITION_SECONDS} s) between live-ingester and the HX Insight WireMock. Mirrors {@link AcsShortPartitionReliabilityIT} on the HXI side: the {@code toxic-hxi} proxy is fully disabled so connect attempts to {@code /presigned-urls}, {@code /ingestion-events}, and the auth {@code /token} endpoint are refused outright.

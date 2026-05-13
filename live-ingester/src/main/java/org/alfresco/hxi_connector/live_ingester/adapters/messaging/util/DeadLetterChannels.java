@@ -42,16 +42,19 @@ import org.slf4j.event.Level;
 public final class DeadLetterChannels
 {
     private DeadLetterChannels()
-    {
-    }
+    {}
 
     /**
      * Build the project-standard dead-letter channel for a single Camel route.
      *
-     * @param config Route's redelivery + dead-letter URI knobs (typically the route's Spring config record).
-     * @param recorder Shared Micrometer recorder; injected as a singleton bean.
-     * @param metric Per-route counter metadata (name + description).
-     * @param log Route's own logger; used for the masked-state {@code ERROR} log line on exhaustion.
+     * @param config
+     *            Route's redelivery + dead-letter URI knobs (typically the route's Spring config record).
+     * @param recorder
+     *            Shared Micrometer recorder; injected as a singleton bean.
+     * @param metric
+     *            Per-route counter metadata (name + description).
+     * @param log
+     *            Route's own logger; used for the masked-state {@code ERROR} log line on exhaustion.
      */
     public static DeadLetterChannelBuilder forRoute(
             DeadLetterChannelConfig config,

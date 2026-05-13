@@ -29,7 +29,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.stubFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.ByteArrayInputStream;
@@ -41,8 +40,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Verifies the live-ingester fails loud and bounded when HX Insight stops responding within {@code hyland-experience.ingester.response-timeout-ms}: the HTTP client must surface a timeout exception (not block forever), the route's error handler must catch it, JMS-level redeliveries must exhaust, and the message must land on {@code ActiveMQ.DLQ} where an operator can see it. Acts as a regression guard for the {@code httpClient.responseTimeout} configuration knob — without it the Camel HTTP component defaults to <b>infinite</b> connect/response timeouts and a slow HX Insight would block the route's worker thread until the JVM is restarted.

@@ -37,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Brief network partition (~{@value #PARTITION_SECONDS} s) between live-ingester and Localstack S3 on the content-upload PUT path. Mirrors {@link HxiShortPartitionReliabilityIT} on the S3 side: the {@code toxic-s3} proxy is fully disabled so PUTs against the pre-signed URL are refused outright while the connector continues to receive {@code /presigned-urls} successfully.

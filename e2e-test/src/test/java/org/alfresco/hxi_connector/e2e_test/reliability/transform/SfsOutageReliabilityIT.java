@@ -41,9 +41,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.S3Object;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 
 /**
  * Chaos on the connector's read path to the Shared File Store while the rest of the transform pipeline (ACS, transform-router, transform-core-aio, SFS itself) stays up. The reliability env constructed via {@link ReliabilityEnvironment.Builder#withTransformTopology()} routes only the live-ingester's {@code SharedFileStoreClient.downloadFile} GET through Toxiproxy ({@code toxic-sfs} alias); transform-core-aio's writes to SFS use the real {@code shared-file-store} alias and are unaffected by anything we do with the proxy.
@@ -72,7 +72,8 @@ public class SfsOutageReliabilityIT
     /** Settle window before asserting: transform round-trip (~5 s) + @Retryable + JMS redelivery. */
     private static final int SFS_OUTAGE_SETTLE_SECONDS = 10;
     /**
-     * Substring from {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage.SharedFileStoreClient SharedFileStoreClient}'s {@code onException(Exception.class).log(ERROR, ...)} chain. Fires once per @{@code Retryable} attempt when {@code SharedFileStoreClient.downloadFile} cannot reach the SFS endpoint — i.e. exactly when the {@code ingestContent} handler reaches the SFS-download leg under outage. Asserting a non-zero count of this substring distinguishes "the handler ran and the SFS download failed as designed" from "the handler was silently disabled and the test passes for the wrong reason" — without it, a no-op {@code ingestContent} satisfies all the negative DLQ / content-event assertions trivially. The log line includes the SFS endpoint URL, so it cannot be invariant with respect to the handler running. Chosen over the response route's outer {@code onException(Exception.class).log("Transform :: Retrying ...")} substring because the outer log only fires after the SFS client's @{@code Retryable} exhausts (~30 s with default {@code retryIngestion.attempts}/backoff), which is beyond the IT's settle window.
+     * Substring from {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.storage.SharedFileStoreClient SharedFileStoreClient}'s {@code onException(Exception.class).log(ERROR, ...)} chain. Fires once per @{@code Retryable} attempt when {@code SharedFileStoreClient.downloadFile} cannot reach the SFS endpoint — i.e. exactly when the {@code ingestContent} handler reaches the SFS-download leg under outage. Asserting a non-zero count of this substring distinguishes "the handler ran and the SFS download failed as designed" from "the handler was silently disabled and the test passes for the wrong reason" — without it, a no-op {@code ingestContent} satisfies all the negative DLQ / content-event assertions trivially. The log line includes the SFS endpoint URL, so it cannot be invariant with respect to the handler running. Chosen over the response route's outer {@code onException(Exception.class).log("Transform :: Retrying ...")} substring because the outer log only
+     * fires after the SFS client's @{@code Retryable} exhausts (~30 s with default {@code retryIngestion.attempts}/backoff), which is beyond the IT's settle window.
      */
     private static final String SFS_DOWNLOAD_FAILURE_LOG_FRAGMENT = "Transform :: Unexpected response while downloading rendition";
 
@@ -204,6 +205,5 @@ public class SfsOutageReliabilityIT
      * Holder for the identifiers produced by {@link #createVictimAndSentinelDuringOutage()} so both outage tests can drive their assertions off the same trigger run without duplicating the node-creation code.
      */
     private record SfsOutageRun(Node victim, Node sentinel)
-    {
-    }
+    {}
 }

@@ -30,8 +30,8 @@ import java.io.IOException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Pins the paired-outage worst case: both broker and live-ingester are killed and the connector starts <i>before</i> the broker has finished initializing. Models a docker-compose / kubernetes pod restart that brings both processes up unordered. The connector's connect-retry path must absorb the warm-up window without crash-looping.

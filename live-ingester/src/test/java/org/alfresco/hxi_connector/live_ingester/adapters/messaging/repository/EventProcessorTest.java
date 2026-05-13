@@ -30,7 +30,6 @@ import static java.time.ZoneOffset.UTC;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -418,8 +417,8 @@ class EventProcessorTest
         assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED)
                 .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, unknownType)
                 .counter().count())
-                .as("unknown eventType must increment %s{type=\"%s\"} exactly once", LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED, unknownType)
-                .isEqualTo(1.0);
+                        .as("unknown eventType must increment %s{type=\"%s\"} exactly once", LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED, unknownType)
+                        .isEqualTo(1.0);
         then(repoEventMapper).shouldHaveNoInteractions();
         then(ingestNodeCommandHandler).shouldHaveNoInteractions();
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
@@ -443,8 +442,8 @@ class EventProcessorTest
         assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED)
                 .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, unknownType)
                 .counter().count())
-                .as("counter must be incremented even when the opt-in re-throws — the metric is the always-on signal")
-                .isEqualTo(1.0);
+                        .as("counter must be incremented even when the opt-in re-throws — the metric is the always-on signal")
+                        .isEqualTo(1.0);
         then(repoEventMapper).shouldHaveNoInteractions();
         then(ingestNodeCommandHandler).shouldHaveNoInteractions();
     }

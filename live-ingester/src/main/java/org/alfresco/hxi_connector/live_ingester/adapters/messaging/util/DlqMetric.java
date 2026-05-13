@@ -28,9 +28,10 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.util;
 /**
  * Per-route Micrometer metric metadata bundled into a single value so {@link DeadLetterChannels#forRoute} doesn't need three separate string parameters. Each route declares one as a {@code static final} constant.
  *
- * @param counterName Micrometer counter name, e.g. {@code live_ingester_repo_events_dlq_total}.
- * @param counterDescription Description registered with Micrometer at counter creation.
+ * @param counterName
+ *            Micrometer counter name, e.g. {@code live_ingester_repo_events_dlq_total}.
+ * @param counterDescription
+ *            Description registered with Micrometer at counter creation.
  */
 public record DlqMetric(String counterName, String counterDescription)
-{
-}
+{}

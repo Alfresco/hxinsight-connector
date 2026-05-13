@@ -37,8 +37,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
  * Flapping proxy: Toxiproxy is randomly disabled and re-enabled in a tight loop for ~20 seconds, simulating an unstable broker hop where the connection drops and recovers many times in quick succession. The threat model is a reconnect storm — if the connector reacts to every disable with a hard re-init, it could exhaust connection pools, leak threads, or lose its durable subscription registration.
