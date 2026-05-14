@@ -26,7 +26,6 @@
 package org.alfresco.hxi_connector.common.adapters.auth;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
@@ -61,7 +60,7 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
         lock.lock();
         try
         {
-            Token token = accessTokens.get(providerId);  // re-check under lock
+            Token token = accessTokens.get(providerId); // re-check under lock
             if (shouldRefreshToken(token))
             {
                 refreshAuthenticationResult(providerId);
