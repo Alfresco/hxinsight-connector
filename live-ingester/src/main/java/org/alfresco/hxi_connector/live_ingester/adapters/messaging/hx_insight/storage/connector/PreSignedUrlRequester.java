@@ -77,9 +77,7 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     public void configure()
     {
         // @formatter:off
-        String storageRequestEndpoint = integrationProperties.hylandExperience().storage().location().endpoint()
-                + "&httpClient.responseTimeout=" + integrationProperties.hylandExperience().storage().location().responseTimeoutMs()
-                + ApplicationInfoProvider.USER_AGENT_PARAM;
+        String storageRequestEndpoint = buildStorageRequestEndpoint();
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while requesting pre-signed URL - Endpoint: %s".formatted(storageRequestEndpoint))
             .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
@@ -101,6 +99,19 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
             .endChoice()
             .end();
         // @formatter:on
+    }
+
+    private String buildStorageRequestEndpoint()
+    {
+        String base = integrationProperties.hylandExperience().storage().location().endpoint();
+        int timeoutMs = integrationProperties.hylandExperience().storage().location().responseTimeoutMs();
+        if (timeoutMs <= 0)
+        {
+            // 0 means "no per-request timeout"; omit the parameter so the Camel HTTP default applies
+            // (matches HttpFileUploader#buildUploadEndpoint, AlfrescoRepositoryContentClient#buildContentEndpoint).
+            return base + ApplicationInfoProvider.USER_AGENT_PARAM;
+        }
+        return base + "&httpClient.responseTimeout=" + timeoutMs + ApplicationInfoProvider.USER_AGENT_PARAM;
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,
