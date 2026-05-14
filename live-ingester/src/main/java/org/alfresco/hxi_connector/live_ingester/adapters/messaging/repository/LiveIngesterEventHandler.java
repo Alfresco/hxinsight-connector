@@ -99,11 +99,6 @@ public class LiveIngesterEventHandler extends RouteBuilder
             return baseUri;
         }
 
-        // URL-encode the subscription name before splicing it into the Camel endpoint URI: the field is only @NotBlank,
-        // so an operator-configured value containing a space or a reserved URI character (& ? = #) would otherwise
-        // produce a malformed query string and prevent the route from starting. Camel decodes endpoint-URI query
-        // values as application/x-www-form-urlencoded, so a percent-encoded value round-trips back to the original
-        // identifier on the JMS ConnectionFactory.
         String encodedName = URLEncoder.encode(subscription.name(), StandardCharsets.UTF_8);
         String separator = baseUri.contains("?") ? "&" : "?";
         String durableUri = baseUri
