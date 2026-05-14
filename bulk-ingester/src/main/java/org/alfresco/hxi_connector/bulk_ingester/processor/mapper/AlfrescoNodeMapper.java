@@ -113,14 +113,14 @@ public class AlfrescoNodeMapper
         }
         @SuppressWarnings("unchecked")
         Set<String> appliedAllowAccess = (Set<String>) getResourceAppliedReaderAuthorities(alfrescoNode);
-        if (!allowAccess.isEmpty())
+        if (!appliedAllowAccess.isEmpty())
         {
             allProperties.put(APPLIED_ALLOW_ACCESS, (Serializable) appliedAllowAccess);
         }
 
         @SuppressWarnings("unchecked")
         Set<String> appliedDenyAccess = (Set<String>) getResourceAppliedDeniedAuthorities(alfrescoNode);
-        if (!denyAccess.isEmpty())
+        if (!appliedDenyAccess.isEmpty())
         {
             allProperties.put(APPLIED_DENY_ACCESS, (Serializable) appliedDenyAccess);
         }
