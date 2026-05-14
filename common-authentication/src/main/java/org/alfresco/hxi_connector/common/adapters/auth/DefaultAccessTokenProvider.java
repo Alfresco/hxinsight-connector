@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.common.adapters.auth;
 import java.time.OffsetDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -42,14 +44,24 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     static final int REFRESH_OFFSET_SECS = 60;
     private final AuthenticationClient authenticationClient;
 
-    private final Map<String, Token> accessTokens = new HashMap<>();
+    private final Map<String, Token> accessTokens = new ConcurrentHashMap<>();
+    private final Map<String, ReentrantLock> refreshLocks = new ConcurrentHashMap<>();
 
     @Override
     public String getAccessToken(String providerId)
     {
-        synchronized (this)
+        // Fast path
+        Token cached = accessTokens.get(providerId);
+        if (!shouldRefreshToken(cached))
         {
-            Token token = accessTokens.get(providerId);
+            return cached.getAccessToken();
+        }
+        // Slow path
+        ReentrantLock lock = refreshLocks.computeIfAbsent(providerId, k -> new ReentrantLock());
+        lock.lock();
+        try
+        {
+            Token token = accessTokens.get(providerId);  // re-check under lock
             if (shouldRefreshToken(token))
             {
                 refreshAuthenticationResult(providerId);
@@ -57,6 +69,10 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
             }
             EnsureUtils.ensureNonNull(token, "Authentication result is null");
             return token.getAccessToken();
+        }
+        finally
+        {
+            lock.unlock();
         }
     }
 

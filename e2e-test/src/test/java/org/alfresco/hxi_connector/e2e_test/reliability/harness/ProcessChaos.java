@@ -159,6 +159,7 @@ public final class ProcessChaos
     /**
      * Poll the ACS root path ({@code /alfresco}) until it returns a non-error status code or {@code deadlineMs} elapses. Mirrors the {@code Wait.forHttp("/alfresco")} startup strategy used by {@code AlfrescoRepositoryContainer}; Testcontainers' wait strategy only fires on the initial {@code start()}, so chaos tests that drive {@code docker stop} + {@code docker start} need to re-poll explicitly.
      */
+    @SuppressWarnings("PMD.CloseResource") // HttpClient does not have close method in java17
     public static void awaitAcsReadiness(ReliabilityEnvironment env, long deadlineMs)
     {
         String probeUrl = env.repositoryBaseUrl() + "/alfresco";
