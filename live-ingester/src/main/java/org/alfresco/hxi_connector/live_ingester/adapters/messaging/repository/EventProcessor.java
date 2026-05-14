@@ -164,12 +164,13 @@ public class EventProcessor
     private void handleUnsupportedEventType(RepoEvent<DataAttributes<NodeResource>> event)
     {
         String eventType = event.getType();
+        String resolvedEventType = eventType == null ? "null" : eventType;
         log.info("Repository :: Skipping event id={} with unsupported eventType={} — no dispatch predicate matched. Increment {}{{type=\"{}\"}} on every occurrence.",
-                event.getId(), eventType, LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED, eventType);
+                event.getId(), resolvedEventType, LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED, resolvedEventType);
 
         Counter.builder(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED)
                 .description(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED_DESCRIPTION)
-                .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, eventType == null ? "null" : eventType)
+                .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, resolvedEventType)
                 .register(meterRegistry)
                 .increment();
 

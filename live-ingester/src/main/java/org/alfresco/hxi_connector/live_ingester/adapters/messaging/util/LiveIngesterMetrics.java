@@ -75,7 +75,7 @@ public final class LiveIngesterMetrics
         public static final String REPO_EVENTS_UNHANDLED_DESCRIPTION = "Repository events whose eventType matched no dispatch predicate and were therefore skipped without being routed to any command handler";
 
         public static final String TRANSFORM_RESPONSE_SILENT = "live_ingester_transform_response_silent_drop_total";
-        public static final String TRANSFORM_RESPONSE_SILENT_DESC = "Failed transform-responses (status=400) silently dropped by the default-deployment branch in ATSTransformResponseHandler.ingestContent (ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false). Drops to zero when deployments opt in to dead-letter coverage and the entries land on " + Dlq.TRANSFORM_RESPONSE + " instead.";
+        public static final String TRANSFORM_RESPONSE_SILENT_DESCRIPTION = "Failed transform-responses (status=400) silently dropped by the default-deployment branch in ATSTransformResponseHandler.ingestContent (ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false). Drops to zero when deployments opt in to dead-letter coverage and the entries land on " + Dlq.TRANSFORM_RESPONSE + " instead.";
 
         private Drop()
         {}

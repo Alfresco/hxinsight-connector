@@ -64,8 +64,8 @@ public class LiveIngesterEventHandler extends RouteBuilder
     @Override
     public void configure()
     {
-        String eventSource = buildEventSourceUri();
         EventsSubscription subscription = integrationProperties.alfresco().repository().eventsSubscription();
+        String eventSource = buildEventSourceUri(subscription);
 
         if (subscription.deadLetterEnabled())
         {
@@ -89,10 +89,9 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 .end();
     }
 
-    private String buildEventSourceUri()
+    private String buildEventSourceUri(EventsSubscription subscription)
     {
         String baseUri = integrationProperties.alfresco().repository().eventsEndpoint();
-        var subscription = integrationProperties.alfresco().repository().eventsSubscription();
         if (subscription == null || !subscription.durable())
         {
             log.info("Repository :: Subscribing to {} as a non-durable consumer. Events published while disconnected will be dropped by the broker. Set ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE=true to enable a durable subscription.", baseUri);

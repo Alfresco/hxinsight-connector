@@ -87,6 +87,6 @@ public class RetryMetricsRecorder implements RetryListener
     private static boolean isFrameworkWrapper(Throwable t)
     {
         String name = t.getClass().getName();
-        return name.startsWith("org.apache.camel.") || name.startsWith("java.util.concurrent.ExecutionException");
+        return name.startsWith("org.apache.camel.") || name.equals("java.util.concurrent.ExecutionException");
     }
 }
