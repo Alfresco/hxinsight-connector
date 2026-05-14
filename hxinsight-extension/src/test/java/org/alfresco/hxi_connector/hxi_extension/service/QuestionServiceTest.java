@@ -26,11 +26,13 @@
 
 package org.alfresco.hxi_connector.hxi_extension.service;
 
+import static org.apache.http.HttpStatus.SC_SERVICE_UNAVAILABLE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.BDDMockito.willThrow;
 import static org.mockito.Mockito.mock;
 
 import java.util.List;
@@ -38,6 +40,7 @@ import java.util.Set;
 
 import org.hyland.sdk.cic.agent.AgentService;
 import org.hyland.sdk.cic.agent.IntegrationAgentService;
+import org.hyland.sdk.cic.agent.object.AgentSummary;
 import org.hyland.sdk.cic.agent.object.IntegrationSubmitQuestionRequest;
 import org.hyland.sdk.cic.agent.object.QuestionResponse;
 import org.hyland.sdk.cic.http.client.CICSdkException;
@@ -286,5 +289,187 @@ class QuestionServiceTest
         assertEquals("dummy-id-5678", newQuestionId);
         then(questionResource).should().submitFeedback(org.hyland.sdk.cic.qna.object.FeedbackType.RETRY);
         then(integrationAgentResource).should().submitQuestion(any(IntegrationSubmitQuestionRequest.class));
+    }
+
+    @Test
+    void shouldReturnAgentList()
+    {
+        // given
+        AgentSummary summary = new AgentSummary("agent-1", "My Agent", "Desc", "gpt-4", null, "https://avatar.url",
+                null, List.of(SOURCE_ID), List.of(), 1, true, null, null, null, null);
+        given(integrationAgentService.listAgents(SOURCE_ID)).willReturn(List.of(summary));
+
+        // when
+        var agents = questionService.listAgents();
+
+        // then
+        assertEquals(1, agents.size());
+        assertEquals("agent-1", agents.get(0).getId());
+        assertEquals("My Agent", agents.get(0).getName());
+        assertEquals("Desc", agents.get(0).getDescription());
+        assertEquals("https://avatar.url", agents.get(0).getAvatarUrl());
+    }
+
+    @Test
+    void shouldReturnEmptyAgentList()
+    {
+        // given
+        given(integrationAgentService.listAgents(SOURCE_ID)).willReturn(List.of());
+
+        // when
+        var agents = questionService.listAgents();
+
+        // then
+        assertEquals(0, agents.size());
+    }
+
+    @Test
+    void shouldReturnServiceUnavailableOnSdkException_ListAgents()
+    {
+        // given
+        given(integrationAgentService.listAgents(SOURCE_ID)).willThrow(new CICSdkException("timeout"));
+
+        // when, then
+        WebScriptException ex = assertThrows(WebScriptException.class, () -> questionService.listAgents());
+        assertEquals(SC_SERVICE_UNAVAILABLE, ex.getStatus());
+    }
+
+    @Test
+    void shouldSendEmptyContextObjectIdsWhenQuestionHasNone()
+    {
+        // given
+        given(integrationAgentResource.submitQuestion(any(IntegrationSubmitQuestionRequest.class)))
+                .willReturn(new QuestionResponse("some-id"));
+
+        Question question = new Question("What is 2+2?", null);
+
+        // when
+        questionService.askQuestion(AGENT_ID, question);
+
+        // then
+        ArgumentCaptor<IntegrationSubmitQuestionRequest> captor = ArgumentCaptor.forClass(IntegrationSubmitQuestionRequest.class);
+        then(integrationAgentResource).should().submitQuestion(captor.capture());
+        assertEquals(List.of(), captor.getValue().contextObjectIds());
+    }
+
+    @Test
+    void shouldThrowWhenPersonNotFound()
+    {
+        // given - SDK requires userId != null; if the person lookup returns null the service throws
+        given(personService.getPersonOrNull(USER_NAME)).willReturn(null);
+
+        Question question = new Question("What is 2+2?", OBJECT_IDS);
+
+        // when, then
+        assertThrows(NullPointerException.class,
+                () -> questionService.askQuestion(AGENT_ID, question));
+    }
+
+    @Test
+    void shouldReturnServiceUnavailableOnSdkException_AskQuestion()
+    {
+        // given
+        given(integrationAgentResource.submitQuestion(any(IntegrationSubmitQuestionRequest.class)))
+                .willThrow(new CICSdkException("timeout"));
+
+        // when, then
+        WebScriptException ex = assertThrows(WebScriptException.class,
+                () -> questionService.askQuestion(AGENT_ID, new Question("Any?", OBJECT_IDS)));
+        assertEquals(SC_SERVICE_UNAVAILABLE, ex.getStatus());
+    }
+
+    @Test
+    void shouldReturnServiceUnavailableOnSdkException_GetAnswer()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        given(integrationQnaService.question(questionId)).willReturn(integrationQuestionResource);
+        given(integrationQuestionResource.getAnswer(USER_NODE_ID)).willThrow(new CICSdkException("timeout"));
+
+        // when, then
+        WebScriptException ex = assertThrows(WebScriptException.class,
+                () -> questionService.getAnswer(questionId));
+        assertEquals(SC_SERVICE_UNAVAILABLE, ex.getStatus());
+    }
+
+    @Test
+    void shouldSubmitBadFeedback()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        given(qnaService.question(questionId)).willReturn(questionResource);
+
+        // when
+        questionService.submitFeedback(questionId, FeedbackType.BAD);
+
+        // then
+        then(questionResource).should().submitFeedback(org.hyland.sdk.cic.qna.object.FeedbackType.BAD);
+    }
+
+    @Test
+    void shouldReturnServiceUnavailableOnSdkException_Feedback()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        given(qnaService.question(questionId)).willReturn(questionResource);
+        willThrow(new CICSdkException("timeout"))
+                .given(questionResource).submitFeedback(any(org.hyland.sdk.cic.qna.object.FeedbackType.class));
+
+        // when, then
+        WebScriptException ex = assertThrows(WebScriptException.class,
+                () -> questionService.submitFeedback(questionId, FeedbackType.GOOD));
+        assertEquals(SC_SERVICE_UNAVAILABLE, ex.getStatus());
+    }
+
+    @Test
+    void shouldPreserveStatusCodeOnServiceException_RetryQuestion()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        given(qnaService.question(questionId)).willReturn(questionResource);
+        willThrow(new CICServiceException("Not found", 404))
+                .given(questionResource).submitFeedback(org.hyland.sdk.cic.qna.object.FeedbackType.RETRY);
+
+        // when, then
+        WebScriptException ex = assertThrows(WebScriptException.class,
+                () -> questionService.retryQuestion(AGENT_ID, questionId, "comment",
+                        new Question("Redo this", OBJECT_IDS)));
+        assertEquals(404, ex.getStatus());
+    }
+
+    @Test
+    void shouldReturnServiceUnavailableOnSdkException_RetryQuestion()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        given(qnaService.question(questionId)).willReturn(questionResource);
+        willThrow(new CICSdkException("timeout"))
+                .given(questionResource).submitFeedback(org.hyland.sdk.cic.qna.object.FeedbackType.RETRY);
+
+        // when, then
+        WebScriptException ex = assertThrows(WebScriptException.class,
+                () -> questionService.retryQuestion(AGENT_ID, questionId, "comment",
+                        new Question("Redo this", OBJECT_IDS)));
+        assertEquals(SC_SERVICE_UNAVAILABLE, ex.getStatus());
+    }
+
+    @Test
+    void shouldPropagateUserIdInRetryQuestion()
+    {
+        // given
+        String questionId = "dummy-id-1234";
+        given(qnaService.question(questionId)).willReturn(questionResource);
+        given(integrationAgentResource.submitQuestion(any(IntegrationSubmitQuestionRequest.class)))
+                .willReturn(new QuestionResponse("new-id"));
+
+        Question question = new Question("Redo this", OBJECT_IDS);
+
+        // when
+        questionService.retryQuestion(AGENT_ID, questionId, "comment", question);
+
+        // then
+        ArgumentCaptor<IntegrationSubmitQuestionRequest> captor = ArgumentCaptor.forClass(IntegrationSubmitQuestionRequest.class);
+        then(integrationAgentResource).should().submitQuestion(captor.capture());
+        assertEquals(USER_NODE_ID, captor.getValue().userId());
     }
 }
