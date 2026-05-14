@@ -29,14 +29,14 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.util;
  * Common shape that route subscription/config records expose to {@link DeadLetterChannels#forRoute} so the helper can build a Camel {@code deadLetterChannel} without needing a dedicated DTO conversion. Each implementor (e.g. {@code Repository.EventsSubscription}, {@code BulkIngester}, {@code Transform.Response}) declares these accessors with matching names so they can be passed by their abstract role.
  *
  * <p>
- * {@link #deadLetterEnabled()} is the per-route on/off switch; route {@code configure()} methods are expected to gate the {@code errorHandler(DeadLetterChannels.forRoute(...))} call on it. The default of {@code true} preserves the always-on behaviour for routes whose dead-letter wiring is mandatory (repo-events, bulk-ingester) — i.e. any unhandled exception during in-delivery processing must land the message on the configured DLQ. Routes whose default is opt-in (transform-response) override the field on the record so deployments that don't want a DLQ entry per failed transform-response can keep the silent-drop semantics. With the DLC disabled the route falls back to Camel's {@code DefaultErrorHandler} + JMS-broker-side redelivery, which surfaces failures as broker-side redeliveries and ultimately to the broker's own dead-letter strategy rather than the route-scoped DLQ this helper builds.
+ * {@link #deadLetterEnabled()} is the per-route on/off switch; route {@code configure()} methods are expected to gate the {@code errorHandler(DeadLetterChannels.forRoute(...))} call on it. Every implementor today defaults the field to {@code false} (see {@code @DefaultValue("false")} on the records) so the route ships with Camel's {@code DefaultErrorHandler} and exhausted retries fall back to broker-side redelivery + the broker's own dead-letter strategy. Operators opt the route-scoped DLC in via the matching {@code ALFRESCO_..._DEADLETTERENABLED=true} env var (see {@code docs/live-ingester.md}); reliability ITs flip the same switch to assert DLQ inventory and metrics. The default-off applies to all three routes uniformly to preserve master parity for the bulk-ingester test topology — see {@code BulkIngesterE2eTest} — and is documented per route in the operator guide.
+ *
+ * <p>
+ * No {@code default} on {@link #deadLetterEnabled()}: every implementor must declare the field explicitly so the operator-facing default lives next to the other {@code @ConfigurationProperties} bindings (where the rest of the route's DLC tunables — {@link #deadLetterUri()}, {@link #maximumRedeliveries()}, {@link #redeliveryDelayMs()} — are also declared) rather than silently inheriting from the interface and drifting away from the docs.
  */
 public interface DeadLetterChannelConfig
 {
-    default boolean deadLetterEnabled()
-    {
-        return true;
-    }
+    boolean deadLetterEnabled();
 
     String deadLetterUri();
 
