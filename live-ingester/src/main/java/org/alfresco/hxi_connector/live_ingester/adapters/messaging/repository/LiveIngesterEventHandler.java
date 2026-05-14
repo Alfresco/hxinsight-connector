@@ -28,6 +28,9 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 import static org.apache.camel.LoggingLevel.DEBUG;
 import static org.apache.camel.LoggingLevel.INFO;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.builder.RouteBuilder;
@@ -96,11 +99,17 @@ public class LiveIngesterEventHandler extends RouteBuilder
             return baseUri;
         }
 
+        // URL-encode the subscription name before splicing it into the Camel endpoint URI: the field is only @NotBlank,
+        // so an operator-configured value containing a space or a reserved URI character (& ? = #) would otherwise
+        // produce a malformed query string and prevent the route from starting. Camel decodes endpoint-URI query
+        // values as application/x-www-form-urlencoded, so a percent-encoded value round-trips back to the original
+        // identifier on the JMS ConnectionFactory.
+        String encodedName = URLEncoder.encode(subscription.name(), StandardCharsets.UTF_8);
         String separator = baseUri.contains("?") ? "&" : "?";
         String durableUri = baseUri
                 + separator
                 + "subscriptionDurable=true"
-                + "&durableSubscriptionName=" + subscription.name();
+                + "&durableSubscriptionName=" + encodedName;
         log.info("Repository :: Subscribing to {} as a durable consumer with durableSubscriptionName={}. The connection's clientId is configured on the JMS ConnectionFactory by JmsClientIdConfigurer. Only one live-ingester instance can hold this subscription at a time; multi-instance HA is not yet supported.",
                 baseUri, subscription.name());
         return durableUri;
