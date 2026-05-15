@@ -104,7 +104,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
                 + separator
                 + "subscriptionDurable=true"
                 + "&durableSubscriptionName=" + encodedName;
-        log.info("Repository :: Subscribing to {} as a durable consumer with durableSubscriptionName={}. The connection's clientId is configured on the JMS ConnectionFactory by JmsClientIdConfigurer. Only one live-ingester instance can hold this subscription at a time; multi-instance HA is not yet supported.",
+        log.info("Repository :: Subscribing to {} as a durable consumer with durableSubscriptionName={}. The connection's clientId is configured on the JMS ConnectionFactory by JmsClientIdConfigurer. Single-instance deployment is the supported shape; the exclusive subscription contract is intentional, not a deferral.",
                 baseUri, subscription.name());
         return durableUri;
     }
