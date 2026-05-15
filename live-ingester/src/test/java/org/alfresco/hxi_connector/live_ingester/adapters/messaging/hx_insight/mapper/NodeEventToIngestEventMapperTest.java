@@ -269,6 +269,28 @@ class NodeEventToIngestEventMapperTest
     }
 
     @Test
+    void shouldMapCollectionOfFloatsToDoubleArray() throws JSONException
+    {
+        UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)
+                .addMetadataInstruction(new NodeProperty<>("scores", List.of(1.5f, 2.5f)));
+
+        IngestEvent result = mapper.map(event);
+        String json = MapperService.writeAsString(result);
+
+        String expected = """
+                {
+                  "objectId": "node-id",
+                  "sourceId": "dummy-source-id",
+                  "eventType": "createOrUpdate",
+                  "sourceTimestamp": 1724225729830,
+                  "properties": {
+                    "scores": {"value": [1.5, 2.5], "type": "float"}
+                  }
+                }""";
+        JSONAssert.assertEquals(expected, json, true);
+    }
+
+    @Test
     void shouldIgnoreEmptyCollection() throws JSONException
     {
         UpdateNodeEvent event = new UpdateNodeEvent(NODE_ID, CREATE_OR_UPDATE, SOURCE_ID, TIMESTAMP)

@@ -27,12 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 
-import java.time.Duration;
-
 import lombok.RequiredArgsConstructor;
 import org.hyland.sdk.cic.http.client.auth.AuthenticationHttpClient;
-import org.hyland.sdk.cic.http.client.retry.BackoffStrategy;
-import org.hyland.sdk.cic.http.client.retry.RetryCondition;
 import org.hyland.sdk.cic.http.client.retry.RetryPolicy;
 import org.hyland.sdk.cic.ingest.IngestHttpClient;
 import org.hyland.sdk.cic.ingest.IngestService;
@@ -43,7 +39,6 @@ import org.springframework.context.event.EventListener;
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.AcsHealthProbe;
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
-import org.alfresco.hxi_connector.common.config.properties.Retry;
 
 @Configuration
 @RequiredArgsConstructor
@@ -68,24 +63,15 @@ public class IngestClientConfiguration
         AuthenticationHttpClient.Builder authBuilder = AuthenticationHttpClient.from(authProvider.getTokenUri())
                 .clientId(authProvider.getClientId())
                 .clientSecret(authProvider.getClientSecret())
-                .grantType(authProvider.getGrantType());
+                .grantType(authProvider.getGrantType())
+                .retryPolicy(RetryPolicy.none());
         authProvider.getScope().forEach(authBuilder::scope);
-
-        Retry retryConfig = integrationProperties.hylandExperience().ingester().retry();
-        long initialDelayMs = Math.max(1, retryConfig.initialDelay());
-        RetryPolicy retryPolicy = RetryPolicy.builder()
-                .maxAttempts(retryConfig.attempts())
-                .backoffStrategy(BackoffStrategy.exponentialDelay(
-                        Duration.ofMillis(initialDelayMs),
-                        Duration.ofSeconds(20)))
-                .retryCondition(RetryCondition.defaultCondition())
-                .build();
 
         IngestHttpClient ingestHttpClient = IngestHttpClient.from(baseUrl, authBuilder)
                 .sourceId(applicationInfoProvider.getSourceId())
                 .hxpEnvironment(authProvider.getEnvironmentKey())
                 .userAgent(applicationInfoProvider.getUserAgentData())
-                .retryPolicy(retryPolicy)
+                .retryPolicy(RetryPolicy.none())
                 .build();
 
         IngestService realIngestService = new IngestService(ingestHttpClient);

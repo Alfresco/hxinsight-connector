@@ -19,9 +19,6 @@ hyland-experience:
     retry:
       initial-delay: 0
   storage:
-    location:
-      retry:
-        initial-delay: 0
     upload:
       retry:
         initial-delay: 0

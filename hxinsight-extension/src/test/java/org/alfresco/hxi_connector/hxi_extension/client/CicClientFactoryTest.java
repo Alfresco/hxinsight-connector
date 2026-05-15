@@ -56,19 +56,19 @@ class CicClientFactoryTest
     }
 
     @Test
-    void shouldComputeExponentialBackoffDelays()
+    void shouldComputeBackoffDelaysUsingMultiplier()
     {
         RetryPolicy policy = CicClientFactory.buildRetryPolicy(DEFAULT_RETRY);
 
-        // attempt 1: jittered in [0, 500 * 2^0] = [0, 500ms]
+        // attempt 1: 500 * 2^0 = 500ms
         Duration delay1 = policy.backoffStrategy().computeDelay(context(1, new IOException()));
-        assertTrue(!delay1.isNegative() && delay1.compareTo(Duration.ofMillis(500)) <= 0);
-        // attempt 2: jittered in [0, 500 * 2^1] = [0, 1000ms]
+        assertEquals(Duration.ofMillis(500), delay1);
+        // attempt 2: 500 * 2^1 = 1000ms
         Duration delay2 = policy.backoffStrategy().computeDelay(context(2, new IOException()));
-        assertTrue(!delay2.isNegative() && delay2.compareTo(Duration.ofMillis(1000)) <= 0);
-        // attempt 3: jittered in [0, 500 * 2^2] = [0, 2000ms]
+        assertEquals(Duration.ofMillis(1000), delay2);
+        // attempt 3: 500 * 2^2 = 2000ms
         Duration delay3 = policy.backoffStrategy().computeDelay(context(3, new IOException()));
-        assertTrue(!delay3.isNegative() && delay3.compareTo(Duration.ofMillis(2000)) <= 0);
+        assertEquals(Duration.ofMillis(2000), delay3);
     }
 
     @Test
@@ -101,7 +101,7 @@ class CicClientFactoryTest
         RetryPolicy policy = CicClientFactory.buildRetryPolicy(new Retry(3, 0, 2.0));
 
         Duration delay = policy.backoffStrategy().computeDelay(context(1, new IOException()));
-        assertTrue(!delay.isNegative() && delay.compareTo(Duration.ofMillis(1)) <= 0);
+        assertEquals(Duration.ofMillis(1), delay);
     }
 
     @Test
@@ -144,13 +144,28 @@ class CicClientFactoryTest
     }
 
     @Test
-    void shouldCapBackoffDelayAtTwentySeconds()
+    void shouldComputeBackoffWithCustomMultiplier()
     {
-        // initialDelay=1000ms, after 10 doublings uncapped would be 1024s, capped at 20s
-        RetryPolicy policy = CicClientFactory.buildRetryPolicy(new Retry(20, 1_000, 2.0));
+        RetryPolicy policy = CicClientFactory.buildRetryPolicy(new Retry(5, 100, 3.0));
 
-        Duration delay = policy.backoffStrategy().computeDelay(context(10, new IOException()));
-        assertTrue(delay.compareTo(Duration.ofSeconds(20)) <= 0);
+        // attempt 1: 100 * 3^0 = 100ms
+        assertEquals(Duration.ofMillis(100), policy.backoffStrategy().computeDelay(context(1, new IOException())));
+        // attempt 2: 100 * 3^1 = 300ms
+        assertEquals(Duration.ofMillis(300), policy.backoffStrategy().computeDelay(context(2, new IOException())));
+        // attempt 3: 100 * 3^2 = 900ms
+        assertEquals(Duration.ofMillis(900), policy.backoffStrategy().computeDelay(context(3, new IOException())));
+        // attempt 4: 100 * 3^3 = 2700ms
+        assertEquals(Duration.ofMillis(2700), policy.backoffStrategy().computeDelay(context(4, new IOException())));
+    }
+
+    @Test
+    void shouldComputeBackoffWithMultiplierOfOne()
+    {
+        RetryPolicy policy = CicClientFactory.buildRetryPolicy(new Retry(3, 500, 1.0));
+
+        assertEquals(Duration.ofMillis(500), policy.backoffStrategy().computeDelay(context(1, new IOException())));
+        assertEquals(Duration.ofMillis(500), policy.backoffStrategy().computeDelay(context(2, new IOException())));
+        assertEquals(Duration.ofMillis(500), policy.backoffStrategy().computeDelay(context(3, new IOException())));
     }
 
     @Test

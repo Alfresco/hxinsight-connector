@@ -31,7 +31,6 @@ import java.time.Duration;
 import org.hyland.sdk.cic.agent.AgentHttpClient;
 import org.hyland.sdk.cic.agent.AgentService;
 import org.hyland.sdk.cic.http.client.auth.AuthenticationHttpClient;
-import org.hyland.sdk.cic.http.client.retry.BackoffStrategy;
 import org.hyland.sdk.cic.http.client.retry.RetryPolicy;
 import org.hyland.sdk.cic.qna.QnaHttpClient;
 import org.hyland.sdk.cic.qna.QnaService;
@@ -82,9 +81,13 @@ public final class CicClientFactory
     static RetryPolicy buildRetryPolicy(Retry retry)
     {
         long initialDelayMs = Math.max(1, retry.initialDelay());
+        double multiplier = retry.delayMultiplier();
         return RetryPolicy.builder()
                 .maxAttempts(retry.attempts())
-                .backoffStrategy(BackoffStrategy.exponentialDelay(Duration.ofMillis(initialDelayMs), Duration.ofSeconds(20))) // cap max delay to 10 minutes
+                .backoffStrategy(context -> {
+                    double delay = initialDelayMs * Math.pow(multiplier, context.attemptNumber() - 1);
+                    return Duration.ofMillis(Math.round(delay));
+                })
                 .retryCondition(context -> {
                     Throwable cause = context.exception();
                     while (cause != null)

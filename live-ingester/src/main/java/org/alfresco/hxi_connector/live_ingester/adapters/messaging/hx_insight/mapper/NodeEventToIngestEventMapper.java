@@ -284,9 +284,9 @@ public class NodeEventToIngestEventMapper
         {
             return PropertyArray.of(collection.stream().mapToLong(o -> (Long) o).toArray());
         }
-        else if (first instanceof Double)
+        else if (first instanceof Float || first instanceof Double)
         {
-            return PropertyArray.of(collection.stream().mapToDouble(o -> (Double) o).toArray());
+            return PropertyArray.of(collection.stream().mapToDouble(o -> ((Number) o).doubleValue()).toArray());
         }
         else if (first instanceof Boolean)
         {

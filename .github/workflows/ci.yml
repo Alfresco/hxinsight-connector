@@ -288,7 +288,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v15.6.2
         with:
           java-version: ${{ env.JAVA_VERSION }}
-
+          maven-settings: ${{ env.MAVEN_SETTINGS }}
       - name: "Download all coverage data"
         uses: actions/download-artifact@v8
         with:

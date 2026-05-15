@@ -26,17 +26,23 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config;
 
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.hyland.sdk.cic.http.client.CICSdkException;
+import org.hyland.sdk.cic.http.client.CICServiceException;
 import org.hyland.sdk.cic.http.client.mapper.object.CICBlob;
 import org.hyland.sdk.cic.ingest.IngestService;
 import org.hyland.sdk.cic.ingest.object.IngestEvent;
 import org.hyland.sdk.cic.ingest.object.PreSignedUrl;
 
 import org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider;
+import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 
 public class LiveIngestService
 {
+    private static final Set<Integer> RETRYABLE_STATUS_CODES = Set.of(408, 429, 500, 502, 503, 504);
+
     private final ApplicationInfoProvider applicationInfoProvider;
     private final AtomicReference<IngestService> delegateRef = new AtomicReference<>();
 
@@ -62,11 +68,35 @@ public class LiveIngestService
 
     public void ingest(IngestEvent event)
     {
-        getDelegate().ingest(event);
+        try
+        {
+            getDelegate().ingest(event);
+        }
+        catch (CICSdkException e)
+        {
+            throw wrapIfRetryable(e);
+        }
     }
 
     public Optional<PreSignedUrl> uploadBlobIfNeeded(String nodeId, CICBlob blob)
     {
-        return getDelegate().uploadBlobIfNeeded(applicationInfoProvider.getSourceId(), nodeId, blob);
+        try
+        {
+            return getDelegate().uploadBlobIfNeeded(applicationInfoProvider.getSourceId(), nodeId, blob);
+        }
+        catch (CICSdkException e)
+        {
+            throw wrapIfRetryable(e);
+        }
+    }
+
+    private static RuntimeException wrapIfRetryable(CICSdkException e)
+    {
+        if (e instanceof CICServiceException serviceException
+                && !RETRYABLE_STATUS_CODES.contains(serviceException.statusCode()))
+        {
+            return e;
+        }
+        return new EndpointServerErrorException(e);
     }
 }

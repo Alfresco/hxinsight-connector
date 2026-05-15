@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 import static java.util.Objects.requireNonNullElse;
 import static java.util.Objects.requireNonNullElseGet;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
@@ -36,20 +35,12 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
 
 @SuppressWarnings("PMD.UnusedAssignment")
-public record Storage(@NotNull Location location, @NotNull Upload upload)
+public record Storage(@NotNull Upload upload)
 {
 
     public Storage
     {
         upload = requireNonNullElse(upload, new Upload(new Retry()));
-    }
-
-    public record Location(@NotBlank String endpoint, @NotNull @NestedConfigurationProperty Retry retry)
-    {
-        public Location
-        {
-            retry = requireNonNullElseGet(retry, Retry::new);
-        }
     }
 
     public record Upload(@NotNull @NestedConfigurationProperty Retry retry)
