@@ -169,6 +169,42 @@ class CicClientFactoryTest
     }
 
     @Test
+    void shouldNotRetryWhenReasonsIsNull()
+    {
+        Retry retry = new Retry(3, 500, 2.0, null);
+        RetryPolicy policy = CicClientFactory.buildRetryPolicy(retry);
+
+        assertFalse(policy.retryCondition().shouldRetry(context(1, new RuntimeException())));
+    }
+
+    @Test
+    void shouldRetryOnIOExceptionEvenWhenReasonsIsNull()
+    {
+        Retry retry = new Retry(3, 500, 2.0, null);
+        RetryPolicy policy = CicClientFactory.buildRetryPolicy(retry);
+
+        assertTrue(policy.retryCondition().shouldRetry(context(1, new IOException())));
+    }
+
+    @Test
+    void shouldRetryOnDeeplyNestedIOException()
+    {
+        RetryPolicy policy = CicClientFactory.buildRetryPolicy(DEFAULT_RETRY);
+
+        Exception deep = new RuntimeException(new IllegalStateException(new IOException("deep")));
+        assertTrue(policy.retryCondition().shouldRetry(context(1, deep)));
+    }
+
+    @Test
+    void shouldNotRetryOnDeeplyNestedUnrelatedExceptions()
+    {
+        RetryPolicy policy = CicClientFactory.buildRetryPolicy(DEFAULT_RETRY);
+
+        Exception deep = new RuntimeException(new IllegalStateException(new IllegalArgumentException("deep")));
+        assertFalse(policy.retryCondition().shouldRetry(context(1, deep)));
+    }
+
+    @Test
     void shouldBuildAuthWithNullScope() throws Exception
     {
         AuthenticationHttpClient.Builder builder = CicClientFactory.buildAuth(
