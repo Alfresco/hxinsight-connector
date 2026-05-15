@@ -72,7 +72,8 @@ public record Repository(@NotBlank String baseUrl,
             @NotBlank @DefaultValue("activemq:queue:ActiveMQ.DLQ") String deadLetterUri,
             @PositiveOrZero @DefaultValue("6") int maximumRedeliveries,
             @PositiveOrZero @DefaultValue("1000") long redeliveryDelayMs,
-            @DefaultValue("false") boolean deadLetterUnsupportedTypes)
+            @DefaultValue("false") boolean deadLetterUnsupportedTypes,
+            @DefaultValue("false") boolean observeContentDrops)
             implements DeadLetterChannelConfig
     {}
 }

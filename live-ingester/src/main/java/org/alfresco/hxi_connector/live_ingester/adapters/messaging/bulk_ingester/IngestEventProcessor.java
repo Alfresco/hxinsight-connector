@@ -44,6 +44,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -51,10 +53,12 @@ import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent.ContentInfo;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.property.PropertyMappingHelper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityInfo;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
@@ -70,6 +74,8 @@ public class IngestEventProcessor
     private final IngestContentCommandHandler ingestContentCommandHandler;
     private final MimeTypeMapper mimeTypeMapper;
     private final AuthorityTypeResolver authorityTypeResolver;
+    private final MeterRegistry meterRegistry;
+    private final IntegrationProperties integrationProperties;
 
     public void process(@Validated IngestEvent ingestEvent)
     {
@@ -90,7 +96,22 @@ public class IngestEventProcessor
             String targetMimeType = mimeTypeMapper.mapMimeType(sourceMimeType);
             if (MimeTypeMapper.EMPTY_MIME_TYPE.equals(targetMimeType))
             {
-                log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}", ingestEvent.nodeId(), sourceMimeType);
+                String resolvedMimeType = sourceMimeType == null ? "null" : sourceMimeType;
+                if (integrationProperties.alfresco().bulkIngester().observeContentDrops())
+                {
+                    log.info("Content :: Skipping ingestion for node id={} because no MIME mapping matched source mimeType={} — increment {}{{mime_type=\"{}\"}} on every occurrence.",
+                            ingestEvent.nodeId(), resolvedMimeType, LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING, resolvedMimeType);
+
+                    Counter.builder(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING)
+                            .description(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING_DESCRIPTION)
+                            .tag(LiveIngesterMetrics.Tag.MIME_TYPE, resolvedMimeType)
+                            .register(meterRegistry)
+                            .increment();
+                }
+                else
+                {
+                    log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}", ingestEvent.nodeId(), resolvedMimeType);
+                }
                 return;
             }
             TriggerContentIngestionCommand triggerContentIngestionCommand = new TriggerContentIngestionCommand(

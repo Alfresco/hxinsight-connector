@@ -134,6 +134,33 @@ alfresco:
 - Cardinality of the `type` tag is bounded by ACS' actual event taxonomy; the counter does not sanitise the tag value, so a malformed publisher (or a deliberate fuzz on the topic) can in principle inflate the cardinality. ACS-side topics are not externally writable so this is a low-risk concern in supported deployments.
 - The opt-in default is `false` because flipping it changes operator-visible queue depth on the broker (`ActiveMQ.DLQ`) and risks new ACS event types flooding the DLQ until the connector adds dispatch for them. The default-off path is the right shape for forward-compatibility; opt in only when your alerting story demands per-event DLQ inventory.
 
+#### Repo events: content with no MIME mapping
+
+When a content-bearing event arrives whose source MIME type maps to the empty string under `alfresco.transform.mime-type.mapping` (either an explicit `*: ""` rule or no matching rule with no fall-through catch-all), the connector skips ingestion of the binary by design — the metadata still flows, the binary does not. See the operator guidance on `alfresco.transform.mime-type.mapping` for when to configure this on purpose.
+
+- **Default behaviour:** the skip is silent except for a `DEBUG` log line naming the node and source MIME type. This keeps the steady-state log signal clean for deployments that intentionally configure `video/*: ""` (or similar) and expect drops on every video upload.
+- **Opt-in observability:** set `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_OBSERVECONTENTDROPS=true` to promote the per-skip log to `INFO` and increment a Micrometer counter tagged with the source MIME type. Pick this when you suspect an unintended `EMPTY_MIME_TYPE` mapping (e.g. an operator pasted a `xfdf: ""` rule that's silently dropping binaries you wanted ingested) and want per-event evidence rather than just the `live_ingester_repo_events_total` aggregate.
+
+```yaml
+alfresco:
+  repository:
+    events-subscription:
+      observe-content-drops: false  # default; flip to true to surface every skipped binary as INFO + counter
+```
+
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_OBSERVECONTENTDROPS` | When `true`, every content event skipped because of an `EMPTY_MIME_TYPE` mapping emits an `INFO` log line and increments `live_ingester_content_no_mime_mapping_total{mime_type="<source-mime>"}`. When `false`, only a `DEBUG` log line is produced; no counter is registered. (boolean) | `false` |
+
+**Observability (only when the opt-in is enabled):**
+- Counter `live_ingester_content_no_mime_mapping_total{mime_type="<source-mime>"}` is incremented exactly once per skipped binary. The `mime_type` tag is the resolved source MIME (or `"null"` when the event lacks one) so operators can break out per-format drops.
+- One `INFO` log line is emitted per skip, naming the node id and the source MIME.
+
+**Operational notes:**
+- The cardinality of the `mime_type` tag is bounded by what ACS reports as content MIME types (typically a small fixed set across an instance). A misbehaving content provider that injects high-cardinality `mimeType` strings could in principle inflate the cardinality; the counter does not sanitise the tag value.
+- The default-off shape matches the precedent of `dead-letter-unsupported-types`: the connector ships with no per-event observability for what is, for many deployments, an intentional config. Opt in only when you want to alert on the `EMPTY_MIME_TYPE` drops.
+- This toggle gates the live repo-events route only. The bulk-ingester route has its own independent toggle (`alfresco.bulk-ingester.observe-content-drops` / `ALFRESCO_BULKINGESTER_OBSERVECONTENTDROPS`) with the same default-off semantics — flip them independently as your alerting story requires. Both routes share the same metric name (`live_ingester_content_no_mime_mapping_total`) and `mime_type` tag so dashboards work uniformly regardless of which route produced the drop.
+
 ### HX Insight Ingestion
 
 The most common configuration is to set the `base-url` for HX Insight. The storage and ingestion endpoints are automatically derived from this base URL.
@@ -250,6 +277,30 @@ alfresco:
 - Set a service-specific DLQ (e.g. `activemq:queue:LiveIngester.BulkEvents.DLQ`) if you need to differentiate bulk-ingester failures from other DLQ traffic.
 - Setting `maximum-redeliveries=0` skips retries entirely and dead-letters on the first exception. Useful for testing the alert path without waiting for backoff.
 - Both JMS ingress routes (repo events and bulk-ingester) default to `maximumRedeliveries=6` so a single retry budget covers them. Tune them independently if one route's downstream behaves very differently from the other's.
+
+### Bulk-ingester events: content with no MIME mapping
+
+The same `EMPTY_MIME_TYPE`-skip semantics covered for the live route under [Repo events: content with no MIME mapping](#repo-events-content-with-no-mime-mapping) apply on the bulk-ingester ingress: a bulk event whose source MIME maps to the empty string (either an explicit `*: ""` rule or no matching rule) has its binary skipped by design, with metadata still flowing through.
+
+- **Default behaviour:** the skip is silent except for a `DEBUG` log line naming the node and source MIME type. Same rationale as the live route — deployments that intentionally configure `video/*: ""` (or similar) should not see an `INFO` line on every bulk-imported video.
+- **Opt-in observability:** set `ALFRESCO_BULKINGESTER_OBSERVECONTENTDROPS=true` to promote the per-skip log to `INFO` and increment `live_ingester_content_no_mime_mapping_total{mime_type="<source-mime>"}` — the same metric and tag the live route uses, so dashboards do not need to discriminate by route.
+
+```yaml
+alfresco:
+  bulk-ingester:
+    observe-content-drops: false  # default; flip to true to surface every skipped binary as INFO + counter
+```
+
+| Environment Variable | Description | Default |
+|---------------------|-------------|---------|
+| `ALFRESCO_BULKINGESTER_OBSERVECONTENTDROPS` | When `true`, every bulk-ingester content event skipped because of an `EMPTY_MIME_TYPE` mapping emits an `INFO` log line and increments `live_ingester_content_no_mime_mapping_total{mime_type="<source-mime>"}`. When `false`, only a `DEBUG` log line is produced; no counter is registered. (boolean) | `false` |
+
+**Observability (only when the opt-in is enabled):**
+- Same metric and `mime_type` tag as the live-route opt-in. Operators alerting on `live_ingester_content_no_mime_mapping_total` already see drops from both routes once both opt-ins are flipped; if you only want to alert on bulk-import drops (without live-route noise), gate your alert on the route via the existing log-source labelling.
+
+**Operational notes:**
+- This toggle is independent of the live-route opt-in (`ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_OBSERVECONTENTDROPS`); flip them independently as your alerting story requires.
+- Since bulk imports are typically deliberate, scoped operations on a known content set, many operators will want this `true` during a bulk-import campaign and `false` (or unset) at steady state when bulk-ingest traffic is low or absent.
 
 ---
 

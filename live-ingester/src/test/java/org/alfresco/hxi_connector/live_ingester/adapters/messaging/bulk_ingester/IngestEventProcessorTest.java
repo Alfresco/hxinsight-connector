@@ -25,9 +25,11 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.bulk_ingester;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.mock;
 
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CONTENT_PROPERTY;
 import static org.alfresco.hxi_connector.common.constant.NodeProperties.CREATED_AT_PROPERTY;
@@ -41,15 +43,19 @@ import java.time.Instant;
 import java.util.Map;
 import java.util.Set;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.util.AuthorityTypeResolver;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.IngestNodeCommand;
@@ -71,8 +77,34 @@ class IngestEventProcessorTest
     private MimeTypeMapper mimeTypeMapper;
     @Mock
     private AuthorityTypeResolver authorityTypeResolver;
-    @InjectMocks
+    @Mock
+    private IntegrationProperties integrationProperties;
+    @Mock
+    private IntegrationProperties.Alfresco alfrescoProperties;
+
+    private SimpleMeterRegistry meterRegistry;
     private IngestEventProcessor ingestEventProcessor;
+
+    @BeforeEach
+    void setUp()
+    {
+        meterRegistry = new SimpleMeterRegistry();
+        ingestEventProcessor = new IngestEventProcessor(
+                ingestNodeCommandHandler,
+                ingestContentCommandHandler,
+                mimeTypeMapper,
+                authorityTypeResolver,
+                meterRegistry,
+                integrationProperties);
+    }
+
+    private void givenBulkIngesterObserveContentDrops(boolean enabled)
+    {
+        BulkIngester bulkIngester = mock(BulkIngester.class);
+        given(integrationProperties.alfresco()).willReturn(alfrescoProperties);
+        given(alfrescoProperties.bulkIngester()).willReturn(bulkIngester);
+        given(bulkIngester.observeContentDrops()).willReturn(enabled);
+    }
 
     @Test
     void shouldIngestJustNodeMetadataIfItDoesNotContainAnyContent()
@@ -159,6 +191,7 @@ class IngestEventProcessorTest
                         CREATED_AT_PROPERTY, CREATED_AT),
                 TIMESTAMP);
         given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
+        givenBulkIngesterObserveContentDrops(false);
 
         // when
         ingestEventProcessor.process(ingestEvent);
@@ -176,5 +209,43 @@ class IngestEventProcessorTest
 
         then(mimeTypeMapper).should().mapMimeType(mimeType);
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
+
+        assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING).counter())
+                .as("with the opt-in disabled (default), %s must not be registered — drop is silent at DEBUG only",
+                        LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING)
+                .isNull();
+    }
+
+    @Test
+    void shouldObserveContentDropWhenMimeTypeMappedToEmptyAndObserveContentDropsEnabled()
+    {
+        // given
+        String mimeType = "application/octetstream";
+        IngestEvent.ContentInfo contentInfo = new IngestEvent.ContentInfo(
+                100L,
+                "UTF-8",
+                mimeType);
+
+        IngestEvent ingestEvent = new IngestEvent(
+                NODE_ID,
+                contentInfo,
+                Map.of(TYPE_PROPERTY, NODE_TYPE,
+                        CREATED_AT_PROPERTY, CREATED_AT),
+                TIMESTAMP);
+        given(mimeTypeMapper.mapMimeType(mimeType)).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
+        givenBulkIngesterObserveContentDrops(true);
+
+        // when
+        ingestEventProcessor.process(ingestEvent);
+
+        // then
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+
+        assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING)
+                .tag(LiveIngesterMetrics.Tag.MIME_TYPE, mimeType)
+                .counter().count())
+                        .as("with the opt-in enabled, EMPTY_MIME_TYPE drop must increment %s{mime_type=\"%s\"} exactly once",
+                                LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING, mimeType)
+                        .isEqualTo(1.0);
     }
 }

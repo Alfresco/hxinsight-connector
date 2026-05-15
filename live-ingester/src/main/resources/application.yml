@@ -26,6 +26,7 @@ alfresco:
       maximum-redeliveries: 6
       redelivery-delay-ms: 1000
       dead-letter-unsupported-types: false
+      observe-content-drops: false
     base-url: http://localhost:8080/alfresco
     response-timeout-ms: 0
     discovery-endpoint: ${alfresco.repository.base-url}/api/discovery
@@ -39,6 +40,7 @@ alfresco:
     dead-letter-uri: activemq:queue:ActiveMQ.DLQ
     maximum-redeliveries: 6
     redelivery-delay-ms: 1000
+    observe-content-drops: false
   transform:
     request:
       endpoint: activemq:queue:acs-repo-transform-request?jmsMessageType=Text

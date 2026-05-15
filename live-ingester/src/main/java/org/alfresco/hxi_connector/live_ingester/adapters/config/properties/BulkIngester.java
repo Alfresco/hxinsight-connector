@@ -39,6 +39,7 @@ public record BulkIngester(
         @DefaultValue("false") boolean deadLetterEnabled,
         @NotBlank @DefaultValue("activemq:queue:ActiveMQ.DLQ") String deadLetterUri,
         @PositiveOrZero @DefaultValue("6") int maximumRedeliveries,
-        @PositiveOrZero @DefaultValue("1000") long redeliveryDelayMs)
+        @PositiveOrZero @DefaultValue("1000") long redeliveryDelayMs,
+        @DefaultValue("false") boolean observeContentDrops)
         implements DeadLetterChannelConfig
 {}

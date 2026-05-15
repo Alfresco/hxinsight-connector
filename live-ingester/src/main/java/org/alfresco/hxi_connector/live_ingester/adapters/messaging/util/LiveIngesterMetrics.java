@@ -43,6 +43,8 @@ public final class LiveIngesterMetrics
         public static final String EXCEPTION = "exception";
         /** The repo-event {@code type} string for events that bypass dispatch. */
         public static final String EVENT_TYPE = "type";
+        /** The source MIME type of a content event that was skipped because the configured mapping returned no target. */
+        public static final String MIME_TYPE = "mime_type";
 
         private Tag()
         {}
@@ -76,6 +78,9 @@ public final class LiveIngesterMetrics
 
         public static final String TRANSFORM_RESPONSE_SILENT = "live_ingester_transform_response_silent_drop_total";
         public static final String TRANSFORM_RESPONSE_SILENT_DESCRIPTION = "Failed transform-responses (status=400) silently dropped by the default-deployment branch in ATSTransformResponseHandler.ingestContent (ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false). Drops to zero when deployments opt in to dead-letter coverage and the entries land on " + Dlq.TRANSFORM_RESPONSE + " instead.";
+
+        public static final String CONTENT_NO_MIME_MAPPING = "live_ingester_content_no_mime_mapping_total";
+        public static final String CONTENT_NO_MIME_MAPPING_DESCRIPTION = "Content events skipped because MimeTypeMapper returned EMPTY_MIME_TYPE — either no rule matched the source MIME type or the matching rule had an empty target. Tagged with the source MIME type so operators can spot misconfigured alfresco.transform.mime-type.mapping entries.";
 
         private Drop()
         {}

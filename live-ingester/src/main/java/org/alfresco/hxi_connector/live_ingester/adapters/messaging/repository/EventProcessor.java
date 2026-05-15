@@ -136,7 +136,22 @@ public class EventProcessor
             {
                 NodeResource resource = event.getData().getResource();
                 String sourceMimeType = resource.getContent().getMimeType();
-                log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}.", resource.getId(), sourceMimeType);
+                String resolvedMimeType = sourceMimeType == null ? "null" : sourceMimeType;
+                if (integrationProperties.alfresco().repository().eventsSubscription().observeContentDrops())
+                {
+                    log.info("Content :: Skipping ingestion for node id={} because no MIME mapping matched source mimeType={} — increment {}{{mime_type=\"{}\"}} on every occurrence.",
+                            resource.getId(), resolvedMimeType, LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING, resolvedMimeType);
+
+                    Counter.builder(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING)
+                            .description(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING_DESCRIPTION)
+                            .tag(LiveIngesterMetrics.Tag.MIME_TYPE, resolvedMimeType)
+                            .register(meterRegistry)
+                            .increment();
+                }
+                else
+                {
+                    log.atDebug().log("Content will not be ingested - cannot determine target MIME type for node of id {} with source MIME type {}.", resource.getId(), resolvedMimeType);
+                }
                 return;
             }
 

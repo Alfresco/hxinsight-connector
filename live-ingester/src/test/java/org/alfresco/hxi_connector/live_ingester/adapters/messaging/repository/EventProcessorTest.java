@@ -383,15 +383,18 @@ class EventProcessorTest
     void shouldNotIngestContentWhenMimeTypeMappedToEmpty()
     {
         // given
+        String sourceMimeType = "application/xfdf";
         RepoEvent<DataAttributes<NodeResource>> event = prepareMockCreatedEvent();
         ContentInfo contentInfo = mock();
         given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
+        given(contentInfo.getMimeType()).willReturn(sourceMimeType);
         given(event.getData().getResource().getContent()).willReturn(contentInfo);
         given(mockMessage.getBody(RepoEvent.class)).willReturn(event);
 
         TriggerContentIngestionCommand triggerContentIngestionCommand = mock();
         given(triggerContentIngestionCommand.targetMimeType()).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
         given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(triggerContentIngestionCommand);
+        givenEventsSubscriptionObserveContentDrops(false);
 
         // when
         eventProcessor.process(mockExchange);
@@ -402,6 +405,42 @@ class EventProcessorTest
 
         then(ingestNodeCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
+
+        assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING).counter())
+                .as("with the opt-in disabled (default), %s must not be registered — drop is silent at DEBUG only",
+                        LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING)
+                .isNull();
+    }
+
+    @Test
+    void shouldObserveContentDropWhenMimeTypeMappedToEmptyAndObserveContentDropsEnabled()
+    {
+        // given
+        String sourceMimeType = "application/xfdf";
+        RepoEvent<DataAttributes<NodeResource>> event = prepareMockCreatedEvent();
+        ContentInfo contentInfo = mock();
+        given(contentInfo.getSizeInBytes()).willReturn(CONTENT_SIZE);
+        given(contentInfo.getMimeType()).willReturn(sourceMimeType);
+        given(event.getData().getResource().getContent()).willReturn(contentInfo);
+        given(mockMessage.getBody(RepoEvent.class)).willReturn(event);
+
+        TriggerContentIngestionCommand triggerContentIngestionCommand = mock();
+        given(triggerContentIngestionCommand.targetMimeType()).willReturn(MimeTypeMapper.EMPTY_MIME_TYPE);
+        given(repoEventMapper.mapToIngestContentCommand(event)).willReturn(triggerContentIngestionCommand);
+        givenEventsSubscriptionObserveContentDrops(true);
+
+        // when
+        eventProcessor.process(mockExchange);
+
+        // then
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+
+        assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING)
+                .tag(LiveIngesterMetrics.Tag.MIME_TYPE, sourceMimeType)
+                .counter().count())
+                        .as("with the opt-in enabled, EMPTY_MIME_TYPE drop must increment %s{mime_type=\"%s\"} exactly once",
+                                LiveIngesterMetrics.Drop.CONTENT_NO_MIME_MAPPING, sourceMimeType)
+                        .isEqualTo(1.0);
     }
 
     @Test
@@ -456,6 +495,15 @@ class EventProcessorTest
         given(mockAlfrescoProperties.repository()).willReturn(repository);
         given(repository.eventsSubscription()).willReturn(subscription);
         given(subscription.deadLetterUnsupportedTypes()).willReturn(enabled);
+    }
+
+    private void givenEventsSubscriptionObserveContentDrops(boolean enabled)
+    {
+        Repository repository = mock();
+        Repository.EventsSubscription subscription = mock();
+        given(mockAlfrescoProperties.repository()).willReturn(repository);
+        given(repository.eventsSubscription()).willReturn(subscription);
+        given(subscription.observeContentDrops()).willReturn(enabled);
     }
 
     RepoEvent<DataAttributes<NodeResource>> prepareMockCreatedEvent()
