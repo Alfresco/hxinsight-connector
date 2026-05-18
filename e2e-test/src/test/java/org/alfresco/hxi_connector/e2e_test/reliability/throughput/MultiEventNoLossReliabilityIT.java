@@ -45,10 +45,10 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
  * Multi-event end-to-end correctness guard. Pins that {@value #NODE_COUNT} sequentially-created content events flow through the connector to HX Insight WireMock with zero DLQ entries and per-event POST ratios matching the single-event natural-flow baseline pinned by {@code ActiveMqReliabilityIT#shouldDeliverIngestionEventsEndToEndThroughToxiproxyBaseline}. Catches regressions where the connector silently drops events on the floor, batches them in a way that violates the per-event POST contract, or starts producing DLQ entries on the happy path.
  *
  * <p>
- * <b>This is NOT a throughput baseline.</b> An earlier draft framed it that way and the data dismantled the framing: with sequential ACS REST submits, the test JVM submits at ~11 ev/s while the connector drains at >4500 ev/s in the test profile. The bottleneck is ACS REST, not the connector, so any "drain time" measurement here is dominated by the submit phase plus a sub-second tail and tells you nothing about connector throughput. For an actual throughput baseline see the follow-up tests in this package:
+ * <b>This is NOT a throughput baseline.</b> An earlier draft framed it that way and the data dismantled the framing: with sequential ACS REST submits, the test JVM submits at ~11 ev/s while the connector drains at >4500 ev/s in the test profile. The bottleneck is ACS REST, not the connector, so any "drain time" measurement here is dominated by the submit phase plus a sub-second tail and tells you nothing about connector throughput. For an actual throughput baseline see the sibling tests in this package:
  * <ul>
- * <li><b>{@code BacklogDrainReliabilityIT} (TBD)</b> — sever the consumer-side Toxiproxy proxy during submit so events pile up at the broker, then re-enable and time the drain. Measures connector burst throughput against a real backlog.</li>
- * <li><b>{@code SyntheticEventThroughputReliabilityIT} (TBD)</b> — publish synthetic CloudEvent payloads directly to {@code alfresco.repo.event2}, bypassing ACS REST entirely. Cleanest measure of connector-only throughput; requires a synthetic-event harness primitive.</li>
+ * <li>{@link BacklogDrainReliabilityIT} — severs the consumer-side Toxiproxy proxy during submit so events pile up at the broker, then re-enables and times the drain. Measures connector burst throughput against a real backlog through the full content pipeline.</li>
+ * <li>{@link SyntheticEventThroughputReliabilityIT} — publishes synthetic metadata-only CloudEvent payloads directly to {@code alfresco.repo.event2}, bypassing ACS REST entirely. Cleanest measure of connector publish-side throughput; does not exercise the content pipeline.</li>
  * </ul>
  *
  * <p>

@@ -19,6 +19,17 @@ The Alfresco Connector for Content Intelligence provides knowledge retrieval cap
 
 ### Development Environment
 
+#### JDK requirement
+
+Build with **JDK 21**. The connector targets Java 17 bytecode for its own
+modules, but `alfresco-platform.version` (currently `26.1.0`) ships
+classpath dependencies (e.g. `alfresco-remote-api`) compiled at Java 21
+(class file major version 65). A JDK 17 `javac` will refuse to read
+those entries on the compile classpath and the build will fail with a
+`cannot find symbol` cascade for `EntityResource`, `NodesImpl`,
+`Parameters`, `WithResponse` etc. — even though the JARs are present in
+your local Maven cache and listed by `mvn dependency:tree`.
+
 #### To run tests in IntelliJ IDEA you should first build application with `mvn clean install -DskipTests -Pdistribution`
 
 To set up a local developer environment then build the jar, the docker image and finally run the docker-compose environment:
@@ -50,6 +61,70 @@ docker compose up -d
 ````
 
 ```bash
+
+#### Troubleshooting: ACS container fails to start with `NoClassDefFoundError: Prediction`
+
+If the Alfresco repository container fails to come up during e2e or
+reliability tests with this stack trace:
+
+```
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'predictionMapper'
+...
+Caused by: java.lang.NoClassDefFoundError: Prediction
+Caused by: java.lang.ClassNotFoundException: Prediction
+```
+
+note the missing class name has **no package** — that is the giveaway.
+The `PredictionMapperImpl.class` shipped inside
+`hxinsight-extension/target/.../alfresco-hxinsight-connector-hxinsight-extension-*.jar`
+is an Eclipse JDT (ECJ) "compilation-failed-stub" rather than the real
+MapStruct-generated impl. Its body is literally:
+
+```
+new java/lang/Error
+ldc "Unresolved compilation problems: ... Prediction cannot be resolved to a type ..."
+athrow
+```
+
+ECJ writes this stub when it tried to compile the file and failed type
+resolution; `javac` would have stopped the build outright instead. The
+class arrives in the JAR because some IDE incremental builder (typically
+IntelliJ's JPS) ran ECJ and wrote the stub directly into Maven's
+`target/classes/` while Maven was building.
+
+##### How to verify
+
+```bash
+javap -p hxinsight-extension/target/classes/org/alfresco/hxi_connector/hxi_extension/service/PredictionMapperImpl.class
+```
+
+A healthy class shows `public Prediction map(...)` where `Prediction`
+resolves under `org.alfresco.hxi_connector.hxi_extension.service.model`
+(check the constant pool with `javap -v ...`). A broken stub shows the
+unqualified `Prediction` and its constant pool contains
+`Unresolved compilation problems: ...` strings.
+
+##### Fix
+
+1. Stop your IDE from racing Maven on the same `target/classes`
+   directory:
+   - **IntelliJ IDEA**: Settings → Build, Execution, Deployment → Build
+     Tools → Maven → Runner → enable
+     **"Delegate IDE build/run actions to Maven"**. Optionally also
+     uncheck Settings → Build, Execution, Deployment → Compiler →
+     **"Build project automatically"**.
+   - **VS Code / Eclipse / others**: disable any auto-build / Java
+     Language Server background compilation that writes into
+     `*/target/classes`. The Maven build must own that directory
+     exclusively.
+2. Rebuild from a clean state with **JDK 21**:
+   ```bash
+   mvn -pl hxinsight-extension clean install -DskipTests
+   mvn clean install -DskipTests -Pdistribution
+   ./scripts/ci/buildDockerImages.sh
+   ```
+3. Re-verify with the `javap -p ...` command above before re-running
+   the integration tests.
 
 ### Code Quality
 This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.

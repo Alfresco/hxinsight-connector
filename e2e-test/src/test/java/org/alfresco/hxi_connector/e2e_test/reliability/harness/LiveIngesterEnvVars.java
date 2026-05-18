@@ -61,6 +61,17 @@ final class LiveIngesterEnvVars
     {
         Map<String, String> env = new LinkedHashMap<>();
 
+        // Override the DEBUG default from DockerContainers.createLiveIngesterContainerWithin to INFO for
+        // reliability ITs. DEBUG produces ~10-15 log lines per event from the connector container, which the
+        // throughput suite (Multi-event no-loss, BacklogDrain, SyntheticEventThroughput) flooded with tens of
+        // thousands of lines per run — burying the [reliability] summary lines and pushing CI log volume past
+        // useful thresholds. Every assertion in this suite that inspects container logs targets INFO or ERROR
+        // fragments (verified across AcsLatencyReliabilityIT, TransformResponseFailureReliabilityIT,
+        // UnsupportedEventTypeReliabilityIT, SfsOutageReliabilityIT, TransformPipelineUnreachableReliabilityIT),
+        // so the change is safe. To investigate a flake locally, override per-class with a one-off
+        // `.withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")` on the live-ingester container.
+        env.put("LOGGING_LEVEL_ORG_ALFRESCO", "INFO");
+
         env.put("SPRING_ACTIVEMQ_BROKERURL", "nio://" + TOXIC_ACTIVEMQ_ALIAS + ":" + ACTIVEMQ_PORT);
         // Route ACS REST through Toxiproxy so chaos tests can inject latency / partition without
         // disturbing the test JVM's direct RepositoryClient (which keeps using the host port).
