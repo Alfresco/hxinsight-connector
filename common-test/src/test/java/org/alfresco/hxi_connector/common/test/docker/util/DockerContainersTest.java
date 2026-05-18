@@ -188,8 +188,8 @@ class DockerContainersTest
 
         String javaOpts = DockerContainers.getHxInsightRepoJavaOpts(mockContainer);
 
-        assertThat(javaOpts).contains("hxi.discovery.agent-base-url=http://wiremock:8080/agent");
-        assertThat(javaOpts).contains("hxi.discovery.qna-base-url=http://wiremock:8080/qna");
+        assertThat(javaOpts).contains("hxi.discovery.agents-endpoint=http://wiremock:8080/agent");
+        assertThat(javaOpts).contains("hxi.discovery.questions-endpoint=http://wiremock:8080/qna");
         assertThat(javaOpts).contains("hxi.auth.providers.hyland-experience.token-uri=http://wiremock:8080/token");
     }
 

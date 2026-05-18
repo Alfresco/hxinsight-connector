@@ -86,8 +86,8 @@ Endpoints for the HX Insight Discovery service.
 
 ```properties
 hxi.discovery.base-url=https://hxinsight.hyland.com
-hxi.discovery.agents-endpoint=${hxi.discovery.base-url}/agent/integrations
-hxi.discovery.questions-endpoint=${hxi.discovery.base-url}/qna/integrations
+hxi.discovery.agents-endpoint=${hxi.discovery.base-url}/agent
+hxi.discovery.questions-endpoint=${hxi.discovery.base-url}/qna
 ```
 
 | Property | Description |

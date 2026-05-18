@@ -112,12 +112,12 @@
 
     <bean id="cicAgentService" class="org.alfresco.hxi_connector.hxi_extension.client.CicClientFactory"
           factory-method="createAgentService" parent="baseCicService">
-        <constructor-arg name="baseUrl" value="${hxi.discovery.agent-base-url}"/>
+        <constructor-arg name="baseUrl" value="${hxi.discovery.agents-endpoint}"/>
     </bean>
 
     <bean id="cicQnaService" class="org.alfresco.hxi_connector.hxi_extension.client.CicClientFactory"
           factory-method="createQnaService" parent="baseCicService">
-        <constructor-arg name="baseUrl" value="${hxi.discovery.qna-base-url}"/>
+        <constructor-arg name="baseUrl" value="${hxi.discovery.questions-endpoint}"/>
     </bean>
 
     <bean id="questionsApiConfig" class="org.alfresco.hxi_connector.hxi_extension.rest.api.config.QuestionsApiConfig">
