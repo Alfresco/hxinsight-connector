@@ -25,6 +25,7 @@
  */
 package org.alfresco.hxi_connector.hxi_extension.client;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -35,9 +36,11 @@ import java.net.UnknownHostException;
 import java.time.Duration;
 import java.util.Set;
 
+import org.hyland.sdk.cic.agent.AgentService;
 import org.hyland.sdk.cic.http.client.auth.AuthenticationHttpClient;
 import org.hyland.sdk.cic.http.client.retry.RetryContext;
 import org.hyland.sdk.cic.http.client.retry.RetryPolicy;
+import org.hyland.sdk.cic.qna.QnaService;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
@@ -242,6 +245,28 @@ class CicClientFactoryTest
         AuthenticationHttpClient client = builder.clientId("id").clientSecret("secret").build();
 
         assertEquals(Set.of("read", "write", "admin"), scopes(client));
+    }
+
+    @Test
+    void shouldCreateAgentService()
+    {
+        AuthenticationHttpClient.Builder authBuilder = CicClientFactory.buildAuth(
+                "http://token", "id", "secret", null, DEFAULT_RETRY);
+
+        AgentService service = CicClientFactory.createAgentService(authBuilder, "env-key", "http://agent.example.com");
+
+        assertNotNull(service);
+    }
+
+    @Test
+    void shouldCreateQnaService()
+    {
+        AuthenticationHttpClient.Builder authBuilder = CicClientFactory.buildAuth(
+                "http://token", "id", "secret", null, DEFAULT_RETRY);
+
+        QnaService service = CicClientFactory.createQnaService(authBuilder, "env-key", "http://qna.example.com");
+
+        assertNotNull(service);
     }
 
     private static Set<String> scopes(AuthenticationHttpClient client) throws Exception
