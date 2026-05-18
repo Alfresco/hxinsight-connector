@@ -75,6 +75,27 @@ public final class ActuatorMetricsProbe
      */
     public double counterValue(String metricName, String tagKey, String tagValue)
     {
+        return readMeasurement(metricName, tagKey, tagValue, "COUNT");
+    }
+
+    /**
+     * Returns the {@code VALUE} measurement for a Spring Boot Actuator gauge (e.g. {@code jvm.threads.live}, {@code jvm.classes.loaded}, {@code process.files.open}). Same 404-tolerant semantics as {@link #counterValue(String)}: a missing gauge is reported as {@code 0.0} so callers can observe "not yet registered" without a try/catch around every lookup.
+     */
+    public double gaugeValue(String metricName)
+    {
+        return gaugeValue(metricName, null, null);
+    }
+
+    /**
+     * Returns the {@code VALUE} measurement for a tag-filtered Spring Boot Actuator gauge (e.g. {@code jvm.memory.used} filtered to {@code area:heap}). Same 404-tolerant semantics as {@link #counterValue(String)}.
+     */
+    public double gaugeValue(String metricName, String tagKey, String tagValue)
+    {
+        return readMeasurement(metricName, tagKey, tagValue, "VALUE");
+    }
+
+    private double readMeasurement(String metricName, String tagKey, String tagValue, String statistic)
+    {
         URI uri = buildUri(metricName, tagKey, tagValue);
         try
         {
@@ -87,7 +108,7 @@ public final class ActuatorMetricsProbe
             int status = response.statusCode();
             if (status == 404)
             {
-                log.debug("[actuator] {} returned 404 — treating as count=0 (counter not yet registered)", uri);
+                log.debug("[actuator] {} returned 404 — treating as {}=0 (metric not yet registered)", uri, statistic);
                 return 0.0;
             }
             if (status != 200)
@@ -98,7 +119,7 @@ public final class ActuatorMetricsProbe
             JsonNode measurements = root.path("measurements");
             for (JsonNode measurement : measurements)
             {
-                if ("COUNT".equals(measurement.path("statistic").asText()))
+                if (statistic.equals(measurement.path("statistic").asText()))
                 {
                     return measurement.path("value").asDouble(0.0);
                 }
