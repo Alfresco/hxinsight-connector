@@ -48,7 +48,7 @@ public class SyncSchedulerServiceTest
     void shouldExecuteScheduledSyncWhenEnabled()
     {
         // Given
-        SyncSchedulerService schedulerService = new SyncSchedulerService(true, syncOrchestrationService);
+        SyncSchedulerService schedulerService = createSchedulerService(true);
         when(syncOrchestrationService.performFullSync())
                 .thenReturn("Sync completed successfully");
 
@@ -63,7 +63,7 @@ public class SyncSchedulerServiceTest
     void shouldSkipScheduledSyncWhenDisabled()
     {
         // Given
-        SyncSchedulerService schedulerService = new SyncSchedulerService(false, syncOrchestrationService);
+        SyncSchedulerService schedulerService = createSchedulerService(false);
 
         // When
         schedulerService.scheduledSync();
@@ -76,7 +76,7 @@ public class SyncSchedulerServiceTest
     void shouldHandleSyncInProgressExceptionGracefully()
     {
         // Given
-        SyncSchedulerService schedulerService = new SyncSchedulerService(true, syncOrchestrationService);
+        SyncSchedulerService schedulerService = createSchedulerService(true);
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new SyncInProgressException());
 
@@ -90,7 +90,7 @@ public class SyncSchedulerServiceTest
     void shouldHandleSyncExceptionGracefully()
     {
         // Given
-        SyncSchedulerService schedulerService = new SyncSchedulerService(true, syncOrchestrationService);
+        SyncSchedulerService schedulerService = createSchedulerService(true);
         when(syncOrchestrationService.performFullSync())
                 .thenThrow(new AlfrescoUnavailableException("Connection failed",
                         new RuntimeException()));
@@ -99,5 +99,10 @@ public class SyncSchedulerServiceTest
         assertThatNoException().isThrownBy(schedulerService::scheduledSync);
 
         verify(syncOrchestrationService).performFullSync();
+    }
+
+    private SyncSchedulerService createSchedulerService(boolean enabled)
+    {
+        return new SyncSchedulerService(enabled, syncOrchestrationService);
     }
 }

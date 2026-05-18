@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.common.test.docker.repository;
 import static org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer.REPOSITORY_TAG;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.COMMUNITY;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -35,9 +36,7 @@ import java.util.Locale;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-import lombok.Cleanup;
 import lombok.NonNull;
-import lombok.SneakyThrows;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 import org.testcontainers.images.builder.dockerfile.statement.SingleArgumentStatement;
 import org.testcontainers.utility.DockerImageName;
@@ -132,19 +131,22 @@ public class AlfrescoRepositoryExtension extends ImageFromDockerfile
                 .withBuildArg("JAVA_VERSION", REPO_JAVA_VERSION);
     }
 
-    @SneakyThrows
     private static Path findTargetJar(String name)
     {
         String path = "target";
         String extension = "jar";
-        @Cleanup
-        Stream<Path> files = Files.list(Paths.get(path));
-
         String extensionFileName = "%s-%s.%s".formatted(name, DockerTags.getHxiConnectorTag(), extension);
-        return files.filter(nameEquals(extensionFileName))
-                .findFirst()
-                .orElseThrow(() -> new IllegalStateException("%s file with name: '%s' not found in directory: '%s/'"
-                        .formatted(extension.toUpperCase(Locale.ENGLISH), extensionFileName, path)));
+        try (Stream<Path> files = Files.list(Paths.get(path)))
+        {
+            return files.filter(nameEquals(extensionFileName))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalStateException("%s file with name: '%s' not found in directory: '%s/'"
+                            .formatted(extension.toUpperCase(Locale.ENGLISH), extensionFileName, path)));
+        }
+        catch (IOException e)
+        {
+            throw new IllegalStateException("Failed to read directory: " + path, e);
+        }
     }
 
     private static Predicate<Path> nameEquals(final String name)

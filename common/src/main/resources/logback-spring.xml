@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Shared Logback configuration for all Spring Boot apps in this project.
+
+    Mitigates CWE-117 (Improper Output Neutralization for Logs / log forging) at the appender
+    level: every log message has ASCII control characters (0x00-0x1F and 0x7F) replaced with '_'
+    via Logback's %replace conversion word. This applies uniformly to every log statement in
+    every module without requiring callers to remember to sanitize at each log site.
+
+    See: https://logback.qos.ch/manual/layouts.html#replace
+
+    NOTE - Veracode SAST does not see runtime Logback configuration and will keep flagging the
+    raw log statements as CWE-117. Those findings should be marked as "Mitigated by Design" in
+    the Veracode UI, referencing this file.
+-->
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <!--
+        Override the Spring Boot default CONSOLE_LOG_PATTERN: wrap the message conversion (%m)
+        in %replace so any CR/LF/control characters in the rendered message are neutralised
+        before they reach the appender. Everything else matches the upstream default.
+    -->
+    <property name="CONSOLE_LOG_PATTERN"
+              value="%clr(%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}}){faint} %clr(${LOG_LEVEL_PATTERN:-%5p}) %clr(${PID:- }){magenta} %clr(---){faint} %clr([%15.15t]){faint} %clr(%-40.40logger{39}){cyan} %clr(:){faint} %replace(%m){'[\x00-\x1f\x7f]', '_'}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <!-- Same treatment for file output, in case it is enabled by an app via logging.file.name. -->
+    <property name="FILE_LOG_PATTERN"
+              value="%d{${LOG_DATEFORMAT_PATTERN:-yyyy-MM-dd'T'HH:mm:ss.SSSXXX}} ${LOG_LEVEL_PATTERN:-%5p} ${PID:- } --- [%t] %-40.40logger{39} : %replace(%m){'[\x00-\x1f\x7f]', '_'}%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}"/>
+
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml"/>
+    <include resource="org/springframework/boot/logging/logback/file-appender.xml"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+</configuration>
