@@ -675,6 +675,13 @@
                         <include>**/*IntegrationTest.java</include>
                     </includes>
                     <skipTests>${skipIntegrationTests}</skipTests>
+                    <!-- Multi-module dev-time use-case: `mvn -pl e2e-test -am verify -Dit.test=Foo`
+                         walks every reactor module looking for `Foo`. Without this flag, the first
+                         module that does not contain a class named `Foo` (the parent, common, etc.)
+                         fails the build with `failIfNoSpecifiedTests=true` and `Foo` never gets a
+                         chance to run in e2e-test. CI does not pass `-Dit.test=` so this only relaxes
+                         the dev-time path. -->
+                    <failIfNoSpecifiedTests>false</failIfNoSpecifiedTests>
                 </configuration>
             </plugin>
 
