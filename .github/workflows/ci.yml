@@ -200,8 +200,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - repoVersion: 7.4.2
-            platformJavaVersion: 11
           - repoVersion: 23.4.1
             platformJavaVersion: 17
           - repoVersion: 25.3.0
