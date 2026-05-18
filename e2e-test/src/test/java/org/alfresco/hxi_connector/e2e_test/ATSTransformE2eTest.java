@@ -175,7 +175,7 @@ public class ATSTransformE2eTest
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
             // Then verify the presigned-url call happened (indicates content upload initiated)
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls")));
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=100")));
 
             // Finally verify S3 content was uploaded
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
@@ -202,7 +202,7 @@ public class ATSTransformE2eTest
         // then - verify no content was uploaded to S3 (no presigned-urls call for content)
         RetryUtils.retryWithBackoff(() -> {
             // First verify the ingestion event happened but no presigned-url was requested
-            WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/v1/presigned-urls")));
+            WireMock.verify(exactly(0), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=100")));
             WireMock.verify(moreThanOrExactly(1), postRequestedFor(urlEqualTo("/v2/ingestion-events")));
 
             // Then verify S3 bucket is unchanged (no content uploaded)
