@@ -253,7 +253,7 @@ class CicClientFactoryTest
         AuthenticationHttpClient.Builder authBuilder = CicClientFactory.buildAuth(
                 "http://token", "id", "secret", null, DEFAULT_RETRY);
 
-        AgentService service = CicClientFactory.createAgentService(authBuilder, "env-key", "http://agent.example.com");
+        AgentService service = CicClientFactory.createAgentService(authBuilder, "env-key", "http://localhost");
 
         assertNotNull(service);
     }
@@ -264,7 +264,7 @@ class CicClientFactoryTest
         AuthenticationHttpClient.Builder authBuilder = CicClientFactory.buildAuth(
                 "http://token", "id", "secret", null, DEFAULT_RETRY);
 
-        QnaService service = CicClientFactory.createQnaService(authBuilder, "env-key", "http://qna.example.com");
+        QnaService service = CicClientFactory.createQnaService(authBuilder, "env-key", "http://localhost");
 
         assertNotNull(service);
     }

@@ -33,6 +33,7 @@ import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
@@ -72,7 +73,7 @@ public class IntegrationProperties
     @ConfigurationProperties("hyland-experience")
     public record HylandExperience(
             @NotNull @NestedConfigurationProperty Insight insight,
-            @NotNull @NestedConfigurationProperty Storage storage,
-            @NotNull @NestedConfigurationProperty Ingester ingester)
+            @DefaultValue @NestedConfigurationProperty Storage storage,
+            @DefaultValue @NestedConfigurationProperty Ingester ingester)
     {}
 }

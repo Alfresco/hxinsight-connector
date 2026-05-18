@@ -65,7 +65,7 @@ class HttpHxInsightStorageClientTest
         // given
         InputStream inputStreamMock = mock(InputStream.class);
         File testData = new File(inputStreamMock);
-        PreSignedUrl preSignedUrl = new PreSignedUrl(CONTENT_ID, "https://storage.example.com/upload");
+        PreSignedUrl preSignedUrl = new PreSignedUrl(CONTENT_ID, "https://localhost/upload");
         given(ingestServiceMock.uploadBlobIfNeeded(eq(NODE_ID), any())).willReturn(Optional.of(preSignedUrl));
 
         // when
