@@ -282,8 +282,7 @@ class QuestionServiceTest
         Question question = new Question("Create a sonnet about the Super Bowl", OBJECT_IDS);
 
         // when
-        String newQuestionId = questionService.retryQuestion(AGENT_ID, questionId,
-                "The fourth line was not quite in iambic pentameter", question);
+        String newQuestionId = questionService.retryQuestion(AGENT_ID, questionId, question);
 
         // then
         assertEquals("dummy-id-5678", newQuestionId);
@@ -432,7 +431,7 @@ class QuestionServiceTest
 
         // when, then
         WebScriptException ex = assertThrows(WebScriptException.class,
-                () -> questionService.retryQuestion(AGENT_ID, questionId, "comment",
+                () -> questionService.retryQuestion(AGENT_ID, questionId,
                         new Question("Redo this", OBJECT_IDS)));
         assertEquals(404, ex.getStatus());
     }
@@ -448,7 +447,7 @@ class QuestionServiceTest
 
         // when, then
         WebScriptException ex = assertThrows(WebScriptException.class,
-                () -> questionService.retryQuestion(AGENT_ID, questionId, "comment",
+                () -> questionService.retryQuestion(AGENT_ID, questionId,
                         new Question("Redo this", OBJECT_IDS)));
         assertEquals(SC_SERVICE_UNAVAILABLE, ex.getStatus());
     }
@@ -465,7 +464,7 @@ class QuestionServiceTest
         Question question = new Question("Redo this", OBJECT_IDS);
 
         // when
-        questionService.retryQuestion(AGENT_ID, questionId, "comment", question);
+        questionService.retryQuestion(AGENT_ID, questionId, question);
 
         // then
         ArgumentCaptor<IntegrationSubmitQuestionRequest> captor = ArgumentCaptor.forClass(IntegrationSubmitQuestionRequest.class);

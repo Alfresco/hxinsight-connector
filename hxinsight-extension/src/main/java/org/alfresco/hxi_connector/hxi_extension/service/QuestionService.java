@@ -126,7 +126,7 @@ public class QuestionService
         }
     }
 
-    public String retryQuestion(String agentId, String questionId, String comments, Question question)
+    public String retryQuestion(String agentId, String questionId, Question question)
     {
         question.setUserId(getUserId());
         try

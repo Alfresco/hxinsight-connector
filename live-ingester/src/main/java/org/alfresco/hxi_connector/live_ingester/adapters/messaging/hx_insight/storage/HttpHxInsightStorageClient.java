@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Optional;
 
@@ -37,6 +39,7 @@ import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.LiveIngestService;
+import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.IngestionEngineStorageClient;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.storage.model.IngestContentResponse;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -55,28 +58,43 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
     @Override
     public IngestContentResponse upload(File file, String contentType, String nodeId)
     {
-        CICBlob blob = new CICBlob() {
-            @Override
-            public InputStream getInputStream()
-            {
-                return file.data();
-            }
+        try (InputStream inputStream = file.data())
+        {
 
-            @Override
-            public Optional<String> getDigest()
-            {
-                return Optional.empty();
-            }
-        };
+            CICBlob blob = new CICBlob() {
+                @Override
+                public InputStream getInputStream()
+                {
+                    try
+                    {
+                        return new ByteArrayInputStream(inputStream.readAllBytes());
+                    }
+                    catch (IOException e)
+                    {
+                        throw new LiveIngesterRuntimeException("Failed to read content for node: " + nodeId, e);
+                    }
+                }
 
-        return ingestService.uploadBlobIfNeeded(nodeId, blob)
-                .map(preSignedUrl -> {
-                    log.atInfo().log("Storage :: Content of type: {} for node: {} successfully uploaded using pre-signed URL", contentType, nodeId);
-                    return new IngestContentResponse(preSignedUrl.id(), contentType);
-                })
-                .orElseGet(() -> {
-                    log.atInfo().log("Storage :: Content of type: {} for node: {} already exists, no upload needed", contentType, nodeId);
-                    return new IngestContentResponse(null, contentType);
-                });
+                @Override
+                public Optional<String> getDigest()
+                {
+                    return Optional.empty();
+                }
+            };
+            return ingestService.uploadBlobIfNeeded(nodeId, blob)
+                    .map(preSignedUrl -> {
+                        log.atInfo().log("Storage :: Content of type: {} for node: {} successfully uploaded using pre-signed URL", contentType, nodeId);
+                        return new IngestContentResponse(preSignedUrl.id(), contentType);
+                    })
+                    .orElseGet(() -> {
+                        log.atInfo().log("Storage :: Content of type: {} for node: {} already exists, no upload needed", contentType, nodeId);
+                        return new IngestContentResponse(null, contentType);
+                    });
+        }
+        catch (IOException e)
+        {
+            throw new LiveIngesterRuntimeException("Failed to read content for node: " + nodeId, e);
+        }
+
     }
 }
