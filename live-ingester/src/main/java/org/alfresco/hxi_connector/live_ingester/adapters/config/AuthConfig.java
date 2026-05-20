@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -52,7 +52,7 @@ public class AuthConfig
     {
         return security
                 .formLogin(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/actuator/health/**").permitAll())
+                .authorizeHttpRequests(authorize -> authorize.requestMatchers("/actuator/health/**", "/actuator/metrics/**").permitAll())
                 .authorizeHttpRequests(authorize -> authorize.anyRequest().denyAll())
                 .build();
     }

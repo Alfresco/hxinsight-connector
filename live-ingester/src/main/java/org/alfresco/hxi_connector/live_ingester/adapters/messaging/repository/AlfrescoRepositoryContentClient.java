@@ -71,7 +71,7 @@ public class AlfrescoRepositoryContentClient extends RouteBuilder implements Rep
     @Override
     public void configure()
     {
-        String contentEndpoint = CONTENT_ENDPOINT_PATTERN.formatted(integrationProperties.alfresco().repository().baseUrl());
+        String contentEndpoint = buildContentEndpoint();
         onException(Exception.class)
                 .log(ERROR, log, "Repository :: Unexpected response while downloading content - Endpoint: %s".formatted(contentEndpoint))
                 .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
@@ -129,6 +129,19 @@ public class AlfrescoRepositoryContentClient extends RouteBuilder implements Rep
         }
 
         ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
+    }
+
+    private String buildContentEndpoint()
+    {
+        String base = CONTENT_ENDPOINT_PATTERN.formatted(integrationProperties.alfresco().repository().baseUrl());
+        int timeoutMs = integrationProperties.alfresco().repository().responseTimeoutMs();
+        if (timeoutMs <= 0)
+        {
+            // Camel HTTP component default, no upper bound, route worker thread will hang indefinitely.
+            return base;
+        }
+
+        return base + "&httpClient.responseTimeout=" + timeoutMs;
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")

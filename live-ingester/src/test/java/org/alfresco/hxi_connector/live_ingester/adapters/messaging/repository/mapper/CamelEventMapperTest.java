@@ -47,7 +47,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import org.alfresco.hxi_connector.common.test.util.LoggingUtils;
+import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 import org.alfresco.repo.event.databind.ObjectMapperFactory;
 import org.alfresco.repo.event.v1.model.DataAttributes;
@@ -139,7 +139,7 @@ class CamelEventMapperTest
         // given
         given(mockExchange.getIn()).willReturn(mockMessage);
         given(mockMessage.getBody(String.class)).willReturn(CHILD_ASSOC_CREATED_EVENT);
-        ListAppender<ILoggingEvent> logEntries = LoggingUtils.createLogsListAppender(CamelEventMapper.class);
+        ListAppender<ILoggingEvent> logEntries = LogCaptureUtils.createLogsListAppender(CamelEventMapper.class);
 
         // when
         RepoEvent<DataAttributes<NodeResource>> result = eventMapper.repoEventFrom(mockExchange);

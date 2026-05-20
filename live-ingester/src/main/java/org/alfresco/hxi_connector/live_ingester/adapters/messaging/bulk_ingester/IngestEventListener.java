@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,31 +31,53 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DeadLetterChannels;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetric;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetricsRecorder;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
 import org.alfresco.hxi_connector.live_ingester.domain.exception.LiveIngesterRuntimeException;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class IngestEventListener extends RouteBuilder
 {
     private static final String ROUTE_ID = "bulk-ingester-events-consumer";
+    private static final DlqMetric DLQ_METRIC = new DlqMetric(
+            LiveIngesterMetrics.Dlq.BULK_EVENTS,
+            LiveIngesterMetrics.Dlq.BULK_EVENTS_DESCRIPTION);
 
     private final ObjectMapper objectMapper;
     private final IngestEventProcessor eventProcessor;
     private final IntegrationProperties integrationProperties;
+    private final DlqMetricsRecorder dlqMetricsRecorder;
 
     @Override
     public void configure()
     {
-        from(integrationProperties.alfresco().bulkIngester().endpoint())
+        BulkIngester bulkIngester = integrationProperties.alfresco().bulkIngester();
+
+        if (bulkIngester.deadLetterEnabled())
+        {
+            errorHandler(DeadLetterChannels.forRoute(bulkIngester, dlqMetricsRecorder, DLQ_METRIC, log));
+        }
+        else
+        {
+            log.warn("Bulk Ingester :: dead-letter channel disabled. Set alfresco.bulk-ingester.dead-letter-enabled=true to re-enable.");
+        }
+
+        from(bulkIngester.endpoint())
                 .transacted()
                 .routeId(ROUTE_ID)
-                .log(DEBUG, "Received bulk ingester event : ${header.JMSMessageID}")
+                .log(DEBUG, log, "Bulk Ingester :: Received event : ${header.JMSMessageID}")
                 .process(exchange -> eventProcessor.process(mapToIngestEvent(exchange)))
                 .end();
     }

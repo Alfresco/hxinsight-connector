@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -40,7 +40,7 @@ import lombok.NoArgsConstructor;
 import org.slf4j.LoggerFactory;
 
 @NoArgsConstructor(access = PRIVATE)
-public class LoggingUtils
+public class LogCaptureUtils
 {
 
     public static ListAppender<ILoggingEvent> createLogsListAppender(Class<?> classToTrack, Class<?>... classesToTrack)

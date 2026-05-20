@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -73,7 +73,7 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     public void configure()
     {
         // @formatter:off
-        String ingestionEndpoint = integrationProperties.hylandExperience().ingester().endpoint() + ApplicationInfoProvider.USER_AGENT_PARAM;
+        String ingestionEndpoint = buildIngestionEndpoint();
         onException(Exception.class)
             .log(LoggingLevel.ERROR, log, "Ingestion :: Unexpected response - Endpoint: %s".formatted(ingestionEndpoint))
             .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
@@ -95,6 +95,19 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
             .endChoice()
             .end();
         // @formatter:on
+    }
+
+    private String buildIngestionEndpoint()
+    {
+        String base = integrationProperties.hylandExperience().ingester().endpoint();
+        int timeoutMs = integrationProperties.hylandExperience().ingester().responseTimeoutMs();
+        if (timeoutMs <= 0)
+        {
+            // 0 means "no per-request timeout"; omit the parameter so the Camel HTTP default applies
+            // (matches HttpFileUploader#buildUploadEndpoint, AlfrescoRepositoryContentClient#buildContentEndpoint).
+            return base + ApplicationInfoProvider.USER_AGENT_PARAM;
+        }
+        return base + "&httpClient.responseTimeout=" + timeoutMs + ApplicationInfoProvider.USER_AGENT_PARAM;
     }
 
     @Retryable(retryFor = EndpointServerErrorException.class,

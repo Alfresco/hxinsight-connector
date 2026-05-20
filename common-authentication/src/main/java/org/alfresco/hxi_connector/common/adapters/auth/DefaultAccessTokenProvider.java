@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,8 +26,9 @@
 package org.alfresco.hxi_connector.common.adapters.auth;
 
 import java.time.OffsetDateTime;
-import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.locks.ReentrantLock;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -42,22 +43,36 @@ public class DefaultAccessTokenProvider implements AccessTokenProvider
     static final int REFRESH_OFFSET_SECS = 60;
     private final AuthenticationClient authenticationClient;
 
-    private final Map<String, Token> accessTokens = new HashMap<>();
+    private final Map<String, Token> accessTokens = new ConcurrentHashMap<>();
+    private final Map<String, ReentrantLock> refreshLocks = new ConcurrentHashMap<>();
 
     @Override
     public String getAccessToken(String providerId)
     {
-        Token token = accessTokens.get(providerId);
-        synchronized (this)
+        // Fast path
+        Token cached = accessTokens.get(providerId);
+        if (!shouldRefreshToken(cached))
         {
+            return cached.getAccessToken();
+        }
+        // Slow path
+        ReentrantLock lock = refreshLocks.computeIfAbsent(providerId, k -> new ReentrantLock());
+        lock.lock();
+        try
+        {
+            Token token = accessTokens.get(providerId); // re-check under lock
             if (shouldRefreshToken(token))
             {
                 refreshAuthenticationResult(providerId);
                 token = accessTokens.get(providerId);
             }
+            EnsureUtils.ensureNonNull(token, "Authentication result is null");
+            return token.getAccessToken();
         }
-        EnsureUtils.ensureNonNull(token, "Authentication result is null");
-        return token.getAccessToken();
+        finally
+        {
+            lock.unlock();
+        }
     }
 
     private void refreshAuthenticationResult(String providerId)

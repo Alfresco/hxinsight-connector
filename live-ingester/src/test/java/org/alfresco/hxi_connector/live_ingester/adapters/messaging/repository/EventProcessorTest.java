@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository;
 
 import static java.time.ZoneOffset.UTC;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -47,20 +49,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter.RepoEventFilterHandler;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.RepoEventMapper;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestContentCommandHandler;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.TriggerContentIngestionCommand;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.delete.DeleteNodeCommand;
@@ -75,6 +79,7 @@ import org.alfresco.repo.event.v1.model.NodeResource;
 import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
+@SuppressWarnings("PMD.CouplingBetweenObjects")
 class EventProcessorTest
 {
     private static final long CONTENT_SIZE = 123L;
@@ -113,7 +118,7 @@ class EventProcessorTest
     @Mock
     private Filter mockFilter;
 
-    @InjectMocks
+    private SimpleMeterRegistry meterRegistry;
     EventProcessor eventProcessor;
 
     @BeforeEach
@@ -124,6 +129,15 @@ class EventProcessorTest
         given(mockExchange.getIn()).willReturn(mockMessage);
         given(mockMessage.getBody(RepoEvent.class)).willReturn(mockEvent);
         given(mockRepoEventFilterHandler.handleAndGetAllowed(mockExchange, mockFilter)).willReturn(true);
+        meterRegistry = new SimpleMeterRegistry();
+        eventProcessor = new EventProcessor(
+                ingestNodeCommandHandler,
+                ingestContentCommandHandler,
+                deleteNodeCommandHandler,
+                repoEventMapper,
+                mockRepoEventFilterHandler,
+                mockIntegrationProperties,
+                meterRegistry);
     }
 
     @Test
@@ -352,6 +366,8 @@ class EventProcessorTest
         given(mockEvent.getData().getResource()).willReturn(mock());
         given(mockEvent.getData().getResource().getAspectNames()).willReturn(Set.of(PREDICTION_APPLIED_ASPECT));
         given(mockEvent.getData().getResource().getProperties()).willReturn(Map.of(PREDICTION_TIME_PROPERTY, "time"));
+        given(mockEvent.getData().getResourceBefore()).willReturn(mock());
+        given(mockEvent.getData().getResourceBefore().getProperties()).willReturn(Map.of(PREDICTION_TIME_PROPERTY, "old-time"));
 
         // when
         eventProcessor.process(mockExchange);
@@ -386,6 +402,60 @@ class EventProcessorTest
 
         then(ingestNodeCommandHandler).should().handle(any());
         then(ingestContentCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldIncrementUnhandledCounterAndSkipDispatchWhenEventTypeIsUnknown()
+    {
+        String unknownType = "org.alfresco.event.node.Garbled";
+        given(mockEvent.getType()).willReturn(unknownType);
+        given(mockEvent.getData()).willReturn(mock());
+        given(mockEvent.getData().getResource()).willReturn(mock());
+        givenEventsSubscriptionDeadLetterUnsupportedTypes(false);
+
+        eventProcessor.process(mockExchange);
+
+        assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED)
+                .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, unknownType)
+                .counter().count())
+                        .as("unknown eventType must increment %s{type=\"%s\"} exactly once", LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED, unknownType)
+                        .isEqualTo(1.0);
+        then(repoEventMapper).shouldHaveNoInteractions();
+        then(ingestNodeCommandHandler).shouldHaveNoInteractions();
+        then(ingestContentCommandHandler).shouldHaveNoInteractions();
+        then(deleteNodeCommandHandler).shouldHaveNoInteractions();
+    }
+
+    @Test
+    void shouldThrowUnsupportedEventTypeExceptionWhenOptInEnabled()
+    {
+        String unknownType = "org.alfresco.event.node.Garbled";
+        given(mockEvent.getId()).willReturn("event-id-42");
+        given(mockEvent.getType()).willReturn(unknownType);
+        given(mockEvent.getData()).willReturn(mock());
+        given(mockEvent.getData().getResource()).willReturn(mock());
+        givenEventsSubscriptionDeadLetterUnsupportedTypes(true);
+
+        assertThatThrownBy(() -> eventProcessor.process(mockExchange))
+                .isInstanceOf(UnsupportedEventTypeException.class)
+                .hasMessageContaining(unknownType)
+                .hasMessageContaining("event-id-42");
+        assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED)
+                .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, unknownType)
+                .counter().count())
+                        .as("counter must be incremented even when the opt-in re-throws — the metric is the always-on signal")
+                        .isEqualTo(1.0);
+        then(repoEventMapper).shouldHaveNoInteractions();
+        then(ingestNodeCommandHandler).shouldHaveNoInteractions();
+    }
+
+    private void givenEventsSubscriptionDeadLetterUnsupportedTypes(boolean enabled)
+    {
+        Repository repository = mock();
+        Repository.EventsSubscription subscription = mock();
+        given(mockAlfrescoProperties.repository()).willReturn(repository);
+        given(repository.eventsSubscription()).willReturn(subscription);
+        given(subscription.deadLetterUnsupportedTypes()).willReturn(enabled);
     }
 
     RepoEvent<DataAttributes<NodeResource>> prepareMockCreatedEvent()

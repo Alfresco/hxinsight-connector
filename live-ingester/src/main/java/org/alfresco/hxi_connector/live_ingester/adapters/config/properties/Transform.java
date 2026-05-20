@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -31,12 +31,14 @@ import java.util.Map;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.boot.context.properties.bind.ConstructorBinding;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
 import org.alfresco.hxi_connector.common.config.properties.Retry;
+import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DeadLetterChannelConfig;
 
 public record Transform(@NotNull Request request, @NotNull Response response, @NotNull SharedFileStore sharedFileStore, MimeType mimeType)
 {
@@ -58,12 +60,27 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
             @NotBlank String endpoint,
             @NotBlank String queueName,
             @NotNull @NestedConfigurationProperty Retry retryIngestion,
-            @NotNull @NestedConfigurationProperty Retry retryTransformation)
+            @NotNull @NestedConfigurationProperty Retry retryTransformation,
+            @DefaultValue("false") boolean deadLetterEnabled,
+            @NotBlank @DefaultValue("activemq:queue:ActiveMQ.DLQ") String deadLetterUri,
+            @PositiveOrZero @DefaultValue("6") int maximumRedeliveries,
+            @PositiveOrZero @DefaultValue("1000") long redeliveryDelayMs,
+            @DefaultValue("false") boolean throwFailedTransforms)
+            implements DeadLetterChannelConfig
     {
+        @ConstructorBinding
         public Response
         {
-            retryIngestion = requireNonNullElseGet(retryTransformation, Retry::new);
+            retryIngestion = requireNonNullElseGet(retryIngestion, Retry::new);
             retryTransformation = requireNonNullElseGet(retryTransformation, Retry::new);
+        }
+
+        /**
+         * Convenience constructor for hand-rolled test fixtures.
+         */
+        public Response(String endpoint, String queueName, Retry retryIngestion, Retry retryTransformation)
+        {
+            this(endpoint, queueName, retryIngestion, retryTransformation, false, "activemq:queue:ActiveMQ.DLQ", 6, 1000L, false);
         }
     }
 

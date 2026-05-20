@@ -45,7 +45,7 @@ import static org.mockito.Mockito.times;
 
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 import static org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClient.AUTH_ERROR_LOG_MESSAGE;
-import static org.alfresco.hxi_connector.common.test.util.LoggingUtils.createLogsListAppender;
+import static org.alfresco.hxi_connector.common.test.util.LogCaptureUtils.createLogsListAppender;
 
 import java.util.Objects;
 

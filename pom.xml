@@ -85,6 +85,10 @@
         <wiremock.version>3.13.2</wiremock.version>
         <wiremock-testcontainers-module.version>1.0-alpha-15</wiremock-testcontainers-module.version>
         <system-stubs.version>2.1.8</system-stubs.version>
+        <!-- testcontainers.version must match the version transitively brought in by spring-boot-dependencies ${spring-boot.version};
+             it's pinned here only for modules not in that BOM (e.g. testcontainers-toxiproxy). -->
+        <testcontainers.version>2.0.4</testcontainers.version>
+        <toxiproxy-java.version>2.1.11</toxiproxy-java.version>
 
         <mapstruct.version>1.6.3</mapstruct.version>
         <lombok.version>1.18.46</lombok.version>
@@ -273,6 +277,16 @@
                 <groupId>org.wiremock.integrations.testcontainers</groupId>
                 <artifactId>wiremock-testcontainers-module</artifactId>
                 <version>${wiremock-testcontainers-module.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.testcontainers</groupId>
+                <artifactId>testcontainers-toxiproxy</artifactId>
+                <version>${testcontainers.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>eu.rekawek.toxiproxy</groupId>
+                <artifactId>toxiproxy-java</artifactId>
+                <version>${toxiproxy-java.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.wiremock</groupId>

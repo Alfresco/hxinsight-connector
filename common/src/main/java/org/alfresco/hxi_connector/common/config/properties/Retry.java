@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,6 +26,7 @@
 package org.alfresco.hxi_connector.common.config.properties;
 
 import java.net.MalformedURLException;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -60,10 +61,8 @@ public class Retry
             JsonEOFException.class,
             MismatchedInputException.class);
 
-    @Min(-1)
-    private int attempts;
-    @PositiveOrZero
-    private int initialDelay;
+    @Min(-1) private int attempts;
+    @PositiveOrZero private int initialDelay;
     @Positive private double delayMultiplier;
     @NotNull private Set<Class<? extends Throwable>> reasons;
 
@@ -78,7 +77,8 @@ public class Retry
                 Stream.concat(RETRY_REASONS_BASIC.stream(), Stream.of(
                         HttpHostConnectException.class,
                         NoHttpResponseException.class,
-                        MalformedChunkCodingException.class)).collect(Collectors.toSet()));
+                        MalformedChunkCodingException.class,
+                        SocketException.class)).collect(Collectors.toSet()));
     }
 
     public Retry(int attempts, int initialDelay, double delayMultiplier, Set<Class<? extends Throwable>> reasons)
