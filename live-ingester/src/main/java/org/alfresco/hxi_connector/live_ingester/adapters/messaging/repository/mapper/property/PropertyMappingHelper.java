@@ -141,7 +141,7 @@ public class PropertyMappingHelper
         EventData eventData = (EventData) event.getData();
 
         // This can happen with Community events. Since we don't have permission information then don't make any changes.
-        if (eventData.getResourceReaderAuthorities() == null && eventData.getResourceDeniedAuthorities() == null)
+        if (eventData.getResourceReaderAuthorities() == null && eventData.getResourceDeniedAuthorities() == null && eventData.getResourceAppliedReaderAuthorities() == null && eventData.getResourceAppliedDeniedAuthorities() == null)
         {
             return Optional.empty();
         }
@@ -151,8 +151,6 @@ public class PropertyMappingHelper
         Set<String> allowAccess;
         Set<String> denyAccess;
 
-        if (Boolean.TRUE.equals(inheritanceEnabled))
-        {
             // Inheritance enabled so send directly-applied ACLs — KD will walk the hierarchy to compute effective
             allowAccess = eventData.getResourceAppliedReaderAuthorities() == null
                     ? Collections.emptySet()
@@ -160,17 +158,6 @@ public class PropertyMappingHelper
             denyAccess = eventData.getResourceAppliedDeniedAuthorities() == null
                     ? Collections.emptySet()
                     : eventData.getResourceAppliedDeniedAuthorities();
-        }
-        else
-        {
-            // Inheritance disabled, hence send effective ACLs
-            allowAccess = eventData.getResourceReaderAuthorities() == null
-                    ? Collections.emptySet()
-                    : eventData.getResourceReaderAuthorities();
-            denyAccess = eventData.getResourceDeniedAuthorities() == null
-                    ? Collections.emptySet()
-                    : eventData.getResourceDeniedAuthorities();
-        }
 
         List<AuthorityInfo> allowAccessWithTypes = convertToAuthorityInfoList(allowAccess, authorityTypeResolver);
         List<AuthorityInfo> denyAccessWithTypes = convertToAuthorityInfoList(denyAccess, authorityTypeResolver);

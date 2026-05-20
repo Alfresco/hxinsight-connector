@@ -113,17 +113,11 @@ public class AlfrescoNodeMapper
         }
         @SuppressWarnings("unchecked")
         Set<String> appliedAllowAccess = (Set<String>) getResourceAppliedReaderAuthorities(alfrescoNode);
-        if (!appliedAllowAccess.isEmpty())
-        {
             allProperties.put(APPLIED_ALLOW_ACCESS, (Serializable) appliedAllowAccess);
-        }
 
         @SuppressWarnings("unchecked")
         Set<String> appliedDenyAccess = (Set<String>) getResourceAppliedDeniedAuthorities(alfrescoNode);
-        if (!appliedDenyAccess.isEmpty())
-        {
             allProperties.put(APPLIED_DENY_ACCESS, (Serializable) appliedDenyAccess);
-        }
         Map<String, Serializable> ancestorsMap = Map.of(
                 "primaryParentId", parentId != null ? parentId : "",
                 "primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));
