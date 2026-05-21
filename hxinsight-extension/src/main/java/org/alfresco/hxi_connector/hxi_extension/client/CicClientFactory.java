@@ -27,15 +27,15 @@ package org.alfresco.hxi_connector.hxi_extension.client;
 
 import java.io.IOException;
 import java.time.Duration;
+import java.util.Set;
 
 import org.hyland.sdk.cic.agent.AgentHttpClient;
 import org.hyland.sdk.cic.agent.AgentService;
 import org.hyland.sdk.cic.http.client.auth.AuthenticationHttpClient;
+import org.hyland.sdk.cic.http.client.retry.BackoffStrategy;
 import org.hyland.sdk.cic.http.client.retry.RetryPolicy;
 import org.hyland.sdk.cic.qna.QnaHttpClient;
 import org.hyland.sdk.cic.qna.QnaService;
-
-import org.alfresco.hxi_connector.common.config.properties.Retry;
 
 public final class CicClientFactory
 {
@@ -62,48 +62,42 @@ public final class CicClientFactory
     }
 
     public static AuthenticationHttpClient.Builder buildAuth(
-            String tokenUri, String clientId, String clientSecret, String scope, Retry retry)
+            String tokenUri, String clientId, String clientSecret, String scope,
+            int maxAttempts, long initialDelayMs, double multiplier, long maxDelayMs)
     {
         AuthenticationHttpClient.Builder builder = AuthenticationHttpClient.from(tokenUri)
                 .clientId(clientId)
                 .clientSecret(clientSecret)
-                .retryPolicy(buildRetryPolicy(retry));
-        if (scope != null && !scope.isBlank())
+                .retryPolicy(RetryPolicy.builder()
+                        .maxAttempts(maxAttempts)
+                        .backoffStrategy(BackoffStrategy.exponentialDelay(
+                                Duration.ofMillis(Math.max(1, initialDelayMs)),
+                                Duration.ofMillis(maxDelayMs),
+                                multiplier))
+                        .retryCondition(context -> {
+                            Throwable cause = context.exception();
+                            while (cause != null)
+                            {
+                                if (cause instanceof IOException)
+                                    return true;
+                                cause = cause.getCause();
+                            }
+                            return false;
+                        })
+                        .build());
+        for (String s : parseScopes(scope))
         {
-            for (String s : scope.split("\\s+"))
-            {
-                builder.scope(s);
-            }
+            builder.scope(s);
         }
         return builder;
     }
 
-    static RetryPolicy buildRetryPolicy(Retry retry)
+    static Set<String> parseScopes(String scope)
     {
-        long initialDelayMs = Math.max(1, retry.initialDelay());
-        double multiplier = retry.delayMultiplier();
-        return RetryPolicy.builder()
-                .maxAttempts(retry.attempts())
-                .backoffStrategy(context -> {
-                    double delay = initialDelayMs * Math.pow(multiplier, context.attemptNumber() - 1);
-                    return Duration.ofMillis(Math.round(delay));
-                })
-                .retryCondition(context -> {
-                    Throwable cause = context.exception();
-                    while (cause != null)
-                    {
-                        if (cause instanceof IOException)
-                        {
-                            return true;
-                        }
-                        if (retry.reasons() != null && retry.reasons().contains(cause.getClass()))
-                        {
-                            return true;
-                        }
-                        cause = cause.getCause();
-                    }
-                    return false;
-                })
-                .build();
+        if (scope == null || scope.isBlank())
+        {
+            return Set.of();
+        }
+        return Set.of(scope.strip().split("\\s+"));
     }
 }

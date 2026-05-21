@@ -57,7 +57,7 @@ public class QuestionFeedbackRelationshipTest
     void testFeedbackCanBeSubmittedSuccessfully()
     {
         // given
-        FeedbackModel feedback = new FeedbackModel(LIKE, "Thanks for the evidence-based solution to my problem!");
+        FeedbackModel feedback = new FeedbackModel(LIKE);
 
         // when
         List<FeedbackModel> actual = questionFeedbackRelation.create("question-id", List.of(feedback), null);
@@ -70,8 +70,8 @@ public class QuestionFeedbackRelationshipTest
     void testMultiplePiecesOfFeedbackThrowsException()
     {
         // given
-        FeedbackModel feedbackA = new FeedbackModel(LIKE, null);
-        FeedbackModel feedbackB = new FeedbackModel(DISLIKE, "Churros are not suitable for use in surgery");
+        FeedbackModel feedbackA = new FeedbackModel(LIKE);
+        FeedbackModel feedbackB = new FeedbackModel(DISLIKE);
 
         // when and then
         assertThrows(WebScriptException.class, () -> questionFeedbackRelation.create("question-id", List.of(feedbackA, feedbackB), null));

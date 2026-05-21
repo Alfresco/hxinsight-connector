@@ -27,11 +27,8 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.LiveIngestService;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.mapper.NodeEventToIngestEventMapper;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
@@ -45,10 +42,6 @@ public class HxInsightEventPublisher implements IngestionEngineEventPublisher
     private final LiveIngestService ingestService;
     private final NodeEventToIngestEventMapper nodeEventToIngestEventMapper;
 
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{@integrationProperties.hylandExperience.ingester.retry.attempts}",
-            backoff = @Backoff(delayExpression = "#{@integrationProperties.hylandExperience.ingester.retry.initialDelay}",
-                    multiplierExpression = "#{@integrationProperties.hylandExperience.ingester.retry.delayMultiplier}"))
     @Override
     public void publishMessage(NodeEvent event)
     {

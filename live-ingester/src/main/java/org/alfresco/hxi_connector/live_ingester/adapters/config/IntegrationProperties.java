@@ -33,17 +33,14 @@ import lombok.experimental.Accessors;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
-import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
 
 import org.alfresco.hxi_connector.common.config.properties.Application;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Ingester;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Insight;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository;
-import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Storage;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 
 @Component
@@ -72,8 +69,6 @@ public class IntegrationProperties
     @Validated
     @ConfigurationProperties("hyland-experience")
     public record HylandExperience(
-            @NotNull @NestedConfigurationProperty Insight insight,
-            @DefaultValue @NestedConfigurationProperty Storage storage,
-            @DefaultValue @NestedConfigurationProperty Ingester ingester)
+            @NotNull @NestedConfigurationProperty Insight insight)
     {}
 }

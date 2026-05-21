@@ -51,7 +51,6 @@ import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.LiveIngestService;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.mapper.NodeEventToIngestEventMapper;
@@ -132,8 +131,7 @@ class HxInsightEventPublisherIntegrationTest
         Throwable thrown = catchThrowable(() -> publisher.publishMessage(NODE_EVENT));
 
         // then
-        assertThat(thrown).isInstanceOf(EndpointServerErrorException.class)
-                .hasCauseInstanceOf(CICServiceException.class);
+        assertThat(thrown).isInstanceOf(CICServiceException.class);
     }
 
     @Test

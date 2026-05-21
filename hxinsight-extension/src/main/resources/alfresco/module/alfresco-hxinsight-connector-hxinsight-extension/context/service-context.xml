@@ -90,19 +90,16 @@
         <property name="extendingBeanName" value="hxInsightSimpleMappingExceptionResolver"/>
     </bean>
 
-    <bean id="hxiAuthRetry" class="org.alfresco.hxi_connector.common.config.properties.Retry">
-        <constructor-arg name="attempts" value="${hxi.auth.retry.attempts}"/>
-        <constructor-arg name="initialDelay" value="${hxi.auth.retry.initial-delay}"/>
-        <constructor-arg name="delayMultiplier" value="${hxi.auth.retry.delay-multiplier}"/>
-    </bean>
-
     <bean id="cicAuthHttpBuilder" class="org.alfresco.hxi_connector.hxi_extension.client.CicClientFactory"
           factory-method="buildAuth">
         <constructor-arg name="tokenUri" value="${hxi.auth.providers.hyland-experience.token-uri}"/>
         <constructor-arg name="clientId" value="${hxi.auth.providers.hyland-experience.client-id}"/>
         <constructor-arg name="clientSecret" value="${hxi.auth.providers.hyland-experience.client-secret}"/>
         <constructor-arg name="scope" value="${hxi.auth.providers.hyland-experience.scope}"/>
-        <constructor-arg name="retry" ref="hxiAuthRetry"/>
+        <constructor-arg name="maxAttempts" value="${hxi.auth.retry.attempts}"/>
+        <constructor-arg name="initialDelayMs" value="${hxi.auth.retry.initial-delay}"/>
+        <constructor-arg name="multiplier" value="${hxi.auth.retry.delay-multiplier}"/>
+        <constructor-arg name="maxDelayMs" value="${hxi.auth.retry.max-delay}"/>
     </bean>
 
     <bean id="baseCicService" abstract="true">

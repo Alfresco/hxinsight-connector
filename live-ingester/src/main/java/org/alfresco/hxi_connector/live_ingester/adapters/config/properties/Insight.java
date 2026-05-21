@@ -25,12 +25,24 @@
  */
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
+import static java.util.Objects.requireNonNullElseGet;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
+
+import org.alfresco.hxi_connector.common.config.properties.Retry;
+
+@SuppressWarnings("PMD.UnusedAssignment")
 public record Insight(@NotNull Ingestion ingestion)
 {
 
-    public record Ingestion(@NotBlank String baseUrl)
-    {}
+    public record Ingestion(@NotBlank String baseUrl, @NotNull @NestedConfigurationProperty Retry retry)
+    {
+        public Ingestion
+        {
+            retry = requireNonNullElseGet(retry, Retry::new);
+        }
+    }
 }

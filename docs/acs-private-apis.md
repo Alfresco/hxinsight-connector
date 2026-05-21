@@ -105,7 +105,6 @@ Ask a question for Hx Insights (not ready on Hx Insight side yet).
 * Request:
     * Content-Type: `application/json`
     * Body:
-        * `comments` [string]
         * `originalQuestion` [object]:
           * `question` [string]
           * `restrictionQuery` [object]:
@@ -113,7 +112,6 @@ Ask a question for Hx Insights (not ready on Hx Insight side yet).
     * Sample
     ```json
     {
-      "comments": "I need more details about the answer.",
       "originalQuestion": {
         "question": "What is the meaning of life?",
         "restrictionQuery": {
@@ -133,12 +131,10 @@ Send feedback about an answer from Hx Insight (not ready on Hx Insight side yet)
 * Request:
     * Content-Type: `application/json`
     * Body:
-        * `comments` [string]
         * `feedbackType` [LIKE|DISLIKE]
     * Sample
     ```json
     {
-      "comments": "I need more details about the answer.",
       "feedbackType": "DISLIKE"
     }
     ```
