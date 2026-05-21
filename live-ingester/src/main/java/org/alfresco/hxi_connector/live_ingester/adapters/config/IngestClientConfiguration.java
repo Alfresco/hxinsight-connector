@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config;
 import static org.alfresco.hxi_connector.common.adapters.auth.AuthService.HXP_AUTH_PROVIDER;
 
 import java.time.Duration;
+import java.util.Optional;
 
 import lombok.RequiredArgsConstructor;
 import org.hyland.sdk.cic.http.client.auth.AuthenticationHttpClient;
@@ -74,7 +75,7 @@ public class IngestClientConfiguration
                 .clientSecret(authProvider.getClientSecret())
                 .grantType(authProvider.getGrantType())
                 .retryPolicy(authRetryPolicy);
-        authProvider.getScope().forEach(authBuilder::scope);
+        Optional.ofNullable(authProvider.getScope()).ifPresent(scopes -> scopes.forEach(authBuilder::scope));
 
         IngestHttpClient ingestHttpClient = IngestHttpClient.from(baseUrl, authBuilder)
                 .sourceId(applicationInfoProvider.getSourceId())

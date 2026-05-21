@@ -102,6 +102,7 @@ jobs:
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v17.6.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
+          maven-settings: ${{ env.MAVEN_SETTINGS }}
       - uses: Alfresco/ya-pmd-scan@v4.4.1
 
   test_application:
