@@ -126,6 +126,59 @@ unqualified `Prediction` and its constant pool contains
 3. Re-verify with the `javap -p ...` command above before re-running
    the integration tests.
 
+#### Reliability tests
+
+The reliability test suite under `e2e-test/src/test/java/.../reliability/`
+is gated by the `reliability-tests` Maven profile so it never runs in
+the default e2e build:
+
+```bash
+mvn -pl e2e-test -am verify -Preliability-tests
+# or a single IT:
+mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=AcsLatencyReliabilityIT
+```
+
+The profile covers the full chaos matrix (single-axis ITs, burst /
+composite-failure subset, longevity soaks). Wall-time per IT is
+bounded; the full profile run is well under 60 minutes on a healthy
+laptop.
+
+The two soak ITs (`SteadyLoadResourceSoakReliabilityIT`,
+`RandomChaosSoakReliabilityIT`) ship with per-PR-friendly defaults
+(~3 min wall-time each). `SteadyLoadResourceSoakReliabilityIT` is a
+fixed 1 000-event smoke; `RandomChaosSoakReliabilityIT` exposes
+per-block parameters as `-Dsoak.*` system properties so nightly jobs
+can run the longer production-reference variant.
+
+The drain SLA scales automatically with the total event count, so
+only the event count and chaos windows need bumping. The formula is:
+
+```
+drainSlaMs = totalEvents * perEventBudgetMs * safetyFactor
+           = totalEvents * 70 ms        * 2
+```
+
+`70 ms` is the connector's measured single-threaded topic-consumer
+ceiling per event (one Camel JmsConsumer thread, four sequential HTTP
+round-trips per event); the `2` safety factor absorbs run-to-run
+variance and the slower first minute of post-chaos drain. For the
+10 000-event nightly variant that gives a 1 400 000 ms (~23 min)
+drain budget; actual drain typically completes in ~9 min.
+
+A nightly invocation:
+
+```bash
+mvn -pl e2e-test -am verify -Preliability-tests \
+    -Dit.test=RandomChaosSoakReliabilityIT \
+    -Dsoak.eventsPerChaosBlock=2000 -Dsoak.eventsFinalRecovery=2000 \
+    -Dsoak.chaosWindowMs=120000 -Dsoak.amqDisconnectWindowMs=60000
+```
+
+runs ~30 min wall-time (~17 min submit + ~9 min actual drain, well
+inside the auto-derived budget). See the IT's class Javadoc for the
+full parameter shape and the `-Dsoak.chaosDrainSlaMs` override knob
+for the drain SLA when investigating bottlenecks.
+
 ### Code Quality
 This project uses `spotless` that enforces `alfresco-formatter.xml` to ensure code quality.
 

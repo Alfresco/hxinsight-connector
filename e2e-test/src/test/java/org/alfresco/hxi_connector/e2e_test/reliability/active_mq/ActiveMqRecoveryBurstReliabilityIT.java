@@ -30,13 +30,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.io.IOException;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.DeliveryMode;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Session;
 import jakarta.jms.Topic;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -200,7 +200,7 @@ public class ActiveMqRecoveryBurstReliabilityIT extends BaseReliabilityIT
     }
 
     /**
-     * Mirrors the synthetic-event shape used by {@link org.alfresco.hxi_connector.e2e_test.reliability.throughput.SyntheticEventThroughputReliabilityIT SyntheticEventThroughputReliabilityIT}: an {@code org.alfresco.event.node.Created} payload with the {@code content} block omitted, so the connector's {@code EventProcessor.handleContentChange} short-circuits and only the metadata flow runs. Helper duplicated rather than hoisted per the "accept duplication until the matrix is closed" rule in {@code acs-11299-production-ready.md}'s reliability-harness housekeeping note; consolidate post-matrix-close.
+     * Mirrors the synthetic-event shape used by {@link org.alfresco.hxi_connector.e2e_test.reliability.throughput.SyntheticEventThroughputReliabilityIT SyntheticEventThroughputReliabilityIT}: an {@code org.alfresco.event.node.Created} payload with the {@code content} block omitted, so the connector's {@code EventProcessor.handleContentChange} short-circuits and only the metadata flow runs. Helper duplicated across reliability ITs rather than hoisted into the shared harness — accept the duplication while the reliability suite is still accumulating new chaos shapes; consolidate once the suite stabilises.
      */
     private static String buildSyntheticMetadataEvent(int index)
     {

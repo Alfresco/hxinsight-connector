@@ -61,15 +61,8 @@ final class LiveIngesterEnvVars
     {
         Map<String, String> env = new LinkedHashMap<>();
 
-        // Override the DEBUG default from DockerContainers.createLiveIngesterContainerWithin to INFO for
-        // reliability ITs. DEBUG produces ~10-15 log lines per event from the connector container, which the
-        // throughput suite (Multi-event no-loss, BacklogDrain, SyntheticEventThroughput) flooded with tens of
-        // thousands of lines per run — burying the [reliability] summary lines and pushing CI log volume past
-        // useful thresholds. Every assertion in this suite that inspects container logs targets INFO or ERROR
-        // fragments (verified across AcsLatencyReliabilityIT, TransformResponseFailureReliabilityIT,
-        // UnsupportedEventTypeReliabilityIT, SfsOutageReliabilityIT, TransformPipelineUnreachableReliabilityIT),
-        // so the change is safe. To investigate a flake locally, override per-class with a one-off
-        // `.withEnv("LOGGING_LEVEL_ORG_ALFRESCO", "DEBUG")` on the live-ingester container.
+        // Comment out this line to see DEBUG-level logs
+        // Please note that DEBUG logs have massive impact on reliability/throughput tests.
         env.put("LOGGING_LEVEL_ORG_ALFRESCO", "INFO");
 
         env.put("SPRING_ACTIVEMQ_BROKERURL", "nio://" + TOXIC_ACTIVEMQ_ALIAS + ":" + ACTIVEMQ_PORT);
@@ -95,8 +88,9 @@ final class LiveIngesterEnvVars
         env.put("ALFRESCO_TRANSFORM_SHAREDFILESTORE_RETRY_DELAYMULTIPLIER", "1");
         env.put("ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE", "true");
         // Reliability ITs assert DLQ inventory + metric, so opt in to the route-level DLC for both
-        // JMS-fed routes here (production defaults to off since ACS-11592 to preserve master parity
-        // for the BulkIngesterE2eTest topology — operators enable per route via these same env vars).
+        // JMS-fed routes here (production defaults the route-level DLC to off to preserve master
+        // parity for the BulkIngesterE2eTest topology — operators enable per route via these same
+        // env vars).
         env.put("ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DEADLETTERENABLED", "true");
         env.put("ALFRESCO_BULKINGESTER_DEADLETTERENABLED", "true");
         // Test-only fast DLC profile: production defaults are 6 redeliveries with exponential backoff

@@ -110,6 +110,36 @@ public final class JolokiaProbe
     }
 
     /**
+     * Number of messages dispatched to the topic's subscribers but not yet acknowledged. Drains to zero in steady state. Non-zero after a chaos test's convergence window means the broker is still trying to deliver — i.e. a consumer is stuck or messages are mid-redelivery handshake. Used as a "broker has finished its work" gate so the test's completeness assertion isn't fooled by a transient post-chaos backlog.
+     */
+    public int topicInFlightCount(String topicName)
+    {
+        String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Topic,destinationName=%s"
+                .formatted(brokerName, topicName);
+        return readIntAttribute(mbean, "InFlightCount");
+    }
+
+    /**
+     * Cumulative count of messages enqueued on this topic since the broker started (i.e. how many publishes the broker has accepted). Pair with {@link #topicDequeueCount(String)} to expose where messages are stuck — consumer-side ({@code enqueue == dispatch >> dequeue}) vs. publisher-side (unexpected {@code enqueue} shortfall).
+     */
+    public int topicEnqueueCount(String topicName)
+    {
+        String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Topic,destinationName=%s"
+                .formatted(brokerName, topicName);
+        return readIntAttribute(mbean, "EnqueueCount");
+    }
+
+    /**
+     * Cumulative count of messages dequeued from this topic since the broker started (i.e. how many ACKs the broker has received from durable subscribers). Pair with {@link #topicEnqueueCount(String)} to spot stuck-on-broker vs. delivered-and-processed.
+     */
+    public int topicDequeueCount(String topicName)
+    {
+        String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Topic,destinationName=%s"
+                .formatted(brokerName, topicName);
+        return readIntAttribute(mbean, "DequeueCount");
+    }
+
+    /**
      * Purge a queue (broker-level {@code purge} operation). Used by reliability tests to scrub leftover dead-lettered messages between tests so each test sees a clean DLQ baseline.
      *
      * <p>

@@ -29,13 +29,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
-
 import jakarta.jms.Connection;
 import jakarta.jms.ConnectionFactory;
 import jakarta.jms.DeliveryMode;
 import jakarta.jms.MessageProducer;
 import jakarta.jms.Session;
 import jakarta.jms.Topic;
+
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.activemq.ActiveMQConnectionFactory;
@@ -66,7 +66,8 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.WiremockCounts;
  * What this DOES NOT measure: the content pipeline. Synthetic events have no {@code content} block, so the connector never invokes {@code IngestContentCommandHandler}. A regression on the upload leg ({@code /presigned-urls}, S3 PUT, content-event POST) is invisible here. Option B covers that end of the pipeline; this is the complementary half.
  *
  * <p>
- * Empirical sizing notes: observed ~5359 ev/s connector drain rate on a healthy local laptop run ({@value #EVENT_COUNT} events drained in ~0.9 s) with publish at ~716 ev/s (~7 s for {@value #EVENT_COUNT} events). Combined with the ~10 ev/s rate from {@link BacklogDrainReliabilityIT}, this pins the content pipeline (ACS download + S3 PUT + content-event POST) as ~500× more expensive than the connector's metadata path alone — i.e. the connector publish-side itself is plenty fast and the throughput ceiling is set entirely by the content leg, not by JMS-listener throughput or HTTP-publish overhead. An earlier run measured drain at ~1361 ev/s with the live-ingester defaulting to DEBUG logging; raising the floor to INFO via {@code LiveIngesterEnvVars} cut log overhead and lifted the rate ~4× to the current ~5359 ev/s, so DEBUG-level logging is a non-trivial drag and INFO is the realistic CI baseline. The {@value #DRAIN_SLA_MS} ms drain cap gives ~20× headroom on the observed rate for CI cold-cache variance; tightenable once we have a corpus of green CI runs.
+ * Empirical sizing notes: observed ~5359 ev/s connector drain rate on a healthy local laptop run ({@value #EVENT_COUNT} events drained in ~0.9 s) with publish at ~716 ev/s (~7 s for {@value #EVENT_COUNT} events). Combined with the ~10 ev/s rate from {@link BacklogDrainReliabilityIT}, this pins the content pipeline (ACS download + S3 PUT + content-event POST) as ~500× more expensive than the connector's metadata path alone — i.e. the connector publish-side itself is plenty fast and the throughput ceiling is set entirely by the content leg, not by JMS-listener throughput or HTTP-publish overhead. An earlier run measured drain at ~1361 ev/s with the live-ingester defaulting to DEBUG logging; raising the floor to INFO via {@code LiveIngesterEnvVars} cut log overhead and lifted the rate ~4× to the current ~5359 ev/s, so DEBUG-level logging is a non-trivial drag and INFO is the realistic CI baseline. The {@value #DRAIN_SLA_MS} ms drain cap gives ~20× headroom on the observed rate for CI
+ * cold-cache variance; tightenable once we have a corpus of green CI runs.
  *
  * <p>
  * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=SyntheticEventThroughputReliabilityIT}.

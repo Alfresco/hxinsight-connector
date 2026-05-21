@@ -50,7 +50,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
  * Pins that exhausted retries on the upload-leg of the passthrough direct-upload path land on {@code ActiveMQ.DLQ} — bounded failure visibility for content events whose source MIME is matched by a passthrough rule (the production-default {@code *: *} mapping). Sister test to {@link PresignedUrlRetryReliabilityIT} (recovery on transient failure) and {@link HxiShortPartitionReliabilityIT} (DLQ on metadata-leg failure under full HXI partition).
  *
  * <p>
- * Why this row exists: the metadata-leg DLQ shape is already pinned by {@code HxiShortPartitionReliabilityIT} — a full HXI partition fails the metadata POST first and {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.EventProcessor#process EventProcessor.process} throws before reaching {@code handleContentChange}, so the upload path never runs. {@code PresignedUrlRetryReliabilityIT} pins the recovery shape on the upload leg (transient 500 → @Retryable → success). Neither pins exhaustion on the upload leg specifically — a regression that wired the upload path's {@code @Retryable} without its DLC (or against the wrong route's error handler) would slip past both. RB-012 (see {@code acs-11299-reliability-bugs.md}) records the gap; this IT closes it.
+ * Why this row exists: the metadata-leg DLQ shape is already pinned by {@code HxiShortPartitionReliabilityIT} — a full HXI partition fails the metadata POST first and {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.EventProcessor#process EventProcessor.process} throws before reaching {@code handleContentChange}, so the upload path never runs. {@code PresignedUrlRetryReliabilityIT} pins the recovery shape on the upload leg (transient 500 → @Retryable → success). Neither pins exhaustion on the upload leg specifically — a regression that wired the upload path's {@code @Retryable} without its DLC (or against the wrong route's error handler) would slip past both. This IT closes that gap.
  *
  * <p>
  * How the test works:
@@ -108,7 +108,7 @@ public class PresignedUrlExhaustionReliabilityIT extends BaseReliabilityIT
                             MIN_PRESIGNED_URL_POSTS)
                     .isGreaterThanOrEqualTo(MIN_PRESIGNED_URL_POSTS);
             assertThat(environment().jolokia().dlqDepth())
-                    .as("upload-leg DLQ contract: victim event for objectId=%s must surface on the DLQ once the upload-leg retries exhaust. A zero here means exhaustion was silent — the regression RB-012 exists to catch (e.g. @Retryable wired without DLC, or DLC misrouted)",
+                    .as("upload-leg DLQ contract: victim event for objectId=%s must surface on the DLQ once the upload-leg retries exhaust. A zero here means exhaustion was silent — the regression class this IT exists to catch (e.g. @Retryable wired without DLC, or DLC misrouted)",
                             finalVictim.id())
                     .isGreaterThanOrEqualTo(1);
         }, CONVERGENCE_DELAY_MS);

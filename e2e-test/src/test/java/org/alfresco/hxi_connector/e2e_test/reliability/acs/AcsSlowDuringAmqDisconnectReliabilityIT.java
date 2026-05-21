@@ -111,15 +111,21 @@ public class AcsSlowDuringAmqDisconnectReliabilityIT extends BaseReliabilityIT
      *   t = 0.0 s     Pre-chaos baseline sentinel created; verified end-to-end before any chaos.
      *
      *   t = 1.5 s     Install ACS latency toxic ({@value #ACS_LATENCY_MS} ms downstream)
-     *                 + {@code activemqProxy().disable()}.
+     *                 + {@code
+     * activemqProxy().disable()
+     * }.
      *
      *   t = 1.5..9.5 s  Submit {@value #CHAOS_NODE_COUNT} chaos creates while AMQ is disconnected;
      *                   the repository's own AMQ connection bypasses Toxiproxy and keeps publishing,
      *                   so messages queue on the connector's durable subscription.
      *
-     *   t = 9.5 s     {@code activemqProxy().enable()}. ACS still slow. Backlog drain begins;
+     *   t = 9.5 s     {@code
+     * activemqProxy().enable()
+     * }. ACS still slow. Backlog drain begins;
      *                 each replayed event hits the slow ACS download path. Metadata POSTs always
-     *                 fire (ordered ahead of content download in {@code EventProcessor.process}).
+     *                 fire (ordered ahead of content download in {@code
+     * EventProcessor.process
+     * }).
      *
      *   t = 9.5..14.5 s   ACS slow during drain → composed chaos. Some content downloads time out,
      *                     retry, and exhaust to DLQ.
