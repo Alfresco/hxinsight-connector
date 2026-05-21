@@ -1,7 +1,12 @@
 {
   "request": {
     "method": "POST",
-    "urlPath": "/presigned-urls"
+    "urlPath": "/v1/presigned-urls",
+    "queryParameters": {
+      "count": {
+        "equalTo": "100"
+      }
+    }
   },
   "response": {
     "status": 200,

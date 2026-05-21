@@ -1216,7 +1216,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e14",
                       "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                       "sourceTimestamp": 1611656982995,
-                      "eventType" : "delete"
+                      "eventType" : "delete",
+                      "properties": {}
                     }
                   ]
                 """;
@@ -1300,7 +1301,8 @@ public class RequestFiltersIntegrationTest extends E2ETestBase
                       "objectId" : "d71dd823-82c7-477c-8490-04cb0e826e15",
                       "sourceId" : "a1f3e7c0-d193-7023-ce1d-0a63de491876",
                       "sourceTimestamp" : 1611656982995,
-                      "eventType" : "delete"
+                      "eventType" : "delete",
+                      "properties": {}
                     }
                   ]
                 """;

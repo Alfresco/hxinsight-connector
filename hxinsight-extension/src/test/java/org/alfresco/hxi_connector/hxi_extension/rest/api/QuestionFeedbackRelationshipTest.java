@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -43,7 +43,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.extensions.webscripts.WebScriptException;
 
 import org.alfresco.hxi_connector.hxi_extension.rest.api.model.FeedbackModel;
-import org.alfresco.hxi_connector.hxi_extension.service.HxInsightClient;
+import org.alfresco.hxi_connector.hxi_extension.service.QuestionService;
 
 @ExtendWith(MockitoExtension.class)
 public class QuestionFeedbackRelationshipTest
@@ -51,13 +51,13 @@ public class QuestionFeedbackRelationshipTest
     @InjectMocks
     QuestionFeedbackRelation questionFeedbackRelation;
     @Mock
-    HxInsightClient mockHxInsightClient;
+    QuestionService mockQuestionService;
 
     @Test
     void testFeedbackCanBeSubmittedSuccessfully()
     {
         // given
-        FeedbackModel feedback = new FeedbackModel(LIKE, "Thanks for the evidence-based solution to my problem!");
+        FeedbackModel feedback = new FeedbackModel(LIKE);
 
         // when
         List<FeedbackModel> actual = questionFeedbackRelation.create("question-id", List.of(feedback), null);
@@ -70,8 +70,8 @@ public class QuestionFeedbackRelationshipTest
     void testMultiplePiecesOfFeedbackThrowsException()
     {
         // given
-        FeedbackModel feedbackA = new FeedbackModel(LIKE, null);
-        FeedbackModel feedbackB = new FeedbackModel(DISLIKE, "Churros are not suitable for use in surgery");
+        FeedbackModel feedbackA = new FeedbackModel(LIKE);
+        FeedbackModel feedbackB = new FeedbackModel(DISLIKE);
 
         // when and then
         assertThrows(WebScriptException.class, () -> questionFeedbackRelation.create("question-id", List.of(feedbackA, feedbackB), null));

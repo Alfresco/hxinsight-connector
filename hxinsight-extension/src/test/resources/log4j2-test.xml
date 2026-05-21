@@ -7,7 +7,7 @@
         <List name="test-appender"/>
     </Appenders>
     <Loggers>
-        <Logger name="org.alfresco.hxi_connector.hxi_extension.client.HxInsightAuthClient" level="INFO" additivity="false">
+        <Logger name="org.alfresco.hxi_connector.hxi_extension" level="INFO" additivity="false">
             <AppenderRef ref="test-appender"/>
             <AppenderRef ref="Console"/>
         </Logger>

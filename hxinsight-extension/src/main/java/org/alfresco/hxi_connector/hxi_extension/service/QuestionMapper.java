@@ -1,8 +1,8 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,9 +23,17 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model;
+package org.alfresco.hxi_connector.hxi_extension.service;
 
-import java.net.URL;
+import org.hyland.sdk.cic.agent.object.AgentSummary;
+import org.hyland.sdk.cic.qna.object.Answer;
 
-public record PreSignedUrlResponse(URL url, String id)
-{}
+import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
+import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
+
+public interface QuestionMapper
+{
+    Agent toAgent(AgentSummary agentSummary);
+
+    AnswerResponse toAnswerResponse(Answer answer);
+}

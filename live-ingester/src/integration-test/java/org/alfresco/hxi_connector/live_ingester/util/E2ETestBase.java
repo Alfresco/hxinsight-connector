@@ -25,9 +25,8 @@
  */
 package org.alfresco.hxi_connector.live_ingester.util;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.containing;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -201,12 +200,13 @@ public class E2ETestBase
     public static void tearDown()
     {
         WireMock.configureFor(hxAuthMock);
-        String expectedAuthRequestBody = AuthUtils.createAuthRequestBody();
         WireMock.verify(postRequestedFor(urlPathEqualTo(AuthUtils.TOKEN_PATH))
                 .withHeader(HOST, new EqualToPattern(hxAuthServer.getHost() + ":" + hxAuthServer.getPort()))
                 .withHeader(Exchange.CONTENT_TYPE, new EqualToPattern(APPLICATION_FORM_URLENCODED.getMimeType()))
-                .withHeader(Exchange.CONTENT_LENGTH, new EqualToPattern(String.valueOf(expectedAuthRequestBody.getBytes(UTF_8).length)))
-                .withRequestBody(new EqualToPattern(expectedAuthRequestBody)));
+                .withRequestBody(containing(AuthUtils.AUTH_REQUEST_GRANT_TYPE_PARAM))
+                .withRequestBody(containing(AuthUtils.AUTH_REQUEST_CLIENT_ID_PARAM))
+                .withRequestBody(containing(AuthUtils.AUTH_REQUEST_CLIENT_SECRET_PARAM))
+                .withRequestBody(containing(AuthUtils.AUTH_REQUEST_SCOPE_PARAM)));
         ContainerSupport.removeInstance();
     }
 

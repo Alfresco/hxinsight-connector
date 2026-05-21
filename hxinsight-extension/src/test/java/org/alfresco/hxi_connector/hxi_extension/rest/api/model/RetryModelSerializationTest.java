@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -49,7 +49,6 @@ class RetryModelSerializationTest
         String retrySerialised = """
                 {
                     "_questionId": "86553f9b-e382-4a1b-b07d-52adae3e96e8",
-                    "comments": "This was not succinct enough!",
                     "originalQuestion": {
                         "restrictionQuery": {
                             "nodesIds": ["880a0f47-31b1-4101-b20b-4d325e54e8b1"]
@@ -70,7 +69,6 @@ class RetryModelSerializationTest
         String retrySerialised = """
                 {
                     "questionId": "86553f9b-e382-4a1b-b07d-52adae3e96e8",
-                    "comments": "This was not succinct enough!",
                     "originalQuestion": {
                         "restrictionQuery": {
                             "nodesIds": ["880a0f47-31b1-4101-b20b-4d325e54e8b1"]
@@ -91,7 +89,6 @@ class RetryModelSerializationTest
         // given
         String retrySerialised = """
                 {
-                    "comments": "This was not succinct enough!",
                     "originalQuestion": {
                         "restrictionQuery": {
                             "nodesIds": ["880a0f47-31b1-4101-b20b-4d325e54e8b1"]
@@ -105,7 +102,7 @@ class RetryModelSerializationTest
         RetryModel retry = objectMapper.readValue(retrySerialised, RetryModel.class);
 
         // then
-        RetryModel expected = new RetryModel(null, "This was not succinct enough!",
+        RetryModel expected = new RetryModel(null,
                 new QuestionModel(null, "Explain how the universe works", new RestrictionQuery(Set.of("880a0f47-31b1-4101-b20b-4d325e54e8b1"))));
         assertEquals(expected, retry);
     }

@@ -245,8 +245,6 @@ All external calls support retry configuration with exponential backoff. Configu
 
 - `auth` - Authentication requests
 - `alfresco.transform.shared-file-store` - File downloads from Shared File Store
-- `hyland-experience.storage.location` - Storage location requests
-- `hyland-experience.storage.upload` - File uploads to HXI storage
 - `hyland-experience.ingester` - Ingestion event requests
 
 Default: 10 attempts, 500ms initial delay, 2x multiplier.

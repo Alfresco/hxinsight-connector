@@ -167,8 +167,8 @@ public class DockerContainers
     {
         String hXIMockAlias = hxInsightMockContainer.getNetworkAliases().stream().findFirst().get();
         return """
-                -Dhxi.discovery.agents-endpoint=http://%s:8080
-                -Dhxi.discovery.questions-endpoint=http://%s:8080
+                -Dhxi.discovery.agents-endpoint=http://%s:8080/agent
+                -Dhxi.discovery.questions-endpoint=http://%s:8080/qna
                 -Dhxi.auth.providers.hyland-experience.token-uri=http://%s:8080/token
                 -Dhxi.question.max-context-size-for-question=10
                 """

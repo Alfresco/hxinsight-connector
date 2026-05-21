@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -76,7 +76,7 @@ public class AgentsQuestionsRelation implements RelationshipResourceAction.Creat
     {
         Question question = validateQuestion(retry.getOriginalQuestion());
 
-        String newQuestionId = questionService.retryQuestion(agentId, questionId, retry.getComments(), question);
+        String newQuestionId = questionService.retryQuestion(agentId, questionId, question);
         return retry.withId(newQuestionId);
     }
 

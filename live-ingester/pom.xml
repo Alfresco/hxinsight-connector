@@ -66,6 +66,18 @@
             <groupId>org.apache.camel.springboot</groupId>
             <artifactId>camel-http-starter</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.hyland.sdk</groupId>
+            <artifactId>cic-ingest</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hyland.sdk</groupId>
+            <artifactId>cic-http-client-jackson2</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.hyland.sdk</groupId>
+            <artifactId>cic-http-client</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>

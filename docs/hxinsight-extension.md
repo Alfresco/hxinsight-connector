@@ -70,13 +70,15 @@ Configure retry behavior for authentication requests.
 hxi.auth.retry.attempts=3
 hxi.auth.retry.initial-delay=500
 hxi.auth.retry.delay-multiplier=2
+hxi.auth.retry.max-delay=30000
 ```
 
-| Property | Description | Default |
-|----------|-------------|---------|
-| `hxi.auth.retry.attempts` | Maximum retry attempts | `3` |
-| `hxi.auth.retry.initial-delay` | Initial delay between retries (ms) | `500` |
-| `hxi.auth.retry.delay-multiplier` | Multiplier for exponential backoff | `2` |
+| Property | Description                        | Default |
+|----------|------------------------------------|---------|
+| `hxi.auth.retry.attempts` | Maximum retry attempts             | `3`     |
+| `hxi.auth.retry.initial-delay` | Initial delay between retries (ms) | `500`   |
+| `hxi.auth.retry.max-delay` | Maximum delay between retries (ms) | `30000` |
+| `hxi.auth.retry.delay-multiplier` | Multiplier for exponential backoff | `2`     |
 
 ---
 
@@ -86,8 +88,8 @@ Endpoints for the HX Insight Discovery service.
 
 ```properties
 hxi.discovery.base-url=https://hxinsight.hyland.com
-hxi.discovery.agents-endpoint=${hxi.discovery.base-url}/agent/integrations
-hxi.discovery.questions-endpoint=${hxi.discovery.base-url}/qna/integrations
+hxi.discovery.agents-endpoint=${hxi.discovery.base-url}/agent
+hxi.discovery.questions-endpoint=${hxi.discovery.base-url}/qna
 ```
 
 | Property | Description |
