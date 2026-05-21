@@ -111,21 +111,11 @@ public class AlfrescoNodeMapper
         {
             allProperties.put(DENY_ACCESS, (Serializable) denyAccess);
         }
-        @SuppressWarnings("unchecked")
-        Set<String> appliedAllowAccess = (Set<String>) getResourceAppliedReaderAuthorities(alfrescoNode);
-            allProperties.put(APPLIED_ALLOW_ACCESS, (Serializable) appliedAllowAccess);
 
-        @SuppressWarnings("unchecked")
-        Set<String> appliedDenyAccess = (Set<String>) getResourceAppliedDeniedAuthorities(alfrescoNode);
-            allProperties.put(APPLIED_DENY_ACCESS, (Serializable) appliedDenyAccess);
         Map<String, Serializable> ancestorsMap = Map.of(
                 "primaryParentId", parentId != null ? parentId : "",
                 "primaryAncestorIds", (Serializable) new ArrayList<>(primaryHierarchy));
         allProperties.put(ANCESTORS_PROPERTY, (Serializable) ancestorsMap);
-
-        // set inheritance info
-        Boolean inheritanceEnabled = alfrescoNode.inheritanceEnabled();
-        allProperties.put(INHERITANCE_ENABLED, inheritanceEnabled);
 
         IngestEvent.ContentInfo content = (IngestEvent.ContentInfo) allProperties.get(CONTENT_PROPERTY);
         Map<String, Serializable> properties = getProperties(allProperties);
@@ -187,17 +177,6 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toSet());
     }
 
-    private Serializable getResourceAppliedReaderAuthorities(AlfrescoNode node)
-    {
-        return (Serializable) ofNullable(node.getAppliedAccessControlList())
-                .stream()
-                .flatMap(Collection::stream)
-                .filter(AccessControlEntry::getAllowed)
-                .map(AccessControlEntry::getAccessControlEntryKey)
-                .map(AccessControlEntryKey::getAuthority)
-                .collect(Collectors.toSet());
-    }
-
     private Serializable getResourceDeniedAuthorities(AlfrescoNode node)
     {
         return (Serializable) ofNullable(node.getAccessControlList())
@@ -209,14 +188,4 @@ public class AlfrescoNodeMapper
                 .collect(Collectors.toSet());
     }
 
-    private Serializable getResourceAppliedDeniedAuthorities(AlfrescoNode node)
-    {
-        return (Serializable) ofNullable(node.getAppliedAccessControlList())
-                .stream()
-                .flatMap(Collection::stream)
-                .filter(not(AccessControlEntry::getAllowed))
-                .map(AccessControlEntry::getAccessControlEntryKey)
-                .map(AccessControlEntryKey::getAuthority)
-                .collect(Collectors.toSet());
-    }
 }
