@@ -79,7 +79,9 @@ public final class CicClientFactory
                             while (cause != null)
                             {
                                 if (cause instanceof IOException)
+                                {
                                     return true;
+                                }
                                 cause = cause.getCause();
                             }
                             return false;

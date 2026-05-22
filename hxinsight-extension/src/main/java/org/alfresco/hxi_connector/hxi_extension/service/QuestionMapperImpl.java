@@ -40,12 +40,14 @@ import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
 public class QuestionMapperImpl implements QuestionMapper
 {
+    @Override
     public Agent toAgent(AgentSummary agentSummary)
     {
         String avatarUrl = agentSummary.avatarPresignedUrl() != null ? agentSummary.avatarPresignedUrl() : agentSummary.avatarUrl();
         return new Agent(agentSummary.id(), agentSummary.name(), agentSummary.description(), avatarUrl);
     }
 
+    @Override
     public AnswerResponse toAnswerResponse(Answer answer)
     {
         Set<AnswerResponse.ObjectReference> objectReferences = Optional.ofNullable(answer.objectReferences())

@@ -354,21 +354,25 @@ class NodeEventToIngestEventMapperTest
     void shouldThrowOnUnsupportedEventType()
     {
         NodeEvent unsupported = new NodeEvent() {
+            @Override
             public String getObjectId()
             {
                 return NODE_ID;
             }
 
+            @Override
             public String getSourceId()
             {
                 return SOURCE_ID;
             }
 
+            @Override
             public long getTimestamp()
             {
                 return TIMESTAMP;
             }
 
+            @Override
             public EventType getEventType()
             {
                 return CREATE_OR_UPDATE;

@@ -108,7 +108,7 @@ class QuestionServiceTest
         given(integrationAgentService.listAgents(SOURCE_ID)).willThrow(new CICSdkException("Server error"));
 
         // when, then
-        assertThrows(WebScriptException.class, () -> questionService.listAgents());
+        assertThrows(WebScriptException.class, questionService::listAgents);
     }
 
     @Test
@@ -118,7 +118,7 @@ class QuestionServiceTest
         given(integrationAgentService.listAgents(SOURCE_ID)).willThrow(new CICServiceException("Not found", 404));
 
         // when, then
-        WebScriptException ex = assertThrows(WebScriptException.class, () -> questionService.listAgents());
+        WebScriptException ex = assertThrows(WebScriptException.class, questionService::listAgents);
         assertEquals(404, ex.getStatus());
     }
 
@@ -329,7 +329,7 @@ class QuestionServiceTest
         given(integrationAgentService.listAgents(SOURCE_ID)).willThrow(new CICSdkException("timeout"));
 
         // when, then
-        WebScriptException ex = assertThrows(WebScriptException.class, () -> questionService.listAgents());
+        WebScriptException ex = assertThrows(WebScriptException.class, questionService::listAgents);
         assertEquals(SC_SERVICE_UNAVAILABLE, ex.getStatus());
     }
 
