@@ -95,7 +95,7 @@
         <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
         <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.14</jacoco-maven-plugin.version>
-        <spotless-plugin.version>3.5.1</spotless-plugin.version>
+        <spotless-plugin.version>3.6.0</spotless-plugin.version>
         <maven.surefire-plugin.version>3.5.5</maven.surefire-plugin.version>
         <jrebel-maven-plugin.version>1.2.1</jrebel-maven-plugin.version>
 
