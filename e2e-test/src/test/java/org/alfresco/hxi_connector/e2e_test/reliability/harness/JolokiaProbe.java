@@ -31,20 +31,19 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.List;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Read-only client for the Jolokia HTTP servlet bundled with the {@code quay.io/alfresco/alfresco-activemq} image. Exposes a small set of broker observations needed by reliability tests: queue depth, DLQ depth, topic subscriber count, and a basic broker-up probe.
+ * Read-only Jolokia client for ActiveMQ MBean observations: queue/topic depths, DLQ depth, subscriber count, broker health, and {@code purge}.
  *
  * <p>
- * All operations are synchronous and short-lived; tests are expected to wrap calls in {@code RetryUtils.retryWithBackoff} when steady-state convergence matters.
- *
- * <p>
- * The probe targets the underlying ActiveMQ container directly (not through Toxiproxy), so observations remain available during simulated network partitions on the broker -> live-ingester path.
+ * Talks to the broker container directly so observations stay available during chaos on the Toxiproxy paths.
  */
 @Slf4j
 @SuppressWarnings("PMD.GuardLogStatement")
@@ -53,9 +52,7 @@ public final class JolokiaProbe
     private static final String DEFAULT_USER = "admin";
     private static final String DEFAULT_PASSWORD = "admin"; // pragma: allowlist secret
     private static final String DEFAULT_BROKER_NAME = "localhost";
-    /**
-     * Jolokia ships with a default {@code jolokia-access.xml} that has {@code <strict-checking/>} enabled and only allows {@code http://localhost*} / {@code http://127.0.0.1*} origins. Java's {@link HttpClient} sends no {@code Origin} header by default, which makes Jolokia respond {@code 403 "Origin null is not allowed to call this agent"}. Sending an explicit, allow-listed {@code Origin} works around this without touching broker config.
-     */
+    /** Default Jolokia access config rejects requests without an allow-listed Origin header. */
     private static final String JOLOKIA_ALLOWED_ORIGIN = "http://localhost";
     private static final Duration HTTP_TIMEOUT = Duration.ofSeconds(5);
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -86,9 +83,7 @@ public final class JolokiaProbe
         return readIntAttribute(mbean, "QueueSize");
     }
 
-    /**
-     * ActiveMQ only registers the DLQ MBean lazily, the first time a message is dead-lettered. "MBean absent" therefore means "no message was ever DLQ'd", which is logically a depth of zero. This method translates the 404 to {@code 0} so callers can simply assert {@code assertThat(dlqDepth()).isZero()}.
-     */
+    /** The DLQ MBean is registered lazily on first dead-letter, so "MBean absent" means depth zero. */
     public int dlqDepth()
     {
         try
@@ -102,6 +97,57 @@ public final class JolokiaProbe
         }
     }
 
+    /**
+     * Browse every message currently on {@code ActiveMQ.DLQ} via the queue MBean's {@code browse()} operation. Returns each message as a {@link DeadLetteredMessage} carrying the JMS message id and the Jolokia JSON envelope. The envelope holds JMS metadata (message id, JMS headers, {@code OriginalDestination}, {@code BrokerPath}, {@code StringProperties}, etc.) but <strong>not</strong> the message payload: ActiveMQ's {@code OpenTypeSupport} maps each JMS message type to a CompositeData schema that exposes a body field for {@code TextMessage} and (truncated) {@code BytesMessage} only — and our Camel-converted {@code ObjectMessage} payloads land outside that envelope. Operators inspect bodies through a real JMS browser session (Hawtio, the AMQ Web Console, or a replay consumer); the JMX/Jolokia lane is for metadata-level correlation. Tests typically pin {@link DeadLetteredMessage#envelopeContains(String)} on {@code OriginalDestination} to confirm the dead-letter came from the route they
+     * triggered. An absent DLQ MBean (no dead-letters yet) yields an empty list.
+     */
+    public List<DeadLetteredMessage> browseDlq()
+    {
+        String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Queue,destinationName=ActiveMQ.DLQ"
+                .formatted(brokerName);
+        try
+        {
+            JsonNode response = post(execRequest(mbean, "browse()"));
+            int status = response.path("status").asInt();
+            if (status == 404)
+            {
+                return List.of();
+            }
+            if (status != 200)
+            {
+                throw new IllegalStateException("[jolokia] browse %s failed: status=%d body=%s"
+                        .formatted(mbean, status, response));
+            }
+            JsonNode value = response.path("value");
+            if (!value.isArray())
+            {
+                return List.of();
+            }
+            List<DeadLetteredMessage> messages = new ArrayList<>(value.size());
+            for (JsonNode message : value)
+            {
+                String messageId = message.path("JMSMessageID").asText("");
+                messages.add(new DeadLetteredMessage(messageId, message.toString()));
+            }
+            return List.copyOf(messages);
+        }
+        catch (JolokiaInstanceNotFoundException e)
+        {
+            log.debug("[jolokia] DLQ MBean not registered yet — no messages to browse");
+            return List.of();
+        }
+    }
+
+    /** A single dead-lettered message as exposed by the JMX {@code QueueViewMBean.browse()} operation: the JMS message id plus the Jolokia JSON envelope of metadata (headers, {@code OriginalDestination}, {@code BrokerPath}, string/property maps, etc.). The envelope deliberately omits the JMS payload for {@code ObjectMessage}-shaped messages — see {@link JolokiaProbe#browseDlq()} for the reasoning and the production-side body-inspection paths. Tests use {@link #envelopeContains(String)} to pin metadata fields like {@code OriginalDestination}. */
+    public record DeadLetteredMessage(String messageId, String envelope)
+    {
+        /** Does the dead-lettered message's Jolokia envelope (JMS metadata + headers, <strong>not</strong> payload) contain {@code marker} anywhere? Returns {@code false} for null/empty envelopes. */
+        public boolean envelopeContains(String marker)
+        {
+            return envelope != null && !envelope.isEmpty() && envelope.contains(marker);
+        }
+    }
+
     public int topicSubscriberCount(String topicName)
     {
         String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Topic,destinationName=%s"
@@ -109,9 +155,7 @@ public final class JolokiaProbe
         return readIntAttribute(mbean, "ConsumerCount");
     }
 
-    /**
-     * Number of messages dispatched to the topic's subscribers but not yet acknowledged. Drains to zero in steady state. Non-zero after a chaos test's convergence window means the broker is still trying to deliver — i.e. a consumer is stuck or messages are mid-redelivery handshake. Used as a "broker has finished its work" gate so the test's completeness assertion isn't fooled by a transient post-chaos backlog.
-     */
+    /** Messages dispatched but not yet ACK'd. Drains to zero in steady state. */
     public int topicInFlightCount(String topicName)
     {
         String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Topic,destinationName=%s"
@@ -119,9 +163,7 @@ public final class JolokiaProbe
         return readIntAttribute(mbean, "InFlightCount");
     }
 
-    /**
-     * Cumulative count of messages enqueued on this topic since the broker started (i.e. how many publishes the broker has accepted). Pair with {@link #topicDequeueCount(String)} to expose where messages are stuck — consumer-side ({@code enqueue == dispatch >> dequeue}) vs. publisher-side (unexpected {@code enqueue} shortfall).
-     */
+    /** Cumulative messages accepted by the broker on this topic since it started. */
     public int topicEnqueueCount(String topicName)
     {
         String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Topic,destinationName=%s"
@@ -129,9 +171,7 @@ public final class JolokiaProbe
         return readIntAttribute(mbean, "EnqueueCount");
     }
 
-    /**
-     * Cumulative count of messages dequeued from this topic since the broker started (i.e. how many ACKs the broker has received from durable subscribers). Pair with {@link #topicEnqueueCount(String)} to spot stuck-on-broker vs. delivered-and-processed.
-     */
+    /** Cumulative messages ACK'd by durable subscribers on this topic since the broker started. */
     public int topicDequeueCount(String topicName)
     {
         String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Topic,destinationName=%s"
@@ -139,19 +179,14 @@ public final class JolokiaProbe
         return readIntAttribute(mbean, "DequeueCount");
     }
 
-    /**
-     * Purge a queue (broker-level {@code purge} operation). Used by reliability tests to scrub leftover dead-lettered messages between tests so each test sees a clean DLQ baseline.
-     *
-     * <p>
-     * Tolerates the case where the queue MBean has not been registered yet (e.g. nothing was ever dead-lettered) — same convention as {@link #dlqDepth()}: "MBean absent" is treated as "nothing to purge".
-     */
+    /** Purge a queue. Tolerates an absent MBean (nothing to purge). */
     public void purgeQueue(String queueName)
     {
         String mbean = "org.apache.activemq:type=Broker,brokerName=%s,destinationType=Queue,destinationName=%s"
                 .formatted(brokerName, queueName);
         try
         {
-            // ActiveMQ's purge operation is overloaded (purge() and purge(long)). Jolokia rejects an unqualified name with HTTP 400 and "Signatures found: ),(long)" — disambiguate by writing the no-arg signature explicitly.
+            // {@code purge} is overloaded on the MBean; the no-arg signature is explicit.
             JsonNode response = post(execRequest(mbean, "purge()"));
             int status = response.path("status").asInt();
             if (status == 404)
@@ -203,9 +238,7 @@ public final class JolokiaProbe
         return response.path("value").asInt();
     }
 
-    /**
-     * Marker exception that lets callers (notably {@link #dlqDepth()}) distinguish "MBean does not exist" from genuine read errors.
-     */
+    /** Distinguishes "MBean does not exist" from genuine read errors. */
     static final class JolokiaInstanceNotFoundException extends RuntimeException
     {
         private static final long serialVersionUID = 1L;

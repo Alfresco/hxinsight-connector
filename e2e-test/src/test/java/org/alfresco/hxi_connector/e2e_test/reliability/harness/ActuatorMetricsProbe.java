@@ -39,13 +39,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 
 /**
- * Read-only client for Spring Boot Actuator's {@code /actuator/metrics/{name}} JSON endpoint on the live-ingester container. Returns the {@code COUNT} measurement value for a given Micrometer counter name + optional tag filter, or {@code 0.0} when the counter has not been registered yet (Spring exposes a 404 in that case, which Micrometer-side is logically a count of zero — the counter is created lazily on first increment).
+ * Read-only client for the live-ingester's Spring Boot Actuator metrics endpoint. Returns the counter/gauge value, or {@code 0.0} when the metric has not been registered yet.
  *
  * <p>
- * Reliability ITs in the {@code @Retryable}-vs-JMS-redelivery family read {@code live_ingester_retry_attempts_total} via this probe to assert that in-delivery retries fired during a chaos window, decoupled from any JMS broker-side redelivery that the route's DLC also performs. Pattern: capture the counter delta across a chaos window with {@link #counterValue(String, String, String)} called before / after.
- *
- * <p>
- * The probe targets the live-ingester container's mapped 8080 port directly (no Toxiproxy in between), so observations remain available during simulated network partitions on the upstream/downstream chaos paths.
+ * The probe talks to the container's mapped port directly, so it stays available while Toxiproxy chaos is on the other paths.
  */
 @Slf4j
 public final class ActuatorMetricsProbe
@@ -62,33 +59,21 @@ public final class ActuatorMetricsProbe
         this.metricsBaseUri = URI.create("http://%s:%d/actuator/metrics/".formatted(host, port));
     }
 
-    /**
-     * Returns the {@code COUNT} measurement value for {@code metricName}, or {@code 0.0} if the counter is not yet registered. Tolerates 404 (counter not created) and missing measurements arrays.
-     */
     public double counterValue(String metricName)
     {
         return counterValue(metricName, null, null);
     }
 
-    /**
-     * Returns the {@code COUNT} measurement value for {@code metricName} filtered to the given tag, or {@code 0.0} if the (counter, tag) combination is not yet registered.
-     */
     public double counterValue(String metricName, String tagKey, String tagValue)
     {
         return readMeasurement(metricName, tagKey, tagValue, "COUNT");
     }
 
-    /**
-     * Returns the {@code VALUE} measurement for a Spring Boot Actuator gauge (e.g. {@code jvm.threads.live}, {@code jvm.classes.loaded}, {@code process.files.open}). Same 404-tolerant semantics as {@link #counterValue(String)}: a missing gauge is reported as {@code 0.0} so callers can observe "not yet registered" without a try/catch around every lookup.
-     */
     public double gaugeValue(String metricName)
     {
         return gaugeValue(metricName, null, null);
     }
 
-    /**
-     * Returns the {@code VALUE} measurement for a tag-filtered Spring Boot Actuator gauge (e.g. {@code jvm.memory.used} filtered to {@code area:heap}). Same 404-tolerant semantics as {@link #counterValue(String)}.
-     */
     public double gaugeValue(String metricName, String tagKey, String tagValue)
     {
         return readMeasurement(metricName, tagKey, tagValue, "VALUE");

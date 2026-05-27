@@ -41,22 +41,10 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Hard TCP reset (RST) on the broker -> live-ingester path: Toxiproxy's {@code reset_peer} toxic forces every connection through the proxy to be torn down with an RST instead of a FIN. Held for ~2 seconds, which is short enough that the broker is still considered up but long enough that any in-flight reads/writes from the consumer side blow up.
+ * Hard TCP reset on the broker → live-ingester path. The consumer's connection is torn down with an RST partway through; the connector should observe a drop, reconnect after the toxic clears, and the durable subscription should hold pending events.
  *
  * <p>
- * The connector's reconnect machinery should observe the RST as a connection drop, mark the consumer as detached, and reconnect cleanly once the toxic is removed. The repository keeps producing events directly to ActiveMQ throughout (it bypasses Toxiproxy), and the durable subscription holds them until the live-ingester re-attaches.
- *
- * <p>
- * Asserts:
- * <ul>
- * <li><b>Completeness</b> — events published before, during, and after the RST window all reach HX Insight; no in-flight event is silently lost when the connection is yanked.</li>
- * <li><b>Liveness</b> — a post-RST sentinel reaches HX Insight, proving the route reconnected on its own.</li>
- * <li><b>No silent drop</b> — DLQ depth stays at {@code 0}; a TCP RST is a transport event, not a message-level error.</li>
- * <li><b>Topic subscription preserved</b> — subscriber count remains {@code >= 1} after recovery.</li>
- * </ul>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=ActiveMqResetPeerReliabilityIT}.
+ * Asserts completeness across pre/during/post-RST events, post-recovery liveness, empty DLQ (RST is a transport event), and a preserved subscription.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})

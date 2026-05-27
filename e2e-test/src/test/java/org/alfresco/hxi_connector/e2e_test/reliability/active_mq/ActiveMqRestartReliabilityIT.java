@@ -38,34 +38,38 @@ import java.util.List;
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Pins broker-side restart recovery: graceful stop, abrupt SIGKILL, and restart while a backlog is still draining. In every variant the broker's KahaDB journal preserves the durable subscription across the cycle and the connector's Spring-JMS reconnect picks up where it left off.
+ * Broker restart recovery: graceful stop, SIGKILL, and restart mid-drain. The durable subscription replays the backlog after restart in every variant.
+ *
+ * <p>
+ * Method order is fixed: the mid-drain test runs first because it is most sensitive to residual broker state from earlier tests in the class.
  */
 @Slf4j
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
 public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
 {
-    /**
-     * Backlog size for the mid-drain test. Small enough to keep wall-time bounded; the slow Wiremock stub stretches per-event drain time so the chaos call provably lands during the drain rather than after it.
-     */
     private static final int BACKLOG_SIZE = 5;
-    /**
-     * Wiremock fixed-delay applied to {@code /ingestion-events} during the mid-drain test. Sized below the connector's HTTP response timeout (configured by the test profile via {@code HYLANDEXPERIENCE_INGESTER_RESPONSETIMEOUTMS=3000}) so each POST returns a successful {@code 202} after the delay rather than getting torn down by a client-side timeout — the drain stays "in progress" via slow successful responses rather than via repeated timeout-and-retry, which would pile in-flight requests on Wiremock's Jetty thread pool and starve the test's own admin queries (observed concretely as a {@code NoHttpResponseException} bubbling out of {@link WiremockCounts#ingestionEventsFor(String)}).
-     */
+    /** Slow stub delay on {@code /ingestion-events} during the mid-drain test. Kept below the connector's HTTP response timeout so each POST returns 202, keeping the drain in progress without piling timeouts. */
     private static final int SLOW_RESPONSE_DELAY_MS = 2_500;
     private static final int OVERRIDE_STUB_PRIORITY = 1;
-    /**
-     * Convergence step for the mid-drain test's per-event ingestion check. Must comfortably exceed {@link #SLOW_RESPONSE_DELAY_MS} times the worst-case in-flight queue length so a single retry attempt covers the whole drain.
-     */
+    /** Retry budget for the per-event ingestion check during the mid-drain test. */
     private static final int BACKLOG_INGESTION_DELAY_MS = 30_000;
+    private static final int BACKLOG_LANDED_POLL_MS = 200;
+    private static final int BACKLOG_LANDED_STABLE_MS = 1_500;
+    private static final long BACKLOG_LANDED_DEADLINE_MS = 30_000L;
 
     @Test
+    @Order(2)
     void shouldRecoverConnectorAfterBrokerGracefulStopAndRestart() throws IOException
     {
         Node baseline = createNode("amq-restart-graceful-baseline.txt", "Graceful stop baseline");
@@ -83,6 +87,7 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
     }
 
     @Test
+    @Order(3)
     void shouldRecoverConnectorAfterBrokerSigKillAndRestart() throws IOException
     {
         Node baseline = createNode("amq-restart-kill-baseline.txt", "SIGKILL baseline");
@@ -100,15 +105,19 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
     }
 
     @Test
+    @Order(1)
     void shouldDrainBacklogAfterBrokerRestartMidStream() throws IOException
     {
         StubMapping slowStub = installSlowResponseStub();
+        boolean toxiproxyDisabled = false;
         try
         {
-            log.info("[chaos] detaching connector via Toxiproxy to assemble a {}-event backlog on the durable subscription", BACKLOG_SIZE);
+            int enqueueBaseline = environment().jolokia().topicEnqueueCount(ReliabilityEnvironment.REPO_EVENT_TOPIC);
+            log.info("[chaos] detaching connector via Toxiproxy to assemble a {}-event backlog on the durable subscription (broker enqueue baseline={})", BACKLOG_SIZE, enqueueBaseline);
             try
             {
                 environment().activemqProxy().disable();
+                toxiproxyDisabled = true;
             }
             catch (IOException e)
             {
@@ -121,10 +130,13 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
                 backlog.add(createNode("amq-backlog-" + i + ".txt", "Backlog event #" + i));
             }
 
+            awaitBacklogLandedOnBroker(enqueueBaseline);
+
             log.info("[chaos] re-enabling Toxiproxy — slow Wiremock responses keep the drain in progress while we restart the broker");
             try
             {
                 environment().activemqProxy().enable();
+                toxiproxyDisabled = false;
             }
             catch (IOException e)
             {
@@ -145,8 +157,58 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         }
         finally
         {
+            // Any failure above must not leave Toxiproxy detached — subsequent test methods would lose the broker.
+            if (toxiproxyDisabled)
+            {
+                try
+                {
+                    environment().activemqProxy().enable();
+                    log.warn("[chaos] cleanup re-enabled Toxiproxy after a failure escaped the chaos block");
+                }
+                catch (IOException restoreFailure)
+                {
+                    log.error("[chaos] cleanup could not re-enable Toxiproxy after a failure — subsequent tests will fail to reach the broker", restoreFailure);
+                }
+            }
             removeStub(slowStub);
         }
+    }
+
+    /**
+     * Wait until the broker's enqueue count has grown by at least {@link #BACKLOG_SIZE} and has been stable for {@link #BACKLOG_LANDED_STABLE_MS} ms. ACS publishes events asynchronously, so {@code createNode} returning is not proof the event reached the broker — stopping the broker before the publisher finishes flushing would lose the in-flight event.
+     */
+    private void awaitBacklogLandedOnBroker(int enqueueBaseline)
+    {
+        long deadline = System.currentTimeMillis() + BACKLOG_LANDED_DEADLINE_MS;
+        int observed = enqueueBaseline;
+        int stablePrev = -1;
+        long stableSince = 0;
+        while (System.currentTimeMillis() < deadline)
+        {
+            observed = environment().jolokia().topicEnqueueCount(ReliabilityEnvironment.REPO_EVENT_TOPIC);
+            int delta = observed - enqueueBaseline;
+            if (observed != stablePrev)
+            {
+                stablePrev = observed;
+                stableSince = System.currentTimeMillis();
+            }
+            if (delta >= BACKLOG_SIZE && System.currentTimeMillis() - stableSince >= BACKLOG_LANDED_STABLE_MS)
+            {
+                log.info("[chaos] broker enqueue stable at {} (delta {} ≥ backlog {}, no growth for {} ms) — backlog confirmed landed in KahaDB", observed, delta, BACKLOG_SIZE, BACKLOG_LANDED_STABLE_MS);
+                return;
+            }
+            try
+            {
+                Thread.sleep(BACKLOG_LANDED_POLL_MS);
+            }
+            catch (InterruptedException e)
+            {
+                Thread.currentThread().interrupt();
+                throw new IllegalStateException("[chaos] interrupted while waiting for backlog to land on broker", e);
+            }
+        }
+        throw new IllegalStateException("[chaos] broker enqueue did not stabilise within %d ms (baseline=%d, last observed=%d, delta=%d, expected ≥ %d) — ACS outbox flush stalled or the broker is unreachable; cannot proceed with the restart-mid-stream chaos because any event still in flight from ACS would be silently lost when the broker stops"
+                .formatted(BACKLOG_LANDED_DEADLINE_MS, enqueueBaseline, observed, observed - enqueueBaseline, BACKLOG_SIZE));
     }
 
     private static StubMapping installSlowResponseStub()
@@ -167,9 +229,9 @@ public class ActiveMqRestartReliabilityIT extends BaseProcessChaosReliabilityIT
                     {
                         count = WiremockCounts.ingestionEventsFor(nodeId);
                     }
-                    catch (RuntimeException e)
+                    catch (Exception e)
                     {
-                        // Wiremock admin can briefly fail to respond while the connector hammers it with the post-restart drain; surface as an AssertionError so RetryUtils retries instead of aborting the test on the first transient infra glitch.
+                        // The Wiremock admin can briefly fail to respond during the post-restart drain. Surface as AssertionError so RetryUtils keeps retrying instead of aborting.
                         throw new AssertionError("[chaos] transient Wiremock admin failure while polling for backlog event %s: %s".formatted(nodeId, e.getMessage()), e);
                     }
                     assertThat(count)

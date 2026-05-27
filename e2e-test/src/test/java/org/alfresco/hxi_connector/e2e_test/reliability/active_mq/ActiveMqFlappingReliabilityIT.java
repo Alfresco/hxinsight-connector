@@ -41,22 +41,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Flapping proxy: Toxiproxy is randomly disabled and re-enabled in a tight loop for ~20 seconds, simulating an unstable broker hop where the connection drops and recovers many times in quick succession. The threat model is a reconnect storm — if the connector reacts to every disable with a hard re-init, it could exhaust connection pools, leak threads, or lose its durable subscription registration.
- *
- * <p>
- * The repository's own connection bypasses Toxiproxy and keeps publishing throughout. The durable subscription should preserve any messages that land while the consumer is in one of its disabled phases.
- *
- * <p>
- * Asserts:
- * <ul>
- * <li><b>Liveness</b> — the post-flap sentinel reaches HX Insight, proving the route survived the storm.</li>
- * <li><b>Completeness (pre-flap)</b> — the pre-flap baseline reaches HX Insight before the chaos starts.</li>
- * <li><b>No silent drop</b> — DLQ depth stays at {@code 0}; flapping is a transport-level event, not a message-level error.</li>
- * <li><b>Topic subscription preserved</b> — subscriber count remains {@code >= 1} after the storm settles. A zero here would mean the connector dropped its durable subscription registration during the storm and must be manually re-registered.</li>
- * </ul>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=ActiveMqFlappingReliabilityIT}.
+ * Toxiproxy is flapped (disable/enable) in a tight loop for ~20 s, simulating an unstable broker hop. Asserts liveness, no DLQ entries (flapping is transport, not message-level), and a preserved durable subscription.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})

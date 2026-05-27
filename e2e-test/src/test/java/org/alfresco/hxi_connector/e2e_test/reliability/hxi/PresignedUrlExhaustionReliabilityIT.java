@@ -47,46 +47,21 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.WiremockCounts;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Pins that exhausted retries on the upload-leg of the passthrough direct-upload path land on {@code ActiveMQ.DLQ} — bounded failure visibility for content events whose source MIME is matched by a passthrough rule (the production-default {@code *: *} mapping). Sister test to {@link PresignedUrlRetryReliabilityIT} (recovery on transient failure) and {@link HxiShortPartitionReliabilityIT} (DLQ on metadata-leg failure under full HXI partition).
- *
- * <p>
- * Why this row exists: the metadata-leg DLQ shape is already pinned by {@code HxiShortPartitionReliabilityIT} — a full HXI partition fails the metadata POST first and {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.EventProcessor#process EventProcessor.process} throws before reaching {@code handleContentChange}, so the upload path never runs. {@code PresignedUrlRetryReliabilityIT} pins the recovery shape on the upload leg (transient 500 → @Retryable → success). Neither pins exhaustion on the upload leg specifically — a regression that wired the upload path's {@code @Retryable} without its DLC (or against the wrong route's error handler) would slip past both. This IT closes that gap.
- *
- * <p>
- * How the test works:
- * <ol>
- * <li>Install a Wiremock scenario for {@code POST /presigned-urls}: state {@code STARTED} → always {@code 500}; state {@code RECOVERED} → file-based default body.</li>
- * <li>Create a victim node with {@code text/plain} content. Default mapping is {@code *: *} (universal passthrough, see {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.MimeTypeMapper#DEFAULT_MIME_TYPES}), so the connector's metadata POST succeeds and {@code handleContentChange} runs the passthrough flow: {@code POST /presigned-urls} fails → {@code @Retryable} exhausts → JMS redelivery → exhausts → DLQ.</li>
- * <li>Flip the scenario to {@code RECOVERED} so subsequent calls succeed.</li>
- * <li>Publish a sentinel and assert it reaches HX Insight end-to-end: liveness check, no permanent damage to the route.</li>
- * </ol>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=PresignedUrlExhaustionReliabilityIT}.
+ * Persistent failures on the upload leg ({@code /presigned-urls}) must exhaust through {@code @Retryable} + JMS redelivery and land on the DLQ. Then a sentinel must flow end-to-end once the stub recovers.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
 public class PresignedUrlExhaustionReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
-    /** Wiremock scenario name shared by the two stub variants (always-500 while STARTED, file-based body when RECOVERED). */
     private static final String EXHAUSTION_SCENARIO = "presigned-urls-exhaustion";
     private static final String RECOVERED_STATE = "recovered";
-    /**
-     * Override priority for the scenario-backed stubs. Lower number = higher priority in Wiremock; the file-based default {@code post-presigned-urls.json} runs at the implicit default of {@code 5}, so any value below that wins. Picked {@code 1} to make the override unambiguous.
-     */
+    /** Lower number = higher Wiremock priority; the file-based default uses 5. */
     private static final int SCENARIO_STUB_PRIORITY = 1;
-    /** File-based default body served once the scenario flips to RECOVERED — byte-identical to what the connector normally sees. */
     private static final String PRESIGNED_URLS_BODY_FILE = "presigned-urls.json";
-    /**
-     * Step delay for the convergence retry loop — covers the upload leg's bounded retry envelope plus JMS redelivery in the test profile (2 in-delivery attempts × ~200 ms × 2 deliveries with maximumRedeliveries=1, plus the JMS redelivery delay of 200 ms).
-     */
     private static final int CONVERGENCE_DELAY_MS = 1_500;
-    /**
-     * Lower bound on observed POSTs to {@code /presigned-urls} once the victim has exhausted retries. With {@code STORAGE_LOCATION_RETRY_ATTEMPTS=2} and {@code MAXIMUMREDELIVERIES=1}, the upload leg fires 2 attempts on each of 2 deliveries before the message DLQs — at minimum 3 (the lower bound is forgiving in case the connector batches the first attempt). A count of {@code 0} or {@code 1} would mean retries did not engage; a count {@code >=} this lower bound proves the bounded retry envelope ran on the upload leg.
-     */
+    /** Lower bound proving the upload-leg retry envelope ran. */
     private static final int MIN_PRESIGNED_URL_POSTS = 3;
-    /** Settle window between the recovery-state flip and the sentinel publish — gives any in-flight retry attempt time to observe the new scenario state before the sentinel races past. */
     private static final long RECOVERY_SETTLE_MS = 500L;
 
     @Test

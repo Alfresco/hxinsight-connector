@@ -39,18 +39,12 @@ import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 
 /**
- * Sister of {@link UnsupportedEventTypeReliabilityIT}: boots the env with the {@code dead-letter-unsupported-types} opt-in enabled and asserts that an unrecognised repo {@code eventType} surfaces on {@code ActiveMQ.DLQ} (instead of the default INFO log + counter + silent ACK).
- *
- * <p>
- * Same trigger as the default-deployment IT (synthetic CloudEvent on {@code alfresco.repo.event2} with an unrecognised {@code type} + sentinel node for liveness); opposite outcome on the DLQ assertion. Both run side-by-side on every CI build so any regression on either path fails loud.
- *
- * <p>
- * Per-class environment lifecycle (own boot, own teardown). Cost: one extra env boot for the opt-in pair.
+ * Opt-out from the default: when {@code dead-letter-unsupported-types=false} an unrecognised CloudEvent {@code type} is logged + counted and the JMS message is ACK'd. Operators choose this for forward-compatibility with future ACS event types over DLQ inventory. Sister class {@link UnsupportedEventTypeReliabilityIT} covers the default DLQ path.
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases", "PMD.SignatureDeclareThrowsException"})
-public class UnsupportedEventTypeWithDlqOptInReliabilityIT
+public class UnsupportedEventTypeOptOutReliabilityIT
 {
     private static final int CONVERGENCE_DELAY_MS = 1_000;
 
@@ -59,9 +53,9 @@ public class UnsupportedEventTypeWithDlqOptInReliabilityIT
     @BeforeAll
     final void startEnvironment() throws Exception
     {
-        log.info("[reliability] Booting per-class ReliabilityEnvironment with repo-events dead-letter-unsupported-types opt-in for {}", getClass().getSimpleName());
+        log.info("[reliability] Booting per-class env with dead-letter-unsupported-types disabled for {}", getClass().getSimpleName());
         environment = ReliabilityEnvironment.builder()
-                .withRepoEventsDeadLetterUnsupportedTypes()
+                .withRepoEventsDeadLetterUnsupportedTypesDisabled()
                 .build();
         environment.start();
     }
@@ -71,26 +65,26 @@ public class UnsupportedEventTypeWithDlqOptInReliabilityIT
     {
         if (environment != null)
         {
-            log.info("[reliability] Closing per-class ReliabilityEnvironment for {}", getClass().getSimpleName());
+            log.info("[reliability] Closing per-class env for {}", getClass().getSimpleName());
             environment.close();
         }
     }
 
-    /**
-     * With the opt-in enabled: an unrecognised {@code eventType} surfaces on the DLQ. Same trigger as {@link UnsupportedEventTypeReliabilityIT#shouldLogAndCountUnsupportedEventTypeWithoutDlq}, flipped by {@link ReliabilityEnvironment.Builder#withRepoEventsDeadLetterUnsupportedTypes()}.
-     */
     @Test
-    void shouldDeadLetterEventWithUnsupportedEventType() throws IOException
+    void shouldLogAndCountUnsupportedEventTypeWithoutDlq() throws IOException
     {
-        UnsupportedEventTypeReliabilityIT.SyntheticUnknownTypeEvent event = UnsupportedEventTypeReliabilityIT.injectSyntheticUnknownTypeEvent(environment);
+        UnsupportedEventTypeTrigger.SyntheticUnknownTypeEvent event = UnsupportedEventTypeTrigger.inject(environment);
 
         RetryUtils.assertWithRetry(() -> {
-            assertThat(environment.jolokia().dlqDepth())
-                    .as("opt-in enabled: an unrecognised eventType must surface on the DLQ. Zero here means the EventProcessor never threw UnsupportedEventTypeException, or the repo-events DeadLetterChannel did not catch it")
-                    .isGreaterThanOrEqualTo(1);
             assertThat(WiremockCounts.ingestionEventsFor(event.sentinelNode().id()))
-                    .as("liveness: sentinel must flow past the dead-lettered failure")
+                    .as("liveness: sentinel published after the unknown-type event must reach HX Insight — failure here means the route stopped on the unsupported event")
                     .isGreaterThanOrEqualTo(1);
+            assertThat(environment.liveIngesterContainer().getLogs())
+                    .as("opt-out path must still emit the always-on INFO log line naming the unsupported eventType")
+                    .contains(UnsupportedEventTypeTrigger.UNHANDLED_LOG_FRAGMENT);
+            assertThat(environment.jolokia().dlqDepth())
+                    .as("opt-out: an unrecognised eventType is logged + counted + ACK'd. DLQ stays at zero so adding a new ACS event type does not flood ActiveMQ.DLQ. The sister IT pins the default DLQ path")
+                    .isZero();
         }, CONVERGENCE_DELAY_MS);
     }
 }

@@ -53,27 +53,10 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.WiremockCounts;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Composed-chaos guard: slow {@code /ingestion-events} ({@value #HXI_DELAY_MS} ms, above the 3 s response timeout) overlapping with continuous {@code toxic-activemq} flap. Pins that Spring Retry on the publish path and the JMS-side dead-letter channel compose correctly when both axes degrade together.
+ * Composed chaos: slow {@code /ingestion-events} (over the response timeout) plus continuous AMQ flap, at the same time. Asserts no event is silently lost, the route stays live, and the broker is healthy after the storm.
  *
  * <p>
- * Each axis is covered alone by {@link IngestionEventTimeoutReliabilityIT} (slow HXI exhausts to DLQ) and {@link org.alfresco.hxi_connector.e2e_test.reliability.active_mq.ActiveMqFlappingReliabilityIT ActiveMqFlappingReliabilityIT} (flap preserves liveness + subscription). Production sees both together; this test guards the interaction.
- *
- * <p>
- * Asserts after the storm clears:
- * <ul>
- * <li>Liveness sentinel reaches HX Insight (route not wedged).</li>
- * <li>Each chaos node produces ≥ 1 {@code POST /ingestion-events} for its objectId — the strong "no silent loss" check (catches even a single dropped event, which a coarse total-POSTs lower bound cannot).</li>
- * <li>Total {@code POST /ingestion-events} ≤ {@value #UPPER_BOUND_TOTAL_POSTS} (no infinite-retry loop).</li>
- * <li>{@code dlqDepth() ≤ CHAOS_NODE_COUNT} — one DLQ entry per submitted JMS message is the absolute ceiling; anything higher is a redelivery storm or an exception-classifier regression.</li>
- * <li>Topic subscriber count = 1 (subscription neither lost nor leaked).</li>
- * <li>Broker healthy.</li>
- * </ul>
- *
- * <p>
- * The DLQ is purged between tests by {@link BaseReliabilityIT#resetBetweenTests()} so any DLQ traffic produced here does not leak into the next test.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=HxiSlowDuringAmqFlapReliabilityIT}.
+ * Under the default-on bounded retry-ingestion ({@code attempts=6}) + per-route DLC contract, a chaos node ends in one of two terminal states: either it produces at least one {@code POST /ingestion-events} (the route processed it cleanly), or it exhausts the broker's redelivery budget during the AMQ flap (each prefetch-then-disconnect cycle counts as a redelivery — six of those land the message on {@code ActiveMQ.DLQ} without the connector ever getting a clean processing pass). The dead-letter is the structured fail-stop that replaces silent loss; the aggregate invariant therefore asserts {@code postedChaosNodes + dlqDepth >= CHAOS_NODE_COUNT}.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -82,61 +65,20 @@ public class HxiSlowDuringAmqFlapReliabilityIT extends BaseReliabilityIT
     private static final String PARENT_ID = "-my-";
     private static final String REPO_EVENT_TOPIC = ReliabilityEnvironment.REPO_EVENT_TOPIC;
 
-    /**
-     * Chaos batch size. Each create produces 2 events (Created + Updated), so 20 messages flow through the broker during chaos.
-     */
     private static final int CHAOS_NODE_COUNT = 10;
-    /**
-     * Wiremock fixed-delay (ms). Above the connector's 3 s {@code responseTimeoutMs} so every attempt during chaos trips the HTTP timeout.
-     */
+    /** Slow-stub delay above the connector's 3 s response timeout, so every attempt during chaos times out. */
     private static final int HXI_DELAY_MS = 5_000;
     private static final int OVERRIDE_STUB_PRIORITY = 1;
-    /**
-     * Chaos window length. One full Spring-Retry-then-DLC-kicks-in cycle takes ~6.4 s (2 attempts × 3 s timeout + 200 ms backoff + 200 ms redelivery delay), so {@value #CHAOS_DURATION_MS} ms gives time for at least one such cycle to complete <i>inside</i> the chaos window.
-     */
+    /** Long enough to fit one full Spring-Retry-then-DLC cycle inside the storm. */
     private static final long CHAOS_DURATION_MS = 8_000L;
     private static final long SETTLE_AFTER_CHAOS_MS = 3_000L;
 
     private static final int CONVERGENCE_TOTAL_MS = 15_000;
     private static final int CONVERGENCE_DELAY_MS = 1_000;
 
-    /**
-     * Upper bound on total {@code POST /ingestion-events}. By design the connector emits 2 POSTs per repo event (one metadata-only via {@code handleMetadataPropertiesChange}, one with content envelope via {@code handleContentChange}); under composed chaos each can also be retried (Spring Retry × JMS redelivery × broker-flap-induced redeliveries). Worst-case math: {@value #CHAOS_NODE_COUNT} chaos creates × 2 POSTs/event × at-most-4 retry attempts × ~2 flap-induced redeliveries + 2 baseline + 2 liveness POSTs ≈ {@value #UPPER_BOUND_TOTAL_POSTS}. Above this is a runaway-retry regression, not a precision count.
-     */
+    /** Safety bound to catch a runaway-retry regression. */
     private static final int UPPER_BOUND_TOTAL_POSTS = 200;
 
-    /**
-     * Wall-clock timeline (relative to the start of the test method, approximate):
-     *
-     * <pre>
-     *   t = 0.0 s     Pre-chaos baseline sentinel created.
-     *   t ≈ 0.5 s     Baseline POST observed at WireMock — happy-path harness check passes.
-     *
-     *   t ≈ 0.5 s     Slow stub installed: POST /ingestion-events now held {@value #HXI_DELAY_MS} ms.
-     *                 ToxicPlanner started: continuous random disable / enable on toxic-activemq.
-     *
-     *   t ≈ 0.5–3.5 s {@value #CHAOS_NODE_COUNT} chaos node creates submitted via RepositoryClient
-     *                 (~300 ms per create through ACS REST).
-     *
-     *   t ≈ 3.5–8.5 s {@value #CHAOS_DURATION_MS} ms chaos window — flap interleaves with
-     *                 in-flight publish retries; each connector attempt either trips the
-     *                 3 s response timeout or is killed mid-flight by a broker disconnect.
-     *                 Window is sized to exceed one full Spring-Retry exhaustion cycle
-     *                 (~6.4 s) so the JMS-side DLC actually engages before chaos clears.
-     *
-     *   t ≈ 8.5 s     Planner stopped; slow stub removed; HXI is fast again.
-     *   t ≈ 8.5–11.5 s {@value #SETTLE_AFTER_CHAOS_MS} ms settle — connector finishes its
-     *                 last reconnect; pending Spring Retry attempts succeed; JMS
-     *                 redeliveries of unacked messages drain through the now-fast HXI.
-     *
-     *   t ≈ 11.5 s    Post-chaos liveness sentinel created.
-     *   t ≈ 11.5 s + ≤ {@value #CONVERGENCE_TOTAL_MS} ms
-     *                 Convergence loop ({@value #CONVERGENCE_DELAY_MS} ms step) — waits
-     *                 for the chaos batch redeliveries + liveness sentinel to all settle.
-     *
-     *   Total in-test work ≈ 18 s; remaining wall-time is shared-env reset + per-test reset.
-     * </pre>
-     */
     @Test
     void shouldComposeRetryBudgetsAndPreserveLivenessUnderHxiSlowAndAmqFlap() throws IOException, InterruptedException
     {
@@ -171,7 +113,7 @@ public class HxiSlowDuringAmqFlapReliabilityIT extends BaseReliabilityIT
         {
             log.info("[reliability] Stopping AMQ flap planner");
             amqPlanner.stop();
-            // Belt-and-braces: the planner's own finally re-enables the proxy, but a forced shutdown can skip it.
+            // Failsafe re-enable in case the planner's own finally was skipped on a forced shutdown.
             if (!environment().activemqProxy().isEnabled())
             {
                 environment().activemqProxy().enable();
@@ -187,23 +129,39 @@ public class HxiSlowDuringAmqFlapReliabilityIT extends BaseReliabilityIT
         RetryUtils.assertWithRetry(() -> {
             int totalPosts = WiremockCounts.ingestionEvents();
             int livenessPosts = WiremockCounts.ingestionEventsFor(liveness.id());
-            log.info("[reliability] Convergence check: total POSTs={}, liveness POSTs={}, dlqDepth={}",
-                    totalPosts, livenessPosts, environment().jolokia().dlqDepth());
+            int dlqDepth = environment().jolokia().dlqDepth();
+            int chaosNodesPosted = 0;
+            for (Node chaosNode : chaosNodes)
+            {
+                if (WiremockCounts.ingestionEventsFor(chaosNode.id()) >= 1)
+                {
+                    chaosNodesPosted++;
+                }
+            }
+            int chaosNodesUnposted = CHAOS_NODE_COUNT - chaosNodesPosted;
+            log.info("[reliability] Convergence check: total POSTs={}, liveness POSTs={}, chaos posted={}/{}, chaos unposted={}, dlqDepth={}",
+                    totalPosts, livenessPosts, chaosNodesPosted, CHAOS_NODE_COUNT, chaosNodesUnposted, dlqDepth);
 
             assertThat(livenessPosts)
                     .as("liveness sentinel %s must reach HX Insight — zero means the storm wedged the route", liveness.id())
                     .isGreaterThanOrEqualTo(1);
-            for (Node chaosNode : chaosNodes)
-            {
-                assertThat(WiremockCounts.ingestionEventsFor(chaosNode.id()))
-                        .as("chaos node %s must produce ≥ 1 POST /ingestion-events — zero means the connector silently dropped it (broker lost the message during a disconnect, or a filter regression discarded it)",
-                                chaosNode.id())
-                        .isGreaterThanOrEqualTo(1);
-            }
+            // Under the default-on bounded retry-ingestion + per-route DLC contract, a chaos node has two valid terminal outcomes:
+            // (a) ≥ 1 POST /ingestion-events at wiremock — the route processed the event and the broker ACKed it, OR
+            // (b) the broker's prefetch-then-disconnect cycle exhausted maxRedeliveries during the AMQ flap and the message
+            // landed on ActiveMQ.DLQ without the connector ever getting a clean processing pass — the dead-letter is
+            // the structured fail-stop the contract guarantees in lieu of silent loss.
+            // The aggregate invariant: every unposted chaos node is accounted for by a DLQ entry. We cannot attribute DLQ
+            // entries to specific nodes without payload inspection (JMX browse() exposes JMS metadata only — see
+            // JolokiaProbe.browseDlq()), so we require dlqDepth ≥ unposted-chaos-count. Anything less means an event was
+            // truly lost — silent drop, filter regression, or a subscription leak.
+            assertThat(dlqDepth)
+                    .as("no-silent-loss: %d chaos node(s) produced 0 POST /ingestion-events under composed slow-HXI + AMQ-flap chaos. Under the default-on bounded retry contract these must be accounted for by ≥ %d entries on ActiveMQ.DLQ (broker-redelivery exhaustion is the contract's fail-stop). Observed dlqDepth=%d → an event was silently dropped (broker lost the message, filter regression, or subscription leak).",
+                            chaosNodesUnposted, chaosNodesUnposted, dlqDepth)
+                    .isGreaterThanOrEqualTo(chaosNodesUnposted);
             assertThat(totalPosts)
                     .as("total POSTs > %d — points to an infinite-retry regression", UPPER_BOUND_TOTAL_POSTS)
                     .isLessThanOrEqualTo(UPPER_BOUND_TOTAL_POSTS);
-            assertThat(environment().jolokia().dlqDepth())
+            assertThat(dlqDepth)
                     .as("DLQ depth bounded by submitted JMS messages — depth above %d means the broker is being flooded by something other than legitimate retry exhaustion (e.g. a redelivery storm or an exception-classifier regression)",
                             CHAOS_NODE_COUNT)
                     .isLessThanOrEqualTo(CHAOS_NODE_COUNT);

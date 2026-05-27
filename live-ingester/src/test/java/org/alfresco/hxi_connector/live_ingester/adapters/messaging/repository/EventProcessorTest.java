@@ -444,7 +444,7 @@ class EventProcessorTest
     }
 
     @Test
-    void shouldIncrementUnhandledCounterAndSkipDispatchWhenEventTypeIsUnknown()
+    void shouldIncrementUnhandledCounterAndSkipDispatchWhenDeadLetterDisabled()
     {
         String unknownType = "org.alfresco.event.node.Garbled";
         given(mockEvent.getType()).willReturn(unknownType);
@@ -466,7 +466,7 @@ class EventProcessorTest
     }
 
     @Test
-    void shouldThrowUnsupportedEventTypeExceptionWhenOptInEnabled()
+    void shouldThrowUnsupportedEventTypeExceptionByDefault()
     {
         String unknownType = "org.alfresco.event.node.Garbled";
         given(mockEvent.getId()).willReturn("event-id-42");
@@ -482,7 +482,7 @@ class EventProcessorTest
         assertThat(meterRegistry.find(LiveIngesterMetrics.Drop.REPO_EVENTS_UNHANDLED)
                 .tag(LiveIngesterMetrics.Tag.EVENT_TYPE, unknownType)
                 .counter().count())
-                        .as("counter must be incremented even when the opt-in re-throws — the metric is the always-on signal")
+                        .as("counter must be incremented even when the default throw fires — the metric is the always-on signal")
                         .isEqualTo(1.0);
         then(repoEventMapper).shouldHaveNoInteractions();
         then(ingestNodeCommandHandler).shouldHaveNoInteractions();

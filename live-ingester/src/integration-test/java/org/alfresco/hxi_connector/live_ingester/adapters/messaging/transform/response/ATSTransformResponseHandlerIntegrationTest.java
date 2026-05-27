@@ -96,9 +96,12 @@ class ATSTransformResponseHandlerIntegrationTest extends IntegrationCamelTestBas
     private ProducerTemplate producerTemplate;
 
     @Test
-    void shouldSkipProcessingIfTransformationFailedWith400Error()
+    void shouldNotIngestContentWhenTransformationFailedWith400Error()
     {
-        // given
+        // Under the default {@code throwFailedTransforms=true}, the route throws
+        // {@code FailedTransformResponseException} before {@code ingestContent} is invoked,
+        // so the command handler must never be called. The route's {@code onException} branch
+        // handles the throw (handled=true) so no exception escapes the simulated send.
         TransformResponse transformResponse = new TransformResponse(
                 "e5bcc533-853c-44f1-a02d-3ab1e36a03e6",
                 new ClientData(

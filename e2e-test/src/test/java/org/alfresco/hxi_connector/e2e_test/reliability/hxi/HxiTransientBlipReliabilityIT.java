@@ -40,40 +40,15 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Positive counterpart to {@link HxiShortPartitionReliabilityIT} and {@link IngestionEventTimeoutReliabilityIT}: pins that a brief HX Insight blip <i>shorter</i> than the connector's HXI publish retry budget recovers via Spring Retry (within a single delivery) or JMS redelivery (across deliveries) — the event reaches HX Insight and {@code dlqDepth() == 0}.
- *
- * <p>
- * Without this guard, a regression that silently disables retries on the HXI publish path (annotation removed, exception type re-classified, retry-reasons mis-wired, …) would still pass {@link IngestionEventTimeoutReliabilityIT} / {@link HxiShortPartitionReliabilityIT} — those assert DLQ, and DLQ would still happen, just without the retries that should have prevented it. This test fails loudly in that scenario.
- *
- * <p>
- * Timing budget (test profile, see {@link ReliabilityEnvironment}):
- *
- * <pre>
- *   Spring Retry within delivery: 2 attempts × 200 ms backoff       ~200 ms
- *   JMS redelivery delay (REDELIVERYDELAYMS=200)                     200 ms
- *   Spring Retry within redelivery: 2 attempts × 200 ms backoff     ~200 ms
- *   ────────────────────────────────────────────────────────────────────────
- *   Total before DLQ (from "connector reads event")                 ~600 ms
- * </pre>
- *
- * <p>
- * Disabling {@code toxic-hxi} for {@value #BLIP_MS} ms means the connector's first {@code /presigned-urls} or {@code /ingestion-events} attempt (fired ~50 ms after the event lands on the broker) is guaranteed to hit the disabled proxy and surface as a connect-refused error into the publish-retry path. The proxy comes back up before the total budget exhausts, so either the in-delivery second attempt or the JMS-redelivered first attempt succeeds. Either path satisfies the operational invariant: a transient HXI blip within budget does not produce a DLQ entry.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=HxiTransientBlipReliabilityIT}.
+ * Brief HX Insight blip shorter than the publish retry budget must recover via Spring Retry or JMS redelivery: the event reaches HX Insight, DLQ stays empty.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
 public class HxiTransientBlipReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
-    /**
-     * Duration the {@code toxic-hxi} proxy is held disabled. Sized to comfortably cover the in-delivery Spring Retry budget (~200 ms) so the first publish attempt provably fails, but well under the total ~600 ms budget so the message can recover before DLQ. See class-level Javadoc for the breakdown.
-     */
+    /** Long enough to fail the first publish attempt, short enough that retries recover before DLQ. */
     private static final int BLIP_MS = 300;
-    /**
-     * Per-attempt step for the convergence retry loop. Generous so the default 15-attempt cap on {@link RetryUtils#retryWithBackoff} comfortably absorbs JMS redelivery + downstream {@code /presigned-urls} + {@code /ingestion-events} round-trips after the proxy is re-enabled.
-     */
     private static final int CONVERGENCE_DELAY_MS = 2_000;
 
     @Test

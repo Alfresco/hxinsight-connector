@@ -41,20 +41,10 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Pins bounded-failure visibility when ACS REST is reachable but pathologically slow. Toxiproxy injects {@value #ACS_LATENCY_MS} ms of downstream latency per byte; the connector is configured with a {@code 3 s} response timeout (test profile, see {@link ReliabilityEnvironment}). The expected end state for an event whose content download fires while the latency is in place:
- *
- * <ul>
- * <li><b>No silent hung thread</b> — the per-request timeout fires (vs. the production default of {@code 0} which leaves Camel HTTP at no upper bound), the route worker thread is released, the route stays alive.</li>
- * <li><b>Bounded retries</b> — the connector retries via {@link org.springframework.retry.annotation.Retryable} (test-tightened to {@code attempts=2, initialDelay=200, multiplier=1}), then hands back to JMS-level redelivery, which exhausts inside the test's wall-time budget.</li>
- * <li><b>Observable failure</b> — the message lands on {@code ActiveMQ.DLQ} (depth becomes {@code >= 1}); no ingestion event for that {@code objectId} reaches HX Insight.</li>
- * <li><b>Liveness</b> — once the latency is removed, a sentinel publish flows end-to-end without operator intervention.</li>
- * </ul>
+ * ACS REST is reachable but slow (latency above the response timeout). The per-request timeout must fire, retries exhaust, the message lands on the DLQ with a log fragment that pins the ACS download path, and a post-recovery sentinel flows end-to-end.
  *
  * <p>
- * Production note: the {@code alfresco.repository.responseTimeoutMs} setting exercised here defaults to {@code 0} (unset). With the default, this exact scenario would pin the route worker thread on the slow ACS request indefinitely. A positive value is the only way to bound per-request wait — see {@code live-ingester.md}.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=AcsLatencyReliabilityIT}.
+ * The {@code alfresco.repository.responseTimeoutMs} setting defaults to 0 in production; this test requires a positive value to bound the per-request wait.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -62,14 +52,9 @@ public class AcsLatencyReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
     private static final String LATENCY_TOXIC_NAME = "acs_huge_latency";
-    /**
-     * Per-byte latency Toxiproxy injects on the live-ingester ↔ ACS path. Comfortably exceeds the connector's {@code RESPONSETIMEOUTMS=3000} test profile so each content-download attempt provably trips the timeout rather than completing late.
-     */
+    /** Above the 3 s response timeout so every attempt trips it. */
     private static final int ACS_LATENCY_MS = 6_000;
     private static final int CONVERGENCE_DELAY_MS = 2_000;
-    /**
-     * Wall-clock budget for the connector to exhaust HTTP retries + JMS redelivery and surface the failure on the DLQ. Sized for {@code attempts=2 × ~3 s} on each of {@code maximumRedeliveries=1+1} JMS attempts, plus headroom for Camel internal scheduling.
-     */
     private static final int DLQ_DEADLINE_MS = 30_000;
 
     private static final String ACS_DOWNLOAD_FAILURE_LOG_FRAGMENT = "Repository :: Unexpected response while downloading content";
@@ -96,10 +81,8 @@ public class AcsLatencyReliabilityIT extends BaseReliabilityIT
                     .createNodeWithContent(PARENT_ID, "acs-latency-victim.txt", content, "text/plain");
             log.info("[reliability] Published node {} during ACS latency window — expecting DLQ within {} ms", slow.id(), DLQ_DEADLINE_MS);
 
-            // Why not the simpler assertInDeliveryRetryFired-style check (ingestionEventsFor == 0): the
-            // metadata POST runs ahead of the content download and may reach HXI even when the content
-            // path DLQs, so its count is not a clean negative signal for this scenario. The log substring
-            // (asserted below) binds the DLQ entry to the ACS download path under test.
+            // The log substring binds the DLQ entry to the ACS download path. A simple "ingestionEventsFor==0" would
+            // be wrong because the metadata POST runs ahead of the content download and may still reach HXI.
             RetryUtils.assertWithRetry(() -> {
                 assertThat(environment().jolokia().dlqDepth())
                         .as("ACS slowdown should produce an observable DLQ entry — a zero here means the route is stuck waiting on the slow request, contradicting the bounded-retry contract pinned by alfresco.repository.responseTimeoutMs")

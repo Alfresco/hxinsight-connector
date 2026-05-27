@@ -46,31 +46,10 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.BaseReliabilityIT
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.WiremockCounts;
 
 /**
- * Connector publish-side throughput baseline using synthetic CloudEvents — Option C in the throughput-baseline comparison alongside {@link MultiEventNoLossReliabilityIT} (multi-event correctness) and {@link BacklogDrainReliabilityIT} (Option B — real backlog with full content pipeline). The three sit side-by-side in this package while we evaluate which baseline shape gives the most useful per-CI-run signal.
+ * Connector publish-side throughput baseline using synthetic metadata-only events (no content block). Publishes JMS messages straight to the broker so ACS REST is not on the hot path, then times the drain to HX Insight.
  *
  * <p>
- * The shape:
- * <ol>
- * <li><b>Synthesise events.</b> Build {@value #EVENT_COUNT} CloudEvent payloads in the test JVM, each shaped like an ACS-emitted {@code org.alfresco.event.node.Created} but with the {@code content} block deliberately omitted so the connector's {@code EventProcessor.handleContentChange} short-circuits and only the metadata flow runs. No content download from ACS, no presigned-URL request, no S3 PUT — just metadata POSTs to {@code /ingestion-events}.</li>
- * <li><b>Publish directly to the broker topic.</b> One persistent {@code TextMessage} per synthetic event onto {@code alfresco.repo.event2}, reusing a single JMS connection / session / producer for the whole loop. Bypasses ACS REST entirely; the publish rate is bounded by JMS throughput, not the test JVM's HTTP-client + ACS-DB chain.</li>
- * <li><b>Time the drain.</b> Wall-clock from "publish loop returns" to "≥ {@value #EVENT_COUNT} ingestion-event POSTs observed at WireMock". This measures the connector's publish-side throughput in isolation: JMS listener pull rate × dispatch rate × HTTP-publish rate, with no ACS dependency on the hot path.</li>
- * </ol>
- *
- * <p>
- * What this measures that {@link MultiEventNoLossReliabilityIT} cannot: the connector's actual processing rate. With ACS REST as the bottleneck (~10 ev/s), any "drain time" measurement on real events tells you about ACS, not the connector. Synthetic events bypass that bottleneck entirely so you see what the connector itself can do.
- *
- * <p>
- * What this measures that {@link BacklogDrainReliabilityIT} cannot: pure publish-side throughput at scale. Option B is bounded by the pre-stage cost (~90s for 1000 events) and exercises the full content pipeline; Option C runs in seconds, scales to 5000+ events, and isolates the publish-side path.
- *
- * <p>
- * What this DOES NOT measure: the content pipeline. Synthetic events have no {@code content} block, so the connector never invokes {@code IngestContentCommandHandler}. A regression on the upload leg ({@code /presigned-urls}, S3 PUT, content-event POST) is invisible here. Option B covers that end of the pipeline; this is the complementary half.
- *
- * <p>
- * Empirical sizing notes: observed ~5359 ev/s connector drain rate on a healthy local laptop run ({@value #EVENT_COUNT} events drained in ~0.9 s) with publish at ~716 ev/s (~7 s for {@value #EVENT_COUNT} events). Combined with the ~10 ev/s rate from {@link BacklogDrainReliabilityIT}, this pins the content pipeline (ACS download + S3 PUT + content-event POST) as ~500× more expensive than the connector's metadata path alone — i.e. the connector publish-side itself is plenty fast and the throughput ceiling is set entirely by the content leg, not by JMS-listener throughput or HTTP-publish overhead. An earlier run measured drain at ~1361 ev/s with the live-ingester defaulting to DEBUG logging; raising the floor to INFO via {@code LiveIngesterEnvVars} cut log overhead and lifted the rate ~4× to the current ~5359 ev/s, so DEBUG-level logging is a non-trivial drag and INFO is the realistic CI baseline. The {@value #DRAIN_SLA_MS} ms drain cap gives ~20× headroom on the observed rate for CI
- * cold-cache variance; tightenable once we have a corpus of green CI runs.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=SyntheticEventThroughputReliabilityIT}.
+ * Complement to {@link BacklogDrainReliabilityIT}, which exercises the full content pipeline.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -78,13 +57,7 @@ public class SyntheticEventThroughputReliabilityIT extends BaseReliabilityIT
 {
     private static final String REPO_EVENT_TOPIC = "alfresco.repo.event2";
     private static final int EVENT_COUNT = 5000;
-    /**
-     * SLA for the drain phase only — wall-clock time from "publish loop returned" to "convergence threshold met". Generous for the first run; see class Javadoc.
-     */
     private static final long DRAIN_SLA_MS = 20_000;
-    /**
-     * Per-attempt step for the drain convergence loop. Short on purpose so the first-success time is close to the actual drain time rather than poll-interval-rounded.
-     */
     private static final int CONVERGENCE_DELAY_MS = 200;
     private static final int CONVERGENCE_MAX_ATTEMPTS = (int) (DRAIN_SLA_MS / CONVERGENCE_DELAY_MS);
 

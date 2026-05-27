@@ -32,11 +32,10 @@ import static org.apache.camel.LoggingLevel.INFO;
 import static org.alfresco.hxi_connector.common.adapters.messaging.repository.ApplicationInfoProvider.USER_AGENT_DATA;
 import static org.alfresco.hxi_connector.common.util.ErrorUtils.UNEXPECTED_STATUS_CODE_MESSAGE;
 
-import java.util.Set;
-
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
@@ -74,11 +73,16 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     {
         // @formatter:off
         String ingestionEndpoint = buildIngestionEndpoint();
+        // onException is log-only. Throwing or otherwise mutating the exchange from inside an
+        // onException processor triggers Camel's FatalFallbackErrorHandler, which short-circuits
+        // the outer transacted route's error handling. Retry classification for transient I/O
+        // is delegated to publishMessage()'s catch block, which calls
+        // ErrorUtils.wrapErrorAndThrowIfNecessary against the configured retry reasons set so
+        // an in-cause-chain HttpHostConnectException / NoHttpResponseException / etc. is
+        // re-thrown as EndpointServerErrorException for @Retryable to match.
         onException(Exception.class)
             .log(LoggingLevel.ERROR, log, "Ingestion :: Unexpected response - Endpoint: %s".formatted(ingestionEndpoint))
-            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
-            .process(this::wrapErrorIfNecessary)
-            .stop();
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR));
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
@@ -117,10 +121,32 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
     @Override
     public void publishMessage(NodeEvent event)
     {
-        camelContext.createFluentProducerTemplate()
-                .to(LOCAL_ENDPOINT)
-                .withBody(event)
-                .request();
+        try
+        {
+            camelContext.createFluentProducerTemplate()
+                    .to(LOCAL_ENDPOINT)
+                    .withBody(event)
+                    .request();
+        }
+        catch (CamelExecutionException e)
+        {
+            classifyAndRethrow(e);
+            throw e;
+        }
+    }
+
+    /**
+     * Translates transient I/O causes (e.g. {@code HttpHostConnectException}, {@code NoHttpResponseException}, {@code SocketException}) into {@link EndpointServerErrorException} so {@code @Retryable} on {@link #publishMessage(NodeEvent)} matches and Spring Retry's listener ({@code RetryMetricsRecorder}) records the attempt under the stable {@code exception=EndpointServerErrorException} tag — independent of which concrete Apache HC exception class the underlying Camel HTTP component happened to surface.
+     */
+    private void classifyAndRethrow(CamelExecutionException e)
+    {
+        Throwable cause = e.getCause();
+        if (cause instanceof Exception causeException)
+        {
+            ErrorUtils.wrapErrorAndThrowIfNecessary(causeException,
+                    integrationProperties.hylandExperience().ingester().retry().reasons(),
+                    LiveIngesterRuntimeException.class);
+        }
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
@@ -133,14 +159,5 @@ public class HxInsightEventPublisher extends RouteBuilder implements IngestionEn
         }
 
         ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
-    }
-
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().ingester().retry().reasons();
-
-        ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
     }
 }

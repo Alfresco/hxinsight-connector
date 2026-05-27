@@ -40,21 +40,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Poison-pill on the repo events topic: a malformed JSON payload is published directly onto {@code alfresco.repo.event2} and we observe how the live-ingester handles it.
- *
- * <p>
- * Bypasses Toxiproxy by publishing the synthetic message directly to the broker's host-mapped OpenWire port (via {@link DirectTopicPublisher}) so the test exercises the route's exception handler, not its reconnect logic. The repository is not involved — the malformed payload would never originate from a real ACS.
- *
- * <p>
- * Asserts the three reliability invariants we expect a robust route to honour:
- * <ol>
- * <li><b>Liveness</b> — a valid sentinel event published <i>after</i> the poison pill (via the normal ACS create path) still reaches HX Insight, proving the route did not stop after the failure.</li>
- * <li><b>No silent drop</b> — the malformed message must end up on {@code ActiveMQ.DLQ}, i.e. {@code dlqDepth() >= 1}. A {@code 0} here means the broker ACK'd the message without anyone processing it, so it vanished.</li>
- * <li><b>No retry storm</b> — DLQ depth equals exactly {@code 1}, not {@code N}. A larger value would mean the route is retrying the same poisoned payload tens of times before parking it.</li>
- * </ol>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=RepoEventPoisonPillReliabilityIT}.
+ * Malformed JSON published directly to the repo events topic. Asserts the route survives, the message lands on the DLQ exactly once (no retry storm), and a sentinel still reaches HX Insight.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -62,9 +48,7 @@ public class RepoEventPoisonPillReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
     private static final String REPO_EVENT_TOPIC = "alfresco.repo.event2";
-    /**
-     * Not valid JSON, deliberately. The Camel-Jackson body converter throws while unmarshalling, and the route's error handler must dead-letter the original payload.
-     */
+    /** Deliberately not valid JSON — Camel-Jackson throws while unmarshalling. */
     private static final String POISON_PAYLOAD = "{ this is not valid JSON :: poison-pill from RepoEventPoisonPillReliabilityIT";
     private static final int CONVERGENCE_DELAY_MS = 1_000;
 

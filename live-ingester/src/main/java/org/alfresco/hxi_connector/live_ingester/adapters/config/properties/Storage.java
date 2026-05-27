@@ -43,7 +43,7 @@ public record Storage(@NotNull Location location, @NotNull Upload upload)
 
     public Storage
     {
-        upload = requireNonNullElse(upload, new Upload(new Retry(), 0));
+        upload = requireNonNullElse(upload, new Upload(new Retry(), 30000));
     }
 
     public record Location(
@@ -59,7 +59,7 @@ public record Storage(@NotNull Location location, @NotNull Upload upload)
 
     public record Upload(
             @NotNull @NestedConfigurationProperty Retry retry,
-            @PositiveOrZero @DefaultValue("0") int responseTimeoutMs)
+            @PositiveOrZero @DefaultValue("30000") int responseTimeoutMs)
     {
         public Upload
         {

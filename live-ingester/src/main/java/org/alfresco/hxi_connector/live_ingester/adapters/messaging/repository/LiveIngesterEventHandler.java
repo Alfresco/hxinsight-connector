@@ -41,7 +41,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Repository.EventsSubscription;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.mapper.CamelEventMapper;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DeadLetterChannels;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetric;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetricsRecorder;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
@@ -67,14 +66,13 @@ public class LiveIngesterEventHandler extends RouteBuilder
         EventsSubscription subscription = integrationProperties.alfresco().repository().eventsSubscription();
         String eventSource = buildEventSourceUri(subscription);
 
-        if (subscription.deadLetterEnabled())
-        {
-            errorHandler(DeadLetterChannels.forRoute(subscription, dlqMetricsRecorder, DLQ_METRIC, log));
-        }
-        else
-        {
-            log.warn("Repository :: dead-letter channel disabled. Set alfresco.repository.events-subscription.dead-letter-enabled=true to re-enable.");
-        }
+        // Failed messages take the broker DLQ path: the JMS consumer is transactional (configured
+        // globally via camel.component.activemq.transacted=true), so any unhandled exception rolls
+        // back the JMS session and the broker enqueues the message onto ActiveMQ.DLQ. The
+        // onException below is metric-only — it does not call .handled(true), .stop(), or otherwise
+        // mutate the exchange, so the exception propagates as normal and TX rollback proceeds.
+        onException(Exception.class)
+                .process(exchange -> dlqMetricsRecorder.record(exchange, DLQ_METRIC));
 
         SecurityContext securityContext = SecurityContextHolder.getContext();
         from(eventSource)
@@ -94,7 +92,7 @@ public class LiveIngesterEventHandler extends RouteBuilder
         String baseUri = integrationProperties.alfresco().repository().eventsEndpoint();
         if (subscription == null || !subscription.durable())
         {
-            log.info("Repository :: Subscribing to {} as a non-durable consumer. Events published while disconnected will be dropped by the broker. Set ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE=true to enable a durable subscription.", baseUri);
+            log.warn("Repository :: Subscribing to {} as a non-durable consumer — events published while disconnected (broker restart, network partition, ingester restart) will be silently dropped by the broker. The default is durable; this code path is hit only when ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE is explicitly set to false. Unset (or set to true) to restore broker-side replay across reconnects.", baseUri);
             return baseUri;
         }
 

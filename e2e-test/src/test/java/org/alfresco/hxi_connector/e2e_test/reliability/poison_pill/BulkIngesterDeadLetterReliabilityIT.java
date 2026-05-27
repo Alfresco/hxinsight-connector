@@ -40,24 +40,10 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Verifies the bulk-ingester ingress route's explicit dead-letter policy: an unprocessable message must be retried with bounded redelivery, parked on {@code ActiveMQ.DLQ}, counted in the route's Micrometer counter, and the route must remain alive afterwards.
+ * Bulk-ingester ingress route DLC. An unprocessable message must be bounded-redelivered, parked on the DLQ exactly once, and the route must stay alive.
  *
  * <p>
- * The synthetic malformed payload published by this test is a <b>test-only stand-in for any uncaught exception in real traffic</b>. The realistic real-world trigger for this route's dead-letter pathway is a transient downstream failure (HX Insight 5xx, network blip), not external poison-pill input — the producer for the {@code bulk-ingester-events} queue is the bulk-ingester service shipped from this repository, so a malformed payload would in practice mean a producer/consumer schema skew of our own making. Provoking the exception path with malformed JSON is simply the cheapest way to exercise the {@code DeadLetterChannel} configuration end-to-end.
- *
- * <p>
- * Bypasses Toxiproxy by publishing the synthetic message directly to the broker's host-mapped OpenWire port (via {@link DirectQueuePublisher}) so the test exercises the route's exception handler, not its reconnect logic.
- *
- * <p>
- * Asserts the three reliability invariants we expect a robust route to honour:
- * <ol>
- * <li><b>Liveness</b> — a valid sentinel event published <i>after</i> the unprocessable message (via the normal ACS create path) still reaches HX Insight, proving the route did not stop after the failure. The sentinel travels through the repo-events route rather than the bulk-ingester route because the reliability environment does not include a running bulk-ingester service; ACS create still proves the live-ingester JVM and broker connection are healthy.</li>
- * <li><b>Bounded redelivery exhausts to DLQ</b> — the malformed message must end up on {@code ActiveMQ.DLQ}, i.e. {@code dlqDepth() >= 1}. A {@code 0} here means the broker ACK'd the message without anyone processing it, so it vanished.</li>
- * <li><b>No retry storm</b> — DLQ depth equals exactly {@code 1}, not {@code N}. A larger value would mean the route is retrying the same payload tens of times before parking it.</li>
- * </ol>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=BulkIngesterDeadLetterReliabilityIT}.
+ * Malformed JSON is a test-only stand-in for any uncaught exception in the route — the realistic real-world trigger is a downstream failure, not poison-pill input.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -65,9 +51,7 @@ public class BulkIngesterDeadLetterReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
     private static final String BULK_INGESTER_QUEUE = "bulk-ingester-events";
-    /**
-     * Not valid JSON, deliberately. The Camel route's body deserialization throws while unmarshalling, and the route's error handler must dead-letter the original payload. See class javadoc for why "malformed input" is a synthetic test vehicle here rather than a realistic threat model.
-     */
+    /** Deliberately invalid JSON; the route's unmarshaller throws and the DLC must park the payload. */
     private static final String UNPROCESSABLE_PAYLOAD = "{ this is not valid JSON :: stand-in for any route exception, from BulkIngesterDeadLetterReliabilityIT";
     private static final int CONVERGENCE_DELAY_MS = 1_000;
 

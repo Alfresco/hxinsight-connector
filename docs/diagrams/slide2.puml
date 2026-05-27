@@ -1,0 +1,24 @@
+@startuml hxi-connector-flow
+!theme plain
+left to right direction
+skinparam componentStyle rectangle
+skinparam DefaultFontSize 13
+skinparam shadowing false
+skinparam roundCorner 8
+rectangle "ACS" as acs
+queue    "ActiveMQ broker\nalfresco.repo.event2 (topic)" as amq
+rectangle "hxinsight-connector" as connector {
+  rectangle "Live-ingester" as live
+}
+cloud    "CIC Insight Ingestion API\n(WireMock in tests)" as cic
+cloud "Transform path\n(router • core-aio • SFS)" as tx
+cloud    "S3" as s3
+acs  -[#333333,thickness=2]->  amq  : 1. repo event
+amq  -[#333333,thickness=2]->  live : 2. consume
+live -[#CC5500,thickness=2]->  tx   : 3a. transform request
+tx   -[#CC5500,thickness=2]->  live : 3b. rendition file
+live -[#2E8B57,thickness=2]->  cic  : 4. POST ingest event
+live -[#2E8B57,thickness=2]->  s3   : 5. PUT rendition
+
+
+@enduml

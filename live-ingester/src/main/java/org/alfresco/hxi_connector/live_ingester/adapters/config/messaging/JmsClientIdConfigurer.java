@@ -27,18 +27,17 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.messaging;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.config.BeanPostProcessor;
+import org.springframework.boot.activemq.autoconfigure.ActiveMQConnectionFactoryCustomizer;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
-import org.springframework.jms.connection.SingleConnectionFactory;
 import org.springframework.stereotype.Component;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 
 /**
- * Sets the JMS {@code clientId} on the autoconfigured {@link SingleConnectionFactory} so the live-ingester can subscribe to {@code alfresco.repo.event2} as a durable consumer. Runs as a {@link BeanPostProcessor} because {@code SingleConnectionFactory} rejects late {@code setClientID} calls once a connection is open ("setClientID call not supported on proxy for shared Connection").
+ * Sets the JMS {@code clientID} on the autoconfigured {@code ActiveMQConnectionFactory} so the live-ingester can subscribe to {@code alfresco.repo.event2} as a durable consumer. Implemented as an {@link ActiveMQConnectionFactoryCustomizer} (vs. a {@code BeanPostProcessor} on Spring's {@code SingleConnectionFactory}) because the customizer hook fires at the right point in Spring Boot's ActiveMQ auto-configuration lifecycle and does not depend on bean-instantiation ordering — a {@code BeanPostProcessor} that depends on application beans (here, {@code IntegrationProperties}) can be created late, after Spring has already instantiated and shared the {@code ConnectionFactory}, leaving the durable consumer without a clientID.
  *
  * <p>
- * The clientId applies to every JMS connection in this process (repo events, bulk-ingester events, transform.response). JMS permits one active connection per clientId per broker, so the durable-subscription path is single-instance only;
+ * The clientID applies to every JMS connection that the {@code ActiveMQConnectionFactory} produces in this process (repo events, bulk-ingester events, transform.response). JMS permits one active connection per clientID per broker, so the durable-subscription path is single-instance only.
  *
  * <p>
  * Activated by {@code alfresco.repository.events-subscription.durable=true}.
@@ -47,19 +46,15 @@ import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationPrope
 @ConditionalOnProperty(prefix = "alfresco.repository.events-subscription", name = "durable", havingValue = "true")
 @RequiredArgsConstructor
 @Slf4j
-public class JmsClientIdConfigurer implements BeanPostProcessor
+public class JmsClientIdConfigurer implements ActiveMQConnectionFactoryCustomizer
 {
     private final IntegrationProperties integrationProperties;
 
     @Override
-    public Object postProcessBeforeInitialization(Object bean, String beanName)
+    public void customize(org.apache.activemq.ActiveMQConnectionFactory factory)
     {
-        if (bean instanceof SingleConnectionFactory factory)
-        {
-            String clientId = integrationProperties.alfresco().repository().eventsSubscription().name();
-            factory.setClientId(clientId);
-            log.info("JMS :: configured clientId={} on bean '{}' to enable durable topic subscription", clientId, beanName);
-        }
-        return bean;
+        String clientId = integrationProperties.alfresco().repository().eventsSubscription().name();
+        factory.setClientID(clientId);
+        log.info("JMS :: configured clientID={} on ActiveMQConnectionFactory to enable durable topic subscription", clientId);
     }
 }

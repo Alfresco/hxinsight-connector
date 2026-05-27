@@ -35,11 +35,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.model.dataformat.JsonLibrary;
@@ -78,11 +78,16 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     {
         // @formatter:off
         String storageRequestEndpoint = buildStorageRequestEndpoint();
+        // onException is log-only. Throwing or otherwise mutating the exchange from inside an
+        // onException processor triggers Camel's FatalFallbackErrorHandler, which short-circuits
+        // the outer transacted route's error handling. Retry classification for transient I/O
+        // is delegated to requestStorageLocation()'s catch block, which calls
+        // ErrorUtils.wrapErrorAndThrowIfNecessary against the configured retry reasons set so
+        // a Jackson parse failure / HttpHostConnectException / NoHttpResponseException / etc.
+        // is re-thrown as EndpointServerErrorException for @Retryable to match.
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while requesting pre-signed URL - Endpoint: %s".formatted(storageRequestEndpoint))
-            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
-            .process(this::wrapErrorIfNecessary)
-            .stop();
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR));
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
@@ -121,9 +126,31 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
     @Override
     public PreSignedUrlResponse requestStorageLocation()
     {
-        return camelContext.createFluentProducerTemplate()
-                .to(LOCAL_ENDPOINT)
-                .request(PreSignedUrlResponse.class);
+        try
+        {
+            return camelContext.createFluentProducerTemplate()
+                    .to(LOCAL_ENDPOINT)
+                    .request(PreSignedUrlResponse.class);
+        }
+        catch (CamelExecutionException e)
+        {
+            classifyAndRethrow(e);
+            throw e;
+        }
+    }
+
+    /**
+     * Translates transient I/O / parse causes (e.g. {@code HttpHostConnectException}, {@code NoHttpResponseException}, {@code JsonEOFException}, {@code MismatchedInputException}) into {@link EndpointServerErrorException} so {@code @Retryable} on {@link #requestStorageLocation()} matches and Spring Retry's listener ({@code RetryMetricsRecorder}) records the attempt under the stable {@code exception=EndpointServerErrorException} tag — independent of which concrete Apache HC / Jackson exception class the underlying Camel HTTP component happened to surface.
+     */
+    private void classifyAndRethrow(CamelExecutionException e)
+    {
+        Throwable cause = e.getCause();
+        if (cause instanceof Exception causeException)
+        {
+            ErrorUtils.wrapErrorAndThrowIfNecessary(causeException,
+                    integrationProperties.hylandExperience().storage().location().retry().reasons(),
+                    LiveIngesterRuntimeException.class);
+        }
     }
 
     @SuppressWarnings({"unchecked", "PMD.UnusedPrivateMethod"})
@@ -173,12 +200,4 @@ public class PreSignedUrlRequester extends RouteBuilder implements StorageLocati
         ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
-
-        ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
 }

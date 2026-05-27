@@ -41,22 +41,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Short network partition (~2 s) between live-ingester and ActiveMQ: the chaos window is shorter than the broker's heartbeat / reconnect detection budget, so the connector should ride it out without stopping the route or accumulating any DLQ traffic.
- *
- * <p>
- * Differs from {@link ActiveMqPartitionReliabilityIT}'s 30-second partition: that scenario forces a full disconnect/reconnect cycle and exercises the durable-subscription replay path; this one stresses the connector's tolerance of brief broker round-trip blips that, in production, would correspond to a transient network hiccup rather than a real outage.
- *
- * <p>
- * Asserts:
- * <ul>
- * <li><b>Liveness</b> — a sentinel published right after the brief partition reaches HX Insight; the route did not stop, and the topic subscription is still alive.</li>
- * <li><b>Completeness</b> — the pre-partition baseline event also reaches HX Insight (proves topology was healthy before the chaos started; failure here means the test is wrong, not the system).</li>
- * <li><b>No silent drop</b> — DLQ depth stays at {@code 0}; brief network blips are not error events and must not be dead-lettered.</li>
- * <li><b>Topic subscription preserved</b> — subscriber count remains {@code >= 1} after the blip.</li>
- * </ul>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=ActiveMqShortPartitionReliabilityIT}.
+ * 2 s broker partition — shorter than the heartbeat budget, so the connector should ride it out. Asserts liveness, empty DLQ, and a preserved durable subscription. Longer outage covered by {@link ActiveMqPartitionReliabilityIT}.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})

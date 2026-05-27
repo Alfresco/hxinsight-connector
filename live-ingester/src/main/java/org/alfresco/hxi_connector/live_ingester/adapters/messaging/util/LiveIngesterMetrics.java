@@ -69,7 +69,7 @@ public final class LiveIngesterMetrics
     }
 
     /**
-     * Counters incremented when an event bypasses normal processing — either silently dropped on a known by-design path (status=400 transform-response with the throw opt-in off) or skipped because no dispatch predicate matched (unknown {@code eventType}).
+     * Counters incremented when an event bypasses normal processing — either silently dropped on a known by-design path (status=400 transform-response when the throw default is opted out) or skipped because no dispatch predicate matched (unknown {@code eventType}).
      */
     public static final class Drop
     {
@@ -77,7 +77,7 @@ public final class LiveIngesterMetrics
         public static final String REPO_EVENTS_UNHANDLED_DESCRIPTION = "Repository events whose eventType matched no dispatch predicate and were therefore skipped without being routed to any command handler";
 
         public static final String TRANSFORM_RESPONSE_SILENT = "live_ingester_transform_response_silent_drop_total";
-        public static final String TRANSFORM_RESPONSE_SILENT_DESCRIPTION = "Failed transform-responses (status=400) silently dropped by the default-deployment branch in ATSTransformResponseHandler.ingestContent (ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false). Drops to zero when deployments opt in to dead-letter coverage and the entries land on " + Dlq.TRANSFORM_RESPONSE + " instead.";
+        public static final String TRANSFORM_RESPONSE_SILENT_DESCRIPTION = "Failed transform-responses (status=400) silently dropped by the legacy branch in ATSTransformResponseHandler.ingestContent (ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false). Zero under the default-on throw contract — failed transforms land on " + Dlq.TRANSFORM_RESPONSE + " instead. Non-zero only when deployments opt out.";
 
         public static final String CONTENT_NO_MIME_MAPPING = "live_ingester_content_no_mime_mapping_total";
         public static final String CONTENT_NO_MIME_MAPPING_DESCRIPTION = "Content events skipped because MimeTypeMapper returned EMPTY_MIME_TYPE — either no rule matched the source MIME type or the matching rule had an empty target. Tagged with the source MIME type so operators can spot misconfigured alfresco.transform.mime-type.mapping entries.";

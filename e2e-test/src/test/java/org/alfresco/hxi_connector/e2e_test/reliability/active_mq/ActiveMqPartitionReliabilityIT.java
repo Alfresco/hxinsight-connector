@@ -40,27 +40,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Mid-stream network partition between live-ingester and ActiveMQ: the broker is reachable from the repository (which keeps publishing repo events) but unreachable from the live-ingester for the duration of the partition. Verifies that no event is silently dropped while the consumer is detached and that the route resumes on its own once connectivity heals.
- *
- * <p>
- * Shape (three publishes around one disable/enable):
- * <ol>
- * <li><b>Pre-outage</b> — baseline create on a healthy path; must reach HX Insight before the partition starts.</li>
- * <li><b>Partition</b> — disable the Toxiproxy for ~{@value #PARTITION_SECONDS} seconds. While the proxy is disabled, create a <i>mid-outage</i> node. The repository still reaches ActiveMQ directly (it connects to {@code activemq:61616}, not through Toxiproxy), so the repo-event publish lands on the topic even though the live-ingester's subscriber is disconnected. Whether that message is retained and replayed on reconnect depends on the topic subscription being durable.</li>
- * <li><b>Post-outage</b> — a third create after re-enabling the proxy; must reach HX Insight after the partition heals.</li>
- * </ol>
- *
- * <p>
- * Asserts all four reliability invariants exercised by this scenario:
- * <ul>
- * <li><b>Completeness</b> — every committed ACS create (including the mid-outage one) produces at least one ingestion event downstream.</li>
- * <li><b>Backlog drain</b> — an event published while the subscriber is disconnected is still delivered after recovery. A failure here would mean the subscription is non-durable and the broker dropped the message — a silent-drop regression.</li>
- * <li><b>Liveness</b> — once the partition heals, downstream traffic resumes without manual intervention.</li>
- * <li><b>No silent drop</b> — DLQ depth is observable and remains 0 (any drop would land here, not on the floor).</li>
- * </ul>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=ActiveMqPartitionReliabilityIT}.
+ * Mid-stream partition between live-ingester and ActiveMQ. The repository keeps publishing through the broker's direct alias; the connector's view goes dark via Toxiproxy. Asserts that the durable subscription preserves the mid-outage event and the route recovers on its own.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})

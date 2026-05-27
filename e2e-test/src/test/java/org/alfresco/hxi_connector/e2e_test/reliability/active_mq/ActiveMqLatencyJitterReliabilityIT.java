@@ -43,22 +43,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Latency + jitter on the broker -> live-ingester path: Toxiproxy adds ~300 ms downstream latency with ±200 ms jitter for the duration of a sustained ~20-event publish burst. The connection stays open and bytes keep flowing, but message delivery is irregular and round-trips are stretched.
- *
- * <p>
- * The threat model here is reordering, throughput collapse, or a redelivery loop driven by a heartbeat-near-timeout boundary. The connector should keep flushing messages at the throttled rate without losing or unboundedly duplicating events; once latency is removed, throughput should resume normal speed.
- *
- * <p>
- * Asserts:
- * <ul>
- * <li><b>Completeness</b> — every one of the ~20 events published during the latency window reaches HX Insight after recovery.</li>
- * <li><b>Bounded resources</b> — the test wall-time stays bounded by the chaos window plus the convergence budget; no thread or connection leak that would drag this past the {@link RetryUtils} budget.</li>
- * <li><b>No silent drop</b> — DLQ depth stays at {@code 0}; latency is not an error event.</li>
- * <li><b>Topic subscription preserved</b> — subscriber count remains {@code >= 1} after recovery.</li>
- * </ul>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=ActiveMqLatencyJitterReliabilityIT}.
+ * Latency + jitter on the broker → live-ingester path while a ~20-event burst is being published. Connection stays open but messages are throttled and uneven. Asserts every event arrives, the DLQ stays empty, and the subscription is preserved.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})

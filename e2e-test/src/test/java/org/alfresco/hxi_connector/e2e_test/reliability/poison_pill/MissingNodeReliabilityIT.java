@@ -41,27 +41,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Pins the connector's behaviour when a syntactically-valid {@code Created}-with-content event references a node id that ACS does not have.
- *
- * <p>
- * For metadata-only events ACS REST is never consulted (the event itself carries the metadata), so 404 cannot surface. To exercise the lookup path the test publishes an event with a non-zero {@code content.sizeInBytes}, which makes {@code EventProcessor} run {@code handleContentChange} and call {@code AlfrescoRepositoryContentClient.downloadContent(nodeId)} against {@code /api/-default-/public/alfresco/versions/1/nodes/{nodeId}/content}.
- *
- * <p>
- * Expected behaviour (PASS today):
- * <ol>
- * <li><b>No retry storm at the HTTP layer</b> — {@code @Retryable(retryFor = EndpointServerErrorException.class)} on {@code downloadContent} does not catch {@link org.alfresco.hxi_connector.common.exception.ResourceNotFoundException} (404 is special-cased in {@code ErrorUtils.throwExceptionOnUnexpectedStatusCode}), so the call fails immediately on the first attempt instead of retrying for ~8.5 minutes.</li>
- * <li><b>Bounded redelivery and dead-letter</b> — the exception propagates through the route's {@code onException(Exception.class).process(::wrapErrorIfNecessary).stop()} and the JMS-level handler then performs at most {@code maximumRedeliveries} attempts (1 in the test profile, 6 in production) before parking the message on {@code ActiveMQ.DLQ} with {@code live_ingester_repo_events_dlq_total} incremented. Operators see one DLQ entry per such event, never an infinite loop.</li>
- * <li><b>Liveness</b> — the route survives the failure: a sentinel event published afterwards via the normal ACS create path still reaches HX Insight.</li>
- * </ol>
- *
- * <p>
- * Note on partial state at HX Insight: {@code EventProcessor.process} runs {@code handleMetadataPropertiesChange} <i>before</i> {@code handleContentChange}, so the metadata POST to {@code /ingestion-events} succeeds <i>before</i> the ACS lookup 404s. Each JMS redelivery re-POSTs the metadata (HX Insight is replay-safe — duplicate metadata POSTs for the same {@code (sourceId, objectId)} are de-duplicated server-side), so this test asserts {@link WiremockCounts#ingestionEventsFor(String)} with a {@code >= 1} bound rather than an exact count. The end-state is: HX Insight has the metadata for the missing node id, the original message is on DLQ, and the content was never uploaded.
- *
- * <p>
- * Bypasses Toxiproxy via {@link DirectTopicPublisher} so the test exercises the dispatch + ACS-lookup + dead-letter path, not reconnect logic. The fabricated node id is fresh per run so we never collide with anything else in the topic.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test failsafe:integration-test failsafe:verify -Preliability-tests -Dit.test=MissingNodeReliabilityIT}.
+ * Event references a node id ACS does not have. The content-download {@code @Retryable} must not catch 404 (no retry storm), the JMS redelivery budget exhausts, and the message lands on the DLQ. The metadata POST succeeds before the 404 so HX Insight ends up with metadata-only state.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -70,9 +50,6 @@ public class MissingNodeReliabilityIT extends BaseReliabilityIT
     private static final String REPO_EVENT_TOPIC = "alfresco.repo.event2";
     private static final String PARENT_ID = "-my-";
     private static final int MIN_INGESTION_FOR_FABRICATED = 1;
-    /**
-     * Convergence budget tuned to the test-profile JMS DLC: 1 redelivery with 200 ms delay (see {@link ReliabilityEnvironment}). 4s gives the broker comfortable headroom to land the parked message on the DLQ even when the host is loaded, while staying short enough to keep the IT under 30s wall-time.
-     */
     private static final int CONVERGENCE_DELAY_MS = 4_000;
 
     @Test

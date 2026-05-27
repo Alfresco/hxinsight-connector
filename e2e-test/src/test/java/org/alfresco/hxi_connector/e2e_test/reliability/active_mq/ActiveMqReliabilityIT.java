@@ -48,13 +48,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Baseline reliability test: verifies that a node created in ACS produces the expected ingestion traffic on HX Insight when ActiveMQ is consumed by live-ingester via Toxiproxy, without any chaos applied.
- *
- * <p>
- * Purpose: prove the Toxiproxy harness is correctly wired end-to-end. Any chaos scenarios (disable/enable the proxy, latency, bandwidth cuts, container restarts) will be added in later milestones.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile at Maven level; default is to skip. Opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests}.
+ * No-chaos baseline. Proves the Toxiproxy harness is wired end-to-end before any chaos scenarios apply.
  */
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
 public class ActiveMqReliabilityIT extends BaseReliabilityIT

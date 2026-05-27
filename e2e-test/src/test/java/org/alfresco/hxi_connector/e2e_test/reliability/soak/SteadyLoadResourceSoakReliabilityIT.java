@@ -44,13 +44,10 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.WiremockCounts;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Bounded-resources soak guard: submits {@value #SOAK_NODE_COUNT} content events end-to-end at the natural ACS REST rate (~10 ev/s) and asserts that the live-ingester's bounded resources (live threads, loaded classes) settle back to within tolerance of their pre-load baseline once the load has drained, with the durable subscription preserved and the DLQ empty. Catches per-message resource leaks that scale with work volume — leaked HTTP-client thread workers, classloader-retaining caches, lingering subscribers — and would not surface in short single-shot ITs.
+ * Resource-leak soak. Pushes {@value #SOAK_NODE_COUNT} content events through at the natural ACS rate and asserts that thread and class counts settle near their pre-load baseline. Catches per-message leaks that only surface at volume.
  *
  * <p>
- * Shape: warm-up ({@value #WARMUP_NODE_COUNT} events to flatten the cold-class tail) → baseline snapshot → soak ({@value #SOAK_NODE_COUNT} events end-to-end) → drain → settle → post snapshot. Same pattern as {@code ActiveMqReconnectStormReliabilityIT}; the warm-up phase is what stops cold-cache class loading from masquerading as a leak.
- *
- * <p>
- * Heap is intentionally not asserted. Container-default JVM heap settings + G1's IHOP threshold mean mixed-GC cycles only fire above a few hundred MB of allocation, so neither {@code jvm.memory.used} (conflates retained data with uncollected young-gen garbage) nor {@code jvm.gc.live.data.size} (zero until a mixed GC fires) gives a stable signal at this event count. Heap leaks of the magnitudes that matter (per-event collection growth, classloader retention) co-vary with thread or class growth, which we do assert; the post-soak heap is included in the snapshot log line for diagnostic triage only.
+ * Heap is logged but not asserted: container heap settings and G1's IHOP threshold mean the gauge is too noisy at this scale. Heap leaks that matter co-vary with thread/class growth, which we do assert.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})

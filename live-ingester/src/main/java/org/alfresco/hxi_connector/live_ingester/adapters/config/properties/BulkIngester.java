@@ -26,20 +26,12 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.PositiveOrZero;
 
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.validation.annotation.Validated;
 
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DeadLetterChannelConfig;
-
 @Validated
 public record BulkIngester(
         @NotBlank String endpoint,
-        @DefaultValue("false") boolean deadLetterEnabled,
-        @NotBlank @DefaultValue("activemq:queue:ActiveMQ.DLQ") String deadLetterUri,
-        @PositiveOrZero @DefaultValue("6") int maximumRedeliveries,
-        @PositiveOrZero @DefaultValue("1000") long redeliveryDelayMs,
         @DefaultValue("false") boolean observeContentDrops)
-        implements DeadLetterChannelConfig
 {}
