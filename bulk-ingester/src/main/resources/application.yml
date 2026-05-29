@@ -35,3 +35,10 @@ alfresco:
     path:
       allow:
       deny:
+    required-fields:
+      - name
+      - type
+      - createdAt
+      - createdBy
+      - modifiedAt
+      - modifiedBy

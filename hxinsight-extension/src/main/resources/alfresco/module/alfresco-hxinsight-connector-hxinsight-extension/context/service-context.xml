@@ -63,7 +63,7 @@
 
     <bean id="predictionMapper" class="org.alfresco.hxi_connector.hxi_extension.service.PredictionMapperImpl"/>
 
-    <bean id="questionMapper" class="org.alfresco.hxi_connector.hxi_extension.service.QuestionMapperImpl"/>
+    <bean id="agentAnswerMapper" class="org.alfresco.hxi_connector.hxi_extension.service.AgentAnswerMapperImpl"/>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.PredictionChildrenRelation">
         <property name="nodes" ref="nodes"/>
@@ -132,7 +132,7 @@
         <constructor-arg name="authenticationService" ref="AuthenticationService"/>
         <constructor-arg name="personService" ref="PersonService"/>
         <constructor-arg name="applicationInfoProvider" ref="applicationInfoProvider"/>
-        <constructor-arg name="questionMapper" ref="questionMapper"/>
+        <constructor-arg name="agentAnswerMapper" ref="agentAnswerMapper"/>
     </bean>
 
     <bean class="org.alfresco.hxi_connector.hxi_extension.rest.api.QuestionsEntityResource"/>

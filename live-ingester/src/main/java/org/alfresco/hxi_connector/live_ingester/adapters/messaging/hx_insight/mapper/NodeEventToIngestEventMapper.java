@@ -42,7 +42,6 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.No
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.PermissionsProperty;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
-import org.alfresco.hxi_connector.live_ingester.domain.usecase.metadata.model.EventType;
 
 @Component
 public class NodeEventToIngestEventMapper
@@ -81,10 +80,6 @@ public class NodeEventToIngestEventMapper
 
     private IngestEvent mapUpdate(UpdateNodeEvent event)
     {
-        IngestEvent.Type type = event.getEventType() == EventType.CREATE_OR_UPDATE
-                ? IngestEvent.Type.CREATE_OR_UPDATE
-                : IngestEvent.Type.DELETE;
-
         IngestEventProperties.Builder propsBuilder = IngestEventProperties.builder();
         boolean hasProperties = false;
 
@@ -110,7 +105,7 @@ public class NodeEventToIngestEventMapper
             hasProperties = true;
         }
 
-        IngestEvent.Builder builder = IngestEvent.builder(type, event.getObjectId())
+        IngestEvent.Builder builder = IngestEvent.builder(IngestEvent.Type.CREATE_OR_UPDATE, event.getObjectId())
                 .sourceId(event.getSourceId())
                 .date(Instant.ofEpochMilli(event.getTimestamp()));
 

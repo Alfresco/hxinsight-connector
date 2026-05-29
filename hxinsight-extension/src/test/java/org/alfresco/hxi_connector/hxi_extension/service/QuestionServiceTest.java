@@ -78,7 +78,7 @@ class QuestionServiceTest
     private final AuthenticationService authenticationService = mock(AuthenticationService.class);
     private final PersonService personService = mock(PersonService.class);
     private final ApplicationInfoProvider applicationInfoProvider = mock(ApplicationInfoProvider.class);
-    private final QuestionMapper questionMapper = new QuestionMapperImpl();
+    private final AgentAnswerMapper agentAnswerMapper = new AgentAnswerMapperImpl();
 
     private final IntegrationAgentService integrationAgentService = mock(IntegrationAgentService.class);
     private final IntegrationAgentService.IntegrationAgentResource integrationAgentResource = mock(IntegrationAgentService.IntegrationAgentResource.class);
@@ -87,7 +87,7 @@ class QuestionServiceTest
     private final QnaService.QuestionResource questionResource = mock(QnaService.QuestionResource.class);
 
     private final QuestionService questionService = new QuestionService(
-            agentService, qnaService, authenticationService, personService, applicationInfoProvider, questionMapper);
+            agentService, qnaService, authenticationService, personService, applicationInfoProvider, agentAnswerMapper);
 
     @BeforeEach
     void setUp()

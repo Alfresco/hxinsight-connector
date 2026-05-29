@@ -31,7 +31,7 @@ import org.hyland.sdk.cic.qna.object.Answer;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
-public interface QuestionMapper
+public interface AgentAnswerMapper
 {
     Agent toAgent(AgentSummary agentSummary);
 

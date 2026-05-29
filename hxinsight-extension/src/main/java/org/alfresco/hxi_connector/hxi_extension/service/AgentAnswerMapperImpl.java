@@ -38,7 +38,7 @@ import org.hyland.sdk.cic.qna.object.ReferenceItem;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
-public class QuestionMapperImpl implements QuestionMapper
+public class AgentAnswerMapperImpl implements AgentAnswerMapper
 {
     @Override
     public Agent toAgent(AgentSummary agentSummary)

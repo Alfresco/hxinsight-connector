@@ -73,6 +73,13 @@ public class HttpHxInsightStorageClient implements IngestionEngineStorageClient
                 {
                     return Optional.empty();
                 }
+                // TODO: Uncomment once CICBlob supports content type
+                // @Override
+                // public Optional<String> getContentType()
+                // {
+                // return Optional.ofNullable(contentType);
+                // }
+
             };
             return ingestService.uploadBlobIfNeeded(nodeId, blob)
                     .map(preSignedUrl -> {

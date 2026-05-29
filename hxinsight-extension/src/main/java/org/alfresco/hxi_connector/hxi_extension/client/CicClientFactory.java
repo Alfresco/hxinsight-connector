@@ -39,6 +39,7 @@ import org.hyland.sdk.cic.qna.QnaService;
 
 public final class CicClientFactory
 {
+    private static final String HXP_APP_VALUE = "hxai-discovery";
 
     private CicClientFactory()
     {}
@@ -48,6 +49,7 @@ public final class CicClientFactory
     {
         AgentHttpClient httpClient = AgentHttpClient.from(baseUrl, authBuilder)
                 .hxpEnvironment(environmentKey)
+                .hxpApp(HXP_APP_VALUE)
                 .build();
         return new AgentService(httpClient);
     }
@@ -57,6 +59,7 @@ public final class CicClientFactory
     {
         QnaHttpClient httpClient = QnaHttpClient.from(baseUrl, authBuilder)
                 .hxpEnvironment(environmentKey)
+                .hxpApp(HXP_APP_VALUE)
                 .build();
         return new QnaService(httpClient);
     }

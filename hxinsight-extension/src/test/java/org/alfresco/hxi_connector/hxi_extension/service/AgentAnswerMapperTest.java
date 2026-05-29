@@ -40,11 +40,11 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.hxi_extension.service.model.Agent;
 import org.alfresco.hxi_connector.hxi_extension.service.model.AnswerResponse;
 
-class QuestionMapperTest
+class AgentAnswerMapperTest
 {
     private static final String AGENT_ID = "agent-id";
 
-    private final QuestionMapper questionMapper = new QuestionMapperImpl();
+    private final AgentAnswerMapper agentAnswerMapper = new AgentAnswerMapperImpl();
 
     @Test
     void shouldMapAgentSummaryToAgent()
@@ -54,7 +54,7 @@ class QuestionMapperTest
                 "http://avatar.url", null, null, List.of(), List.of(), 1, true, null, null, null, null);
 
         // when
-        Agent agent = questionMapper.toAgent(agentSummary);
+        Agent agent = agentAnswerMapper.toAgent(agentSummary);
 
         // then
         assertEquals("agent-1", agent.getId());
@@ -71,7 +71,7 @@ class QuestionMapperTest
                 "http://static.url", "http://presigned.url", null, List.of(), List.of(), 1, true, null, null, null, null);
 
         // when
-        Agent agent = questionMapper.toAgent(agentSummary);
+        Agent agent = agentAnswerMapper.toAgent(agentSummary);
 
         // then
         assertEquals("http://presigned.url", agent.getAvatarUrl());
@@ -85,7 +85,7 @@ class QuestionMapperTest
                 List.of(), List.of(), "question text", null, null, null, null);
 
         // when
-        AnswerResponse answerResponse = questionMapper.toAnswerResponse(sdkAnswer);
+        AnswerResponse answerResponse = agentAnswerMapper.toAnswerResponse(sdkAnswer);
 
         // then
         assertEquals("answer text", answerResponse.getAnswer());
@@ -106,7 +106,7 @@ class QuestionMapperTest
                 List.of(objRef), List.of(), "question", null, null, null, null);
 
         // when
-        AnswerResponse answerResponse = questionMapper.toAnswerResponse(sdkAnswer);
+        AnswerResponse answerResponse = agentAnswerMapper.toAnswerResponse(sdkAnswer);
 
         // then
         assertEquals(1, answerResponse.getObjectReferences().size());
@@ -129,7 +129,7 @@ class QuestionMapperTest
                 List.of(objRef), List.of(), "question", null, null, null, null);
 
         // when
-        AnswerResponse answerResponse = questionMapper.toAnswerResponse(sdkAnswer);
+        AnswerResponse answerResponse = agentAnswerMapper.toAnswerResponse(sdkAnswer);
 
         // then
         AnswerResponse.Reference mappedRef = answerResponse.getObjectReferences().iterator().next()
@@ -145,7 +145,7 @@ class QuestionMapperTest
                 null, null, "question", null, null, null, null);
 
         // when
-        AnswerResponse answerResponse = questionMapper.toAnswerResponse(sdkAnswer);
+        AnswerResponse answerResponse = agentAnswerMapper.toAnswerResponse(sdkAnswer);
 
         // then
         assertEquals(Set.of(), answerResponse.getObjectReferences());

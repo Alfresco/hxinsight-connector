@@ -61,14 +61,14 @@ public class QuestionService
     private final AuthenticationService authenticationService;
     private final PersonService personService;
     private final ApplicationInfoProvider applicationInfoProvider;
-    private final QuestionMapper questionMapper;
+    private final AgentAnswerMapper agentAnswerMapper;
 
     public List<Agent> listAgents()
     {
         try
         {
             return agentService.integrations().listAgents(applicationInfoProvider.getSourceId()).stream()
-                    .map(questionMapper::toAgent)
+                    .map(agentAnswerMapper::toAgent)
                     .collect(Collectors.toList());
         }
         catch (CICServiceException e)
@@ -93,7 +93,7 @@ public class QuestionService
         try
         {
             Answer answer = qnaService.integrations().question(questionId).getAnswer(getUserId());
-            return questionMapper.toAnswerResponse(answer);
+            return agentAnswerMapper.toAnswerResponse(answer);
         }
         catch (CICServiceException e)
         {

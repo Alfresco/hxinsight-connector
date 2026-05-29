@@ -84,6 +84,7 @@ public class LocalStorageClient
             PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                     .bucket(bucketName)
                     .key(objectKey)
+                    .contentType(contentType)
                     .build();
 
             PutObjectPresignRequest preSignPutRequest = PutObjectPresignRequest.builder()
