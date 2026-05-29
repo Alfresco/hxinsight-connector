@@ -22,3 +22,4 @@ hyland-experience:
     ingestion:
       retry:
         initial-delay: 0
+      presigned-urls-count: 100

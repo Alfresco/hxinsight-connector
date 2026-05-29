@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -88,7 +88,7 @@ public class RepoEventFilterHandler
         for (RepoEventFilterApplier filterApplier : repoEventFilterAppliers)
         {
             log.atDebug().log("Filtering :: Applying filters {} to current repo event of id: {}", filter, repoEvent.getId());
-            final boolean allow = filterApplier.isNodeAllowed(repoEvent.getData().getResource(), filter);
+            final boolean allow = filterApplier.isNodeAllowed(repoEvent, filter);
             allowCurrentNode = allowCurrentNode && allow;
             if (eventTypeUpdated && allowPreviousNode)
             {

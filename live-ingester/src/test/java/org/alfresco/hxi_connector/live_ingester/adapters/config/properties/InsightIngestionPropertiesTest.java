@@ -23,31 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+
 package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import static java.util.Objects.requireNonNullElseGet;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
+import org.junit.jupiter.api.Test;
 
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
-
-import org.alfresco.hxi_connector.common.config.properties.Retry;
-
-@SuppressWarnings("PMD.UnusedAssignment")
-public record Insight(@NotNull Ingestion ingestion)
+class InsightIngestionPropertiesTest
 {
-
-    public record Ingestion(@NotBlank String baseUrl, @NotNull @NestedConfigurationProperty Retry retry, @Positive Integer presignedUrlsCount)
+    @Test
+    void givenNoPresignedUrlsCountDefaultsToOne()
     {
+        Insight.Ingestion ingestion = new Insight.Ingestion("http://localhost:8001", null, null);
 
-        private static final int DEFAULT_PRESIGNED_URLS_COUNT = 1;
+        assertEquals(1, ingestion.presignedUrlsCount());
+    }
 
-        public Ingestion
-        {
-            retry = requireNonNullElseGet(retry, Retry::new);
-            presignedUrlsCount = requireNonNullElseGet(presignedUrlsCount, () -> DEFAULT_PRESIGNED_URLS_COUNT);
-        }
+    @Test
+    void givenPresignedUrlsCountUsesProvidedValue()
+    {
+        Insight.Ingestion ingestion = new Insight.Ingestion("http://localhost:8001", null, 100);
+
+        assertEquals(100, ingestion.presignedUrlsCount());
     }
 }

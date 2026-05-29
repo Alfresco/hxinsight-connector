@@ -577,10 +577,16 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "id": "321d84e3-a5fe-431e-92f5-f8e09480305e",
                       "name": "321d84e3-a5fe-431e-92f5-f8e09480305e",
                       "nodeType": "cm:person",
-                      "createdByUser": null,
-                      "createdAt": null,
-                      "modifiedByUser": null,
-                      "modifiedAt": null,
+                      "createdByUser": {
+                        "id": "system",
+                        "displayName": "system"
+                      },
+                      "createdAt": "2021-01-21T11:14:15.695Z",
+                      "modifiedByUser": {
+                        "id": "system",
+                        "displayName": "system"
+                      },
+                      "modifiedAt": "2021-01-26T10:29:42.529Z",
                       "content": null,
                       "properties": {
                         "cm:homeFolderProvider": "bootstrapHomeFolderProvider",
@@ -617,6 +623,22 @@ public class UpdateRequestIntegrationTest extends E2ETestBase
                       "cm:homeFolderProvider" : {
                         "type": "string",
                         "value" : "bootstrapHomeFolderProvider"
+                      },
+                      "createdAt" : {
+                            "value" : "2021-01-21T11:14:15.695Z",
+                            "annotation" : "dateCreated"
+                      },
+                      "modifiedAt" : {
+                              "value" : "2021-01-26T10:29:42.529Z",
+                              "annotation" : "dateModified"
+                      },
+                      "createdBy" : {
+                              "value" : "system",
+                              "annotation" : "createdBy"
+                      },
+                      "modifiedBy" : {
+                              "value" : "system",
+                              "annotation" : "modifiedBy"
                       },
                       "cm:homeFolder" : {
                         "value" : {

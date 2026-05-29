@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -27,7 +27,9 @@
 package org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.filter;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
 public interface RepoEventFilterApplier
 {
@@ -39,6 +41,18 @@ public interface RepoEventFilterApplier
      * @return If node is allowed by supplied filter configuration
      */
     boolean isNodeAllowed(NodeResource nodeResource, Filter filter);
+
+    /**
+     * @param event
+     *            Full repo event
+     * @param filter
+     *            configuration
+     * @return If node is allowed by supplied filter configuration
+     */
+    default boolean isNodeAllowed(RepoEvent<DataAttributes<NodeResource>> event, Filter filter)
+    {
+        return isNodeAllowed(event.getData().getResource(), filter);
+    }
 
     /**
      * Default implementation can be used to filter based on properties that are always present in the "before" resource. It is not suitable if the property is omitted when unchanged and therefore needs a specific implementation.

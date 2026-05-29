@@ -64,6 +64,7 @@ public class IngestClientConfiguration
     {
         String baseUrl = integrationProperties.hylandExperience().insight().ingestion().baseUrl();
         Retry retry = integrationProperties.hylandExperience().insight().ingestion().retry();
+        int presignedUrlsCount = integrationProperties.hylandExperience().insight().ingestion().presignedUrlsCount();
         Retry authRetry = authProperties.getRetry();
         AuthProperties.AuthProvider authProvider = authProperties.getProviders().get(HXP_AUTH_PROVIDER);
 
@@ -81,6 +82,7 @@ public class IngestClientConfiguration
                 .sourceId(applicationInfoProvider.getSourceId())
                 .hxpEnvironment(authProvider.getEnvironmentKey())
                 .userAgent(applicationInfoProvider.getUserAgentData())
+                .presignedUrlsCount(presignedUrlsCount)
                 .retryPolicy(retryPolicy)
                 .build();
 

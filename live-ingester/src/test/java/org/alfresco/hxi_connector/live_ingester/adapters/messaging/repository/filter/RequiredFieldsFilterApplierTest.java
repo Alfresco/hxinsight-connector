@@ -31,6 +31,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.BDDMockito.given;
 
+import static org.alfresco.repo.event.v1.model.EventType.NODE_DELETED;
+import static org.alfresco.repo.event.v1.model.EventType.NODE_UPDATED;
+
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -42,7 +45,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Filter;
+import org.alfresco.repo.event.v1.model.DataAttributes;
 import org.alfresco.repo.event.v1.model.NodeResource;
+import org.alfresco.repo.event.v1.model.RepoEvent;
 
 @ExtendWith(MockitoExtension.class)
 class RequiredFieldsFilterApplierTest
@@ -51,6 +56,10 @@ class RequiredFieldsFilterApplierTest
     private NodeResource mockResource;
     @Mock
     private Filter mockFilter;
+    @Mock
+    private RepoEvent<DataAttributes<NodeResource>> mockEvent;
+    @Mock
+    private DataAttributes<NodeResource> mockData;
 
     @InjectMocks
     private RequiredFieldsFilterApplier objectUnderTest;
@@ -88,6 +97,26 @@ class RequiredFieldsFilterApplierTest
         given(mockFilter.requiredFields()).willReturn(List.of("unknownField"));
 
         assertTrue(objectUnderTest.isNodeAllowed(mockResource, mockFilter));
+    }
+
+    @Test
+    void givenDeleteEvent_whenRequiredFieldsConfigured_thenNodeIsAllowed()
+    {
+        given(mockEvent.getType()).willReturn(NODE_DELETED.getType());
+
+        assertTrue(objectUnderTest.isNodeAllowed(mockEvent, mockFilter));
+    }
+
+    @Test
+    void givenNonDeleteEvent_whenRequiredFieldsConfigured_thenDelegatesToNodeResource()
+    {
+        given(mockEvent.getType()).willReturn(NODE_UPDATED.getType());
+        given(mockEvent.getData()).willReturn(mockData);
+        given(mockData.getResource()).willReturn(mockResource);
+        given(mockFilter.requiredFields()).willReturn(List.of("name"));
+        given(mockResource.getName()).willReturn("test-node");
+
+        assertTrue(objectUnderTest.isNodeAllowed(mockEvent, mockFilter));
     }
 
     @ParameterizedTest
