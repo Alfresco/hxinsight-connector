@@ -144,7 +144,7 @@ public class CreateNodeE2eTest
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size() + 1);
 
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=100")));
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=1")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
@@ -172,7 +172,7 @@ public class CreateNodeE2eTest
             String actualContent = getTextContent(s3Object.key());
             assertThat(actualContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
 
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=100")));
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=1")));
             WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
