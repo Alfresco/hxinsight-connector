@@ -47,6 +47,10 @@ public final class WiremockCounts
 {
     public static final String PRESIGNED_URLS_PATH = "/presigned-urls";
     public static final String INGESTION_EVENTS_PATH = "/ingestion-events";
+    public static final String SYSTEM_ID = "-dummy-system-id";
+    public static final String USER_MAPPINGS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings";
+    public static final String GROUPS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/groups";
+    public static final String GROUP_MEMBERS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/group-members";
 
     public static int presignedUrlRequests()
     {
@@ -56,6 +60,18 @@ public final class WiremockCounts
     public static int ingestionEvents()
     {
         return findAll(postRequestedFor(urlEqualTo(INGESTION_EVENTS_PATH))).size();
+    }
+
+    public static int userMappingRequests(){
+        return findAll(postRequestedFor(urlEqualTo(USER_MAPPINGS_PATH))).size();
+    }
+
+    public static int groupMappingRequests(){
+        return findAll(postRequestedFor(urlEqualTo(GROUPS_PATH))).size();
+    }
+
+    public static int groupMembersRequests(){
+        return findAll(postRequestedFor(urlEqualTo(GROUP_MEMBERS_PATH))).size();
     }
 
     public static int ingestionEventsFor(String objectId)

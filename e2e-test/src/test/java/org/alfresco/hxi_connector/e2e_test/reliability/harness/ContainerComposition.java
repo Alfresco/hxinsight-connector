@@ -28,7 +28,8 @@ package org.alfresco.hxi_connector.e2e_test.reliability.harness;
 import static org.alfresco.hxi_connector.common.test.docker.repository.RepositoryType.ENTERPRISE;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getMinimalRepoJavaOpts;
 import static org.alfresco.hxi_connector.common.test.docker.util.DockerContainers.getRepoJavaOptsWithTransforms;
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.HXI_MOCK_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.*;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_LISTEN_PORT;
 
 import java.time.Duration;
 
@@ -63,6 +64,8 @@ final class ContainerComposition implements AutoCloseable
     private final GenericContainer<?> sfs;
     private final GenericContainer<?> transformCoreAio;
     private final GenericContainer<?> transformRouter;
+    private final WireMockContainer nucleusMock;
+    private final GenericContainer<?> nucleusSyncContainer;
 
     ContainerComposition(ReliabilityEnvironmentSpec spec, NetworkTopology topology)
     {
@@ -100,6 +103,15 @@ final class ContainerComposition implements AutoCloseable
 
         awsMock = DockerContainers.createLocalStackContainerWithin(topology.network());
 
+        // Mock Nucleus Container backed By WireMock
+        nucleusMock = DockerContainers.createWireMockContainerWithin(topology.network())
+                .withNetworkAliases(NUCLEUS_ALIAS)
+                .withFileSystemBind(
+                        "src/test/resources/wiremock/nuclues",
+                        "/home/wiremock",
+                        BindMode.READ_ONLY
+                );
+
         // ACS java opts switch with the toggle: transform.service.enabled=true plus transform-router / SFS URLs
         // are needed for the transform-capability registry to populate; otherwise the registry stays empty
         // and ACS short-circuits every transform request with a status=400 transform-response (the path
@@ -114,6 +126,33 @@ final class ContainerComposition implements AutoCloseable
 
         liveIngester = DockerContainers.createLiveIngesterContainerForWireMock(hxInsightMock, repository, topology.network())
                 .withEnv(LiveIngesterEnvVars.forSpec(spec));
+        // Nucleus Sync Container with Stub enabled for high Ingestion Operations
+
+        nucleusSyncContainer = DockerContainers.createNucleusSyncContainerForWireMock(nucleusMock, repository, topology.network())
+                // Route nucleus-sync's outbound traffic through Toxiproxy so chaos tests can target the
+                // nucleus-sync ↔ ACS and nucleus-sync ↔ Nucleus paths independently — mirrors the always-on
+                // toxic-* routing the live-ingester uses. With no toxics installed this is a transparent
+                // passthrough, so non-chaos tests (SimpleMappingTest) still pass.
+                // When withStubbedAcs is true, route to nucleus WireMock instead of real ACS for full stub testing.
+                .withEnv("ALFRESCO_BASE_URL",
+                        spec.withStubbedAcs()
+                                ? "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT
+                                  + "/alfresco/api/-default-/public/alfresco/versions/1"
+                                : "http://" + TOXIC_ACS_ALIAS + ":" + REPOSITORY_PORT
+                                  + "/alfresco/api/-default-/public/alfresco/versions/1")
+                .withEnv("NUCLEUS_BASE_URL",
+                        "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT) // This Mapping Works like toxic-xyz , The xyz is the actual Container address will be resolved through toxic-proxy
+                .withEnv("NUCLEUS_IDP_BASE_URL",
+                        "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT)
+                .withEnv("HX_TOKEN_URI",
+                        "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT + "/token")
+                // Tight test-only retry envelope (defaults are 3 × 2s × 2 multiplier ≈ 14s, unworkable
+                // in a chaos test). 4 attempts × 200 ms × 2 multiplier (max 1 s) ≈ 2.4 s total budget
+                // means a sub-2 s partition gets covered by the in-flight retry and the sync still completes.
+                .withEnv("HTTP_RETRY_MAX_ATTEMPTS", "5")
+                .withEnv("HTTP_RETRY_INITIAL_DELAY_MS", "200")
+                .withEnv("HTTP_RETRY_MULTIPLIER", "2")
+                .withEnv("HTTP_RETRY_MAX_DELAY_MS", "1000");
     }
 
     /**
@@ -125,6 +164,7 @@ final class ContainerComposition implements AutoCloseable
         activemq.start();
         hxInsightMock.start();
         awsMock.start();
+        nucleusMock.start();
     }
 
     /**
@@ -140,6 +180,21 @@ final class ContainerComposition implements AutoCloseable
         sfs.start();
         transformCoreAio.start();
         transformRouter.start();
+    }
+
+    void startNucleusSync()
+    {
+        log.info("[reliability] Starting nucleus-sync");
+        nucleusSyncContainer.start();
+    }
+
+    GenericContainer<?> nucleusSync(){
+        return nucleusSyncContainer;
+    }
+
+    WireMockContainer nucleusMock()
+    {
+        return nucleusMock;
     }
 
     void startRepository()
@@ -234,6 +289,8 @@ final class ContainerComposition implements AutoCloseable
         stopQuietly(hxInsightMock);
         stopQuietly(activemq);
         stopQuietly(postgres);
+        stopQuietly(nucleusMock);
+        stopQuietly(nucleusSyncContainer);
     }
 
     private static void stopQuietly(GenericContainer<?> container)

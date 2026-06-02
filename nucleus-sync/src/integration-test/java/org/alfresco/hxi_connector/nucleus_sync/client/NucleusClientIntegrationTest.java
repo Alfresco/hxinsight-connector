@@ -47,6 +47,7 @@ import java.util.stream.IntStream;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,7 @@ public class NucleusClientIntegrationTest
     private static final String SYSTEM_ID = "test-system-id";
     private static final String CURSOR = "test-cursor";
     private static final Integer LIMIT = 1;
+    private MeterRegistry meterRegistry;
 
     @BeforeEach
     void setUp()
@@ -97,7 +99,8 @@ public class NucleusClientIntegrationTest
                 idpBaseUrl,
                 LIMIT,
                 50,
-                5);
+                5,
+                meterRegistry);
     }
 
     @AfterEach

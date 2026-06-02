@@ -310,6 +310,30 @@ public class DockerContainers
         return liveIngester;
     }
 
+    public static GenericContainer<?> createNucleusSyncContainerForWireMock(WireMockContainer nucleusMockContainer,AlfrescoRepositoryContainer acsContainer,Network network)
+    {
+        String nucleusHost = nucleusMockContainer.getNetworkAliases().stream().findFirst().get();
+        String acsHost = acsContainer.getNetworkAliases().stream().findFirst().get();
+        return createNucleusSyncContainerWithin(network)
+                // Disable the cron — tests trigger sync explicitly via POST /sync/trigger.
+                .withEnv("SYNC_ENABLED", "false")
+                .withEnv("SYNC_CRON_EXPRESSION","0 0 0 * * ?")
+                .withEnv("NUCLEUS_SYSTEM_ID","-dummy-system-id")
+                .withEnv("NUCLEUS_BASE_URL", "http://%s:8080".formatted(nucleusHost))
+                .withEnv("NUCLEUS_IDP_BASE_URL", "http://%s:8080".formatted(nucleusHost))
+                // application.yml: auth.providers.hyland-experience.type — accepted value is "oauth2".
+                .withEnv("AUTH_HX_TYPE", "client-credentials")
+                .withEnv("HX_TOKEN_URI", "http://%s:8080/token".formatted(nucleusHost))
+                .withEnv("HX_CLIENT_ID", "dummy-client-key")
+                .withEnv("HX_CLIENT_SECRET", "dummy-client-secret")
+                // application.yml uses ${ALFRESCO_USER_NAME} / ${ALFRESCO_PASSWORD} — not the AUTH_PROVIDERS_* names
+                // (those are the live-ingester's convention; nucleus-sync has its own placeholder names).
+                .withEnv("ALFRESCO_USER_NAME", "admin")
+                .withEnv("ALFRESCO_PASSWORD", "admin")
+                .withEnv("AUTH_ALFRESCO_TYPE","basic")
+                .withEnv("ALFRESCO_BASE_URL", "http://%s:8080/alfresco/api/-default-/public/alfresco/versions/1".formatted(acsHost));
+    }
+
     public static GenericContainer<?> createLiveIngesterContainerForWireMock(WireMockContainer hxInsightMockContainer, Network network)
     {
         return createLiveIngesterContainerWithin(network)

@@ -32,6 +32,8 @@ import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +43,8 @@ import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
@@ -70,6 +74,7 @@ public class NucleusClient
     private final int pageSize;
     private final int timeoutInMin;
     private final int deleteBatchSize;
+    private final MeterRegistry meterRegistry;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NucleusClient.class);
 
@@ -82,7 +87,8 @@ public class NucleusClient
             @Value("${nucleus.page-size:1000}") int pageSize,
             @Value("${nucleus.delete-group-member-batch-size:100}") int deleteBatchSize,
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
-            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB)
+            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB,
+            MeterRegistry meterRegistry)
     {
         this(
                 WebClient.builder()
@@ -97,7 +103,8 @@ public class NucleusClient
                 idpBaseUrl,
                 pageSize,
                 deleteBatchSize,
-                timeoutInMins);
+                timeoutInMins,
+                meterRegistry);
     }
 
     NucleusClient(
@@ -109,7 +116,8 @@ public class NucleusClient
             String idpBaseUrl,
             int pageSize,
             int deleteBatchSize,
-            int timeoutInMin)
+            int timeoutInMin,
+            MeterRegistry meterRegistry)
     {
         this.webClient = webClient;
         this.objectMapper = objectMapper;
@@ -120,10 +128,12 @@ public class NucleusClient
         this.pageSize = pageSize;
         this.timeoutInMin = timeoutInMin;
         this.deleteBatchSize = deleteBatchSize;
+        this.meterRegistry = meterRegistry;
     }
 
     public List<IamUser> getAllIamUsers()
     {
+        String op = "getAllIamUsers";
         String initialPath = "/api/users";
 
         try
@@ -132,18 +142,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in retrieving iam users: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "GET", "Error in retrieving iam users", e);
             throw new ClientException("Failed to retrieve iam users", e);
         }
     }
 
     public List<NucleusGroupOutput> getAllExternalGroups()
     {
+        String op = "getAllExternalGroups";
         String initialPath = "/system-integrations/systems/" + systemId + "/groups";
 
         try
@@ -152,18 +158,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in retrieving groups: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "GET", "Error in retrieving groups", e);
             throw new ClientException("Failed to retrieve groups", e);
         }
     }
 
     public void createGroups(List<NucleusGroupInput> groups)
     {
+        String op = "createGroups";
         String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/groups";
 
         try
@@ -174,18 +176,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in creating groups in nucleus: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "POST", "Error in creating groups in nucleus", e);
             throw new ClientException("Failed to create groups in nucleus", e);
         }
     }
 
     public List<NucleusUserMappingOutput> getCurrentUserMappings()
     {
+        String op = "getCurrentUserMappings";
         String initialPath = "/system-integrations/systems/" + systemId + "/user-mappings";
 
         try
@@ -194,18 +192,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in retrieving user mappings: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "GET", "Error in retrieving user mappings", e);
             throw new ClientException("Failed to retrieve user mappings", e);
         }
     }
 
     public void createUserMappings(List<NucleusUserMappingInput> userMappings)
     {
+        String op = "createUserMappings";
         String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/user-mappings";
 
         try
@@ -216,18 +210,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in creating user mappings: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "POST", "Error in creating user mappings", e);
             throw new ClientException("Failed to create user mappings", e);
         }
     }
 
     public List<NucleusGroupMembershipOutput> getCurrentGroupMemberships()
     {
+        String op = "getCurrentGroupMemberships";
         String initalPath = "/system-integrations/systems/" + systemId + "/group-members";
 
         try
@@ -240,18 +230,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in retrieving group memberships: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "GET", "Error in retrieving group memberships", e);
             throw new ClientException("Failed to retrieve group memberships", e);
         }
     }
 
     public void assignGroupMembers(List<NucleusGroupMemberAssignmentInput> assignments)
     {
+        String op = "assignGroupMembers";
         String url = nucleusBaseUrl + "/system-integrations/systems/" + systemId + "/group-members";
 
         try
@@ -262,18 +248,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in creating member assignments to group: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "POST", "Error in creating member assignments to group", e);
             throw new ClientException("Error in creating member assignments to group", e);
         }
     }
 
     public void deleteGroup(String externalGroupId)
     {
+        String op = "deleteGroup";
         try
         {
             String fullUrl = nucleusBaseUrl
@@ -286,18 +268,14 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in deleting group: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "DELETE", "Error in deleting group", e);
             throw new ClientException("Failed to delete group", e);
         }
     }
 
     public void deleteUserMapping(String externalUserId)
     {
+        String op = "deleteUserMapping";
         try
         {
             String fullUrl = nucleusBaseUrl
@@ -310,12 +288,7 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in deleting user mapping: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "DELETE", "Error in deleting user mapping", e);
             throw new ClientException("Failed to delete user mappings", e);
         }
     }
@@ -323,6 +296,7 @@ public class NucleusClient
     public void removeGroupMembers(
             String parentExternalGroupId, List<String> memberExternalUserIds)
     {
+        String op = "removeGroupMembers";
         try
         {
             for (int i = 0; i < memberExternalUserIds.size(); i += deleteBatchSize)
@@ -334,12 +308,7 @@ public class NucleusClient
         }
         catch (Exception e)
         {
-            LOGGER.atError()
-                    .setMessage("Error in removing group members: {}")
-                    .addArgument(e.getMessage())
-                    .setCause(e)
-                    .log();
-
+            logAndRecord(op, "DELETE", "Error in removing group members", e);
             throw new ClientException("Failed to remove group members", e);
         }
     }
@@ -359,7 +328,8 @@ public class NucleusClient
             urlBuilder.append("&memberExternalUserIds=")
                     .append(userId);
         }
-
+        // Let exceptions propagate to removeGroupMembers() so that the failure
+        // is logged & metered exactly once (no double-count, no double-wrap).
         executeDeleteRequest(urlBuilder.toString());
     }
 
@@ -408,12 +378,16 @@ public class NucleusClient
         return allItems;
     }
 
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+    @Retryable(retryFor = {EndpointServerErrorException.class,
+            WebClientResponseException.InternalServerError.class,
+            WebClientResponseException.ServiceUnavailable.class,
+            WebClientResponseException.GatewayTimeout.class,
+            WebClientRequestException.class},
+            maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
             backoff = @Backoff(
-                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
+                    delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.retry.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
     private String executeGetRequest(String fullUrl)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
@@ -431,12 +405,16 @@ public class NucleusClient
                 .block(Duration.ofMinutes(timeoutInMin));
     }
 
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+    @Retryable(retryFor = {EndpointServerErrorException.class,
+            WebClientResponseException.InternalServerError.class,
+            WebClientResponseException.ServiceUnavailable.class,
+            WebClientResponseException.GatewayTimeout.class,
+            WebClientRequestException.class},
+            maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
             backoff = @Backoff(
-                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
+                    delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.retry.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
     private void executePostRequest(String fullUrl, String jsonBody)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
@@ -452,12 +430,16 @@ public class NucleusClient
                 .block(Duration.ofMinutes(timeoutInMin));
     }
 
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
+    @Retryable(retryFor = {EndpointServerErrorException.class,
+            WebClientResponseException.InternalServerError.class,
+            WebClientResponseException.ServiceUnavailable.class,
+            WebClientResponseException.GatewayTimeout.class,
+            WebClientRequestException.class},
+            maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
             backoff = @Backoff(
-                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
+                    delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
+                    multiplierExpression = "#{${http-client.retry.multiplier:2}}",
+                    maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
     private void executeDeleteRequest(String fullUrl)
     {
         Map<String, String> headers = authService.getHxpAuthHeaders();
@@ -469,5 +451,29 @@ public class NucleusClient
                 .retrieve()
                 .bodyToMono(String.class)
                 .block(Duration.ofMinutes(timeoutInMin));
+    }
+
+    private void logAndRecord(String operation, String method, String message, Throwable e)
+    {
+        LOGGER.atError()
+                .setMessage("{} [op={}, method={}]: {}")
+                .addArgument(message)
+                .addArgument(operation)
+                .addArgument(method)
+                .addArgument(e.getMessage())
+                .setCause(e)
+                .log();
+        recordFailedRequest(operation, method, e);
+    }
+
+    private void recordFailedRequest(String operation, String method, Throwable cause)
+    {
+        Counter.builder(NucleusSyncMetrices.NucleusClientMetrics.CONNECTION_ISSUE)
+                .description(NucleusSyncMetrices.NucleusClientMetrics.CONNECTION_ISSUE_DESCRIPTION)
+                .tag(NucleusSyncMetrices.Tags.OPERATION, operation)
+                .tag(NucleusSyncMetrices.Tags.METHOD, method)
+                .tag(NucleusSyncMetrices.Tags.ERROR_TYPE, ClientErrorClassifier.classify(cause))
+                .register(meterRegistry)
+                .increment();
     }
 }

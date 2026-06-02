@@ -28,5 +28,6 @@ package org.alfresco.hxi_connector.e2e_test.util.client.model;
 
 public record User(
         String username,
-        String password)
+        String password,
+        String email)
 {}

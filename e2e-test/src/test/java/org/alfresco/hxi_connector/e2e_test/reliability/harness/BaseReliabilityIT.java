@@ -101,11 +101,20 @@ public abstract class BaseReliabilityIT
         WireMock.configureFor(env.hxInsightMock().getHost(), env.hxInsightMock().getPort());
         // First reset clears stubs and counts so waitForBrokerIdle has a stable reference to measure against.
         WireMock.reset();
+        WireMock nucleusClient = env.nucleusWireMock();
+
+        // Independently Clean the nucleus Mock - It has own host/port and static WireMock Client Above
+        nucleusClient.resetMappings(); // Mock Mappings
+        nucleusClient.resetRequests(); // Mock Requests
+        nucleusClient.resetScenarios(); // Reset any Scenario Added
+
         installToxicS3PresignedUrlOverride();
         clearToxicsAndEnableProxy(env.activemqProxy());
         clearToxicsAndEnableProxy(env.acsProxy());
         clearToxicsAndEnableProxy(env.hxiProxy());
         clearToxicsAndEnableProxy(env.s3Proxy());
+        clearToxicsAndEnableProxy(env.nucleusproxy());
+
         env.jolokia().purgeQueue(DLQ_QUEUE);
         waitForBrokerIdle();
         waitForTopicFullyDrained(env);

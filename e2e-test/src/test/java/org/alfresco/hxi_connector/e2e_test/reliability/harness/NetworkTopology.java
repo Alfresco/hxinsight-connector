@@ -44,15 +44,20 @@ final class NetworkTopology implements AutoCloseable
     static final String TOXIC_ACS_ALIAS = "toxic-acs";
     static final String HXI_MOCK_ALIAS = "hxinsight-mock";
     static final String TOXIC_HXI_ALIAS = "toxic-hxi";
+    static final String TOXIC_NUCLEUS_ALIAS = "toxic-nucleus";
     static final String LOCALSTACK_ALIAS = "aws-mock";
     static final String TOXIC_S3_ALIAS = "toxic-s3";
     static final String SFS_ALIAS = "shared-file-store";
     static final String TOXIC_SFS_ALIAS = "toxic-sfs";
+    static final String NUCLEUS_ALIAS = "nucleus";
 
     static final int ACTIVEMQ_PORT = 61616;
     static final int ACTIVEMQ_JOLOKIA_PORT = 8161;
     static final int REPOSITORY_PORT = 8080;
     static final int HXI_MOCK_PORT = 8080;
+    static final int NUCLEUS_LISTEN_PORT = 8083;
+    static final int NUCLEUS_PORT = 8081;
+    static final int NUCLEUS_MOCK_PORT = 8080;
     /**
      * Port the {@code toxic-hxi} Toxiproxy listener binds inside the Toxiproxy container. Distinct from {@link #REPOSITORY_PORT} so the ACS and HXI proxies can coexist in the single Toxiproxy container — a Toxiproxy listener cannot share a port with another listener even if the network aliases differ.
      */
@@ -77,8 +82,8 @@ final class NetworkTopology implements AutoCloseable
     String[] toxiproxyAliases(boolean withTransformTopology)
     {
         return withTransformTopology
-                ? new String[]{TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS, TOXIC_SFS_ALIAS}
-                : new String[]{TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS};
+                ? new String[]{TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS, TOXIC_SFS_ALIAS, TOXIC_NUCLEUS_ALIAS}
+                : new String[]{TOXIC_ACTIVEMQ_ALIAS, TOXIC_ACS_ALIAS, TOXIC_HXI_ALIAS, TOXIC_S3_ALIAS, TOXIC_NUCLEUS_ALIAS};
     }
 
     @Override
