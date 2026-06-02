@@ -18,13 +18,7 @@ hyland-experience:
   authentication:
     retry:
       initial-delay: 0
-  storage:
-    location:
+  insight:
+    ingestion:
       retry:
         initial-delay: 0
-    upload:
-      retry:
-        initial-delay: 0
-  ingester:
-    retry:
-      initial-delay: 0

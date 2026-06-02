@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,7 +29,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 import java.util.List;
 import jakarta.validation.constraints.NotNull;
 
-public record Filter(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path path)
+public record Filter(@NotNull Aspect aspect, @NotNull Type type, @NotNull Path path, @NotNull List<String> requiredFields)
 {
     public record Aspect(@NotNull List<String> allow, @NotNull List<String> deny)
     {}

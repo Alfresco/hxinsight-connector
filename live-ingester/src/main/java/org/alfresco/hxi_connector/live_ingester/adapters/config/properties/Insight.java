@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,28 +23,31 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-package org.alfresco.hxi_connector.hxi_extension.service.config;
+import static java.util.Objects.requireNonNullElseGet;
 
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
-import lombok.Getter;
+import org.springframework.boot.context.properties.NestedConfigurationProperty;
 
-@Getter
-public final class HxInsightClientConfig
+import org.alfresco.hxi_connector.common.config.properties.Retry;
+
+@SuppressWarnings("PMD.UnusedAssignment")
+public record Insight(@NotNull Ingestion ingestion)
 {
-    private final String agentsUrl;
-    private final String avatarsUrl;
-    private final String questionsUrl;
-    private final String answersUrl;
-    private final String feedbackUrl;
 
-    public HxInsightClientConfig(@NotBlank String agentsEndpoint, @NotBlank String questionsEndpoint)
+    public record Ingestion(@NotBlank String baseUrl, @NotNull @NestedConfigurationProperty Retry retry, @Positive Integer presignedUrlsCount)
     {
-        this.agentsUrl = agentsEndpoint + "/agents";
-        this.avatarsUrl = agentsUrl + "/%s/avatar";
-        this.questionsUrl = agentsUrl + "/%s/questions";
-        this.answersUrl = questionsEndpoint + "/questions/%s/answer";
-        this.feedbackUrl = answersUrl + "/feedback";
+
+        private static final int DEFAULT_PRESIGNED_URLS_COUNT = 1;
+
+        public Ingestion
+        {
+            retry = requireNonNullElseGet(retry, Retry::new);
+            presignedUrlsCount = requireNonNullElseGet(presignedUrlsCount, () -> DEFAULT_PRESIGNED_URLS_COUNT);
+        }
     }
 }

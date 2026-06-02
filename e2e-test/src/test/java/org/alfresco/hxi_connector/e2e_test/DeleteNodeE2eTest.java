@@ -104,7 +104,7 @@ public class DeleteNodeE2eTest
         @Cleanup
         InputStream fileContent = new ByteArrayInputStream(DUMMY_CONTENT.getBytes());
         Node createdNode = repositoryClient.createNodeWithContent(PARENT_ID, "dummy.txt", fileContent, "text/plain");
-        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                 .withRequestBody(containing(createdNode.id()))), DELAY_MS);
         WireMock.reset();
 
@@ -112,7 +112,7 @@ public class DeleteNodeE2eTest
         repositoryClient.deleteNode(createdNode.id());
 
         // then
-        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/ingestion-events"))
+        RetryUtils.retryWithBackoff(() -> WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                 .withRequestBody(containing("\"objectId\":\"%s\"".formatted(createdNode.id())))
                 .withRequestBody(containing("\"sourceId\":\"a1f3e7c0-d193-7023-ce1d-0a63de491876\""))
                 .withRequestBody(containing("\"sourceTimestamp\""))

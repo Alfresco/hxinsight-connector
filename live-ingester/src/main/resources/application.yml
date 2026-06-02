@@ -57,17 +57,19 @@ alfresco:
     path:
       allow:
       deny:
+    required-fields:
+      - name
+      - type
+      - createdAt
+      - createdBy
+      - modifiedAt
+      - modifiedBy
 hyland-experience:
   insight:
     ingestion:
       base-url: http://localhost:8001
   storage:
     digest-algorithm: SHA-256
-    location:
-      endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
-  ingester:
-    endpoint: ${hyland-experience.insight.ingestion.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
-
 auth:
   providers:
     hyland-experience:

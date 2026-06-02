@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -23,22 +23,28 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.model;
 
-import static com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL;
+package org.alfresco.hxi_connector.live_ingester.adapters.config.properties;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@Getter
-@JsonInclude(NON_NULL)
-@RequiredArgsConstructor
-public class ContentMetadata
+import org.junit.jupiter.api.Test;
+
+class InsightIngestionPropertiesTest
 {
-    @JsonProperty("content-type")
-    private final String sourceMimeType;
-    private final Long size;
-    private final String name;
+    @Test
+    void givenNoPresignedUrlsCountDefaultsToOne()
+    {
+        Insight.Ingestion ingestion = new Insight.Ingestion("http://localhost:8001", null, null);
+
+        assertEquals(1, ingestion.presignedUrlsCount());
+    }
+
+    @Test
+    void givenPresignedUrlsCountUsesProvidedValue()
+    {
+        Insight.Ingestion ingestion = new Insight.Ingestion("http://localhost:8001", null, 100);
+
+        assertEquals(100, ingestion.presignedUrlsCount());
+    }
 }

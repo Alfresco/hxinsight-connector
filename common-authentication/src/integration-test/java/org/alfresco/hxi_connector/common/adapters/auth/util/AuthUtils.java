@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -61,6 +61,10 @@ public class AuthUtils
     public static final String TEST_ENVIRONMENT_HEADER = "hxai-environment-key";
     public static final String TOKEN_PATH = "/token";
     public static final String AUTH_HEADER = TOKEN_TYPE + " " + ACCESS_TOKEN;
+    public static final String AUTH_REQUEST_GRANT_TYPE_PARAM = "grant_type=" + encode(AUTH_GRAND_TYPE, UTF_8);
+    public static final String AUTH_REQUEST_CLIENT_ID_PARAM = "client_id=" + encode(CLIENT_ID, UTF_8);
+    public static final String AUTH_REQUEST_CLIENT_SECRET_PARAM = "client_secret=" + encode(CLIENT_SECRET, UTF_8);
+    public static final String AUTH_REQUEST_SCOPE_PARAM = "scope=" + encode(SCOPE, UTF_8);
 
     public static String createAuthResponseBody()
     {

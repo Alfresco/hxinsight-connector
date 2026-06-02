@@ -144,8 +144,8 @@ public class CreateNodeE2eTest
             List<S3Object> actualBucketContent = awsS3Client.listS3Content();
             assertThat(actualBucketContent.size()).isEqualTo(initialBucketContent.size() + 1);
 
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=1")));
+            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
         }, MAX_RETRY_ATTEMPTS, DELAY_MS);
@@ -172,8 +172,8 @@ public class CreateNodeE2eTest
             String actualContent = getTextContent(s3Object.key());
             assertThat(actualContent).isEqualToIgnoringWhitespace(DUMMY_CONTENT);
 
-            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/presigned-urls")));
-            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/ingestion-events"))
+            WireMock.verify(exactly(1), postRequestedFor(urlEqualTo("/v1/presigned-urls?count=1")));
+            WireMock.verify(moreThanOrExactly(2), postRequestedFor(urlEqualTo("/v2/ingestion-events"))
                     .withRequestBody(containing(createdNode.id()).and(containing("sourceTimestamp")))
                     .withHeader(USER_AGENT, matching(getAppInfoRegex())));
         }, MAX_RETRY_ATTEMPTS, DELAY_MS);
@@ -192,7 +192,7 @@ public class CreateNodeE2eTest
 
         // then
         RetryUtils.retryWithBackoff(() -> {
-            List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/ingestion-events")));
+            List<LoggedRequest> requests = findAll(postRequestedFor(urlEqualTo("/v2/ingestion-events")));
 
             assertFalse(requests.isEmpty(), "Expected ingestion events but none were received");
 

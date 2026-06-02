@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -53,6 +53,7 @@ public class Retry
     private static final int RETRY_ATTEMPTS_DEFAULT = 10;
     private static final int RETRY_INITIAL_DELAY_DEFAULT = 500;
     private static final double RETRY_DELAY_MULTIPLIER_DEFAULT = 2;
+    private static final int RETRY_MAX_DELAY_DEFAULT = 30000;
     private static final Set<Class<? extends Throwable>> RETRY_REASONS_BASIC = Set.of(
             EndpointServerErrorException.class,
             UnknownHostException.class,
@@ -60,21 +61,29 @@ public class Retry
             JsonEOFException.class,
             MismatchedInputException.class);
 
-    @Min(-1)
-    private int attempts;
-    @PositiveOrZero
-    private int initialDelay;
+    @Min(-1) private int attempts;
+    @PositiveOrZero private int initialDelay;
     @Positive private double delayMultiplier;
     @NotNull private Set<Class<? extends Throwable>> reasons;
+    @PositiveOrZero private int maxDelay;
 
     public Retry()
     {
-        this(RETRY_ATTEMPTS_DEFAULT, RETRY_INITIAL_DELAY_DEFAULT, RETRY_DELAY_MULTIPLIER_DEFAULT);
+        this(RETRY_ATTEMPTS_DEFAULT, RETRY_INITIAL_DELAY_DEFAULT, RETRY_DELAY_MULTIPLIER_DEFAULT, RETRY_MAX_DELAY_DEFAULT);
     }
 
     public Retry(int attempts, int initialDelay, double delayMultiplier)
     {
-        this(attempts, initialDelay, delayMultiplier,
+        this(attempts, initialDelay, delayMultiplier, RETRY_MAX_DELAY_DEFAULT,
+                Stream.concat(RETRY_REASONS_BASIC.stream(), Stream.of(
+                        HttpHostConnectException.class,
+                        NoHttpResponseException.class,
+                        MalformedChunkCodingException.class)).collect(Collectors.toSet()));
+    }
+
+    public Retry(int attempts, int initialDelay, double delayMultiplier, int maxDelay)
+    {
+        this(attempts, initialDelay, delayMultiplier, maxDelay,
                 Stream.concat(RETRY_REASONS_BASIC.stream(), Stream.of(
                         HttpHostConnectException.class,
                         NoHttpResponseException.class,
@@ -83,10 +92,16 @@ public class Retry
 
     public Retry(int attempts, int initialDelay, double delayMultiplier, Set<Class<? extends Throwable>> reasons)
     {
+        this(attempts, initialDelay, delayMultiplier, RETRY_MAX_DELAY_DEFAULT, reasons);
+    }
+
+    public Retry(int attempts, int initialDelay, double delayMultiplier, int maxDelay, Set<Class<? extends Throwable>> reasons)
+    {
         this.attempts = attempts;
         this.initialDelay = initialDelay;
         this.delayMultiplier = delayMultiplier;
         this.reasons = reasons;
+        this.maxDelay = maxDelay;
     }
 
     public int attempts()
@@ -102,6 +117,11 @@ public class Retry
     public double delayMultiplier()
     {
         return delayMultiplier;
+    }
+
+    public int maxDelay()
+    {
+        return maxDelay;
     }
 
     public Set<Class<? extends Throwable>> reasons()
