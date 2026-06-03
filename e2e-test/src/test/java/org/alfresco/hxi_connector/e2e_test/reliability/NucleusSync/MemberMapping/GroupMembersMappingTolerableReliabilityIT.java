@@ -23,10 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
+package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.MemberMapping;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -39,7 +40,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT{
+public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
     /**
      * Delay between triggering sync and opening the partition. Larger than the user-mapping
      * variant because group-member sync runs last — user discovery + mapping + group discovery

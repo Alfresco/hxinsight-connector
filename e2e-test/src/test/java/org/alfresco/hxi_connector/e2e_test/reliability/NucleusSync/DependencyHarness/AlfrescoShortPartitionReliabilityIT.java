@@ -42,12 +42,16 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabilityIT {
     /**
-     * How long the {@code acsProxy} stays disabled. Sized to lie inside the nucleus-sync HTTP retry budget
-     *      * first attempt fails at t≈0,
-     *      * retries fire at t≈200, 600, 1400 , 240, 3400
-     *      So 3.6 s partition will exhaust all the retries
+     * How long the {@code acsProxy} stays disabled. Must lie INSIDE the nucleus-sync HTTP retry
+     * budget so the next attempt after re-enable still has budget left.
+     * <p>
+     * Retry envelope (configured via HTTP_CLIENT_RETRY_* env vars in ContainerComposition,
+     * binds to {@code http-client.retry.*}): 5 attempts × initial 200 ms × multiplier 2,
+     * capped at 1000 ms. Attempts fire at t ≈ 0, 200, 600, 1400, 2400 ms → total budget ≈ 2.4 s.
+     * 1500 ms partition lets attempts 1–3 fail during the outage and attempt 4 (t≈1400) or
+     * attempt 5 (t≈2400) succeed after recovery, with comfortable margin.
      */
-    private static final long PARTITION_DURATION_MS = 2_600L;
+    private static final long PARTITION_DURATION_MS = 2_200L;
 
     /**
      * Settle window after re-enabling the proxy, before assertions run. Covers the post-recovery retry

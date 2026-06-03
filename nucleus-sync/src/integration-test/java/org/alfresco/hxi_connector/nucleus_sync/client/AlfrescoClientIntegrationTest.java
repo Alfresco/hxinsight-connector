@@ -40,6 +40,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -53,6 +54,7 @@ public class AlfrescoClientIntegrationTest
     private WireMockServer wireMockServer;
     private AlfrescoClient alfrescoClient;
     private MeterRegistry meterRegistry;
+    private RetryableHttpInvoker retryableHttpInvoker;
 
     @BeforeEach
     void setUp()
@@ -60,6 +62,10 @@ public class AlfrescoClientIntegrationTest
         // Start WireMock server
         wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         wireMockServer.start();
+
+        // Initialise collaborators (previously left null — would NPE on first request).
+        meterRegistry = new SimpleMeterRegistry();
+        retryableHttpInvoker = new RetryableHttpInvoker(5, 10240);
 
         // Create mock AuthService
         AuthService authService = new AuthService(null, null) {
@@ -80,7 +86,8 @@ public class AlfrescoClientIntegrationTest
                 baseUrl,
                 100,
                 true,
-                meterRegistry);
+                meterRegistry,
+                retryableHttpInvoker);
     }
 
     @AfterEach
@@ -217,7 +224,7 @@ public class AlfrescoClientIntegrationTest
         // Act & Assert
         assertThatThrownBy(alfrescoClient::getAllUsers)
                 .isInstanceOf(ClientException.class)
-                .hasMessageContaining("Failed to fetch users");
+                .hasMessageContaining("Failed to fetch getAllUsers");
     }
 
     @Test

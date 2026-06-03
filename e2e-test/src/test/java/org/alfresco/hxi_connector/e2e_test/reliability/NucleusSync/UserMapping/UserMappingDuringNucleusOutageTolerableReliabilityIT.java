@@ -23,11 +23,11 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
+package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.UserMapping;
 
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -40,7 +40,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNucleusSyncReliabilityIT{
+public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNucleusSyncReliabilityIT {
     /**
      * Outer wait for the sync to complete (covers the post-recovery retry back-off plus the synchronous
      * controller round-trip plus the time to actually map {@value #TOTAL_USERS} users). Far below the

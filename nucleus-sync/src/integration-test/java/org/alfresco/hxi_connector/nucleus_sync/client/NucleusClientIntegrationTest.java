@@ -48,10 +48,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
 import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
@@ -64,11 +64,12 @@ public class NucleusClientIntegrationTest
 {
     private WireMockServer wireMockServer;
     private NucleusClient nucleusClient;
+    private MeterRegistry meterRegistry;
+    private RetryableHttpInvoker retryableHttpInvoker;
 
     private static final String SYSTEM_ID = "test-system-id";
     private static final String CURSOR = "test-cursor";
     private static final Integer LIMIT = 1;
-    private MeterRegistry meterRegistry;
 
     @BeforeEach
     void setUp()
@@ -76,6 +77,10 @@ public class NucleusClientIntegrationTest
         // Start WireMock server
         wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         wireMockServer.start();
+
+        // Initialise collaborators (previously left null — would NPE on first request).
+        meterRegistry = new SimpleMeterRegistry();
+        retryableHttpInvoker = new RetryableHttpInvoker(5, 10240);
 
         // Create mock AuthService
         AuthService authService = new AuthService(null, null) {
@@ -91,16 +96,15 @@ public class NucleusClientIntegrationTest
         String idpBaseUrl = "http://localhost:" + wireMockServer.port();
 
         nucleusClient = new NucleusClient(
-                WebClient.builder().build(),
                 new ObjectMapper(),
-                authService,
                 SYSTEM_ID,
                 nucleusBaseUrl,
                 idpBaseUrl,
                 LIMIT,
                 50,
-                5,
-                meterRegistry);
+                authService,
+                meterRegistry,
+                retryableHttpInvoker);
     }
 
     @AfterEach

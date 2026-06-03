@@ -64,6 +64,7 @@ public class AlfrescoClient
     private final int pageSize;
     private final boolean skipNotEnabled;
     private final MeterRegistry meterRegistry;
+    private final RetryableHttpInvoker retryableHttpInvoker;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoClient.class);
 
@@ -75,7 +76,8 @@ public class AlfrescoClient
             @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB,
             @Value("${alfresco.page-size:100}") int pageSize,
             @Value("${alfresco.user.skip-not-enabled:true}") boolean skipNotEnabled,
-            MeterRegistry meterRegistry)
+            MeterRegistry meterRegistry,
+            RetryableHttpInvoker retryableHttpInvoker)
     {
         this(
                 WebClient.builder()
@@ -89,7 +91,8 @@ public class AlfrescoClient
                 alfrescoBaseUrl,
                 pageSize,
                 skipNotEnabled,
-                meterRegistry);
+                meterRegistry,
+                retryableHttpInvoker);
     }
 
     AlfrescoClient(
@@ -100,7 +103,8 @@ public class AlfrescoClient
             String alfrescoBaseUrl,
             int pageSize,
             boolean skipNotEnabled,
-            MeterRegistry meterRegistry)
+            MeterRegistry meterRegistry,
+            RetryableHttpInvoker retryableHttpInvoker)
     {
         this.webClient = webClient;
         this.objectMapper = objectMapper;
@@ -110,6 +114,7 @@ public class AlfrescoClient
         this.pageSize = pageSize;
         this.skipNotEnabled = skipNotEnabled;
         this.meterRegistry = meterRegistry;
+        this.retryableHttpInvoker = retryableHttpInvoker;
     }
 
     public List<AlfrescoUser> getAllUsers()
@@ -153,9 +158,9 @@ public class AlfrescoClient
                 uriBuilder.queryParam("maxItems", pageSize);
                 uriBuilder.queryParam("skipCount", skipCount);
 
-                String response = makeAuthenticatedRequest(uriBuilder.toUriString())
-                        .bodyToMono(String.class)
-                        .block(Duration.ofMinutes(timeoutInMins));
+                // RetryableHttpInvoker's WebClient has no base URL — pass the absolute URL.
+                String fullUrl = alfrescoBaseUrl + uriBuilder.toUriString();
+                String response = retryableHttpInvoker.executeGetRequest(fullUrl, authService.getAlfrescoAuthHeaders());
 
                 AlfrescoPagedResponse<T> pagedResponse = objectMapper.readValue(response, typeRef);
 
@@ -206,26 +211,5 @@ public class AlfrescoClient
                 .tag(NucleusSyncMetrices.Tags.ERROR_TYPE, ClientErrorClassifier.classify(cause))
                 .register(meterRegistry)
                 .increment();
-    }
-
-    @Retryable(retryFor = {EndpointServerErrorException.class,
-                           WebClientResponseException.InternalServerError.class,
-                           WebClientResponseException.ServiceUnavailable.class,
-                           WebClientResponseException.GatewayTimeout.class,
-                           WebClientRequestException.class},
-            maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
-            backoff = @Backoff(
-                    delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.retry.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
-    public WebClient.ResponseSpec makeAuthenticatedRequest(String path)
-    {
-        Map<String, String> headers = authService.getAlfrescoAuthHeaders();
-
-        return webClient
-                .get()
-                .uri(alfrescoBaseUrl + path)
-                .headers(httpHeaders -> headers.forEach(httpHeaders::set))
-                .retrieve();
     }
 }

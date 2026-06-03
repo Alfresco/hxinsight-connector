@@ -23,14 +23,14 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
+package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.UserMapping;
 
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
 
 import java.util.List;
 import java.util.Set;
@@ -68,7 +68,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 
 @Slf4j
-public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT{
+public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
 
     /**
      * Tests nucleus-sync's ability to map 1 million users from both ACS and Nucleus sides.

@@ -23,11 +23,12 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
+package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.GroupMapping;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -40,7 +41,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
-public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT{
+public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
 
 
     private void installAllStubs(){

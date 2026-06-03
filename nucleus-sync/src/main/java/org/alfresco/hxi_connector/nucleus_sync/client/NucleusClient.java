@@ -65,71 +65,64 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
 @Component
 public class NucleusClient
 {
-    private final WebClient webClient;
     private final ObjectMapper objectMapper;
-    private final AuthService authService;
     private final String systemId;
     private final String nucleusBaseUrl;
     private final String idpBaseUrl;
     private final int pageSize;
-    private final int timeoutInMin;
     private final int deleteBatchSize;
     private final MeterRegistry meterRegistry;
+    private final RetryableHttpInvoker retryableHttpInvoker;
+    private final AuthService authService;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(NucleusClient.class);
 
     @Autowired
     public NucleusClient(
-            AuthService authService,
             @Value("${nucleus.system-id}") String systemId,
             @Value("${nucleus.base-url}") String nucleusBaseUrl,
             @Value("${nucleus.idp-base-url}") String idpBaseUrl,
             @Value("${nucleus.page-size:1000}") int pageSize,
             @Value("${nucleus.delete-group-member-batch-size:100}") int deleteBatchSize,
-            @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
-            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB,
-            MeterRegistry meterRegistry)
+            AuthService authService,
+            MeterRegistry meterRegistry,
+            RetryableHttpInvoker retryableHttpInvoker)
     {
         this(
-                WebClient.builder()
-                        .codecs(configurer -> configurer
-                                .defaultCodecs()
-                                .maxInMemorySize(bufferInKB * 1024))
-                        .build(),
                 new ObjectMapper(),
-                authService,
                 systemId,
                 nucleusBaseUrl,
                 idpBaseUrl,
                 pageSize,
                 deleteBatchSize,
-                timeoutInMins,
-                meterRegistry);
+                authService,
+                meterRegistry,
+                retryableHttpInvoker);
     }
 
     NucleusClient(
-            WebClient webClient,
             ObjectMapper objectMapper,
-            AuthService authService,
             String systemId,
             String nucleusBaseUrl,
             String idpBaseUrl,
             int pageSize,
             int deleteBatchSize,
-            int timeoutInMin,
-            MeterRegistry meterRegistry)
+            AuthService authService,
+            MeterRegistry meterRegistry,
+            RetryableHttpInvoker retryableHttpInvoker)
     {
-        this.webClient = webClient;
         this.objectMapper = objectMapper;
-        this.authService = authService;
         this.systemId = systemId;
         this.nucleusBaseUrl = nucleusBaseUrl;
         this.idpBaseUrl = idpBaseUrl;
         this.pageSize = pageSize;
-        this.timeoutInMin = timeoutInMin;
         this.deleteBatchSize = deleteBatchSize;
+        this.authService = authService;
         this.meterRegistry = meterRegistry;
+        this.retryableHttpInvoker = retryableHttpInvoker;
     }
+
+
 
     public List<IamUser> getAllIamUsers()
     {
@@ -172,7 +165,7 @@ public class NucleusClient
         {
             String jsonBody = objectMapper.writeValueAsString(groups);
 
-            executePostRequest(url, jsonBody);
+            retryableHttpInvoker.executePostRequest(url, jsonBody,authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -206,7 +199,7 @@ public class NucleusClient
         {
             String jsonBody = objectMapper.writeValueAsString(userMappings);
 
-            executePostRequest(url, jsonBody);
+            retryableHttpInvoker.executePostRequest(url, jsonBody,authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -244,7 +237,7 @@ public class NucleusClient
         {
             String jsonBody = objectMapper.writeValueAsString(assignments);
 
-            executePostRequest(url, jsonBody);
+            retryableHttpInvoker.executePostRequest(url, jsonBody,authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -264,7 +257,7 @@ public class NucleusClient
                     + "/groups/"
                     + externalGroupId;
 
-            executeDeleteRequest(fullUrl);
+            retryableHttpInvoker.executeDeleteRequest(fullUrl,authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -284,7 +277,7 @@ public class NucleusClient
                     + "/user-mappings/"
                     + externalUserId;
 
-            executeDeleteRequest(fullUrl);
+            retryableHttpInvoker.executeDeleteRequest(fullUrl,authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -330,7 +323,7 @@ public class NucleusClient
         }
         // Let exceptions propagate to removeGroupMembers() so that the failure
         // is logged & metered exactly once (no double-count, no double-wrap).
-        executeDeleteRequest(urlBuilder.toString());
+        retryableHttpInvoker.executeDeleteRequest(urlBuilder.toString(),authService.getHxpAuthHeaders());
     }
 
     private <T, R extends NucleusPagedResponse<T>> List<T> fetchAllPages(
@@ -357,7 +350,7 @@ public class NucleusClient
 
             String fullUrl = baseUrl + nextPath;
 
-            String response = executeGetRequest(fullUrl);
+            String response = retryableHttpInvoker.executeGetRequest(fullUrl,authService.getHxpAuthHeaders());
             R page = objectMapper.readValue(response, responseType);
 
             if (page.items() != null && !page.items().isEmpty())
@@ -378,80 +371,6 @@ public class NucleusClient
         return allItems;
     }
 
-    @Retryable(retryFor = {EndpointServerErrorException.class,
-            WebClientResponseException.InternalServerError.class,
-            WebClientResponseException.ServiceUnavailable.class,
-            WebClientResponseException.GatewayTimeout.class,
-            WebClientRequestException.class},
-            maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
-            backoff = @Backoff(
-                    delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.retry.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
-    private String executeGetRequest(String fullUrl)
-    {
-        Map<String, String> headers = authService.getHxpAuthHeaders();
-
-        return webClient
-                .get()
-                .uri(fullUrl)
-                .headers(
-                        httpHeaders -> {
-                            headers.forEach(httpHeaders::set);
-                            httpHeaders.set("Content-Type", "application/json");
-                        })
-                .retrieve()
-                .bodyToMono(String.class)
-                .block(Duration.ofMinutes(timeoutInMin));
-    }
-
-    @Retryable(retryFor = {EndpointServerErrorException.class,
-            WebClientResponseException.InternalServerError.class,
-            WebClientResponseException.ServiceUnavailable.class,
-            WebClientResponseException.GatewayTimeout.class,
-            WebClientRequestException.class},
-            maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
-            backoff = @Backoff(
-                    delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.retry.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
-    private void executePostRequest(String fullUrl, String jsonBody)
-    {
-        Map<String, String> headers = authService.getHxpAuthHeaders();
-
-        webClient
-                .post()
-                .uri(fullUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .headers(httpHeaders -> headers.forEach(httpHeaders::set))
-                .bodyValue(jsonBody)
-                .retrieve()
-                .bodyToMono(String.class)
-                .block(Duration.ofMinutes(timeoutInMin));
-    }
-
-    @Retryable(retryFor = {EndpointServerErrorException.class,
-            WebClientResponseException.InternalServerError.class,
-            WebClientResponseException.ServiceUnavailable.class,
-            WebClientResponseException.GatewayTimeout.class,
-            WebClientRequestException.class},
-            maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
-            backoff = @Backoff(
-                    delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.retry.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
-    private void executeDeleteRequest(String fullUrl)
-    {
-        Map<String, String> headers = authService.getHxpAuthHeaders();
-
-        webClient
-                .delete()
-                .uri(fullUrl)
-                .headers(httpHeaders -> headers.forEach(httpHeaders::set))
-                .retrieve()
-                .bodyToMono(String.class)
-                .block(Duration.ofMinutes(timeoutInMin));
-    }
 
     private void logAndRecord(String operation, String method, String message, Throwable e)
     {

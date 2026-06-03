@@ -146,13 +146,15 @@ final class ContainerComposition implements AutoCloseable
                         "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT)
                 .withEnv("HX_TOKEN_URI",
                         "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT + "/token")
-                // Tight test-only retry envelope (defaults are 3 × 2s × 2 multiplier ≈ 14s, unworkable
-                // in a chaos test). 4 attempts × 200 ms × 2 multiplier (max 1 s) ≈ 2.4 s total budget
-                // means a sub-2 s partition gets covered by the in-flight retry and the sync still completes.
-                .withEnv("HTTP_RETRY_MAX_ATTEMPTS", "5")
-                .withEnv("HTTP_RETRY_INITIAL_DELAY_MS", "200")
-                .withEnv("HTTP_RETRY_MULTIPLIER", "2")
-                .withEnv("HTTP_RETRY_MAX_DELAY_MS", "1000");
+                // Tight test-only retry envelope. The properties below bind to
+                // `http-client.retry.*` (note the `-client` segment) — must match the @Value
+                // expressions in RetryableHttpInvoker, otherwise Spring falls back to the
+                // annotation defaults (3 × 2 s × 2 ≈ 6 s budget) and chaos-test timings drift
+                // unpredictably. 5 attempts × 200 ms × 2 multiplier (max 1 s) ≈ 2.4 s budget.
+                .withEnv("HTTP_CLIENT_RETRY_MAX_ATTEMPTS",     "5")
+                .withEnv("HTTP_CLIENT_RETRY_INITIAL_DELAY_MS", "200")
+                .withEnv("HTTP_CLIENT_RETRY_MULTIPLIER",       "2")
+                .withEnv("HTTP_CLIENT_RETRY_MAX_DELAY_MS",     "1000");
     }
 
     /**
