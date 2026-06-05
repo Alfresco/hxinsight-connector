@@ -195,9 +195,12 @@ public class DockerContainers
 
     public static GenericContainer<?> createActiveMqContainer()
     {
+        // Wait on the broker's own "started" log line. The default HostPortWaitStrategy
+        // races the openwire port bind on CI and times out before the broker is reachable.
         return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
                 .withExposedPorts(61616, 8161, 5672, 61613)
+                .waitingFor(Wait.forLogMessage(".*Apache ActiveMQ.*started.*\\n", 1))
                 .withStartupTimeout(Duration.ofMinutes(2));
     }
 

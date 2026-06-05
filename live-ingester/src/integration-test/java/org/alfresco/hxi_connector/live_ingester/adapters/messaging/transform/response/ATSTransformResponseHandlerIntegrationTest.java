@@ -53,6 +53,7 @@ import org.alfresco.hxi_connector.common.config.properties.Retry;
 import org.alfresco.hxi_connector.common.exception.ResourceNotFoundException;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.messaging.JmsTransactionConfig;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.Transform;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.model.ClientData;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.transform.request.ATSTransformRequester;
@@ -69,7 +70,8 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Emp
                 ATSTransformResponseHandler.class,
                 DlqMetricsRecorder.class,
                 ATSTransformResponseHandlerIntegrationTest.IntegrationPropertiesTestConfig.class,
-                IntegrationCamelTestBase.class})
+                IntegrationCamelTestBase.class,
+                JmsTransactionConfig.class})
 @EnableAutoConfiguration
 @SuppressWarnings("PMD.FieldNamingConventions")
 class ATSTransformResponseHandlerIntegrationTest extends IntegrationCamelTestBase

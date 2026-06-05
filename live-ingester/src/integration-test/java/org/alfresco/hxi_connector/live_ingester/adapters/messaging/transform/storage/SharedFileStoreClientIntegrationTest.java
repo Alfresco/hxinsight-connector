@@ -66,13 +66,15 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.messaging.JmsTransactionConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.transform_engine.TransformEngineFileStorage;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
 
 @SpringBootTest(classes = {
         IntegrationProperties.class,
         SharedFileStoreClient.class,
-        Application.class},
+        Application.class,
+        JmsTransactionConfig.class},
         properties = "logging.level.org.alfresco=DEBUG")
 @EnableAutoConfiguration
 @EnableRetry
