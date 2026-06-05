@@ -43,22 +43,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Bandwidth-cut on the broker -> live-ingester path: {@code 0 KB/s} downstream throttle for ~5 seconds, applied via Toxiproxy. The connection stays open from the kernel's perspective, but bytes stop flowing — Camel/Spring JMS may either ride it out or treat it as a heartbeat-timeout disconnect; either path must converge to "all events delivered, with bounded duplication" once the throttle is removed.
- *
- * <p>
- * The repository's own ActiveMQ connection bypasses Toxiproxy ({@code activemq:61616} direct), so events keep landing on the topic during the throttle window — the threat is purely on the consumer's side.
- *
- * <p>
- * Asserts:
- * <ul>
- * <li><b>Completeness</b> — every event published during and around the throttle window reaches HX Insight after recovery.</li>
- * <li><b>Bounded duplication</b> — at-least-once delivery is acceptable, but a stuck consumer should not produce an unbounded number of redeliveries; cap at {@code MAX_DUPLICATES_PER_NODE} per node.</li>
- * <li><b>No silent drop</b> — DLQ depth stays at {@code 0}; a stalled consumer is not an error event.</li>
- * <li><b>Topic subscription preserved</b> — subscriber count remains {@code >= 1} after recovery.</li>
- * </ul>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=ActiveMqBandwidthCutReliabilityIT}.
+ * Bandwidth cut on the broker → live-ingester path for ~5 s. Connection stays open but bytes stop flowing. Asserts every event arrives, duplicates stay bounded ({@link #MAX_DUPLICATES_PER_NODE}), DLQ stays empty, subscription preserved.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -72,9 +57,7 @@ public class ActiveMqBandwidthCutReliabilityIT extends BaseReliabilityIT
     private static final long PUBLISH_GAP_MS = 800L;
     private static final long SETTLE_AFTER_RECOVERY_MS = 2_000L;
     private static final int CONVERGENCE_DELAY_MS = 1_000;
-    /**
-     * At-least-once is allowed; uncontrolled redelivery is not. The connector's reconnect path can produce a small number of duplicates after the broker decides the consumer is gone, but tens of duplicates would indicate a redelivery loop.
-     */
+    /** Reconnect can produce a few duplicates; tens would indicate a redelivery loop. */
     private static final int MAX_DUPLICATES_PER_NODE = 5;
 
     @Test

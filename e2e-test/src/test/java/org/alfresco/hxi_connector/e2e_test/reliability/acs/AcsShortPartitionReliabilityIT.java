@@ -41,24 +41,10 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Brief network partition (~{@value #PARTITION_SECONDS} s) between live-ingester and ACS REST. Differs from {@link AcsLatencyReliabilityIT}: there the connection is reachable but slow, so each request times out individually; here the {@code toxic-acs} proxy is fully disabled, so connect attempts are refused outright.
+ * Brief ACS partition: the {@code toxic-acs} proxy is disabled outright (not slow, refused). Asserts bounded-failure visibility (mid-partition event lands in DLQ), liveness after recovery, and that the JMS subscription survived.
  *
  * <p>
- * Asserts:
- * <ul>
- * <li><b>Bounded failure visibility</b> — a content-download attempt that lands inside the partition window exhausts retries and parks on {@code ActiveMQ.DLQ}; nothing is silently dropped.</li>
- * <li><b>Liveness</b> — once the proxy is re-enabled, a sentinel publish flows end-to-end. The route is not stuck.</li>
- * <li><b>Topic subscription preserved</b> — the live-ingester is still subscribed to {@code alfresco.repo.event2} after the partition (the ACS chaos must not knock out the JMS subscription).</li>
- * </ul>
- *
- * <p>
- * Carve-out from the matrix's "30 s" wording: the connector's content-download retry budget is bounded by {@code SHAREDFILESTORE_RETRY_ATTEMPTS=2} × {@code 200 ms} plus one JMS redelivery — total {@code < 1 s} before the message DLQs. A 30 s partition is indistinguishable from "ACS is down" at the connector's per-event time scale; the realistic invariant is bounded-failure visibility, which a {@value #PARTITION_SECONDS} s partition pins just as cleanly. The longer-outage shape is covered process-side by {@link AcsRestartReliabilityIT}.
- *
- * <p>
- * Contract-shape note: unlike {@link AcsLatencyReliabilityIT} — which provably exercises the {@code AlfrescoRepositoryContentClient} path because the latency toxic survives long enough for the download attempt to time out and emit the route's {@code Repository :: Unexpected response while downloading content} ERROR log — the {@code disable()} flavour here cannot be tightened to that same log substring without flakiness: in practice the connector's content-fetch attempt and the partition window race, and the DLQ entry the test observes can come from a downstream collateral failure in the rendition pipeline (e.g. an empty-stream upload further along). The IT is therefore retained as a bounded-failure visibility + liveness guard at the chaos-shape level, not as a regression guard for the ACS-download retry contract specifically. The latter is held by {@link AcsLatencyReliabilityIT}'s log-substring assertion.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=AcsShortPartitionReliabilityIT}.
+ * Distinct from {@link AcsLatencyReliabilityIT}: that test pins the ACS-download retry contract via log substring; this one is a chaos-shape guard at the disconnect-refused boundary.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -68,9 +54,6 @@ public class AcsShortPartitionReliabilityIT extends BaseReliabilityIT
     private static final String REPO_EVENT_TOPIC = "alfresco.repo.event2";
     private static final int PARTITION_SECONDS = 2;
     private static final long SETTLE_AFTER_RECOVERY_MS = 1_000L;
-    /**
-     * Per-attempt step for the post-partition convergence check. Sized so that the default 15-attempt cap on {@link RetryUtils#retryWithBackoff} comfortably covers the bounded-failure path: {@code attempts=2 × ~200 ms} on each of {@code maximumRedeliveries=1+1} JMS attempts plus the partition window plus headroom.
-     */
     private static final int CONVERGENCE_DELAY_MS = 2_000;
 
     @Test

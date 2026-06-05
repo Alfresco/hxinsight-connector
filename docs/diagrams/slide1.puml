@@ -1,0 +1,28 @@
+@startuml hxi-connector-components
+!theme plain
+left to right direction
+skinparam componentStyle rectangle
+skinparam DefaultFontSize 13
+skinparam shadowing false
+skinparam roundCorner 8
+rectangle "ACS" as acs
+together {
+    cloud "Transform path\nrouter • core-aio • SFS" as tx
+    queue    "ActiveMQ broker\nalfresco.repo.event2 (topic)" as amq
+}
+rectangle "hxinsight-connector" as connector {
+  rectangle "Nucleus-sync \n(ACS users data)" as nucleus #DDDDDD
+  rectangle "Bulk-ingester\n(initial seeding via ACS DB)" as bulk #DDDDDD
+  rectangle "Live-ingester" as live
+}
+
+cloud    "CIC Insight Ingestion API\n(WireMock in tests)" as hxi
+cloud    "S3" as s3
+acs  -- amq
+amq  -- live
+live -- tx
+live -- hxi
+live -- s3
+
+
+@enduml

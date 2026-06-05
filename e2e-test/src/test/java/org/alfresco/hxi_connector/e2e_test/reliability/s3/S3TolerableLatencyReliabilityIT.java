@@ -41,16 +41,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Positive counterpart to {@link S3LatencyReliabilityIT}: pins that an S3 upload PUT slower than a healthy round-trip but <i>under</i> the connector's {@code hyland-experience.storage.upload.response-timeout-ms} budget completes successfully — ingestion event reaches HX Insight, {@code dlqDepth() == 0}.
- *
- * <p>
- * Without this guard, a regression that trips the upload response timeout early (wrong unit on the property, mis-wired Camel HTTP option, accidental zeroing in a future refactor) would still pass {@link S3LatencyReliabilityIT} (the symmetric negative): both the over-budget and under-budget cases would DLQ, so the negative test alone cannot tell "the timeout setting is working" from "the timeout is permanently broken to fire instantly". This row separates the two.
- *
- * <p>
- * Toxiproxy injects {@value #S3_LATENCY_MS} ms downstream latency on the {@code toxic-s3} listener; the connector is configured with a {@code 3 s} upload response timeout (test profile, see {@link ReliabilityEnvironment}). Each PUT attempt should complete in ~{@value #S3_LATENCY_MS} ms — comfortably below the timeout — so the very first attempt succeeds, no retry / JMS redelivery is needed, and the message reaches HX Insight without touching the DLQ.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=S3TolerableLatencyReliabilityIT}.
+ * Positive pair for {@link S3LatencyReliabilityIT}: S3 upload latency under the timeout budget must succeed first try, no DLQ. Without this, the negative test alone could pass even if the timeout fired instantly.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -58,13 +49,8 @@ public class S3TolerableLatencyReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
     private static final String LATENCY_TOXIC_NAME = "s3_tolerable_latency";
-    /**
-     * Downstream latency Toxiproxy injects on the live-ingester ↔ S3 upload path. Comfortably under the connector's {@code STORAGE_UPLOAD_RESPONSETIMEOUTMS=3000} test profile so each PUT attempt completes inside the per-request budget rather than tripping the timeout. Picked well above a healthy Localstack round-trip (~tens of ms) so the test cannot pass by the latency being a no-op.
-     */
+    /** Under the 3 s upload timeout; well above a healthy round-trip so the test isn't a no-op. */
     private static final int S3_LATENCY_MS = 1_500;
-    /**
-     * Per-attempt step for the convergence retry loop. Sized to comfortably absorb one slow upload PUT round-trip (~{@value #S3_LATENCY_MS} ms) plus the downstream HX Insight POSTs.
-     */
     private static final int CONVERGENCE_DELAY_MS = 2_000;
 
     @Test

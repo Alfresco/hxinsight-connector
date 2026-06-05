@@ -39,30 +39,25 @@ import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 
 /**
- * Sister of {@link TransformResponseFailureReliabilityIT}: boots the env with both the {@code transform-response} dead-letter opt-in and the {@code throw-failed-transforms} opt-in enabled, and asserts that an ATS-reported transform failure ({@code status=400}) surfaces on {@code ActiveMQ.DLQ} with a {@code live_ingester_transform_response_dlq_total} counter increment.
- *
- * <p>
- * Same trigger as the default-deployment IT (synthetic {@code status=400} on the transform-response queue + sentinel node for liveness); opposite outcome on the DLQ assertion. Both run side-by-side on every CI build so any regression on either path fails loud.
- *
- * <p>
- * Per-class environment lifecycle (own boot, own teardown). Cost: one extra env boot for the opt-in pair.
+ * Opt-out from both transform-response defaults: with {@code throw-failed-transforms=false} and {@code dead-letter-enabled=false} a {@code status=400} transform-response is logged at WARN and silently ACK'd. No DLQ entry, no counter. Sister class {@link TransformResponseFailureReliabilityIT} covers the default DLQ path.
  */
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases", "PMD.SignatureDeclareThrowsException"})
-public class TransformResponseFailureWithDlqOptInReliabilityIT
+public class TransformResponseFailureOptOutReliabilityIT
 {
     private static final int CONVERGENCE_DELAY_MS = 1_000;
+    private static final String SILENT_DROP_LOG_FRAGMENT = "Transform :: Silently dropped failed transform-response";
 
     private ReliabilityEnvironment environment;
 
     @BeforeAll
     final void startEnvironment() throws Exception
     {
-        log.info("[reliability] Booting per-class ReliabilityEnvironment with transform-response DLC + throw-failed-transforms opt-ins for {}", getClass().getSimpleName());
+        log.info("[reliability] Booting per-class env with transform-response DLC + throw-failed-transforms disabled for {}", getClass().getSimpleName());
         environment = ReliabilityEnvironment.builder()
-                .withTransformResponseDeadLetterEnabled()
-                .withTransformResponseThrowFailedTransforms()
+                .withTransformResponseDeadLetterDisabled()
+                .withTransformResponseThrowFailedTransformsDisabled()
                 .build();
         environment.start();
     }
@@ -72,26 +67,29 @@ public class TransformResponseFailureWithDlqOptInReliabilityIT
     {
         if (environment != null)
         {
-            log.info("[reliability] Closing per-class ReliabilityEnvironment for {}", getClass().getSimpleName());
+            log.info("[reliability] Closing per-class env for {}", getClass().getSimpleName());
             environment.close();
         }
     }
 
-    /**
-     * With both opt-ins enabled: a {@code status=400} transform-response surfaces on the DLQ. Same trigger as {@link TransformResponseFailureReliabilityIT#shouldSilentlyDropTransformResponseWith400Status}, flipped by {@link ReliabilityEnvironment.Builder#withTransformResponseThrowFailedTransforms()} + {@link ReliabilityEnvironment.Builder#withTransformResponseDeadLetterEnabled()}.
-     */
     @Test
-    void shouldDeadLetterTransformResponseWith400Status() throws IOException
+    void shouldSilentlyDropTransformResponseWith400Status() throws IOException
     {
-        TransformResponseFailureReliabilityIT.SyntheticFailure failure = TransformResponseFailureReliabilityIT.injectSynthetic400Failure(environment);
+        TransformResponseFailureTrigger.SyntheticFailure failure = TransformResponseFailureTrigger.inject(environment);
 
         RetryUtils.assertWithRetry(() -> {
-            assertThat(environment.jolokia().dlqDepth())
-                    .as("opt-in enabled: failed transform-response must surface on the DLQ. Zero here means the route's deadLetterChannel did not catch the FailedTransformResponseException")
-                    .isGreaterThanOrEqualTo(1);
             assertThat(WiremockCounts.ingestionEventsFor(failure.sentinelNode().id()))
-                    .as("liveness: sentinel must flow past the dead-lettered failure")
+                    .as("liveness: sentinel must reach HX Insight after the route ACK'd the failed transform-response")
                     .isGreaterThanOrEqualTo(1);
+            assertThat(WiremockCounts.ingestionEventsFor(failure.droppedNodeRef()))
+                    .as("opt-out: the response handler returns early — no rendition POSTs for the dropped clientData.nodeRef")
+                    .isZero();
+            assertThat(environment.jolokia().dlqDepth())
+                    .as("opt-out: 400 transform-response is ACK'd silently after a route-level WARN log. Sister IT covers the default DLQ path")
+                    .isZero();
+            assertThat(environment.liveIngesterContainer().getLogs())
+                    .as("the silent-drop branch must actually have executed — proves the handler ran rather than being silently bypassed")
+                    .contains(SILENT_DROP_LOG_FRAGMENT);
         }, CONVERGENCE_DELAY_MS);
     }
 }

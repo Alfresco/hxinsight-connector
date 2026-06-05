@@ -146,8 +146,10 @@ class HttpFileUploaderTest
         Throwable thrown = catchThrowable(() -> httpFileUploader.upload(request, NODE_ID));
 
         // then
+        // upload() catches the route's CamelExecutionException and delegates to
+        // ErrorUtils.wrapErrorAndThrowIfNecessary, which returns the already-thrown
+        // EndpointServerErrorException as-is, so the Camel wrapper is gone by the time the test sees it.
         assertThat(thrown)
-                .cause()
                 .isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("received:", 500);
     }
@@ -164,7 +166,6 @@ class HttpFileUploaderTest
 
         // then
         assertThat(thrown)
-                .cause()
                 .isInstanceOf(EndpointClientErrorException.class)
                 .hasMessageContaining("received:", 400);
     }

@@ -136,8 +136,11 @@ class PreSignedUrlRequesterTest
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
+        // requestStorageLocation() catches the route's CamelExecutionException and delegates to
+        // ErrorUtils.wrapErrorAndThrowIfNecessary which returns the already-thrown
+        // EndpointServerErrorException as-is, so the Camel wrapper is gone by the time the test sees it.
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("received:", 500);
     }
 
@@ -152,7 +155,7 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointClientErrorException.class)
+                .isInstanceOf(EndpointClientErrorException.class)
                 .hasMessageContaining("received:", 400);
     }
 
@@ -168,7 +171,7 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("Missing", STORAGE_LOCATION_PROPERTY);
     }
 
@@ -183,8 +186,12 @@ class PreSignedUrlRequesterTest
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
+        // JsonEOFException is configured as a retry reason via Retry.RETRY_REASONS_BASIC; the
+        // requestStorageLocation() catch block calls ErrorUtils.wrapErrorAndThrowIfNecessary
+        // which re-throws it wrapped in EndpointServerErrorException so @Retryable matches
+        // and the retry-attempts counter records under the stable EndpointServerErrorException tag.
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(JsonEOFException.class)
                 .message().isNotEmpty();
     }
@@ -200,8 +207,10 @@ class PreSignedUrlRequesterTest
         Throwable thrown = catchThrowable(() -> preSignedUrlRequester.requestStorageLocation());
 
         // then
+        // MismatchedInputException is configured as a retry reason via Retry.RETRY_REASONS_BASIC;
+        // same wrap-then-retry contract as the JsonEOFException case above.
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MismatchedInputException.class)
                 .message().isNotEmpty();
     }
@@ -218,7 +227,7 @@ class PreSignedUrlRequesterTest
 
         // then
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .hasMessageContaining("Parsing URL from response property failed!")
                 .rootCause().isInstanceOf(MalformedURLException.class)
                 .message().isNotEmpty();

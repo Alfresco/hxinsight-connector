@@ -41,16 +41,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Positive counterpart to {@link AcsLatencyReliabilityIT}: pins that an ACS REST response slower than a healthy round-trip but <i>under</i> the connector's {@code alfresco.repository.responseTimeoutMs} budget completes successfully — ingestion event reaches HX Insight, {@code dlqDepth() == 0}.
- *
- * <p>
- * Without this guard, a regression that trips the response timeout early (wrong unit on the property, mis-wired Camel HTTP option, accidental zeroing in a future refactor) would still pass {@link AcsLatencyReliabilityIT} (the symmetric negative): both the over-budget and under-budget cases would DLQ, so the negative test alone cannot tell "the timeout setting is working" from "the timeout is permanently broken to fire instantly". This row separates the two.
- *
- * <p>
- * Toxiproxy injects {@value #ACS_LATENCY_MS} ms downstream latency on the live-ingester ↔ ACS path; the connector is configured with a {@code 3 s} response timeout (test profile, see {@link ReliabilityEnvironment}). Each content-download attempt should complete in ~{@value #ACS_LATENCY_MS} ms — comfortably below the timeout — so the very first attempt succeeds, no retry / JMS redelivery is needed, and the message reaches HX Insight without touching the DLQ.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=AcsTolerableLatencyReliabilityIT}.
+ * Positive pair for {@link AcsLatencyReliabilityIT}: ACS latency under the timeout budget must succeed first try, no DLQ. Without this, the negative test alone could pass even if the timeout fired instantly.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -58,13 +49,8 @@ public class AcsTolerableLatencyReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
     private static final String LATENCY_TOXIC_NAME = "acs_tolerable_latency";
-    /**
-     * Downstream latency Toxiproxy injects on the live-ingester ↔ ACS path. Comfortably under the connector's {@code RESPONSETIMEOUTMS=3000} test profile so each content-download attempt completes inside the per-request budget rather than tripping the timeout. Picked well above a healthy ACS round-trip (~tens of ms) so the test cannot pass by the latency being a no-op.
-     */
+    /** Under the 3 s ACS response timeout; well above a healthy round-trip so the test isn't a no-op. */
     private static final int ACS_LATENCY_MS = 1_500;
-    /**
-     * Per-attempt step for the convergence retry loop. Sized to comfortably absorb one slow ACS round-trip (~{@value #ACS_LATENCY_MS} ms) plus the downstream HX Insight POSTs.
-     */
     private static final int CONVERGENCE_DELAY_MS = 2_000;
 
     @Test

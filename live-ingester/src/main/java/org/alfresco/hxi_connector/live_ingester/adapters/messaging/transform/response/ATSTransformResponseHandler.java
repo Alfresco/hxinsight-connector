@@ -99,10 +99,10 @@ public class ATSTransformResponseHandler extends RouteBuilder
                 .log(WARN, log, "Transform :: Unexpected state while processing rendition from: %s due to: ${exception.message}. Body: ${body}".formatted(transformationSource))
                 .process(this::retryContentTransformation);
 
-        // Deterministic transform failures (status=400) — opt-in via throwFailedTransforms. Skip retries
-        // (deterministic, no point) and ACK the message. With deadLetterEnabled=true the exchange is also
-        // copied to the DLQ + counter incremented for operator inventory; without it, only the WARN logs
-        // remain (matches the default-deployment silent-drop contract minus the opt-in throw signal).
+        // Deterministic transform failures (status=400) — default-on via throwFailedTransforms. Skip retries
+        // (deterministic, no point) and ACK the message. With deadLetterEnabled=true (default) the exchange is
+        // also copied to the DLQ + counter incremented for operator inventory; opting out leaves only the WARN
+        // logs — the legacy silent-drop contract.
         onException(FailedTransformResponseException.class)
                 .log(WARN, log, "Transform :: Deterministic transform failure: ${exception.message}. Routing to error handler without retry.")
                 .handled(true)
@@ -170,7 +170,7 @@ public class ATSTransformResponseHandler extends RouteBuilder
     }
 
     /**
-     * Failure processor for deterministic transform failures handled via {@code onException(FailedTransformResponseException.class)}: mirrors the {@link DeadLetterChannels#forRoute} on-prepare callback (masked exchange-state log + Micrometer counter) and, when {@code deadLetterEnabled=true}, copies the original exchange to the configured dead-letter URI for operator inventory. With the DLC opt-in off, only the WARN line and the route-level {@code Transformation failed} log survive — matching the default-deployment silent-drop contract minus the opt-in's diagnostic value.
+     * Failure processor for deterministic transform failures handled via {@code onException(FailedTransformResponseException.class)}: mirrors the {@link DeadLetterChannels#forRoute} on-prepare callback (masked exchange-state log + Micrometer counter) and, when {@code deadLetterEnabled=true} (default), copies the original exchange to the configured dead-letter URI for operator inventory. With the DLC opted out, only the WARN line and the route-level {@code Transformation failed} log survive — the legacy silent-drop contract minus the default's diagnostic value.
      */
     @SuppressWarnings("PMD.UnusedPrivateMethod")
     private void handleDeterministicTransformFailure(Exchange exchange)

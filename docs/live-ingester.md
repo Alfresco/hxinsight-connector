@@ -43,39 +43,37 @@ alfresco:
 | `ALFRESCO_REPOSITORY_HEALTHPROBE_ENDPOINT` | Health check endpoint for Alfresco (URL) | Derived from `base-url` |
 | `ALFRESCO_REPOSITORY_HEALTHPROBE_TIMEOUTSECONDS` | Max time to wait for Alfresco to become healthy in seconds (integer) | `1800` |
 | `ALFRESCO_REPOSITORY_HEALTHPROBE_INTERVALSECONDS` | Interval between health checks in seconds (integer) | `30` |
-| `ALFRESCO_REPOSITORY_RESPONSETIMEOUTMS` | Per-request response timeout (ms) for ACS REST content downloads. `0` (default) leaves the underlying Camel HTTP client at its built-in timeout — a slow or unresponsive ACS can pin a route worker thread until the JVM is restarted. Set a positive value (e.g., `30000`) in production to bound per-request wait and surface a slow ACS as a timeout that can be retried / dead-lettered. (integer ms, `>= 0`) | `0` |
+| `ALFRESCO_REPOSITORY_RESPONSETIMEOUTMS` | Per-request response timeout (ms) for ACS REST content downloads. The default bounds per-request wait so a slow ACS surfaces as a timeout that can be retried / dead-lettered rather than pinning a route worker thread. Set to `0` to fall back to the underlying Camel HTTP client's built-in timeout (typically no upper bound). (integer ms, `>= 0`) | `30000` |
 
 > **Note:** The connector needs to know the ACS version. Choose one approach:
 > - **Automatic detection (recommended):** Set `base-url` and leave `version-override` empty. The connector will call the Alfresco Discovery API at startup to determine the ACS version.
 > - **Manual override:** Set `version-override` to skip the Discovery API call (e.g., `23.2.0`). Useful if the Alfresco Discovery API is inaccessible.
 
-#### Durable event subscription (recommended)
+#### Durable event subscription (default)
 
-By default, the Live Ingester subscribes to `alfresco.repo.event2` as a **non-durable** topic consumer. If the broker connection drops (network partition, broker restart, ingester restart), any repo events published while the consumer is detached are silently dropped by ActiveMQ. This is acceptable for a development setup but causes data drift in production.
-
-Opt in to a **durable** subscription so that the broker retains events for this consumer across disconnects and replays them on reconnect:
+By default, the Live Ingester subscribes to `alfresco.repo.event2` as a **durable** topic consumer. The broker retains events for this consumer across disconnects (network partition, broker restart, ingester restart) and replays them on reconnect — no events are lost while the connector is offline. This is the production-safe default.
 
 ```yaml
 alfresco:
   repository:
     events-subscription:
-      durable: true
+      durable: true                    # default
       name: LiveIngesterSubscription   # any unique identifier; keep stable across restarts
 ```
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE` | Set to `true` to use a durable topic subscription so events published while the Live Ingester is disconnected are retained by the broker and replayed on reconnect. (boolean) | `false` |
+| `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE` | When `true` (default), the Live Ingester subscribes as a durable topic consumer so events published while disconnected are retained by the broker and replayed on reconnect. Set to `false` only for development setups that explicitly accept silent loss across disconnects. (boolean) | `true` |
 | `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_NAME` | Subscription identifier and JMS connection clientId. Must be unique per Live Ingester deployment and **must remain stable across restarts** — changing it abandons the existing subscription on the broker (which keeps accumulating events until cleaned up). (string) | `LiveIngesterSubscription` |
 
 **Broker requirements:** ActiveMQ Classic 5.15+ (tested on 5.18.x and 6.1.x). Both `kahadb` and `jdbc` persistence stores work; the broker must be configured with `persistent="true"` (the default).
 
 **Operational notes:**
 - Durable subscriptions persist on the broker until explicitly unsubscribed. If you decommission a Live Ingester instance, run `Unsubscribe` on the broker (Web Console → Subscribers → Offline Durable Topic Subscribers → Delete) or events will accumulate forever for the abandoned subscription.
-- The configured `name` is also set as the JMS connection `clientId` on **all** of this Live Ingester's JMS connections (the `bulk-ingester-events` and transform-response queues too), because durable topic subscriptions require a unique `clientId` per the JMS specification. The broker will refuse a second simultaneous connection from the same `clientId`. **Run only one Live Ingester instance** with the durable opt-in enabled. Multi-instance HA is tracked under `RB-003` in the reliability bug log and requires a separate fix.
-- The `events-endpoint` URI itself remains unchanged (`activemq:topic:alfresco.repo.event2` by default). The Live Ingester appends `?subscriptionDurable=true&durableSubscriptionName=<name>` internally when the opt-in is on.
+- The configured `name` is also set as the JMS connection `clientId` on **all** of this Live Ingester's JMS connections (the `bulk-ingester-events` and transform-response queues too), because durable topic subscriptions require a unique `clientId` per the JMS specification. The broker will refuse a second simultaneous connection from the same `clientId`. **Run only one Live Ingester instance** with the durable default. Multi-instance HA is tracked under `RB-003` in the reliability bug log and requires a separate fix.
+- The `events-endpoint` URI itself remains unchanged (`activemq:topic:alfresco.repo.event2` by default). The Live Ingester appends `?subscriptionDurable=true&durableSubscriptionName=<name>` internally.
 
-**Rollback:** Set `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE=false` (or unset) and restart. The Live Ingester reverts to a non-durable subscription. Remember to unsubscribe the orphaned durable subscription on the broker.
+**Opting out:** Set `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DURABLE=false` and restart. The Live Ingester subscribes non-durably and the broker silently drops events published while the consumer is detached. Only choose this for development setups that explicitly accept that loss; remember to unsubscribe the orphaned durable subscription on the broker.
 
 #### Repo events: dead-letter channel
 
@@ -110,29 +108,28 @@ alfresco:
 
 #### Repo events: unrecognised `eventType`
 
-The connector dispatches on a fixed set of repo event types (`org.alfresco.event.node.Created` / `Updated` / `PermissionUpdated` / `Deleted`, plus the prediction-event variants). When a syntactically-valid CloudEvent arrives with an `eventType` outside that set:
+The connector dispatches on a fixed set of repo event types (`org.alfresco.event.node.Created` / `Updated` / `PermissionUpdated` / `Deleted`, plus the prediction-event variants). When a syntactically-valid CloudEvent arrives with an `eventType` outside that set, the connector re-throws the event as `UnsupportedEventTypeException` so the existing repo-events `DeadLetterChannel` (above) routes it to `ActiveMQ.DLQ` with a `live_ingester_repo_events_dlq_total{exception="UnsupportedEventTypeException"}` increment. The `live_ingester_repo_events_unhandled_total{type="<the.unknown.type>"}` counter is also incremented and an `INFO` log line names the type before the exception is thrown.
 
-- **Default behaviour:** an `INFO` log line names the unsupported type, the `live_ingester_repo_events_unhandled_total{type="<the.unknown.type>"}` Micrometer counter is incremented, and the JMS message is ACK'd. The route is preserved (no DLQ flood) so a future ACS release adding a new event type does not pile up on `ActiveMQ.DLQ` until the connector adds explicit handling.
-- **Opt-in dead-letter:** set `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DEADLETTERUNSUPPORTEDTYPES=true` to re-throw the event as `UnsupportedEventTypeException` so the existing repo-events `DeadLetterChannel` (above) routes it to `ActiveMQ.DLQ` with a `live_ingester_repo_events_dlq_total{exception="UnsupportedEventTypeException"}` increment. Pick this if your alerting story needs structured DLQ inventory rather than counter / log inventory.
+Set `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DEADLETTERUNSUPPORTEDTYPES=false` to fall back to the legacy ACK-and-count behaviour (counter + log only, no DLQ entry). This is appropriate for deployments that prefer forward-compatibility with future ACS event types over structured DLQ inventory.
 
 ```yaml
 alfresco:
   repository:
     events-subscription:
-      dead-letter-unsupported-types: false  # default; flip to true for hard-fail inventory
+      dead-letter-unsupported-types: true   # default; set to false for ACK-and-count behaviour
 ```
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DEADLETTERUNSUPPORTEDTYPES` | When `true`, an unrecognised `eventType` is re-thrown as `UnsupportedEventTypeException` and routed to the DLQ via the repo-events dead-letter channel. When `false`, only the `live_ingester_repo_events_unhandled_total` counter is incremented and the message is ACK'd. (boolean) | `false` |
+| `ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DEADLETTERUNSUPPORTEDTYPES` | When `true` (default), an unrecognised `eventType` is re-thrown as `UnsupportedEventTypeException` and routed to the DLQ via the repo-events dead-letter channel. When `false`, only the `live_ingester_repo_events_unhandled_total` counter is incremented and the message is ACK'd. (boolean) | `true` |
 
-**Observability (always on regardless of the opt-in):**
+**Observability (always on regardless of the setting):**
 - Counter `live_ingester_repo_events_unhandled_total{type="<the.unknown.type>"}` is incremented exactly once per unrecognised event. The `type` tag carries the offending `eventType` so operators can break out e.g. classification events from retention events on the same alert.
 - One `INFO` log line is emitted per unrecognised event, naming the type.
 
 **Operational notes:**
 - Cardinality of the `type` tag is bounded by ACS' actual event taxonomy; the counter does not sanitise the tag value, so a malformed publisher (or a deliberate fuzz on the topic) can in principle inflate the cardinality. ACS-side topics are not externally writable so this is a low-risk concern in supported deployments.
-- The opt-in default is `false` because flipping it changes operator-visible queue depth on the broker (`ActiveMQ.DLQ`) and risks new ACS event types flooding the DLQ until the connector adds dispatch for them. The default-off path is the right shape for forward-compatibility; opt in only when your alerting story demands per-event DLQ inventory.
+- A future ACS release adding a new repo event type will land it on the DLQ until the connector adds explicit dispatch for it. Operators alerting on DLQ depth should bracket ACS upgrades with a runbook step that drains expected unknown-type entries; deployments that prefer forward-compatibility without that step should set the property to `false`.
 
 #### Repo events: content with no MIME mapping
 
@@ -314,33 +311,30 @@ By default, the Live Ingester downloads content directly from the Alfresco repos
 | `ALFRESCO_TRANSFORM_REQUEST_TIMEOUT` | Max time to wait for transform to complete in ms (integer) | `20000` |
 | `ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL` | Shared File Store base URL (URL) | Required |
 | `ALFRESCO_TRANSFORM_RESPONSE_QUEUENAME` | Queue name for receiving transform responses (string) | `org.alfresco.hxinsight-connector.transform.response` |
-| `ALFRESCO_TRANSFORM_RESPONSE_RETRYINGESTION_ATTEMPTS` | Retry attempts for failed ingestion after transform (integer, `-1` = unlimited) | `-1` |
+| `ALFRESCO_TRANSFORM_RESPONSE_RETRYINGESTION_ATTEMPTS` | Retry attempts on the route's broad-`Exception` `onException` handler. Must be a finite value when `dead-letter-enabled=true`, otherwise the broad handler retries forever and the DLC is never reached. (integer; `-1` = unbounded, default `6` matches the DLC redelivery budget) | `6` |
 
-#### Transform-response: dead-letter channel (recommended)
+#### Transform-response: dead-letter channel
 
-By default, post-201 failures while processing a transform-response (e.g. transient Shared File Store unavailability when downloading the rendition, S3 PUT errors after rendition download but before upload-to-HXI, or any other exception that bubbles past the response handler's retry budget) are silently ACK'd by Camel's `DefaultErrorHandler`. The transform itself succeeded on the ATS side, but the rendition is silently abandoned: HX Insight ends up with only the metadata-only ingestion-event for the affected node, no DLQ entry exists, no metric is incremented, and no log line names the dropped node reference. This is acceptable for a development setup but constitutes silent data loss in production whenever SFS or downstream systems flap.
-
-Opt in to a route-level `DeadLetterChannel` so failures land on a dead-letter queue with bounded redelivery and a Micrometer counter for observability. **Pair the DLC opt-in with a finite `retry-ingestion.attempts` value** — the production default is `-1` (unbounded) for legacy reasons, and the route's broad-`Exception` retry handler will swallow exceptions in an infinite loop and never reach the dead-letter destination unless this is set:
+Post-201 failures while processing a transform-response (transient Shared File Store unavailability when downloading the rendition, S3 PUT errors after rendition download, or any other exception that bubbles past the response handler's retry budget) land on `ActiveMQ.DLQ` via a route-level `DeadLetterChannel` with bounded redelivery and a Micrometer counter for observability.
 
 ```yaml
 alfresco:
   transform:
     response:
-      dead-letter-enabled: true
+      dead-letter-enabled: true                      # default
       dead-letter-uri: activemq:queue:ActiveMQ.DLQ   # default
       maximum-redeliveries: 6                        # default
       redelivery-delay-ms: 1000                      # default; exponential backoff: 1s, 2s, 4s, 8s, 16s, 32s
       retry-ingestion:
-        attempts: 6                                  # required; production default is -1 (unbounded) and would render the DLC inert
+        attempts: 6                                  # default; -1 (unbounded) renders the DLC inert
 ```
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_TRANSFORM_RESPONSE_DEADLETTERENABLED` | Set to `true` to install a Camel `errorHandler(deadLetterChannel(...))` on the `transform-events-consumer` route so post-201 failures during rendition processing land on the dead-letter queue instead of being silently ACK'd. (boolean) | `false` |
+| `ALFRESCO_TRANSFORM_RESPONSE_DEADLETTERENABLED` | When `true` (default), a Camel `errorHandler(deadLetterChannel(...))` on the `transform-events-consumer` route catches post-201 failures and routes them to the dead-letter queue. Set to `false` to fall back to Camel's `DefaultErrorHandler` (silent ACK on retry exhaustion — silent data loss whenever SFS or downstream systems flap). (boolean) | `true` |
 | `ALFRESCO_TRANSFORM_RESPONSE_DEADLETTERURI` | Camel endpoint URI used as the dead-letter destination for transform-response messages. Only takes effect when `dead-letter-enabled=true`. (string) | `activemq:queue:ActiveMQ.DLQ` |
 | `ALFRESCO_TRANSFORM_RESPONSE_MAXIMUMREDELIVERIES` | Maximum number of redelivery attempts before the message is moved to the dead-letter URI. Only takes effect when `dead-letter-enabled=true`. (integer; `0` disables retries) | `6` |
 | `ALFRESCO_TRANSFORM_RESPONSE_REDELIVERYDELAYMS` | Initial delay between redelivery attempts in milliseconds. Exponential backoff doubles the delay on each subsequent retry. Only takes effect when `dead-letter-enabled=true`. (long; `0` for no delay) | `1000` |
-| `ALFRESCO_TRANSFORM_RESPONSE_RETRYINGESTION_ATTEMPTS` | Maximum redelivery attempts on the route's broad-`Exception` `onException` handler. Production default is `-1` (unbounded) and predates the DLC; **must be set to a finite value when `dead-letter-enabled=true`**, otherwise the broad handler retries forever and the DLC is never reached. The connector logs a `WARN` at startup if it detects this misconfiguration. (integer; `-1` = unbounded, recommended `6` to match the DLC redelivery budget) | `-1` |
 
 **Observability:**
 - Counter `live_ingester_transform_response_dlq_total{exception="<short-class-name>"}` is exposed via the existing Micrometer registry. It is incremented exactly once per message routed to the DLQ.
@@ -349,41 +343,34 @@ alfresco:
 - A startup `WARN` is logged when `dead-letter-enabled=true` is detected together with `retry-ingestion.attempts < 0`, calling out that the DLC will be inert until the property is bounded.
 
 **Operational notes:**
-- Default off because turning it on adds a new queue depth (`ActiveMQ.DLQ`) for operators to monitor; the DLQ shape and tunables match the repo-events and bulk-ingester DLCs already documented in this file, so monitoring tooling that already alerts on those counters trivially covers this one.
 - Setting `maximum-redeliveries=0` skips retries entirely and dead-letters on the first exception. Useful for testing the alert path without waiting for backoff.
-- The unbounded default of `retry-ingestion.attempts` predates the DLC opt-in and is preserved for backward compatibility with deployments that rely on the legacy "retry forever" behaviour. A coordinated default-flip to a bounded value is on the same release roadmap as the other reliability defaults (durable subscription, DLC default-on); until then the pairing requirement above is the operator's responsibility.
+- Setting `dead-letter-enabled=false` reverts to the legacy silent-ACK behaviour. Only do this for non-production deployments; in production it constitutes silent data loss on every post-201 failure.
 
-**Rollback:** Set `ALFRESCO_TRANSFORM_RESPONSE_DEADLETTERENABLED=false` (or unset) and restart. The route reverts to the default — silent ACK on retry exhaustion. Drain the DLQ before rollback if non-empty.
+#### Transform-response: surface ATS-reported failures
 
-#### Transform-response: surface ATS-reported failures (optional)
+When ATS reports a transform as failed (`status=400` on the transform-response queue — typically a deterministic "I cannot produce this rendition" signal: unsupported mime mapping, transform-engine config, etc.), the connector throws `FailedTransformResponseException` so the failure flows through the dead-letter channel above. The result is a DLQ entry with the original payload, an exception-tagged counter increment, and an `ERROR` log line.
 
-When ATS reports a transform as failed (`status=400` on the transform-response queue — typically a deterministic "I cannot produce this rendition" signal: unsupported mime mapping, transform-engine config, etc.), the connector logs a route-level `WARN` line containing the full payload (so the offending `clientData.nodeRef` and `errorDetails` are grep-friendly) and then ACKs the JMS message without further work. Retrying a deterministic ATS rejection is pointless and would just produce a flood of redeliveries with no upside, so this is the by-design behaviour and is appropriate for most deployments.
-
-Deployments that want a structured, automation-friendly inventory of these abandonments (DLQ entry per failure, exception-tagged Micrometer counter, replayable original payload) can opt in to surfacing them as a thrown exception that flows through the route's error handler. Pair this opt-in with `dead-letter-enabled` above so the failed message lands on the DLQ rather than just exhausting the retry budget:
+Set `ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false` to fall back to the legacy `WARN`-log + silent ACK behaviour (no DLQ entry, no counter increment, only a route-level log line containing the full payload).
 
 ```yaml
 alfresco:
   transform:
     response:
-      throw-failed-transforms: true
-      dead-letter-enabled: true                       # required to land the failure on the DLQ
+      throw-failed-transforms: true   # default
 ```
 
 | Environment Variable | Description | Default |
 |---------------------|-------------|---------|
-| `ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS` | When `true`, an ATS-reported transform failure (`status=400` on the transform-response queue) is surfaced as a `FailedTransformResponseException` instead of the default silent ACK. The exception flows through the route's error handler — pair with `dead-letter-enabled=true` for the failure to land on the DLQ + counter. (boolean) | `false` |
+| `ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS` | When `true` (default), an ATS-reported transform failure is surfaced as `FailedTransformResponseException` and routed to the DLQ via the transform-response dead-letter channel. When `false`, the route logs the failure and silently ACKs the JMS message. (boolean) | `true` |
 
 **Observability:**
-- Increments the same `live_ingester_transform_response_dlq_total{exception="FailedTransformResponseException"}` counter exposed by the dead-letter-channel opt-in. Operators alerting on a non-zero rate over a 5-minute window will catch a sudden spike in ATS-reported failures the same way they'd catch SFS-related drops.
+- Increments `live_ingester_transform_response_dlq_total{exception="FailedTransformResponseException"}`. Operators alerting on a non-zero rate over a 5-minute window will catch a sudden spike in ATS-reported failures the same way they'd catch SFS-related drops.
 - The DLQ entry preserves the original transform-response payload so operators can inspect `clientData.nodeRef`, `targetMimeType`, and ATS' `errorDetails` and replay against a corrected ATS configuration if appropriate.
-- The default-deployment `WARN` log line (`Transform :: Transformation failed. Body: ${body}`) still fires whether the opt-in is on or off — the opt-in adds the structured signal alongside the existing log.
+- The route-level `WARN` log line (`Transform :: Transformation failed. Body: ${body}`) still fires whether the property is `true` or `false`.
 
 **Operational notes:**
-- Default off because retrying a deterministic ATS rejection is wasted work, and most deployments are happy with the existing `WARN`-log signal. Turn the opt-in on if your alerting story needs metric/DLQ inventory rather than log-line inventory.
-- `throw-failed-transforms=true` without `dead-letter-enabled=true` causes the exception to exhaust the route's retry budget and then ACK the message anyway (with extra `ERROR` logs along the way) — strictly noisier than the default unless paired with the DLC.
-- Intended as a permanent operator-visibility opt-in, not as a transitional workaround for a bug. The default-off behaviour is a deliberate design choice in the connector and is expected to remain the default for new deployments; turn the opt-in on if and only if your alerting story needs structured failure inventory.
-
-**Rollback:** Set `ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false` (or unset) and restart. The route reverts to the default `WARN`-log + silent-ACK behaviour. Drain any pending DLQ entries before rollback if non-empty.
+- `throw-failed-transforms=true` requires `dead-letter-enabled=true` (the default) — otherwise the exception exhausts the route's retry budget and then ACKs the message anyway with extra `ERROR` logs, strictly noisier than `throw-failed-transforms=false`.
+- Setting both properties to `false` reverts to the legacy log-only behaviour. This is appropriate for non-production deployments that prefer log-line inventory over DLQ inventory; in production it makes ATS rejections invisible to metric-based alerting.
 
 ---
 
@@ -514,11 +501,11 @@ The two HX Insight HTTP paths (`/presigned-urls`, `/ingestion-events`) accept a 
 |---------------------|-------------|---------|
 | `HYLANDEXPERIENCE_INGESTER_RESPONSETIMEOUTMS` | Maximum time (ms) to wait for an HX Insight `/ingestion-events` response before aborting with `SocketTimeoutException`. The aborted attempt counts against the JMS-level redelivery budget; exhaustion sends the message to `ActiveMQ.DLQ` (see [Repo events dead-letter channel](#repo-events-dead-letter-channel)). | `30000` (30 s) |
 | `HYLANDEXPERIENCE_STORAGE_LOCATION_RESPONSETIMEOUTMS` | Same, for the `/presigned-urls` path. | `30000` (30 s) |
-| `HYLANDEXPERIENCE_STORAGE_UPLOAD_RESPONSETIMEOUTMS` | Per-request response timeout (ms) for the actual content `PUT` against the pre-signed S3 URL returned by HX Insight. `0` (default) leaves no per-request response timeout on the underlying Apache HttpClient5 (`RequestConfig.responseTimeout` unset, falling through to the connection's default `SocketConfig.soTimeout` of `0` / disabled), so the socket read blocks indefinitely on a slow or unresponsive S3 endpoint and the route worker thread stays pinned until the JVM is restarted. Set a positive value (e.g., `30000`) in production to bound per-request wait and surface a slow upload as a `SocketTimeoutException` that can be retried / dead-lettered. (integer ms, `>= 0`) | `0` |
+| `HYLANDEXPERIENCE_STORAGE_UPLOAD_RESPONSETIMEOUTMS` | Per-request response timeout (ms) for the actual content `PUT` against the pre-signed S3 URL returned by HX Insight. The default bounds per-request wait so a slow upload surfaces as a `SocketTimeoutException` that can be retried / dead-lettered. Set to `0` to leave the underlying Apache HttpClient5 with no per-request response timeout (`RequestConfig.responseTimeout` unset). Large uploads against a distant region may legitimately need a larger value — tune to your deployment. (integer ms, `>= 0`) | `30000` |
 
 The 30 s default on the two HX Insight paths is chosen to be conservative: long enough to cover real HX Insight cold-start spikes (cold S3 client, distant region) without being so long that a single hung response can stall the route for minutes. Tune lower if your HX Insight tenant has tight SLOs and you'd rather fail fast (the failure surfaces as a counter increment on `live_ingester_repo_events_dlq_total{exception="SocketTimeoutException"}` and a parked message on the DLQ).
 
-The S3 upload path (`HYLANDEXPERIENCE_STORAGE_UPLOAD_RESPONSETIMEOUTMS`) defaults to `0` rather than a positive value because the right value depends on operator-side tuning (large content uploads against a distant S3 region legitimately take many seconds), so no single safe number works across deployments.
+The S3 upload path (`HYLANDEXPERIENCE_STORAGE_UPLOAD_RESPONSETIMEOUTMS`) shares the same 30 s default as the other HX Insight paths. Large content uploads against a distant S3 region can legitimately take many seconds, so operators with that profile should tune this value up (or set to `0` to disable the per-request timeout entirely). The default trades a small risk of premature timeouts on large uploads for the guarantee that a slow or unresponsive S3 endpoint cannot pin a route worker thread indefinitely.
 
 > Note on `4xx` responses: any HX Insight `4xx` response (other than `404`, which surfaces as `ResourceNotFoundException`) is treated as a fatal client error and is **not retried**. This applies to `400`, `409`, `412`, `429`, etc. uniformly — the connector does not implement bespoke handling for individual `4xx` semantics. If you observe `live_ingester_repo_events_dlq_total{exception="EndpointClientErrorException"}` increasing, inspect the corresponding HX Insight response codes and tighten producer pacing (e.g. cap the bulk-ingester batch rate) if the upstream is signalling overload.
 

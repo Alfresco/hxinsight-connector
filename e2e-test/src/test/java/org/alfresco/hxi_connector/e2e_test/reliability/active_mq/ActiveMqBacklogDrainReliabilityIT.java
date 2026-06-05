@@ -42,22 +42,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Backlog drain after a broker partition: disable the Toxiproxy in front of ActiveMQ, publish a small batch of repo events while the live-ingester's consumer is detached, then re-enable the proxy and verify every backlog event eventually reaches HX Insight.
- *
- * <p>
- * The repository's own connection to ActiveMQ goes around Toxiproxy (it talks directly to {@code activemq:61616}), so events published during the outage land on the topic. Whether the live-ingester sees them after recovery depends on the durable subscription staying registered while disconnected.
- *
- * <p>
- * Asserts the reliability invariants this scenario covers:
- * <ul>
- * <li><b>Backlog drain</b> — every event published while the consumer was detached arrives at HX Insight after the proxy is re-enabled.</li>
- * <li><b>Completeness</b> — the post-recovery sentinel also arrives, proving the route resumed normal flow.</li>
- * <li><b>No silent drop</b> — DLQ depth stays at {@code 0} (the chaos here is network-level, not exception-level).</li>
- * <li><b>Reconnect</b> — the live-ingester is back as a topic subscriber after the proxy is re-enabled.</li>
- * </ul>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=ActiveMqBacklogDrainReliabilityIT}.
+ * Backlog drain after a broker partition. Events published while the consumer is detached must all reach HX Insight after the proxy is re-enabled, with no DLQ traffic and a preserved subscription.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})

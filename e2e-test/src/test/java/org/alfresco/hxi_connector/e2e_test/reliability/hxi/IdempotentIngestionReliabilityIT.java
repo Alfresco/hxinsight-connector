@@ -52,20 +52,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Pins two producer-side invariants of the live-ingester's HX Insight ingestion path: that a transient 5xx on {@code POST /ingestion-events} is retried, and that the retried request body is bit-identical to the original. Both invariants are necessary for HX Insight to recognise a redelivered event as a replay rather than a brand-new event.
- *
- * <p>
- * Failure is injected at the HX Insight HTTP boundary by overriding the file-based Wiremock stub for {@code /ingestion-events} with a higher-priority scenario stub: the first matching POST returns {@code 500}, every subsequent POST returns {@code 202}.
- *
- * <p>
- * Two assertions, one per test:
- * <ol>
- * <li><b>Retry happens.</b> The journal of POSTs to {@code /ingestion-events} for the new node must reach the natural-flow baseline plus at least one redelivery of the forced-500 attempt. A count stuck at the natural baseline means the connector observed the {@code 500} and gave up.</li>
- * <li><b>Retried body is byte-identical to the original.</b> Captured request bodies are grouped by exact equality; at least one body must appear at least twice. A mutation on retry (e.g. fresh {@code sourceTimestamp}, regenerated header) would make every body unique and HX Insight would see brand-new events instead of replays.</li>
- * </ol>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=IdempotentIngestionReliabilityIT}.
+ * Two ingestion invariants: a transient 5xx on {@code POST /ingestion-events} must be retried, and the retried body must be byte-identical to the original. Both are required for HX Insight to dedupe replays.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -73,22 +60,12 @@ public class IdempotentIngestionReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
     private static final String SENTINEL_CONTENT = "Idempotent ingestion sentinel";
-    /**
-     * Wiremock scenario name shared by the two stub variants (initial 500, then recovered 202). Held as a constant so the two stubs cannot drift apart.
-     */
     private static final String FLAKE_SCENARIO = "ingestion-events-flake-once";
     private static final String RECOVERED_STATE = "recovered";
-    /**
-     * Override priority for the scenario-backed stubs. Lower number = higher priority in Wiremock; the file-based default {@code post-ingestion-events.json} runs at the implicit default of {@code 5}, so any value below that wins. Picked {@code 1} to make the override unambiguous to a future reader.
-     */
+    /** Lower number = higher Wiremock priority; the file-based default uses 5. */
     private static final int SCENARIO_STUB_PRIORITY = 1;
-    /**
-     * Step delay for the convergence retry loop. The HX Insight ingester's retry policy (see {@code hyland-experience.ingester.retry} in {@code application.yml}) defaults to a 500 ms initial backoff, so a single forced retry resolves within a couple of seconds in the steady state.
-     */
     private static final int CONVERGENCE_DELAY_MS = 1_000;
-    /**
-     * Lower bound on observed POSTs once the connector has retried the forced 500 once. Derived as: baseline natural flow (≥ 2 events per create — see {@link ActiveMqReliabilityIT#shouldDeliverIngestionEventsEndToEndThroughToxiproxyBaseline}) + one redelivery of the failed attempt. Encoded as a constant so the rationale stays attached to the literal.
-     */
+    /** Natural flow (≥ 2 POSTs per create) + one redelivery of the failed attempt. */
     private static final int MIN_POSTS_AFTER_RETRY = 3;
 
     @Test

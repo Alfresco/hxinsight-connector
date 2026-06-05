@@ -35,6 +35,7 @@ import java.io.InputStream;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.camel.CamelContext;
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.slf4j.event.Level;
@@ -72,11 +73,16 @@ public class AlfrescoRepositoryContentClient extends RouteBuilder implements Rep
     public void configure()
     {
         String contentEndpoint = buildContentEndpoint();
+        // onException is log-only: anything that mutates the exchange (throwing, calling
+        // exchange.setException, .stop()) from inside an onException processor triggers
+        // Camel's FatalFallbackErrorHandler, which silently ACKs the JMS message and prevents
+        // the outer transacted route from rolling back / the broker from redelivering / DLQ-ing.
+        // Exception wrapping for retry classification happens in {@link #downloadContent} instead,
+        // around the producerTemplate.request() call, so the original exception flows through
+        // Camel naturally and the wrap is applied in plain Java where Spring's @Retryable can see it.
         onException(Exception.class)
                 .log(ERROR, log, "Repository :: Unexpected response while downloading content - Endpoint: %s".formatted(contentEndpoint))
-                .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
-                .process(this::wrapErrorIfNecessary)
-                .stop();
+                .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR));
 
         // @formatter:off
         from(LOCAL_ENDPOINT)
@@ -101,10 +107,32 @@ public class AlfrescoRepositoryContentClient extends RouteBuilder implements Rep
     public File downloadContent(String nodeId)
     {
         log.atDebug().log("Repository :: Downloading content directly for node: {}", nodeId);
-        return camelContext.createFluentProducerTemplate()
-                .to(LOCAL_ENDPOINT)
-                .withHeader(NODE_ID_HEADER, nodeId)
-                .request(File.class);
+        try
+        {
+            return camelContext.createFluentProducerTemplate()
+                    .to(LOCAL_ENDPOINT)
+                    .withHeader(NODE_ID_HEADER, nodeId)
+                    .request(File.class);
+        }
+        catch (CamelExecutionException e)
+        {
+            classifyAndRethrow(e);
+            throw e;
+        }
+    }
+
+    /**
+     * Translates transient I/O causes (e.g. {@code HttpHostConnectException}, {@code NoHttpResponseException}, {@code SocketException}) into {@link EndpointServerErrorException} so {@code @Retryable} on {@link #downloadContent(String)} matches and Spring Retry's listener ({@code RetryMetricsRecorder}) records the attempt under the stable {@code exception=EndpointServerErrorException} tag — independent of which concrete Apache HC exception class the underlying Camel HTTP component happened to surface.
+     */
+    private void classifyAndRethrow(CamelExecutionException e)
+    {
+        Throwable cause = e.getCause();
+        if (cause instanceof Exception causeException)
+        {
+            ErrorUtils.wrapErrorAndThrowIfNecessary(causeException,
+                    integrationProperties.alfresco().transform().sharedFileStore().retry().reasons(),
+                    LiveIngesterRuntimeException.class);
+        }
     }
 
     @SuppressWarnings("PMD.UnusedPrivateMethod")
@@ -144,13 +172,4 @@ public class AlfrescoRepositoryContentClient extends RouteBuilder implements Rep
         return base + "&httpClient.responseTimeout=" + timeoutMs;
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        // Reuse the same retry reasons as the shared file store client
-        var retryReasons = integrationProperties.alfresco().transform().sharedFileStore().retry().reasons();
-
-        ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
 }

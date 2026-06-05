@@ -61,11 +61,11 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
             @NotBlank String queueName,
             @NotNull @NestedConfigurationProperty Retry retryIngestion,
             @NotNull @NestedConfigurationProperty Retry retryTransformation,
-            @DefaultValue("false") boolean deadLetterEnabled,
+            @DefaultValue("true") boolean deadLetterEnabled,
             @NotBlank @DefaultValue("activemq:queue:ActiveMQ.DLQ") String deadLetterUri,
             @PositiveOrZero @DefaultValue("6") int maximumRedeliveries,
             @PositiveOrZero @DefaultValue("1000") long redeliveryDelayMs,
-            @DefaultValue("false") boolean throwFailedTransforms)
+            @DefaultValue("true") boolean throwFailedTransforms)
             implements DeadLetterChannelConfig
     {
         @ConstructorBinding
@@ -80,7 +80,7 @@ public record Transform(@NotNull Request request, @NotNull Response response, @N
          */
         public Response(String endpoint, String queueName, Retry retryIngestion, Retry retryTransformation)
         {
-            this(endpoint, queueName, retryIngestion, retryTransformation, false, "activemq:queue:ActiveMQ.DLQ", 6, 1000L, false);
+            this(endpoint, queueName, retryIngestion, retryTransformation, true, "activemq:queue:ActiveMQ.DLQ", 6, 1000L, true);
         }
     }
 

@@ -4,12 +4,27 @@ server:
 management:
   endpoints.web.exposure.include: health,metrics
   endpoint.health.probes.enabled: true
+  # Gate the readiness probe on the Camel route state. Default Spring readiness flips to ACCEPTING_TRAFFIC
+  # at ApplicationReadyEvent — but our Camel routes don't start until ProcessingStarter receives AcsHealthy,
+  # so the probe would falsely report UP for the few seconds (or longer if ACS is slow to come up) between
+  # Spring boot complete and routes started. Adding camelRoutes to the readiness group means /health/readiness
+  # is UP only when every registered Camel route has transitioned to Started — i.e. the connector is actually
+  # consuming JMS events. Liveness keeps the default contributors and continues to track process liveness.
+  endpoint.health.group.readiness.include: readinessState,camelRoutes
   health.liveness-state.enabled: true
   health.readiness-state.enabled: true
 camel:
   springboot.main-run-controller: true
   dataformat.jackson.autoDiscoverObjectMapper: true
   main.auto-startup: false
+  component:
+    # Make the JMS consumer's session transactional and bind it to Spring's JmsTransactionManager.
+    # Without this, .transacted() on a route only rolls back the Spring TX template; the JMS message
+    # itself is auto-acked the moment Camel hands it to the route, so any unhandled exception
+    # silently loses the message instead of triggering broker redelivery and eventual DLQ landing.
+    activemq:
+      transacted: true
+      transaction-manager: "#jmsTransactionManager"
 
 application:
   source-id: a1f3e7c0-d193-7023-ce1d-0a63de491876
@@ -19,16 +34,12 @@ alfresco:
   repository:
     events-endpoint: activemq:topic:alfresco.repo.event2
     events-subscription:
-      durable: false
+      durable: true
       name: LiveIngesterSubscription
-      dead-letter-enabled: false
-      dead-letter-uri: activemq:queue:ActiveMQ.DLQ
-      maximum-redeliveries: 6
-      redelivery-delay-ms: 1000
-      dead-letter-unsupported-types: false
+      dead-letter-unsupported-types: true
       observe-content-drops: false
     base-url: http://localhost:8080/alfresco
-    response-timeout-ms: 0
+    response-timeout-ms: 30000
     discovery-endpoint: ${alfresco.repository.base-url}/api/discovery
     health-probe:
       endpoint: ${alfresco.repository.base-url}
@@ -36,10 +47,6 @@ alfresco:
       interval-seconds: 30
   bulk-ingester:
     endpoint: activemq:queue:bulk-ingester-events
-    dead-letter-enabled: false
-    dead-letter-uri: activemq:queue:ActiveMQ.DLQ
-    maximum-redeliveries: 6
-    redelivery-delay-ms: 1000
     observe-content-drops: false
   transform:
     request:
@@ -58,12 +65,12 @@ alfresco:
       queue-name: org.alfresco.hxinsight-connector.transform.response
       endpoint: activemq:queue:${alfresco.transform.response.queue-name}
       retry-ingestion:
-        attempts: -1
-      dead-letter-enabled: false
+        attempts: 6
+      dead-letter-enabled: true
       dead-letter-uri: activemq:queue:ActiveMQ.DLQ
       maximum-redeliveries: 6
       redelivery-delay-ms: 1000
-      throw-failed-transforms: false
+      throw-failed-transforms: true
     shared-file-store:
       base-url: http://localhost:8099
       file-endpoint: ${alfresco.transform.shared-file-store.base-url}/alfresco/api/-default-/private/sfs/versions/1/file
@@ -87,7 +94,7 @@ hyland-experience:
       endpoint: ${hyland-experience.insight.ingestion.base-url}/presigned-urls?httpMethod=POST&throwExceptionOnFailure=false
       response-timeout-ms: 30000
     upload:
-      response-timeout-ms: 0
+      response-timeout-ms: 30000
   ingester:
     endpoint: ${hyland-experience.insight.ingestion.base-url}/ingestion-events?httpMethod=POST&throwExceptionOnFailure=false
     response-timeout-ms: 30000

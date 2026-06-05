@@ -45,21 +45,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.Node;
 
 /**
- * Pins that the live-ingester retries a transient 5xx from {@code POST /presigned-urls} and that the downstream ingestion chain still completes after recovery. Without this guard, a single bad response from the storage-location endpoint would orphan content in ACS without a corresponding HX Insight event — silent data loss.
- *
- * <p>
- * Failure is injected at the HX Insight HTTP boundary by overriding the file-based Wiremock stub for {@code /presigned-urls} with a higher-priority scenario stub: the first matching POST returns {@code 500}, every subsequent POST returns {@code 200} with the same body the default stub would have served.
- *
- * <p>
- * Three coupled assertions, single test:
- * <ol>
- * <li><b>In-delivery retry fired.</b> The {@code live_ingester_retry_attempts_total} Micrometer counter (tagged {@code exception=EndpointServerErrorException}, populated by {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.RetryMetricsRecorder RetryMetricsRecorder} on every Spring {@code @Retryable} {@code onError}) must increment by ≥ 1 during the chaos window. This is the only signal that distinguishes Spring Retry's in-delivery {@code @Retryable} attempts from JMS-broker-side redelivery — both can produce additional POSTs at the boundary, but only {@code @Retryable} increments the counter. A delta of 0 means the connector observed the 500 and the {@code @Retryable} mechanism did not engage; any pass on the boundary-POST count alone would be a JMS-redelivery substitute.</li>
- * <li><b>Retry observable at the HTTP boundary.</b> The journal of POSTs to {@code /presigned-urls} for this run must be ≥ 2 — initial 500 plus at least one recovery attempt. A count of 1 means the connector observed the 500 and gave up.</li>
- * <li><b>Chain still completes.</b> After the connector recovers from the 500, it must finish the upload-then-emit chain: ≥ 2 POSTs to {@code /ingestion-events} for the new node, mirroring the natural-flow baseline (one create yields ≥ 2 ingestion-event POSTs end-to-end). A 0 here means {@code /presigned-urls} eventually succeeded but the connector dropped the rest of the chain.</li>
- * </ol>
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test -am verify -Preliability-tests -Dit.test=PresignedUrlRetryReliabilityIT}.
+ * The connector must retry a transient 5xx on {@code /presigned-urls} and the downstream chain must still complete after recovery. Asserts the retry counter increments (proving {@code @Retryable} fired), the HTTP journal shows ≥ 2 attempts, and the ingestion-event POSTs land per the natural baseline.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
@@ -67,34 +53,16 @@ public class PresignedUrlRetryReliabilityIT extends BaseReliabilityIT
 {
     private static final String PARENT_ID = "-my-";
     private static final String SENTINEL_CONTENT = "Presigned-URL retry sentinel";
-    /**
-     * Wiremock scenario name shared by the two stub variants (initial 500, then recovered 200). Held as a constant so the two stubs cannot drift apart.
-     */
     private static final String FLAKE_SCENARIO = "presigned-urls-flake-once";
     private static final String RECOVERED_STATE = "recovered";
-    /**
-     * Override priority for the scenario-backed stubs. Lower number = higher priority in Wiremock; the file-based default {@code post-presigned-urls.json} runs at the implicit default of {@code 5}, so any value below that wins. Picked {@code 1} to make the override unambiguous to a future reader.
-     */
+    /** Lower number = higher Wiremock priority; the file-based default uses 5. */
     private static final int SCENARIO_STUB_PRIORITY = 1;
-    /**
-     * Body file name reused from the file-based default stub so the recovered response is byte-identical to what the connector normally sees. Editing the default {@code presigned-urls.json} also updates this test.
-     */
     private static final String PRESIGNED_URLS_BODY_FILE = "presigned-urls.json";
-    /**
-     * Step delay for the convergence retry loop. The HX Insight storage-location retry policy in the test profile (see {@link ReliabilityEnvironment}) is 2 attempts × 200 ms initial backoff, so a single forced retry resolves within roughly a second.
-     */
     private static final int CONVERGENCE_DELAY_MS = 1_000;
-    /**
-     * Lower bound on observed POSTs once the connector has retried the forced 500 once. Initial 500 + at least one recovery attempt.
-     */
+    /** Initial 500 + at least one recovery attempt. */
     private static final int MIN_PRESIGNED_URL_POSTS = 2;
-    /**
-     * Lower bound on observed ingestion-event POSTs after the chain has converged. Matches the natural-flow baseline (≥ 2 events per create — see {@link ActiveMqReliabilityIT#shouldDeliverIngestionEventsEndToEndThroughToxiproxyBaseline}).
-     */
+    /** Metadata + content POST per node. */
     private static final int MIN_INGESTION_EVENTS = 2;
-    /**
-     * Counter increment expected during the chaos window: a single forced 500 on {@code /presigned-urls} fires {@code @Retryable.onError} once before the recovered 200 succeeds. The exception class tag matches what {@code PreSignedUrlRequester.requestStorageLocation} declares as {@code retryFor}.
-     */
     private static final String RETRY_COUNTER = "live_ingester_retry_attempts_total";
     private static final String RETRY_EXCEPTION_TAG = "EndpointServerErrorException";
     private static final double MIN_RETRY_DELTA = 1.0;

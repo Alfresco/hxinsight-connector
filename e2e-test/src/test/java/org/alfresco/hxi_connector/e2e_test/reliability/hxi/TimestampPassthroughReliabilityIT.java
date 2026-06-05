@@ -45,22 +45,13 @@ import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.*;
 
 /**
- * Pins the connector's behaviour as a <i>passthrough</i> for the CloudEvent {@code time} field — Jackson parses it to an {@code OffsetDateTime}, {@code EventUtils.getEventTimestamp} calls {@code .toInstant().toEpochMilli()}, and the result is set verbatim as {@code sourceTimestamp} on the outbound HX Insight POST. The passthrough method covers value range, ISO-8601 format variants, and timezone offsets; each scenario publishes a synthetic CloudEvent with a fresh {@code objectId} and asserts the corresponding epoch-millis arrives unchanged at Wiremock with {@code dlqDepth() == 0}.
- *
- * <p>
- * The rejection method pins the one documented carve-out: {@code IngestNodeCommand} and {@code DeleteNodeCommand} enforce a {@code sourceTimestamp > 0} guard, so the literal Unix epoch and any pre-1970 date trigger a {@code ValidationException} inside the record constructor (before the metadata POST is built) and dead-letter via the route's error handler. If a future change loosens or removes the guard, this method will fail and force a deliberate update.
- *
- * <p>
- * Gated by the {@code reliability-tests} profile; opt-in with {@code mvn -pl e2e-test failsafe:integration-test failsafe:verify -Preliability-tests -Dit.test=TimestampPassthroughReliabilityIT}.
+ * The CloudEvent {@code time} field must reach HX Insight verbatim as {@code sourceTimestamp}. Covers value range, ISO-8601 variants, and timezone offsets. Carve-out: pre-1970 / epoch values trigger the {@code sourceTimestamp > 0} guard and DLQ.
  */
 @Slf4j
 @SuppressWarnings({"PMD.FieldNamingConventions", "PMD.TestClassWithoutTestCases"})
 public class TimestampPassthroughReliabilityIT extends BaseReliabilityIT
 {
     private static final String REPO_EVENT_TOPIC = "alfresco.repo.event2";
-    /**
-     * Convergence budget for per-scenario assertions. Passthrough scenarios converge in well under a second (one publish, one POST). Rejection scenarios need to wait for the bounded JMS redelivery to exhaust before the message lands on DLQ; with the test-profile JMS DLC (1 redelivery, 200 ms delay — see {@link ReliabilityEnvironment}) this is sub-second too. 2 s is comfortable headroom over realistic env latency for both shapes.
-     */
     private static final int CONVERGENCE_DELAY_MS = 2_000;
 
     @ParameterizedTest(name = "[{index}] {0}")

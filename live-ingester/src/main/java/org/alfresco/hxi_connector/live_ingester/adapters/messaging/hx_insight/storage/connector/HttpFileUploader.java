@@ -37,11 +37,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Map;
-import java.util.Set;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.camel.CamelContext;
+import org.apache.camel.CamelExecutionException;
 import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.http.HttpMethods;
@@ -76,11 +76,16 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
     {
         // @formatter:off
         String uploadEndpoint = buildUploadEndpoint();
+        // onException is log-only. Throwing or otherwise mutating the exchange from inside an
+        // onException processor triggers Camel's FatalFallbackErrorHandler, which short-circuits
+        // the outer transacted route's error handling. Retry classification for transient I/O
+        // is delegated to the upload() method's catch block, which calls
+        // ErrorUtils.wrapErrorAndThrowIfNecessary against the configured retry reasons set so
+        // an in-cause-chain HttpHostConnectException / NoHttpResponseException / etc. is
+        // re-thrown as EndpointServerErrorException for @Retryable to match.
         onException(Exception.class)
             .log(ERROR, log, "Storage :: Unexpected response while uploading content - Endpoint: %s".formatted(uploadEndpoint))
-            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR))
-            .process(this::wrapErrorIfNecessary)
-            .stop();
+            .process(exchange -> LoggingUtils.logMaskedExchangeState(exchange, log, Level.ERROR));
 
         from(LOCAL_ENDPOINT)
             .id(ROUTE_ID)
@@ -130,19 +135,43 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
                     .request();
             log.atInfo().log("Storage :: Rendition of type: {} for node: {} successfully uploaded to pre-signed URL: {}", fileUploadRequest.contentType(), nodeId, fileUploadRequest.storageLocation().getPath());
         }
+        catch (CamelExecutionException e)
+        {
+            resetStream(fileData, nodeId);
+            classifyAndRethrow(e);
+        }
         catch (Exception e)
         {
-            try
-            {
-                fileData.reset();
-                throw e;
-            }
-            catch (IOException ioe)
-            {
-                log.atWarn().log("Storage :: Rendition stream NOT reset properly after node %s content upload fail due to: %s".formatted(nodeId, ioe.getMessage()), ioe);
-                throw e;
-            }
+            resetStream(fileData, nodeId);
+            throw e;
         }
+    }
+
+    private static void resetStream(InputStream fileData, String nodeId)
+    {
+        try
+        {
+            fileData.reset();
+        }
+        catch (IOException ioe)
+        {
+            log.atWarn().log("Storage :: Rendition stream NOT reset properly after node %s content upload fail due to: %s".formatted(nodeId, ioe.getMessage()), ioe);
+        }
+    }
+
+    /**
+     * Translates transient I/O causes (e.g. {@code HttpHostConnectException}, {@code NoHttpResponseException}, {@code SocketException}) into {@link EndpointServerErrorException} so {@code @Retryable} on {@link #upload(FileUploadRequest, String)} matches and Spring Retry's listener ({@code RetryMetricsRecorder}) records the attempt under the stable {@code exception=EndpointServerErrorException} tag — independent of which concrete Apache HC exception class the underlying Camel HTTP component happened to surface.
+     */
+    private void classifyAndRethrow(CamelExecutionException e)
+    {
+        Throwable cause = e.getCause();
+        if (cause instanceof Exception causeException)
+        {
+            ErrorUtils.wrapErrorAndThrowIfNecessary(causeException,
+                    integrationProperties.hylandExperience().storage().upload().retry().reasons(),
+                    LiveIngesterRuntimeException.class);
+        }
+        throw e;
     }
 
     private String wrapRawToken(URL preSignedUrl)
@@ -174,12 +203,4 @@ public class HttpFileUploader extends RouteBuilder implements FileUploader
         ErrorUtils.throwExceptionOnUnexpectedStatusCode(actualStatusCode, EXPECTED_STATUS_CODE);
     }
 
-    @SuppressWarnings("PMD.UnusedPrivateMethod")
-    private void wrapErrorIfNecessary(Exchange exchange)
-    {
-        Exception cause = exchange.getProperty(Exchange.EXCEPTION_CAUGHT, Exception.class);
-        Set<Class<? extends Throwable>> retryReasons = integrationProperties.hylandExperience().storage().upload().retry().reasons();
-
-        ErrorUtils.wrapErrorAndThrowIfNecessary(cause, retryReasons, LiveIngesterRuntimeException.class);
-    }
 }

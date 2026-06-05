@@ -39,7 +39,6 @@ import org.springframework.stereotype.Component;
 import org.alfresco.hxi_connector.common.model.ingest.IngestEvent;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.properties.BulkIngester;
-import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DeadLetterChannels;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetric;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.DlqMetricsRecorder;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.util.LiveIngesterMetrics;
@@ -65,14 +64,13 @@ public class IngestEventListener extends RouteBuilder
     {
         BulkIngester bulkIngester = integrationProperties.alfresco().bulkIngester();
 
-        if (bulkIngester.deadLetterEnabled())
-        {
-            errorHandler(DeadLetterChannels.forRoute(bulkIngester, dlqMetricsRecorder, DLQ_METRIC, log));
-        }
-        else
-        {
-            log.warn("Bulk Ingester :: dead-letter channel disabled. Set alfresco.bulk-ingester.dead-letter-enabled=true to re-enable.");
-        }
+        // Failed messages take the broker DLQ path: the JMS consumer is transactional (configured
+        // globally via camel.component.activemq.transacted=true), so any unhandled exception rolls
+        // back the JMS session and the broker enqueues the message onto ActiveMQ.DLQ. The
+        // onException below is metric-only — it does not call .handled(true), .stop(), or otherwise
+        // mutate the exchange, so the exception propagates as normal and TX rollback proceeds.
+        onException(Exception.class)
+                .process(exchange -> dlqMetricsRecorder.record(exchange, DLQ_METRIC));
 
         from(bulkIngester.endpoint())
                 .transacted()
