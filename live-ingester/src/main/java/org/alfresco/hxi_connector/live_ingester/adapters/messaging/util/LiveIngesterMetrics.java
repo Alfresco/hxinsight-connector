@@ -28,7 +28,7 @@ package org.alfresco.hxi_connector.live_ingester.adapters.messaging.util;
 /**
  * Inventory of every Micrometer counter the live-ingester exposes via {@code /actuator/metrics}. Producers (route builders, listeners, recorders) reference these constants instead of hard-coding names so operators have a single file to read when wiring dashboards / Prometheus scrape configs. Sister modules (bulk-ingester, nucleus-sync, prediction-applier) should mirror this shape with their own holder classes if/when they grow custom counters.
  */
-@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
+@SuppressWarnings({"PMD.MissingStaticMethodInNonInstantiatableClass", "PMD.LongVariable"})
 public final class LiveIngesterMetrics
 {
     private LiveIngesterMetrics()

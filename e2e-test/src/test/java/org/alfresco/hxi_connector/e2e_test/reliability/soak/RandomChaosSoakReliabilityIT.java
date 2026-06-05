@@ -80,7 +80,7 @@ public class RandomChaosSoakReliabilityIT extends BaseReliabilityIT
     private static final int MIN_INGESTION_EVENTS_PER_NODE = 2;
     /** ~1% of total nodes: tight enough to catch multi-percent loss, loose enough to absorb legitimate redelivery coalescing. */
     private static final int PRESIGNED_URL_LOSS_TOLERANCE = Math.max(3, TOTAL_NODE_COUNT / 100);
-    private static final int NODE_COUNT_MINUS_PRESIGNED_LOSS_TOLERANCE = TOTAL_NODE_COUNT - PRESIGNED_URL_LOSS_TOLERANCE;
+    private static final int PRESIGNED_URL_DELIVERY_FLOOR = TOTAL_NODE_COUNT - PRESIGNED_URL_LOSS_TOLERANCE;
     /**
      * DLQ ceiling sized for the worst case where every AMQ-chaos-block event ends up dead-lettered. Anything above means an event was dead-lettered from a non-AMQ block — a real regression.
      */
@@ -141,7 +141,7 @@ public class RandomChaosSoakReliabilityIT extends BaseReliabilityIT
                 int presignedAccountedFor = totalPresignedUrls + dlqDepth;
                 log.info("[reliability] Drain progress: ingestion={} (+dlq×{}={}/≥{}), presigned={} (+dlq={}/≥{}), dlq={}, broker[enq={}, deq={}, inflight={}], jvmThreads[live={}, blocked={}, waiting={}, timedWaiting={}, runnable={}]",
                         totalIngestionEvents, MIN_INGESTION_EVENTS_PER_NODE, ingestionAccountedFor, expectedIngestionEvents,
-                        totalPresignedUrls, presignedAccountedFor, NODE_COUNT_MINUS_PRESIGNED_LOSS_TOLERANCE,
+                        totalPresignedUrls, presignedAccountedFor, PRESIGNED_URL_DELIVERY_FLOOR,
                         dlqDepth, topicEnqueued, topicDequeued, topicInFlight,
                         (int) environment().actuatorMetrics().gaugeValue("jvm.threads.live"),
                         (int) environment().actuatorMetrics().gaugeValue("jvm.threads.states", "state", "blocked"),
@@ -157,8 +157,8 @@ public class RandomChaosSoakReliabilityIT extends BaseReliabilityIT
                         .isGreaterThanOrEqualTo(expectedIngestionEvents);
                 assertThat(presignedAccountedFor)
                         .as("expected ≥ %d (presignedUrls + dlq) — below = upload-leg events disappeared without DLQ trace",
-                                NODE_COUNT_MINUS_PRESIGNED_LOSS_TOLERANCE)
-                        .isGreaterThanOrEqualTo(NODE_COUNT_MINUS_PRESIGNED_LOSS_TOLERANCE);
+                                PRESIGNED_URL_DELIVERY_FLOOR)
+                        .isGreaterThanOrEqualTo(PRESIGNED_URL_DELIVERY_FLOOR);
             }, CONVERGENCE_MAX_ATTEMPTS, CONVERGENCE_DELAY_MS);
         }
         finally
@@ -172,7 +172,7 @@ public class RandomChaosSoakReliabilityIT extends BaseReliabilityIT
             int finalTopicDequeued = environment().jolokia().topicDequeueCount(REPO_EVENT_TOPIC);
             log.info("[reliability] Drain phase ended after {} ms — ingestion={} + dlq×{}={} (expected ≥ {}), presigned={} + dlq={} (expected ≥ {}), dlq={} (≤ {}), broker[enq={}, deq={}, inflight={}]",
                     drainMs, finalIngestionEvents, MIN_INGESTION_EVENTS_PER_NODE, finalIngestionEvents + finalDlqDepth * MIN_INGESTION_EVENTS_PER_NODE, expectedIngestionEvents,
-                    finalPresignedUrls, finalPresignedUrls + finalDlqDepth, NODE_COUNT_MINUS_PRESIGNED_LOSS_TOLERANCE,
+                    finalPresignedUrls, finalPresignedUrls + finalDlqDepth, PRESIGNED_URL_DELIVERY_FLOOR,
                     finalDlqDepth, DLQ_TOLERANCE,
                     finalTopicEnqueued, finalTopicDequeued, finalTopicInFlight);
         }

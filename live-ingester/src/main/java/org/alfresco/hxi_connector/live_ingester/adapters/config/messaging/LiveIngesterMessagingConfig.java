@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -58,6 +58,8 @@ public class LiveIngesterMessagingConfig
 
     public static final String CONFIGURATION_ERR_MESSAGE = "One of properties: 'alfresco.repository.discovery-endpoint' or 'alfresco.repository.version-override' must be set in the Live Ingester configuration.";
 
+    private static final int BROKER_MAX_REDELIVERIES = 1;
+
     /**
      * Provides the {@link PlatformTransactionManager} that Camel's ActiveMQ component uses to make its JMS consumer sessions transactional (wired in {@code application.yml} via {@code camel.component.activemq.transaction-manager=#jmsTransactionManager}). With this in place, an exception bubbling out of a route triggers a JMS rollback, which the broker honours by redelivering the message up to {@link #BROKER_MAX_REDELIVERIES} times (see {@link #brokerRedeliveryPolicyCustomizer}) before routing it to {@code ActiveMQ.DLQ}.
      */
@@ -89,8 +91,6 @@ public class LiveIngesterMessagingConfig
             policy.setMaximumRedeliveries(BROKER_MAX_REDELIVERIES);
         };
     }
-
-    private static final int BROKER_MAX_REDELIVERIES = 1;
 
     @Bean
     @ConfigurationProperties(prefix = "application")

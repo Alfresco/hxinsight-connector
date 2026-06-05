@@ -204,6 +204,10 @@ public class NoChaosBaselineReliabilityIT extends BaseReliabilityIT
         }
     }
 
+    // Project's declared source level is Java 17 (parent pom: java.version=17); ExecutorService only became
+    // AutoCloseable in JDK 19, so TWR is not available here. Manual two-stage shutdown drains in-flight tasks
+    // for up to 30 s then force-interrupts via shutdownNow().
+    @SuppressWarnings("PMD.CloseResource")
     private void submitContentEventsInParallel(int count, String label, int parallelism) throws InterruptedException
     {
         AtomicInteger nextThreadId = new AtomicInteger();
@@ -245,7 +249,7 @@ public class NoChaosBaselineReliabilityIT extends BaseReliabilityIT
                 }
                 catch (ExecutionException e)
                 {
-                    throw new IllegalStateException("[reliability] Parallel submit failed for " + label + " (completed=" + completed.get() + " / " + count + ")", e.getCause());
+                    throw new IllegalStateException("[reliability] Parallel submit failed for " + label + " (completed=" + completed.get() + " / " + count + ")", e);
                 }
             }
         }

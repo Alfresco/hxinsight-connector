@@ -63,7 +63,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
  * Build via {@link #builder()}. The transform topology (SFS + transform-core-aio) is opt-in; it adds ~90 s of boot time.
  */
 @Slf4j
-@SuppressWarnings("PMD.LongVariable")
+@SuppressWarnings({"PMD.LongVariable", "PMD.TooManyMethods"})
 public class ReliabilityEnvironment implements AutoCloseable
 {
     public static final String BUCKET_NAME = "test-hxinsight-bucket";
