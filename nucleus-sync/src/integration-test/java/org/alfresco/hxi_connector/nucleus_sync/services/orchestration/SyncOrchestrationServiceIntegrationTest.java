@@ -97,7 +97,7 @@ public class SyncOrchestrationServiceIntegrationTest
 
         List<UserMapping> userMappings = List.of(
                 new UserMapping("alice@email.com", "alice", "iam-alice"));
-        when(userMappingSyncProcessor.syncUserMappings(alfrescoUsers, iamUsers, currentUserMappings, Set.of()))
+        when(userMappingSyncProcessor.addUserMappings(alfrescoUsers, iamUsers, currentUserMappings, Set.of()))
                 .thenReturn(userMappings);
 
         Map<String, List<String>> userGroupMemberships = Map.of(
@@ -122,7 +122,8 @@ public class SyncOrchestrationServiceIntegrationTest
         inOrder.verify(nucleusClient).getCurrentUserMappings();
         inOrder.verify(nucleusClient).getAllExternalGroups();
         inOrder.verify(nucleusClient).getCurrentGroupMemberships();
-        inOrder.verify(userMappingSyncProcessor).syncUserMappings(alfrescoUsers, iamUsers, currentUserMappings, Set.of());
+        inOrder.verify(userMappingSyncProcessor).deleteUserMappings(alfrescoUsers, currentUserMappings, Set.of());
+        inOrder.verify(userMappingSyncProcessor).addUserMappings(alfrescoUsers, iamUsers, currentUserMappings, Set.of());
         inOrder.verify(userGrpMembershipService).buildUserGroupMemberships(userMappings);
         inOrder.verify(groupMappingSyncProcessor).syncGroupMappings(currentGroups, userGroupMemberships);
         inOrder.verify(userGroupMembershipSyncProcessor).syncUserGroupMemberships(

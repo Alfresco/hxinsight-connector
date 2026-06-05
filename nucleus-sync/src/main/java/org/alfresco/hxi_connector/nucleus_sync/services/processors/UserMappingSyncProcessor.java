@@ -62,92 +62,20 @@ public class UserMappingSyncProcessor
         this.createBatchSize = createBatchSize;
     }
 
-    /**
-     * Sync alfresco and nucleus user mappings
-     *
-     * @param alfrescoUsers
-     *            list of alfresco users
-     * @param nucleusIamUsers
-     *            list of IAM users of nucleus
-     * @param currentUserMappings
-     *            current nucleus user mappings
-     * @param unsyncableAlfrescoUserIds
-     *            set of user ids from Alfresco that cannot be synced to Nucleus
-     * @return list of updated user mappings
-     */
-    public List<UserMapping> syncUserMappings(
+    public void deleteUserMappings(
             List<AlfrescoUser> alfrescoUsers,
-            List<IamUser> nucleusIamUsers,
             List<NucleusUserMappingOutput> currentUserMappings,
             Set<String> unsyncableAlfrescoUserIds)
     {
+        Set<String> alfrescoUserIds = alfrescoUsers.stream()
+                .map(AlfrescoUser::id)
+                .collect(toSet());
 
-        Map<String, Set<AlfrescoUser>> alfrescoUserByEmail = alfrescoUsers.stream()
-                .filter(u -> u.email() != null && !u.email().isEmpty())
-                .collect(groupingBy(AlfrescoUser::email, toSet()));
+        List<String> nucleusMappingsToDelete = currentUserMappings.stream()
+                .map(NucleusUserMappingOutput::externalUserId)
+                .filter(id -> !alfrescoUserIds.contains(id) || unsyncableAlfrescoUserIds.contains(id))
+                .toList();
 
-        Map<String, IamUser> nucleusIamUserByEmail = nucleusIamUsers.stream()
-                .collect(Collectors.toMap(IamUser::email, Function.identity()));
-
-        Map<String, NucleusUserMappingOutput> nucleusMappingByAlfrescoId = currentUserMappings.stream()
-                .collect(
-                        Collectors.toMap(
-                                NucleusUserMappingOutput::externalUserId,
-                                Function.identity()));
-
-        List<String> nucleusMappingsToDelete = new ArrayList<>();
-        List<NucleusUserMappingInput> nucleusMappingsToCreate = new ArrayList<>();
-        List<UserMapping> updatedUserMappings = new ArrayList<>();
-        Set<String> validAlfrescoIds = new HashSet<>();
-
-        Set<String> commonEmails = new HashSet<>(alfrescoUserByEmail.keySet());
-        commonEmails.retainAll(nucleusIamUserByEmail.keySet());
-
-        for (String email : commonEmails)
-        {
-            AlfrescoUser alfrescoUser = alfrescoUserByEmail.get(email).iterator().next();
-            if (unsyncableAlfrescoUserIds.contains(alfrescoUser.id()))
-            {
-                continue;
-            }
-            IamUser nucleusIamUser = nucleusIamUserByEmail.get(email);
-            String alfrescoUserId = alfrescoUser.id();
-            String nucleusUserId = nucleusIamUser.userId();
-
-            validAlfrescoIds.add(alfrescoUserId);
-            updatedUserMappings.add(
-                    new UserMapping(alfrescoUser.email(), alfrescoUserId, nucleusUserId));
-
-            if (!nucleusMappingByAlfrescoId.containsKey(alfrescoUserId))
-            {
-                nucleusMappingsToCreate.add(
-                        new NucleusUserMappingInput(nucleusUserId, alfrescoUserId));
-            }
-        }
-
-        for (NucleusUserMappingOutput nucleusMapping : currentUserMappings)
-        {
-            String alfrescoUserId = nucleusMapping.externalUserId();
-            if (!validAlfrescoIds.contains(alfrescoUserId))
-            {
-                nucleusMappingsToDelete.add(alfrescoUserId);
-            }
-        }
-
-        executeUserBatchOperations(nucleusMappingsToDelete, nucleusMappingsToCreate);
-
-        LOGGER.atDebug()
-                .setMessage("Final user mappings count: {}")
-                .addArgument(updatedUserMappings.size())
-                .log();
-
-        return updatedUserMappings;
-    }
-
-    private void executeUserBatchOperations(
-            List<String> nucleusMappingsToDelete,
-            List<NucleusUserMappingInput> nucleusMappingsToCreate)
-    {
         for (String alfrescoUserId : nucleusMappingsToDelete)
         {
             nucleusClient.deleteUserMapping(alfrescoUserId);
@@ -163,7 +91,66 @@ public class UserMappingSyncProcessor
                 .setMessage("Deleted {} user mapping in Nucleus.")
                 .addArgument(nucleusMappingsToDelete.size())
                 .log();
+    }
 
+    public List<UserMapping> addUserMappings(
+            List<AlfrescoUser> alfrescoUsers,
+            List<IamUser> nucleusIamUsers,
+            List<NucleusUserMappingOutput> currentUserMappings,
+            Set<String> unsyncableAlfrescoUserIds)
+    {
+        Map<String, Set<AlfrescoUser>> alfrescoUserByEmail = alfrescoUsers.stream()
+                .filter(u -> u.email() != null && !u.email().isEmpty())
+                .collect(groupingBy(AlfrescoUser::email, toSet()));
+
+        Map<String, IamUser> nucleusIamUserByEmail = nucleusIamUsers.stream()
+                .collect(Collectors.toMap(IamUser::email, Function.identity()));
+
+        Map<String, NucleusUserMappingOutput> nucleusMappingByAlfrescoId = currentUserMappings.stream()
+                .collect(
+                        Collectors.toMap(
+                                NucleusUserMappingOutput::externalUserId,
+                                Function.identity()));
+
+        List<NucleusUserMappingInput> nucleusMappingsToCreate = new ArrayList<>();
+        List<UserMapping> updatedUserMappings = new ArrayList<>();
+
+        Set<String> commonEmails = new HashSet<>(alfrescoUserByEmail.keySet());
+        commonEmails.retainAll(nucleusIamUserByEmail.keySet());
+
+        for (String email : commonEmails)
+        {
+            AlfrescoUser alfrescoUser = alfrescoUserByEmail.get(email).iterator().next();
+            if (unsyncableAlfrescoUserIds.contains(alfrescoUser.id()))
+            {
+                continue;
+            }
+            IamUser nucleusIamUser = nucleusIamUserByEmail.get(email);
+            String alfrescoUserId = alfrescoUser.id();
+            String nucleusUserId = nucleusIamUser.userId();
+
+            updatedUserMappings.add(
+                    new UserMapping(alfrescoUser.email(), alfrescoUserId, nucleusUserId));
+
+            if (!nucleusMappingByAlfrescoId.containsKey(alfrescoUserId))
+            {
+                nucleusMappingsToCreate.add(
+                        new NucleusUserMappingInput(nucleusUserId, alfrescoUserId));
+            }
+        }
+
+        mapUsersInBatches(nucleusMappingsToCreate);
+
+        LOGGER.atDebug()
+                .setMessage("Final user mappings count: {}")
+                .addArgument(updatedUserMappings.size())
+                .log();
+
+        return updatedUserMappings;
+    }
+
+    private void mapUsersInBatches(List<NucleusUserMappingInput> nucleusMappingsToCreate)
+    {
         if (!nucleusMappingsToCreate.isEmpty())
         {
             for (int i = 0; i < nucleusMappingsToCreate.size(); i += createBatchSize)

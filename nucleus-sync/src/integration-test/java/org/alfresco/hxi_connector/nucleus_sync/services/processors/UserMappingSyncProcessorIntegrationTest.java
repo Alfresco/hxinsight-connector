@@ -54,45 +54,21 @@ public class UserMappingSyncProcessorIntegrationTest
     private NucleusClient nucleusClient;
 
     @Test
-    void shouldPerformCompleteUserMappingSyncWithCorrectApiCalls()
+    void shouldDeleteStaleMappingsWithCorrectApiCalls()
     {
-        // Given - A scenario with creates, deletes, and unchanged mappings
-        List<AlfrescoUser> alfrescoUsers = List.of(
-                // new mapping - create
-                new AlfrescoUser("jdoe", "john.doe@company.com", true),
-                // new mapping - create
-                new AlfrescoUser("sjohnson", "sarah.johnson@company.com", true),
-                // existing mapping - keep
-                new AlfrescoUser("moliver", "michael.oliver@company.com", true),
-                // No nucleus match, ignore
-                new AlfrescoUser("ataylor", "anthony.taylor@company.com", true),
-                // No email, ignore
-                new AlfrescoUser("dcoot", null, true));
-
-        List<IamUser> nucleusUsers = List.of(
-                // New mapping to create
-                new IamUser("john.doe@company.com", "be81a981-3726-483e-b9b1-ecf1d3f36b7d", "john.doe@company.com"),
-                // New mapping to create
-                new IamUser("sarah.johnson@company.com", "7c92b082-4837-594f-c0c2-fdf2e4g47c8e", "sarah.johnson@company.com"),
-                // Existing mapping, keep
-                new IamUser("michael.oliver@company.com", "6b73fd36-d76e-40b7-8624-2d897f35603c", "michael.oliver@company.com"),
-                // No alfresco match, ignore
-                new IamUser("user5@company.com", "2bd22c19-91e7-4002-8f26-4dfeb3fee12f", "user5@company.com"));
-
-        List<NucleusUserMappingOutput> currentMappings = List.of(
-                // Keep - still valid
-                new NucleusUserMappingOutput("michael.oliver@company.com", "moliver"),
-                // Delete - stale mapping
-                new NucleusUserMappingOutput("mark.clattenburg", "mclattenburg"),
-                // Delete - stale mapping
-                new NucleusUserMappingOutput("old.user@company.com", "ouser"));
-
         // When
-        List<UserMapping> result = processor.syncUserMappings(alfrescoUsers, nucleusUsers, currentMappings, Set.of());
+        processor.deleteUserMappings(alfrescoUsers(), currentMappings(), Set.of());
 
-        // Then - Verify all deletions happened
+        // Then
         verify(nucleusClient).deleteUserMapping("mclattenburg");
         verify(nucleusClient).deleteUserMapping("ouser");
+    }
+
+    @Test
+    void shouldAddNewMappingsWithCorrectApiCalls()
+    {
+        // When
+        List<UserMapping> result = processor.addUserMappings(alfrescoUsers(), nucleusUsers(), currentMappings(), Set.of());
 
         // Then - Verify creations with correct payload (2 new mappings)
         verify(nucleusClient).createUserMappings(argThat(mappings -> mappings.size() == 2 &&
@@ -105,5 +81,44 @@ public class UserMappingSyncProcessorIntegrationTest
                         new UserMapping("john.doe@company.com", "jdoe", "be81a981-3726-483e-b9b1-ecf1d3f36b7d"),
                         new UserMapping("sarah.johnson@company.com", "sjohnson", "7c92b082-4837-594f-c0c2-fdf2e4g47c8e"),
                         new UserMapping("michael.oliver@company.com", "moliver", "6b73fd36-d76e-40b7-8624-2d897f35603c"));
+    }
+
+    private List<AlfrescoUser> alfrescoUsers()
+    {
+        return List.of(
+                // new mapping - create
+                new AlfrescoUser("jdoe", "john.doe@company.com", true),
+                // new mapping - create
+                new AlfrescoUser("sjohnson", "sarah.johnson@company.com", true),
+                // existing mapping - keep
+                new AlfrescoUser("moliver", "michael.oliver@company.com", true),
+                // No nucleus match, ignore
+                new AlfrescoUser("ataylor", "anthony.taylor@company.com", true),
+                // No email, ignore
+                new AlfrescoUser("dcoot", null, true));
+    }
+
+    private List<IamUser> nucleusUsers()
+    {
+        return List.of(
+                // New mapping to create
+                new IamUser("john.doe@company.com", "be81a981-3726-483e-b9b1-ecf1d3f36b7d", "john.doe@company.com"),
+                // New mapping to create
+                new IamUser("sarah.johnson@company.com", "7c92b082-4837-594f-c0c2-fdf2e4g47c8e", "sarah.johnson@company.com"),
+                // Existing mapping, keep
+                new IamUser("michael.oliver@company.com", "6b73fd36-d76e-40b7-8624-2d897f35603c", "michael.oliver@company.com"),
+                // No alfresco match, ignore
+                new IamUser("user5@company.com", "2bd22c19-91e7-4002-8f26-4dfeb3fee12f", "user5@company.com"));
+    }
+
+    private List<NucleusUserMappingOutput> currentMappings()
+    {
+        return List.of(
+                // Keep - still valid
+                new NucleusUserMappingOutput("michael.oliver@company.com", "moliver"),
+                // Delete - stale mapping
+                new NucleusUserMappingOutput("mark.clattenburg", "mclattenburg"),
+                // Delete - stale mapping
+                new NucleusUserMappingOutput("old.user@company.com", "ouser"));
     }
 }

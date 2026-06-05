@@ -130,7 +130,11 @@ public class SyncOrchestrationService
         List<NucleusGroupMembershipOutput> currentMemberships = loadNucleusMemberships();
 
         // Sync Users
-        List<UserMapping> userMappings = userMappingSyncProcessor.syncUserMappings(
+        userMappingSyncProcessor.deleteUserMappings(
+                alfrescoUsers,
+                currentUserMappings,
+                unsyncableAlfrescoUserIds);
+        List<UserMapping> userMappings = userMappingSyncProcessor.addUserMappings(
                 alfrescoUsers,
                 nucleusIamUsers,
                 currentUserMappings,
