@@ -738,5 +738,17 @@
                 </plugins>
             </build>
         </profile>
+
+        <profile>
+            <id>reliability-tests</id>
+            <!-- Companion to the e2e-test profile of the same id. Flipping these here
+                 propagates the skips to every reactor module, so only e2e-test's
+                 *ReliabilityIT.java run. -->
+            <properties>
+                <skipUnitTests>true</skipUnitTests>
+                <skipIntegrationTests>true</skipIntegrationTests>
+                <skipE2eTests>true</skipE2eTests>
+            </properties>
+        </profile>
     </profiles>
 </project>
