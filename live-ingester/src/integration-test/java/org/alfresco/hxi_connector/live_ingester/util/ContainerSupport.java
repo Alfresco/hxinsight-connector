@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.get;
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.givenThat;
 import static com.github.tomakehurst.wiremock.client.WireMock.matching;
+import static com.github.tomakehurst.wiremock.client.WireMock.moreThanOrExactly;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
@@ -251,7 +252,11 @@ public class ContainerSupport
     {
         WireMock.configureFor(getSfsMock());
 
-        retryWithBackoff(() -> getSfsMock().verifyThat(exactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
+        // JMS delivery is at-least-once with transacted consumers and broker redelivery,
+        // so the route may fire this GET more than once; assert it happened at least once.
+        retryWithBackoff(() -> getSfsMock().verifyThat(moreThanOrExactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
+        getSfsMock().resetRequests();
+        getSfsMock().resetMappings();
 
         WireMock.configureFor(getHxInsightMock());
     }
@@ -313,7 +318,11 @@ public class ContainerSupport
         WireMock acsMock = getAcsMock();
         WireMock.configureFor(acsMock);
 
-        retryWithBackoff(() -> acsMock.verifyThat(exactly(1), getRequestedFor(urlPathEqualTo(ACS_CONTENT_PATH + nodeId + "/content"))));
+        // JMS delivery is at-least-once with transacted consumers and broker redelivery,
+        // so the route may fire this GET more than once; assert it happened at least once.
+        retryWithBackoff(() -> acsMock.verifyThat(moreThanOrExactly(1), getRequestedFor(urlPathEqualTo(ACS_CONTENT_PATH + nodeId + "/content"))));
+        acsMock.resetRequests();
+        acsMock.resetMappings();
 
         WireMock.configureFor(getHxInsightMock());
     }

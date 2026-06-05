@@ -75,7 +75,9 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
         SharedFileStoreClient.class,
         Application.class,
         JmsTransactionConfig.class},
-        properties = "logging.level.org.alfresco=DEBUG")
+        properties = {
+                "logging.level.org.alfresco=DEBUG",
+                "management.endpoint.health.group.readiness.include=readinessState"})
 @EnableAutoConfiguration
 @EnableRetry
 @ActiveProfiles("test")

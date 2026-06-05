@@ -65,7 +65,9 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.IngestCon
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.EmptyRenditionException;
 
 @SpringBootTest(
-        properties = {"logging.level.org.alfresco=DEBUG"},
+        properties = {
+                "logging.level.org.alfresco=DEBUG",
+                "management.endpoint.health.group.readiness.include=readinessState"},
         classes = {
                 ATSTransformResponseHandler.class,
                 DlqMetricsRecorder.class,
