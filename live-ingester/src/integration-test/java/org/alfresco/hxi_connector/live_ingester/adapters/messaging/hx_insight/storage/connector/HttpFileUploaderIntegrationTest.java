@@ -64,6 +64,7 @@ import org.alfresco.hxi_connector.common.test.docker.util.DockerContainers;
 import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.messaging.JmsTransactionConfig;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.local.LocalStorageConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.File;
@@ -72,8 +73,13 @@ import org.alfresco.hxi_connector.live_ingester.domain.usecase.content.model.Fil
         IntegrationProperties.class,
         LocalStorageConfig.class,
         HttpFileUploader.class,
-        Application.class},
-        properties = "logging.level.org.alfresco=DEBUG")
+        Application.class,
+        JmsTransactionConfig.class},
+        properties = {
+                "logging.level.org.alfresco=DEBUG",
+                // The slice doesn't include LiveIngesterMessagingConfig, so the camelRoutes
+                // health contributor referenced by application.yml's readiness group is absent.
+                "management.endpoint.health.group.readiness.include=readinessState"})
 @EnableAutoConfiguration
 @EnableRetry
 @ActiveProfiles("test")
@@ -144,7 +150,7 @@ class HttpFileUploaderIntegrationTest extends IntegrationCamelTestBase
         // then
         then(fileUploader).should(times(RETRY_ATTEMPTS)).upload(any(), any());
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .rootCause().isInstanceOf(HttpHostConnectException.class)
                 .hasMessageContaining(preSignedUrl.getHost(), preSignedUrl.getPort());
     }
@@ -165,7 +171,7 @@ class HttpFileUploaderIntegrationTest extends IntegrationCamelTestBase
 
         // then
         then(fileUploader).should(times(1)).upload(any(), any());
-        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointClientErrorException.class);
     }
 
     @Test

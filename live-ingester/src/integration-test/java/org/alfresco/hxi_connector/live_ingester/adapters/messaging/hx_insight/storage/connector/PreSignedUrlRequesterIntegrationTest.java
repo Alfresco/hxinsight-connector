@@ -98,6 +98,7 @@ import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.messaging.JmsTransactionConfig;
 import org.alfresco.hxi_connector.live_ingester.adapters.messaging.hx_insight.storage.connector.model.PreSignedUrlResponse;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.HxInsightRequest;
 import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
@@ -107,8 +108,13 @@ import org.alfresco.hxi_connector.live_ingester.util.insight_api.RequestLoader;
         PreSignedUrlRequester.class,
         LiveIngesterAuthClient.class,
         PreSignedUrlRequesterIntegrationTest.PreSignedUrlRequesterIntegrationTestConfig.class,
-        ApplicationInfoProvider.class},
-        properties = "logging.level.org.alfresco=DEBUG")
+        ApplicationInfoProvider.class,
+        JmsTransactionConfig.class},
+        properties = {
+                "logging.level.org.alfresco=DEBUG",
+                // The slice doesn't include LiveIngesterMessagingConfig, so the camelRoutes
+                // health contributor referenced by application.yml's readiness group is absent.
+                "management.endpoint.health.group.readiness.include=readinessState"})
 @EnableAutoConfiguration
 @EnableRetry
 @ActiveProfiles("test")
@@ -178,7 +184,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
 
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
-        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointServerErrorException.class);
     }
 
     @Test
@@ -193,7 +199,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
 
         // then
         then(locationRequester).should(times(1)).requestStorageLocation();
-        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointClientErrorException.class);
     }
 
     @Test
@@ -211,7 +217,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MismatchedInputException.class);
     }
 
@@ -230,7 +236,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(JsonEOFException.class);
     }
 
@@ -251,7 +257,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(MalformedURLException.class);
     }
 
@@ -268,7 +274,7 @@ class PreSignedUrlRequesterIntegrationTest extends IntegrationCamelTestBase
         // then
         then(locationRequester).should(times(RETRY_ATTEMPTS)).requestStorageLocation();
         assertThat(thrown)
-                .cause().isInstanceOf(EndpointServerErrorException.class)
+                .isInstanceOf(EndpointServerErrorException.class)
                 .cause().isInstanceOf(NoHttpResponseException.class);
     }
 

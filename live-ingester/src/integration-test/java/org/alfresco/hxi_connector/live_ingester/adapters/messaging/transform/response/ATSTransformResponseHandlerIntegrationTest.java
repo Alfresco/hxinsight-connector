@@ -237,11 +237,17 @@ class ATSTransformResponseHandlerIntegrationTest extends IntegrationCamelTestBas
                             mock(),
                             new Transform(
                                     mock(),
+                                    // Use a Camel mock: sink for the DLQ so the slice doesn't need a broker.
                                     new Transform.Response(
                                             RESPONSE_ENDPOINT,
                                             RESPONSE_ENDPOINT,
                                             retryIngestion,
-                                            retryTransformation),
+                                            retryTransformation,
+                                            true,
+                                            "mock:dlq",
+                                            6,
+                                            1000L,
+                                            true),
                                     mock(),
                                     mock()),
                             mock()),

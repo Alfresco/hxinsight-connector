@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -42,9 +42,18 @@ import org.alfresco.hxi_connector.common.adapters.auth.DefaultAuthenticationClie
 import org.alfresco.hxi_connector.common.adapters.auth.config.properties.AuthProperties;
 import org.alfresco.hxi_connector.common.adapters.auth.util.AuthUtils;
 import org.alfresco.hxi_connector.common.config.properties.Retry;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.messaging.JmsTransactionConfig;
 
-@SpringBootTest(classes = {LiveIngesterAuthClientIntegrationTest.LiveIngesterAuthClientIntegrationTestConfig.class, LiveIngesterAuthClient.class},
-        properties = "logging.level.org.alfresco=DEBUG")
+@SpringBootTest(
+        classes = {
+                LiveIngesterAuthClientIntegrationTest.LiveIngesterAuthClientIntegrationTestConfig.class,
+                LiveIngesterAuthClient.class,
+                JmsTransactionConfig.class},
+        properties = {
+                "logging.level.org.alfresco=DEBUG",
+                // The slice doesn't include LiveIngesterMessagingConfig, so the camelRoutes
+                // health contributor referenced by application.yml's readiness group is absent.
+                "management.endpoint.health.group.readiness.include=readinessState"})
 @EnableAutoConfiguration
 @EnableRetry
 @ActiveProfiles("test")

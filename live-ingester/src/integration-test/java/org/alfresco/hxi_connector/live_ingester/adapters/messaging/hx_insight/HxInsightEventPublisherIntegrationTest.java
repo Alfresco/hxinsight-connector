@@ -98,6 +98,7 @@ import org.alfresco.hxi_connector.common.test.util.LogCaptureUtils;
 import org.alfresco.hxi_connector.live_ingester.IntegrationCamelTestBase;
 import org.alfresco.hxi_connector.live_ingester.adapters.auth.LiveIngesterAuthClient;
 import org.alfresco.hxi_connector.live_ingester.adapters.config.IntegrationProperties;
+import org.alfresco.hxi_connector.live_ingester.adapters.config.messaging.JmsTransactionConfig;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.IngestionEngineEventPublisher;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.NodeEvent;
 import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.UpdateNodeEvent;
@@ -107,8 +108,13 @@ import org.alfresco.hxi_connector.live_ingester.domain.ports.ingestion_engine.Up
         HxInsightEventPublisher.class,
         HxInsightEventPublisherIntegrationTest.HxInsightEventPublisherTestConfig.class,
         LiveIngesterAuthClient.class,
-        ApplicationInfoProvider.class},
-        properties = "logging.level.org.alfresco=DEBUG")
+        ApplicationInfoProvider.class,
+        JmsTransactionConfig.class},
+        properties = {
+                "logging.level.org.alfresco=DEBUG",
+                // The slice doesn't include LiveIngesterMessagingConfig, so the camelRoutes
+                // health contributor referenced by application.yml's readiness group is absent.
+                "management.endpoint.health.group.readiness.include=readinessState"})
 @EnableAutoConfiguration
 @EnableMethodSecurity
 @EnableRetry
@@ -171,7 +177,7 @@ class HxInsightEventPublisherIntegrationTest extends IntegrationCamelTestBase
 
         // then
         then(ingestionEngineEventPublisher).should(times(RETRY_ATTEMPTS)).publishMessage(NODE_EVENT);
-        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointServerErrorException.class);
     }
 
     @Test
@@ -186,7 +192,7 @@ class HxInsightEventPublisherIntegrationTest extends IntegrationCamelTestBase
 
         // then
         then(ingestionEngineEventPublisher).should(times(1)).publishMessage(NODE_EVENT);
-        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointClientErrorException.class);
     }
 
     @Test

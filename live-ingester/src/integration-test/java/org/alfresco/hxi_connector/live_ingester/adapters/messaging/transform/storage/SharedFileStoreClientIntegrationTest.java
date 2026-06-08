@@ -138,7 +138,7 @@ class SharedFileStoreClientIntegrationTest extends IntegrationCamelTestBase
 
         // then
         then(sharedFileStoreClient).should(times(RETRY_ATTEMPTS)).downloadFile(FILE_ID);
-        assertThat(thrown).cause().isInstanceOf(EndpointServerErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointServerErrorException.class);
     }
 
     @Test
@@ -153,7 +153,7 @@ class SharedFileStoreClientIntegrationTest extends IntegrationCamelTestBase
 
         // then
         then(sharedFileStoreClient).should(times(1)).downloadFile(FILE_ID);
-        assertThat(thrown).cause().isInstanceOf(EndpointClientErrorException.class);
+        assertThat(thrown).isInstanceOf(EndpointClientErrorException.class);
     }
 
     @Test
