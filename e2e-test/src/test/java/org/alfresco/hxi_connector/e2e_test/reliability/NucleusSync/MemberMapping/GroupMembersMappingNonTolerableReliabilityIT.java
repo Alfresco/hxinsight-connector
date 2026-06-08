@@ -146,4 +146,3 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
         installMutationEndpointsWithTracking();
     }
 }
-

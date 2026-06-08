@@ -97,6 +97,3 @@ final class ClientErrorClassifier
         return Tags.ERR_UNKNOWN;
     }
 }
-
-
-
