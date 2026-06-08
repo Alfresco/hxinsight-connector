@@ -25,34 +25,32 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
-import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
+
 @Slf4j
-public class NucleusShortPartitionReliabilityIT extends BaseNucleusSyncReliabilityIT {
+public class NucleusShortPartitionReliabilityIT extends BaseNucleusSyncReliabilityIT
+{
     /**
-     * Window during which the {@code nucleusProxy} is disabled. Long enough to burn the first 2–3 retry
-     * attempts, short enough that attempt 4 lands after recovery.
+     * Window during which the {@code nucleusProxy} is disabled. Long enough to burn the first 2–3 retry attempts, short enough that attempt 4 lands after recovery.
      */
     private static final long PARTITION_DURATION_MS = 1_000L;
 
     /**
-     * Outer wait for the sync to complete (covers the post-recovery retry back-off plus the synchronous
-     * controller round-trip). Far below the per-attempt WebClient timeout so a misconfigured retry path
-     * surfaces as a future timeout rather than a silent green pass.
+     * Outer wait for the sync to complete (covers the post-recovery retry back-off plus the synchronous controller round-trip). Far below the per-attempt WebClient timeout so a misconfigured retry path surfaces as a future timeout rather than a silent green pass.
      */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 20L;
-
 
     @Test
     void shouldRecoverWhenNucleusBriefPartitionEndsBeforeRetryBudgetExhausts() throws Exception

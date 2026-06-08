@@ -25,26 +25,28 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.GroupMapping;
 
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
+
 @Slf4j
-public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
+public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT
+{
 
-
-    private void installAllStubs(){
+    private void installAllStubs()
+    {
         installNucleusAuthStub();
         installSingleAcsUserStub();
         installRepositoryGroupStubs(TOTAL_GROUPS_COUNT);
@@ -55,16 +57,15 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
         installMutationEndpointsWithTracking();
     }
 
-
     /**
-     * Tests nucleus-sync's ability to map 1 million Groups from ACS to Nucleus Side
-     * The Group needs to be linked or part of any User
+     * Tests nucleus-sync's ability to map 1 million Groups from ACS to Nucleus Side The Group needs to be linked or part of any User
      *
-     * <p><b>What this proves:</b>
+     * <p>
+     * <b>What this proves:</b>
      * <ul>
-     *   <li>nucleus-sync can handle 1M Group SYNC</li>
-     *   <li>All 1M mappings are created correctly — no mappings dropped</li>
-     *   <li>Pagination works correctly at scale</li>
+     * <li>nucleus-sync can handle 1M Group SYNC</li>
+     * <li>All 1M mappings are created correctly — no mappings dropped</li>
+     * <li>Pagination works correctly at scale</li>
      * </ul>
      */
     @Test
@@ -91,7 +92,6 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
                     .as("Expected /people to be called (ACS stub hit)")
                     .isGreaterThanOrEqualTo(1);
 
-
             // verify group creation request was hit. Groups are POSTed in batched array bodies
             // (one POST can carry many NucleusGroupInput entries), so we only assert at least one
             // POST landed; the exact group-count check happens after the retry loop.
@@ -115,7 +115,7 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
         // Verify no groups were dropped
         assertThat(mappedGroupIds.size())
                 .as("Expected all %d groups to be mapped, but only %d were mapped. " +
-                                "Missing count: %d mappings dropped!",
+                        "Missing count: %d mappings dropped!",
                         TOTAL_GROUPS_COUNT, mappedGroupIds.size(), TOTAL_GROUPS_COUNT - mappedGroupIds.size())
                 .isEqualTo(TOTAL_GROUPS_COUNT);
 

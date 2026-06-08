@@ -25,60 +25,58 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.UserMapping;
 
-
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
+
 /**
  * Large-scale user-mapping test — exercises nucleus-sync with 1 million synthetic users on both ACS and Nucleus sides.
  *
  * <h2>Full stub approach</h2>
- * <p>This test stubs BOTH the ACS /people endpoint AND the Nucleus /api/users endpoint with 1 million
- * synthetic users each. The nucleus-sync container's {@code ALFRESCO_BASE_URL} is routed to the nucleus
- * WireMock (via the {@code withStubbedAcs()} builder flag) so ACS calls hit our stubs instead of the real repository.
+ * <p>
+ * This test stubs BOTH the ACS /people endpoint AND the Nucleus /api/users endpoint with 1 million synthetic users each. The nucleus-sync container's {@code ALFRESCO_BASE_URL} is routed to the nucleus WireMock (via the {@code withStubbedAcs()} builder flag) so ACS calls hit our stubs instead of the real repository.
  *
  * <h2>How it works</h2>
  * <ol>
- *   <li>Stub ACS /people to return 1M users with emails {@code user0@hyland.com} through {@code user999999@hyland.com}.</li>
- *   <li>Stub Nucleus /api/users to return 1M users with the same emails.</li>
- *   <li>Trigger sync — nucleus-sync fetches both sides and matches by email.</li>
- *   <li>All 1M mappings should be created (perfect intersection), no mappings dropped.</li>
+ * <li>Stub ACS /people to return 1M users with emails {@code user0@hyland.com} through {@code user999999@hyland.com}.</li>
+ * <li>Stub Nucleus /api/users to return 1M users with the same emails.</li>
+ * <li>Trigger sync — nucleus-sync fetches both sides and matches by email.</li>
+ * <li>All 1M mappings should be created (perfect intersection), no mappings dropped.</li>
  * </ol>
  *
  * <h2>Performance expectations</h2>
  * <ul>
- *   <li>1M users on both sides: may take several minutes</li>
- *   <li>Memory pressure on WireMock and nucleus-sync — watch heap</li>
- *   <li>Uses chunked stub generation to avoid OOM during stub installation</li>
+ * <li>1M users on both sides: may take several minutes</li>
+ * <li>Memory pressure on WireMock and nucleus-sync — watch heap</li>
+ * <li>Uses chunked stub generation to avoid OOM during stub installation</li>
  * </ul>
  */
 
-
-
 @Slf4j
-public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
+public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT
+{
 
     /**
-     * Tests nucleus-sync's ability to map 1 million users from both ACS and Nucleus sides.
-     * Both sides are stubbed with identical synthetic users so we expect all 1M mappings to be created.
+     * Tests nucleus-sync's ability to map 1 million users from both ACS and Nucleus sides. Both sides are stubbed with identical synthetic users so we expect all 1M mappings to be created.
      *
-     * <p><b>What this proves:</b>
+     * <p>
+     * <b>What this proves:</b>
      * <ul>
-     *   <li>nucleus-sync can handle 1M users on both sides without OOM or timeout</li>
-     *   <li>All 1M mappings are created correctly — no mappings dropped</li>
-     *   <li>Pagination works correctly at scale</li>
+     * <li>nucleus-sync can handle 1M users on both sides without OOM or timeout</li>
+     * <li>All 1M mappings are created correctly — no mappings dropped</li>
+     * <li>Pagination works correctly at scale</li>
      * </ul>
      */
     @Test
@@ -128,7 +126,7 @@ public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeInge
         // Verify no users were dropped
         assertThat(mappedUserIds.size())
                 .as("Expected all %d users to be mapped, but only %d were mapped. " +
-                                "Missing count: %d mappings dropped!",
+                        "Missing count: %d mappings dropped!",
                         TOTAL_USER_COUNT, mappedUserIds.size(), TOTAL_USER_COUNT - mappedUserIds.size())
                 .isEqualTo(TOTAL_USER_COUNT);
 
@@ -146,7 +144,8 @@ public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeInge
         log.info("[scale-test] ✓ All {} users successfully mapped — no mappings dropped!", TOTAL_USER_COUNT);
     }
 
-    private void installAllStubs(){
+    private void installAllStubs()
+    {
         // 1. Install all stubs
         installNucleusAuthStub();
         installAcsPeopleStubs(TOTAL_USER_COUNT);

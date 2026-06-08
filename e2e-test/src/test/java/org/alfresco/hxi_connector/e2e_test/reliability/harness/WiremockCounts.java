@@ -62,15 +62,18 @@ public final class WiremockCounts
         return findAll(postRequestedFor(urlEqualTo(INGESTION_EVENTS_PATH))).size();
     }
 
-    public static int userMappingRequests(){
+    public static int userMappingRequests()
+    {
         return findAll(postRequestedFor(urlEqualTo(USER_MAPPINGS_PATH))).size();
     }
 
-    public static int groupMappingRequests(){
+    public static int groupMappingRequests()
+    {
         return findAll(postRequestedFor(urlEqualTo(GROUPS_PATH))).size();
     }
 
-    public static int groupMembersRequests(){
+    public static int groupMembersRequests()
+    {
         return findAll(postRequestedFor(urlEqualTo(GROUP_MEMBERS_PATH))).size();
     }
 

@@ -25,6 +25,10 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
+import java.io.IOException;
+import java.time.Duration;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
@@ -35,33 +39,34 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
-import java.io.IOException;
-import java.time.Duration;
-import java.util.Map;
-
 // Primary Component to call api endpoints with reliability
 @Component
-public class RetryableHttpInvoker {
+public class RetryableHttpInvoker
+{
     private final WebClient webClient;
     private final int timeoutInMins;
 
     @Autowired
     public RetryableHttpInvoker(
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
-            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB) {
+            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB)
+    {
         this.timeoutInMins = timeoutInMins;
         this.webClient = WebClient.builder()
                 .codecs(
-                        clientCodecConfigurer ->
-                                clientCodecConfigurer
-                                        .defaultCodecs()
-                                        .maxInMemorySize(bufferInKB * 1024)).build();
+                        clientCodecConfigurer -> clientCodecConfigurer
+                                .defaultCodecs()
+                                .maxInMemorySize(bufferInKB * 1024))
+                .build();
     }
 
     /**
      * HTTP: Verb GET
-     * @param fullUrl The Exact URL we want
-     * @param headers Headers including Auth
+     * 
+     * @param fullUrl
+     *            The Exact URL we want
+     * @param headers
+     *            Headers including Auth
      * @return The Response as String
      */
     @Retryable(retryFor = {
@@ -73,7 +78,8 @@ public class RetryableHttpInvoker {
                     delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.retry.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
-    public String executeGetRequest(final String fullUrl, final Map<String, String> headers) {
+    public String executeGetRequest(final String fullUrl, final Map<String, String> headers)
+    {
         return webClient
                 .get()
                 .uri(fullUrl)
@@ -96,7 +102,7 @@ public class RetryableHttpInvoker {
                     delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.retry.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
-    public String executePostRequest(String fullUrl, final String jsonBody,final Map<String, String> headers)
+    public String executePostRequest(String fullUrl, final String jsonBody, final Map<String, String> headers)
     {
         return webClient
                 .post()
@@ -119,9 +125,9 @@ public class RetryableHttpInvoker {
                     delayExpression = "#{${http-client.retry.initial-delay-ms:2000}}",
                     multiplierExpression = "#{${http-client.retry.multiplier:2}}",
                     maxDelayExpression = "#{${http-client.retry.max-delay-ms:10000}}"))
-    public String executeDeleteRequest(final String fullUrl,final Map<String, String> headers)
+    public String executeDeleteRequest(final String fullUrl, final Map<String, String> headers)
     {
-       return webClient
+        return webClient
                 .delete()
                 .uri(fullUrl)
                 .headers(httpHeaders -> headers.forEach(httpHeaders::set))

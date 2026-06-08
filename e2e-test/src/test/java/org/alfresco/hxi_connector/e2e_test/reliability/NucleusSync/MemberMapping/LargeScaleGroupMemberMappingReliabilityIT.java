@@ -25,32 +25,32 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.MemberMapping;
 
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
+
 @Slf4j
-public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
+public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT
+{
     /**
-     * Total number of users mapped on BOTH ACS and Nucleus sides — also the number of memberships
-     * the test will expect against the shared group. Tune this single knob to scale.
+     * Total number of users mapped on BOTH ACS and Nucleus sides — also the number of memberships the test will expect against the shared group. Tune this single knob to scale.
      */
     private static final int TOTAL_USERS = 100000;
 
     /** Synthetic group every user belongs to — produces {@value #TOTAL_USERS} memberships. */
     private static final String SHARED_GROUP_ID = "groupShared";
-
 
     @Test
     void shouldMapAllGroupMembershipsFromBothSides()
@@ -90,7 +90,7 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
                 elapsedMs, TOTAL_USERS, TOTAL_USERS * 1000L / Math.max(1, elapsedMs));
 
         // 4. Verify every (group, user) pair was POSTed. Pairs come in batched array bodies, so
-        //    we parse all POST /group-members bodies and dedupe by (externalGroupId, memberExternalUserId).
+        // we parse all POST /group-members bodies and dedupe by (externalGroupId, memberExternalUserId).
         List<LoggedRequest> memberPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUP_MEMBERS_PATH)));
         Set<String> createdMemberships = extractMemberships(memberPosts);
 
@@ -99,7 +99,7 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
 
         assertThat(createdMemberships.size())
                 .as("Expected all %d memberships against group '%s' to be mapped, but only %d were mapped "
-                                + "(%d dropped).",
+                        + "(%d dropped).",
                         TOTAL_USERS, SHARED_GROUP_ID, createdMemberships.size(), TOTAL_USERS - createdMemberships.size())
                 .isEqualTo(TOTAL_USERS);
 

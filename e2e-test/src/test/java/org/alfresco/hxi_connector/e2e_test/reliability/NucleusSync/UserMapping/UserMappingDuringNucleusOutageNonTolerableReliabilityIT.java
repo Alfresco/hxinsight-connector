@@ -25,60 +25,50 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.UserMapping;
 
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 
 /**
- * Non-tolerable user-mapping outage scenario — inject a Nucleus mutation fault mid-sync so
- * retries exhaust and the sync aborts with a partial set of users mapped.
+ * Non-tolerable user-mapping outage scenario — inject a Nucleus mutation fault mid-sync so retries exhaust and the sync aborts with a partial set of users mapped.
  *
- * <h2>Why WireMock faults instead of Toxiproxy disable?</h2>
- * With {@code withStubbedAcs()}, both ACS and Nucleus traffic flow through the same Toxiproxy
- * listener ({@code toxic-nucleus:8083}). Calling {@code nucleusproxy().disable()} kills ACS
- * stubs too — the sync would fail during user <em>discovery</em> (read phase), not during
- * user-mapping <em>creation</em> (write phase). WireMock stub replacement selectively breaks
- * only the Nucleus POST /user-mappings endpoint while ACS reads continue.
+ * <h2>Why WireMock faults instead of Toxiproxy disable?</h2> With {@code withStubbedAcs()}, both ACS and Nucleus traffic flow through the same Toxiproxy listener ({@code toxic-nucleus:8083}). Calling {@code nucleusproxy().disable()} kills ACS stubs too — the sync would fail during user <em>discovery</em> (read phase), not during user-mapping <em>creation</em> (write phase). WireMock stub replacement selectively breaks only the Nucleus POST /user-mappings endpoint while ACS reads continue.
  *
  * <h2>Expected behaviour</h2>
  * <ol>
- *   <li>Sync starts: reads ACS /people (1M stubbed users) + Nucleus /api/users (1M).</li>
- *   <li>User-mapping POSTs begin — some succeed.</li>
- *   <li>We replace POST /user-mappings with a 503 fault at higher priority.</li>
- *   <li>Retries exhaust against the 503, sync fails.</li>
- *   <li>Fewer than {@link #TOTAL_USER_COUNT} mappings were created.</li>
+ * <li>Sync starts: reads ACS /people (1M stubbed users) + Nucleus /api/users (1M).</li>
+ * <li>User-mapping POSTs begin — some succeed.</li>
+ * <li>We replace POST /user-mappings with a 503 fault at higher priority.</li>
+ * <li>Retries exhaust against the 503, sync fails.</li>
+ * <li>Fewer than {@link #TOTAL_USER_COUNT} mappings were created.</li>
  * </ol>
  */
 @Slf4j
 public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
 {
     /**
-     * Delay between triggering sync and injecting the fault. Must be long enough for user
-     * discovery (reading 1M users from ACS + Nucleus stubs) to complete AND the first batch of
-     * user-mapping POSTs to land. 10 s is generous for paginated stub reads.
+     * Delay between triggering sync and injecting the fault. Must be long enough for user discovery (reading 1M users from ACS + Nucleus stubs) to complete AND the first batch of user-mapping POSTs to land. 10 s is generous for paginated stub reads.
      */
     private static final long DELAY_BEFORE_FAULT_MS = 5 * 60_000L + 5000;
 
     /**
-     * Duration the fault stays active. Must outlive the retry budget (~2.4 s with the test env's
-     * 5 × 200 ms × 2 config) so all retry attempts hit the 503.
+     * Duration the fault stays active. Must outlive the retry budget (~2.4 s with the test env's 5 × 200 ms × 2 config) so all retry attempts hit the 503.
      */
     private static final long FAULT_DURATION_MS = 3 * 60_000L;
 
     /**
-     * Outer wait for the sync future to terminate (with an exception). Generous so a "sync hung
-     * instead of failing" regression surfaces as a test failure.
+     * Outer wait for the sync future to terminate (with an exception). Generous so a "sync hung instead of failing" regression surfaces as a test failure.
      */
     private static final long SYNC_FAILURE_TIMEOUT_S = 20L;
 
@@ -110,7 +100,7 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
             nucleus().removeStubMapping(faultStub);
         }
 
-        syncCall.get(SYNC_FAILURE_TIMEOUT_S,TimeUnit.MINUTES);
+        syncCall.get(SYNC_FAILURE_TIMEOUT_S, TimeUnit.MINUTES);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[outage-test] Sync failed (as expected) after {} ms — fault window was {} ms",
@@ -140,8 +130,7 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
     }
 
     /**
-     * Replace the normal 200-OK POST /user-mappings stub with a 503 Service Unavailable at
-     * higher priority. ACS stubs are unaffected since they use different URL paths.
+     * Replace the normal 200-OK POST /user-mappings stub with a 503 Service Unavailable at higher priority. ACS stubs are unaffected since they use different URL paths.
      */
     private StubMapping injectUserMappingFault()
     {

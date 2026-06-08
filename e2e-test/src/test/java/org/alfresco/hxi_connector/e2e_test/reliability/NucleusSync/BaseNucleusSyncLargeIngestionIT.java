@@ -25,15 +25,14 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.ReliabilityEnvironment;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.TestInstance;
+import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
+import static com.github.tomakehurst.wiremock.client.WireMock.absent;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.get;
+import static com.github.tomakehurst.wiremock.client.WireMock.post;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -45,29 +44,28 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.TestInstance;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
-import static com.github.tomakehurst.wiremock.client.WireMock.absent;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.get;
-import static com.github.tomakehurst.wiremock.client.WireMock.post;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.ReliabilityEnvironment;
 
 // This is the Base Class for Large Scale Ingestion Mapping Tolerance Tests
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
-public abstract class BaseNucleusSyncLargeIngestionIT {
+public abstract class BaseNucleusSyncLargeIngestionIT
+{
 
     /** Must match NUCLEUS_SYSTEM_ID env var on the nucleus-sync container. */
     protected static final String SYSTEM_ID = "-dummy-system-id";
-    protected static final String USER_MAPPINGS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings";
-    protected static final String GROUPS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/groups";
-    protected static final String GROUP_MEMBERS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/group-members";
+    protected static final String USER_MAPPINGS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings";
+    protected static final String GROUPS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/groups";
+    protected static final String GROUP_MEMBERS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/group-members";
     protected static final String ALL_USERS_PATH = "/api/users";
 
     /**
@@ -83,10 +81,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     protected static final int SCENARIO_STUB_PRIORITY = 1;
 
     /**
-     * Total number of users to simulate on BOTH ACS and Nucleus sides. Tune this single knob to
-     * scale the test — currently {@code 100} for fast local runs; production-grade scale check is
-     * {@code 1_000_000}. Note the install cost: each ACS page is one stub, so 1M users at
-     * {@link #ACS_PAGE_SIZE}=100 means 10 000 stubs registered before the sync even starts.
+     * Total number of users to simulate on BOTH ACS and Nucleus sides. Tune this single knob to scale the test — currently {@code 100} for fast local runs; production-grade scale check is {@code 1_000_000}. Note the install cost: each ACS page is one stub, so 1M users at {@link #ACS_PAGE_SIZE}=100 means 10 000 stubs registered before the sync even starts.
      */
     protected static final int TOTAL_USER_COUNT = 1000000;
 
@@ -141,7 +136,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
         registeredStubs.clear();
     }
 
-   // All Stub Helpers
+    // All Stub Helpers
     protected void installNucleusAuthStub()
     {
         StubMapping stub = nucleus().register(post(urlEqualTo("/token"))
@@ -161,9 +156,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     }
 
     /**
-     * Stub ACS per-user {@code /people/{userId}/groups} endpoint. nucleus-sync calls this for every user
-     * during the mapping flow (see {@code AlfrescoClient#getUserGroups}); without this stub each request
-     * returns 404 and the sync fails. Returns an empty group list for every user via a regex URL match.
+     * Stub ACS per-user {@code /people/{userId}/groups} endpoint. nucleus-sync calls this for every user during the mapping flow (see {@code AlfrescoClient#getUserGroups}); without this stub each request returns 404 and the sync fails. Returns an empty group list for every user via a regex URL match.
      */
     protected void installSingleAcsUserStub()
     {
@@ -198,10 +191,8 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
         registeredStubs.add(stub);
     }
 
-
     /**
-     * Stub ACS /people endpoint with paginated responses for the given number of users.
-     * Uses skipCount-based pagination matching ACS's API.
+     * Stub ACS /people endpoint with paginated responses for the given number of users. Uses skipCount-based pagination matching ACS's API.
      */
     protected void installAcsPeopleStubs(int totalUserCount)
     {
@@ -271,8 +262,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     }
 
     /**
-     * Stub Nucleus IAM /api/users to return a large set of synthetic users.
-     * Uses offset-based pagination with the {@code next} link in the response.
+     * Stub Nucleus IAM /api/users to return a large set of synthetic users. Uses offset-based pagination with the {@code next} link in the response.
      */
     protected void installNucleusIamUsersStubs(int totalUserCount)
     {
@@ -341,9 +331,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     }
 
     /**
-     * Stub ACS per-user {@code /people/{userId}/groups} endpoint. nucleus-sync calls this for every user
-     * during the mapping flow (see {@code AlfrescoClient#getUserGroups}); without this stub each request
-     * returns 404 and the sync fails. Returns an empty group list for every user via a regex URL match.
+     * Stub ACS per-user {@code /people/{userId}/groups} endpoint. nucleus-sync calls this for every user during the mapping flow (see {@code AlfrescoClient#getUserGroups}); without this stub each request returns 404 and the sync fails. Returns an empty group list for every user via a regex URL match.
      */
     protected void installAcsUserGroupsStub()
     {
@@ -358,7 +346,8 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     }
 
     // Install ACS User Group Stub with shared Group
-    protected void installAcsUserGroupStubWithGroupId(String SHARED_GROUP_ID){
+    protected void installAcsUserGroupStubWithGroupId(String SHARED_GROUP_ID)
+    {
         String body = "{\"list\":{"
                 + "\"pagination\":{\"count\":1,\"hasMoreItems\":false,\"totalItems\":1,\"skipCount\":0,\"maxItems\":100},"
                 + "\"entries\":[{\"entry\":{\"id\":\"" + SHARED_GROUP_ID + "\"}}]"
@@ -372,7 +361,6 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
                                 .withBody(body)));
         registeredStubs.add(stub);
     }
-
 
     protected void installEmptyMappingsStub()
     {
@@ -426,11 +414,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     }
 
     /**
-     * Extract the Alfresco-side user IDs that were mapped, by parsing the POST bodies sent to
-     * {@code /user-mappings}. The body is a JSON array of {@code NucleusUserMappingInput}
-     * records: {@code [{"userId":"iam-0","externalUserId":"user0"}, ...]}. The Alfresco id lives
-     * in {@code externalUserId} (see {@code UserMappingSyncProcessor#syncUserMappings} where the
-     * input is constructed as {@code new NucleusUserMappingInput(nucleusUserId, alfrescoUserId)}).
+     * Extract the Alfresco-side user IDs that were mapped, by parsing the POST bodies sent to {@code /user-mappings}. The body is a JSON array of {@code NucleusUserMappingInput} records: {@code [{"userId":"iam-0","externalUserId":"user0"}, ...]}. The Alfresco id lives in {@code externalUserId} (see {@code UserMappingSyncProcessor#syncUserMappings} where the input is constructed as {@code new NucleusUserMappingInput(nucleusUserId, alfrescoUserId)}).
      */
     protected Set<String> extractMappedUserIds(List<LoggedRequest> requests)
     {
@@ -452,7 +436,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     // Install Nucleus Empty Users
     protected void installNucleusSingleUserStub()
     {
-       StubMapping users =  nucleus().register(get(urlPathEqualTo(ALL_USERS_PATH))
+        StubMapping users = nucleus().register(get(urlPathEqualTo(ALL_USERS_PATH))
                 .atPriority(SCENARIO_STUB_PRIORITY)
                 .willReturn(aResponse()
                         .withStatus(200)
@@ -468,12 +452,11 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
                                   ]
                                 }
                                 """)));
-       registeredStubs.add(users);
+        registeredStubs.add(users);
     }
 
     /**
-     * Stub ACS /group endpoint with paginated responses for the given number of users.
-     * Uses skipCount-based pagination matching ACS's API.
+     * Stub ACS /group endpoint with paginated responses for the given number of users. Uses skipCount-based pagination matching ACS's API.
      */
     protected void installRepositoryGroupStubs(int totalGroupsCount)
     {
@@ -540,11 +523,8 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
         return sb.toString();
     }
 
-
     /**
-     * Extract the Alfresco-side group IDs that were posted, by parsing the POST bodies sent to
-     * {@code /groups}. The body is a JSON array of {@code NucleusGroupInput} records where the
-     * Alfresco id lives in {@code externalGroupId}.
+     * Extract the Alfresco-side group IDs that were posted, by parsing the POST bodies sent to {@code /groups}. The body is a JSON array of {@code NucleusGroupInput} records where the Alfresco id lives in {@code externalGroupId}.
      */
     protected Set<String> extractGroupIds(List<LoggedRequest> requests)
     {
@@ -564,10 +544,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT {
     }
 
     /**
-     * Extract every {@code (externalGroupId, memberExternalUserId)} pair captured in POST
-     * {@code /group-members} bodies — these are the {@code NucleusGroupMemberAssignmentInput}
-     * records. The DTO is an array per request so we walk the body left-to-right pairing the
-     * fields in document order.
+     * Extract every {@code (externalGroupId, memberExternalUserId)} pair captured in POST {@code /group-members} bodies — these are the {@code NucleusGroupMemberAssignmentInput} records. The DTO is an array per request so we walk the body left-to-right pairing the fields in document order.
      */
     protected Set<String> extractMemberships(List<LoggedRequest> requests)
     {

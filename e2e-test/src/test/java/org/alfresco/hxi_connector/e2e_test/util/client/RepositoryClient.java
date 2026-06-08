@@ -51,7 +51,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.Visibility;
 public class RepositoryClient
 {
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-    public static final User ADMIN_USER = new User("admin", "admin","abcd@gmail.com");
+    public static final User ADMIN_USER = new User("admin", "admin", "abcd@gmail.com");
     private static final String API_PATH = "%s/alfresco/api/-default-/public/alfresco/versions/1";
     private static final String GS_API_PATH = "%s/alfresco/api/-default-/public/gs/versions/1";
     private static final String NODES_URL_PATTERN = API_PATH + "/nodes/%s";

@@ -25,18 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.BaseProcessChaosReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.ProcessChaos;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
-import java.time.Duration;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.get;
@@ -44,48 +32,47 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Duration;
+
+import com.github.tomakehurst.wiremock.client.WireMock;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.BaseProcessChaosReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.ProcessChaos;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
+
 /**
  * Reliability of nucleus-sync's Alfresco client across an Alfresco container restart.
  *
- * <p><b>Why this extends {@link BaseProcessChaosReliabilityIT} rather than {@code BaseReliabilityIT}.</b>
- * The shared-environment base is documented as off-limits for tests that drive {@code docker stop} on
- * infrastructure — its {@code @BeforeEach} reset asserts broker health + DLQ depth + active subscription,
- * and a chaos-restart from a previous test can leave those invariants broken for the next one. By owning
- * the environment per-class we get a clean ACS to break, and tests in other classes are unaffected.
+ * <p>
+ * <b>Why this extends {@link BaseProcessChaosReliabilityIT} rather than {@code BaseReliabilityIT}.</b> The shared-environment base is documented as off-limits for tests that drive {@code docker stop} on infrastructure — its {@code @BeforeEach} reset asserts broker health + DLQ depth + active subscription, and a chaos-restart from a previous test can leave those invariants broken for the next one. By owning the environment per-class we get a clean ACS to break, and tests in other classes are unaffected.
  *
- * <p><b>What this pins.</b> After a graceful {@code stop} + {@code start} of ACS, a freshly-triggered
- * sync must (a) reach Alfresco (the new container instance) over the existing {@code toxic-acs} listener,
- * (b) progress past the Alfresco-fetch phase into the Nucleus phase, and (c) drive the IAM-users and
- * user-mappings GETs on the Nucleus mock — proving the nucleus-sync HTTP client recovered from any stale
- * pooled TCP connections.
+ * <p>
+ * <b>What this pins.</b> After a graceful {@code stop} + {@code start} of ACS, a freshly-triggered sync must (a) reach Alfresco (the new container instance) over the existing {@code toxic-acs} listener, (b) progress past the Alfresco-fetch phase into the Nucleus phase, and (c) drive the IAM-users and user-mappings GETs on the Nucleus mock — proving the nucleus-sync HTTP client recovered from any stale pooled TCP connections.
  *
- * <p><b>Convergence budget.</b> {@link #SETTLE_BEFORE_SYNC_MS} after readiness lets the live-ingester's
- * JMS subscription re-attach so the broker invariants don't trip the next class's preconditions. The
- * {@link #ASSERTION_CONVERGENCE_MS} retry window is generous because the first request after restart
- * commonly burns a retry on a dead pooled Netty connection before establishing a fresh one.
+ * <p>
+ * <b>Convergence budget.</b> {@link #SETTLE_BEFORE_SYNC_MS} after readiness lets the live-ingester's JMS subscription re-attach so the broker invariants don't trip the next class's preconditions. The {@link #ASSERTION_CONVERGENCE_MS} retry window is generous because the first request after restart commonly burns a retry on a dead pooled Netty connection before establishing a fresh one.
  */
 
 @Slf4j
-public class AlfrescoRestartReliabilityIT extends BaseProcessChaosReliabilityIT {
+public class AlfrescoRestartReliabilityIT extends BaseProcessChaosReliabilityIT
+{
     /** Must match {@code NUCLEUS_SYSTEM_ID} on the nucleus-sync container. */
     private static final String SYSTEM_ID = "-dummy-system-id";
-    private static final String USER_MAPPINGS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings";
-    private static final String GROUPS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/groups";
-    private static final String GROUP_MEMBERS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/group-members";
+    private static final String USER_MAPPINGS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings";
+    private static final String GROUPS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/groups";
+    private static final String GROUP_MEMBERS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/group-members";
 
     /**
-     * Wait between "ACS is reachable" and "trigger sync". Covers the gap between the HTTP probe in
-     * {@link ProcessChaos#awaitAcsReadiness} (which only checks Tomcat is up) and the People API being
-     * fully bootstrapped + the in-memory authentication subsystem accepting credentials.
+     * Wait between "ACS is reachable" and "trigger sync". Covers the gap between the HTTP probe in {@link ProcessChaos#awaitAcsReadiness} (which only checks Tomcat is up) and the People API being fully bootstrapped + the in-memory authentication subsystem accepting credentials.
      */
     private static final long SETTLE_BEFORE_SYNC_MS = 3_000L;
 
     /**
-     * Total wall clock allowed for the assertion to converge. After an ACS restart the first call from
-     * nucleus-sync may pay one or two stale-Netty-connection retries before reaching a healthy peer.
+     * Total wall clock allowed for the assertion to converge. After an ACS restart the first call from nucleus-sync may pay one or two stale-Netty-connection retries before reaching a healthy peer.
      */
     private static final int ASSERTION_CONVERGENCE_MS = 30_000;
 

@@ -25,17 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -44,34 +33,36 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
+
 /**
- * IDP / OAuth2 token endpoint outage — every Nucleus call needs a Bearer token from {@code POST /token}.
- * If that endpoint fails persistently, the sync MUST surface a clear failure (not hang, not silently
- * succeed against {@code Authorization: Bearer null}, not loop forever on token refresh).
+ * IDP / OAuth2 token endpoint outage — every Nucleus call needs a Bearer token from {@code POST /token}. If that endpoint fails persistently, the sync MUST surface a clear failure (not hang, not silently succeed against {@code Authorization: Bearer null}, not loop forever on token refresh).
  *
- * <h2>Why this is critical</h2>
- * Token failures sit upstream of every other failure mode. None of the other tests exercise this hop —
- * they all assume a working token. A regression that breaks token refresh (expired credentials, IdP
- * misconfig, JWKS rotation, network outage to the IdP) would slip past every existing test.
+ * <h2>Why this is critical</h2> Token failures sit upstream of every other failure mode. None of the other tests exercise this hop — they all assume a working token. A regression that breaks token refresh (expired credentials, IdP misconfig, JWKS rotation, network outage to the IdP) would slip past every existing test.
  *
  * <h2>What this pins</h2>
  * <ol>
- *   <li>Token endpoint persistently returns 503 → sync future MUST complete exceptionally.</li>
- *   <li>NO Nucleus mutation requests landed (POST /user-mappings, /groups, /group-members all empty)
- *       — proves the failure aborted BEFORE any state change, not after partial progress.</li>
+ * <li>Token endpoint persistently returns 503 → sync future MUST complete exceptionally.</li>
+ * <li>NO Nucleus mutation requests landed (POST /user-mappings, /groups, /group-members all empty) — proves the failure aborted BEFORE any state change, not after partial progress.</li>
  * </ol>
  *
- * <h2>Why no /token GET probe assertion</h2>
- * Whether {@code /token} was hit 1×, 3× (token refresh retry) or N× (per-call refresh) is an
- * implementation detail. We only assert the visible contract: sync fails, no mutations land.
+ * <h2>Why no /token GET probe assertion</h2> Whether {@code /token} was hit 1×, 3× (token refresh retry) or N× (per-call refresh) is an implementation detail. We only assert the visible contract: sync fails, no mutations land.
  */
 @Slf4j
 public class NucleusTokenEndpointFailureReliabilityIT extends BaseNucleusSyncReliabilityIT
 {
     /**
-     * Outer wait for the sync future to terminate (with an exception). Token failure should fail
-     * fast — most code paths hit /token on the very first call. 30 s is generous so a hung token
-     * refresh shows up as a test failure here rather than as a confusing TimeoutException.
+     * Outer wait for the sync future to terminate (with an exception). Token failure should fail fast — most code paths hit /token on the very first call. 30 s is generous so a hung token refresh shows up as a test failure here rather than as a confusing TimeoutException.
      */
     private static final long SYNC_FAILURE_TIMEOUT_S = 30L;
 
@@ -113,9 +104,9 @@ public class NucleusTokenEndpointFailureReliabilityIT extends BaseNucleusSyncRel
 
         // No mutations should have landed — without a valid token, no authenticated request can succeed.
         // If any of these are non-empty, nucleus-sync is bypassing auth somehow (serious bug).
-        assertNoMutationsLanded(USER_MAPPINGS_PATH,  "user-mapping");
-        assertNoMutationsLanded(GROUPS_PATH,         "group");
-        assertNoMutationsLanded(GROUP_MEMBERS_PATH,  "group-member");
+        assertNoMutationsLanded(USER_MAPPINGS_PATH, "user-mapping");
+        assertNoMutationsLanded(GROUPS_PATH, "group");
+        assertNoMutationsLanded(GROUP_MEMBERS_PATH, "group-member");
     }
 
     private void assertNoMutationsLanded(String path, String label)

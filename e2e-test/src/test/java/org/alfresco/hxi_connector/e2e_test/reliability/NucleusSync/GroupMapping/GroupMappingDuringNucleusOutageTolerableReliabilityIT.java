@@ -25,42 +25,36 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.GroupMapping;
 
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 
 @Slf4j
-public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
+public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
+{
     /**
-     * Outer wait for the sync future to complete (covers post-recovery retry back-off plus the
-     * synchronous controller round-trip plus the time to actually create all groups). Sized far
-     * below any per-attempt WebClient timeout so a misconfigured retry path surfaces as a
-     * timeout rather than a silent green pass.
+     * Outer wait for the sync future to complete (covers post-recovery retry back-off plus the synchronous controller round-trip plus the time to actually create all groups). Sized far below any per-attempt WebClient timeout so a misconfigured retry path surfaces as a timeout rather than a silent green pass.
      */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 240L;
 
     /**
-     * Delay between triggering sync and opening the partition. Small but non-zero — lets the
-     * sync thread leave the controller, complete user discovery + mapping, and start hitting
-     * Nucleus group-creation endpoints so the outage genuinely overlaps the group-mapping work.
+     * Delay between triggering sync and opening the partition. Small but non-zero — lets the sync thread leave the controller, complete user discovery + mapping, and start hitting Nucleus group-creation endpoints so the outage genuinely overlaps the group-mapping work.
      */
     private static final long DELAY_BEFORE_OUTAGE_MS = 10000L;
 
     /**
-     * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts
-     * (≈200 ms, 600 ms, 1400 ms in the standard envelope) without exhausting the full 3 s retry
-     * budget, so the next attempt after re-enable still lands inside the budget and the sync
-     * recovers.
+     * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts (≈200 ms, 600 ms, 1400 ms in the standard envelope) without exhausting the full 3 s retry budget, so the next attempt after re-enable still lands inside the budget and the sync recovers.
      */
     private static final long OUTAGE_DURATION_MS = 2_000L;
 
@@ -106,8 +100,8 @@ public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseN
         // 5. Every group must be created — the outage healed in time, so no groups should be dropped.
         assertThat(createdGroupIds.size())
                 .as("Expected all %d groups to be mapped after Nucleus outage healed, but only %d were mapped "
-                                + "(%d dropped). Either the retry budget was exhausted (shorten OUTAGE_DURATION_MS) "
-                                + "or the recovery path is broken.",
+                        + "(%d dropped). Either the retry budget was exhausted (shorten OUTAGE_DURATION_MS) "
+                        + "or the recovery path is broken.",
                         TOTAL_GROUPS_COUNT, createdGroupIds.size(), TOTAL_GROUPS_COUNT - createdGroupIds.size())
                 .isEqualTo(TOTAL_GROUPS_COUNT);
 

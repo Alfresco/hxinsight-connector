@@ -25,27 +25,25 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
-import org.junit.jupiter.api.Test;
-
-import java.util.concurrent.CompletableFuture;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.concurrent.CompletableFuture;
+
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
+
 @Slf4j
-public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncReliabilityIT {
+public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncReliabilityIT
+{
     /**
-     * Window during which the {@code nucleusProxy} stays disabled. Sized to outlive the entire retry
-     * budget: attempts at t≈0, 200, 600, 1400, 2400 ms → 3 600 ms guarantees every attempt fails before
-     * we re-enable.
+     * Window during which the {@code nucleusProxy} stays disabled. Sized to outlive the entire retry budget: attempts at t≈0, 200, 600, 1400, 2400 ms → 3 600 ms guarantees every attempt fails before we re-enable.
      */
     private static final long PARTITION_DURATION_MS = 3_600L;
-
 
     @Test
     void shouldFailFastWhenNucleusPartitionOutlastsRetryBudget() throws Exception
@@ -58,7 +56,7 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
         environment().nucleusproxy().disable();
 
         // 2. Trigger sync on a background thread; the controller blocks until performFullSync() resolves
-        //    (here: with an error, after retries exhaust).
+        // (here: with an error, after retries exhaust).
         CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
                 () -> environment().nucleusSyncClient().startSynchronization());
 
@@ -70,16 +68,15 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
         finally
         {
             // 4. Restore the network even though we expect failure — otherwise the @BeforeEach reset in
-            //    the next test could itself race against a still-disabled proxy.
+            // the next test could itself race against a still-disabled proxy.
             log.info("[reliability] Re-enabling nucleusProxy after {} ms partition window", PARTITION_DURATION_MS);
             environment().nucleusproxy().enable();
         }
 
-
         // 6. No mutations should have landed on Nucleus during the outage. The retried calls all failed
-        //    at TCP (listener closed), so the WireMock journal must be empty for the mutation endpoints.
-        //    A non-empty result here would mean either (a) the partition healed mid-test and orchestration
-        //    re-attempted past it, or (b) the proxy wasn't actually controlling that traffic.
+        // at TCP (listener closed), so the WireMock journal must be empty for the mutation endpoints.
+        // A non-empty result here would mean either (a) the partition healed mid-test and orchestration
+        // re-attempted past it, or (b) the proxy wasn't actually controlling that traffic.
         RetryUtils.assertWithRetry(() -> {
             assertThat(nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))))
                     .as("Expected zero user-mapping mutations on Nucleus during a total outage, but some "
@@ -97,6 +94,5 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
                     .isEmpty();
         });
     }
-
 
 }

@@ -70,6 +70,7 @@ final class NetworkTopology implements AutoCloseable
     static final int SFS_PORT = 8099;
 
     private final Network network = Network.newNetwork();
+
     Network network()
     {
         return network;

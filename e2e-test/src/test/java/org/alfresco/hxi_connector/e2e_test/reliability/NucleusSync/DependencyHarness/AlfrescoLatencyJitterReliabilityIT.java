@@ -25,43 +25,35 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import eu.rekawek.toxiproxy.model.ToxicDirection;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.Actions;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import eu.rekawek.toxiproxy.model.ToxicDirection;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.Actions;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
+
 @Slf4j
-public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilityIT {
+public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilityIT
+{
     /**
-     * Generous upper bound for the synchronous {@code /sync/trigger} call to return. Sized 4× the worst-case
-     * wall clock under jitter (~2 s observed) so a moderately slow CI runner doesn't flake the test, while
-     * still being far enough below the 5-minute per-attempt timeout that an accidental retry would manifest
-     * as a timeout rather than as a green pass.
+     * Generous upper bound for the synchronous {@code /sync/trigger} call to return. Sized 4× the worst-case wall clock under jitter (~2 s observed) so a moderately slow CI runner doesn't flake the test, while still being far enough below the 5-minute per-attempt timeout that an accidental retry would manifest as a timeout rather than as a green pass.
      */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 30L;
 
     /**
-     * Lower bound for "the chaos was actually in effect". Without latency the round-trip for the people
-     * fetch is ~10 ms; with 300 ± 200 ms latency on each chunk it inflates by an order of magnitude. We
-     * assert the wall clock is at least this many ms over the baseline so a silently-bypassed toxic
-     * (e.g. nucleus-sync accidentally pointed at the real {@code repository} alias instead of {@code toxic-acs})
-     * surfaces as a clear failure rather than a falsely-passing assertion.
+     * Lower bound for "the chaos was actually in effect". Without latency the round-trip for the people fetch is ~10 ms; with 300 ± 200 ms latency on each chunk it inflates by an order of magnitude. We assert the wall clock is at least this many ms over the baseline so a silently-bypassed toxic (e.g. nucleus-sync accidentally pointed at the real {@code repository} alias instead of {@code toxic-acs}) surfaces as a clear failure rather than a falsely-passing assertion.
      */
     private static final long EXPECTED_MIN_WALL_CLOCK_MS = 400L;
-
-
 
     @AfterEach
     void removeAcsLatencyToxic()
@@ -121,15 +113,10 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
     }
 
     /**
-     * Heavier latency than {@link #shouldCompleteSyncWhenAlfrescoPathHasModerateLatencyAndJitter} —
-     * still under the per-attempt WebClient block timeout (5 minutes default), so retries must not
-     * fire and the sync must complete. Uses a {@link Actions#addLatencyAndJitter}-style custom toxic
-     * because the shared helper is fixed at 300 ± 200 ms.
+     * Heavier latency than {@link #shouldCompleteSyncWhenAlfrescoPathHasModerateLatencyAndJitter} — still under the per-attempt WebClient block timeout (5 minutes default), so retries must not fire and the sync must complete. Uses a {@link Actions#addLatencyAndJitter}-style custom toxic because the shared helper is fixed at 300 ± 200 ms.
      *
-     * <p>1.5 s ± 500 ms is "noticeably slow but legal" — covers the case where ACS is under load but
-     * not unreachable. If a future change tightens the per-attempt block timeout below this, this
-     * test will start failing with a {@code WebClientRequestException} chain and the assertion message
-     * above will point at exactly the right cause.
+     * <p>
+     * 1.5 s ± 500 ms is "noticeably slow but legal" — covers the case where ACS is under load but not unreachable. If a future change tightens the per-attempt block timeout below this, this test will start failing with a {@code WebClientRequestException} chain and the assertion message above will point at exactly the right cause.
      */
     @Test
     void shouldCompleteSyncUnderHeavyButTolerableLatency() throws IOException
@@ -156,7 +143,7 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
 
         assertThat(elapsedMs)
                 .as("Heavy-latency sync took %d ms, exceeding the %d s test budget. Likely cause: the "
-                                + "WebClient per-attempt timeout fired and triggered a retry storm.",
+                        + "WebClient per-attempt timeout fired and triggered a retry storm.",
                         elapsedMs, SYNC_COMPLETION_TIMEOUT_S)
                 .isLessThan(TimeUnit.SECONDS.toMillis(SYNC_COMPLETION_TIMEOUT_S));
 

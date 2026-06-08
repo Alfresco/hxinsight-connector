@@ -25,12 +25,7 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.BaseReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
 
 import java.util.HashSet;
 import java.util.List;
@@ -40,21 +35,25 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.BaseReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
 /**
  * This Test is meant to Have The common Components Needed for any Nucleus Sync Tests
  */
 @Slf4j
-public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
+public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT
+{
     /** Must match NUCLEUS_SYSTEM_ID env var on the nucleus-sync container (DockerContainers#createNucleusSyncContainerForWireMock). */
     protected static final String SYSTEM_ID = "-dummy-system-id";
-    protected static final String USER_MAPPINGS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings";
-    protected static final String GROUPS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/groups";
-    protected static final String GROUP_MEMBERS_PATH =
-            "/system-integrations/systems/" + SYSTEM_ID + "/group-members";
+    protected static final String USER_MAPPINGS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/user-mappings";
+    protected static final String GROUPS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/groups";
+    protected static final String GROUP_MEMBERS_PATH = "/system-integrations/systems/" + SYSTEM_ID + "/group-members";
 
     /**
      * Page size Nucleus IAM uses (must match nucleus-sync's {@code nucleus.page-size} config, default 1000).
@@ -62,10 +61,7 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
     protected static final int NUCLEUS_PAGE_SIZE = 1000;
 
     /**
-     * Outer wait for the sync to complete (covers the post-recovery retry back-off plus the synchronous
-     * controller round-trip plus the time to actually map {@value #TOTAL_USERS} users). Far below the
-     * per-attempt WebClient timeout so a misconfigured retry path surfaces as a future timeout rather
-     * than a silent green pass.
+     * Outer wait for the sync to complete (covers the post-recovery retry back-off plus the synchronous controller round-trip plus the time to actually map {@value #TOTAL_USERS} users). Far below the per-attempt WebClient timeout so a misconfigured retry path surfaces as a future timeout rather than a silent green pass.
      */
     protected static final long SYNC_COMPLETION_TIMEOUT_S = 60L;
 
@@ -74,29 +70,21 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
     protected static final int TOTAL_USERS = 100;
 
     /**
-     * Delay between triggering sync and opening the partition. Small but non-zero — gives the sync
-     * thread enough time to leave the controller and hit the first Nucleus call so the outage
-     * genuinely overlaps the mapping work rather than landing before it starts.
+     * Delay between triggering sync and opening the partition. Small but non-zero — gives the sync thread enough time to leave the controller and hit the first Nucleus call so the outage genuinely overlaps the mapping work rather than landing before it starts.
      */
     protected static final long DELAY_BEFORE_OUTAGE_MS = 50L;
 
     /**
-     * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts
-     * (≈200 ms, 600 ms, 1400 ms in the standard envelope) without exhausting the full 3 s retry budget,
-     * so the next attempt after re-enable still lands inside the budget and the sync recovers.
+     * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts (≈200 ms, 600 ms, 1400 ms in the standard envelope) without exhausting the full 3 s retry budget, so the next attempt after re-enable still lands inside the budget and the sync recovers.
      */
     protected static final long OUTAGE_DURATION_MS = 1_000L;
 
     protected final List<StubMapping> registeredStubs = new java.util.ArrayList<>();
 
-
-
-
     protected WireMock nucleus()
     {
         return environment().nucleusWireMock();
     }
-
 
     /**
      * A stubbed response for the "get users" endpoint that returns a user with the same email as the test user.
@@ -117,7 +105,6 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
                         }
                         """)));
     }
-
 
     protected static com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder jsonResponse(String body)
     {
@@ -197,16 +184,17 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
         return new User(name, "test", email);
     }
 
-    protected void createUsersInRepository(int count){
-        for (int i = 0; i < count; i++) {
+    protected void createUsersInRepository(int count)
+    {
+        for (int i = 0; i < count; i++)
+        {
             User user = createUser("test-user-%d".formatted(i), "user%d@hyland.com".formatted(i));
             environment().repositoryClient().createUser(user);
         }
     }
 
     /**
-     * Stub Nucleus IAM /api/users to return a large set of synthetic users.
-     * Uses offset-based pagination with the {@code next} link in the response.
+     * Stub Nucleus IAM /api/users to return a large set of synthetic users. Uses offset-based pagination with the {@code next} link in the response.
      */
     protected void installNucleusIamUsersStubs(int totalUserCount)
     {
@@ -293,9 +281,7 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
     }
 
     /**
-     * Installs the standard set of stubs needed for a happy-path sync: auth, single Nucleus user
-     * matching a single ACS user by email, empty current mappings/groups/members, and mutation
-     * endpoints. Subclasses can override specific stubs at higher priority for chaos injection.
+     * Installs the standard set of stubs needed for a happy-path sync: auth, single Nucleus user matching a single ACS user by email, empty current mappings/groups/members, and mutation endpoints. Subclasses can override specific stubs at higher priority for chaos injection.
      */
     protected void installAllStubs()
     {
@@ -308,11 +294,7 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
     }
 
     /**
-     * Extract the Alfresco-side user IDs that were mapped, by parsing the POST bodies sent to
-     * {@code /user-mappings}. The body is a JSON array of {@code NucleusUserMappingInput}
-     * records: {@code [{"userId":"iam-0","externalUserId":"user0"}, ...]}. The Alfresco id lives
-     * in {@code externalUserId} (see {@code UserMappingSyncProcessor#syncUserMappings} where the
-     * input is constructed as {@code new NucleusUserMappingInput(nucleusUserId, alfrescoUserId)}).
+     * Extract the Alfresco-side user IDs that were mapped, by parsing the POST bodies sent to {@code /user-mappings}. The body is a JSON array of {@code NucleusUserMappingInput} records: {@code [{"userId":"iam-0","externalUserId":"user0"}, ...]}. The Alfresco id lives in {@code externalUserId} (see {@code UserMappingSyncProcessor#syncUserMappings} where the input is constructed as {@code new NucleusUserMappingInput(nucleusUserId, alfrescoUserId)}).
      */
     protected Set<String> extractMappedUserIds(List<LoggedRequest> requests)
     {

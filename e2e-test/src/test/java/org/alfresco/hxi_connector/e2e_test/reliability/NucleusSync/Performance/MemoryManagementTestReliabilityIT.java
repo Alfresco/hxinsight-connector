@@ -25,22 +25,24 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.Performance;
 
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.ActuatorMetricsProbe;
-import org.junit.jupiter.api.Test;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.ActuatorMetricsProbe;
 
 // During 1M user Mapping Test the JVM Memory
 @Slf4j
-public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
+public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestionIT
+{
 
     // First Mock the same 1M users Count
 
@@ -48,7 +50,8 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
     private final long MAX_TIME_BEFORE_FAIL = 20L; // 20 minutes
 
     @Test
-    public void testLargeScaleUserMappingMemoryConsumption() throws Exception{
+    public void testLargeScaleUserMappingMemoryConsumption() throws Exception
+    {
         installAllStubs();
         ActuatorMetricsProbe metricsProbe = environment.nucleusSyncMetrics();
         CompletableFuture<Void> syncTask = CompletableFuture.runAsync(() -> {
@@ -57,7 +60,8 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
 
         List<Double> memorySnapShorts = new ArrayList<>();
         // Take memory SnapShort during different Periods for next
-        while(!syncTask.isDone()){
+        while (!syncTask.isDone())
+        {
             memorySnapShorts.add(snapshot(metricsProbe, "during-sync").heapBytes);
             Thread.sleep(50);
         }
@@ -66,10 +70,9 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
         log.info("[reliability] Final heap memory consumption: {} bytes", (long) finalHeapBytes);
         // Find Average and Median for the memory consumption during the sync
 
-
         syncTask.get(MAX_TIME_BEFORE_FAIL, TimeUnit.MINUTES);
 
-        RetryUtils.assertWithRetry(()->{
+        RetryUtils.assertWithRetry(() -> {
             double averageMemoryConsumption = findAverageMemoryConsumption(memorySnapShorts);
             double medianMemoryConsumption = findMedianMemoryConsumption(memorySnapShorts);
             double maxMemoryConsumption = findMaxMemoryConsumption(memorySnapShorts);
@@ -83,30 +86,34 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
         });
     }
 
-    private double findAverageMemoryConsumption(List<Double> list){
+    private double findAverageMemoryConsumption(List<Double> list)
+    {
         return list.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
     }
 
-    private double findMedianMemoryConsumption(List<Double> list){
+    private double findMedianMemoryConsumption(List<Double> list)
+    {
         return list.stream().mapToDouble(Double::doubleValue).sorted().skip((list.size() - 1) / 2).limit(2 - list.size() % 2).average().orElse(0.0);
     }
 
-    private double findMaxMemoryConsumption(List<Double> list){
+    private double findMaxMemoryConsumption(List<Double> list)
+    {
         return list.stream().mapToDouble(Double::doubleValue).max().orElse(0.0);
     }
 
-    private double findMinMemoryConsumption(List<Double> list){
+    private double findMinMemoryConsumption(List<Double> list)
+    {
         return list.stream().mapToDouble(Double::doubleValue).min().orElse(0.0);
     }
 
-    private double findStandardDeviationMemoryConsumption(List<Double> list){
+    private double findStandardDeviationMemoryConsumption(List<Double> list)
+    {
         double meanMemoryConsumption = findAverageMemoryConsumption(list);
         return list.stream().mapToDouble(Double::doubleValue)
                 .map(memory -> Math.pow(memory - meanMemoryConsumption, 2))
                 .average()
                 .orElse(0.0);
     }
-
 
     private static MemoryResourceSnapShort snapshot(ActuatorMetricsProbe metrics, String label)
     {
@@ -118,7 +125,8 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
         return new MemoryResourceSnapShort(threads, heapBytes);
     }
 
-    protected void installAllStubs(){
+    protected void installAllStubs()
+    {
         // 1. Install all stubs
         installNucleusAuthStub();
         installAcsPeopleStubs(TOTAL_USER_COUNT);
@@ -130,5 +138,6 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
         installMutationEndpointsWithTracking();
     }
 
-    record MemoryResourceSnapShort(double threads,double heapBytes){}
+    record MemoryResourceSnapShort(double threads, double heapBytes)
+    {}
 }

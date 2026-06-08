@@ -25,34 +25,31 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.MemberMapping;
 
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
+import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
+import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 
 @Slf4j
-public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
+public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
+{
     /**
-     * Delay between triggering sync and opening the partition. Larger than the user-mapping
-     * variant because group-member sync runs last — user discovery + mapping + group discovery
-     * + group creation must all complete first so the outage genuinely overlaps the membership
-     * POST phase rather than earlier stages.
+     * Delay between triggering sync and opening the partition. Larger than the user-mapping variant because group-member sync runs last — user discovery + mapping + group discovery + group creation must all complete first so the outage genuinely overlaps the membership POST phase rather than earlier stages.
      */
     private static final long DELAY_BEFORE_OUTAGE_MS = 300L;
 
     /**
-     * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts
-     * without exhausting the full 3 s retry budget, so the next attempt after re-enable still
-     * lands inside the budget and the sync recovers.
+     * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts without exhausting the full 3 s retry budget, so the next attempt after re-enable still lands inside the budget and the sync recovers.
      */
     private static final long OUTAGE_DURATION_MS = 1_000L;
 
@@ -63,7 +60,6 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
 
     /** Outer wait for the sync future to complete. */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 60L;
-
 
     @Test
     void shouldMapAllGroupMembershipsWhenNucleusOutageHealsBeforeRetryBudgetExhausts() throws Exception
@@ -106,8 +102,8 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
 
         assertThat(createdMemberships.size())
                 .as("Expected all %d memberships against group '%s' to be mapped after Nucleus outage healed, "
-                                + "but only %d were mapped (%d dropped). Either the retry budget was exhausted "
-                                + "(shorten OUTAGE_DURATION_MS) or the recovery path is broken.",
+                        + "but only %d were mapped (%d dropped). Either the retry budget was exhausted "
+                        + "(shorten OUTAGE_DURATION_MS) or the recovery path is broken.",
                         TOTAL_USERS, SHARED_GROUP_ID, createdMemberships.size(),
                         TOTAL_USERS - createdMemberships.size())
                 .isEqualTo(TOTAL_USERS);
@@ -126,7 +122,6 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
         log.info("[outage-test] ✓ All {} memberships against {} successfully mapped despite Nucleus outage!",
                 TOTAL_USERS, SHARED_GROUP_ID);
     }
-
 
     private void installAllStubs()
     {

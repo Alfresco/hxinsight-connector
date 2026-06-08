@@ -79,7 +79,7 @@ public class QuestionsPermissionsAGSE2eTest
     @Container
     static final AlfrescoRepositoryContainer repository = createRepositoryContainer()
             .dependsOn(postgres, activemq);
-    private static final User regularUser = new User("test", "test","abcd@gmail.com");
+    private static final User regularUser = new User("test", "test", "abcd@gmail.com");
     private static String publicDocumentId;
     private static String superConfidentialDocumentId;
 

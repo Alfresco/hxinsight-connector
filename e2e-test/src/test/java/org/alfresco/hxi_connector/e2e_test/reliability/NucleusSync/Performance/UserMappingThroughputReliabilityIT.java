@@ -25,10 +25,8 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.Performance;
 
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
+import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,29 +35,29 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 
 /**
- * Measures end-to-end throughput of the user-mapping flow at the 1M-user scale.
- * Renamed with the {@code *IT} suffix so Failsafe picks it up under the
- * {@code reliability-tests} profile (the {@code *Tests} suffix was being filtered out).
+ * Measures end-to-end throughput of the user-mapping flow at the 1M-user scale. Renamed with the {@code *IT} suffix so Failsafe picks it up under the {@code reliability-tests} profile (the {@code *Tests} suffix was being filtered out).
  */
 @Slf4j
-public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeIngestionIT {
+public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeIngestionIT
+{
 
     private static final long SAMPLE_WINDOW_MS = 5000L;
     private static final long SYNC_HARD_TIMEOUT_MIN = 20L;
     /**
-     * Minimum acceptable aggregate throughput, measured as POST /user-mappings
-     * REQUESTS per second (not users — each request carries a batch of mappings).
-     * Calibrate after first stable runs.
+     * Minimum acceptable aggregate throughput, measured as POST /user-mappings REQUESTS per second (not users — each request carries a batch of mappings). Calibrate after first stable runs.
      */
     private static final double MIN_AGGREGATE_THROUGHPUT_REQUESTS_PER_SEC = 1.0;
 
-
     @Test
-    public void shouldMaintainExpectedThroughput() throws Exception {
+    public void shouldMaintainExpectedThroughput() throws Exception
+    {
         installAllStubs();
         long startNanos = System.nanoTime();
         CompletableFuture<Void> syncTask = CompletableFuture.runAsync(() -> {
@@ -124,42 +122,38 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
         // Correctness gate — without this, a "fast but wrong" run could pass.
         assertThat(mappedUserIds)
                 .as("Expected all %d users to be mapped, but only %d distinct externalUserIds "
-                                + "appeared in POST bodies (%d dropped).",
+                        + "appeared in POST bodies (%d dropped).",
                         TOTAL_USER_COUNT, mappedUserIds.size(), TOTAL_USER_COUNT - mappedUserIds.size())
                 .hasSize(TOTAL_USER_COUNT);
 
         // Regression gate — calibrate the threshold after first stable runs.
         assertThat(aggregateRequestsPerSec)
                 .as("Aggregate throughput %.2f req/sec is below the minimum acceptable "
-                                + "threshold (%s). Either a regression in nucleus-sync, or noisy CI host.",
+                        + "threshold (%s). Either a regression in nucleus-sync, or noisy CI host.",
                         aggregateRequestsPerSec, MIN_AGGREGATE_THROUGHPUT_REQUESTS_PER_SEC)
                 .isGreaterThanOrEqualTo(MIN_AGGREGATE_THROUGHPUT_REQUESTS_PER_SEC);
     }
 
     private double percentile(List<Double> sortedSamples, int p)
     {
-        if (sortedSamples.isEmpty()) return 0;
+        if (sortedSamples.isEmpty())
+            return 0;
         int idx = Math.min(sortedSamples.size() - 1, (int) Math.ceil((p / 100.0) * sortedSamples.size()) - 1);
         return sortedSamples.get(Math.max(0, idx));
     }
 
     /**
-     * Cheap-ish sample of how many POST /user-mappings requests WireMock has journaled
-     * so far. Each request carries a BATCH of mappings, so this is "requests landed",
-     * not "users mapped" — see the one-shot extractMappedUserIds() call after the sync
-     * completes for the user-level count.
+     * Cheap-ish sample of how many POST /user-mappings requests WireMock has journaled so far. Each request carries a BATCH of mappings, so this is "requests landed", not "users mapped" — see the one-shot extractMappedUserIds() call after the sync completes for the user-level count.
      * <p>
-     * Note: the WireMock client API has no count-only endpoint exposed; {@code find()}
-     * is the only option and materialises every {@link LoggedRequest}. At 1M users
-     * batched at typical sizes (~100/POST) that's ~10k objects per sample — acceptable.
+     * Note: the WireMock client API has no count-only endpoint exposed; {@code find()} is the only option and materialises every {@link LoggedRequest}. At 1M users batched at typical sizes (~100/POST) that's ~10k objects per sample — acceptable.
      */
     private long countMappingPostRequests()
     {
         return nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))).size();
     }
 
-
-    protected void installAllStubs() {
+    protected void installAllStubs()
+    {
         installNucleusAuthStub();
         installAcsPeopleStubs(TOTAL_USER_COUNT);
         installAcsUserGroupsStub();

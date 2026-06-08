@@ -109,8 +109,7 @@ final class ContainerComposition implements AutoCloseable
                 .withFileSystemBind(
                         "src/test/resources/wiremock/nuclues",
                         "/home/wiremock",
-                        BindMode.READ_ONLY
-                );
+                        BindMode.READ_ONLY);
 
         // ACS java opts switch with the toggle: transform.service.enabled=true plus transform-router / SFS URLs
         // are needed for the transform-capability registry to populate; otherwise the registry stays empty
@@ -137,9 +136,9 @@ final class ContainerComposition implements AutoCloseable
                 .withEnv("ALFRESCO_BASE_URL",
                         spec.withStubbedAcsEnabled()
                                 ? "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT
-                                  + "/alfresco/api/-default-/public/alfresco/versions/1"
+                                        + "/alfresco/api/-default-/public/alfresco/versions/1"
                                 : "http://" + TOXIC_ACS_ALIAS + ":" + REPOSITORY_PORT
-                                  + "/alfresco/api/-default-/public/alfresco/versions/1")
+                                        + "/alfresco/api/-default-/public/alfresco/versions/1")
                 .withEnv("NUCLEUS_BASE_URL",
                         "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT) // This Mapping Works like toxic-xyz , The xyz is the actual Container address will be resolved through toxic-proxy
                 .withEnv("NUCLEUS_IDP_BASE_URL",
@@ -151,10 +150,10 @@ final class ContainerComposition implements AutoCloseable
                 // expressions in RetryableHttpInvoker, otherwise Spring falls back to the
                 // annotation defaults (3 × 2 s × 2 ≈ 6 s budget) and chaos-test timings drift
                 // unpredictably. 5 attempts × 200 ms × 2 multiplier (max 1 s) ≈ 2.4 s budget.
-                .withEnv("HTTP_CLIENT_RETRY_MAX_ATTEMPTS",     "5")
+                .withEnv("HTTP_CLIENT_RETRY_MAX_ATTEMPTS", "5")
                 .withEnv("HTTP_CLIENT_RETRY_INITIAL_DELAY_MS", "200")
-                .withEnv("HTTP_CLIENT_RETRY_MULTIPLIER",       "2")
-                .withEnv("HTTP_CLIENT_RETRY_MAX_DELAY_MS",     "1000");
+                .withEnv("HTTP_CLIENT_RETRY_MULTIPLIER", "2")
+                .withEnv("HTTP_CLIENT_RETRY_MAX_DELAY_MS", "1000");
     }
 
     /**
@@ -190,7 +189,8 @@ final class ContainerComposition implements AutoCloseable
         nucleusSyncContainer.start();
     }
 
-    GenericContainer<?> nucleusSync(){
+    GenericContainer<?> nucleusSync()
+    {
         return nucleusSyncContainer;
     }
 

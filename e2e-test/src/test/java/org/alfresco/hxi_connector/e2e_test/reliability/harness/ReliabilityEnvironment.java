@@ -25,6 +25,8 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.harness;
 
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.*;
+
 import java.io.IOException;
 import java.time.Duration;
 import java.util.Optional;
@@ -35,16 +37,14 @@ import com.github.dockerjava.api.model.Ports;
 import com.github.tomakehurst.wiremock.client.WireMock;
 import eu.rekawek.toxiproxy.Proxy;
 import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.util.client.NucleusSyncClient;
 import org.testcontainers.DockerClientFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
+import org.alfresco.hxi_connector.e2e_test.util.client.NucleusSyncClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
-
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.*;
 
 /**
  * Composes a full Testcontainers topology for reliability testing, fronting every dependency the live-ingester talks to with a Toxiproxy listener so chaos tests can inject failures on each path independently without disturbing the test JVM's own admin / control connections.
@@ -182,19 +182,22 @@ public class ReliabilityEnvironment implements AutoCloseable
     }
 
     // Proxy for the Nucleus
-    public Proxy nucleusproxy(){return proxies.nucleusProxy();}
-
+    public Proxy nucleusproxy()
+    {
+        return proxies.nucleusProxy();
+    }
 
     // Mock for the Nucleus
-    public WireMockContainer nucleusMock(){
+    public WireMockContainer nucleusMock()
+    {
         return containers.nucleusMock();
     }
 
     // Nucleus Client
-    public NucleusSyncClient  nucleusSyncClient(){
+    public NucleusSyncClient nucleusSyncClient()
+    {
         return nucleusSyncClient;
     }
-
 
     /**
      * Dedicated WireMock client bound to the {@link #nucleusMock()} host port. Use this instead of the static {@code WireMock.stubFor(...)} when wiring Nucleus stubs — the static client is configured against {@link #hxInsightMock()} in {@link BaseReliabilityIT}, so any stub registered through it would land on the wrong mock and the nucleus-sync container's requests would 404.
@@ -205,7 +208,6 @@ public class ReliabilityEnvironment implements AutoCloseable
                 containers.nucleusMock().getHost(),
                 containers.nucleusMock().getPort());
     }
-
 
     /**
      * Toxiproxy proxy in front of the Shared File Store. {@code null} unless this environment was built via {@link Builder#withTransformTopology()}. Use to inject latency / partition / reset on the live-ingester ↔ SFS rendition-download path. Transform-core-aio's writes to SFS bypass this proxy (they use the real {@code shared-file-store} alias) so chaos here only affects the connector's read path.
@@ -336,6 +338,7 @@ public class ReliabilityEnvironment implements AutoCloseable
     {
         return actuatorMetrics;
     }
+
     // Only for Nucleus Sync
     public ActuatorMetricsProbe nucleusSyncMetrics()
     {
@@ -406,10 +409,7 @@ public class ReliabilityEnvironment implements AutoCloseable
         }
 
         /**
-         * Route nucleus-sync's {@code ALFRESCO_BASE_URL} to the nucleus WireMock instead of the real ACS repository.
-         * This allows large-scale user mapping tests to stub both ACS and Nucleus with synthetic users rather than
-         * creating millions of real users in ACS. When enabled, the test must install appropriate stubs on the
-         * nucleus WireMock for the ACS {@code /people} endpoint.
+         * Route nucleus-sync's {@code ALFRESCO_BASE_URL} to the nucleus WireMock instead of the real ACS repository. This allows large-scale user mapping tests to stub both ACS and Nucleus with synthetic users rather than creating millions of real users in ACS. When enabled, the test must install appropriate stubs on the nucleus WireMock for the ACS {@code /people} endpoint.
          */
         public Builder withStubbedAcs()
         {

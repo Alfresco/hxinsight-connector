@@ -25,39 +25,35 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-import eu.rekawek.toxiproxy.model.Toxic;
-import eu.rekawek.toxiproxy.model.ToxicDirection;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.reliability.harness.Actions;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
-
-import java.io.IOException;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
+import java.util.concurrent.TimeUnit;
+
+import eu.rekawek.toxiproxy.model.Toxic;
+import eu.rekawek.toxiproxy.model.ToxicDirection;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.common.test.util.RetryUtils;
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.harness.Actions;
+
 @Slf4j
-public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilityIT {
+public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilityIT
+{
     /**
-     * Generous upper bound for {@code /sync/trigger} to return. Sized far below the WebClient per-attempt
-     * timeout so an accidental retry surfaces as a wall-clock overshoot rather than a silent green pass.
+     * Generous upper bound for {@code /sync/trigger} to return. Sized far below the WebClient per-attempt timeout so an accidental retry surfaces as a wall-clock overshoot rather than a silent green pass.
      */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 30L;
 
     /**
-     * Lower bound for "the chaos was actually in effect". Without latency the round-trip is ~10 ms;
-     * with 300 ± 200 ms downstream latency it inflates by an order of magnitude. A silently-bypassed
-     * toxic (e.g. nucleus-sync pointed at the real {@code nucleus} alias instead of {@code toxic-nucleus})
-     * would fall through this floor.
+     * Lower bound for "the chaos was actually in effect". Without latency the round-trip is ~10 ms; with 300 ± 200 ms downstream latency it inflates by an order of magnitude. A silently-bypassed toxic (e.g. nucleus-sync pointed at the real {@code nucleus} alias instead of {@code toxic-nucleus}) would fall through this floor.
      */
     private static final long EXPECTED_MIN_WALL_CLOCK_MS = 400L;
-
-
 
     @AfterEach
     void removeAllNucleusToxics() throws IOException
@@ -87,14 +83,14 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
 
         assertThat(elapsedMs)
                 .as("Sync took %d ms — far over the %d s budget. Either a retry storm fired (per-attempt "
-                                + "timeout tripped) or the wall clock is starved on this runner.",
+                        + "timeout tripped) or the wall clock is starved on this runner.",
                         elapsedMs, SYNC_COMPLETION_TIMEOUT_S)
                 .isLessThan(TimeUnit.SECONDS.toMillis(SYNC_COMPLETION_TIMEOUT_S));
 
         assertThat(elapsedMs)
                 .as("Sync completed in %d ms — below the expected minimum %d ms under latency injection. "
-                                + "The latency toxic likely didn't apply: check NUCLEUS_BASE_URL routes via "
-                                + "toxic-nucleus and that addLatencyAndJitter ran against environment().nucleusProxy()",
+                        + "The latency toxic likely didn't apply: check NUCLEUS_BASE_URL routes via "
+                        + "toxic-nucleus and that addLatencyAndJitter ran against environment().nucleusProxy()",
                         elapsedMs, EXPECTED_MIN_WALL_CLOCK_MS)
                 .isGreaterThanOrEqualTo(EXPECTED_MIN_WALL_CLOCK_MS);
 
@@ -111,8 +107,7 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
     }
 
     /**
-     * Heavier latency than the moderate case — still below the per-attempt WebClient block timeout,
-     * so retries must not fire and the sync must complete. Models "Nucleus is under load but reachable".
+     * Heavier latency than the moderate case — still below the per-attempt WebClient block timeout, so retries must not fire and the sync must complete. Models "Nucleus is under load but reachable".
      */
     @Test
     void shouldCompleteSyncUnderHeavyButTolerableNucleusLatency() throws IOException
@@ -134,7 +129,7 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
 
         assertThat(elapsedMs)
                 .as("Heavy-latency sync took %d ms, exceeding the %d s budget. Likely cause: WebClient "
-                                + "per-attempt timeout fired and triggered a retry storm.",
+                        + "per-attempt timeout fired and triggered a retry storm.",
                         elapsedMs, SYNC_COMPLETION_TIMEOUT_S)
                 .isLessThan(TimeUnit.SECONDS.toMillis(SYNC_COMPLETION_TIMEOUT_S));
 

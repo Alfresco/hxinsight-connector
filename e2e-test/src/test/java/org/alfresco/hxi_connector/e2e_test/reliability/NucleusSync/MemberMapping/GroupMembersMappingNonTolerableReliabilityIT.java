@@ -25,18 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.MemberMapping;
 
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
@@ -45,21 +33,29 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
+import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
+
 /**
- * Non-tolerable group-member mapping outage — Nucleus POST /group-members returns 503 permanently.
- * Closes the mapping-flow failure-path matrix (User + Group already covered; this completes Member).
+ * Non-tolerable group-member mapping outage — Nucleus POST /group-members returns 503 permanently. Closes the mapping-flow failure-path matrix (User + Group already covered; this completes Member).
  *
- * <h2>Why WireMock fault, not Toxiproxy disable?</h2>
- * Both ACS and Nucleus traffic share the {@code toxic-nucleus} listener when {@code withStubbedAcs()}
- * is on. A proxy disable would kill ACS reads too. A targeted 503 on the membership-mutation endpoint
- * leaves user/group reads + earlier mutation phases untouched.
+ * <h2>Why WireMock fault, not Toxiproxy disable?</h2> Both ACS and Nucleus traffic share the {@code toxic-nucleus} listener when {@code withStubbedAcs()} is on. A proxy disable would kill ACS reads too. A targeted 503 on the membership-mutation endpoint leaves user/group reads + earlier mutation phases untouched.
  *
  * <h2>What this pins</h2>
  * <ol>
- *   <li>User-mapping + group-creation phases succeed (the 503 only affects /group-members POST).</li>
- *   <li>The first membership POST hits the 503 → ClientException propagates → sync future fails.</li>
- *   <li>Fewer than {@link #TOTAL_USERS} memberships landed — proves the membership phase aborted
- *       partway through (or immediately) rather than completing despite the fault.</li>
+ * <li>User-mapping + group-creation phases succeed (the 503 only affects /group-members POST).</li>
+ * <li>The first membership POST hits the 503 → ClientException propagates → sync future fails.</li>
+ * <li>Fewer than {@link #TOTAL_USERS} memberships landed — proves the membership phase aborted partway through (or immediately) rather than completing despite the fault.</li>
  * </ol>
  */
 @Slf4j
@@ -69,9 +65,7 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
     private static final String SHARED_GROUP_ID = "groupShared";
 
     /**
-     * Outer wait for the sync future to terminate (with an exception). The membership phase runs
-     * after user-mapping + group-creation, so the failure surfaces a few seconds in. 60 s is generous
-     * — a timeout here would mask a "sync hung instead of failing" regression.
+     * Outer wait for the sync future to terminate (with an exception). The membership phase runs after user-mapping + group-creation, so the failure surfaces a few seconds in. 60 s is generous — a timeout here would mask a "sync hung instead of failing" regression.
      */
     private static final long SYNC_FAILURE_TIMEOUT_S = 60L;
 
@@ -109,7 +103,7 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
 
         assertThat(createdMemberships.size())
                 .as("Expected fewer than %d memberships because the 503 fault should have aborted "
-                                + "the sync, but %d landed — fault was ineffective.",
+                        + "the sync, but %d landed — fault was ineffective.",
                         TOTAL_USERS, createdMemberships.size())
                 .isLessThan(TOTAL_USERS);
 
@@ -118,9 +112,7 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
     }
 
     /**
-     * Replace the 200-OK POST /group-members stub with a 503 at higher priority. Other Nucleus
-     * mutation endpoints (POST /user-mappings, POST /groups) keep the normal 200 stub so the
-     * earlier phases of sync complete normally and the membership phase is where the cut lands.
+     * Replace the 200-OK POST /group-members stub with a 503 at higher priority. Other Nucleus mutation endpoints (POST /user-mappings, POST /groups) keep the normal 200 stub so the earlier phases of sync complete normally and the membership phase is where the cut lands.
      */
     private void injectGroupMembersFault()
     {
