@@ -43,6 +43,7 @@ import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
+import org.testcontainers.utility.MountableFile;
 import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
@@ -197,9 +198,16 @@ public class DockerContainers
     {
         // Wait on the broker's own "started" log line. The default HostPortWaitStrategy
         // races the openwire port bind on CI and times out before the broker is reachable.
+        // Also overlay a jetty.xml that adds 0.0.0.0/0 to the web-console InetAccessHandler
+        // allow-list. The shipped 5.19 file allows only loopback, so on Linux CI the Jolokia
+        // probe gets HTTP 403 from the Docker bridge gateway IP (macOS Docker Desktop happens
+        // to present host traffic as loopback, hence the local discrepancy).
         return new GenericContainer<>(DockerImageName.parse(ACTIVE_MQ_IMAGE).withTag(ACTIVE_MQ_TAG))
                 .withEnv("JAVA_OPTS", "-Xms512m -Xmx1g")
                 .withExposedPorts(61616, 8161, 5672, 61613)
+                .withCopyFileToContainer(
+                        MountableFile.forClasspathResource("docker/activemq/jetty.xml"),
+                        "/opt/activemq/conf/jetty.xml")
                 .waitingFor(Wait.forLogMessage(".*Apache ActiveMQ.*started.*\\n", 1))
                 .withStartupTimeout(Duration.ofMinutes(2));
     }
