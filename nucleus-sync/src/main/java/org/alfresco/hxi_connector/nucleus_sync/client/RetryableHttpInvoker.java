@@ -62,7 +62,7 @@ public class RetryableHttpInvoker
 
     /**
      * HTTP: Verb GET
-     * 
+     *
      * @param fullUrl
      *            The Exact URL we want
      * @param headers
