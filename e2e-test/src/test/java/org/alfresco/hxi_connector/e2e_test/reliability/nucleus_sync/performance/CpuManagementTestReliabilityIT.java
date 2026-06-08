@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.Performance;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.performance;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,8 +36,8 @@ import java.util.concurrent.TimeUnit;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.ActuatorMetricsProbe;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
 
 /**
  * Measures JVM and system CPU utilization during the 1M-user mapping sync. Detects CPU bottlenecks — excessive serialization, tight spin loops, or unbounded parallelism that saturates all available cores.
@@ -126,8 +126,11 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
         // Actuator returns 0.0–1.0 fractions; convert to percentage for readability
         double systemCpuPct = metrics.gaugeValue("system.cpu.usage") * 100.0;
         double jvmCpuPct = metrics.gaugeValue("process.cpu.usage") * 100.0;
-        log.debug("[reliability] {} CPU snapshot: system={}%, jvm={}%", label,
-                String.format("%.1f", systemCpuPct), String.format("%.1f", jvmCpuPct));
+        if (log.isDebugEnabled())
+        {
+            log.debug("[reliability] {} CPU snapshot: system={}%, jvm={}%", label,
+                    String.format("%.1f", systemCpuPct), String.format("%.1f", jvmCpuPct));
+        }
         return new CpuSnapshot(systemCpuPct, jvmCpuPct);
     }
 
@@ -144,7 +147,9 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
     private static double percentile(List<Double> samples, int p)
     {
         if (samples.isEmpty())
+        {
             return 0.0;
+        }
         List<Double> sorted = new ArrayList<>(samples);
         Collections.sort(sorted);
         int idx = Math.min(sorted.size() - 1, (int) Math.ceil(p / 100.0 * sorted.size()) - 1);

@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.Performance;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.performance;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -39,7 +39,7 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
 
 /**
  * Measures end-to-end throughput of the user-mapping flow at the 1M-user scale. Renamed with the {@code *IT} suffix so Failsafe picks it up under the {@code reliability-tests} profile (the {@code *Tests} suffix was being filtered out).
@@ -53,7 +53,7 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
     /**
      * Minimum acceptable aggregate throughput, measured as POST /user-mappings REQUESTS per second (not users — each request carries a batch of mappings). Calibrate after first stable runs.
      */
-    private static final double MIN_AGGREGATE_THROUGHPUT_REQUESTS_PER_SEC = 1.0;
+    private static final double MIN_THROUGHPUT_REQ_PER_SEC = 1.0;
 
     @Test
     public void shouldMaintainExpectedThroughput() throws Exception
@@ -130,15 +130,17 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
         assertThat(aggregateRequestsPerSec)
                 .as("Aggregate throughput %.2f req/sec is below the minimum acceptable "
                         + "threshold (%s). Either a regression in nucleus-sync, or noisy CI host.",
-                        aggregateRequestsPerSec, MIN_AGGREGATE_THROUGHPUT_REQUESTS_PER_SEC)
-                .isGreaterThanOrEqualTo(MIN_AGGREGATE_THROUGHPUT_REQUESTS_PER_SEC);
+                        aggregateRequestsPerSec, MIN_THROUGHPUT_REQ_PER_SEC)
+                .isGreaterThanOrEqualTo(MIN_THROUGHPUT_REQ_PER_SEC);
     }
 
     private double percentile(List<Double> sortedSamples, int p)
     {
         if (sortedSamples.isEmpty())
+        {
             return 0;
-        int idx = Math.min(sortedSamples.size() - 1, (int) Math.ceil((p / 100.0) * sortedSamples.size()) - 1);
+        }
+        int idx = Math.min(sortedSamples.size() - 1, (int) Math.ceil(p / 100.0 * sortedSamples.size()) - 1);
         return sortedSamples.get(Math.max(0, idx));
     }
 

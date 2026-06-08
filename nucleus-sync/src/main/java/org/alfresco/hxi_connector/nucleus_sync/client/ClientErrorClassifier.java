@@ -36,64 +36,77 @@ import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.nucleus_sync.client.NucleusSyncMetrices.Tags;
 
 /**
- * Maps a throwable to a coarse-grained {@code error.type} tag value used by the
- * client failure counters. Walks the cause chain so wrapped exceptions are still
- * classified meaningfully.
+ * Maps a throwable to a coarse-grained {@code error.type} tag value used by the client failure counters. Walks the cause chain so wrapped exceptions are still classified meaningfully.
  */
+@SuppressWarnings({"PMD.CyclomaticComplexity", "PMD.NPathComplexity"})
 final class ClientErrorClassifier
 {
-    private ClientErrorClassifier() {}
+    private ClientErrorClassifier()
+    {}
 
     static String classify(Throwable t)
     {
         Throwable cur = t;
         while (cur != null)
         {
-            if (cur instanceof WebClientResponseException wcre)
+            String result = classifySingle(cur);
+            if (result != null)
             {
-                int status = wcre.getStatusCode().value();
-                if (status == 401 || status == 403)
-                {
-                    return Tags.ERR_AUTH;
-                }
-                if (status >= 500)
-                {
-                    return Tags.ERR_SERVER;
-                }
-                if (status >= 400)
-                {
-                    return Tags.ERR_CLIENT;
-                }
-            }
-            if (cur instanceof EndpointServerErrorException)
-            {
-                return Tags.ERR_SERVER;
-            }
-            if (cur instanceof TimeoutException
-                    || cur.getClass().getSimpleName().contains("Timeout"))
-            {
-                return Tags.ERR_TIMEOUT;
-            }
-            if (cur instanceof WebClientRequestException)
-            {
-                return Tags.ERR_NETWORK;
-            }
-            // Jackson serialization (writing) and deserialization (reading) both surface as
-            // JsonProcessingException; keep classification coarse-grained as "parsing".
-            if (cur instanceof JsonProcessingException)
-            {
-                return Tags.ERR_PARSING;
-            }
-            if (cur instanceof IOException)
-            {
-                return Tags.ERR_NETWORK;
+                return result;
             }
             cur = cur.getCause();
-            if (cur == t)
+            if (cur != null && cur.equals(t))
             {
                 break;
             }
         }
         return Tags.ERR_UNKNOWN;
+    }
+
+    private static String classifySingle(Throwable cur)
+    {
+        if (cur instanceof WebClientResponseException wcre)
+        {
+            return classifyHttpStatus(wcre.getStatusCode().value());
+        }
+        if (cur instanceof EndpointServerErrorException)
+        {
+            return Tags.ERR_SERVER;
+        }
+        if (cur instanceof TimeoutException
+                || cur.getClass().getSimpleName().contains("Timeout"))
+        {
+            return Tags.ERR_TIMEOUT;
+        }
+        if (cur instanceof WebClientRequestException)
+        {
+            return Tags.ERR_NETWORK;
+        }
+        if (cur instanceof JsonProcessingException)
+        {
+            return Tags.ERR_PARSING;
+        }
+        if (cur instanceof IOException)
+        {
+            return Tags.ERR_NETWORK;
+        }
+        return null;
+    }
+
+    private static String classifyHttpStatus(int status)
+    {
+        if (status == 401 || status == 403)
+        {
+            return Tags.ERR_AUTH;
+        }
+        if (status >= 500)
+        {
+            return Tags.ERR_SERVER;
+        }
+        if (status >= 400)
+        {
+            return Tags.ERR_CLIENT;
+        }
+        return null;
     }
 }

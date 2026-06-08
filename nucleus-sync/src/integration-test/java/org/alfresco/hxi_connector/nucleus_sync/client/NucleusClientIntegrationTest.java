@@ -60,6 +60,7 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupMembershipOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusUserMappingOutput;
 
+@SuppressWarnings("PMD.SingularField")
 public class NucleusClientIntegrationTest
 {
     private WireMockServer wireMockServer;

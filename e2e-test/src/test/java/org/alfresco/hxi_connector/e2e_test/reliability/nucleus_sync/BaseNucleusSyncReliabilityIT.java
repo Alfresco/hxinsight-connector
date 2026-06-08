@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 

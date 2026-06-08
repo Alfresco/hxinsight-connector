@@ -49,6 +49,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 
+@SuppressWarnings("PMD.SingularField")
 public class AlfrescoClientIntegrationTest
 {
     private WireMockServer wireMockServer;

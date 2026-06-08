@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.absent;
@@ -58,6 +58,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.ReliabilityEnviro
 // This is the Base Class for Large Scale Ingestion Mapping Tolerance Tests
 @Slf4j
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@SuppressWarnings("PMD.AbstractClassWithoutAbstractMethod")
 public abstract class BaseNucleusSyncLargeIngestionIT
 {
 
@@ -346,11 +347,11 @@ public abstract class BaseNucleusSyncLargeIngestionIT
     }
 
     // Install ACS User Group Stub with shared Group
-    protected void installAcsUserGroupStubWithGroupId(String SHARED_GROUP_ID)
+    protected void installAcsUserGroupStubWithGroupId(String sharedGroupId)
     {
         String body = "{\"list\":{"
                 + "\"pagination\":{\"count\":1,\"hasMoreItems\":false,\"totalItems\":1,\"skipCount\":0,\"maxItems\":100},"
-                + "\"entries\":[{\"entry\":{\"id\":\"" + SHARED_GROUP_ID + "\"}}]"
+                + "\"entries\":[{\"entry\":{\"id\":\"" + sharedGroupId + "\"}}]"
                 + "}}";
         StubMapping stub = nucleus().register(
                 get(urlPathMatching("/alfresco/api/-default-/public/alfresco/versions/1/people/user[0-9]+/groups"))

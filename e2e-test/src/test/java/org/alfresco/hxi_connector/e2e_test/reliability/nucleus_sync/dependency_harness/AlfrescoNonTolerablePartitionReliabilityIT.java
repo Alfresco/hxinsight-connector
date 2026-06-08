@@ -23,9 +23,9 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.dependency_harness;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.*;
+import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -36,18 +36,16 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncReliabilityIT;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
 @Slf4j
-public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabilityIT
+public class AlfrescoNonTolerablePartitionReliabilityIT extends BaseNucleusSyncReliabilityIT
 {
     /**
-     * How long the {@code acsProxy} stays disabled. Must lie INSIDE the nucleus-sync HTTP retry budget so the next attempt after re-enable still has budget left.
-     * <p>
-     * Retry envelope (configured via HTTP_CLIENT_RETRY_* env vars in ContainerComposition, binds to {@code http-client.retry.*}): 5 attempts × initial 200 ms × multiplier 2, capped at 1000 ms. Attempts fire at t ≈ 0, 200, 600, 1400, 2400 ms → total budget ≈ 2.4 s. 1500 ms partition lets attempts 1–3 fail during the outage and attempt 4 (t≈1400) or attempt 5 (t≈2400) succeed after recovery, with comfortable margin.
+     * How long the {@code acsProxy} stays disabled. Sized to lie inside the nucleus-sync HTTP retry budget * first attempt fails at t≈0, * retries fire at t≈200, 600, 1400 , 240, 3400 So 3.6 s partition will exhaust all the retries
      */
-    private static final long PARTITION_DURATION_MS = 2_200L;
+    private static final long PARTITION_DURATION_MS = 3_600L;
 
     /**
      * Settle window after re-enabling the proxy, before assertions run. Covers the post-recovery retry back-off plus the synchronous /sync/trigger response trip.
@@ -55,9 +53,8 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
     private static final long SYNC_COMPLETION_TIMEOUT_S = 20L;
 
     @Test
-    void shouldRecoverWhenAlfrescoBriefPartitionEndsBeforeRetryBudgetExhausts() throws Exception
+    void shouldFailWhenAlfrescoPartitionOutlastsRetryBudget() throws Exception
     {
-        installAllStubsSpecial();
         // Pre-conditions: user in Alfresco + all Nucleus stubs ready so the only failure axis is the partition.
         environment().repositoryClient().createUser(new User("test", "test", "abcd@hyland.com"));
 
@@ -94,26 +91,17 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
         // - At least one user-mappings GET landed — proves the orchestration ran end-to-end after recovery.
         RetryUtils.assertWithRetry(() -> {
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo("/api/users"))))
-                    .as("nucleus-sync didn't reach /api/users after partition recovery — either retries "
-                            + "exhausted before re-enable (shorten PARTITION_DURATION_MS or extend the retry "
-                            + "budget) or ALFRESCO_BASE_URL isn't routed via toxic-acs")
-                    .isNotEmpty();
+                    .as("Expected zero /api/users calls on Nucleus — the ACS partition outlasted the "
+                            + "retry budget, so nucleus-sync should never have reached the Nucleus phase. "
+                            + "Non-empty means the partition healed too early (increase PARTITION_DURATION_MS) "
+                            + "or ALFRESCO_BASE_URL bypasses toxic-acs")
+                    .isEmpty();
 
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))))
-                    .as("nucleus-sync didn't reach the user-mappings GET after partition recovery — sync "
-                            + "orchestration stopped before the Nucleus mapping phase")
-                    .isNotEmpty();
+                    .as("Expected zero user-mappings GETs — sync should have aborted during the "
+                            + "ACS read phase and never progressed to the Nucleus mapping phase")
+                    .isEmpty();
         });
-    }
-
-    private void installAllStubsSpecial()
-    {
-        installMutationEndpointsWithTracking();
-        installAuthResponse();
-        installReturnEmptyGroups();
-        installReturnEmptyGroupMembers();
-        installReturnEmptyMapping();
-        installReturnUserWithSameMail();
     }
 
 }

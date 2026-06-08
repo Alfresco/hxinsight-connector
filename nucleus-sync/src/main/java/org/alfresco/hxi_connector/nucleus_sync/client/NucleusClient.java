@@ -25,10 +25,8 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -38,17 +36,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.MediaType;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.nucleus_sync.dto.IamUser;
 import org.alfresco.hxi_connector.nucleus_sync.dto.IamUsersOutput;
 import org.alfresco.hxi_connector.nucleus_sync.dto.NucleusGroupInput;
@@ -122,8 +113,6 @@ public class NucleusClient
         this.retryableHttpInvoker = retryableHttpInvoker;
     }
 
-
-
     public List<IamUser> getAllIamUsers()
     {
         String op = "getAllIamUsers";
@@ -165,7 +154,7 @@ public class NucleusClient
         {
             String jsonBody = objectMapper.writeValueAsString(groups);
 
-            retryableHttpInvoker.executePostRequest(url, jsonBody,authService.getHxpAuthHeaders());
+            retryableHttpInvoker.executePostRequest(url, jsonBody, authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -199,7 +188,7 @@ public class NucleusClient
         {
             String jsonBody = objectMapper.writeValueAsString(userMappings);
 
-            retryableHttpInvoker.executePostRequest(url, jsonBody,authService.getHxpAuthHeaders());
+            retryableHttpInvoker.executePostRequest(url, jsonBody, authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -237,7 +226,7 @@ public class NucleusClient
         {
             String jsonBody = objectMapper.writeValueAsString(assignments);
 
-            retryableHttpInvoker.executePostRequest(url, jsonBody,authService.getHxpAuthHeaders());
+            retryableHttpInvoker.executePostRequest(url, jsonBody, authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -257,7 +246,7 @@ public class NucleusClient
                     + "/groups/"
                     + externalGroupId;
 
-            retryableHttpInvoker.executeDeleteRequest(fullUrl,authService.getHxpAuthHeaders());
+            retryableHttpInvoker.executeDeleteRequest(fullUrl, authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -277,7 +266,7 @@ public class NucleusClient
                     + "/user-mappings/"
                     + externalUserId;
 
-            retryableHttpInvoker.executeDeleteRequest(fullUrl,authService.getHxpAuthHeaders());
+            retryableHttpInvoker.executeDeleteRequest(fullUrl, authService.getHxpAuthHeaders());
         }
         catch (Exception e)
         {
@@ -323,7 +312,7 @@ public class NucleusClient
         }
         // Let exceptions propagate to removeGroupMembers() so that the failure
         // is logged & metered exactly once (no double-count, no double-wrap).
-        retryableHttpInvoker.executeDeleteRequest(urlBuilder.toString(),authService.getHxpAuthHeaders());
+        retryableHttpInvoker.executeDeleteRequest(urlBuilder.toString(), authService.getHxpAuthHeaders());
     }
 
     private <T, R extends NucleusPagedResponse<T>> List<T> fetchAllPages(
@@ -350,7 +339,7 @@ public class NucleusClient
 
             String fullUrl = baseUrl + nextPath;
 
-            String response = retryableHttpInvoker.executeGetRequest(fullUrl,authService.getHxpAuthHeaders());
+            String response = retryableHttpInvoker.executeGetRequest(fullUrl, authService.getHxpAuthHeaders());
             R page = objectMapper.readValue(response, responseType);
 
             if (page.items() != null && !page.items().isEmpty())
@@ -370,7 +359,6 @@ public class NucleusClient
 
         return allItems;
     }
-
 
     private void logAndRecord(String operation, String method, String message, Throwable e)
     {

@@ -73,7 +73,7 @@ import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
  * Internally this is a thin orchestrator over four single-responsibility collaborators: {@link ReliabilityEnvironmentSpec} (immutable opt-in toggles), {@link NetworkTopology} (Docker network + alias / port constants), {@link ContainerComposition} (Testcontainers handles + lifecycle), and {@link ToxiproxyListeners} (Toxiproxy container + per-path proxy handles). The Facade itself owns the boot ordering, the test-side clients ({@link RepositoryClient}, {@link AwsS3Client}, {@link JolokiaProbe}, {@link ActuatorMetricsProbe}), and the host-port refresh after a chaos restart.
  */
 @Slf4j
-@SuppressWarnings("PMD.LongVariable")
+@SuppressWarnings({"PMD.LongVariable", "PMD.TooManyMethods"})
 public class ReliabilityEnvironment implements AutoCloseable
 {
     public static final String BUCKET_NAME = "test-hxinsight-bucket";

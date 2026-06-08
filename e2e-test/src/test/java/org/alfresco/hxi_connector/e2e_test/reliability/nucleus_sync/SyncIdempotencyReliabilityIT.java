@@ -23,16 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync;
-
-import com.github.tomakehurst.wiremock.stubbing.StubMapping;
-import com.github.tomakehurst.wiremock.verification.LoggedRequest;
-import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
-
-import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.aResponse;
 import static com.github.tomakehurst.wiremock.client.WireMock.deleteRequestedFor;
@@ -42,36 +33,35 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathMatching;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+
+import com.github.tomakehurst.wiremock.stubbing.StubMapping;
+import com.github.tomakehurst.wiremock.verification.LoggedRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Test;
+
 /**
- * Idempotency property of full sync — running sync twice against an unchanged source state must NOT
- * produce duplicate writes on the second run. This is a fundamental correctness invariant of any
- * reconciler: re-running it should converge, not amplify.
+ * Idempotency property of full sync — running sync twice against an unchanged source state must NOT produce duplicate writes on the second run. This is a fundamental correctness invariant of any reconciler: re-running it should converge, not amplify.
  *
- * <h2>What this catches</h2>
- * Real regressions this test would surface:
+ * <h2>What this catches</h2> Real regressions this test would surface:
  * <ul>
- *   <li>Diff logic that compares the wrong identifier (e.g. uses {@code userName} instead of
- *       {@code externalUserId}) → second run sees "no current mappings" → re-POSTs everything.</li>
- *   <li>{@code getCurrentUserMappings} response not being consumed → diff always thinks Nucleus
- *       is empty → every sync re-creates all mappings.</li>
- *   <li>Stale in-memory caches in nucleus-sync that hold the first run's "to-create" list and
- *       re-emit it on the second trigger.</li>
- *   <li>{@code DELETE} thrash — second sync sees current mappings as "extra" and deletes them.</li>
+ * <li>Diff logic that compares the wrong identifier (e.g. uses {@code userName} instead of {@code externalUserId}) → second run sees "no current mappings" → re-POSTs everything.</li>
+ * <li>{@code getCurrentUserMappings} response not being consumed → diff always thinks Nucleus is empty → every sync re-creates all mappings.</li>
+ * <li>Stale in-memory caches in nucleus-sync that hold the first run's "to-create" list and re-emit it on the second trigger.</li>
+ * <li>{@code DELETE} thrash — second sync sees current mappings as "extra" and deletes them.</li>
  * </ul>
  *
  * <h2>How it works</h2>
  * <ol>
- *   <li>First sync runs against empty current state → N user-mapping POSTs land on Nucleus.</li>
- *   <li>We capture the posted mapping bodies and re-stub {@code GET /user-mappings} to return them
- *       — simulating "Nucleus now has these mappings persisted".</li>
- *   <li>We reset the WireMock request journal so the second run's counts are isolated.</li>
- *   <li>Second sync runs against the same ACS users + Nucleus IAM users → diff is empty → there
- *       should be ZERO new POSTs and ZERO DELETEs.</li>
+ * <li>First sync runs against empty current state → N user-mapping POSTs land on Nucleus.</li>
+ * <li>We capture the posted mapping bodies and re-stub {@code GET /user-mappings} to return them — simulating "Nucleus now has these mappings persisted".</li>
+ * <li>We reset the WireMock request journal so the second run's counts are isolated.</li>
+ * <li>Second sync runs against the same ACS users + Nucleus IAM users → diff is empty → there should be ZERO new POSTs and ZERO DELETEs.</li>
  * </ol>
  *
- * <h2>Test sizing</h2>
- * Small ({@value #TOTAL_USERS}) — idempotency is a property, not a scale test. We don't need 1M
- * users to expose a "re-creates every mapping" bug; 50 is plenty and keeps the test fast.
+ * <h2>Test sizing</h2> Small ({@value #TOTAL_USERS}) — idempotency is a property, not a scale test. We don't need 1M users to expose a "re-creates every mapping" bug; 50 is plenty and keeps the test fast.
  */
 @Slf4j
 public class SyncIdempotencyReliabilityIT extends BaseNucleusSyncLargeIngestionIT
@@ -141,11 +131,9 @@ public class SyncIdempotencyReliabilityIT extends BaseNucleusSyncLargeIngestionI
     }
 
     /**
-     * Replace the "empty current mappings" stub with one that returns the mappings nucleus-sync
-     * just POSTed. WireMock priority makes this stub win over the empty one installed earlier.
+     * Replace the "empty current mappings" stub with one that returns the mappings nucleus-sync just POSTed. WireMock priority makes this stub win over the empty one installed earlier.
      * <p>
-     * The current-mappings response shape is the same paged-list envelope used elsewhere:
-     * {@code {"items":[{"userId":"iam-N","externalUserId":"userN"}, ...]}}.
+     * The current-mappings response shape is the same paged-list envelope used elsewhere: {@code {"items":[{"userId":"iam-N","externalUserId":"userN"}, ...]}}.
      */
     private void replaceCurrentMappingsStubWithRun1Result()
     {

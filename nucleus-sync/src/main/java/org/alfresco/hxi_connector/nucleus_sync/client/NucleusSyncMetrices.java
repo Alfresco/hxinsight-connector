@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.nucleus_sync.client;
 /**
  * Inventory Provides Metrices for the Nucleus Sync with all the counter names and their descriptions.
  */
+@SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
 public final class NucleusSyncMetrices
 {
 

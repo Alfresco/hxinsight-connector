@@ -25,6 +25,11 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.harness;
 
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.*;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_LISTEN_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_MOCK_PORT;
+
 import java.io.IOException;
 import java.time.Duration;
 
@@ -33,11 +38,6 @@ import eu.rekawek.toxiproxy.ToxiproxyClient;
 import lombok.extern.slf4j.Slf4j;
 import org.testcontainers.containers.ToxiproxyContainer;
 import org.testcontainers.utility.DockerImageName;
-
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.*;
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_ALIAS;
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_LISTEN_PORT;
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_MOCK_PORT;
 
 /**
  * Owns the Toxiproxy container plus every {@link Proxy} listener fronting an upstream container in the reliability environment. Creation is split into two phases mirroring the dependency chain — see {@link #createPreRepositoryProxies(boolean)} and {@link #createAcsProxy()}.
@@ -119,13 +119,14 @@ final class ToxiproxyListeners
         }
     }
 
-    void createNucleusProxy() throws IOException{
+    void createNucleusProxy() throws IOException
+    {
         log.info("[reliability] Configuring Toxiproxy: {}:{} -> {}:{}",
                 TOXIC_NUCLEUS_ALIAS, NUCLEUS_LISTEN_PORT, NUCLEUS_ALIAS, NUCLEUS_MOCK_PORT);
         nucleusproxy = client.createProxy(
-                    NUCLEUS_ALIAS,
-                    "0.0.0.0:" + NUCLEUS_LISTEN_PORT,
-                    NUCLEUS_ALIAS + ":" + NUCLEUS_MOCK_PORT);
+                NUCLEUS_ALIAS,
+                "0.0.0.0:" + NUCLEUS_LISTEN_PORT,
+                NUCLEUS_ALIAS + ":" + NUCLEUS_MOCK_PORT);
     }
 
     /**
@@ -170,5 +171,8 @@ final class ToxiproxyListeners
     }
 
     // Proxy to the Nucleus WireMock Container
-    Proxy nucleusProxy() {return nucleusproxy;}
+    Proxy nucleusProxy()
+    {
+        return nucleusproxy;
+    }
 }

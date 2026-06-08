@@ -25,19 +25,20 @@
  */
 package org.alfresco.hxi_connector.e2e_test.util.client;
 
-import lombok.AllArgsConstructor;
-import lombok.SneakyThrows;
-
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
+import lombok.AllArgsConstructor;
+import lombok.SneakyThrows;
+
 /**
  * Nucleus Sync Client Used for Communication with Nucleus Sync Container in E2E Tests. This client can be used to perform operations such as triggering sync, checking sync status, etc. The implementation details will depend on the specific API exposed by the Nucleus Sync container.
  */
 @AllArgsConstructor
-public class NucleusSyncClient {
+public class NucleusSyncClient
+{
     private final String baseUrl;
     private final int port;
     private static final String SYNC_URL = "http://%s:%s/sync/trigger";
@@ -48,7 +49,7 @@ public class NucleusSyncClient {
     public void startSynchronization()
     {
         // Implementation to trigger synchronization via API call to Nucleus Sync container
-        String uri = SYNC_URL.formatted(baseUrl,String.valueOf(port));
+        String uri = SYNC_URL.formatted(baseUrl, String.valueOf(port));
         send(
                 HttpRequest.newBuilder()
                         .uri(java.net.URI.create(uri))
@@ -56,9 +57,9 @@ public class NucleusSyncClient {
                         .build());
     }
 
-
     @SneakyThrows
-    private HttpResponse<String> send(HttpRequest request){
+    private HttpResponse<String> send(HttpRequest request)
+    {
         HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
         return response;
     }

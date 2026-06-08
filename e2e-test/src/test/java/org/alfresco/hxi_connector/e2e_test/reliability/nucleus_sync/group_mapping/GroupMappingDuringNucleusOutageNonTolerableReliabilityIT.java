@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.GroupMapping;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.group_mapping;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -38,7 +38,7 @@ import com.github.tomakehurst.wiremock.verification.LoggedRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
 
 /**
  * Non-tolerable group-mapping outage scenario — simulates a Nucleus outage during the group creation phase by injecting WireMock faults on the mutation endpoint.
@@ -86,7 +86,7 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread.
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture.runAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
         // 2. Let sync complete user-mapping and start group creation, then inject the fault.

@@ -23,7 +23,7 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
-package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.Performance;
+package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.performance;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -36,8 +36,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
-import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncLargeIngestionIT;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.ActuatorMetricsProbe;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
 
 // During 1M user Mapping Test the JVM Memory
 @Slf4j
@@ -46,8 +46,8 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
 
     // First Mock the same 1M users Count
 
-    private final long MAX_MEMORY_CONSUMPTION_BYTES = 4_000_000_000L; // 4 GB
-    private final long MAX_TIME_BEFORE_FAIL = 20L; // 20 minutes
+    private static final long MAX_MEMORY_CONSUMPTION_BYTES = 4_000_000_000L; // 4 GB
+    private static final long MAX_TIME_BEFORE_FAIL = 20L; // 20 minutes
 
     @Test
     public void testLargeScaleUserMappingMemoryConsumption() throws Exception

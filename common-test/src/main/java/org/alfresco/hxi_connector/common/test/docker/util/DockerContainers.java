@@ -310,15 +310,15 @@ public class DockerContainers
         return liveIngester;
     }
 
-    public static GenericContainer<?> createNucleusSyncContainerForWireMock(WireMockContainer nucleusMockContainer,AlfrescoRepositoryContainer acsContainer,Network network)
+    public static GenericContainer<?> createNucleusSyncContainerForWireMock(WireMockContainer nucleusMockContainer, AlfrescoRepositoryContainer acsContainer, Network network)
     {
         String nucleusHost = nucleusMockContainer.getNetworkAliases().stream().findFirst().get();
         String acsHost = acsContainer.getNetworkAliases().stream().findFirst().get();
         return createNucleusSyncContainerWithin(network)
                 // Disable the cron — tests trigger sync explicitly via POST /sync/trigger.
                 .withEnv("SYNC_ENABLED", "false")
-                .withEnv("SYNC_CRON_EXPRESSION","0 0 0 * * ?")
-                .withEnv("NUCLEUS_SYSTEM_ID","-dummy-system-id")
+                .withEnv("SYNC_CRON_EXPRESSION", "0 0 0 * * ?")
+                .withEnv("NUCLEUS_SYSTEM_ID", "-dummy-system-id")
                 .withEnv("NUCLEUS_BASE_URL", "http://%s:8080".formatted(nucleusHost))
                 .withEnv("NUCLEUS_IDP_BASE_URL", "http://%s:8080".formatted(nucleusHost))
                 // application.yml: auth.providers.hyland-experience.type — accepted value is "oauth2".
@@ -330,7 +330,7 @@ public class DockerContainers
                 // (those are the live-ingester's convention; nucleus-sync has its own placeholder names).
                 .withEnv("ALFRESCO_USER_NAME", "admin")
                 .withEnv("ALFRESCO_PASSWORD", "admin")
-                .withEnv("AUTH_ALFRESCO_TYPE","basic")
+                .withEnv("AUTH_ALFRESCO_TYPE", "basic")
                 .withEnv("ALFRESCO_BASE_URL", "http://%s:8080/alfresco/api/-default-/public/alfresco/versions/1".formatted(acsHost));
     }
 
