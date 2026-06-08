@@ -128,14 +128,5 @@ public class NucleusTokenEndpointFailureReliabilityIT extends BaseNucleusSyncRel
                 .isEmpty();
     }
 
-    private void installAllStubs()
-    {
-        installAuthResponse();              // Healthy /token stub — will be overridden by the 503 above
-        installReturnUserWithSameMail();
-        installReturnEmptyMapping();
-        installReturnEmptyGroups();
-        installReturnEmptyGroupMembers();
-        installMutationEndpoints();
-    }
 }
 

@@ -293,6 +293,21 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT{
     }
 
     /**
+     * Installs the standard set of stubs needed for a happy-path sync: auth, single Nucleus user
+     * matching a single ACS user by email, empty current mappings/groups/members, and mutation
+     * endpoints. Subclasses can override specific stubs at higher priority for chaos injection.
+     */
+    protected void installAllStubs()
+    {
+        installAuthResponse();
+        installReturnUserWithSameMail();
+        installReturnEmptyMapping();
+        installReturnEmptyGroups();
+        installReturnEmptyGroupMembers();
+        installMutationEndpoints();
+    }
+
+    /**
      * Extract the Alfresco-side user IDs that were mapped, by parsing the POST bodies sent to
      * {@code /user-mappings}. The body is a JSON array of {@code NucleusUserMappingInput}
      * records: {@code [{"userId":"iam-0","externalUserId":"user0"}, ...]}. The Alfresco id lives

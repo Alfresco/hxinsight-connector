@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import eu.rekawek.toxiproxy.model.Toxic;
 import eu.rekawek.toxiproxy.model.ToxicDirection;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +57,6 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
      */
     private static final long EXPECTED_MIN_WALL_CLOCK_MS = 400L;
 
-    private static final int SCENARIO_STUB_PRIORITY = 1;
 
 
     @AfterEach
@@ -146,13 +144,4 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
                 .isNotEmpty());
     }
 
-    private void installAllStubs()
-    {
-        installAuthResponse();
-        installReturnUserWithSameMail();
-        installReturnEmptyMapping();
-        installReturnEmptyGroups();
-        installReturnEmptyGroupMembers();
-        installMutationEndpoints();
-    }
 }

@@ -63,7 +63,7 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
     @Test
     void shouldRecoverWhenAlfrescoBriefPartitionEndsBeforeRetryBudgetExhausts() throws Exception
     {
-        installAllStubs();
+        installAllStubsSpecial();
         // Pre-conditions: user in Alfresco + all Nucleus stubs ready so the only failure axis is the partition.
         environment().repositoryClient().createUser(new User("test", "test", "abcd@hyland.com"));
 
@@ -100,19 +100,19 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
         //    - At least one user-mappings GET landed — proves the orchestration ran end-to-end after recovery.
         RetryUtils.assertWithRetry(() -> {
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo("/api/users"))))
-                    .as("nucleus-sync did  call /api/users after partition recovery — "
-                            + "either retries didn't exhausted after re-enable (extend PARTITION_DURATION_MS upward, "
-                            + "or shorten the retry budget) or ALFRESCO_BASE_URL is routed via toxic-acs")
+                    .as("nucleus-sync didn't reach /api/users after partition recovery — either retries "
+                            + "exhausted before re-enable (shorten PARTITION_DURATION_MS or extend the retry "
+                            + "budget) or ALFRESCO_BASE_URL isn't routed via toxic-acs")
                     .isNotEmpty();
 
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))))
-                    .as("nucleus sync reached somehow to the alfresco instead of network partition "
-                            + "sync orchestration was able before the Nucleus mapping phase")
+                    .as("nucleus-sync didn't reach the user-mappings GET after partition recovery — sync "
+                            + "orchestration stopped before the Nucleus mapping phase")
                     .isNotEmpty();
         });
     }
 
-    private void installAllStubs(){
+    private void installAllStubsSpecial(){
         installMutationEndpointsWithTracking();
         installAuthResponse();
         installReturnEmptyGroups();

@@ -61,7 +61,6 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
      */
     private static final long EXPECTED_MIN_WALL_CLOCK_MS = 400L;
 
-    private static final int SCENARIO_STUB_PRIORITY = 1;
 
 
     @AfterEach

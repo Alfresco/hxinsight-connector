@@ -56,7 +56,7 @@ public class AlfrescoNonTolerablePartitionReliabilityIT extends BaseNucleusSyncR
 
 
     @Test
-    void shouldRecoverWhenAlfrescoBriefPartitionEndsBeforeRetryBudgetExhausts() throws Exception
+    void shouldFailWhenAlfrescoPartitionOutlastsRetryBudget() throws Exception
     {
         // Pre-conditions: user in Alfresco + all Nucleus stubs ready so the only failure axis is the partition.
         environment().repositoryClient().createUser(new User("test", "test", "abcd@hyland.com"));
@@ -94,14 +94,15 @@ public class AlfrescoNonTolerablePartitionReliabilityIT extends BaseNucleusSyncR
         //    - At least one user-mappings GET landed — proves the orchestration ran end-to-end after recovery.
         RetryUtils.assertWithRetry(() -> {
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo("/api/users"))))
-                    .as("nucleus-sync did  call /api/users after partition recovery — "
-                            + "either retries didn't exhausted after re-enable (extend PARTITION_DURATION_MS upward, "
-                            + "or shorten the retry budget) or ALFRESCO_BASE_URL is routed via toxic-acs")
+                    .as("Expected zero /api/users calls on Nucleus — the ACS partition outlasted the "
+                            + "retry budget, so nucleus-sync should never have reached the Nucleus phase. "
+                            + "Non-empty means the partition healed too early (increase PARTITION_DURATION_MS) "
+                            + "or ALFRESCO_BASE_URL bypasses toxic-acs")
                     .isEmpty();
 
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))))
-                    .as("nucleus sync reached somehow to the alfresco instead of network partition "
-                            + "sync orchestration was able before the Nucleus mapping phase")
+                    .as("Expected zero user-mappings GETs — sync should have aborted during the "
+                            + "ACS read phase and never progressed to the Nucleus mapping phase")
                     .isEmpty();
         });
     }

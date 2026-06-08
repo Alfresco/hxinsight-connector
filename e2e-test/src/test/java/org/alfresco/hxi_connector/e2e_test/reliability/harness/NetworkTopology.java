@@ -56,7 +56,7 @@ final class NetworkTopology implements AutoCloseable
     static final int REPOSITORY_PORT = 8080;
     static final int HXI_MOCK_PORT = 8080;
     static final int NUCLEUS_LISTEN_PORT = 8083;
-    static final int NUCLEUS_PORT = 8081;
+    static final int NUCLEUS_SYNC_PORT = 8081;
     static final int NUCLEUS_MOCK_PORT = 8080;
     /**
      * Port the {@code toxic-hxi} Toxiproxy listener binds inside the Toxiproxy container. Distinct from {@link #REPOSITORY_PORT} so the ACS and HXI proxies can coexist in the single Toxiproxy container — a Toxiproxy listener cannot share a port with another listener even if the network aliases differ.
@@ -70,7 +70,6 @@ final class NetworkTopology implements AutoCloseable
     static final int SFS_PORT = 8099;
 
     private final Network network = Network.newNetwork();
-
     Network network()
     {
         return network;

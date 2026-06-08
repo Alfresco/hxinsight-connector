@@ -33,13 +33,9 @@ import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @Slf4j
 public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncReliabilityIT {
@@ -49,14 +45,6 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
      * we re-enable.
      */
     private static final long PARTITION_DURATION_MS = 3_600L;
-
-    /**
-     * Outer wait for the background sync future to terminate (in this test, with an exception). Must
-     * exceed PARTITION_DURATION + the controller's failure-propagation tail. 20 s is generous on purpose
-     * — a future timeout here would mask a real "sync hung instead of failing" regression behind a
-     * confusing TimeoutException.
-     */
-    private static final long SYNC_FAILURE_TIMEOUT_S = 20L;
 
 
     @Test
@@ -110,14 +98,5 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
         });
     }
 
-    private void installAllStubs()
-    {
-        installAuthResponse();
-        installReturnUserWithSameMail();
-        installReturnEmptyMapping();
-        installReturnEmptyGroups();
-        installReturnEmptyGroupMembers();
-        installMutationEndpoints();
-    }
 
 }

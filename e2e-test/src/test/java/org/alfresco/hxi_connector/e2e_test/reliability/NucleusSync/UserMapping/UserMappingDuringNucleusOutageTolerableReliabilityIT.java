@@ -49,9 +49,6 @@ public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNu
      */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 120L;
 
-    private static final int SCENARIO_STUB_PRIORITY = 1;
-
-    private static final int TOTAL_USERS = 100;
 
     /**
      * Delay between triggering sync and opening the partition. Small but non-zero — gives the sync
@@ -71,7 +68,7 @@ public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNu
 
     @Test
     void shouldMapAllUsersWhenNucleusOutageHealsBeforeRetryBudgetExhausts() throws Exception {
-        installAllStubs();
+        installAllStubsSpecific();
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread — startSynchronization() blocks on the controller round-trip.
@@ -128,7 +125,7 @@ public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNu
         log.info("[reliability] ✓ All {} users successfully mapped despite Nucleus outage — no mappings dropped!", TOTAL_USERS);
     }
 
-    private void installAllStubs()
+    private void installAllStubsSpecific()
     {
         installAuthResponse();
         installReturnEmptyMapping();

@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.DependencyHarness;
 
-import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.extern.slf4j.Slf4j;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.NucleusSync.BaseNucleusSyncReliabilityIT;
@@ -96,13 +95,4 @@ public class NucleusShortPartitionReliabilityIT extends BaseNucleusSyncReliabili
         });
     }
 
-    private void installAllStubs()
-    {
-        installAuthResponse();
-        installReturnUserWithSameMail();
-        installReturnEmptyMapping();
-        installReturnEmptyGroups();
-        installReturnEmptyGroupMembers();
-        installMutationEndpoints();
-    }
 }

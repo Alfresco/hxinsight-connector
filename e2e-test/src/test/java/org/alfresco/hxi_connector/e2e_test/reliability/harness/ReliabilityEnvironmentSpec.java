@@ -26,40 +26,25 @@
 package org.alfresco.hxi_connector.e2e_test.reliability.harness;
 
 /**
- * Immutable description of which reliability-fix opt-in toggles a {@link ReliabilityEnvironment} should boot with. Drives both topology choices (which containers to start) and the live-ingester environment-variable map ({@link LiveIngesterEnvVars#forSpec(ReliabilityEnvironmentSpec)}).
- *
- * <p>
- * All toggles default to {@code false}. The default spec ({@code new ReliabilityEnvironmentSpec(false, false, false, false)}) gives a minimal env equivalent to the production-default deployment shape.
+ * Topology + opt-out toggles for a {@link ReliabilityEnvironment}. The opt-out flags exist so legacy-behaviour ITs can flip a now-default-on reliability property back off. All flags default to {@code false} — the resulting env tracks the production-default deployment shape.
  *
  * @param withTransformTopology
  *            see {@link ReliabilityEnvironment.Builder#withTransformTopology()}
- * @param withTransformResponseDeadLetterEnabled
- *            see {@link ReliabilityEnvironment.Builder#withTransformResponseDeadLetterEnabled()}
- * @param withTransformResponseThrowFailedTransforms
- *            see {@link ReliabilityEnvironment.Builder#withTransformResponseThrowFailedTransforms()}
- * @param withRepoEventsDeadLetterUnsupportedTypes
- *            see {@link ReliabilityEnvironment.Builder#withRepoEventsDeadLetterUnsupportedTypes()}
+ * @param withTransformResponseDeadLetterDisabled
+ *            see {@link ReliabilityEnvironment.Builder#withTransformResponseDeadLetterDisabled()}
+ * @param withTransformResponseThrowFailedTransformsDisabled
+ *            see {@link ReliabilityEnvironment.Builder#withTransformResponseThrowFailedTransformsDisabled()}
+ * @param withRepoEventsDeadLetterUnsupportedTypesDisabled
+ *            see {@link ReliabilityEnvironment.Builder#withRepoEventsDeadLetterUnsupportedTypesDisabled()}
  */
 @SuppressWarnings("PMD.LongVariable")
 public record ReliabilityEnvironmentSpec(
         boolean withTransformTopology,
-        boolean withTransformResponseDeadLetterEnabled,
-        boolean withTransformResponseThrowFailedTransforms,
-        boolean withRepoEventsDeadLetterUnsupportedTypes,
-        boolean withStubbedAcs)
-{
-    // Convenience constructor for backward compatibility
-    public ReliabilityEnvironmentSpec(
-            boolean withTransformTopology,
-            boolean withTransformResponseDeadLetterEnabled,
-            boolean withTransformResponseThrowFailedTransforms,
-            boolean withRepoEventsDeadLetterUnsupportedTypes)
-    {
-        this(withTransformTopology, withTransformResponseDeadLetterEnabled,
-                withTransformResponseThrowFailedTransforms, withRepoEventsDeadLetterUnsupportedTypes, false);
-    }
-    public static ReliabilityEnvironmentSpec defaultSpec()
-    {
-        return new ReliabilityEnvironmentSpec(false, false, false, false);
+        boolean withTransformResponseDeadLetterDisabled,
+        boolean withTransformResponseThrowFailedTransformsDisabled,
+        boolean withRepoEventsDeadLetterUnsupportedTypesDisabled,
+        boolean withStubbedAcsEnabled) {
+    public static ReliabilityEnvironmentSpec defaultSpec() {
+        return new ReliabilityEnvironmentSpec(false, false, false, false,false);
     }
 }

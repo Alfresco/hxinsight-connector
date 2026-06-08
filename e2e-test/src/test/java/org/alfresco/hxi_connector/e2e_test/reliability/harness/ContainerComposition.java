@@ -135,7 +135,7 @@ final class ContainerComposition implements AutoCloseable
                 // passthrough, so non-chaos tests (SimpleMappingTest) still pass.
                 // When withStubbedAcs is true, route to nucleus WireMock instead of real ACS for full stub testing.
                 .withEnv("ALFRESCO_BASE_URL",
-                        spec.withStubbedAcs()
+                        spec.withStubbedAcsEnabled()
                                 ? "http://" + TOXIC_NUCLEUS_ALIAS + ":" + NUCLEUS_LISTEN_PORT
                                   + "/alfresco/api/-default-/public/alfresco/versions/1"
                                 : "http://" + TOXIC_ACS_ALIAS + ":" + REPOSITORY_PORT

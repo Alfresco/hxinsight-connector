@@ -75,7 +75,7 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
      * finishes in ~10 requests (< 1 s), but large enough that the Nucleus group creation phase
      * takes measurable time so the fault can land mid-creation.
      */
-    private static final int TEST_GROUPS_COUNT = 1_0000;
+    private static final int TEST_GROUPS_COUNT = 10_000;
 
     /**
      * Delay between triggering sync and injecting the fault. Allows user-mapping + group discovery

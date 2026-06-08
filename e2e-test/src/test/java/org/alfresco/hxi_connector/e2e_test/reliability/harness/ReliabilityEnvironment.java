@@ -90,6 +90,7 @@ public class ReliabilityEnvironment implements AutoCloseable
     private JolokiaProbe jolokia;
     private ActuatorMetricsProbe actuatorMetrics;
     private NucleusSyncClient nucleusSyncClient;
+    private ActuatorMetricsProbe nucleusSyncProbe;
 
     // === Host-port mappings refreshed after a chaos restart of the corresponding container
     // (Docker re-allocates ephemeral host ports on each `docker start`; Testcontainers caches the original allocation). ===
@@ -142,10 +143,10 @@ public class ReliabilityEnvironment implements AutoCloseable
         log.info("[reliability] Live-ingester JDWP listening — attach IntelliJ to localhost:{} (container 5007)",
                 containers.liveIngester().getMappedPort(5007));
         actuatorMetrics = new ActuatorMetricsProbe(containers.liveIngester().getHost(), containers.liveIngester().getMappedPort(8080));
-
+        nucleusSyncProbe = new ActuatorMetricsProbe(containers.nucleusSync().getHost(), containers.nucleusSync().getMappedPort(NUCLEUS_SYNC_PORT));
         repositoryHostPort = containers.repository().getMappedPort(REPOSITORY_PORT);
         repositoryClient = new RepositoryClient(containers.repository().getBaseUrl(), RepositoryClient.ADMIN_USER);
-        nucleusSyncClient = new NucleusSyncClient(containers.nucleusSync().getHost(), containers.nucleusSync().getMappedPort(NUCLEUS_PORT));
+        nucleusSyncClient = new NucleusSyncClient(containers.nucleusSync().getHost(), containers.nucleusSync().getMappedPort(NUCLEUS_SYNC_PORT));
         WireMock.configureFor(containers.hxInsightMock().getHost(), containers.hxInsightMock().getPort());
 
         log.info("[reliability] Environment ready");
@@ -335,6 +336,11 @@ public class ReliabilityEnvironment implements AutoCloseable
     {
         return actuatorMetrics;
     }
+    // Only for Nucleus Sync
+    public ActuatorMetricsProbe nucleusSyncMetrics()
+    {
+        return nucleusSyncProbe;
+    }
 
     @Override
     public void close()
@@ -361,10 +367,10 @@ public class ReliabilityEnvironment implements AutoCloseable
     public static final class Builder
     {
         private boolean withTransformTopology;
-        private boolean withTransformResponseDeadLetterEnabled;
-        private boolean withTransformResponseThrowFailedTransforms;
-        private boolean withRepoEventsDeadLetterUnsupportedTypes;
-        private boolean withStubbedAcs;
+        private boolean withTransformResponseDeadLetterDisabled;
+        private boolean withTransformResponseThrowFailedTransformsDisabled;
+        private boolean withRepoEventsDeadLetterUnsupportedTypesDisabled;
+        private boolean withStubbedAcsEnabled;
 
         private Builder()
         {}
@@ -378,30 +384,24 @@ public class ReliabilityEnvironment implements AutoCloseable
             return this;
         }
 
-        /**
-         * Install the {@code errorHandler(deadLetterChannel(...))} on the {@code transform-response} Camel route so post-201 failures land on {@code ActiveMQ.DLQ} with a {@code live_ingester_transform_response_dlq_total} counter increment instead of silently ACK'ing. Sets {@code ALFRESCO_TRANSFORM_RESPONSE_DEADLETTERENABLED=true} plus a tight test-only redelivery profile (1 attempt, 200 ms).
-         */
-        public Builder withTransformResponseDeadLetterEnabled()
+        /** Opt out of the default transform-response DLC. Sets {@code ALFRESCO_TRANSFORM_RESPONSE_DEADLETTERENABLED=false} so post-201 failures fall back to silent ACK. */
+        public Builder withTransformResponseDeadLetterDisabled()
         {
-            this.withTransformResponseDeadLetterEnabled = true;
+            this.withTransformResponseDeadLetterDisabled = true;
             return this;
         }
 
-        /**
-         * Surface ATS-reported transform failures (status=400 transform-responses) as a thrown exception instead of the by-design silent ACK. Sets {@code ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=true}. Pair with {@link #withTransformResponseDeadLetterEnabled()} for the failed message to land on the DLQ; without the DLC opt-in, the thrown exception just exhausts the retry budget and the message is ACK'd anyway (with ERROR logs).
-         */
-        public Builder withTransformResponseThrowFailedTransforms()
+        /** Opt out of throwing on ATS-reported transform failures. Sets {@code ALFRESCO_TRANSFORM_RESPONSE_THROWFAILEDTRANSFORMS=false}, restoring the legacy WARN-log + silent-ACK shape. */
+        public Builder withTransformResponseThrowFailedTransformsDisabled()
         {
-            this.withTransformResponseThrowFailedTransforms = true;
+            this.withTransformResponseThrowFailedTransformsDisabled = true;
             return this;
         }
 
-        /**
-         * Re-throw {@link org.alfresco.hxi_connector.live_ingester.adapters.messaging.repository.UnsupportedEventTypeException UnsupportedEventTypeException} for repo events whose {@code eventType} matches no dispatch predicate, instead of the default INFO log + {@code live_ingester_repo_events_unhandled_total} counter increment + silent ACK. Sets {@code ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DEADLETTERUNSUPPORTEDTYPES=true} so the existing repo-events {@code DeadLetterChannel} routes the failure to {@code ActiveMQ.DLQ} with a {@code live_ingester_repo_events_dlq_total} increment.
-         */
-        public Builder withRepoEventsDeadLetterUnsupportedTypes()
+        /** Opt out of dead-lettering unrecognised repo-event types. Sets {@code ALFRESCO_REPOSITORY_EVENTSSUBSCRIPTION_DEADLETTERUNSUPPORTEDTYPES=false} so the route falls back to log + counter + ACK. */
+        public Builder withRepoEventsDeadLetterUnsupportedTypesDisabled()
         {
-            this.withRepoEventsDeadLetterUnsupportedTypes = true;
+            this.withRepoEventsDeadLetterUnsupportedTypesDisabled = true;
             return this;
         }
 
@@ -413,7 +413,7 @@ public class ReliabilityEnvironment implements AutoCloseable
          */
         public Builder withStubbedAcs()
         {
-            this.withStubbedAcs = true;
+            this.withStubbedAcsEnabled = true;
             return this;
         }
 
@@ -421,10 +421,11 @@ public class ReliabilityEnvironment implements AutoCloseable
         {
             return new ReliabilityEnvironment(new ReliabilityEnvironmentSpec(
                     withTransformTopology,
-                    withTransformResponseDeadLetterEnabled,
-                    withTransformResponseThrowFailedTransforms,
-                    withRepoEventsDeadLetterUnsupportedTypes,
-                    withStubbedAcs));
+                    withTransformResponseDeadLetterDisabled,
+                    withTransformResponseThrowFailedTransformsDisabled,
+                    withRepoEventsDeadLetterUnsupportedTypesDisabled,
+                    withStubbedAcsEnabled));
         }
+
     }
 }

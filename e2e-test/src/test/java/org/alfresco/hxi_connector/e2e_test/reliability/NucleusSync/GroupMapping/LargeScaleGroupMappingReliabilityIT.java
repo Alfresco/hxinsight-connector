@@ -68,7 +68,7 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
      * </ul>
      */
     @Test
-    void shouldMapOneMillionUsersFromBothSides()
+    void shouldMapOneMillionGroupsFromBothSides()
     {
         log.info("[scale-test] Starting full stub test: {} users on both ACS and Nucleus sides", TOTAL_GROUPS_COUNT);
 
