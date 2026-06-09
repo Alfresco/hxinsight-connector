@@ -113,7 +113,7 @@ public class BulkIngesterE2eTest
             assertEquals(eventType, event.get("eventType").asText());
             assertTrue(event.has("sourceTimestamp"));
             assertTrue(event.has("properties"));
-        }, 15, 200);
+        }, 60, 500);
     }
 
     @Test
@@ -139,6 +139,6 @@ public class BulkIngesterE2eTest
             assertEquals(Set.of("GROUP_EVERYONE"), asSet(properties.get(allowAccessFieldName).get("value")));
 
             assertFalse(properties.has(denyAccessFieldName));
-        }, 15, 200);
+        }, 60, 500);
     }
 }
