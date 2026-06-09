@@ -69,6 +69,7 @@ import jakarta.jms.Topic;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.matching.RequestPatternBuilder;
 import lombok.Cleanup;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -163,20 +164,51 @@ public class ContainerSupport
 
     public void expectHxIngestMessageReceived(String expectedBody)
     {
-        retryWithBackoff(() -> getHxInsightMock().verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
+        WireMock hxiMock = getHxInsightMock();
+        retryWithBackoff(() -> hxiMock.verifyThat(postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT))
                 .withHeader(AUTHORIZATION, equalTo(AuthUtils.createAuthorizationHeader()))
                 .withHeader(CONTENT_TYPE, equalTo("application/json"))
                 .withHeader(USER_AGENT, matching(getAppInfoRegex()))
                 .withRequestBody(equalToJson(expectedBody))));
+        // Drain any in-flight redeliveries before reset. transacted JMS consumers with
+        // BROKER_MAX_REDELIVERIES=1 mean the route can fire this POST more than once;
+        // resetting on the first match leaks the extras into the next test.
+        awaitMockSettled(hxiMock, postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
         resetWireMock();
     }
 
     @SneakyThrows
     public void expectNoHxIngestMessagesReceived()
     {
-        TimeUnit.MILLISECONDS.sleep(200);
-        getHxInsightMock().verifyThat(exactly(0), postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT)));
+        WireMock hxiMock = getHxInsightMock();
+        RequestPatternBuilder pattern = postRequestedFor(urlPathEqualTo(HX_INSIGHT_INGEST_ENDPOINT));
+        // Sample for a sustained-quiet window. A single check after 200ms is hospitable
+        // to a redelivery from a prior allowed-path test arriving inside the window.
+        long stepMs = 100;
+        int requiredQuiet = 10;
+        for (int i = 0; i < requiredQuiet; i++)
+        {
+            hxiMock.verifyThat(exactly(0), pattern);
+            TimeUnit.MILLISECONDS.sleep(stepMs);
+        }
         resetWireMock();
+    }
+
+    @SneakyThrows
+    private static void awaitMockSettled(WireMock mock, RequestPatternBuilder pattern)
+    {
+        long stepMs = 100;
+        int requiredQuiet = 5;
+        long deadlineMs = System.currentTimeMillis() + 5000;
+        int prev = mock.find(pattern).size();
+        int quiet = 0;
+        while (quiet < requiredQuiet && System.currentTimeMillis() < deadlineMs)
+        {
+            TimeUnit.MILLISECONDS.sleep(stepMs);
+            int now = mock.find(pattern).size();
+            quiet = now == prev ? quiet + 1 : 0;
+            prev = now;
+        }
     }
 
     private static void resetWireMock()
@@ -250,13 +282,16 @@ public class ContainerSupport
 
     public void expectSFSMessageReceived(String targetReference)
     {
-        WireMock.configureFor(getSfsMock());
+        WireMock sfsMock = getSfsMock();
+        WireMock.configureFor(sfsMock);
 
         // JMS delivery is at-least-once with transacted consumers and broker redelivery,
         // so the route may fire this GET more than once; assert it happened at least once.
-        retryWithBackoff(() -> getSfsMock().verifyThat(moreThanOrExactly(1), getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference))));
-        getSfsMock().resetRequests();
-        getSfsMock().resetMappings();
+        RequestPatternBuilder pattern = getRequestedFor(urlPathEqualTo(SFS_PATH + targetReference));
+        retryWithBackoff(() -> sfsMock.verifyThat(moreThanOrExactly(1), pattern));
+        awaitMockSettled(sfsMock, pattern);
+        sfsMock.resetRequests();
+        sfsMock.resetMappings();
 
         WireMock.configureFor(getHxInsightMock());
     }
@@ -320,7 +355,9 @@ public class ContainerSupport
 
         // JMS delivery is at-least-once with transacted consumers and broker redelivery,
         // so the route may fire this GET more than once; assert it happened at least once.
-        retryWithBackoff(() -> acsMock.verifyThat(moreThanOrExactly(1), getRequestedFor(urlPathEqualTo(ACS_CONTENT_PATH + nodeId + "/content"))));
+        RequestPatternBuilder pattern = getRequestedFor(urlPathEqualTo(ACS_CONTENT_PATH + nodeId + "/content"));
+        retryWithBackoff(() -> acsMock.verifyThat(moreThanOrExactly(1), pattern));
+        awaitMockSettled(acsMock, pattern);
         acsMock.resetRequests();
         acsMock.resetMappings();
 
