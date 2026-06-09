@@ -114,10 +114,7 @@ public class HxiSlowDuringAmqFlapReliabilityIT extends BaseReliabilityIT
             log.info("[reliability] Stopping AMQ flap planner");
             amqPlanner.stop();
             // Failsafe re-enable in case the planner's own finally was skipped on a forced shutdown.
-            if (!environment().activemqProxy().isEnabled())
-            {
-                environment().activemqProxy().enable();
-            }
+            environment().activemqProxy().enable();
             removeStub(slowStub);
             log.info("[reliability] Slow stub removed; settling {} ms before liveness sentinel", SETTLE_AFTER_CHAOS_MS);
             Thread.sleep(SETTLE_AFTER_CHAOS_MS);

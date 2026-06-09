@@ -252,10 +252,7 @@ public abstract class BaseReliabilityIT
                     throw new IllegalStateException("[reliability] Failed to remove toxic " + toxic.getName() + " between tests", e);
                 }
             });
-            if (!proxy.isEnabled())
-            {
-                proxy.enable();
-            }
+            proxy.enable();
         }
         catch (IOException e)
         {

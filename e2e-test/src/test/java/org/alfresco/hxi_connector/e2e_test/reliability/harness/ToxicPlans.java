@@ -101,10 +101,7 @@ public class ToxicPlans
             }
             finally
             {
-                if (!proxy.isEnabled())
-                {
-                    Actions.enable(proxy).run();
-                }
+                Actions.enable(proxy).run();
             }
         };
     }

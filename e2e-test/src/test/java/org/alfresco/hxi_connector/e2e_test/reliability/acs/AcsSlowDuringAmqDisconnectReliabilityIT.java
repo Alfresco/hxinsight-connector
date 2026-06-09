@@ -102,10 +102,7 @@ public class AcsSlowDuringAmqDisconnectReliabilityIT extends BaseReliabilityIT
         finally
         {
             log.info("[reliability] Re-enabling Toxiproxy — backlog drain begins through still-slow ACS");
-            if (!environment().activemqProxy().isEnabled())
-            {
-                environment().activemqProxy().enable();
-            }
+            environment().activemqProxy().enable();
         }
 
         log.info("[reliability] Holding ACS latency for {} ms after AMQ recovery so the drain composes both chaos sources", ACS_OVERLAP_AFTER_AMQ_RECOVERY_MS);

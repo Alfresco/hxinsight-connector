@@ -205,10 +205,7 @@ public class RandomChaosSoakReliabilityIT extends BaseReliabilityIT
         }
         finally
         {
-            if (!environment().activemqProxy().isEnabled())
-            {
-                environment().activemqProxy().enable();
-            }
+            environment().activemqProxy().enable();
             submitter.join();
         }
         log.info("[reliability] Block 1/5 complete");
@@ -274,10 +271,7 @@ public class RandomChaosSoakReliabilityIT extends BaseReliabilityIT
         }
         finally
         {
-            if (!environment().activemqProxy().isEnabled())
-            {
-                environment().activemqProxy().enable();
-            }
+            environment().activemqProxy().enable();
         }
         log.info("[reliability] Block 4/5 complete");
     }
