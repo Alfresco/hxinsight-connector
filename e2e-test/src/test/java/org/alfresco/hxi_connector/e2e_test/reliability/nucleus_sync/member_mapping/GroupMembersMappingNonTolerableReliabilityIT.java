@@ -31,12 +31,9 @@ import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 import com.github.tomakehurst.wiremock.stubbing.StubMapping;
@@ -47,30 +44,46 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
 
 /**
- * Non-tolerable group-member mapping outage — Nucleus POST /group-members returns 503 permanently. Closes the mapping-flow failure-path matrix (User + Group already covered; this completes Member).
+ * Non-tolerable group-member mapping outage — Nucleus POST /group-members returns 503 permanently.
  *
- * <h2>Why WireMock fault, not Toxiproxy disable?</h2> Both ACS and Nucleus traffic share the {@code toxic-nucleus} listener when {@code withStubbedAcs()} is on. A proxy disable would kill ACS reads too. A targeted 503 on the membership-mutation endpoint leaves user/group reads + earlier mutation phases untouched.
+ * <h2>Behaviour under test</h2>
+ * {@code NucleusClient.assignGroupMembers()} throws {@code ClientException} when the POST fails
+ * after retries exhaust. The sync controller catches this and returns an error HTTP status (500)
+ * from {@code POST /sync/trigger}. The test verifies this via the response status code.
+ *
+ * <h2>Why extractMemberships() doesn't work for this assertion</h2>
+ * WireMock's journal records the full request body of every attempt — including ones that got 503.
+ * If all memberships are sent in a single batch POST, the request body contains all N memberships
+ * even though the server rejected them. Counting memberships from request bodies does NOT tell you
+ * how many were successfully persisted.
  *
  * <h2>What this pins</h2>
  * <ol>
- * <li>User-mapping + group-creation phases succeed (the 503 only affects /group-members POST).</li>
- * <li>The first membership POST hits the 503 → ClientException propagates → sync future fails.</li>
- * <li>Fewer than {@link #TOTAL_USERS} memberships landed — proves the membership phase aborted partway through (or immediately) rather than completing despite the fault.</li>
+ *   <li>User-mapping + group-creation phases succeed (503 only affects /group-members POST).</li>
+ *   <li>The sync returns a non-200 status — {@code ClientException} propagated to the controller.</li>
+ *   <li>At least one POST /group-members attempt was made — proves the phase was reached.</li>
  * </ol>
+ *
+ * <h2>Why WireMock fault, not Toxiproxy disable?</h2>
+ * Both ACS and Nucleus traffic share the {@code toxic-nucleus} listener when {@code withStubbedAcs()}
+ * is on. A proxy disable would kill ACS reads too. A targeted 503 on the membership-mutation endpoint
+ * leaves user/group reads + earlier mutation phases untouched.
  */
 @Slf4j
 public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
 {
-    private static final int TOTAL_USERS = 100;
+    private static final int TOTAL_USERS = 1000;
     private static final String SHARED_GROUP_ID = "groupShared";
 
     /**
-     * Outer wait for the sync future to terminate (with an exception). The membership phase runs after user-mapping + group-creation, so the failure surfaces a few seconds in. 60 s is generous — a timeout here would mask a "sync hung instead of failing" regression.
+     * Outer wait for the sync future to terminate. The membership phase runs after user-mapping +
+     * group-creation, so the failure surfaces a few seconds in. 120 s is generous — a timeout here
+     * would mask a "sync hung" regression.
      */
-    private static final long SYNC_FAILURE_TIMEOUT_S = 60L;
+    private static final long SYNC_COMPLETION_TIMEOUT_S = 120L;
 
     @Test
-    void shouldFailWhenNucleusGroupMembersEndpointReturns503() throws Exception
+    void shouldFailSyncWhenGroupMembersEndpointPermanentlyReturns503() throws Exception
     {
         installAllStubs();
 
@@ -82,37 +95,55 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
 
         long startNanos = System.nanoTime();
 
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        // startSynchronization() returns the HTTP status code from /sync/trigger.
+        // It does NOT throw — even if the sync fails internally, the HTTP call succeeds.
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
-        assertThatThrownBy(() -> syncCall.get(SYNC_FAILURE_TIMEOUT_S, TimeUnit.SECONDS))
-                .as("Sync was expected to fail on 503 from POST /group-members, but it completed "
-                        + "cleanly. Either the fault wasn't applied (check priority) or the error "
-                        + "was silently swallowed.")
-                .isInstanceOf(ExecutionException.class);
+        int statusCode = syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
-        log.info("[outage-test] Sync failed (as expected) after {} ms", elapsedMs);
+        log.info("[outage-test] Sync returned HTTP {} after {} ms", statusCode, elapsedMs);
 
-        // Verify the membership phase aborted: fewer than TOTAL_USERS memberships were posted.
+        // Primary assertion: sync must return a non-200 status because assignGroupMembers()
+        // throws ClientException which the controller should surface as 500.
+        assertThat(statusCode)
+                .as("Expected /sync/trigger to return a non-200 status because POST /group-members "
+                        + "permanently returns 503 and NucleusClient.assignGroupMembers() throws "
+                        + "ClientException. Got HTTP %d — either the exception was swallowed in "
+                        + "the orchestration layer, or the controller maps it to 200 (bug).", statusCode)
+                .isGreaterThanOrEqualTo(400);
+
+        // Secondary assertion: at least one POST /group-members attempt was made
+        // (proves the membership phase was reached before the failure).
         List<LoggedRequest> memberPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUP_MEMBERS_PATH)));
-        Set<String> createdMemberships = extractMemberships(memberPosts);
+        log.info("[outage-test] POST /group-members attempts before failure: {}", memberPosts.size());
 
-        log.info("[outage-test] POST /group-members requests landed: {} (unique memberships: {} / {})",
-                memberPosts.size(), createdMemberships.size(), TOTAL_USERS);
+        assertThat(memberPosts)
+                .as("Expected at least one POST /group-members attempt — the membership phase "
+                        + "should have been reached after user-mapping and group-creation succeeded")
+                .isNotEmpty();
 
-        assertThat(createdMemberships.size())
-                .as("Expected fewer than %d memberships because the 503 fault should have aborted "
-                        + "the sync, but %d landed — fault was ineffective.",
-                        TOTAL_USERS, createdMemberships.size())
-                .isLessThan(TOTAL_USERS);
+        // Tertiary assertion: user-mappings and groups succeeded (earlier phases were unaffected)
+        List<LoggedRequest> userMappingPosts = nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH)));
+        assertThat(userMappingPosts)
+                .as("User-mapping phase should have completed before the membership fault kicked in")
+                .isNotEmpty();
 
-        log.info("[outage-test] ✓ Non-tolerable outage correctly aborted sync — {} of {} memberships landed",
-                createdMemberships.size(), TOTAL_USERS);
+        List<LoggedRequest> groupPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUPS_PATH)));
+        assertThat(groupPosts)
+                .as("Group-creation phase should have completed before the membership fault kicked in")
+                .isNotEmpty();
+
+        log.info("[outage-test] ✓ Sync correctly failed with HTTP {} — {} membership attempts made, "
+                        + "user-mappings and groups succeeded beforehand",
+                statusCode, memberPosts.size());
     }
 
     /**
-     * Replace the 200-OK POST /group-members stub with a 503 at higher priority. Other Nucleus mutation endpoints (POST /user-mappings, POST /groups) keep the normal 200 stub so the earlier phases of sync complete normally and the membership phase is where the cut lands.
+     * Replace the 200-OK POST /group-members stub with a 503 at higher priority. Other Nucleus
+     * mutation endpoints (POST /user-mappings, POST /groups) keep the normal 200 stub so the
+     * earlier phases of sync complete normally and the membership phase is where the fault lands.
      */
     private void injectGroupMembersFault()
     {

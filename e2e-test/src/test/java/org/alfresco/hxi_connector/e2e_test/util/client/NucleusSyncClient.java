@@ -44,17 +44,21 @@ public class NucleusSyncClient
     private static final String SYNC_URL = "http://%s:%s/sync/trigger";
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
-    // This is the main Sync Process Executor Call
+    /**
+     * Triggers a full synchronization. Returns the HTTP status code from the controller.
+     * A 200 means sync completed successfully; any other status (typically 500) means
+     * an error occurred during the sync (e.g. a downstream dependency returned 503).
+     */
     @SneakyThrows
-    public void startSynchronization()
+    public int startSynchronization()
     {
-        // Implementation to trigger synchronization via API call to Nucleus Sync container
         String uri = SYNC_URL.formatted(baseUrl, String.valueOf(port));
-        send(
+        HttpResponse<String> response = send(
                 HttpRequest.newBuilder()
                         .uri(java.net.URI.create(uri))
                         .POST(HttpRequest.BodyPublishers.noBody())
                         .build());
+        return response.statusCode();
     }
 
     @SneakyThrows
