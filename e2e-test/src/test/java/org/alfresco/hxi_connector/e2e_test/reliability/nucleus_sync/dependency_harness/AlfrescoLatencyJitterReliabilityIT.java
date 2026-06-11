@@ -30,6 +30,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import eu.rekawek.toxiproxy.model.ToxicDirection;
@@ -42,6 +43,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.harness.Actions;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncReliabilityIT;
 import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
+
 @Slf4j
 public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilityIT
 {
@@ -49,7 +51,6 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
      * Generous upper bound for the synchronous {@code /sync/trigger} call to return. Sized 4× the worst-case wall clock under jitter (~2 s observed) so a moderately slow CI runner doesn't flake the test, while still being far enough below the 5-minute per-attempt timeout that an accidental retry would manifest as a timeout rather than as a green pass.
      */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 30L;
-
     /**
      * Lower bound for "the chaos was actually in effect". Without latency the round-trip for the people fetch is ~10 ms; with 300 ± 200 ms latency on each chunk it inflates by an order of magnitude. We assert the wall clock is at least this many ms over the baseline so a silently-bypassed toxic (e.g. nucleus-sync accidentally pointed at the real {@code repository} alias instead of {@code toxic-acs}) surfaces as a clear failure rather than a falsely-passing assertion.
      */
@@ -64,13 +65,10 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
     @Test
     void shouldCompleteSyncWhenAlfrescoPathHasModerateLatencyAndJitter()
     {
-        environment().repositoryClient().createUser(new User("test1", "test", "abcd@hyland.com"));
-        installAuthResponse();
-        installReturnUserWithSameMail();
-        installReturnEmptyMapping();
-        installReturnEmptyGroups();
-        installReturnEmptyGroupMembers();
-        installMutationEndpoints();
+
+        String emailIdForUserToCreate = "abcd@hyland_%s.com".formatted(UUID.randomUUID()); // This must be unique as Nucleus Sync Drops mapping for multiple users with same email ID
+        createTestUserWithTestEmail(emailIdForUserToCreate);
+        installStubs(emailIdForUserToCreate);
 
         log.info("[reliability] Adding latency+jitter toxic on acsProxy (300 ± 200 ms downstream)");
         Actions.addLatencyAndJitter(environment().acsProxy()).run();
@@ -121,13 +119,9 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
     @Test
     void shouldCompleteSyncUnderHeavyButTolerableLatency() throws IOException
     {
-        environment().repositoryClient().createUser(new User("test2", "test", "heavy@hyland.com"));
-        installAuthResponse();
-        installReturnUserWithSameMail();
-        installReturnEmptyMapping();
-        installReturnEmptyGroups();
-        installReturnEmptyGroupMembers();
-        installMutationEndpoints();
+        String emailIdForUserToCreate = "abcd@hyland_%s.com".formatted(UUID.randomUUID()); // This must be unique as Nucleus Sync Drops mapping for multiple users with same email ID
+        createTestUserWithTestEmail(emailIdForUserToCreate);
+        installStubs(emailIdForUserToCreate);
 
         // Custom toxic — we want a stronger latency profile than the shared 300 ms helper, but the
         // toxic name is the same so the @AfterEach hook removes it via the standard helper.
@@ -153,6 +147,15 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
                             + "Alfresco read likely timed out and the orchestration aborted")
                     .isNotEmpty();
         });
+    }
+
+    private void installStubs(String emailId){
+        installAuthResponse();
+        installReturnUserWithSameMail(emailId);
+        installReturnEmptyMapping();
+        installReturnEmptyGroups();
+        installReturnEmptyGroupMembers();
+        installMutationEndpoints();
     }
 
 }

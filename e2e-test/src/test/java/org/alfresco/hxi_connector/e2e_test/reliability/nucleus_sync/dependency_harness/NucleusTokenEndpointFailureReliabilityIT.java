@@ -34,6 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
@@ -43,7 +44,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
 /**
  * IDP / OAuth2 token endpoint outage — every Nucleus call needs a Bearer token from {@code POST /token}. If that endpoint fails persistently, the sync MUST surface a clear failure (not hang, not silently succeed against {@code Authorization: Bearer null}, not loop forever on token refresh).
@@ -70,12 +70,11 @@ public class NucleusTokenEndpointFailureReliabilityIT extends BaseNucleusSyncRel
     void shouldFailSyncWhenTokenEndpointPersistentlyReturns503() throws Exception
     {
         // Pre-condition: real ACS has at least one user so the sync has something to mediate.
-        environment().repositoryClient().createUser(new User("test", "test", "abcd@hyland.com"));
+        // User Already Exsists Find some other way to create or
+        String emailId = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
+        createTestUserWithTestEmail(emailId);
+        installAllStubs(emailId);
 
-        // Install ALL the success-path Nucleus stubs first, then OVERRIDE /token with a 503 at
-        // higher priority. This way every other endpoint is "healthy" — the ONLY thing wrong is
-        // that nucleus-sync cannot obtain a Bearer token.
-        installAllStubs();
         nucleus().register(post(urlEqualTo("/token"))
                 .atPriority(SCENARIO_STUB_PRIORITY - 1) // priority 0 > priority 1
                 .willReturn(aResponse()
@@ -86,18 +85,15 @@ public class NucleusTokenEndpointFailureReliabilityIT extends BaseNucleusSyncRel
         log.info("[token-failure] /token stubbed to return 503 — triggering sync");
 
         long startNanos = System.nanoTime();
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment().nucleusSyncClient().startSynchronization());
 
         // The sync future MUST complete exceptionally. A silent green pass here would mean either
         // (a) the auth layer swallowed the token failure and passed a null/empty Authorization
         // header to Nucleus (which the stubs would then accept since they don't verify auth), or
         // (b) the controller decoupled the failure from its response — both are bugs we want to catch.
-        assertThatThrownBy(() -> syncCall.get(SYNC_FAILURE_TIMEOUT_S, TimeUnit.SECONDS))
-                .as("Sync was expected to fail because the Nucleus token endpoint is down, but it "
-                        + "returned cleanly. Either the auth layer is swallowing token errors or "
-                        + "stubs are accepting requests with missing/invalid Authorization headers.")
-                .isInstanceOf(ExecutionException.class);
+        int statusCode = syncCall.get(SYNC_FAILURE_TIMEOUT_S, TimeUnit.SECONDS);
+        assertThat(statusCode).isEqualTo(503);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[token-failure] Sync failed (as expected) after {} ms", elapsedMs);

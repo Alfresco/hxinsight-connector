@@ -60,12 +60,12 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
     /**
      * Delay between triggering sync and injecting the fault. Must be long enough for user discovery (reading 1M users from ACS + Nucleus stubs) to complete AND the first batch of user-mapping POSTs to land. 10 s is generous for paginated stub reads.
      */
-    private static final long DELAY_BEFORE_FAULT_MS = 5 * 60_000L + 5000;
+    private static final long DELAY_BEFORE_FAULT_MS = 3 * 60_000L + 5000;
 
     /**
      * Duration the fault stays active. Must outlive the retry budget (~2.4 s with the test env's 5 × 200 ms × 2 config) so all retry attempts hit the 503.
      */
-    private static final long FAULT_DURATION_MS = 3 * 60_000L;
+    private static final long FAULT_DURATION_MS = 2 * 60_000L;
 
     /**
      * Outer wait for the sync future to terminate (with an exception). Generous so a "sync hung instead of failing" regression surfaces as a test failure.

@@ -30,6 +30,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -86,10 +87,15 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT
         return environment().nucleusWireMock();
     }
 
+    protected void createTestUserWithTestEmail(String email)
+    {
+        environment().repositoryClient().createUser(new User("test@"+ UUID.randomUUID(), "test", email));
+    }
+
     /**
      * A stubbed response for the "get users" endpoint that returns a user with the same email as the test user.
      */
-    protected void installReturnUserWithSameMail()
+    protected void installReturnUserWithSameMail(String email)
     {
         nucleus().register(get(urlPathEqualTo("/api/users"))
                 .atPriority(SCENARIO_STUB_PRIORITY)
@@ -99,11 +105,11 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT
                             {
                               "userName": "asmith",
                               "userId": "iam-1234",
-                              "email": "abcd@hyland.com"
+                              "email": "%s"
                             }
                           ]
                         }
-                        """)));
+                        """.formatted(email))));
     }
 
     protected static com.github.tomakehurst.wiremock.client.ResponseDefinitionBuilder jsonResponse(String body)
@@ -283,10 +289,10 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT
     /**
      * Installs the standard set of stubs needed for a happy-path sync: auth, single Nucleus user matching a single ACS user by email, empty current mappings/groups/members, and mutation endpoints. Subclasses can override specific stubs at higher priority for chaos injection.
      */
-    protected void installAllStubs()
+    protected void installAllStubs(String emailId)
     {
         installAuthResponse();
-        installReturnUserWithSameMail();
+        installReturnUserWithSameMail(emailId);
         installReturnEmptyMapping();
         installReturnEmptyGroups();
         installReturnEmptyGroupMembers();

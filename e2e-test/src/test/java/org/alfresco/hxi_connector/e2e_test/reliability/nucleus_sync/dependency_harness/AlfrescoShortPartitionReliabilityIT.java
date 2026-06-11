@@ -29,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -37,7 +38,6 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
 
 @Slf4j
 public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabilityIT
@@ -57,9 +57,10 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
     @Test
     void shouldRecoverWhenAlfrescoBriefPartitionEndsBeforeRetryBudgetExhausts() throws Exception
     {
-        installAllStubsSpecial();
+        String emailIdForUserToCreate = "abcd@hyland_%s.com".formatted(UUID.randomUUID());
+        createTestUserWithTestEmail(emailIdForUserToCreate);
+        installAllStubsSpecial(emailIdForUserToCreate);
         // Pre-conditions: user in Alfresco + all Nucleus stubs ready so the only failure axis is the partition.
-        environment().repositoryClient().createUser(new User("test", "test", "abcd@hyland.com"));
 
         // 1. Open the partition BEFORE triggering sync so the first outbound Alfresco call fails immediately
         // (otherwise the call might land before the disable() takes effect on the Toxiproxy listener).
@@ -106,14 +107,14 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
         });
     }
 
-    private void installAllStubsSpecial()
+    private void installAllStubsSpecial(String mailId)
     {
         installMutationEndpointsWithTracking();
         installAuthResponse();
         installReturnEmptyGroups();
         installReturnEmptyGroupMembers();
         installReturnEmptyMapping();
-        installReturnUserWithSameMail();
+        installReturnUserWithSameMail(mailId);
     }
 
 }

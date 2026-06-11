@@ -28,6 +28,7 @@ package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.dependency_
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,8 +49,9 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
     @Test
     void shouldFailFastWhenNucleusPartitionOutlastsRetryBudget() throws Exception
     {
-        environment().repositoryClient().createUser(new User("test", "test", "abcd@hyland.com"));
-        installAllStubs();
+        String emailId = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
+        createTestUserWithTestEmail(emailId);
+        installAllStubs(emailId);
 
         // 1. Open the partition BEFORE triggering sync, so the first Nucleus call fails immediately.
         log.info("[reliability] Disabling nucleusProxy — partition opens (will outlast the retry budget)");
