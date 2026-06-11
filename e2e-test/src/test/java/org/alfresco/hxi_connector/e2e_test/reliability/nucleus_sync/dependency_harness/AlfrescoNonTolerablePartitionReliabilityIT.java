@@ -38,7 +38,6 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncReliabilityIT;
 
-
 @Slf4j
 public class AlfrescoNonTolerablePartitionReliabilityIT extends BaseNucleusSyncReliabilityIT
 {
