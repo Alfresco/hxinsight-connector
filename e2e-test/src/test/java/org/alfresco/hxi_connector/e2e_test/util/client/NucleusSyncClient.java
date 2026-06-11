@@ -45,9 +45,7 @@ public class NucleusSyncClient
     private final HttpClient httpClient = HttpClient.newHttpClient();
 
     /**
-     * Triggers a full synchronization. Returns the HTTP status code from the controller.
-     * A 200 means sync completed successfully; any other status (typically 500) means
-     * an error occurred during the sync (e.g. a downstream dependency returned 503).
+     * Triggers a full synchronization. Returns the HTTP status code from the controller. A 200 means sync completed successfully; any other status (typically 500) means an error occurred during the sync (e.g. a downstream dependency returned 503).
      */
     @SneakyThrows
     public int startSynchronization()
