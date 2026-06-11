@@ -89,7 +89,7 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT
 
     protected void createTestUserWithTestEmail(String email)
     {
-        environment().repositoryClient().createUser(new User("test@"+ UUID.randomUUID(), "test", email));
+        environment().repositoryClient().createUser(new User("test@" + UUID.randomUUID(), "test", email));
     }
 
     /**

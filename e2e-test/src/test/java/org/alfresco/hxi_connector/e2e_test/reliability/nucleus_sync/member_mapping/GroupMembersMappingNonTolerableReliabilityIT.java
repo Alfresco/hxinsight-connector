@@ -46,28 +46,18 @@ import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusS
 /**
  * Non-tolerable group-member mapping outage — Nucleus POST /group-members returns 503 permanently.
  *
- * <h2>Behaviour under test</h2>
- * {@code NucleusClient.assignGroupMembers()} throws {@code ClientException} when the POST fails
- * after retries exhaust. The sync controller catches this and returns an error HTTP status (500)
- * from {@code POST /sync/trigger}. The test verifies this via the response status code.
+ * <h2>Behaviour under test</h2> {@code NucleusClient.assignGroupMembers()} throws {@code ClientException} when the POST fails after retries exhaust. The sync controller catches this and returns an error HTTP status (500) from {@code POST /sync/trigger}. The test verifies this via the response status code.
  *
- * <h2>Why extractMemberships() doesn't work for this assertion</h2>
- * WireMock's journal records the full request body of every attempt — including ones that got 503.
- * If all memberships are sent in a single batch POST, the request body contains all N memberships
- * even though the server rejected them. Counting memberships from request bodies does NOT tell you
- * how many were successfully persisted.
+ * <h2>Why extractMemberships() doesn't work for this assertion</h2> WireMock's journal records the full request body of every attempt — including ones that got 503. If all memberships are sent in a single batch POST, the request body contains all N memberships even though the server rejected them. Counting memberships from request bodies does NOT tell you how many were successfully persisted.
  *
  * <h2>What this pins</h2>
  * <ol>
- *   <li>User-mapping + group-creation phases succeed (503 only affects /group-members POST).</li>
- *   <li>The sync returns a non-200 status — {@code ClientException} propagated to the controller.</li>
- *   <li>At least one POST /group-members attempt was made — proves the phase was reached.</li>
+ * <li>User-mapping + group-creation phases succeed (503 only affects /group-members POST).</li>
+ * <li>The sync returns a non-200 status — {@code ClientException} propagated to the controller.</li>
+ * <li>At least one POST /group-members attempt was made — proves the phase was reached.</li>
  * </ol>
  *
- * <h2>Why WireMock fault, not Toxiproxy disable?</h2>
- * Both ACS and Nucleus traffic share the {@code toxic-nucleus} listener when {@code withStubbedAcs()}
- * is on. A proxy disable would kill ACS reads too. A targeted 503 on the membership-mutation endpoint
- * leaves user/group reads + earlier mutation phases untouched.
+ * <h2>Why WireMock fault, not Toxiproxy disable?</h2> Both ACS and Nucleus traffic share the {@code toxic-nucleus} listener when {@code withStubbedAcs()} is on. A proxy disable would kill ACS reads too. A targeted 503 on the membership-mutation endpoint leaves user/group reads + earlier mutation phases untouched.
  */
 @Slf4j
 public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
@@ -76,9 +66,7 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
     private static final String SHARED_GROUP_ID = "groupShared";
 
     /**
-     * Outer wait for the sync future to terminate. The membership phase runs after user-mapping +
-     * group-creation, so the failure surfaces a few seconds in. 120 s is generous — a timeout here
-     * would mask a "sync hung" regression.
+     * Outer wait for the sync future to terminate. The membership phase runs after user-mapping + group-creation, so the failure surfaces a few seconds in. 120 s is generous — a timeout here would mask a "sync hung" regression.
      */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 120L;
 
@@ -136,14 +124,12 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
                 .isNotEmpty();
 
         log.info("[outage-test] ✓ Sync correctly failed with HTTP {} — {} membership attempts made, "
-                        + "user-mappings and groups succeeded beforehand",
+                + "user-mappings and groups succeeded beforehand",
                 statusCode, memberPosts.size());
     }
 
     /**
-     * Replace the 200-OK POST /group-members stub with a 503 at higher priority. Other Nucleus
-     * mutation endpoints (POST /user-mappings, POST /groups) keep the normal 200 stub so the
-     * earlier phases of sync complete normally and the membership phase is where the fault lands.
+     * Replace the 200-OK POST /group-members stub with a 503 at higher priority. Other Nucleus mutation endpoints (POST /user-mappings, POST /groups) keep the normal 200 stub so the earlier phases of sync complete normally and the membership phase is where the fault lands.
      */
     private void injectGroupMembersFault()
     {

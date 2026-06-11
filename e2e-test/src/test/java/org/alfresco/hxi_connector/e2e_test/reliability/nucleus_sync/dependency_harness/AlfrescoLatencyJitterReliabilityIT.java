@@ -41,8 +41,6 @@ import org.junit.jupiter.api.Test;
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.harness.Actions;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncReliabilityIT;
-import org.alfresco.hxi_connector.e2e_test.util.client.model.User;
-
 
 @Slf4j
 public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilityIT
@@ -149,7 +147,8 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
         });
     }
 
-    private void installStubs(String emailId){
+    private void installStubs(String emailId)
+    {
         installAuthResponse();
         installReturnUserWithSameMail(emailId);
         installReturnEmptyMapping();
