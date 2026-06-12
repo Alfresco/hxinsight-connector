@@ -210,6 +210,10 @@
 
         <profile>
             <id>nucleus-sync</id>
+            <properties>
+                    <performance.userCount>1000000</performance.userCount>
+                    <performance.groupsCount>100000</performance.groupsCount>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
