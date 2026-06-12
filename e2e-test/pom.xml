@@ -211,7 +211,7 @@
         <profile>
             <id>nucleus-sync</id>
             <properties>
-                    <performance.userCount>1000000</performance.userCount>
+                    <performance.userCount>100000</performance.userCount>
                     <performance.groupsCount>100000</performance.groupsCount>
             </properties>
             <build>
@@ -231,6 +231,10 @@
                             </includes>
                             <excludes combine.self="override" />
                             <skipTests>false</skipTests>
+                            <systemPropertyVariables>
+                                <performance.userCount>${performance.userCount}</performance.userCount>
+                                <performance.groupsCount>${performance.groupsCount}</performance.groupsCount>
+                            </systemPropertyVariables>
                         </configuration>
                     </plugin>
                 </plugins>

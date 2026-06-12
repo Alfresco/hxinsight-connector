@@ -46,12 +46,12 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
     /**
      * Delay between triggering sync and opening the partition. Larger than the user-mapping variant because group-member sync runs last — user discovery + mapping + group discovery + group creation must all complete first so the outage genuinely overlaps the membership POST phase rather than earlier stages.
      */
-    private static final long DELAY_BEFORE_OUTAGE_MS = 300L;
+    private static final long DELAY_BEFORE_OUTAGE_MS = 100L;
 
     /**
      * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts without exhausting the full 3 s retry budget, so the next attempt after re-enable still lands inside the budget and the sync recovers.
      */
-    private static final long OUTAGE_DURATION_MS = 1_000L;
+    private static final long OUTAGE_DURATION_MS = 1000L;
 
     /** Total users → also total memberships expected against the shared group. */
     private static final int TOTAL_USERS = 100;

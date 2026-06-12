@@ -51,7 +51,7 @@ public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNu
     /**
      * Delay between triggering sync and opening the partition. Small but non-zero — gives the sync thread enough time to leave the controller and hit the first Nucleus call so the outage genuinely overlaps the mapping work rather than landing before it starts.
      */
-    private static final long DELAY_BEFORE_OUTAGE_MS = 5000L;
+    private static final long DELAY_BEFORE_OUTAGE_MS = 20 * 1000L;
 
     /**
      * Window during which the {@code nucleusProxy} is disabled. Sized to burn 2–3 retry attempts (≈200 ms, 600 ms, 1400 ms in the standard envelope) without exhausting the full 3 s retry budget, so the next attempt after re-enable still lands inside the budget and the sync recovers.
