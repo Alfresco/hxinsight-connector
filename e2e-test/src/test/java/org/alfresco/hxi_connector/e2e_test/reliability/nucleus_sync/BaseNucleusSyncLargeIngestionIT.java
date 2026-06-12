@@ -87,7 +87,7 @@ public abstract class BaseNucleusSyncLargeIngestionIT
     protected static final int TOTAL_USER_COUNT = Integer.getInteger("performance.userCount", 1000000);
 
     // Total User Groups
-    protected static final int TOTAL_GROUPS_COUNT = Integer.getInteger("performance.groupsCount", 1000000);;
+    protected static final int TOTAL_GROUPS_COUNT = Integer.getInteger("performance.groupsCount", 1000000);
 
     /** Track stubs we register so we can clean them up in @AfterEach. */
     protected final List<StubMapping> registeredStubs = new ArrayList<>();
