@@ -84,10 +84,10 @@ public abstract class BaseNucleusSyncLargeIngestionIT
     /**
      * Total number of users to simulate on BOTH ACS and Nucleus sides. Tune this single knob to scale the test — currently {@code 100} for fast local runs; production-grade scale check is {@code 1_000_000}. Note the install cost: each ACS page is one stub, so 1M users at {@link #ACS_PAGE_SIZE}=100 means 10 000 stubs registered before the sync even starts.
      */
-    protected static final int TOTAL_USER_COUNT = Integer.getInteger("performance.userCount",1000000);
+    protected static final int TOTAL_USER_COUNT = Integer.getInteger("performance.userCount", 1000000);
 
     // Total User Groups
-    protected static final int TOTAL_GROUPS_COUNT = Integer.getInteger("performance.groupsCount",1000000);;
+    protected static final int TOTAL_GROUPS_COUNT = Integer.getInteger("performance.groupsCount", 1000000);;
 
     /** Track stubs we register so we can clean them up in @AfterEach. */
     protected final List<StubMapping> registeredStubs = new ArrayList<>();
