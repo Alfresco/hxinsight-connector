@@ -80,10 +80,10 @@ public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeInge
      * </ul>
      */
     @Test
-    void shouldMapOneMillionUsersFromBothSides()
+    void shouldMapLargeUsersFromBothSides()
     {
         log.info("[scale-test] Starting full stub test: {} users on both ACS and Nucleus sides", TOTAL_USER_COUNT);
-        installAllStubs();
+        installAllStubsWithAnyGroup();
         long startNanos = System.nanoTime();
 
         // 2. Trigger sync — both ACS and Nucleus calls hit stubs
@@ -143,18 +143,4 @@ public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeInge
 
         log.info("[scale-test] ✓ All {} users successfully mapped — no mappings dropped!", TOTAL_USER_COUNT);
     }
-
-    private void installAllStubs()
-    {
-        // 1. Install all stubs
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USER_COUNT);
-        installAcsUserGroupsStub();
-        installNucleusIamUsersStubs(TOTAL_USER_COUNT);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
-    }
-
 }

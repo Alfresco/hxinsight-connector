@@ -322,7 +322,7 @@ public class DockerContainers
                 .withEnv("NUCLEUS_BASE_URL", "http://%s:8080".formatted(nucleusHost))
                 .withEnv("NUCLEUS_IDP_BASE_URL", "http://%s:8080".formatted(nucleusHost))
                 // application.yml: auth.providers.hyland-experience.type — accepted value is "oauth2".
-                .withEnv("AUTH_HX_TYPE", "client-credentials")
+                .withEnv("AUTH_HX_TYPE", "oauth2")
                 .withEnv("HX_TOKEN_URI", "http://%s:8080/token".formatted(nucleusHost))
                 .withEnv("HX_CLIENT_ID", "dummy-client-key")
                 .withEnv("HX_CLIENT_SECRET", "dummy-client-secret")

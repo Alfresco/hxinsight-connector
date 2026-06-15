@@ -44,7 +44,6 @@ import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
@@ -80,10 +79,8 @@ public class AlfrescoClientIntegrationTest
         // Create client with WireMock URL
         String baseUrl = "http://localhost:" + wireMockServer.port() + "/alfresco/api/-default-/public/alfresco/versions/1";
         alfrescoClient = new AlfrescoClient(
-                WebClient.builder().build(),
                 new ObjectMapper(),
                 authService,
-                5,
                 baseUrl,
                 100,
                 true,

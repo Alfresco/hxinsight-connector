@@ -28,7 +28,6 @@ package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.dependency_
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,10 +47,7 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
     @Test
     void shouldFailFastWhenNucleusPartitionOutlastsRetryBudget() throws Exception
     {
-        String emailId = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
-        createTestUserWithTestEmail(emailId);
-        installAllStubs(emailId);
-
+        createGroupWithUniqueEmailAndInstallStub();
         // 1. Open the partition BEFORE triggering sync, so the first Nucleus call fails immediately.
         log.info("[reliability] Disabling nucleusProxy — partition opens (will outlast the retry budget)");
         environment().nucleusproxy().disable();
@@ -91,7 +87,7 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
                     .isEmpty();
             // /api/users read also must not have succeeded — every attempt was sunk in retries.
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))))
-                    .as("Expected zero user-mappings GETs to have succeeded during a total outage")
+                    .as("Expected zero /api/users GETs to have succeeded during a total outage")
                     .isEmpty();
         });
     }

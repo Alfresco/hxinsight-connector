@@ -87,6 +87,24 @@ public abstract class BaseNucleusSyncReliabilityIT extends BaseReliabilityIT
         return environment().nucleusWireMock();
     }
 
+    // Create User With Unique Email and Return
+    protected String createUserWithUniqueEmail()
+    {
+        String emailIdForUserToCreate = "abcd@hyland_%s.com".formatted(UUID.randomUUID());
+        createTestUserWithTestEmail(emailIdForUserToCreate);
+        return emailIdForUserToCreate;
+    }
+
+    /**
+     * extending @createUserWithUniqueEmail also install stubs here
+     */
+    protected String createGroupWithUniqueEmailAndInstallStub()
+    {
+        String emailId = createUserWithUniqueEmail();
+        installAllStubs(emailId);
+        return emailId;
+    }
+
     protected void createTestUserWithTestEmail(String email)
     {
         environment().repositoryClient().createUser(new User("test@" + UUID.randomUUID(), "test", email));

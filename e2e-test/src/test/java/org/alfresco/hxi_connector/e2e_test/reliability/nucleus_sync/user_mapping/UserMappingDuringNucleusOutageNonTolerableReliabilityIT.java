@@ -70,12 +70,12 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
     /**
      * Outer wait for the sync future to terminate (with an exception). Generous so a "sync hung instead of failing" regression surfaces as a test failure.
      */
-    private static final long SYNC_FAILURE_TIMEOUT_S = 20L;
+    private static final long SYNC_FAILURE_TIMEOUT = 20L;
 
     @Test
     void shouldFailMidSyncWhenNucleusMappingEndpointReturns503() throws Exception
     {
-        installAllStubs();
+        installAllStubsWithAnyGroup();
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread.
@@ -100,7 +100,7 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
             nucleus().removeStubMapping(faultStub);
         }
 
-        syncCall.get(SYNC_FAILURE_TIMEOUT_S, TimeUnit.MINUTES);
+        syncCall.get(SYNC_FAILURE_TIMEOUT, TimeUnit.MINUTES);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[outage-test] Sync failed (as expected) after {} ms — fault window was {} ms",
@@ -143,17 +143,5 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
                                 .withBody("{\"error\":\"Service Unavailable — simulated outage\"}")));
         registeredStubs.add(fault);
         return fault;
-    }
-
-    private void installAllStubs()
-    {
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USER_COUNT);
-        installAcsUserGroupsStub();
-        installNucleusIamUsersStubs(TOTAL_USER_COUNT);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
     }
 }

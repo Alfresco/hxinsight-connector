@@ -30,19 +30,24 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 
-import lombok.AllArgsConstructor;
 import lombok.SneakyThrows;
 
 /**
  * Nucleus Sync Client Used for Communication with Nucleus Sync Container in E2E Tests. This client can be used to perform operations such as triggering sync, checking sync status, etc. The implementation details will depend on the specific API exposed by the Nucleus Sync container.
  */
-@AllArgsConstructor
 public class NucleusSyncClient
 {
     private final String baseUrl;
     private final int port;
     private static final String SYNC_URL = "http://%s:%s/sync/trigger";
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient;
+
+    public NucleusSyncClient(String baseUrl, int port)
+    {
+        this.baseUrl = baseUrl;
+        this.port = port;
+        this.httpClient = HttpClient.newHttpClient();
+    }
 
     /**
      * Triggers a full synchronization. Returns the HTTP status code from the controller. A 200 means sync completed successfully; any other status (typically 500) means an error occurred during the sync (e.g. a downstream dependency returned 503).

@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -63,7 +64,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusS
 public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
 {
     private static final int TOTAL_USERS = 1000;
-    private static final String SHARED_GROUP_ID = "groupShared";
+    private static final String SHARED_GROUP_ID = "groupShared_%s".formatted(UUID.randomUUID());
 
     /**
      * Outer wait for the sync future to terminate. The membership phase runs after user-mapping + group-creation, so the failure surfaces a few seconds in. 120 s is generous — a timeout here would mask a "sync hung" regression.
@@ -73,7 +74,7 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
     @Test
     void shouldFailSyncWhenGroupMembersEndpointPermanentlyReturns503() throws Exception
     {
-        installAllStubs();
+        installAllTotalUsersBasedStubsWithSameGroupId(TOTAL_USERS, SHARED_GROUP_ID);
 
         // Inject the 503 BEFORE triggering sync so it's guaranteed to be active by the time the
         // membership phase starts. Earlier phases (user mappings, groups) succeed normally.
@@ -141,17 +142,5 @@ public class GroupMembersMappingNonTolerableReliabilityIT extends BaseNucleusSyn
                                 .withHeader("Content-Type", "application/json")
                                 .withBody("{\"error\":\"Service Unavailable — simulated membership outage\"}")));
         registeredStubs.add(fault);
-    }
-
-    private void installAllStubs()
-    {
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USERS);
-        installAcsUserGroupStubWithGroupId(SHARED_GROUP_ID);
-        installNucleusIamUsersStubs(TOTAL_USERS);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
     }
 }

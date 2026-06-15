@@ -29,24 +29,35 @@ import java.io.IOException;
 import java.time.Duration;
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 
-// Primary Component to call api endpoints with reliability
+/**
+ * Primary component to call API endpoints with retry resilience.
+ * <p>
+ * Retries only on transient failures:
+ * <ul>
+ * <li>{@link WebClientRequestException} — network/connection errors</li>
+ * <li>{@link RetryableServerException} — 5xx server errors</li>
+ * <li>{@link IOException} — timeouts</li>
+ * </ul>
+ * 4xx client errors (400, 401, 403, 404) fail immediately without retry — these indicate configuration or auth issues that retrying cannot fix.
+ * <p>
+ * IMPORTANT: {@code @Retryable} must be on each public method individually because Spring AOP cannot intercept self-invocations. A shared {@code executeRequest(Supplier)} wrapper would bypass the proxy and silently disable retries.
+ */
 @Component
 public class RetryableHttpInvoker
 {
     private final WebClient webClient;
     private final int timeoutInMins;
 
-    @Autowired
     public RetryableHttpInvoker(
             @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
             @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB)
@@ -61,17 +72,17 @@ public class RetryableHttpInvoker
     }
 
     /**
-     * HTTP: Verb GET
+     * HTTP GET with retry on transient failures.
      *
      * @param fullUrl
-     *            The Exact URL we want
+     *            the complete URL
      * @param headers
-     *            Headers including Auth
-     * @return The Response as String
+     *            headers including Authorization
+     * @return the response body as String
      */
     @Retryable(retryFor = {
             WebClientRequestException.class,
-            WebClientResponseException.class,
+            RetryableServerException.class,
             IOException.class},
             maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
             backoff = @Backoff(
@@ -88,14 +99,21 @@ public class RetryableHttpInvoker
                     httpHeaders.set("Content-Type", "application/json");
                 })
                 .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, response -> response.bodyToMono(String.class)
+                        .defaultIfEmpty("")
+                        .flatMap(body -> Mono.error(new RetryableServerException(
+                                response.statusCode().value(),
+                                "Server error %d on GET %s: %s".formatted(response.statusCode().value(), fullUrl, body)))))
                 .bodyToMono(String.class)
                 .block(Duration.ofMinutes(timeoutInMins));
     }
 
-    // HTTP VERB: POST
+    /**
+     * HTTP POST with retry on transient failures.
+     */
     @Retryable(retryFor = {
             WebClientRequestException.class,
-            WebClientResponseException.class,
+            RetryableServerException.class,
             IOException.class},
             maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
             backoff = @Backoff(
@@ -111,14 +129,21 @@ public class RetryableHttpInvoker
                 .headers(httpHeaders -> headers.forEach(httpHeaders::set))
                 .bodyValue(jsonBody)
                 .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, response -> response.bodyToMono(String.class)
+                        .defaultIfEmpty("")
+                        .flatMap(body -> Mono.error(new RetryableServerException(
+                                response.statusCode().value(),
+                                "Server error %d on POST %s: %s".formatted(response.statusCode().value(), fullUrl, body)))))
                 .bodyToMono(String.class)
                 .block(Duration.ofMinutes(timeoutInMins));
     }
 
-    // Http Verb : DELETE
+    /**
+     * HTTP DELETE with retry on transient failures.
+     */
     @Retryable(retryFor = {
             WebClientRequestException.class,
-            WebClientResponseException.class,
+            RetryableServerException.class,
             IOException.class},
             maxAttemptsExpression = "#{${http-client.retry.max-attempts:3}}",
             backoff = @Backoff(
@@ -132,8 +157,12 @@ public class RetryableHttpInvoker
                 .uri(fullUrl)
                 .headers(httpHeaders -> headers.forEach(httpHeaders::set))
                 .retrieve()
+                .onStatus(HttpStatusCode::is5xxServerError, response -> response.bodyToMono(String.class)
+                        .defaultIfEmpty("")
+                        .flatMap(body -> Mono.error(new RetryableServerException(
+                                response.statusCode().value(),
+                                "Server error %d on DELETE %s: %s".formatted(response.statusCode().value(), fullUrl, body)))))
                 .bodyToMono(String.class)
                 .block(Duration.ofMinutes(timeoutInMins));
     }
-
 }

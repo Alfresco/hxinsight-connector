@@ -45,7 +45,7 @@ import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusS
 public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT
 {
 
-    private void installAllStubs()
+    private void installSingleAcsUserBasedStubs()
     {
         installNucleusAuthStub();
         installSingleAcsUserStub();
@@ -69,12 +69,12 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
      * </ul>
      */
     @Test
-    void shouldMapOneMillionGroupsFromBothSides()
+    void shouldMapLargeAmountGroupsFromBothSides()
     {
         log.info("[scale-test] Starting full stub test: {} users on both ACS and Nucleus sides", TOTAL_GROUPS_COUNT);
 
         // 1. Install all stubs
-        installAllStubs();
+        installSingleAcsUserBasedStubs();
 
         long startNanos = System.nanoTime();
 

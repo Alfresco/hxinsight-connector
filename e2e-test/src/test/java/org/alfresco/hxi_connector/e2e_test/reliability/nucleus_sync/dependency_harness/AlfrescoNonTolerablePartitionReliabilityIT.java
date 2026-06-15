@@ -44,7 +44,7 @@ public class AlfrescoNonTolerablePartitionReliabilityIT extends BaseNucleusSyncR
     /**
      * How long the {@code acsProxy} stays disabled. Sized to lie inside the nucleus-sync HTTP retry budget * first attempt fails at t≈0, * retries fire at t≈200, 600, 1400 , 240, 3400 So 3.6 s partition will exhaust all the retries
      */
-    private static final long PARTITION_DURATION_MS = 3_600L;
+    private static final long PARTITION_DURATION_MS = 4_000L;
 
     /**
      * Settle window after re-enabling the proxy, before assertions run. Covers the post-recovery retry back-off plus the synchronous /sync/trigger response trip.
@@ -69,7 +69,7 @@ public class AlfrescoNonTolerablePartitionReliabilityIT extends BaseNucleusSyncR
 
         try
         {
-            // 3. Hold the partition for a window shorter than the retry budget.
+            // 3. Hold the partition for a window longer than the retry budget.
             Thread.sleep(PARTITION_DURATION_MS);
         }
         finally

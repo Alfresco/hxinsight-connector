@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -56,7 +57,7 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
     /** Total users → also total memberships expected against the shared group. */
     private static final int TOTAL_USERS = 100;
 
-    private static final String SHARED_GROUP_ID = "groupShared";
+    private static final String SHARED_GROUP_ID = "groupShared_%s".formatted(UUID.randomUUID());
 
     /** Outer wait for the sync future to complete. */
     private static final long SYNC_COMPLETION_TIMEOUT_S = 60L;
@@ -64,7 +65,7 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
     @Test
     void shouldMapAllGroupMembershipsWhenNucleusOutageHealsBeforeRetryBudgetExhausts() throws Exception
     {
-        installAllStubs();
+        installAllTotalUsersBasedStubsWithSameGroupId(TOTAL_USERS, SHARED_GROUP_ID);
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread — startSynchronization() blocks on the controller round-trip.
@@ -121,17 +122,5 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
 
         log.info("[outage-test] ✓ All {} memberships against {} successfully mapped despite Nucleus outage!",
                 TOTAL_USERS, SHARED_GROUP_ID);
-    }
-
-    private void installAllStubs()
-    {
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USERS);
-        installAcsUserGroupStubWithGroupId(SHARED_GROUP_ID);
-        installNucleusIamUsersStubs(TOTAL_USERS);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
     }
 }

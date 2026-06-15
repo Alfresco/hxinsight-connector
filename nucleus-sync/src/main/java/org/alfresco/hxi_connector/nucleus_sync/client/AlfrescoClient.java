@@ -39,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
@@ -50,11 +49,9 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 @Component
 public class AlfrescoClient
 {
-    private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final AuthService authService;
     private final String alfrescoBaseUrl;
-    private final int timeoutInMins;
     private final int pageSize;
     private final boolean skipNotEnabled;
     private final MeterRegistry meterRegistry;
@@ -74,14 +71,8 @@ public class AlfrescoClient
             RetryableHttpInvoker retryableHttpInvoker)
     {
         this(
-                WebClient.builder()
-                        .codecs(configurer -> configurer
-                                .defaultCodecs()
-                                .maxInMemorySize(bufferInKB * 1024))
-                        .build(),
                 new ObjectMapper(),
                 authService,
-                timeoutInMins,
                 alfrescoBaseUrl,
                 pageSize,
                 skipNotEnabled,
@@ -90,20 +81,16 @@ public class AlfrescoClient
     }
 
     AlfrescoClient(
-            WebClient webClient,
             ObjectMapper objectMapper,
             AuthService authService,
-            int timeoutInMins,
             String alfrescoBaseUrl,
             int pageSize,
             boolean skipNotEnabled,
             MeterRegistry meterRegistry,
             RetryableHttpInvoker retryableHttpInvoker)
     {
-        this.webClient = webClient;
         this.objectMapper = objectMapper;
         this.authService = authService;
-        this.timeoutInMins = timeoutInMins;
         this.alfrescoBaseUrl = alfrescoBaseUrl;
         this.pageSize = pageSize;
         this.skipNotEnabled = skipNotEnabled;
@@ -198,11 +185,11 @@ public class AlfrescoClient
 
     private void recordFailedRequest(String operation, String method, Throwable cause)
     {
-        Counter.builder(NucleusSyncMetrices.AlfrescoMetrices.CONNECTION_ISSUE)
-                .description(NucleusSyncMetrices.AlfrescoMetrices.CONNECTION_ISSUE_DESCRIPTION)
-                .tag(NucleusSyncMetrices.Tags.OPERATION, operation)
-                .tag(NucleusSyncMetrices.Tags.METHOD, method)
-                .tag(NucleusSyncMetrices.Tags.ERROR_TYPE, ClientErrorClassifier.classify(cause))
+        Counter.builder(NucleusSyncMetrics.AlfrescoMetrics.CONNECTION_ISSUE)
+                .description(NucleusSyncMetrics.AlfrescoMetrics.CONNECTION_ISSUE_DESCRIPTION)
+                .tag(NucleusSyncMetrics.Tags.OPERATION, operation)
+                .tag(NucleusSyncMetrics.Tags.METHOD, method)
+                .tag(NucleusSyncMetrics.Tags.ERROR_TYPE, ClientErrorClassifier.classify(cause))
                 .register(meterRegistry)
                 .increment();
     }

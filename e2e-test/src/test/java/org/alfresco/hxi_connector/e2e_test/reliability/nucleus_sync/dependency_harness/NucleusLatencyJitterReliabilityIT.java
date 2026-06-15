@@ -30,7 +30,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import eu.rekawek.toxiproxy.model.Toxic;
@@ -69,9 +68,8 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
     @Test
     void shouldCompleteSyncWhenNucleusPathHasModerateLatencyAndJitter()
     {
-        String emailId = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
-        createTestUserWithTestEmail(emailId);
-        installAllStubs(emailId);
+        String mailId = createUserWithUniqueEmail();
+        installAllStubs(mailId);
 
         log.info("[reliability] Adding latency+jitter toxic on nucleusProxy (300 ± 200 ms downstream)");
         // .run() — the factory returns a Runnable; without invoking it no toxic is applied (the original
@@ -114,10 +112,7 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
     @Test
     void shouldCompleteSyncUnderHeavyButTolerableNucleusLatency() throws IOException
     {
-        String emailId = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
-        createTestUserWithTestEmail(emailId);
-        installAllStubs(emailId);
-
+        createGroupWithUniqueEmailAndInstallStub();
         // Custom name on purpose — proves the @AfterEach enumeration-based cleanup catches arbitrary
         // toxic names, not just the one the shared helper knows about.
         log.info("[reliability] Adding heavy latency+jitter toxic on nucleusProxy (1500 ± 500 ms downstream)");

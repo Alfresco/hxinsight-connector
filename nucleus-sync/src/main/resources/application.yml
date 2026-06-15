@@ -15,10 +15,10 @@ http-client:
   timeout-minutes: ${HTTP_CLIENT_TIMEOUT_MINUTES:5}
   buffer-size-kilobytes: ${HTTP_CLIENT_BUFFER_KB:10240}
   retry:
-    max-attempts: ${HTTP_RETRY_MAX_ATTEMPTS:3}
-    initial-delay-ms: ${HTTP_RETRY_INITIAL_DELAY_MS:2000}
-    multiplier: ${HTTP_RETRY_MULTIPLIER:2}
-    max-delay-ms: ${HTTP_RETRY_MAX_DELAY_MS:10000}
+    max-attempts: ${HTTP_CLIENT_RETRY_MAX_ATTEMPTS:3}
+    initial-delay-ms: ${HTTP_CLIENT_RETRY_INITIAL_DELAY_MS:2000}
+    multiplier: ${HTTP_CLIENT_RETRY_MULTIPLIER:2}
+    max-delay-ms: ${HTTP_CLIENT_RETRY_MAX_DELAY_MS:10000}
 
 auth:
   providers:

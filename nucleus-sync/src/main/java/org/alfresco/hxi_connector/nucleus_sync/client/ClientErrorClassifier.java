@@ -33,7 +33,7 @@ import org.springframework.web.reactive.function.client.WebClientRequestExceptio
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 
 import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
-import org.alfresco.hxi_connector.nucleus_sync.client.NucleusSyncMetrices.Tags;
+import org.alfresco.hxi_connector.nucleus_sync.client.NucleusSyncMetrics.Tags;
 
 /**
  * Maps a throwable to a coarse-grained {@code error.type} tag value used by the client failure counters. Walks the cause chain so wrapped exceptions are still classified meaningfully.

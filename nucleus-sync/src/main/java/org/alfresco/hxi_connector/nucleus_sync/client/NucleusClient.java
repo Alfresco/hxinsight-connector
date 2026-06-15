@@ -375,11 +375,11 @@ public class NucleusClient
 
     private void recordFailedRequest(String operation, String method, Throwable cause)
     {
-        Counter.builder(NucleusSyncMetrices.NucleusClientMetrics.CONNECTION_ISSUE)
-                .description(NucleusSyncMetrices.NucleusClientMetrics.CONNECTION_ISSUE_DESCRIPTION)
-                .tag(NucleusSyncMetrices.Tags.OPERATION, operation)
-                .tag(NucleusSyncMetrices.Tags.METHOD, method)
-                .tag(NucleusSyncMetrices.Tags.ERROR_TYPE, ClientErrorClassifier.classify(cause))
+        Counter.builder(NucleusSyncMetrics.NucleusClientMetrics.CONNECTION_ISSUE)
+                .description(NucleusSyncMetrics.NucleusClientMetrics.CONNECTION_ISSUE_DESCRIPTION)
+                .tag(NucleusSyncMetrics.Tags.OPERATION, operation)
+                .tag(NucleusSyncMetrics.Tags.METHOD, method)
+                .tag(NucleusSyncMetrics.Tags.ERROR_TYPE, ClientErrorClassifier.classify(cause))
                 .register(meterRegistry)
                 .increment();
     }

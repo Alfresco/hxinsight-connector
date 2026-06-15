@@ -33,7 +33,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -68,15 +67,8 @@ public class NucleusTokenEndpointFailureReliabilityIT extends BaseNucleusSyncRel
     void shouldFailSyncWhenTokenEndpointPersistentlyReturns503() throws Exception
     {
         // Pre-condition: real ACS has at least one user so the sync has something to mediate.
-        String emailId = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
-        createTestUserWithTestEmail(emailId);
+        createUserWithUniqueEmail();
 
-        // IMPORTANT: Do NOT install happy-path stubs (installAllStubs) here.
-        // When tests run together, Spring Security's OAuth2AuthorizedClientManager inside the
-        // nucleus-sync container caches the token from a prior test (expires_in=3600s). If we
-        // install working mutation stubs, the sync would succeed silently using the cached token
-        // — completely bypassing the /token endpoint we want to test.
-        //
         // By ONLY stubbing /token to 503 and leaving Nucleus endpoints unstubbed:
         // • If no cached token → /token returns 503 → sync fails immediately.
         // • If cached token exists → sync calls unstubbed Nucleus endpoints → WireMock returns

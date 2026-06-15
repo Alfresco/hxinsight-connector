@@ -52,7 +52,7 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
     @Test
     public void testLargeScaleUserMappingMemoryConsumption() throws Exception
     {
-        installAllStubs();
+        installAllStubsWithAnyGroup();
         ActuatorMetricsProbe metricsProbe = environment.nucleusSyncMetrics();
         CompletableFuture<Void> syncTask = CompletableFuture.runAsync(() -> {
             environment.nucleusSyncClient().startSynchronization();
@@ -123,19 +123,6 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
         log.info("[reliability] {} snapshot: threads={}, heap={} bytes, classes={}",
                 label, (int) threads, (long) heapBytes, (int) loadedClasses);
         return new MemoryResourceSnapShort(threads, heapBytes);
-    }
-
-    protected void installAllStubs()
-    {
-        // 1. Install all stubs
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USER_COUNT);
-        installAcsUserGroupsStub();
-        installNucleusIamUsersStubs(TOTAL_USER_COUNT);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
     }
 
     record MemoryResourceSnapShort(double threads, double heapBytes)

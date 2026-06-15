@@ -58,7 +58,7 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
     @Test
     public void shouldMaintainExpectedThroughput() throws Exception
     {
-        installAllStubs();
+        installAllStubsWithAnyGroup();
         long startNanos = System.nanoTime();
         CompletableFuture<Void> syncTask = CompletableFuture.runAsync(() -> {
             environment.nucleusSyncClient().startSynchronization();
@@ -152,17 +152,5 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
     private long countMappingPostRequests()
     {
         return nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))).size();
-    }
-
-    protected void installAllStubs()
-    {
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USER_COUNT);
-        installAcsUserGroupsStub();
-        installNucleusIamUsersStubs(TOTAL_USER_COUNT);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
     }
 }

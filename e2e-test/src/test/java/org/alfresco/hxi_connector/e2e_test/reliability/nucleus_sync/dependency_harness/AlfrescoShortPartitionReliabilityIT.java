@@ -29,7 +29,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -45,7 +44,7 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
     /**
      * How long the {@code acsProxy} stays disabled. Must lie INSIDE the nucleus-sync HTTP retry budget so the next attempt after re-enable still has budget left.
      * <p>
-     * Retry envelope (configured via HTTP_CLIENT_RETRY_* env vars in ContainerComposition, binds to {@code http-client.retry.*}): 5 attempts × initial 200 ms × multiplier 2, capped at 1000 ms. Attempts fire at t ≈ 0, 200, 600, 1400, 2400 ms → total budget ≈ 2.4 s. 1500 ms partition lets attempts 1–3 fail during the outage and attempt 4 (t≈1400) or attempt 5 (t≈2400) succeed after recovery, with comfortable margin.
+     * Retry envelope (configured via HTTP_CLIENT_RETRY_* env vars in ContainerComposition, binds to {@code http-client.retry.*}): 5 attempts × initial 200 ms × multiplier 2, capped at 1000 ms. Attempts fire at t ≈ 0, 200, 600, 1400, 2400 ms → total budget ≈ 2.4 s. 2200 ms partition lets attempts 1–3 fail during the outage and attempt 4 (t≈1400) or attempt 5 (t≈2400) succeed after recovery, with comfortable margin.
      */
     private static final long PARTITION_DURATION_MS = 2_200L;
 
@@ -57,9 +56,8 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
     @Test
     void shouldRecoverWhenAlfrescoBriefPartitionEndsBeforeRetryBudgetExhausts() throws Exception
     {
-        String emailIdForUserToCreate = "abcd@hyland_%s.com".formatted(UUID.randomUUID());
-        createTestUserWithTestEmail(emailIdForUserToCreate);
-        installAllStubsSpecial(emailIdForUserToCreate);
+        String mail = createUserWithUniqueEmail();
+        installAllStubsSpecial(mail);
         // Pre-conditions: user in Alfresco + all Nucleus stubs ready so the only failure axis is the partition.
 
         // 1. Open the partition BEFORE triggering sync so the first outbound Alfresco call fails immediately

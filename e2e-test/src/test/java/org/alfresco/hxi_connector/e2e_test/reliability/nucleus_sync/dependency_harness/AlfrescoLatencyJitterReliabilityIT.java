@@ -64,9 +64,8 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
     void shouldCompleteSyncWhenAlfrescoPathHasModerateLatencyAndJitter()
     {
 
-        String emailIdForUserToCreate = "abcd@hyland_%s.com".formatted(UUID.randomUUID()); // This must be unique as Nucleus Sync Drops mapping for multiple users with same email ID
-        createTestUserWithTestEmail(emailIdForUserToCreate);
-        installStubs(emailIdForUserToCreate);
+        String emailId = createUserWithUniqueEmail();
+        installStubs(emailId);
 
         log.info("[reliability] Adding latency+jitter toxic on acsProxy (300 ± 200 ms downstream)");
         Actions.addLatencyAndJitter(environment().acsProxy()).run();

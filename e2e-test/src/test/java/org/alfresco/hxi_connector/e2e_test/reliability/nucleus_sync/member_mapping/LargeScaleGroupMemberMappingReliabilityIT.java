@@ -32,6 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import com.github.tomakehurst.wiremock.verification.LoggedRequest;
@@ -50,7 +51,7 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
     private static final int TOTAL_USERS = 100000;
 
     /** Synthetic group every user belongs to — produces {@value #TOTAL_USERS} memberships. */
-    private static final String SHARED_GROUP_ID = "groupShared";
+    private static final String SHARED_GROUP_ID = "groupShared_%s".formatted(UUID.randomUUID());
 
     @Test
     void shouldMapAllGroupMembershipsFromBothSides()
@@ -59,7 +60,7 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
                 TOTAL_USERS, SHARED_GROUP_ID);
 
         // 1. Install all stubs
-        installAllStubs();
+        installAllTotalUsersBasedStubsWithSameGroupId(TOTAL_USERS, SHARED_GROUP_ID);
 
         long startNanos = System.nanoTime();
 
@@ -116,17 +117,5 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
 
         log.info("[scale-test] ✓ All {} memberships against {} successfully mapped — no memberships dropped!",
                 TOTAL_USERS, SHARED_GROUP_ID);
-    }
-
-    private void installAllStubs()
-    {
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USERS);
-        installAcsUserGroupStubWithGroupId(SHARED_GROUP_ID);
-        installNucleusIamUsersStubs(TOTAL_USERS);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
     }
 }

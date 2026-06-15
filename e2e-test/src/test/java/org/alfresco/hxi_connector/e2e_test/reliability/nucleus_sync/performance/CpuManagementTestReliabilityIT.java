@@ -68,7 +68,7 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
     @Test
     public void shouldNotSaturateCpuDuringLargeScaleSync() throws Exception
     {
-        installAllStubs();
+        installAllStubsWithAnyGroup();
 
         ActuatorMetricsProbe nucleusSyncProbe = environment.nucleusSyncMetrics();
         List<Double> jvmCpuSamples = new ArrayList<>();
@@ -119,8 +119,6 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
                 .isLessThan(MAX_AVG_CPU_PERCENTAGE);
     }
 
-    // ─── Helpers ───────────────────────────────────────────────────────────────────
-
     private CpuSnapshot snapshot(ActuatorMetricsProbe metrics, String label)
     {
         // Actuator returns 0.0–1.0 fractions; convert to percentage for readability
@@ -154,18 +152,6 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
         Collections.sort(sorted);
         int idx = Math.min(sorted.size() - 1, (int) Math.ceil(p / 100.0 * sorted.size()) - 1);
         return sorted.get(Math.max(0, idx));
-    }
-
-    protected void installAllStubs()
-    {
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USER_COUNT);
-        installAcsUserGroupsStub();
-        installNucleusIamUsersStubs(TOTAL_USER_COUNT);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
     }
 
     private record CpuSnapshot(double systemCpuPct, double jvmCpuPct)

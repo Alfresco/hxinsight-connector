@@ -33,6 +33,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.urlEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Duration;
+import java.util.UUID;
 
 import com.github.tomakehurst.wiremock.client.WireMock;
 import lombok.extern.slf4j.Slf4j;
@@ -77,6 +78,7 @@ public class AlfrescoRestartReliabilityIT extends BaseProcessChaosReliabilityIT
     private static final int ASSERTION_CONVERGENCE_MS = 30_000;
 
     private static final int SCENARIO_STUB_PRIORITY = 1;
+    private static final String COMMON_EMAIL_ID = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
 
     private WireMock nucleus()
     {
@@ -110,7 +112,7 @@ public class AlfrescoRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         Thread.sleep(SETTLE_BEFORE_SYNC_MS);
 
         // Create the user via the post-restart RepositoryClient (refreshed by ProcessChaos.startRepository).
-        User user = new User("test", "test", "abcd@hyland.com");
+        User user = new User("test_%s".formatted(UUID.randomUUID()), "test", COMMON_EMAIL_ID);
         environment().repositoryClient().createUser(user);
 
         // Trigger sync. The first attempt to ACS may fail because nucleus-sync's Reactor Netty
@@ -161,11 +163,11 @@ public class AlfrescoRestartReliabilityIT extends BaseProcessChaosReliabilityIT
                             {
                               "userName": "asmith",
                               "userId": "iam-1234",
-                              "email": "abcd@hyland.com"
+                              "email": "abcd_%s@hyland.com"
                             }
                           ]
                         }
-                        """)));
+                        """.formatted(COMMON_EMAIL_ID))));
     }
 
     private void installAuthResponse()

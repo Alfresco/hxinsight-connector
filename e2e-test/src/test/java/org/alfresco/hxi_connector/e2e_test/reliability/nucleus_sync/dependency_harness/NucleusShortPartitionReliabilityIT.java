@@ -29,7 +29,6 @@ import static com.github.tomakehurst.wiremock.client.WireMock.getRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 
@@ -55,9 +54,7 @@ public class NucleusShortPartitionReliabilityIT extends BaseNucleusSyncReliabili
     @Test
     void shouldRecoverWhenNucleusBriefPartitionEndsBeforeRetryBudgetExhausts() throws Exception
     {
-        String emailId = "abcd_%s@hyland.com".formatted(UUID.randomUUID());
-        createTestUserWithTestEmail(emailId);
-        installAllStubs(emailId);
+        createGroupWithUniqueEmailAndInstallStub();
 
         // Open the partition BEFORE triggering sync — otherwise the first outbound call to Nucleus could
         // land before disable() takes effect on the Toxiproxy listener.

@@ -77,7 +77,7 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
     /**
      * Outer wait for the sync future to terminate (with an exception). Generous so a "sync hung instead of failing" regression surfaces as a test failure, not a confusing TimeoutException.
      */
-    private static final long SYNC_FAILURE_TIMEOUT_S = 60L;
+    private static final long SYNC_FAILURE_TIMEOUT = 60L;
 
     @Test
     void shouldFailGroupCreationWhenNucleusMutationEndpointReturns503() throws Exception
@@ -86,7 +86,7 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread.
-        CompletableFuture.runAsync(
+        CompletableFuture<Void> syncTask = CompletableFuture.runAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
         // 2. Let sync complete user-mapping and start group creation, then inject the fault.
@@ -106,6 +106,8 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
             log.info("[outage-test] Removing 503 fault after {} ms", FAULT_DURATION_MS);
             nucleus().removeStubMapping(faultStub);
         }
+
+        syncTask.get(SYNC_FAILURE_TIMEOUT, TimeUnit.SECONDS);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[outage-test] Sync failed (as expected) after {} ms — fault window was {} ms",

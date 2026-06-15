@@ -84,10 +84,10 @@ public abstract class BaseNucleusSyncLargeIngestionIT
     /**
      * Total number of users to simulate on BOTH ACS and Nucleus sides. Tune this single knob to scale the test — currently {@code 100} for fast local runs; production-grade scale check is {@code 1_000_000}. Note the install cost: each ACS page is one stub, so 1M users at {@link #ACS_PAGE_SIZE}=100 means 10 000 stubs registered before the sync even starts.
      */
-    protected static final int TOTAL_USER_COUNT = Integer.getInteger("performance.userCount", 10_0000);
+    protected static final int TOTAL_USER_COUNT = Integer.getInteger("performance.userCount", 100_000);
 
     // Total User Groups
-    protected static final int TOTAL_GROUPS_COUNT = Integer.getInteger("performance.groupsCount", 10_0000);
+    protected static final int TOTAL_GROUPS_COUNT = Integer.getInteger("performance.groupsCount", 100_000);
 
     /** Track stubs we register so we can clean them up in @AfterEach. */
     protected final List<StubMapping> registeredStubs = new ArrayList<>();
@@ -567,6 +567,31 @@ public abstract class BaseNucleusSyncLargeIngestionIT
             }
         }
         return pairs;
+    }
+
+    // Install Based on same group Id
+    protected void installAllTotalUsersBasedStubsWithSameGroupId(int totalUsers, String groupId)
+    {
+        installNucleusAuthStub();
+        installAcsPeopleStubs(totalUsers);
+        installAcsUserGroupStubWithGroupId(groupId);
+        installNucleusIamUsersStubs(totalUsers);
+        installEmptyMappingsStub();
+        installEmptyGroupsStub();
+        installEmptyGroupMembersStub();
+        installMutationEndpointsWithTracking();
+    }
+
+    protected void installAllStubsWithAnyGroup()
+    {
+        installNucleusAuthStub();
+        installAcsPeopleStubs(TOTAL_USER_COUNT);
+        installAcsUserGroupsStub();
+        installNucleusIamUsersStubs(TOTAL_USER_COUNT);
+        installEmptyMappingsStub();
+        installEmptyGroupsStub();
+        installEmptyGroupMembersStub();
+        installMutationEndpointsWithTracking();
     }
 
     protected static String membershipKey(String groupId, String userId)
