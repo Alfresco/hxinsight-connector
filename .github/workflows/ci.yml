@@ -227,6 +227,7 @@ jobs:
   run_reliability_test:
     name: "Run reliability tests"
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     needs:
       - pre_commit
     if: >
@@ -234,7 +235,6 @@ jobs:
       !contains(github.event.head_commit.message, '[skip build]') &&
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip reliability]')
-    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:

@@ -63,8 +63,6 @@ public class AlfrescoClient
     public AlfrescoClient(
             AuthService authService,
             @Value("${alfresco.base-url}") String alfrescoBaseUrl,
-            @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
-            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB,
             @Value("${alfresco.page-size:100}") int pageSize,
             @Value("${alfresco.user.skip-not-enabled:true}") boolean skipNotEnabled,
             MeterRegistry meterRegistry,
