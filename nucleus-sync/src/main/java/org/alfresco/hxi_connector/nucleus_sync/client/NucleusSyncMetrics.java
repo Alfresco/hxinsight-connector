@@ -27,13 +27,13 @@
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
 /**
- * Inventory Provides Metrices for the Nucleus Sync with all the counter names and their descriptions.
+ * Inventory Provides Metrics for the Nucleus Sync with all the counter names and their descriptions.
  */
 @SuppressWarnings("PMD.MissingStaticMethodInNonInstantiatableClass")
-public final class NucleusSyncMetrices
+public final class NucleusSyncMetrics
 {
 
-    private NucleusSyncMetrices()
+    private NucleusSyncMetrics()
     {}
 
     /** Common tag keys used across client failure counters. */
@@ -63,16 +63,16 @@ public final class NucleusSyncMetrices
     }
 
     // Alfresco Client related metrics
-    public static final class AlfrescoMetrices
+    public static final class AlfrescoMetrics
     {
         public static final String CONNECTION_ISSUE = "alfresco_connection_issue_total";
         public static final String CONNECTION_ISSUE_DESCRIPTION = "Failed requests to Alfresco (tagged by operation, method, error.type)";
 
-        private AlfrescoMetrices()
+        private AlfrescoMetrics()
         {}
     }
 
-    // Nucleus Client Related Metrices
+    // Nucleus Client Related Metrics
     public static final class NucleusClientMetrics
     {
         public static final String CONNECTION_ISSUE = "nucleus_connection_issue_total";

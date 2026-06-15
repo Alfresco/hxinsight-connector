@@ -25,10 +25,27 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.harness;
 
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.*;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.ACTIVEMQ_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.ACTIVEMQ_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.HXI_MOCK_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.HXI_MOCK_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.LOCALSTACK_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.LOCALSTACK_PORT;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_LISTEN_PORT;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_MOCK_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.REPOSITORY_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.REPOSITORY_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.SFS_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.SFS_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_ACS_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_ACTIVEMQ_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_HXI_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_HXI_LISTEN_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_NUCLEUS_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_S3_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_SFS_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_SFS_LISTEN_PORT;
 
 import java.io.IOException;
 import java.time.Duration;
