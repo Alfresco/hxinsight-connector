@@ -25,9 +25,7 @@
  */
 package org.alfresco.hxi_connector.e2e_test.reliability.harness;
 
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.ACTIVEMQ_JOLOKIA_PORT;
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.ACTIVEMQ_PORT;
-import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.REPOSITORY_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.*;
 
 import java.io.IOException;
 import java.time.Duration;
@@ -45,22 +43,34 @@ import org.wiremock.integrations.testcontainers.WireMockContainer;
 
 import org.alfresco.hxi_connector.common.test.docker.repository.AlfrescoRepositoryContainer;
 import org.alfresco.hxi_connector.e2e_test.util.client.AwsS3Client;
+import org.alfresco.hxi_connector.e2e_test.util.client.NucleusSyncClient;
 import org.alfresco.hxi_connector.e2e_test.util.client.RepositoryClient;
 
 /**
- * Testcontainers topology for reliability tests. Every dependency the live-ingester talks to sits behind a Toxiproxy listener so chaos tests can inject failures on each path independently. The test JVM keeps using direct host ports for admin and control.
+ * Composes a full Testcontainers topology for reliability testing, fronting every dependency the live-ingester talks to with a Toxiproxy listener so chaos tests can inject failures on each path independently without disturbing the test JVM's own admin / control connections.
  *
  * <p>
- * Toxiproxy routes:
+ * Wiring (all proxy listeners live in a single Toxiproxy container — distinct ports keep them from colliding):
  * <ul>
- * <li>{@code toxic-activemq:61616} → ActiveMQ (consumed by the live-ingester)</li>
- * <li>{@code toxic-acs:8080} → repository (content downloads)</li>
- * <li>{@code toxic-hxi:8081} → HX Insight Wiremock</li>
- * <li>{@code toxic-s3:4566} → Localstack S3 (uploads to presigned URLs)</li>
+ * <li>{@code activemq} alias -> real ActiveMQ broker (repository publishes here).</li>
+ * <li>{@code toxic-activemq:61616} -> Toxiproxy listener proxying to {@code activemq:61616}. Live-ingester consumes from here.</li>
+ * <li>{@code repository} alias -> real Alfresco repository (test JVM publishes nodes here over the host port).</li>
+ * <li>{@code toxic-acs:8080} -> Toxiproxy listener proxying to {@code repository:8080}. Live-ingester downloads content from here.</li>
+ * <li>{@code hxinsight-mock} alias -> WireMock standing in for HX Insight (test JVM administers stubs over the host port).</li>
+ * <li>{@code toxic-hxi:8081} -> Toxiproxy listener proxying to {@code hxinsight-mock:8080}. Live-ingester posts {@code /presigned-urls}, {@code /ingestion-events}, and fetches the auth {@code /token} through here.</li>
+ * <li>{@code aws-mock} alias -> Localstack S3 (test JVM administers the bucket via the host port).</li>
+ * <li>{@code toxic-s3:4566} -> Toxiproxy listener proxying to {@code aws-mock:4566}. Live-ingester PUTs content here against the pre-signed URLs WireMock returns; {@link BaseReliabilityIT} swaps the WireMock stub body so the URLs point at {@code toxic-s3} instead of {@code aws-mock}. Localstack ignores presigned-URL signatures by default, so the host swap is transparent.</li>
+ * <li>{@code nucleus-mock:8082 -> ToxiProxy listener proxying to nucleus sync}</li>
  * </ul>
  *
  * <p>
- * Build via {@link #builder()}. The transform topology (SFS + transform-core-aio) is opt-in; it adds ~90 s of boot time.
+ * Construct via {@link #builder()}. The default build leaves the ATS / SFS containers off (most reliability tests do not exercise the transform path); {@link Builder#withTransformTopology()} boots SFS, transform-router, and transform-core-aio alongside the rest, switches ACS to {@code transform.service.enabled=true} java opts, fronts SFS with a {@code toxic-sfs} Toxiproxy listener, and configures the live-ingester to point its {@code ALFRESCO_TRANSFORM_SHAREDFILESTORE_BASEURL} at {@code toxic-sfs} (transform-core-aio still talks to the real {@code shared-file-store} alias for its writes — only the connector's read path is proxied). Used by the transform-path chaos tests (e.g. {@link SfsOutageReliabilityIT}). Adds ~90 s of env boot due to the heavyweight transform-core-aio image, which is why the toggle is off by default.
+ *
+ * <p>
+ * Reliability-fix opt-in toggles are exposed via the builder so paired IT classes can boot envs with the fix enabled / disabled and assert the matching contract on each. See {@link Builder#withTransformResponseDeadLetterEnabled()}.
+ *
+ * <p>
+ * Internally this is a thin orchestrator over four single-responsibility collaborators: {@link ReliabilityEnvironmentSpec} (immutable opt-in toggles), {@link NetworkTopology} (Docker network + alias / port constants), {@link ContainerComposition} (Testcontainers handles + lifecycle), and {@link ToxiproxyListeners} (Toxiproxy container + per-path proxy handles). The Facade itself owns the boot ordering, the test-side clients ({@link RepositoryClient}, {@link AwsS3Client}, {@link JolokiaProbe}, {@link ActuatorMetricsProbe}), and the host-port refresh after a chaos restart.
  */
 @Slf4j
 @SuppressWarnings({"PMD.LongVariable", "PMD.TooManyMethods"})
@@ -79,8 +89,11 @@ public class ReliabilityEnvironment implements AutoCloseable
     private AwsS3Client awsS3Client;
     private JolokiaProbe jolokia;
     private ActuatorMetricsProbe actuatorMetrics;
+    private NucleusSyncClient nucleusSyncClient;
+    private ActuatorMetricsProbe nucleusSyncProbe;
 
-    // Host-port mappings refreshed after a chaos restart. Docker re-allocates host ports on each `docker start`.
+    // === Host-port mappings refreshed after a chaos restart of the corresponding container
+    // (Docker re-allocates ephemeral host ports on each `docker start`; Testcontainers caches the original allocation). ===
     private int activemqOpenWireHostPort;
     private int repositoryHostPort;
 
@@ -114,6 +127,9 @@ public class ReliabilityEnvironment implements AutoCloseable
         containers.startRepository();
         proxies.createAcsProxy();
 
+        containers.startNucleusSync();
+        proxies.createNucleusProxy();
+
         if (spec.withTransformTopology())
         {
             // Wait for ACS to populate its transform registry before any test fires a transform request —
@@ -127,41 +143,13 @@ public class ReliabilityEnvironment implements AutoCloseable
         log.info("[reliability] Live-ingester JDWP listening — attach IntelliJ to localhost:{} (container 5007)",
                 containers.liveIngester().getMappedPort(5007));
         actuatorMetrics = new ActuatorMetricsProbe(containers.liveIngester().getHost(), containers.liveIngester().getMappedPort(8080));
-
+        nucleusSyncProbe = new ActuatorMetricsProbe(containers.nucleusSync().getHost(), containers.nucleusSync().getMappedPort(NUCLEUS_SYNC_PORT));
         repositoryHostPort = containers.repository().getMappedPort(REPOSITORY_PORT);
         repositoryClient = new RepositoryClient(containers.repository().getBaseUrl(), RepositoryClient.ADMIN_USER);
+        nucleusSyncClient = new NucleusSyncClient(containers.nucleusSync().getHost(), containers.nucleusSync().getMappedPort(NUCLEUS_SYNC_PORT));
         WireMock.configureFor(containers.hxInsightMock().getHost(), containers.hxInsightMock().getPort());
 
-        // Spring Boot up != Camel routes started. ProcessingStarter only fires startAllRoutes on the first
-        // AcsHealthy event from AcsHealthProbe, so there's a race window where the live-ingester container is
-        // "ready" (actuator UP) but the durable JMS subscription on alfresco.repo.event2 hasn't been
-        // established yet. Tests that publish into the topic during that window lose the message — durable
-        // subscriptions only retain messages anchored AFTER the subscriber registers. Block here on the
-        // broker-observed subscriber count so every test sees a fully-attached connector.
-        waitForRepoEventSubscriberAttached();
-
         log.info("[reliability] Environment ready");
-    }
-
-    private void waitForRepoEventSubscriberAttached() throws InterruptedException
-    {
-        Duration timeout = Duration.ofSeconds(60);
-        long deadlineNanos = System.nanoTime() + timeout.toNanos();
-        int lastObserved = -1;
-        while (System.nanoTime() < deadlineNanos)
-        {
-            int subscribers = jolokia.topicSubscriberCount(REPO_EVENT_TOPIC);
-            if (subscribers >= 1)
-            {
-                log.info("[reliability] Connector subscriber attached to {} (count={}) — env start unblocked", REPO_EVENT_TOPIC, subscribers);
-                return;
-            }
-            lastObserved = subscribers;
-            Thread.sleep(200);
-        }
-        throw new IllegalStateException(
-                "Connector did not attach a subscriber to %s within %s — last observed count=%d. ProcessingStarter likely never fired AcsHealthy or routes failed to start. Check live-ingester logs."
-                        .formatted(REPO_EVENT_TOPIC, timeout, lastObserved));
     }
 
     public Proxy activemqProxy()
@@ -191,6 +179,34 @@ public class ReliabilityEnvironment implements AutoCloseable
     public Proxy s3Proxy()
     {
         return proxies.s3Proxy();
+    }
+
+    // Proxy for the Nucleus
+    public Proxy nucleusproxy()
+    {
+        return proxies.nucleusProxy();
+    }
+
+    // Mock for the Nucleus
+    public WireMockContainer nucleusMock()
+    {
+        return containers.nucleusMock();
+    }
+
+    // Nucleus Client
+    public NucleusSyncClient nucleusSyncClient()
+    {
+        return nucleusSyncClient;
+    }
+
+    /**
+     * Dedicated WireMock client bound to the {@link #nucleusMock()} host port. Use this instead of the static {@code WireMock.stubFor(...)} when wiring Nucleus stubs — the static client is configured against {@link #hxInsightMock()} in {@link BaseReliabilityIT}, so any stub registered through it would land on the wrong mock and the nucleus-sync container's requests would 404.
+     */
+    public com.github.tomakehurst.wiremock.client.WireMock nucleusWireMock()
+    {
+        return new com.github.tomakehurst.wiremock.client.WireMock(
+                containers.nucleusMock().getHost(),
+                containers.nucleusMock().getPort());
     }
 
     /**
@@ -323,6 +339,12 @@ public class ReliabilityEnvironment implements AutoCloseable
         return actuatorMetrics;
     }
 
+    // Only for Nucleus Sync
+    public ActuatorMetricsProbe nucleusSyncMetrics()
+    {
+        return nucleusSyncProbe;
+    }
+
     @Override
     public void close()
     {
@@ -351,6 +373,7 @@ public class ReliabilityEnvironment implements AutoCloseable
         private boolean withTransformResponseDeadLetterDisabled;
         private boolean withTransformResponseThrowFailedTransformsDisabled;
         private boolean withRepoEventsDeadLetterUnsupportedTypesDisabled;
+        private boolean withStubbedAcsEnabled;
 
         private Builder()
         {}
@@ -385,13 +408,24 @@ public class ReliabilityEnvironment implements AutoCloseable
             return this;
         }
 
+        /**
+         * Route nucleus-sync's {@code ALFRESCO_BASE_URL} to the nucleus WireMock instead of the real ACS repository. This allows large-scale user mapping tests to stub both ACS and Nucleus with synthetic users rather than creating millions of real users in ACS. When enabled, the test must install appropriate stubs on the nucleus WireMock for the ACS {@code /people} endpoint.
+         */
+        public Builder withStubbedAcs()
+        {
+            this.withStubbedAcsEnabled = true;
+            return this;
+        }
+
         public ReliabilityEnvironment build()
         {
             return new ReliabilityEnvironment(new ReliabilityEnvironmentSpec(
                     withTransformTopology,
                     withTransformResponseDeadLetterDisabled,
                     withTransformResponseThrowFailedTransformsDisabled,
-                    withRepoEventsDeadLetterUnsupportedTypesDisabled));
+                    withRepoEventsDeadLetterUnsupportedTypesDisabled,
+                    withStubbedAcsEnabled));
         }
+
     }
 }

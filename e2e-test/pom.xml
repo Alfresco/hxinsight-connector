@@ -171,7 +171,7 @@
     <profiles>
         <profile>
             <id>reliability-tests</id>
-           <properties>
+            <properties>
                 <soak.eventsPerChaosBlock>50</soak.eventsPerChaosBlock>
                 <soak.eventsFinalRecovery>100</soak.eventsFinalRecovery>
                 <soak.chaosWindowMs>15000</soak.chaosWindowMs>
@@ -192,13 +192,48 @@
                             <includes combine.self="override">
                                 <include>**/*ReliabilityIT.java</include>
                             </includes>
-                            <excludes combine.self="override" />
+                            <excludes combine.self="override">
+                                <exclude>**/nucleus_sync/**</exclude>
+                            </excludes>
                             <skipTests>false</skipTests>
                             <systemPropertyVariables>
                                 <soak.eventsPerChaosBlock>${soak.eventsPerChaosBlock}</soak.eventsPerChaosBlock>
                                 <soak.eventsFinalRecovery>${soak.eventsFinalRecovery}</soak.eventsFinalRecovery>
                                 <soak.chaosWindowMs>${soak.chaosWindowMs}</soak.chaosWindowMs>
                                 <soak.amqDisconnectWindowMs>${soak.amqDisconnectWindowMs}</soak.amqDisconnectWindowMs>
+                            </systemPropertyVariables>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>nucleus-sync</id>
+            <properties>
+                    <performance.userCount>100000</performance.userCount>
+                    <performance.groupsCount>100000</performance.groupsCount>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <skipTests>true</skipTests>
+                        </configuration>
+                    </plugin>
+                    <plugin>
+                        <artifactId>maven-failsafe-plugin</artifactId>
+                        <configuration>
+                            <includes combine.self="override">
+                                <include>**/nucleus_sync/**/*ReliabilityIT.java</include>
+                            </includes>
+                            <excludes combine.self="override" />
+                            <skipTests>false</skipTests>
+                            <systemPropertyVariables>
+                                <performance.userCount>${performance.userCount}</performance.userCount>
+                                <performance.groupsCount>${performance.groupsCount}</performance.groupsCount>
                             </systemPropertyVariables>
                         </configuration>
                     </plugin>

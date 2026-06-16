@@ -39,18 +39,22 @@ import java.util.Map;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.tomakehurst.wiremock.WireMockServer;
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration;
+import io.micrometer.core.instrument.MeterRegistry;
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.web.reactive.function.client.WebClient;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 
+@SuppressWarnings("PMD.SingularField")
 public class AlfrescoClientIntegrationTest
 {
     private WireMockServer wireMockServer;
     private AlfrescoClient alfrescoClient;
+    private MeterRegistry meterRegistry;
+    private RetryableHttpInvoker retryableHttpInvoker;
 
     @BeforeEach
     void setUp()
@@ -58,6 +62,10 @@ public class AlfrescoClientIntegrationTest
         // Start WireMock server
         wireMockServer = new WireMockServer(WireMockConfiguration.options().dynamicPort());
         wireMockServer.start();
+
+        // Initialise collaborators (previously left null — would NPE on first request).
+        meterRegistry = new SimpleMeterRegistry();
+        retryableHttpInvoker = new RetryableHttpInvoker(5, 10240);
 
         // Create mock AuthService
         AuthService authService = new AuthService(null, null) {
@@ -71,13 +79,13 @@ public class AlfrescoClientIntegrationTest
         // Create client with WireMock URL
         String baseUrl = "http://localhost:" + wireMockServer.port() + "/alfresco/api/-default-/public/alfresco/versions/1";
         alfrescoClient = new AlfrescoClient(
-                WebClient.builder().build(),
                 new ObjectMapper(),
                 authService,
-                5,
                 baseUrl,
                 100,
-                true);
+                true,
+                meterRegistry,
+                retryableHttpInvoker);
     }
 
     @AfterEach
@@ -214,7 +222,7 @@ public class AlfrescoClientIntegrationTest
         // Act & Assert
         assertThatThrownBy(alfrescoClient::getAllUsers)
                 .isInstanceOf(ClientException.class)
-                .hasMessageContaining("Failed to fetch users");
+                .hasMessageContaining("Failed to fetch getAllUsers");
     }
 
     @Test

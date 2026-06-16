@@ -42,10 +42,11 @@ public record ReliabilityEnvironmentSpec(
         boolean withTransformTopology,
         boolean withTransformResponseDeadLetterDisabled,
         boolean withTransformResponseThrowFailedTransformsDisabled,
-        boolean withRepoEventsDeadLetterUnsupportedTypesDisabled)
+        boolean withRepoEventsDeadLetterUnsupportedTypesDisabled,
+        boolean withStubbedAcsEnabled)
 {
     public static ReliabilityEnvironmentSpec defaultSpec()
     {
-        return new ReliabilityEnvironmentSpec(false, false, false, false);
+        return new ReliabilityEnvironmentSpec(false, false, false, false, false);
     }
 }

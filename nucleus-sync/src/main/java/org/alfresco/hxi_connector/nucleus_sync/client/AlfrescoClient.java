@@ -25,7 +25,6 @@
  */
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
-import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -33,18 +32,16 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micrometer.core.instrument.Counter;
+import io.micrometer.core.instrument.MeterRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.retry.annotation.Backoff;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import org.alfresco.hxi_connector.common.adapters.auth.AuthService;
-import org.alfresco.hxi_connector.common.exception.EndpointServerErrorException;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoGroup;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoPagedResponse;
 import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
@@ -52,13 +49,13 @@ import org.alfresco.hxi_connector.nucleus_sync.dto.AlfrescoUser;
 @Component
 public class AlfrescoClient
 {
-    private final WebClient webClient;
     private final ObjectMapper objectMapper;
     private final AuthService authService;
     private final String alfrescoBaseUrl;
-    private final int timeoutInMins;
     private final int pageSize;
     private final boolean skipNotEnabled;
+    private final MeterRegistry meterRegistry;
+    private final RetryableHttpInvoker retryableHttpInvoker;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(AlfrescoClient.class);
 
@@ -66,41 +63,37 @@ public class AlfrescoClient
     public AlfrescoClient(
             AuthService authService,
             @Value("${alfresco.base-url}") String alfrescoBaseUrl,
-            @Value("${http-client.timeout-minutes:5}") int timeoutInMins,
-            @Value("${http-client.buffer-size-kilobytes:10240}") int bufferInKB,
             @Value("${alfresco.page-size:100}") int pageSize,
-            @Value("${alfresco.user.skip-not-enabled:true}") boolean skipNotEnabled)
+            @Value("${alfresco.user.skip-not-enabled:true}") boolean skipNotEnabled,
+            MeterRegistry meterRegistry,
+            RetryableHttpInvoker retryableHttpInvoker)
     {
         this(
-                WebClient.builder()
-                        .codecs(configurer -> configurer
-                                .defaultCodecs()
-                                .maxInMemorySize(bufferInKB * 1024))
-                        .build(),
                 new ObjectMapper(),
                 authService,
-                timeoutInMins,
                 alfrescoBaseUrl,
                 pageSize,
-                skipNotEnabled);
+                skipNotEnabled,
+                meterRegistry,
+                retryableHttpInvoker);
     }
 
     AlfrescoClient(
-            WebClient webClient,
             ObjectMapper objectMapper,
             AuthService authService,
-            int timeoutInMins,
             String alfrescoBaseUrl,
             int pageSize,
-            boolean skipNotEnabled)
+            boolean skipNotEnabled,
+            MeterRegistry meterRegistry,
+            RetryableHttpInvoker retryableHttpInvoker)
     {
-        this.webClient = webClient;
         this.objectMapper = objectMapper;
         this.authService = authService;
-        this.timeoutInMins = timeoutInMins;
         this.alfrescoBaseUrl = alfrescoBaseUrl;
         this.pageSize = pageSize;
         this.skipNotEnabled = skipNotEnabled;
+        this.meterRegistry = meterRegistry;
+        this.retryableHttpInvoker = retryableHttpInvoker;
     }
 
     public List<AlfrescoUser> getAllUsers()
@@ -108,7 +101,7 @@ public class AlfrescoClient
         List<AlfrescoUser> users = fetchAllPagedData(
                 "/people",
                 Map.of("fields", "id,email,enabled"),
-                new TypeReference<AlfrescoPagedResponse<AlfrescoUser>>() {}, "users");
+                new TypeReference<AlfrescoPagedResponse<AlfrescoUser>>() {}, "getAllUsers");
 
         return this.skipNotEnabled
                 ? users.stream()
@@ -123,12 +116,12 @@ public class AlfrescoClient
                 "/people/" + userId + "/groups",
                 Map.of("fields", "id"),
                 new TypeReference<AlfrescoPagedResponse<AlfrescoGroup>>() {},
-                "groups for user " + userId);
+                "getUserGroups");
         return groups.stream().map(AlfrescoGroup::id).toList();
     }
 
     private <T> List<T> fetchAllPagedData(
-            String basePath, Map<String, String> queryParams, TypeReference<AlfrescoPagedResponse<T>> typeRef, String errorContext)
+            String basePath, Map<String, String> queryParams, TypeReference<AlfrescoPagedResponse<T>> typeRef, String operation)
     {
         try
         {
@@ -144,9 +137,9 @@ public class AlfrescoClient
                 uriBuilder.queryParam("maxItems", pageSize);
                 uriBuilder.queryParam("skipCount", skipCount);
 
-                String response = makeAuthenticatedRequest(uriBuilder.toUriString())
-                        .bodyToMono(String.class)
-                        .block(Duration.ofMinutes(timeoutInMins));
+                // RetryableHttpInvoker's WebClient has no base URL — pass the absolute URL.
+                String fullUrl = alfrescoBaseUrl + uriBuilder.toUriString();
+                String response = retryableHttpInvoker.executeGetRequest(fullUrl, authService.getAlfrescoAuthHeaders());
 
                 AlfrescoPagedResponse<T> pagedResponse = objectMapper.readValue(response, typeRef);
 
@@ -177,30 +170,25 @@ public class AlfrescoClient
         catch (Exception e)
         {
             LOGGER.atError()
-                    .setMessage("Error fetching {}: {}")
-                    .addArgument(errorContext)
+                    .setMessage("Error fetching {} [op={}, method=GET]: {}")
+                    .addArgument(operation)
+                    .addArgument(operation)
                     .addArgument(e.getMessage())
                     .setCause(e)
                     .log();
-
-            throw new ClientException("Failed to fetch " + errorContext, e);
+            recordFailedRequest(operation, "GET", e);
+            throw new ClientException("Failed to fetch " + operation, e);
         }
     }
 
-    @Retryable(retryFor = EndpointServerErrorException.class,
-            maxAttemptsExpression = "#{${http-client.max-attempts:3}}",
-            backoff = @Backoff(
-                    delayExpression = "#{${http-client.initial-delay-ms:2000}}",
-                    multiplierExpression = "#{${http-client.multiplier:2}}",
-                    maxDelayExpression = "#{${http-client.max-delay-ms:10000}}"))
-    private WebClient.ResponseSpec makeAuthenticatedRequest(String path)
+    private void recordFailedRequest(String operation, String method, Throwable cause)
     {
-        Map<String, String> headers = authService.getAlfrescoAuthHeaders();
-
-        return webClient
-                .get()
-                .uri(alfrescoBaseUrl + path)
-                .headers(httpHeaders -> headers.forEach(httpHeaders::set))
-                .retrieve();
+        Counter.builder(NucleusSyncMetrics.AlfrescoMetrics.CONNECTION_ISSUE)
+                .description(NucleusSyncMetrics.AlfrescoMetrics.CONNECTION_ISSUE_DESCRIPTION)
+                .tag(NucleusSyncMetrics.Tags.OPERATION, operation)
+                .tag(NucleusSyncMetrics.Tags.METHOD, method)
+                .tag(NucleusSyncMetrics.Tags.ERROR_TYPE, ClientErrorClassifier.classify(cause))
+                .register(meterRegistry)
+                .increment();
     }
 }

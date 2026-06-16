@@ -31,6 +31,9 @@ import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTop
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.HXI_MOCK_PORT;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.LOCALSTACK_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.LOCALSTACK_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_ALIAS;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_LISTEN_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.NUCLEUS_MOCK_PORT;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.REPOSITORY_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.REPOSITORY_PORT;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.SFS_ALIAS;
@@ -39,6 +42,7 @@ import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTop
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_ACTIVEMQ_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_HXI_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_HXI_LISTEN_PORT;
+import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_NUCLEUS_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_S3_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_SFS_ALIAS;
 import static org.alfresco.hxi_connector.e2e_test.reliability.harness.NetworkTopology.TOXIC_SFS_LISTEN_PORT;
@@ -74,6 +78,7 @@ final class ToxiproxyListeners
     private Proxy s3Proxy;
     private Proxy acsProxy;
     private Proxy sfsProxy;
+    private Proxy nucleusproxy;
 
     ToxiproxyListeners(NetworkTopology topology, boolean withTransformTopology)
     {
@@ -131,6 +136,16 @@ final class ToxiproxyListeners
         }
     }
 
+    void createNucleusProxy() throws IOException
+    {
+        log.info("[reliability] Configuring Toxiproxy: {}:{} -> {}:{}",
+                TOXIC_NUCLEUS_ALIAS, NUCLEUS_LISTEN_PORT, NUCLEUS_ALIAS, NUCLEUS_MOCK_PORT);
+        nucleusproxy = client.createProxy(
+                NUCLEUS_ALIAS,
+                "0.0.0.0:" + NUCLEUS_LISTEN_PORT,
+                NUCLEUS_ALIAS + ":" + NUCLEUS_MOCK_PORT);
+    }
+
     /**
      * Create the ACS listener. Must be called after the repository container has started so its {@code repository} alias is resolvable on the Docker network — see {@link #createPreRepositoryProxies(boolean)}.
      */
@@ -170,5 +185,11 @@ final class ToxiproxyListeners
     Proxy sfsProxy()
     {
         return sfsProxy;
+    }
+
+    // Proxy to the Nucleus WireMock Container
+    Proxy nucleusProxy()
+    {
+        return nucleusproxy;
     }
 }

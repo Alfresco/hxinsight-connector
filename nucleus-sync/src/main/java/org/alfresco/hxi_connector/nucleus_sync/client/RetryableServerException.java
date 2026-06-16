@@ -1,4 +1,4 @@
-/*
+/*-
  * #%L
  * Alfresco HX Insight Connector
  * %%
@@ -23,11 +23,23 @@
  * along with Alfresco. If not, see <http://www.gnu.org/licenses/>.
  * #L%
  */
+package org.alfresco.hxi_connector.nucleus_sync.client;
 
-package org.alfresco.hxi_connector.e2e_test.util.client.model;
+/**
+ * Thrown when an HTTP call receives a 5xx server error. This exception is retryable — transient server-side failures (503, 502, etc.) are worth retrying after a backoff. In contrast, 4xx client errors indicate misconfiguration or bad input and should NOT be retried.
+ */
+public class RetryableServerException extends RuntimeException
+{
+    private final int statusCode;
 
-public record User(
-        String username,
-        String password,
-        String email)
-{}
+    public RetryableServerException(int statusCode, String message)
+    {
+        super(message);
+        this.statusCode = statusCode;
+    }
+
+    public int getStatusCode()
+    {
+        return statusCode;
+    }
+}
