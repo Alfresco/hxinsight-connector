@@ -26,6 +26,9 @@
 package org.alfresco.hxi_connector.nucleus_sync.client;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 import java.util.concurrent.TimeoutException;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -46,8 +49,9 @@ final class ClientErrorClassifier
 
     static String classify(Throwable t)
     {
+        Set<Throwable> seen = Collections.newSetFromMap(new IdentityHashMap<>());
         Throwable cur = t;
-        while (cur != null)
+        while (cur != null && seen.add(cur))
         {
             String result = classifySingle(cur);
             if (result != null)
@@ -55,16 +59,16 @@ final class ClientErrorClassifier
                 return result;
             }
             cur = cur.getCause();
-            if (cur != null && cur.equals(t))
-            {
-                break;
-            }
         }
         return Tags.ERR_UNKNOWN;
     }
 
     private static String classifySingle(Throwable cur)
     {
+        if (cur instanceof RetryableServerException rse)
+        {
+            return classifyHttpStatus(rse.getStatusCode());
+        }
         if (cur instanceof WebClientResponseException wcre)
         {
             return classifyHttpStatus(wcre.getStatusCode().value());

@@ -73,10 +73,15 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
         long startNanos = System.nanoTime();
         // Synchronous on purpose — under tolerable latency the sync must return cleanly, not blow up
         // into a retry storm. The wall-clock measurement around the call is part of the assertion below.
-        environment().nucleusSyncClient().startSynchronization();
+        int status = environment().nucleusSyncClient().startSynchronization();
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[reliability] Synchronisation under latency completed in {} ms", elapsedMs);
-
+        assertThat(status)
+                .as("nucleus-sync returned status %d under latency, expected 200 OK — likely cause: the "
+                        + "WebClient per-attempt timeout fired and triggered a retry storm, which means the "
+                        + "orchestration never got to the Nucleus phase at all",
+                        status)
+                .isEqualTo(200);
         // Belt-and-braces upper-bound check — if we somehow exceeded the test budget the future-style
         // get(timeout) would already have failed for the partition test; here we just assert post-hoc.
         assertThat(elapsedMs)
@@ -128,10 +133,15 @@ public class AlfrescoLatencyJitterReliabilityIT extends BaseNucleusSyncReliabili
                 .setJitter(500L);
 
         long startNanos = System.nanoTime();
-        environment().nucleusSyncClient().startSynchronization();
+        int status = environment().nucleusSyncClient().startSynchronization();
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[reliability] Synchronisation under heavy latency completed in {} ms", elapsedMs);
-
+        assertThat(status)
+                .as("nucleus-sync returned status %d under heavy latency, expected 200 OK — likely cause: the "
+                        + "WebClient per-attempt timeout fired and triggered a retry storm, which means the "
+                        + "orchestration never got to the Nucleus phase at all",
+                        status)
+                .isEqualTo(200);
         assertThat(elapsedMs)
                 .as("Heavy-latency sync took %d ms, exceeding the %d s test budget. Likely cause: the "
                         + "WebClient per-attempt timeout fired and triggered a retry storm.",

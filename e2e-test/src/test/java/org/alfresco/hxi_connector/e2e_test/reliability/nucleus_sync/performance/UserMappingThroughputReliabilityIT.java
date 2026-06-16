@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 /**
  * Measures end-to-end throughput of the user-mapping flow at the 1M-user scale. Renamed with the {@code *IT} suffix so Failsafe picks it up under the {@code reliability-tests} profile (the {@code *Tests} suffix was being filtered out).
@@ -60,9 +61,7 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
     {
         installAllStubsWithAnyGroup();
         long startNanos = System.nanoTime();
-        CompletableFuture<Void> syncTask = CompletableFuture.runAsync(() -> {
-            environment.nucleusSyncClient().startSynchronization();
-        });
+        CompletableFuture<Integer> syncTask = CompletableFuture.supplyAsync(() -> environment.nucleusSyncClient().startSynchronization());
 
         long previousCount = 0;
         long previousWindowEndNanos = startNanos;
@@ -90,7 +89,7 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
         // Re-raise any sync failure with its real cause. The 20-min timeout is a no-op on
         // the happy path because the busy-wait above already exited on isDone() — kept here
         // purely to surface ExecutionException for failures and as a hard-stop safety net.
-        syncTask.get(SYNC_HARD_TIMEOUT_MIN, TimeUnit.MINUTES);
+        int statusCode = syncTask.get(SYNC_HARD_TIMEOUT_MIN, TimeUnit.MINUTES);
         long totalElapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         long finalRequestCount = countMappingPostRequests();
         double aggregateRequestsPerSec = finalRequestCount * 1_000.0 / Math.max(1, totalElapsedMs);
@@ -99,7 +98,7 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
         // of on every sample. This gives us the true number of mapped users for the
         // correctness gate.
         List<LoggedRequest> mappingPosts = nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH)));
-        Set<String> mappedUserIds = extractMappedUserIds(mappingPosts);
+        Set<String> mappedUserIds = SyncResponseExtractor.extractMappedUserIds(mappingPosts);
         double aggregateUsersPerSec = mappedUserIds.size() * 1_000.0 / Math.max(1, totalElapsedMs);
 
         // Sort samples to compute percentiles. p50 is the typical window; p95 absorbs the
@@ -118,6 +117,10 @@ public class UserMappingThroughputReliabilityIT extends BaseNucleusSyncLargeInge
         log.info("[throughput] Per-window p50      : {} req/sec", String.format("%.2f", p50));
         log.info("[throughput] Per-window p95      : {} req/sec", String.format("%.2f", p95));
         log.info("[throughput] Per-window samples  : {}", perWindowRequestsPerSec.size());
+
+        assertThat(statusCode)
+                .as("Sync job didn't return 200 OK — likely cause: sync failure or timeout")
+                .isEqualTo(200);
 
         // Correctness gate — without this, a "fast but wrong" run could pass.
         assertThat(mappedUserIds)

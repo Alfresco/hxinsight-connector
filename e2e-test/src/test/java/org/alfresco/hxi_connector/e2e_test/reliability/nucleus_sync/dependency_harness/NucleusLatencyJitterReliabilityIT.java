@@ -77,10 +77,16 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
         Actions.addLatencyAndJitter(environment().nucleusproxy()).run();
 
         long startNanos = System.nanoTime();
-        environment().nucleusSyncClient().startSynchronization();
+        int status = environment().nucleusSyncClient().startSynchronization();
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[reliability] Synchronisation under Nucleus latency completed in {} ms", elapsedMs);
 
+        assertThat(status)
+                .as("nucleus-sync returned status %d under Nucleus latency, expected 200 OK — likely cause: the "
+                        + "WebClient per-attempt timeout fired and triggered a retry storm, which means the "
+                        + "orchestration never got to the Nucleus phase at all",
+                        status)
+                .isEqualTo(200);
         assertThat(elapsedMs)
                 .as("Sync took %d ms — far over the %d s budget. Either a retry storm fired (per-attempt "
                         + "timeout tripped) or the wall clock is starved on this runner.",
@@ -121,10 +127,15 @@ public class NucleusLatencyJitterReliabilityIT extends BaseNucleusSyncReliabilit
                 .setJitter(500L);
 
         long startNanos = System.nanoTime();
-        environment().nucleusSyncClient().startSynchronization();
+        int status = environment().nucleusSyncClient().startSynchronization();
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[reliability] Synchronisation under heavy Nucleus latency completed in {} ms", elapsedMs);
-
+        assertThat(status)
+                .as("nucleus-sync returned status %d under heavy Nucleus latency, expected 200 OK — likely cause: the "
+                        + "WebClient per-attempt timeout fired and triggered a retry storm, which means the "
+                        + "orchestration never got to the Nucleus phase at all",
+                        status)
+                .isEqualTo(200);
         assertThat(elapsedMs)
                 .as("Heavy-latency sync took %d ms, exceeding the %d s budget. Likely cause: WebClient "
                         + "per-attempt timeout fired and triggered a retry storm.",

@@ -120,7 +120,10 @@ public class AlfrescoRestartReliabilityIT extends BaseProcessChaosReliabilityIT
         // covers that. If startSynchronization() still throws, log and rethrow so failure is loud.
         try
         {
-            environment().nucleusSyncClient().startSynchronization();
+            int status = environment().nucleusSyncClient().startSynchronization();
+            assertThat(status)
+                    .as("nucleus-sync failed to complete synchronization after ACS restart — see nucleus-sync container logs in test output")
+                    .isEqualTo(200);
         }
         catch (RuntimeException e)
         {

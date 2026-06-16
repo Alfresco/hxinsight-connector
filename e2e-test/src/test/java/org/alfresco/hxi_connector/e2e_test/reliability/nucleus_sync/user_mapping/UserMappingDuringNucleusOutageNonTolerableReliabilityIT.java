@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 /**
  * Non-tolerable user-mapping outage scenario — inject a Nucleus mutation fault mid-sync so retries exhaust and the sync aborts with a partial set of users mapped.
@@ -79,7 +80,7 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread.
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
         // 2. Let sync read users from both sides and begin POSTing mappings, then inject fault.
@@ -100,7 +101,7 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
             nucleus().removeStubMapping(faultStub);
         }
 
-        syncCall.get(SYNC_FAILURE_TIMEOUT, TimeUnit.MINUTES);
+        int statusCode = syncCall.get(SYNC_FAILURE_TIMEOUT, TimeUnit.MINUTES);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[outage-test] Sync failed (as expected) after {} ms — fault window was {} ms",
@@ -108,10 +109,14 @@ public class UserMappingDuringNucleusOutageNonTolerableReliabilityIT extends Bas
 
         // 6. Verify the cut happened MID-sync: some mappings landed before the fault, but not all.
         List<LoggedRequest> mappingPosts = nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH)));
-        Set<String> mappedUserIds = extractMappedUserIds(mappingPosts);
+        Set<String> mappedUserIds = SyncResponseExtractor.extractMappedUserIds(mappingPosts);
 
         log.info("[outage-test] user-mapping POSTs landed before/during fault: {} (unique users: {} / {})",
                 mappingPosts.size(), mappedUserIds.size(), TOTAL_USER_COUNT);
+        assertThat(statusCode)
+                .as("Expected sync to fail with a non-200 status code due to the injected fault, but got %d",
+                        statusCode)
+                .isNotEqualTo(200);
 
         assertThat(mappedUserIds)
                 .as("Expected at least one user-mapping POST to land before the fault (proves the "

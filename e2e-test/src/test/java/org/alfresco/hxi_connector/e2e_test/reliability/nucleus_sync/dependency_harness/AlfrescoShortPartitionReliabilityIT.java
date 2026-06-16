@@ -67,7 +67,7 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
 
         // 2. Trigger sync on a background thread because startSynchronization() blocks until the Mono
         // resolves (the controller doesn't return until performFullSync() completes).
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment().nucleusSyncClient().startSynchronization());
 
         try
@@ -85,7 +85,13 @@ public class AlfrescoShortPartitionReliabilityIT extends BaseNucleusSyncReliabil
         // 5. Wait for the sync to complete (post-recovery retry + remaining downstream calls).
         // If retries exhausted, startSynchronization() would have thrown IllegalStateException
         // and the future completes exceptionally — surface that as a clear test failure.
-        syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
+        int status = syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
+        assertThat(status)
+                .as("nucleus-sync returned status %d after partition recovery, expected 200 OK — likely cause: the "
+                        + "WebClient per-attempt timeout fired and triggered a retry storm, which means the "
+                        + "orchestration never got to the Nucleus phase at all",
+                        status)
+                .isEqualTo(200);
 
         // 6. Assert the recovery contract:
         // - At least one /api/users call landed on the Nucleus mock — proves the post-recovery sync

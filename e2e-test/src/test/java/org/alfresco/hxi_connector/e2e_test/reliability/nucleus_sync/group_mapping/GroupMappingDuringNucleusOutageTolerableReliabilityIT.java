@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 @Slf4j
 public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
@@ -65,7 +66,7 @@ public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseN
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread — startSynchronization() blocks on the controller round-trip.
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
         // 2. Let the sync make first contact with Nucleus and start creating groups, then open the partition.
@@ -84,7 +85,7 @@ public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseN
         }
 
         // 3. If retries exhausted, this rethrows the ExecutionException — surface that as a clear failure.
-        syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
+        int statusCode = syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[outage-test] Sync completed in {} ms after surviving {} ms Nucleus outage",
@@ -92,11 +93,13 @@ public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseN
 
         // 4. Verify all group creations were eventually persisted — extract group IDs from POST bodies.
         List<LoggedRequest> groupPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUPS_PATH)));
-        Set<String> createdGroupIds = extractGroupIds(groupPosts);
+        Set<String> createdGroupIds = SyncResponseExtractor.extractGroupIds(groupPosts);
 
         log.info("[outage-test] Total POST /groups requests: {}, unique groups created: {}",
                 groupPosts.size(), createdGroupIds.size());
-
+        assertThat(statusCode)
+                .as("Sync job didn't return 200 OK after Nucleus outage healed — either retries exhausted before re-enable (extend OUTAGE_DURATION_MS up, or shorten the retry budget) or the controller didn't respond with an error to trigger retries")
+                .isEqualTo(200);
         // 5. Every group must be created — the outage healed in time, so no groups should be dropped.
         assertThat(createdGroupIds.size())
                 .as("Expected all %d groups to be mapped after Nucleus outage healed, but only %d were mapped "
@@ -122,14 +125,14 @@ public class GroupMappingDuringNucleusOutageTolerableReliabilityIT extends BaseN
 
     private void installAllStubs()
     {
-        installNucleusAuthStub();
-        installSingleAcsUserStub();
-        installNucleusSingleUserStub(); // Only Single user is present
-        installRepositoryGroupStubs(TOTAL_GROUPS_COUNT);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
+        stubs.installNucleusAuthStub();
+        stubs.installSingleAcsUserStub();
+        stubs.installNucleusSingleUserStub(); // Only Single user is present
+        stubs.installRepositoryGroupStubs(TOTAL_GROUPS_COUNT);
+        stubs.installEmptyMappingsStub();
+        stubs.installEmptyGroupsStub();
+        stubs.installEmptyGroupMembersStub();
+        stubs.installMutationEndpointsWithTracking();
     }
 
 }

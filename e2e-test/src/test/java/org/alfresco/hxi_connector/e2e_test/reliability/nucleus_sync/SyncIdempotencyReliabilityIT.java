@@ -74,7 +74,7 @@ public class SyncIdempotencyReliabilityIT extends BaseNucleusSyncLargeIngestionI
         // ── Run #1: cold sync, empty current state → expect TOTAL_USERS creates ─────────────────
         installColdStartStubs();
         log.info("[idempotency] Triggering first sync (cold start, no existing mappings)");
-        environment.nucleusSyncClient().startSynchronization();
+        int statusFirst = environment.nucleusSyncClient().startSynchronization();
 
         int run1Creates = nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH))).size();
         log.info("[idempotency] Run #1 created {} user-mapping POSTs", run1Creates);
@@ -82,6 +82,9 @@ public class SyncIdempotencyReliabilityIT extends BaseNucleusSyncLargeIngestionI
                 .as("First sync should create at least one user-mapping POST; check that "
                         + "installAcsPeopleStubs + installNucleusIamUsersStubs produced matching emails")
                 .isGreaterThan(0);
+        assertThat(statusFirst)
+                .as("Expected first sync to complete with 200 OK status")
+                .isEqualTo(200);
 
         // ── Re-stub current state so run #2 sees the mappings as already-persisted ─────────────
         log.info("[idempotency] Re-stubbing GET /user-mappings to reflect post-run-#1 state");
@@ -92,14 +95,16 @@ public class SyncIdempotencyReliabilityIT extends BaseNucleusSyncLargeIngestionI
 
         // ── Run #2: warm sync, same source state → expect ZERO new mutations ───────────────────
         log.info("[idempotency] Triggering second sync (warm, current state matches source)");
-        environment.nucleusSyncClient().startSynchronization();
+        int statusSecond = environment.nucleusSyncClient().startSynchronization();
 
         List<LoggedRequest> run2Creates = nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH)));
         List<LoggedRequest> run2Deletes = nucleus().find(deleteRequestedFor(
                 urlPathMatching(USER_MAPPINGS_PATH + "/.*")));
 
         log.info("[idempotency] Run #2 produced: {} POSTs, {} DELETEs", run2Creates.size(), run2Deletes.size());
-
+        assertThat(statusSecond)
+                .as("Expected second sync to complete with 200 OK status")
+                .isEqualTo(200);
         assertThat(run2Creates)
                 .as("Second sync should NOT re-create user mappings already present on Nucleus, but "
                         + "%d POST /user-mappings requests landed. Likely causes: diff logic uses "
@@ -120,14 +125,14 @@ public class SyncIdempotencyReliabilityIT extends BaseNucleusSyncLargeIngestionI
 
     private void installColdStartStubs()
     {
-        installNucleusAuthStub();
-        installAcsPeopleStubs(TOTAL_USERS);
-        installAcsUserGroupsStub();
-        installNucleusIamUsersStubs(TOTAL_USERS);
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
+        stubs.installNucleusAuthStub();
+        stubs.installAcsPeopleStubs(TOTAL_USERS);
+        stubs.installAcsUserGroupsStub();
+        stubs.installNucleusIamUsersStubs(TOTAL_USERS);
+        stubs.installEmptyMappingsStub();
+        stubs.installEmptyGroupsStub();
+        stubs.installEmptyGroupMembersStub();
+        stubs.installMutationEndpointsWithTracking();
     }
 
     /**

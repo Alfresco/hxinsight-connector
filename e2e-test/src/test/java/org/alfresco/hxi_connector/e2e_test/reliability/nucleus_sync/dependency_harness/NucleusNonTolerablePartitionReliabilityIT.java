@@ -29,6 +29,7 @@ import static com.github.tomakehurst.wiremock.client.WireMock.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -44,6 +45,9 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
      */
     private static final long PARTITION_DURATION_MS = 3_600L;
 
+    // TimeOut for the sync Job
+    private static final long SYNC_JOB_TIMEOUT_S = 30L;
+
     @Test
     void shouldFailFastWhenNucleusPartitionOutlastsRetryBudget() throws Exception
     {
@@ -54,7 +58,7 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
 
         // 2. Trigger sync on a background thread; the controller blocks until performFullSync() resolves
         // (here: with an error, after retries exhaust).
-        CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncJob = CompletableFuture.supplyAsync(
                 () -> environment().nucleusSyncClient().startSynchronization());
 
         try
@@ -69,7 +73,10 @@ public class NucleusNonTolerablePartitionReliabilityIT extends BaseNucleusSyncRe
             log.info("[reliability] Re-enabling nucleusProxy after {} ms partition window", PARTITION_DURATION_MS);
             environment().nucleusproxy().enable();
         }
-
+        int status = syncJob.get(SYNC_JOB_TIMEOUT_S, TimeUnit.SECONDS);
+        assertThat(status)
+                .as("Expected sync to fail with a non-200 status when the Nucleus partition outlasted the retry budget, but got %d — likely cause: the retry budget wasn't actually exhausted, which means the partition duration was too short or the retries didn't fire as expected")
+                .isNotEqualTo(200);
         // 6. No mutations should have landed on Nucleus during the outage. The retried calls all failed
         // at TCP (listener closed), so the WireMock journal must be empty for the mutation endpoints.
         // A non-empty result here would mean either (a) the partition healed mid-test and orchestration

@@ -26,7 +26,7 @@
 package org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.group_mapping;
 
 import static com.github.tomakehurst.wiremock.client.WireMock.*;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 import java.util.List;
 import java.util.Set;
@@ -39,6 +39,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 /**
  * Non-tolerable group-mapping outage scenario — simulates a Nucleus outage during the group creation phase by injecting WireMock faults on the mutation endpoint.
@@ -86,7 +87,7 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread.
-        CompletableFuture<Void> syncTask = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncTask = CompletableFuture.supplyAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
         // 2. Let sync complete user-mapping and start group creation, then inject the fault.
@@ -107,7 +108,7 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
             nucleus().removeStubMapping(faultStub);
         }
 
-        syncTask.get(SYNC_FAILURE_TIMEOUT, TimeUnit.SECONDS);
+        int status = syncTask.get(SYNC_FAILURE_TIMEOUT, TimeUnit.SECONDS);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[outage-test] Sync failed (as expected) after {} ms — fault window was {} ms",
@@ -115,11 +116,13 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
 
         // 6. Verify partial progress: some groups landed before the fault, but not all.
         List<LoggedRequest> groupPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUPS_PATH)));
-        Set<String> createdGroupIds = extractGroupIds(groupPosts);
+        Set<String> createdGroupIds = SyncResponseExtractor.extractGroupIds(groupPosts);
 
         log.info("[outage-test] POST /groups requests: {}, unique groups created: {} / {}",
                 groupPosts.size(), createdGroupIds.size(), TEST_GROUPS_COUNT);
-
+        assertThat(status)
+                .as("Expected sync to fail with a non-200 status when the group creation endpoint returns 503, but got %d — likely cause: the retry budget wasn't actually exhausted, which means the fault duration was too short or the retries didn't fire as expected", status)
+                .isNotEqualTo(200);
         assertThat(createdGroupIds.size())
                 .as("Expected fewer than %d groups because the fault outlived the retry budget, "
                         + "but %d were created — fault may not have been injected at the right time.",
@@ -154,13 +157,13 @@ public class GroupMappingDuringNucleusOutageNonTolerableReliabilityIT extends Ba
 
     private void installAllStubs()
     {
-        installNucleusAuthStub();
-        installSingleAcsUserStub();
-        installRepositoryGroupStubs(TEST_GROUPS_COUNT);
-        installNucleusSingleUserStub();
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
+        stubs.installNucleusAuthStub();
+        stubs.installSingleAcsUserStub();
+        stubs.installRepositoryGroupStubs(TEST_GROUPS_COUNT);
+        stubs.installNucleusSingleUserStub();
+        stubs.installEmptyMappingsStub();
+        stubs.installEmptyGroupsStub();
+        stubs.installEmptyGroupMembersStub();
+        stubs.installMutationEndpointsWithTracking();
     }
 }

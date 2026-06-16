@@ -40,6 +40,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 @Slf4j
 public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLargeIngestionIT
@@ -69,7 +70,7 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread — startSynchronization() blocks on the controller round-trip.
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
         // 2. Let user-mapping + group-creation phases complete so the outage lands during membership POSTs.
@@ -88,7 +89,7 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
         }
 
         // 3. If retries exhausted, this rethrows the ExecutionException — surface that as a clear failure.
-        syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
+        int statusCode = syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[outage-test] Sync completed in {} ms after surviving {} ms Nucleus outage",
@@ -96,11 +97,13 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
 
         // 4. Verify every (group, user) pair was eventually POSTed.
         List<LoggedRequest> memberPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUP_MEMBERS_PATH)));
-        Set<String> createdMemberships = extractMemberships(memberPosts);
+        Set<String> createdMemberships = SyncResponseExtractor.extractMemberships(memberPosts);
 
         log.info("[outage-test] Total POST /group-members requests: {}, unique memberships created: {}",
                 memberPosts.size(), createdMemberships.size());
-
+        assertThat(statusCode)
+                .as("Sync job didn't return 200 OK after partition recovery — either retries exhausted before re-enable (extend OUTAGE_DURATION_MS up, or shorten the retry budget) or the controller didn't respond with an error to trigger retries")
+                .isEqualTo(200);
         assertThat(createdMemberships.size())
                 .as("Expected all %d memberships against group '%s' to be mapped after Nucleus outage healed, "
                         + "but only %d were mapped (%d dropped). Either the retry budget was exhausted "
@@ -112,13 +115,13 @@ public class GroupMembersMappingTolerableReliabilityIT extends BaseNucleusSyncLa
         // Spot-check specific memberships to ensure correctness, not just count.
         assertThat(createdMemberships)
                 .as("First user (user0) should be a member of %s", SHARED_GROUP_ID)
-                .contains(membershipKey(SHARED_GROUP_ID, "user0"));
+                .contains(SyncResponseExtractor.membershipKey(SHARED_GROUP_ID, "user0"));
         assertThat(createdMemberships)
                 .as("Last user (user%d) should be a member of %s", TOTAL_USERS - 1, SHARED_GROUP_ID)
-                .contains(membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS - 1)));
+                .contains(SyncResponseExtractor.membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS - 1)));
         assertThat(createdMemberships)
                 .as("Middle user (user%d) should be a member of %s", TOTAL_USERS / 2, SHARED_GROUP_ID)
-                .contains(membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS / 2)));
+                .contains(SyncResponseExtractor.membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS / 2)));
 
         log.info("[outage-test] ✓ All {} memberships against {} successfully mapped despite Nucleus outage!",
                 TOTAL_USERS, SHARED_GROUP_ID);

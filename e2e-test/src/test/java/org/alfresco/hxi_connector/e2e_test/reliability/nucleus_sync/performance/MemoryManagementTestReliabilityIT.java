@@ -54,9 +54,7 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
     {
         installAllStubsWithAnyGroup();
         ActuatorMetricsProbe metricsProbe = environment.nucleusSyncMetrics();
-        CompletableFuture<Void> syncTask = CompletableFuture.runAsync(() -> {
-            environment.nucleusSyncClient().startSynchronization();
-        });
+        CompletableFuture<Integer> syncTask = CompletableFuture.supplyAsync(() -> environment.nucleusSyncClient().startSynchronization());
 
         List<Double> memorySnapShorts = new ArrayList<>();
         // Take memory SnapShort during different Periods for next
@@ -70,7 +68,7 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
         log.info("[reliability] Final heap memory consumption: {} bytes", (long) finalHeapBytes);
         // Find Average and Median for the memory consumption during the sync
 
-        syncTask.get(MAX_TIME_BEFORE_FAIL, TimeUnit.MINUTES);
+        int statusCode = syncTask.get(MAX_TIME_BEFORE_FAIL, TimeUnit.MINUTES);
 
         RetryUtils.assertWithRetry(() -> {
             double averageMemoryConsumption = findAverageMemoryConsumption(memorySnapShorts);
@@ -83,6 +81,9 @@ public class MemoryManagementTestReliabilityIT extends BaseNucleusSyncLargeInges
                     (long) averageMemoryConsumption, (long) medianMemoryConsumption, (long) maxMemoryConsumption, (long) minMemoryConsumption, (long) stdDevMemoryConsumption);
 
             assertThat(finalHeapBytes).isLessThan(MAX_MEMORY_CONSUMPTION_BYTES);
+            assertThat(statusCode)
+                    .withFailMessage("Expected sync to complete with status code 200, but got %d", statusCode)
+                    .isEqualTo(200);
         });
     }
 

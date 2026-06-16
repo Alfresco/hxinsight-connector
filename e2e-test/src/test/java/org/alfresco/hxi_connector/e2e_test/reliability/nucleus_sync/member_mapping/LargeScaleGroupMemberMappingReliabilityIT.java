@@ -41,6 +41,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 @Slf4j
 public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT
@@ -66,8 +67,10 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
 
         // 2. Trigger sync — both ACS and Nucleus calls hit stubs
         log.info("[scale-test] Triggering synchronization...");
-        environment.nucleusSyncClient().startSynchronization();
-
+        int statusCode = environment.nucleusSyncClient().startSynchronization();
+        assertThat(statusCode)
+                .as("Expected sync to complete with 200 OK status")
+                .isEqualTo(200);
         // 3. Wait for the membership phase to fire at least one POST /group-members
         RetryUtils.assertWithRetry(() -> {
             int acsPeopleRequests = nucleus().find(getRequestedFor(
@@ -93,7 +96,7 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
         // 4. Verify every (group, user) pair was POSTed. Pairs come in batched array bodies, so
         // we parse all POST /group-members bodies and dedupe by (externalGroupId, memberExternalUserId).
         List<LoggedRequest> memberPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUP_MEMBERS_PATH)));
-        Set<String> createdMemberships = extractMemberships(memberPosts);
+        Set<String> createdMemberships = SyncResponseExtractor.extractMemberships(memberPosts);
 
         log.info("[scale-test] Total POST /group-members requests: {}, unique memberships created: {}",
                 memberPosts.size(), createdMemberships.size());
@@ -107,13 +110,13 @@ public class LargeScaleGroupMemberMappingReliabilityIT extends BaseNucleusSyncLa
         // Spot-check specific memberships to ensure correctness
         assertThat(createdMemberships)
                 .as("First user (user0) should be a member of %s", SHARED_GROUP_ID)
-                .contains(membershipKey(SHARED_GROUP_ID, "user0"));
+                .contains(SyncResponseExtractor.membershipKey(SHARED_GROUP_ID, "user0"));
         assertThat(createdMemberships)
                 .as("Last user (user%d) should be a member of %s", TOTAL_USERS - 1, SHARED_GROUP_ID)
-                .contains(membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS - 1)));
+                .contains(SyncResponseExtractor.membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS - 1)));
         assertThat(createdMemberships)
                 .as("Middle user (user%d) should be a member of %s", TOTAL_USERS / 2, SHARED_GROUP_ID)
-                .contains(membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS / 2)));
+                .contains(SyncResponseExtractor.membershipKey(SHARED_GROUP_ID, "user" + (TOTAL_USERS / 2)));
 
         log.info("[scale-test] ✓ All {} memberships against {} successfully mapped — no memberships dropped!",
                 TOTAL_USERS, SHARED_GROUP_ID);

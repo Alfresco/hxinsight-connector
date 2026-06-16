@@ -65,7 +65,7 @@ public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNu
         long startNanos = System.nanoTime();
 
         // 1. Trigger sync on a background thread — startSynchronization() blocks on the controller round-trip.
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment().nucleusSyncClient().startSynchronization());
 
         // 2. Let the sync make first contact with Nucleus, then open the partition mid-mapping.
@@ -84,7 +84,7 @@ public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNu
         }
 
         // 3. If retries exhausted, this rethrows the ExecutionException — surface that as a clear failure.
-        syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
+        int status = syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
 
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[reliability] Sync completed in {} ms after surviving {} ms Nucleus outage", elapsedMs, OUTAGE_DURATION_MS);
@@ -103,7 +103,9 @@ public class UserMappingDuringNucleusOutageTolerableReliabilityIT extends BaseNu
                         + "or the recovery path is broken.",
                         TOTAL_USERS, mappedUserIds.size(), TOTAL_USERS - mappedUserIds.size())
                 .isEqualTo(TOTAL_USERS);
-
+        assertThat(status)
+                .as("Sync job didn't return 200 OK after Nucleus outage healed — either retries exhausted before re-enable (extend OUTAGE_DURATION_MS up, or shorten the retry budget) or the controller didn't respond with an error to trigger retries")
+                .isEqualTo(200);
         // Spot-check specific users to ensure mapping correctness, not just count.
         assertThat(mappedUserIds)
                 .as("First user (test-user-0) should be mapped")

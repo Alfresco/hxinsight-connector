@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 @Slf4j
 public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIngestionIT
@@ -47,14 +48,14 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
 
     private void installSingleAcsUserBasedStubs()
     {
-        installNucleusAuthStub();
-        installSingleAcsUserStub();
-        installRepositoryGroupStubs(TOTAL_GROUPS_COUNT);
-        installNucleusSingleUserStub();
-        installEmptyMappingsStub();
-        installEmptyGroupsStub();
-        installEmptyGroupMembersStub();
-        installMutationEndpointsWithTracking();
+        stubs.installNucleusAuthStub();
+        stubs.installSingleAcsUserStub();
+        stubs.installRepositoryGroupStubs(TOTAL_GROUPS_COUNT);
+        stubs.installNucleusSingleUserStub();
+        stubs.installEmptyMappingsStub();
+        stubs.installEmptyGroupsStub();
+        stubs.installEmptyGroupMembersStub();
+        stubs.installMutationEndpointsWithTracking();
     }
 
     /**
@@ -80,12 +81,13 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
 
         // 2. Trigger sync — both ACS and Nucleus calls hit stubs
         log.info("[scale-test] Triggering synchronization for {} Groups...", TOTAL_GROUPS_COUNT);
-        environment.nucleusSyncClient().startSynchronization();
-
+        int statusCode = environment.nucleusSyncClient().startSynchronization();
+        assertThat(statusCode)
+                .as("Expected sync to complete with 200 OK status")
+                .isEqualTo(200);
         // 3. Wait for sync to complete and verify mappings
         // For 1M users, allow up to 10 minutes (120 attempts @ 5 second delay)
         RetryUtils.assertWithRetry(() -> {
-
             // verify Groups call was done for user<number>
             int acsGroupRequests = nucleus().find(getRequestedFor(urlPathEqualTo("/alfresco/api/-default-/public/alfresco/versions/1/people/user1/groups"))).size();
             assertThat(acsGroupRequests)
@@ -107,7 +109,7 @@ public class LargeScaleGroupMappingReliabilityIT extends BaseNucleusSyncLargeIng
 
         // 4. Verify all groups were created — extract group IDs from POST bodies
         List<LoggedRequest> mappingPosts = nucleus().find(postRequestedFor(urlPathEqualTo(GROUPS_PATH)));
-        Set<String> mappedGroupIds = extractGroupIds(mappingPosts);
+        Set<String> mappedGroupIds = SyncResponseExtractor.extractGroupIds(mappingPosts);
 
         log.info("[scale-test] Total group POST requests: {}, unique groups mapped: {}",
                 mappingPosts.size(), mappedGroupIds.size());

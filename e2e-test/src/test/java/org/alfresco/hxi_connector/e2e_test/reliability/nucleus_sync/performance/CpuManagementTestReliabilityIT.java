@@ -75,7 +75,7 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
         List<Double> systemCpuSamples = new ArrayList<>();
 
         long startMs = System.currentTimeMillis();
-        CompletableFuture<Void> syncJob = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncJob = CompletableFuture.supplyAsync(
                 () -> environment.nucleusSyncClient().startSynchronization());
 
         while (!syncJob.isDone())
@@ -86,7 +86,7 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
             Thread.sleep(SAMPLE_INTERVAL_MS);
         }
 
-        syncJob.get(MAX_TIME_BEFORE_FAIL, TimeUnit.MINUTES);
+        int statusCode = syncJob.get(MAX_TIME_BEFORE_FAIL, TimeUnit.MINUTES);
         long elapsedSec = (System.currentTimeMillis() - startMs) / 1000;
 
         // Compute statistics
@@ -105,6 +105,9 @@ public class CpuManagementTestReliabilityIT extends BaseNucleusSyncLargeIngestio
         log.info("[reliability] System CPU: avg={}%, max={}%",
                 String.format("%.1f", avgSystemCpu), String.format("%.1f", maxSystemCpu));
 
+        assertThat(statusCode)
+                .as("Sync job should complete successfully with 200 OK status, but got %s", statusCode)
+                .isEqualTo(200);
         // Assertions — p95 is more meaningful than raw max (single GC spike won't fail the test)
         assertThat(p95JvmCpu)
                 .as("p95 JVM CPU usage (%.1f%%) should stay below %s%% — sustained saturation indicates "

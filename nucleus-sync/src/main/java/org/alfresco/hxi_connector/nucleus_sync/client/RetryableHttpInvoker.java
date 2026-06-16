@@ -92,8 +92,8 @@ public class RetryableHttpInvoker
     public String executeGetRequest(final String fullUrl, final Map<String, String> headers)
     {
         return webClient
-                .get()
-                .uri(fullUrl)
+                .get() // method
+                .uri(fullUrl) // uri
                 .headers(httpHeaders -> {
                     headers.forEach(httpHeaders::set);
                     httpHeaders.set("Content-Type", "application/json");

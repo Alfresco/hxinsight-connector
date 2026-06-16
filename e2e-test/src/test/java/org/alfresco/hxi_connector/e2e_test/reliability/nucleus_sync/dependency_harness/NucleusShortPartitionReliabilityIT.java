@@ -62,7 +62,7 @@ public class NucleusShortPartitionReliabilityIT extends BaseNucleusSyncReliabili
         environment().nucleusproxy().disable();
 
         // Trigger sync on a background thread; startSynchronization() blocks on the controller round-trip.
-        CompletableFuture<Void> syncCall = CompletableFuture.runAsync(
+        CompletableFuture<Integer> syncCall = CompletableFuture.supplyAsync(
                 () -> environment().nucleusSyncClient().startSynchronization());
 
         try
@@ -76,8 +76,10 @@ public class NucleusShortPartitionReliabilityIT extends BaseNucleusSyncReliabili
         }
 
         // If retries exhausted, this rethrows the ExecutionException — surface that as a clear failure.
-        syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
-
+        int status = syncCall.get(SYNC_COMPLETION_TIMEOUT_S, TimeUnit.SECONDS);
+        assertThat(status)
+                .as("Sync job didn't return 200 OK after partition recovery — either retries exhausted before re-enable (extend PARTITION_DURATION_MS up, or shorten the retry budget) or the controller didn't respond with an error to trigger retries")
+                .isEqualTo(200);
         RetryUtils.assertWithRetry(() -> {
             assertThat(nucleus().find(getRequestedFor(urlPathEqualTo("/api/users"))))
                     .as("nucleus-sync didn't reach /api/users after partition recovery — either retries "

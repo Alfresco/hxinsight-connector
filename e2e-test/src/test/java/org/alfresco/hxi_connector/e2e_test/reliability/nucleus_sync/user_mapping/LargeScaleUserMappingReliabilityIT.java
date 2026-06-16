@@ -40,6 +40,7 @@ import org.junit.jupiter.api.Test;
 
 import org.alfresco.hxi_connector.common.test.util.RetryUtils;
 import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.BaseNucleusSyncLargeIngestionIT;
+import org.alfresco.hxi_connector.e2e_test.reliability.nucleus_sync.SyncResponseExtractor;
 
 /**
  * Large-scale user-mapping test — exercises nucleus-sync with 1 million synthetic users on both ACS and Nucleus sides.
@@ -88,7 +89,7 @@ public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeInge
 
         // 2. Trigger sync — both ACS and Nucleus calls hit stubs
         log.info("[scale-test] Triggering synchronization for {} users...", TOTAL_USER_COUNT);
-        environment.nucleusSyncClient().startSynchronization();
+        int statusCode = environment.nucleusSyncClient().startSynchronization();
 
         // 3. Wait for sync to complete and verify mappings
         // For 1M users, allow up to 10 minutes (120 attempts @ 5 second delay)
@@ -112,13 +113,16 @@ public class LargeScaleUserMappingReliabilityIT extends BaseNucleusSyncLargeInge
                     .isNotEmpty();
         }, 120, 5000); // 120 attempts @ 5 second delay = 10 minute timeout for large scale test
 
+        assertThat(statusCode)
+                .as("Expected sync to complete with 200 OK status")
+                .isEqualTo(200);
         long elapsedMs = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startNanos);
         log.info("[scale-test] Full 1M sync completed in {} ms ({} users processed at {} users/sec)",
                 elapsedMs, TOTAL_USER_COUNT, TOTAL_USER_COUNT * 1000L / Math.max(1, elapsedMs));
 
         // 4. Verify all mappings were created — extract user IDs from POST requests
         List<LoggedRequest> mappingPosts = nucleus().find(postRequestedFor(urlPathEqualTo(USER_MAPPINGS_PATH)));
-        Set<String> mappedUserIds = extractMappedUserIds(mappingPosts);
+        Set<String> mappedUserIds = SyncResponseExtractor.extractMappedUserIds(mappingPosts);
 
         log.info("[scale-test] Total mapping POST requests: {}, unique users mapped: {}",
                 mappingPosts.size(), mappedUserIds.size());
