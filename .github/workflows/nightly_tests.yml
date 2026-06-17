@@ -1,4 +1,4 @@
-name: Veracode and Nightly Tests run
+name: Nightly Tests run
 
 on:
   schedule:

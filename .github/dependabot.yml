@@ -14,7 +14,7 @@ updates:
       interval: "daily"
       time: "22:00"
       timezone: "Europe/London"
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 99
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -29,4 +29,4 @@ updates:
       interval: daily
       time: "22:00"
       timezone: Europe/London
-    open-pull-requests-limit: 10
+    open-pull-requests-limit: 99
