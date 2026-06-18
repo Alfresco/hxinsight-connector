@@ -1,4 +1,4 @@
-name: Veracode and Nightly Tests run
+name: Nightly Tests run
 
 on:
   schedule:
@@ -8,26 +8,6 @@ env:
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
 
 jobs:
-  veracode_sca:
-    name: "Veracode - Source Clear Scan (SCA)"
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v6
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v17.6.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v17.6.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/veracode@v17.6.1
-        env:
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-        with:
-          srcclr-api-token: ${{ secrets.SRCCLR_API_TOKEN }}
-      - name: "Notify on failure"
-        if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v17.6.1
-        with:
-          webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
-          message: "Veracode SCA scan failed"
-
   nightly_tests:
     name: "Run nightly tests"
     runs-on: ubuntu-latest

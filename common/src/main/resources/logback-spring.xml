@@ -8,10 +8,6 @@
     every module without requiring callers to remember to sanitize at each log site.
 
     See: https://logback.qos.ch/manual/layouts.html#replace
-
-    NOTE - Veracode SAST does not see runtime Logback configuration and will keep flagging the
-    raw log statements as CWE-117. Those findings should be marked as "Mitigated by Design" in
-    the Veracode UI, referencing this file.
 -->
 <configuration>
     <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
