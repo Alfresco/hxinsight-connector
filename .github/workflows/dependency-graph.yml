@@ -23,7 +23,7 @@ jobs:
           mkdir -p .mvn/wrapper
           echo "distributionUrl=https://repo.maven.apache.org/maven2/org/apache/maven/apache-maven/3.9.9/apache-maven-3.9.9-bin.zip" > .mvn/wrapper/maven-wrapper.properties
           echo "wrapperUrl=https://repo.maven.apache.org/maven2/org/apache/maven/wrapper/maven-wrapper/3.3.2/maven-wrapper-3.3.2.jar" >> .mvn/wrapper/maven-wrapper.properties
-      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v17.6.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/maven-dependency-scan@v18.11.0
         with:
           java-version: '21'
           maven-version: '3.9.9'

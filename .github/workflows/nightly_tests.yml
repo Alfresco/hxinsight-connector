@@ -22,7 +22,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: "Notify on failure"
         if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v17.6.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v18.11.0
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           message: "Nightly tests failed"
