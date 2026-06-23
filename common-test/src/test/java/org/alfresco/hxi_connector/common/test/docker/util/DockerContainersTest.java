@@ -94,7 +94,7 @@ class DockerContainersTest
         WireMockContainer container = DockerContainers.createWireMockContainer();
 
         assertThat(container).isNotNull();
-        assertThat(container.getEnvMap()).containsEntry("WIREMOCK_OPTIONS", "--verbose");
+        assertThat(container.getEnvMap()).containsEntry("WIREMOCK_OPTIONS", "--disable-gzip --verbose");
     }
 
     @Test
@@ -106,7 +106,7 @@ class DockerContainersTest
 
         assertThat(container).isNotNull();
         assertThat(container.getNetwork()).isEqualTo(network);
-        assertThat(container.getEnvMap()).containsEntry("WIREMOCK_OPTIONS", "--global-response-templating --verbose");
+        assertThat(container.getEnvMap()).containsEntry("WIREMOCK_OPTIONS", "--global-response-templating --disable-gzip --verbose");
     }
 
     @Test
