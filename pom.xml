@@ -71,7 +71,7 @@
         <skipE2eTests>${skipTests}</skipE2eTests>
 
         <alfresco-platform.version>26.1.0</alfresco-platform.version>
-        <alfresco-sdk.version>4.15.0</alfresco-sdk.version>
+        <alfresco-sdk.version>4.16.0</alfresco-sdk.version>
         <alfresco-db-connector.version>1.5.0</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.12</alfresco-event-model.version>
         <spring-boot.version>4.1.0</spring-boot.version>
