@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: "Run TCK Tests"
         uses: ./.github/actions/tck-tests
         with:
@@ -22,7 +22,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
       - name: "Notify on failure"
         if: failure()
-        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v17.6.1
+        uses: Alfresco/alfresco-build-tools/.github/actions/send-teams-notification@v18.15.0
         with:
           webhook-url: ${{ secrets.MS_TEAMS_WEBHOOK_URL }}
           message: "Nightly tests failed"
