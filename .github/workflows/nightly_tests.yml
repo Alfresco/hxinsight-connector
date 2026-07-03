@@ -7,6 +7,10 @@ on:
 env:
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
 
+permissions:
+  contents: read
+  packages: read
+
 jobs:
   nightly_tests:
     name: "Run nightly tests"
