@@ -27,21 +27,24 @@ env:
   JAVA_VERSION: "21"
   S3_BUCKET_REGION: "eu-west-1"
 
+permissions:
+  contents: read
+
 jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
       - id: changed-files
-        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@v18.15.0
+        uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           write-list-to-env: true
-      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/pre-commit@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           pre-commit-all-files: "false"
 
@@ -53,12 +56,12 @@ jobs:
       !contains(github.event.head_commit.message, '[skip pmd]') &&
       !contains(github.event.head_commit.message, '[skip tests]')
     steps:
-      - uses: actions/checkout@v7
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
-      - uses: Alfresco/ya-pmd-scan@v4.4.1
+      - uses: Alfresco/ya-pmd-scan@1f36f8e45695ce60362010345a99a0c8f7310264 # v4.4.1
 
   test_application:
     name: "Build and test application"
@@ -75,15 +78,15 @@ jobs:
         subproject: [ "bulk-ingester", "common", "common-authentication", "common-test",
                       "live-ingester", "prediction-applier", "hxinsight-extension", "nucleus-sync" ]
     steps:
-      - uses: actions/checkout@v7
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
       - name: "Login to Quay.io"
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
       - name: "Test application"
@@ -92,7 +95,7 @@ jobs:
             jacoco:report \
             -Djacoco.destFile=${{ github.workspace }}/${{ matrix.subproject }}/target/jacoco-${{ matrix.subproject }}.exec \
       - name: "Upload coverage data"
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         if: >
           github.actor != 'dependabot[bot]' &&
           github.ref_name != 'master' &&
@@ -128,15 +131,15 @@ jobs:
           - repoVersion: 26.1.0
             platformJavaVersion: 21
     steps:
-      - uses: actions/checkout@v7
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
       - name: "Login to Quay.io"
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
       - name: "Build application with distribution profile"
@@ -165,15 +168,15 @@ jobs:
           - repoVersion: 26.1.0
             platformJavaVersion: 21
     steps:
-      - uses: actions/checkout@v7
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
       - name: "Login to Quay.io"
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
       - name: "Build application"
@@ -190,6 +193,9 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - pre_commit
+    permissions:
+      contents: read # checkout the repository
+      packages: read # pull container images from ghcr.io for the TCK run
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -197,7 +203,7 @@ jobs:
       contains(github.event.head_commit.message, '[release]')
     steps:
       - name: "Checkout repository"
-        uses: actions/checkout@v7
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: "Run TCK Tests"
         uses: ./.github/actions/tck-tests
         with:
@@ -212,7 +218,8 @@ jobs:
     needs:
       - test_application
     permissions:
-      pull-requests: write
+      contents: read       # checkout the repository
+      pull-requests: write # post the coverage report comment on the PR
     if: >
       github.actor != 'dependabot[bot]' &&
       github.ref_name != 'master' &&
@@ -220,7 +227,7 @@ jobs:
       !contains(github.event.head_commit.message, '[skip tests]') &&
       !contains(github.event.head_commit.message, '[skip coverage]')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
       - name: Get PR number
@@ -239,13 +246,13 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
 
       - name: "Download all coverage data"
-        uses: actions/download-artifact@v8
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
         with:
           pattern: jacoco-report-*
           path: ${{ github.workspace }}/jacoco-data
@@ -256,7 +263,7 @@ jobs:
         env:
           WORKSPACE: ${{ github.workspace }}
       - name: "Upload coverage report"
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: jacoco-coverage-report
           path: |
@@ -276,7 +283,7 @@ jobs:
           WORKSPACE: ${{ github.workspace }}
       - name: "Enforce minimum code coverage threshold on changed files"
         if: ${{ steps.pr.outputs.pr_found == 'true' && steps.process_coverage.outputs.coverage-changed-files < 80.0 }}
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
         with:
           script: |
             core.setFailed('Files changed coverage is less than 80%!')
@@ -295,17 +302,17 @@ jobs:
       !(failure() || cancelled()) &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-qemu-action@v4
-      - uses: docker/setup-buildx-action@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
       - name: "Login to Quay.io"
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
       - name: "Build application"
@@ -331,10 +338,10 @@ jobs:
       github.event_name != 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip build]')
     steps:
-      - uses: actions/checkout@v7
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@v18.15.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
       - name: "Publish SNAPSHOT artifacts"
@@ -351,20 +358,22 @@ jobs:
       - test_distribution
       - run_e2e_test
       - tck_tests
+    permissions:
+      contents: write # maven-release-plugin creates the release tag and pushes the version-bump commits
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
       github.event_name != 'pull_request' &&
       contains(github.event.head_commit.message, '[release]')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/configure-git-author@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
@@ -378,11 +387,11 @@ jobs:
         run: mv "distribution/target/alfresco-hxinsight-connector-distribution-${{ env.RELEASE_VERSION }}.zip" "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/"
       - name: "Clone Alfresco/third-party-license-overrides"
         run: git clone --depth=1 https://github.com/Alfresco/third-party-license-overrides.git
-      - uses: actions/setup-python@v6
+      - uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6.3.0
       - name: "Create third party license csv file and add it to the deploy directory"
         run: python3 ./third-party-license-overrides/thirdPartyLicenseCSVCreator.py --project "${{ github.workspace }}" --version "${{ env.RELEASE_VERSION }}" --combined --output "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}"
       - name: "Configure AWS credentials"
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_S3_STAGING_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_S3_STAGING_SECRET_KEY }}
@@ -406,17 +415,17 @@ jobs:
       github.event_name != 'pull_request' &&
       contains(github.event.head_commit.message, '[release]')
     steps:
-      - uses: actions/checkout@v7
-      - uses: docker/setup-qemu-action@v4
-      - uses: docker/setup-buildx-action@v4
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: docker/setup-qemu-action@96fe6ef7f33517b61c61be40b68a1882f3264fb8 # v4.2.0
+      - uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
       - name: "Login to Quay.io"
-        uses: docker/login-action@v4
+        uses: docker/login-action@af1e73f918a031802d376d3c8bbc3fe56130a9b0 # v4.4.0
         with:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@v18.15.0
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@v18.15.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
       - name: "Build application"
@@ -442,9 +451,9 @@ jobs:
       github.event_name != 'pull_request' &&
       contains(github.event.head_commit.message, '[release]')
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - name: "Configure AWS credentials"
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@254c19bd240aabef8777f48595e9d2d7b972184b # v6.2.1
         with:
           aws-access-key-id: ${{ secrets.AWS_S3_RELEASE_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_S3_RELEASE_SECRET_ACCESS_KEY }}
