@@ -1,4 +1,10 @@
-# Alfresco Connector for Content Intelligence
+## ⚠️ Deprecated: Alfresco Connector for Content Intelligence
+
+**This repository is deprecated and no longer maintained.**
+
+This project has been replaced by the [Alfresco CIC Connector](https://github.com/Alfresco/alfresco-cic-connector). Please migrate to the new connector for continued support, bug fixes, and feature updates.
+
+---
 
 The Alfresco Connector for Content Intelligence provides knowledge retrieval capabilities by connecting your content repository, Alfresco Content Services (ACS), to Knowledge Discovery. Knowledge Discovery allows you to apply machine learning to your content repository.
 
