@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,6 +29,7 @@ package org.alfresco.hxi_connector.bulk_ingester.repository;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 
 import org.alfresco.database.connector.AlfrescoMetadataRepository;
@@ -36,7 +37,9 @@ import org.alfresco.database.connector.ChildAssocParams;
 import org.alfresco.database.connector.NodeParams;
 import org.alfresco.database.connector.model.AlfrescoNode;
 import org.alfresco.database.connector.model.ChildAssocMetaData;
+import org.alfresco.database.connector.model.NodeIdRange;
 import org.alfresco.database.connector.model.TagData;
+import org.alfresco.database.connector.model.TransactionCommitTimeRange;
 
 class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
 {
@@ -93,6 +96,24 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
 
     @Override
     public Long getDBIdFromNodeRef(String s)
+    {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public Long getMinCommitTimeMs()
+    {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public Optional<NodeIdRange> getNodeIdRange()
+    {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
+    public Optional<TransactionCommitTimeRange> getTransactionCommitTimeRange()
     {
         throw new UnsupportedOperationException("Not implemented");
     }
