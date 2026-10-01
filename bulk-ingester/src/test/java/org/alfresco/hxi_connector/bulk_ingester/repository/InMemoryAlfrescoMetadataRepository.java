@@ -101,6 +101,12 @@ class InMemoryAlfrescoMetadataRepository implements AlfrescoMetadataRepository
     }
 
     @Override
+    public List<Long> getFolderHierarchyNodeIds(String folderId)
+    {
+        throw new UnsupportedOperationException("Not implemented");
+    }
+
+    @Override
     public Long getMinCommitTimeMs()
     {
         throw new UnsupportedOperationException("Not implemented");

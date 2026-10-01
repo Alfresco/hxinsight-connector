@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2024 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -29,6 +29,7 @@ import static java.lang.String.format;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -43,6 +44,7 @@ import org.springframework.core.io.support.EncodedResource;
 import org.springframework.core.io.support.PropertySourceFactory;
 import org.springframework.validation.annotation.Validated;
 
+import org.alfresco.database.connector.model.QName;
 import org.alfresco.hxi_connector.bulk_ingester.exception.BulkIngesterRuntimeException;
 import org.alfresco.hxi_connector.bulk_ingester.processor.mapper.NamespacePrefixMapper;
 
@@ -67,6 +69,22 @@ public class PredefinedNamespacePrefixMapper implements NamespacePrefixMapper
         }
 
         return prefix + ":" + localName;
+    }
+
+    @Override
+    public Optional<QName> toQName(String prefixedName)
+    {
+        final int separator = prefixedName.indexOf(':');
+        if (separator < 0)
+        {
+            return Optional.empty();
+        }
+
+        final String prefix = prefixedName.substring(0, separator);
+        return prefixUriMap.entrySet().stream()
+                .filter(entry -> entry.getValue().equals(prefix))
+                .findFirst()
+                .map(entry -> QName.newTransientInstance(entry.getKey(), prefixedName.substring(separator + 1)));
     }
 
     public static class JsonPropertySourceFactory implements PropertySourceFactory

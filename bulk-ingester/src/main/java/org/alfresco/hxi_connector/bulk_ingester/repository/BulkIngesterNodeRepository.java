@@ -41,6 +41,7 @@ import org.alfresco.database.connector.AlfrescoMetadataRepository;
 import org.alfresco.database.connector.NodeParams;
 import org.alfresco.database.connector.model.AlfrescoNode;
 import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFilterHandler;
+import org.alfresco.hxi_connector.bulk_ingester.repository.filter.DatabaseNodeFilter;
 
 @Slf4j
 @Component
@@ -53,9 +54,11 @@ public class BulkIngesterNodeRepository
 
     private final AlfrescoNodeFilterHandler alfrescoNodeFilterHandler;
 
+    private final DatabaseNodeFilter databaseNodeFilter;
+
     public Stream<AlfrescoNode> find(IdRange idRange)
     {
-        NodeParams nodeParams = NodeParams.searchByIdRange(idRange.from(), idRange.to()).withPrimaryHierarchy(true);
+        NodeParams nodeParams = databaseNodeFilter.apply(NodeParams.searchByIdRange(idRange.from(), idRange.to()).withPrimaryHierarchy(true));
 
         return IntStream.iterate(0, page -> page + 1)
                 .mapToObj(page -> nodeParams.withPaging(page, bulkIngesterRepositoryConfig.pageSize()))

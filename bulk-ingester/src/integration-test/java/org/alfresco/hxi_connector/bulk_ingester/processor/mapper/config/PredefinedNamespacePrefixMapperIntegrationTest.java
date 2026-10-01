@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -28,6 +28,8 @@ package org.alfresco.hxi_connector.bulk_ingester.processor.mapper.config;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -88,6 +90,24 @@ class PredefinedNamespacePrefixMapperIntegrationTest
 
         // then
         assertEquals("alf:someProperty", propertyWithPrefix);
+    }
+
+    @Test
+    void shouldMapPrefixedNameToQName()
+    {
+        assertEquals(Optional.of(QName.newTransientInstance("http://www.alfresco.org/model/content/1.0", "versionable")), namespacePrefixMapper.toQName("cm:versionable"));
+    }
+
+    @Test
+    void shouldNotMapUnknownPrefixToQName()
+    {
+        assertEquals(Optional.empty(), namespacePrefixMapper.toQName("unknown:versionable"));
+    }
+
+    @Test
+    void shouldNotMapNameWithoutPrefixToQName()
+    {
+        assertEquals(Optional.empty(), namespacePrefixMapper.toQName("versionable"));
     }
 
     @Test
