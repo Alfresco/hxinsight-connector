@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -83,6 +83,23 @@ class BulkIngesterNodeRepositoryTest
 
         // then
         assertEquals(nodes, foundNodes);
+    }
+
+    @Test
+    void shouldFindNodesAfterAPageWhereEveryNodeIsFilteredOut()
+    {
+        // given
+        List<AlfrescoNode> nodes = List.of(mockNode(0), mockNode(1), mockNode(2));
+        given(mockFilterHandler.filterNode(nodes.get(0))).willReturn(false);
+        given(mockFilterHandler.filterNode(nodes.get(1))).willReturn(false);
+        metadataRepository.setNodes(nodes);
+
+        // when
+        List<AlfrescoNode> foundNodes = nodeRepository.find(new IdRange(0, 3))
+                .toList();
+
+        // then
+        assertEquals(List.of(nodes.get(2)), foundNodes);
     }
 
     @Test
