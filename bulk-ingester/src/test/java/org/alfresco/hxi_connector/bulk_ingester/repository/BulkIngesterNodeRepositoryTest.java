@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,6 +30,7 @@ import static java.util.stream.Collectors.toList;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
@@ -50,7 +51,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import org.alfresco.database.connector.NodeParams;
 import org.alfresco.database.connector.model.AlfrescoNode;
+import org.alfresco.database.connector.model.QName;
 import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFilterHandler;
+import org.alfresco.hxi_connector.bulk_ingester.repository.filter.DatabaseNodeFilter;
 
 @Slf4j
 @ExtendWith(MockitoExtension.class)
@@ -61,12 +64,29 @@ class BulkIngesterNodeRepositoryTest
     private final BulkIngesterRepositoryConfig repositoryConfig = new BulkIngesterRepositoryConfig(PAGE_SIZE);
 
     private final AlfrescoNodeFilterHandler mockFilterHandler = mock(AlfrescoNodeFilterHandler.class);
-    private final BulkIngesterNodeRepository nodeRepository = new BulkIngesterNodeRepository(metadataRepository, repositoryConfig, mockFilterHandler);
+    private final DatabaseNodeFilter mockDatabaseFilter = mock(DatabaseNodeFilter.class);
+    private final BulkIngesterNodeRepository nodeRepository = new BulkIngesterNodeRepository(metadataRepository, repositoryConfig, mockFilterHandler, mockDatabaseFilter);
 
     @BeforeEach
     void mockNodeFilter()
     {
         given(mockFilterHandler.filterNode(any())).willReturn(true);
+        given(mockDatabaseFilter.apply(any())).willAnswer(returnsFirstArg());
+    }
+
+    @Test
+    void shouldSearchWithTheDatabaseFilterApplied()
+    {
+        QName aspect = QName.newTransientInstance("http://www.alfresco.org/model/content/1.0", "versionable");
+        given(mockDatabaseFilter.apply(any())).willAnswer(invocation -> invocation.<NodeParams> getArgument(0).withAspect(aspect));
+        metadataRepository.setNodes(List.of(mockNode(0)));
+
+        nodeRepository.find(new IdRange(0, 4)).toList();
+
+        List<NodeParams> expected = IntStream.range(0, 2)
+                .mapToObj(page -> NodeParams.searchByIdRange(0, 4).withPrimaryHierarchy(true).withAspect(aspect).withPaging(page, 2))
+                .collect(toList());
+        assertEquals(expected, metadataRepository.getRequestList());
     }
 
     @Test
@@ -83,6 +103,23 @@ class BulkIngesterNodeRepositoryTest
 
         // then
         assertEquals(nodes, foundNodes);
+    }
+
+    @Test
+    void shouldFindNodesAfterAPageWhereEveryNodeIsFilteredOut()
+    {
+        // given
+        List<AlfrescoNode> nodes = List.of(mockNode(0), mockNode(1), mockNode(2));
+        given(mockFilterHandler.filterNode(nodes.get(0))).willReturn(false);
+        given(mockFilterHandler.filterNode(nodes.get(1))).willReturn(false);
+        metadataRepository.setNodes(nodes);
+
+        // when
+        List<AlfrescoNode> foundNodes = nodeRepository.find(new IdRange(0, 3))
+                .toList();
+
+        // then
+        assertEquals(List.of(nodes.get(2)), foundNodes);
     }
 
     @Test

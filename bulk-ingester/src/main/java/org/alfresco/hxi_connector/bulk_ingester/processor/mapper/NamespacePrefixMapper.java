@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -26,6 +26,8 @@
 
 package org.alfresco.hxi_connector.bulk_ingester.processor.mapper;
 
+import java.util.Optional;
+
 import org.alfresco.database.connector.model.PropertyKey;
 import org.alfresco.database.connector.model.QName;
 
@@ -43,5 +45,12 @@ public interface NamespacePrefixMapper
     }
 
     String toPrefixedName(String uri, String localName);
+
+    /**
+     * Inverse of {@link #toPrefixedName(String, String)}.
+     *
+     * @return the qname, or empty if the name has no prefix or the prefix is unknown.
+     */
+    Optional<QName> toQName(String prefixedName);
 
 }

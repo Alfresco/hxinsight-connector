@@ -2,7 +2,7 @@
  * #%L
  * Alfresco HX Insight Connector
  * %%
- * Copyright (C) 2023 - 2025 Alfresco Software Limited
+ * Copyright (C) 2023 - 2026 Alfresco Software Limited
  * %%
  * This file is part of the Alfresco software.
  * If the software was purchased under a paid Alfresco license, the terms of
@@ -30,7 +30,6 @@ import static java.util.function.Predicate.not;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -42,6 +41,7 @@ import org.alfresco.database.connector.AlfrescoMetadataRepository;
 import org.alfresco.database.connector.NodeParams;
 import org.alfresco.database.connector.model.AlfrescoNode;
 import org.alfresco.hxi_connector.bulk_ingester.repository.filter.AlfrescoNodeFilterHandler;
+import org.alfresco.hxi_connector.bulk_ingester.repository.filter.DatabaseNodeFilter;
 
 @Slf4j
 @Component
@@ -54,24 +54,25 @@ public class BulkIngesterNodeRepository
 
     private final AlfrescoNodeFilterHandler alfrescoNodeFilterHandler;
 
+    private final DatabaseNodeFilter databaseNodeFilter;
+
     public Stream<AlfrescoNode> find(IdRange idRange)
     {
-        NodeParams nodeParams = NodeParams.searchByIdRange(idRange.from(), idRange.to()).withPrimaryHierarchy(true);
+        NodeParams nodeParams = databaseNodeFilter.apply(NodeParams.searchByIdRange(idRange.from(), idRange.to()).withPrimaryHierarchy(true));
 
         return IntStream.iterate(0, page -> page + 1)
                 .mapToObj(page -> nodeParams.withPaging(page, bulkIngesterRepositoryConfig.pageSize()))
                 .map(this::findNodes)
                 .peek(nodes -> log.debug("Found {} nodes", nodes.size()))
                 .takeWhile(not(Collection::isEmpty))
-                .flatMap(Collection::stream);
+                .flatMap(Collection::stream)
+                .filter(alfrescoNodeFilterHandler::filterNode);
     }
 
     private List<AlfrescoNode> findNodes(NodeParams nodeParams)
     {
         log.debug("Looking for nodes: {}", nodeParams);
 
-        return metadataRepository.getAlfrescoNodes(nodeParams).stream()
-                .filter(alfrescoNodeFilterHandler::filterNode)
-                .collect(Collectors.toList());
+        return metadataRepository.getAlfrescoNodes(nodeParams);
     }
 }

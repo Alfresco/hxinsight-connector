@@ -68,6 +68,8 @@ Control which nodes are ingested using allow/deny lists. A node must pass all al
 | `ALFRESCO_FILTER_PATH_ALLOW` | Paths to include |
 | `ALFRESCO_FILTER_PATH_DENY` | Paths to exclude |
 
+The aspect and type allow lists are also applied in the database query, so a repository with few matching nodes is not read page by page. Names are matched exactly, so list every subtype or sub-aspect you want. The deny and path filters are applied to the nodes the query returns.
+
 ### Filter Examples
 
 ```yaml
