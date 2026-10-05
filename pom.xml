@@ -91,7 +91,7 @@
 
         <maven-resources-plugin.version>3.5.0</maven-resources-plugin.version>
         <maven-assembly-plugin.version>3.8.0</maven-assembly-plugin.version>
-        <maven-jar-plugin.version>3.5.0</maven-jar-plugin.version>
+        <maven-jar-plugin.version>3.5.1</maven-jar-plugin.version>
         <maven-shade-plugin.version>3.6.2</maven-shade-plugin.version>
         <license-maven-plugin.version>2.7.1</license-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.15</jacoco-maven-plugin.version>
