@@ -1,22 +1,28 @@
 <settings>
+  <mirrors>
+    <mirror>
+      <id>alfresco-internal</id>
+      <name>Alfresco Cloudsmith Internal</name>
+      <url>https://artifacts.hyland.dev/basic/alfresco-internal/maven/</url>
+      <mirrorOf>*</mirrorOf>
+    </mirror>
+  </mirrors>
+
   <servers>
+    <server>
+      <id>alfresco-internal</id>
+      <username>${env.CLOUDSMITH_USERNAME}</username>
+      <password>${env.CLOUDSMITH_API_KEY}</password>
+    </server>
+
+    <!-- deploys still go to Nexus -->
     <server>
       <id>alfresco-internal-snapshots</id>
       <username>${env.MAVEN_USERNAME}</username>
       <password>${env.MAVEN_PASSWORD}</password>
     </server>
     <server>
-      <id>alfresco-internal</id>
-      <username>${env.MAVEN_USERNAME}</username>
-      <password>${env.MAVEN_PASSWORD}</password>
-    </server>
-    <server>
-      <id>alfresco-internal-plugin</id>
-      <username>${env.MAVEN_USERNAME}</username>
-      <password>${env.MAVEN_PASSWORD}</password>
-    </server>
-    <server>
-      <id>enterprise-releases</id>
+      <id>alfresco-internal-releases</id>
       <username>${env.MAVEN_USERNAME}</username>
       <password>${env.MAVEN_PASSWORD}</password>
     </server>
