@@ -28,12 +28,16 @@ env:
   S3_BUCKET_REGION: "eu-west-1"
 
 permissions:
+  id-token: write
   contents: read
 
 jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -58,6 +62,9 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -86,6 +93,9 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -139,6 +149,9 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -176,6 +189,9 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -220,6 +236,7 @@ jobs:
     permissions:
       contents: read       # checkout the repository
       pull-requests: write # post the coverage report comment on the PR
+      id-token: write      # mint the Cloudsmith token
     if: >
       github.actor != 'dependabot[bot]' &&
       github.ref_name != 'master' &&
@@ -247,6 +264,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -312,6 +332,9 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -341,6 +364,9 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -360,6 +386,7 @@ jobs:
       - tck_tests
     permissions:
       contents: write # maven-release-plugin creates the release tag and pushes the version-bump commits
+      id-token: write # mint the Cloudsmith token
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -370,6 +397,9 @@ jobs:
         with:
           persist-credentials: false
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -425,6 +455,9 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}

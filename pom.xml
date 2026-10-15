@@ -46,7 +46,7 @@
             <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
         </snapshotRepository>
         <repository>
-            <id>alfresco-internal</id>
+            <id>alfresco-internal-releases</id>
             <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
         </repository>
     </distributionManagement>
@@ -72,7 +72,7 @@
 
         <alfresco-platform.version>26.1.0</alfresco-platform.version>
         <alfresco-sdk.version>4.16.0</alfresco-sdk.version>
-        <alfresco-db-connector.version>1.8.0-A.5-SNAPSHOT</alfresco-db-connector.version>
+        <alfresco-db-connector.version>1.8.0</alfresco-db-connector.version>
         <alfresco-event-model.version>1.0.12</alfresco-event-model.version>
         <spring-boot.version>4.1.0</spring-boot.version>
         <spring-retry.version>2.0.13</spring-retry.version>
@@ -120,48 +120,6 @@
         <dist.wiremock.version>${wiremock.version}</dist.wiremock.version>
         <dist.keycloak.version>26.5.0</dist.keycloak.version>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>central</id>
-            <name>Central Repository</name>
-            <url>https://repo.maven.apache.org/maven2</url>
-            <layout>default</layout>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>alfresco-internal</id>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <name>Alfresco Internal Repository</name>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/internal/</url>
-        </repository>
-        <repository>
-            <id>enterprise-releases</id>
-            <releases>
-                <enabled>true</enabled>
-            </releases>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-            <name>Alfresco Enterprise Repository</name>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/enterprise-releases/</url>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>alfresco-internal-plugin</id>
-            <name>Alfresco Internal Repository</name>
-            <url>https://artifacts.alfresco.com/nexus/content/groups/public</url>
-        </pluginRepository>
-    </pluginRepositories>
 
     <dependencyManagement>
         <dependencies>
