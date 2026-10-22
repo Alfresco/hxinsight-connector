@@ -262,6 +262,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+      # generateCoverageReport.sh runs `mvn package` and `mvn jacoco:report`
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
