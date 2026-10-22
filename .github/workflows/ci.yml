@@ -25,7 +25,6 @@ env:
   MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
   MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   JAVA_VERSION: "21"
-  S3_BUCKET_REGION: "eu-west-1"
 
 permissions:
   contents: read
@@ -360,6 +359,7 @@ jobs:
       - tck_tests
     permissions:
       contents: write # maven-release-plugin creates the release tag and pushes the version-bump commits
+      id-token: write # assume the AWS role that uploads to the staging bucket
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -377,6 +377,11 @@ jobs:
         with:
           username: ${{ secrets.BOT_GITHUB_USERNAME }}
           email: ${{ secrets.BOT_GITHUB_EMAIL }}
+      - name: "Check AWS access before releasing"
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          role-to-assume: ${{ vars.AWS_STAGING_ARTIFACT_UPLOAD_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_STAGING_ARTIFACT_UPLOAD_REGION }}
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }}
       - name: "Make release and deploy to Nexus"
@@ -390,14 +395,13 @@ jobs:
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
       - name: "Create third party license csv file and add it to the deploy directory"
         run: python3 ./third-party-license-overrides/thirdPartyLicenseCSVCreator.py --project "${{ github.workspace }}" --version "${{ env.RELEASE_VERSION }}" --combined --output "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}"
-      - name: "Configure AWS credentials"
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          aws-access-key-id: ${{ secrets.AWS_S3_STAGING_ACCESS_KEY }}
-          aws-secret-access-key: ${{ secrets.AWS_S3_STAGING_SECRET_KEY }}
-          aws-region: ${{ env.S3_BUCKET_REGION }}
       - name: "Deploy to S3 Staging Bucket"
-        run: aws s3 cp --recursive --acl private ./deploy_dir s3://alfresco-artefacts-staging
+        uses: Alfresco/alfresco-build-tools/.github/actions/s3-upload@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          aws-region: ${{ vars.AWS_STAGING_ARTIFACT_UPLOAD_REGION }}
+          aws-role-arn: ${{ vars.AWS_STAGING_ARTIFACT_UPLOAD_ROLE_ARN }}
+          source: deploy_dir
+          destination: s3://${{ vars.AWS_STAGING_ARTIFACT_UPLOAD_BUCKET }}
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
@@ -445,6 +449,9 @@ jobs:
       - release_and_deploy_to_nexus_and_s3
       - publish_snapshot_artifacts
       - push_docker_images
+    permissions:
+      contents: read
+      id-token: write # assume the AWS role that uploads to the release bucket
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -452,15 +459,17 @@ jobs:
       contains(github.event.head_commit.message, '[release]')
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - name: "Configure AWS credentials"
-        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
-        with:
-          aws-access-key-id: ${{ secrets.AWS_S3_RELEASE_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_S3_RELEASE_SECRET_ACCESS_KEY }}
-          aws-region: ${{ env.S3_BUCKET_REGION }}
-      - run: set -x
-      - name: "Check release version and copy to S3 Downloads Bucket"
+      - name: "Check release version"
+        id: release_type
         run: |
-          if [[ ${{ env.RELEASE_VERSION }} =~ ^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
-              aws s3 cp --recursive --acl private --copy-props none "s3://alfresco-artefacts-staging/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/" "s3://eu.dl.alfresco.com/release/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/"
+          if [[ "$RELEASE_VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+(\.[0-9]+)?$ ]]; then
+              echo "is_ga=true" >> "$GITHUB_OUTPUT"
           fi
+      - name: "Copy to S3 Downloads Bucket"
+        if: steps.release_type.outputs.is_ga == 'true'
+        uses: Alfresco/alfresco-build-tools/.github/actions/s3-upload@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          aws-region: ${{ vars.AWS_RELEASE_ARTIFACT_UPLOAD_REGION }}
+          aws-role-arn: ${{ vars.AWS_RELEASE_ARTIFACT_UPLOAD_ROLE_ARN }}
+          source: s3://${{ vars.AWS_STAGING_ARTIFACT_UPLOAD_BUCKET }}/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/
+          destination: s3://${{ vars.AWS_RELEASE_ARTIFACT_UPLOAD_BUCKET }}/release/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/
