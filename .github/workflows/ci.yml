@@ -35,15 +35,12 @@ jobs:
   pre_commit:
     runs-on: ubuntu-latest
     steps:
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           fetch-depth: 0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
+        with:
+          java-version: ${{ env.JAVA_VERSION }}
       - id: changed-files
         uses: Alfresco/alfresco-build-tools/.github/actions/github-list-changes@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
@@ -62,9 +59,6 @@ jobs:
     steps:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -212,6 +206,7 @@ jobs:
     permissions:
       contents: read # checkout the repository
       packages: read # pull container images from ghcr.io for the TCK run
+      id-token: write # mint the Cloudsmith token for the Maven build
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -220,6 +215,9 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Run TCK Tests"
         uses: ./.github/actions/tck-tests
         with:
@@ -264,9 +262,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@499eb5d58f3f82a4efa4eaedab26dbecff18328c # v18.15.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
