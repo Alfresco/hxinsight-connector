@@ -19,8 +19,6 @@ done
 # Use GITHUB_TOKEN if available, otherwise fallback to HTTPS
 if [ -n "$GITHUB_TOKEN" ]; then
     REPO_URL="https://x-access-token:${GITHUB_TOKEN}@github.com/HylandSoftware/ingestion-connector-tck"
-    # Configure git to use token for submodules
-    git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
 else
     REPO_URL="https://github.com/HylandSoftware/ingestion-connector-tck"
 fi
@@ -32,18 +30,14 @@ if [ ! -d "$REPO_DIR" ]; then
     echo "Cloning repository..."
     git clone "$REPO_URL"
     cd "$REPO_DIR"
-    git submodule update --init --recursive
 else
     echo "Repository exists, updating..."
     cd "$REPO_DIR"
     git pull
-    git submodule update --init --recursive
 fi
 
 # Ensure we're up to date
 git pull
-git submodule update --remote
 
-# Output information about the commits being used.
+# Output information about the commit being used.
 git log -1
-git submodule status --recursive
