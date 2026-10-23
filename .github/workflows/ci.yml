@@ -58,6 +58,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      # ya-pmd-scan defaults to classpath-enable: true, which runs `mvn -ntp test-compile`
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
