@@ -33,8 +33,8 @@ import static com.github.tomakehurst.wiremock.client.WireMock.post;
 import static com.github.tomakehurst.wiremock.client.WireMock.postRequestedFor;
 import static com.github.tomakehurst.wiremock.client.WireMock.urlPathEqualTo;
 import static lombok.AccessLevel.PROTECTED;
-import static org.apache.http.HttpHeaders.HOST;
-import static org.apache.http.entity.ContentType.APPLICATION_FORM_URLENCODED;
+import static org.apache.hc.core5.http.ContentType.APPLICATION_FORM_URLENCODED;
+import static org.apache.hc.core5.http.HttpHeaders.HOST;
 import static org.testcontainers.containers.localstack.LocalStackContainer.Service.S3;
 import static software.amazon.awssdk.http.HttpStatusCode.OK;
 
