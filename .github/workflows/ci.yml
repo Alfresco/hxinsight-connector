@@ -233,6 +233,7 @@ jobs:
     permissions:
       contents: read       # checkout the repository
       pull-requests: write # post the coverage report comment on the PR
+      id-token: write      # mint the Cloudsmith token for the Maven build
     if: >
       github.actor != 'dependabot[bot]' &&
       github.ref_name != 'master' &&
