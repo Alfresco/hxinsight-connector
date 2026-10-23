@@ -107,3 +107,21 @@ Base path for all sync endpoints mentioned below is `{host}:{port}/sync`
     "status": "UP"
   }
   ```
+
+### Liveness and Readiness Probes
+
+For use as container or Kubernetes probes.
+
+- Method: `GET`
+- Path: `/actuator/health/liveness` or `/actuator/health/readiness`
+- Response:
+  - Status: 200 when `UP`, 503 when `DOWN`
+  - Content-Type: `application/json`
+  - Body:
+    - `status` [string] - `"UP"` or `"DOWN"`
+  - Sample
+  ```json
+  {
+    "status": "UP"
+  }
+  ```
