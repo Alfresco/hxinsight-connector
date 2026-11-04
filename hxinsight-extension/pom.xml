@@ -276,6 +276,4 @@
         </plugins>
     </build>
 
-    <!-- Alfresco Maven Repositories -->
-
 </project>

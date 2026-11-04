@@ -27,7 +27,6 @@ env:
   JAVA_VERSION: "21"
 
 permissions:
-  id-token: write
   contents: read
 
 jobs:
@@ -51,6 +50,9 @@ jobs:
   pmd_scan:
     name: "PMD Scan"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     if: >
       github.event_name == 'pull_request' &&
       !contains(github.event.head_commit.message, '[skip pmd]') &&
@@ -70,6 +72,9 @@ jobs:
   test_application:
     name: "Build and test application"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - pre_commit
     if: >
@@ -119,6 +124,9 @@ jobs:
   test_distribution:
     name: "Build application with distribution profile"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - pre_commit
     if: >
@@ -158,6 +166,9 @@ jobs:
   run_e2e_test:
     name: "Run e2e tests using ACS ${{ matrix.repoVersion }} on Java ${{ matrix.platformJavaVersion }}"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - pre_commit
     if: >
@@ -313,6 +324,9 @@ jobs:
   push_docker_images:
     name: "Push docker images"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - test_application
       - test_distribution
@@ -352,6 +366,9 @@ jobs:
   publish_snapshot_artifacts:
     name: "Publish SNAPSHOT artifacts"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - test_application
       - test_distribution
@@ -440,6 +457,9 @@ jobs:
   deploy_release_version_to_quay:
     name: "Deploy release version to quay.io"
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     needs:
       - test_application
       - test_distribution
