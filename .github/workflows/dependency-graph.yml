@@ -16,8 +16,14 @@ jobs:
   scan-dependencies:
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: write
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: Create Maven Wrapper properties
         run: |
           mkdir -p .mvn/wrapper
