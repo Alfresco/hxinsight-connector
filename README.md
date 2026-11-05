@@ -23,6 +23,33 @@ The Alfresco Connector for Content Intelligence provides knowledge retrieval cap
 | [Prediction Applier](docs/prediction-applier.md) | Prediction application (Deprecated) |
 | [ACS Private APIs](docs/acs-private-apis.md) | Internal API documentation |
 
+### Maven Publishing
+
+Release artifacts are published to Cloudsmith using
+`https://maven.cloudsmith.io/hyland/<repository>/` until the DNS record for
+`maven.artifacts.hyland.dev` exists.
+
+| Version | Repository |
+|---------|------------|
+| A releases, such as `2.3.0-A.1` | `alfresco-internal-releases` |
+| GA and M releases | `alfresco-community-releases` |
+
+The root POM defines the GA/M destination. CI uses `maven-release-slim` from
+`alfresco-build-tools` v19.11.0 to add the `prerelease` profile for `-A.x`
+versions while retaining the `distribution` profile. All modules inherit this
+routing. Maven snapshots are not published. Docker and S3 publishing are unchanged.
+
+CI authenticates through `cloudsmith-auth` using OIDC and temporary
+`CLOUDSMITH_USERNAME` and `CLOUDSMITH_API_KEY` credentials. Both upload destinations
+use the `alfresco-releases` server in [.ci.settings.xml](.ci.settings.xml); no stored
+Maven credentials are needed. Jobs require `id-token: write` and the organization
+variable `CLOUDSMITH_NAMESPACE`. This variable configures OIDC only; upload URLs
+use the fixed `hyland` workspace. Before releasing, ensure this repository's OIDC
+service account has write access to both publishing repositories.
+
+Artifact coordinates and dependency read repositories are unchanged. Dependabot
+uses the organization-level Maven repository configuration.
+
 ### Development Environment
 
 #### To run tests in IntelliJ IDEA you should first build application with `mvn clean install -DskipTests -Pdistribution`
