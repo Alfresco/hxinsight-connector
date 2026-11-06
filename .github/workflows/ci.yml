@@ -22,8 +22,6 @@ env:
   RELEASE_VERSION: "2.2.2" # The version of the release (tag).
   GITHUB_ACTIONS_DEPLOY_TIMEOUT: 60
   MAVEN_CLI_OPTS: "-B -e -fae -V -DinstallAtEnd=true -DfailIfNoTests=false -U -Dorg.slf4j.simpleLogger.log.org.apache.maven.cli.transfer.Slf4jMavenTransferListener=warn -Pdistribution "
-  MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-  MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
   JAVA_VERSION: "21"
 
 permissions:
@@ -32,10 +30,16 @@ permissions:
 jobs:
   pre_commit:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
+        with:
+          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
         with:
           java-version: ${{ env.JAVA_VERSION }}
@@ -61,7 +65,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
       # ya-pmd-scan defaults to classpath-enable: true, which runs `mvn -ntp test-compile`
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -95,7 +99,7 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -154,7 +158,7 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -197,7 +201,7 @@ jobs:
           registry: quay.io
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -229,7 +233,7 @@ jobs:
     steps:
       - name: "Checkout repository"
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: "Run TCK Tests"
@@ -277,7 +281,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
       # generateCoverageReport.sh runs `mvn package` and `mvn jacoco:report`
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -348,7 +352,7 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -363,40 +367,8 @@ jobs:
       - name: "Clean Maven cache"
         run: bash ./scripts/ci/cleanup_cache.sh
 
-  publish_snapshot_artifacts:
-    name: "Publish SNAPSHOT artifacts"
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    needs:
-      - test_application
-      - test_distribution
-      - run_e2e_test
-      - tck_tests
-    if: >
-      !(failure() || cancelled()) &&
-      (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
-      github.event_name != 'pull_request' &&
-      !contains(github.event.head_commit.message, '[skip build]')
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/get-build-info@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-        with:
-          oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
-      - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-        with:
-          java-version: ${{ env.JAVA_VERSION }}
-      - name: "Publish SNAPSHOT artifacts"
-        timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} deploy -DskipTests
-      - name: "Clean Maven cache"
-        run: bash ./scripts/ci/cleanup_cache.sh
-
-  release_and_deploy_to_nexus_and_s3:
-    name: "Make release and deploy to Nexus and S3 Staging Bucket"
+  release_and_deploy_to_cloudsmith_and_s3:
+    name: "Make release and deploy to Cloudsmith and S3 Staging Bucket"
     runs-on: ubuntu-latest
     needs:
       - test_application
@@ -404,8 +376,8 @@ jobs:
       - run_e2e_test
       - tck_tests
     permissions:
-      contents: write # maven-release-plugin creates the release tag and pushes the version-bump commits
-      id-token: write # assume the AWS role that uploads to the staging bucket
+      contents: write # maven-release-slim creates the release tag and pushes the version-bump commits
+      id-token: write # authenticate to Cloudsmith and assume the AWS role for the staging bucket
     if: >
       !(failure() || cancelled()) &&
       (github.ref_name == 'master' || startsWith(github.ref_name, 'release/')) &&
@@ -414,9 +386,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          persist-credentials: false
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -433,9 +405,17 @@ jobs:
           aws-region: ${{ vars.AWS_STAGING_ARTIFACT_UPLOAD_REGION }}
       - name: "Build application"
         run: mvn ${{ env.MAVEN_CLI_OPTS }} clean install -DskipTests -Dproject.revision.key=${{ github.sha }}
-      - name: "Make release and deploy to Nexus"
+      - name: "Make release and deploy to Cloudsmith"
         timeout-minutes: ${{ fromJSON(env.GITHUB_ACTIONS_DEPLOY_TIMEOUT) }}
-        run: mvn ${{ env.MAVEN_CLI_OPTS }} -DreleaseVersion="${{ env.RELEASE_VERSION }}" -DdevelopmentVersion="${{ env.DEVELOPMENT_VERSION }}" -Dtag="${{ env.RELEASE_VERSION }}" -Dusername="${{ secrets.BOT_GITHUB_USERNAME }}" -Dpassword="${{ secrets.BOT_GITHUB_TOKEN }}" -DscmCommentPrefix="[maven-release-plugin][skip ci]" -DskipTests -Dproject.revision.key=${{ github.sha }} "-Darguments=-DskipTests -Dadditionalparam=-Xdoclint:none -Dproject.revision.key=${{ github.sha }}" release:prepare release:perform
+        uses: Alfresco/alfresco-build-tools/.github/actions/maven-release-slim@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
+        with:
+          token: ${{ secrets.BOT_GITHUB_TOKEN }}
+          release-version: ${{ env.RELEASE_VERSION }}
+          development-version: ${{ env.DEVELOPMENT_VERSION }}
+          release-profile: distribution
+          prerelease-profile: prerelease
+          commit-message-prefix: "[maven-release-plugin][skip ci]"
+          maven-args: ${{ env.MAVEN_CLI_OPTS }} -DskipTests -Dadditionalparam=-Xdoclint:none
       - run: mkdir -p deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}
       - name: "Move the final artifacts to a single folder (deploy_dir) to be copied to S3"
         run: mv "distribution/target/alfresco-hxinsight-connector-distribution-${{ env.RELEASE_VERSION }}.zip" "deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}/"
@@ -481,7 +461,7 @@ jobs:
           username: ${{ secrets.QUAY_USERNAME }}
           password: ${{ secrets.QUAY_PASSWORD }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/free-hosted-runner-disk-space@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - uses: Alfresco/alfresco-build-tools/.github/actions/setup-java-build@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
@@ -501,8 +481,7 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - deploy_release_version_to_quay
-      - release_and_deploy_to_nexus_and_s3
-      - publish_snapshot_artifacts
+      - release_and_deploy_to_cloudsmith_and_s3
       - push_docker_images
     permissions:
       contents: read

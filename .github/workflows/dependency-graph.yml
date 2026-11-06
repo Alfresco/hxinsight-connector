@@ -21,7 +21,7 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@b4b2716a50beebc3b17a38294242761251afacf9 # v19.1.1
+      - uses: Alfresco/alfresco-build-tools/.github/actions/cloudsmith-auth@482401ef42e6503cfa54d5873f1a768a0ecb3e0e # v19.11.0
         with:
           oidc-namespace: ${{ vars.CLOUDSMITH_NAMESPACE }}
       - name: Create Maven Wrapper properties
@@ -34,6 +34,4 @@ jobs:
           java-version: '21'
           maven-version: '3.9.9'
           maven-args: -Dscopes=compile,runtime
-          maven-username: ${{ secrets.NEXUS_USERNAME }}
-          maven-password: ${{ secrets.NEXUS_PASSWORD }}
           maven-settings-path: ".ci.settings.xml"

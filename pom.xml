@@ -41,13 +41,9 @@
         <url>https://github.com/${project.scm.organization}/${project.scm.repository}/actions</url>
     </ciManagement>
     <distributionManagement>
-        <snapshotRepository>
-            <id>alfresco-internal-snapshots</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/snapshots</url>
-        </snapshotRepository>
         <repository>
-            <id>alfresco-internal-releases</id>
-            <url>https://artifacts.alfresco.com/nexus/content/repositories/releases</url>
+            <id>alfresco-releases</id>
+            <url>https://maven.cloudsmith.io/hyland/alfresco-community-releases/</url>
         </repository>
     </distributionManagement>
 
@@ -686,6 +682,15 @@
     </build>
 
     <profiles>
+        <profile>
+            <id>prerelease</id>
+            <distributionManagement>
+                <repository>
+                    <id>alfresco-releases</id>
+                    <url>https://maven.cloudsmith.io/hyland/alfresco-internal-releases/</url>
+                </repository>
+            </distributionManagement>
+        </profile>
         <profile>
             <id>local</id>
             <activation>
