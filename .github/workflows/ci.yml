@@ -413,7 +413,6 @@ jobs:
           release-version: ${{ env.RELEASE_VERSION }}
           development-version: ${{ env.DEVELOPMENT_VERSION }}
           release-profile: distribution
-          prerelease-profile: prerelease
           commit-message-prefix: "[maven-release-plugin][skip ci]"
           maven-args: ${{ env.MAVEN_CLI_OPTS }} -DskipTests -Dadditionalparam=-Xdoclint:none
       - run: mkdir -p deploy_dir/community/hxinsight-connector/${{ env.RELEASE_VERSION }}
