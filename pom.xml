@@ -138,6 +138,17 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <!-- Override the parent's snapshot repository by ID, disabling it and replacing its legacy URL. -->
+        <repository>
+            <id>alfresco-public-snapshots</id>
+            <url>https://artifacts.hyland.dev/public/alfresco-public/maven/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
     </repositories>
 
     <pluginRepositories>
@@ -682,15 +693,6 @@
     </build>
 
     <profiles>
-        <profile>
-            <id>prerelease</id>
-            <distributionManagement>
-                <repository>
-                    <id>alfresco-releases</id>
-                    <url>https://maven.cloudsmith.io/hyland/alfresco-internal-releases/</url>
-                </repository>
-            </distributionManagement>
-        </profile>
         <profile>
             <id>local</id>
             <activation>

@@ -31,24 +31,25 @@ Release artifacts are published to Cloudsmith using
 
 | Version | Repository |
 |---------|------------|
-| A releases, such as `2.3.0-A.1` | `alfresco-internal-releases` |
+| A releases, such as `2.3.0-A.1` | `alfresco-community-releases` |
 | GA and M releases | `alfresco-community-releases` |
 
-The root POM defines the GA/M destination. CI uses `maven-release-slim` from
-`alfresco-build-tools` v19.11.0 to add the `prerelease` profile for `-A.x`
-versions while retaining the `distribution` profile. All modules inherit this
-routing. Maven snapshots are not published. Docker and S3 publishing are unchanged.
+The root POM defines the destination for all releases. CI uses `maven-release-slim`
+from `alfresco-build-tools` v19.11.0 with the `distribution` profile for every
+release. All modules inherit this routing. Maven snapshots are not published.
+Docker and S3 publishing are unchanged.
 
 CI authenticates through `cloudsmith-auth` using OIDC and temporary
-`CLOUDSMITH_USERNAME` and `CLOUDSMITH_API_KEY` credentials. Both upload destinations
-use the `alfresco-releases` server in [.ci.settings.xml](.ci.settings.xml); no stored
+`CLOUDSMITH_USERNAME` and `CLOUDSMITH_API_KEY` credentials. Uploads use the
+`alfresco-releases` server in [.ci.settings.xml](.ci.settings.xml); no stored
 Maven credentials are needed. Jobs require `id-token: write` and the organization
 variable `CLOUDSMITH_NAMESPACE`. This variable configures OIDC only; upload URLs
 use the fixed `hyland` workspace. Before releasing, ensure this repository's OIDC
-service account has write access to both publishing repositories.
+service account has write access to `alfresco-community-releases`.
 
-Artifact coordinates and dependency read repositories are unchanged. Dependabot
-uses the organization-level Maven repository configuration.
+Artifact coordinates are unchanged. Dependencies resolve only from `alfresco-public`
+and Maven Central; in CI, Central is mirrored through `cic-ext-pull-through`.
+Dependabot uses the organization-level Maven repository configuration.
 
 ### Development Environment
 
