@@ -138,6 +138,7 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <!-- Override the parent's snapshot repository by ID, disabling it and replacing its legacy URL. -->
         <repository>
             <id>alfresco-public-snapshots</id>
             <url>https://artifacts.hyland.dev/public/alfresco-public/maven/</url>
